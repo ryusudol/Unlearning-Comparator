@@ -1,0 +1,26 @@
+section {
+  margin: 10px;
+  border-radius: 6px;
+  border: 2px solid var(--contentBox-border-color);
+  padding: 14px 12px;
+}
+
+#height-20 {
+  height: 19.8vh;
+}
+
+#height-25 {
+  height: 24vh;
+}
+
+#height-40 {
+  height: 39.5vh;
+}
+
+#height-45 {
+  height: 44.5vh;
+}
+
+#height-50 {
+  height: 49.1vh;
+}
