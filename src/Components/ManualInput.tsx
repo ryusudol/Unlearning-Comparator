@@ -6,7 +6,7 @@ type PropsType = {
   type: "number" | "file";
 };
 
-function NumberInput({ labelName, type }: PropsType) {
+export default function NumberInput({ labelName, type }: PropsType) {
   return (
     <div className="select">
       <label htmlFor={labelName}>{labelName}</label>
@@ -14,5 +14,3 @@ function NumberInput({ labelName, type }: PropsType) {
     </div>
   );
 }
-
-export default NumberInput;

@@ -5,8 +5,6 @@ type PropsType = {
   buttonText: string;
 };
 
-function Button({ buttonText }: PropsType) {
+export default function Button({ buttonText }: PropsType) {
   return <div className="button-wrapper">{buttonText}</div>;
 }
-
-export default Button;

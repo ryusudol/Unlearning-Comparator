@@ -5,9 +5,10 @@ import "./SelectInput.css";
 type PropsType = {
   labelName: string;
   optionData: string[];
+  labelFontSize?: "sm";
 };
 
-function SelectInput({ labelName, optionData }: PropsType) {
+export default function SelectInput({ labelName, optionData }: PropsType) {
   return (
     <div className="select">
       <label className="label" htmlFor={labelName}>
@@ -21,5 +22,3 @@ function SelectInput({ labelName, optionData }: PropsType) {
     </div>
   );
 }
-
-export default SelectInput;

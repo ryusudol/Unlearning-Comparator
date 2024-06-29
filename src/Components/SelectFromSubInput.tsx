@@ -17,7 +17,7 @@ type PropsType = {
   optionData?: string[][];
 };
 
-function SelectFromSubInput({
+export default function SelectFromSubInput({
   name,
   subNames,
   subTypes,
@@ -45,7 +45,11 @@ function SelectFromSubInput({
             <FontAwesomeIcon icon={faCircle} size="sm" className="icons" />
           )}
           {type === "select" ? (
-            <SelectInput labelName={subNames[idx]} optionData={METHODS} />
+            <SelectInput
+              labelName={subNames[idx]}
+              optionData={METHODS}
+              labelFontSize="sm"
+            />
           ) : (
             <ManualInput labelName={subNames[idx]} type={type} />
           )}
@@ -54,5 +58,3 @@ function SelectFromSubInput({
     </div>
   );
 }
-
-export default SelectFromSubInput;

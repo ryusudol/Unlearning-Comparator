@@ -5,8 +5,6 @@ type PropsType = {
   title: string;
 };
 
-function Title({ title }: PropsType) {
+export default function Title({ title }: PropsType) {
   return <p className="title">{title}</p>;
 }
-
-export default Title;

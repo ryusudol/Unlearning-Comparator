@@ -15,7 +15,7 @@ import { SEEDS } from "./constants/seed";
 import { UNLEARN_CLASSES } from "./constants/unlearnClasses";
 import { BATCH_SIZES } from "./constants/batchSize";
 
-function App() {
+export default function App() {
   return (
     <div id="body-wrapper">
       <div className="left">
@@ -65,5 +65,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

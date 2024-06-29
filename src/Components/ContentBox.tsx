@@ -6,7 +6,7 @@ type PropsType = {
   height: 20 | 25 | 40 | 45 | 50;
 };
 
-function ContentBox({ children, height }: PropsType) {
+export default function ContentBox({ children, height }: PropsType) {
   const heightMode =
     height === 20
       ? "height-20"
@@ -20,5 +20,3 @@ function ContentBox({ children, height }: PropsType) {
 
   return <section id={heightMode}>{children}</section>;
 }
-
-export default ContentBox;

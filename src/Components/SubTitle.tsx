@@ -5,8 +5,6 @@ type PropsType = {
   subtitle: string;
 };
 
-function SubTitle({ subtitle }: PropsType) {
+export default function SubTitle({ subtitle }: PropsType) {
   return <p className="subtitle">{subtitle}</p>;
 }
-
-export default SubTitle;
