@@ -1,4 +1,4 @@
-section {
+.section {
   margin: 10px;
   border-radius: 6px;
   border: 2px solid var(--contentBox-border-color);

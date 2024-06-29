@@ -18,5 +18,9 @@ export default function ContentBox({ children, height }: PropsType) {
       ? "height-45"
       : "height-50";
 
-  return <section id={styles[heightMode]}>{children}</section>;
+  return (
+    <section className={styles.section} id={styles[heightMode]}>
+      {children}
+    </section>
+  );
 }

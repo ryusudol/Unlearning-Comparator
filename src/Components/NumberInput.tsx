@@ -1,17 +1,12 @@
 import React from "react";
-import styles from "./ManualInput.module.css";
+import styles from "./NumberInput.module.css";
 
 type PropsType = {
   labelName: string;
-  type: "number" | "file";
   labelFontSize?: "sm" | "md";
 };
 
-export default function NumberInput({
-  labelName,
-  type,
-  labelFontSize,
-}: PropsType) {
+export default function NumberInput({ labelName, labelFontSize }: PropsType) {
   const labelClassName =
     labelFontSize === "sm"
       ? "label-sm"
@@ -24,7 +19,7 @@ export default function NumberInput({
       <label className={styles[labelClassName]} htmlFor={labelName}>
         {labelName}
       </label>
-      <input type={type} id={labelName} />
+      <input type="number" id={labelName} />
     </div>
   );
 }

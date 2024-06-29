@@ -6,7 +6,7 @@ import ContentBox from "./Components/ContentBox";
 import SubTitle from "./Components/SubTitle";
 import Button from "./Components/Button";
 import SelectInput from "./Components/SelectInput";
-import ManualInput from "./Components/ManualInput";
+import NumberInput from "./Components/NumberInput";
 import SelectFromSubInput from "./Components/SelectFromSubInput";
 import { MODELS } from "./constants/models";
 import { DATASETS } from "./constants/datasets";
@@ -42,8 +42,8 @@ export default function App() {
           <div className={styles["subset-wrapper"]}>
             <SubTitle subtitle="Training | Unlearning" />
             <SelectInput labelName="Batch Size" optionData={BATCH_SIZES} />
-            <ManualInput labelName="Learning Rate" type="number" />
-            <ManualInput labelName="Epochs" type="number" />
+            <NumberInput labelName="Learning Rate" />
+            <NumberInput labelName="Epochs" />
           </div>
           <div style={{ marginTop: "0.6rem" }} />
           <Button buttonText="Run" />

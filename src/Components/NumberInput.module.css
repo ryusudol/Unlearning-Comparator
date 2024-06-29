@@ -1,14 +1,6 @@
-input[type="number"],
-input[type="file"] {
+input {
   width: 90px;
 }
-
-/* input[type="file"] {
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  border: 0;
-} */
 
 .select {
   margin: 7px 0px;

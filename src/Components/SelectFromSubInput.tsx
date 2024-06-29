@@ -5,10 +5,11 @@ import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import styles from "./SelectFromSubInput.module.css";
 
 import SelectInput from "./SelectInput";
-import ManualInput from "./ManualInput";
+import NumberInput from "./NumberInput";
+import FileInput from "./FileInput";
 import { METHODS } from "../constants/methods";
 
-type InputTypes = "select" | "file";
+type InputTypes = "select" | "number" | "file";
 
 type PropsType = {
   name: string;
@@ -31,7 +32,7 @@ export default function SelectFromSubInput({
   };
 
   return (
-    <div>
+    <div className={styles["subinput-wrapper-wrapper"]}>
       <span>{name}</span>
       {subTypes.map((type, idx) => (
         <div
@@ -58,12 +59,10 @@ export default function SelectFromSubInput({
               optionData={METHODS}
               labelFontSize="sm"
             />
+          ) : type === "number" ? (
+            <NumberInput labelName={subNames[idx]} labelFontSize="sm" />
           ) : (
-            <ManualInput
-              labelName={subNames[idx]}
-              type={type}
-              labelFontSize="sm"
-            />
+            <FileInput labelName={subNames[idx]} labelFontSize="sm" />
           )}
         </div>
       ))}
