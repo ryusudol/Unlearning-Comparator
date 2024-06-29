@@ -1,0 +1,15 @@
+select {
+  width: 90px;
+  height: 21px;
+}
+
+.select {
+  margin: 8px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 1.1rem;
+}

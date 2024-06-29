@@ -1,0 +1,58 @@
+import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCircle } from "@fortawesome/free-regular-svg-icons";
+import "./SelectFromSubInput.css";
+
+import SelectInput from "./SelectInput";
+import ManualInput from "./ManualInput";
+import { METHODS } from "../constants/methods";
+
+type InputTypes = "select" | "file";
+
+type PropsType = {
+  name: string;
+  subNames: string[];
+  subTypes: InputTypes[];
+  optionData?: string[][];
+};
+
+function SelectFromSubInput({
+  name,
+  subNames,
+  subTypes,
+  optionData,
+}: PropsType) {
+  const [selected, setSelected] = useState(0);
+
+  const onIconClick = (e: React.MouseEvent) => {
+    const selectedIdx = parseInt(e.currentTarget.id);
+    setSelected(selectedIdx);
+  };
+
+  return (
+    <div>
+      <span>{name}</span>
+      {subTypes.map((type, idx) => (
+        <div
+          onClick={onIconClick}
+          className="subinput-wrapper"
+          id={idx.toString()}
+        >
+          {selected === idx ? (
+            <FontAwesomeIcon icon={faCircleCheck} size="sm" className="icons" />
+          ) : (
+            <FontAwesomeIcon icon={faCircle} size="sm" className="icons" />
+          )}
+          {type === "select" ? (
+            <SelectInput labelName={subNames[idx]} optionData={METHODS} />
+          ) : (
+            <ManualInput labelName={subNames[idx]} type={type} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default SelectFromSubInput;

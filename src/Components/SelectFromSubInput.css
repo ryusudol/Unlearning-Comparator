@@ -1,0 +1,11 @@
+.subinput-wrapper {
+  width: 200px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.icons {
+  cursor: pointer;
+}
