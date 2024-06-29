@@ -1,5 +1,5 @@
 import React from "react";
-import "./App.css";
+import styles from "./App.module.css";
 
 import Title from "./Components/Title";
 import ContentBox from "./Components/ContentBox";
@@ -17,11 +17,11 @@ import { BATCH_SIZES } from "./constants/batchSize";
 
 export default function App() {
   return (
-    <div id="body-wrapper">
-      <div className="left">
+    <div id={styles["body-wrapper"]}>
+      <div className={styles.left}>
         <Title title="Settings" />
         <ContentBox height={45}>
-          <div className="subset-wrapper">
+          <div className={styles["subset-wrapper"]}>
             <SubTitle subtitle="Initial Settings" />
             <SelectInput labelName="Model" optionData={MODELS} />
             <SelectInput labelName="Dataset" optionData={DATASETS} />
@@ -39,7 +39,7 @@ export default function App() {
             />
           </div>
           <div style={{ marginTop: "1rem" }} />
-          <div className="subset-wrapper">
+          <div className={styles["subset-wrapper"]}>
             <SubTitle subtitle="Training | Unlearning" />
             <SelectInput labelName="Batch Size" optionData={BATCH_SIZES} />
             <ManualInput labelName="Learning Rate" type="number" />
@@ -48,20 +48,20 @@ export default function App() {
           <div style={{ marginTop: "0.6rem" }} />
           <Button buttonText="Run" />
         </ContentBox>
-        <ContentBox height={25}>hi</ContentBox>
+        <ContentBox height={25}></ContentBox>
         <Title title="Histories" />
-        <ContentBox height={20}>hi</ContentBox>
+        <ContentBox height={20}></ContentBox>
       </div>
-      <div className="middle">
+      <div className={styles.middle}>
         <Title title="Embeddings" />
-        <ContentBox height={45}>hi</ContentBox>
+        <ContentBox height={45}></ContentBox>
         <Title title="Performance Metrics" />
-        <ContentBox height={45}>hi</ContentBox>
+        <ContentBox height={45}></ContentBox>
       </div>
-      <div className="right">
+      <div className={styles.right}>
         <Title title="Privacy Attacks" />
-        <ContentBox height={50}>hi</ContentBox>
-        <ContentBox height={45}>hi</ContentBox>
+        <ContentBox height={50}></ContentBox>
+        <ContentBox height={45}></ContentBox>
       </div>
     </div>
   );

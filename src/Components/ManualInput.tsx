@@ -1,5 +1,5 @@
 import React from "react";
-import "./ManualInput.css";
+import styles from "./ManualInput.module.css";
 
 type PropsType = {
   labelName: string;
@@ -20,11 +20,11 @@ export default function NumberInput({
       : "label";
 
   return (
-    <div className="select">
-      <label className={labelClassName} htmlFor={labelName}>
+    <div className={styles.select}>
+      <label className={styles[labelClassName]} htmlFor={labelName}>
         {labelName}
       </label>
-      <input type={type} name={labelName} />
+      <input type={type} id={labelName} />
     </div>
   );
 }

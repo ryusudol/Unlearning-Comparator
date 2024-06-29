@@ -1,10 +1,10 @@
 import React from "react";
-import "./Title.css";
+import styles from "./Title.module.css";
 
 type PropsType = {
   title: string;
 };
 
 export default function Title({ title }: PropsType) {
-  return <p className="title">{title}</p>;
+  return <p className={styles.title}>{title}</p>;
 }

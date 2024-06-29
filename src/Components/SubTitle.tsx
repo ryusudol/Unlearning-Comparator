@@ -1,10 +1,10 @@
 import React from "react";
-import "./SubTitle.css";
+import styles from "./SubTitle.module.css";
 
 type PropsType = {
   subtitle: string;
 };
 
 export default function SubTitle({ subtitle }: PropsType) {
-  return <p className="subtitle">{subtitle}</p>;
+  return <p className={styles.subtitle}>{subtitle}</p>;
 }

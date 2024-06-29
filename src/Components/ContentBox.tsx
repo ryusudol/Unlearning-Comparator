@@ -1,8 +1,8 @@
 import React from "react";
-import "./ContentBox.css";
+import styles from "./ContentBox.module.css";
 
 type PropsType = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   height: 20 | 25 | 40 | 45 | 50;
 };
 
@@ -18,5 +18,5 @@ export default function ContentBox({ children, height }: PropsType) {
       ? "height-45"
       : "height-50";
 
-  return <section id={heightMode}>{children}</section>;
+  return <section id={styles[heightMode]}>{children}</section>;
 }

@@ -1,10 +1,10 @@
 import React from "react";
-import "./Button.css";
+import styles from "./Button.module.css";
 
 type PropsType = {
   buttonText: string;
 };
 
 export default function Button({ buttonText }: PropsType) {
-  return <div className="button-wrapper">{buttonText}</div>;
+  return <div className={styles["button-wrapper"]}>{buttonText}</div>;
 }

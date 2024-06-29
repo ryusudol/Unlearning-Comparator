@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./SelectInput.css";
+import styles from "./SelectInput.module.css";
 
 type PropsType = {
   labelName: string;
@@ -21,11 +21,11 @@ export default function SelectInput({
       : "label";
 
   return (
-    <div className="select">
-      <label className={labelClassName} htmlFor={labelName}>
+    <div className={styles.select}>
+      <label className={styles[labelClassName]} htmlFor={labelName}>
         {labelName}
       </label>
-      <select name={labelName}>
+      <select id={labelName}>
         {optionData.map((data) => (
           <option value={data}>{data}</option>
         ))}

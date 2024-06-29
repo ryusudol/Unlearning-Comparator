@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
-import "./SelectFromSubInput.css";
+import styles from "./SelectFromSubInput.module.css";
 
 import SelectInput from "./SelectInput";
 import ManualInput from "./ManualInput";
@@ -36,13 +36,21 @@ export default function SelectFromSubInput({
       {subTypes.map((type, idx) => (
         <div
           onClick={onIconClick}
-          className="subinput-wrapper"
+          className={styles["subinput-wrapper"]}
           id={idx.toString()}
         >
           {selected === idx ? (
-            <FontAwesomeIcon icon={faCircleCheck} size="sm" className="icons" />
+            <FontAwesomeIcon
+              icon={faCircleCheck}
+              size="sm"
+              className={styles.icons}
+            />
           ) : (
-            <FontAwesomeIcon icon={faCircle} size="sm" className="icons" />
+            <FontAwesomeIcon
+              icon={faCircle}
+              size="sm"
+              className={styles.icons}
+            />
           )}
           {type === "select" ? (
             <SelectInput

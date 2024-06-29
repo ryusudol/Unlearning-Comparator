@@ -33,15 +33,15 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .short {
   width: 15%;
-  /* min-width: 130px; */
+  min-width: 230px;
 }
 
 .medium {
   width: 50%;
-  /* min-width: 1000px; */
+  min-width: 812px;
 }
 
 .long {
   width: 35%;
-  /* min-width: 700px; */
+  min-width: 562px;
 }
