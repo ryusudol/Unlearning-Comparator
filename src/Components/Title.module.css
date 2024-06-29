@@ -1,5 +1,5 @@
 .title {
-  height: 4vh;
+  height: 42px;
   font-size: 1.8rem;
   font-weight: 500;
   color: #383838;
@@ -8,7 +8,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin: 10px;
+  margin: 0px 10px;
   padding: 0px 1rem;
   border-radius: 4px;
 }

@@ -16,7 +16,9 @@ export default function FileInput({ labelName, labelFontSize }: PropsType) {
 
   return (
     <div>
-      <span className={styles[labelClassName]}>{labelName}</span>
+      <span id={styles.custom} className={styles[labelClassName]}>
+        {labelName}
+      </span>
       <label className={styles["file-input-label"]} htmlFor={labelName}>
         Upload
       </label>

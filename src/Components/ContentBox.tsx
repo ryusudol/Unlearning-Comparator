@@ -3,7 +3,7 @@ import styles from "./ContentBox.module.css";
 
 type PropsType = {
   children?: React.ReactNode;
-  height: 20 | 25 | 40 | 45 | 50;
+  height: 20 | 25 | 45 | 50;
 };
 
 export default function ContentBox({ children, height }: PropsType) {
@@ -12,8 +12,6 @@ export default function ContentBox({ children, height }: PropsType) {
       ? "height-20"
       : height === 25
       ? "height-25"
-      : height === 40
-      ? "height-40"
       : height === 45
       ? "height-45"
       : "height-50";

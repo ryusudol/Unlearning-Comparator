@@ -17,8 +17,8 @@ import { BATCH_SIZES } from "./constants/batchSize";
 
 export default function App() {
   return (
-    <div id={styles["body-wrapper"]}>
-      <div className={styles.left}>
+    <section id={styles["body-wrapper"]}>
+      <div>
         <Title title="Settings" />
         <ContentBox height={45}>
           <div className={styles["subset-wrapper"]}>
@@ -52,17 +52,17 @@ export default function App() {
         <Title title="Histories" />
         <ContentBox height={20}></ContentBox>
       </div>
-      <div className={styles.middle}>
+      <div>
         <Title title="Embeddings" />
         <ContentBox height={45}></ContentBox>
         <Title title="Performance Metrics" />
         <ContentBox height={45}></ContentBox>
       </div>
-      <div className={styles.right}>
+      <div>
         <Title title="Privacy Attacks" />
         <ContentBox height={50}></ContentBox>
         <ContentBox height={45}></ContentBox>
       </div>
-    </div>
+    </section>
   );
 }

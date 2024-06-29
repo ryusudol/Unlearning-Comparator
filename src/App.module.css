@@ -1,22 +1,9 @@
-.left {
-  width: 15%;
-}
-
-.middle {
-  width: 50%;
-}
-
-.right {
-  width: 35%;
+#body-wrapper {
+  display: grid;
+  grid-template-columns: 250px 800px 560px;
+  justify-content: center;
 }
 
 .subset-wrapper {
   width: 100%;
-}
-
-#body-wrapper {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
 }
