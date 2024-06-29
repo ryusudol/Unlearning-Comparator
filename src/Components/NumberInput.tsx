@@ -19,7 +19,7 @@ export default function NumberInput({ labelName, labelFontSize }: PropsType) {
       <label className={styles[labelClassName]} htmlFor={labelName}>
         {labelName}
       </label>
-      <input type="number" id={labelName} />
+      <input className={styles.input} type="number" id={labelName} />
     </div>
   );
 }

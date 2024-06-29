@@ -25,7 +25,7 @@ export default function SelectInput({
       <label className={styles[labelClassName]} htmlFor={labelName}>
         {labelName}
       </label>
-      <select id={labelName}>
+      <select className={styles.input} id={labelName}>
         {optionData.map((data) => (
           <option value={data}>{data}</option>
         ))}
