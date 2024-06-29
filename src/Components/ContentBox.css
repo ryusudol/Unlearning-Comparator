@@ -3,6 +3,11 @@ section {
   border-radius: 6px;
   border: 2px solid var(--contentBox-border-color);
   padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  min-width: 230px;
 }
 
 #height-20 {

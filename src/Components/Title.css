@@ -1,7 +1,7 @@
 .title {
   height: 4vh;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: 500;
   color: #383838;
   background-color: var(--title-bg-color);
   text-align: center;

@@ -10,4 +10,10 @@
   font-weight: 500;
   color: #fefefe;
   border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.button-wrapper:hover {
+  background-color: var(--button-hover-bg-color);
 }

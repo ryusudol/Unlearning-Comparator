@@ -5,6 +5,7 @@
   --contentBox-border-color: #898989;
 
   --button-bg-color: #cacaca;
+  --button-hover-bg-color: #aaaaaa;
 }
 
 * {
@@ -22,6 +23,12 @@ body {
     "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .short {
