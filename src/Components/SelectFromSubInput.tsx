@@ -51,7 +51,11 @@ export default function SelectFromSubInput({
               labelFontSize="sm"
             />
           ) : (
-            <ManualInput labelName={subNames[idx]} type={type} />
+            <ManualInput
+              labelName={subNames[idx]}
+              type={type}
+              labelFontSize="sm"
+            />
           )}
         </div>
       ))}

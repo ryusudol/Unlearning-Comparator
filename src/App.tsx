@@ -35,6 +35,7 @@ export default function App() {
             <SelectInput
               labelName="Unlearn Class"
               optionData={UNLEARN_CLASSES}
+              labelFontSize="md"
             />
           </div>
           <div style={{ marginTop: "1rem" }} />
@@ -44,7 +45,7 @@ export default function App() {
             <ManualInput labelName="Learning Rate" type="number" />
             <ManualInput labelName="Epochs" type="number" />
           </div>
-          <div style={{ marginTop: "1rem" }} />
+          <div style={{ marginTop: "0.6rem" }} />
           <Button buttonText="Run" />
         </ContentBox>
         <ContentBox height={25}>hi</ContentBox>
