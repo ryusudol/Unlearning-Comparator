@@ -1,11 +1,7 @@
 import React from "react";
 import styles from "./Embeddings.module.css";
 
-type PropsType = {
-  data: string;
-};
-
-export default function Settings({ data }: PropsType) {
+export default function Settings() {
   return (
     <section className={styles.section}>
       <div className={styles.wrapper}>

@@ -56,8 +56,7 @@ export default function App() {
       </div>
       <div>
         <Title title="Embeddings" />
-        <Embeddings data="" />
-        {/* <ContentBox height={45}></ContentBox> */}
+        <Embeddings />
         <Title title="Performance Metrics" />
         <ContentBox height={45}></ContentBox>
       </div>
