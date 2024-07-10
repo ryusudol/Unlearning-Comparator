@@ -1,19 +1,20 @@
 import React from "react";
 import styles from "./App.module.css";
 
-import Title from "./Components/Title";
-import ContentBox from "./Components/ContentBox";
-import SubTitle from "./Components/SubTitle";
-import Button from "./Components/Button";
-import SelectInput from "./Components/SelectInput";
-import NumberInput from "./Components/NumberInput";
-import SelectFromSubInput from "./Components/SelectFromSubInput";
-import { MODELS } from "./constants/models";
-import { DATASETS } from "./constants/datasets";
-import { METHODS } from "./constants/methods";
-import { SEEDS } from "./constants/seed";
-import { UNLEARN_CLASSES } from "./constants/unlearnClasses";
-import { BATCH_SIZES } from "./constants/batchSize";
+import Title from "../views/Title";
+import ContentBox from "../views/ContentBox";
+import SubTitle from "../views/SubTitle";
+import Button from "../views/Button";
+import SelectInput from "../views/SelectInput";
+import NumberInput from "../views/NumberInput";
+import SelectFromSubInput from "../views/SelectFromSubInput";
+
+const DATASETS = ["CIFAR-10"];
+const BATCH_SIZES = ["8", "16", "32", "64", "128", "256", "512"];
+const METHODS = ["method1", "method2", "method3", "method4"];
+const MODELS = ["ResNet18"];
+const SEEDS = ["1234"];
+const UNLEARN_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 export default function App() {
   return (

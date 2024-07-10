@@ -7,7 +7,8 @@ import styles from "./SelectFromSubInput.module.css";
 import SelectInput from "./SelectInput";
 import NumberInput from "./NumberInput";
 import FileInput from "./FileInput";
-import { METHODS } from "../constants/methods";
+
+const METHODS = ["method1", "method2", "method3", "method4"];
 
 type InputTypes = "select" | "number" | "file";
 
