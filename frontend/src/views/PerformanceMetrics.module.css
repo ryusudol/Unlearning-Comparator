@@ -1,0 +1,17 @@
+.subtitle {
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+.section {
+  margin: 10px;
+  border-radius: 6px;
+  border: 2px solid var(--contentBox-border-color);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  min-width: 230px;
+}
