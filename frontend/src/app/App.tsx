@@ -8,6 +8,7 @@ import Button from "../views/Button";
 import SelectInput from "../views/SelectInput";
 import NumberInput from "../views/NumberInput";
 import SelectFromSubInput from "../views/SelectFromSubInput";
+import Embeddings from "../views/Embeddings";
 
 const DATASETS = ["CIFAR-10"];
 const BATCH_SIZES = ["8", "16", "32", "64", "128", "256", "512"];
@@ -55,7 +56,8 @@ export default function App() {
       </div>
       <div>
         <Title title="Embeddings" />
-        <ContentBox height={45}></ContentBox>
+        <Embeddings data="" />
+        {/* <ContentBox height={45}></ContentBox> */}
         <Title title="Performance Metrics" />
         <ContentBox height={45}></ContentBox>
       </div>
