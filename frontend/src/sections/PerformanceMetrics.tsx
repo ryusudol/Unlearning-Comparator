@@ -1,11 +1,16 @@
 import React from "react";
 import styles from "./PerformanceMetrics.module.css";
 
+import Title from "../views/Title";
+import ContentBox from "../views/ContentBox";
+
 export default function PerformanceMetrics() {
   return (
     <section className={styles.section}>
-      <h3 className={styles.title}>Performance Metrics</h3>
-      <div className={styles.wrapper}></div>
+      <Title title="Performance Metrics" />
+      <ContentBox height={430}>
+        <div className={styles.wrapper}></div>
+      </ContentBox>
     </section>
   );
 }
