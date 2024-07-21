@@ -33,6 +33,7 @@ dependencies = [
   "umap-learn==0.5.5", # 최신 버전: 0.5.5
   "scikit-learn==1.4.0", # 최신 버전: 1.4.0
   "packaging>=21.0",
+  "matplotlib",
 ]
 
 
