@@ -1,13 +1,11 @@
 import React from "react";
 import styles from "./App.module.css";
 
-import Title from "../views/Title";
-import ContentBox from "../views/ContentBox";
-
 import Settings from "../sections/Settings";
 import Histories from "../sections/Histories";
 import Embeddings from "../sections/Embeddings";
 import PerformanceMetrics from "../sections/PerformanceMetrics";
+import PrivacyAttacks from "../sections/PrivacyAttacks";
 
 export default function App() {
   return (
@@ -20,11 +18,7 @@ export default function App() {
         <Embeddings />
         <PerformanceMetrics />
       </div>
-      <div>
-        <Title title="Privacy Attacks" />
-        <ContentBox height={50}></ContentBox>
-        <ContentBox height={45}></ContentBox>
-      </div>
+      <PrivacyAttacks />
     </section>
   );
 }
