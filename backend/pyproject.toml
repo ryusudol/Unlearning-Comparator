@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mu-vis"
+dynamic = ["version"]
+description = 'mu-vis'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "gnueaj", email = "dlwodnd00@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "fastapi==0.109.0",  # 최신 버전: 0.109.0 (2024년 7월 기준)
+  "uvicorn==0.27.0",   # 최신 버전: 0.27.0
+  "torch==2.1.2",      # 최신 안정 버전: 2.1.2 (CUDA 12.1)
+  "torchvision==0.16.2", # 최신 안정 버전: 0.16.2 (torch 2.1.2와 호환)
+  "numpy>=1.26.3",     # 최신 버전: 1.26.3
+  "umap-learn==0.5.5", # 최신 버전: 0.5.5
+  "scikit-learn==1.4.0", # 최신 버전: 1.4.0
+  "packaging>=21.0",
+]
+
+
+[project.urls]
+Documentation = "https://github.com/gnueaj/mu-vis#readme"
+Issues = "https://github.com/gnueaj/mu-vis/issues"
+Source = "https://github.com/gnueaj/mu-vis"
+
+[tool.hatch.version]
+path = "src/mu_vis/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src/fastapi_resnet_cifar10 --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
+start = "uvicorn main:app --reload"
+
+[tool.hatch.envs.default.scripts]
+start = "uvicorn main:app --reload"
+
+[tool.coverage.run]
+source_pkgs = ["mu_vis", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/mu_vis/__about__.py",
+]
+
+[tool.coverage.paths]
+mu_vis = ["src/mu_vis", "*/mu-vis/src/mu_vis"]
+tests = ["tests", "*/mu-vis/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
