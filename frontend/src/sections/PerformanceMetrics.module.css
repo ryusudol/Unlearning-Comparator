@@ -1,0 +1,8 @@
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapper {
+  width: 900px;
+}

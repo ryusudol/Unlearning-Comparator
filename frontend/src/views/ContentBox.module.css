@@ -1,0 +1,11 @@
+.section {
+  position: relative;
+  margin: 4px 5px;
+  border-radius: 6px;
+  border: 2px solid var(--border-color);
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
