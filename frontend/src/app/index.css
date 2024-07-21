@@ -1,8 +1,13 @@
 :root {
+  --title-font-size: 18px;
+  --subtitle-font-size: 17px;
+  --select-font-size: 15px;
+  --input-font-size: 13px;
+
   --title-text-color: #383838;
   --title-bg-color: #e7e7e7;
 
-  --contentBox-border-color: #898989;
+  --border-color: #898989;
 
   --button-bg-color: #cacaca;
   --button-hover-bg-color: #aaaaaa;

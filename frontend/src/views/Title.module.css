@@ -1,6 +1,6 @@
 .title {
-  height: 42px;
-  font-size: 1.8rem;
+  height: 30px;
+  font-size: var(--title-font-size);
   font-weight: 500;
   color: #383838;
   background-color: var(--title-bg-color);
@@ -9,6 +9,6 @@
   justify-content: flex-start;
   align-items: center;
   margin: 0px 10px;
-  padding: 0px 1rem;
+  padding: 0px 16px;
   border-radius: 4px;
 }

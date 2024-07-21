@@ -1,5 +1,5 @@
 .subtitle {
-  font-size: 1.3rem;
+  font-size: var(--subtitle-font-size);
   font-weight: 500;
-  margin-bottom: 0.8rem;
+  margin-bottom: 6px;
 }
