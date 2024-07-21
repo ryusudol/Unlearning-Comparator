@@ -1,25 +1,35 @@
 import React from "react";
 import styles from "./Embeddings.module.css";
 
+import Title from "../views/Title";
+import ContentBox from "../views/ContentBox";
+import SubTitle from "../views/SubTitle";
+
 export default function Settings() {
   return (
-    <section className={styles.section}>
-      <div className={styles.wrapper}>
-        <p className={styles.subtitle}>Original Model</p>
-        <img
-          className={styles.img}
-          src="/model1.png"
-          alt="Embedding model img1"
-        />
-      </div>
-      <div style={{ width: "10px" }} />
-      <div className={styles.wrapper}>
-        <p className={styles.subtitle}>Unlearned Model</p>
-        <img
-          className={styles.img}
-          src="/model2.png"
-          alt="Embedding model img2"
-        />
+    <section>
+      <Title title="Embeddings" />
+      <div className={styles.section}>
+        <ContentBox height={462}>
+          <div className={styles.wrapper}>
+            <SubTitle subtitle="Original Model" />
+            <img
+              className={styles.img}
+              src="/model1.png"
+              alt="Embedding model img1"
+            />
+          </div>
+        </ContentBox>
+        <ContentBox height={462}>
+          <div className={styles.wrapper}>
+            <SubTitle subtitle="Unlearned Model" />
+            <img
+              className={styles.img}
+              src="/model2.png"
+              alt="Embedding model img2"
+            />
+          </div>
+        </ContentBox>
       </div>
     </section>
   );
