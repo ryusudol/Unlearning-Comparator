@@ -4,32 +4,47 @@ import styles from "./Input.module.css";
 
 type PropsType = {
   labelName: string;
+  value: string | number;
+  setStateString?: (data: string) => void;
+  setStateNumber?: (data: number) => void;
   optionData?: string[];
-  type: "select" | "number" | "file";
+  type: "select" | "number";
 };
 
-export default function Input({ labelName, optionData, type }: PropsType) {
+export default function Input({
+  labelName,
+  value,
+  setStateString,
+  setStateNumber,
+  optionData,
+  type,
+}: PropsType) {
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const enteredValue = e.currentTarget.value;
+    if (setStateNumber) setStateNumber(+enteredValue);
+  };
+
   return (
     <div className={styles.wrapper}>
       <label className={styles.label} htmlFor={labelName}>
         {labelName}
       </label>
       {type === "select" ? (
-        <select className={styles.input} id={labelName}>
-          {optionData!.map((data) => (
-            <option className={styles.option} value={data}>
+        <select className={styles.input} id={labelName} value={value}>
+          {optionData!.map((data, idx) => (
+            <option key={idx} className={styles.option} value={data}>
               {data}
             </option>
           ))}
         </select>
-      ) : type === "number" ? (
+      ) : (
         <input
+          onChange={handleNumberChange}
           className={styles.input}
           type="number"
+          value={value === 0 ? "" : value}
           placeholder="Please enter a value"
         />
-      ) : (
-        <input className={styles.input} type="file" />
       )}
     </div>
   );
