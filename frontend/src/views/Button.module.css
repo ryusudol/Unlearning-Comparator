@@ -12,6 +12,8 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   margin-top: 6px;
+  position: relative;
+  left: 218px;
 }
 
 .button-wrapper:hover {
