@@ -5,17 +5,18 @@ import Title from "../views/Title";
 import ContentBox from "../views/ContentBox";
 
 import Settings from "../sections/Settings";
+import Histories from "../sections/Histories";
 import Embeddings from "../sections/Embeddings";
 import PerformanceMetrics from "../sections/PerformanceMetrics";
 
 export default function App() {
   return (
     <section id={styles["body-wrapper"]}>
-      <Settings />
-      <Title title="Histories" />
-      <ContentBox height={20}></ContentBox>
       <div>
-        <Title title="Embeddings" />
+        <Settings />
+        <Histories />
+      </div>
+      <div>
         <Embeddings />
         <PerformanceMetrics />
       </div>
