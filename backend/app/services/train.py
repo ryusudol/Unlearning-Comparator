@@ -101,31 +101,33 @@ async def run_training(request, status):
 
     status.is_training = True
     status.progress = 0
-    await train_model(model=model, 
-                      train_loader=train_loader, 
-                      criterion=criterion, 
-                      optimizer=optimizer, 
-                      device=device, 
-                      epochs=request.epochs, 
-                      status=status,
-                      model_name="resnet18",
-                      dataset_name="CIFAR10",
-                      learning_rate=request.learning_rate,
-                      )
+    try:
+        await train_model(model=model, 
+                          train_loader=train_loader, 
+                          criterion=criterion, 
+                          optimizer=optimizer, 
+                          device=device, 
+                          epochs=request.epochs, 
+                          status=status,
+                          model_name="resnet18",
+                          dataset_name="CIFAR10",
+                          learning_rate=request.learning_rate,
+                          )
 
-    subset_indices = torch.randperm(len(train_set))[:5000]
-    subset_loader = torch.utils.data.DataLoader(
-        torch.utils.data.Subset(train_set, subset_indices),
-        batch_size=64, shuffle=False)
-    
-    print("\nComputing and saving UMAP embeddings...")
-    activations = get_layer_activations(model, subset_loader, device)
-    labels = torch.tensor([train_set.targets[i] for i in subset_indices])
-    umap_embeddings, svg_files = compute_umap_embeddings(activations, labels)
-    status.umap_embeddings = umap_embeddings
-    status.svg_files = svg_files
-    status.is_training = False
-    print("Training and visualization completed!")
+        subset_indices = torch.randperm(len(train_set))[:5000]
+        subset_loader = torch.utils.data.DataLoader(
+            torch.utils.data.Subset(train_set, subset_indices),
+            batch_size=64, shuffle=False)
+        
+        print("\nComputing and saving UMAP embeddings...")
+        activations = get_layer_activations(model, subset_loader, device)
+        labels = torch.tensor([train_set.targets[i] for i in subset_indices])
+        umap_embeddings, svg_files = compute_umap_embeddings(activations, labels)
+        status.umap_embeddings = umap_embeddings
+        status.svg_files = list(svg_files.values())
+        print("Training and visualization completed!")
+    finally:
+        status.is_training = False
 
 async def run_unlearning(request, status):
     # Implement unlearning logic here
