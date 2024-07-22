@@ -14,11 +14,21 @@ const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise"];
 const METHODS = ["method1", "method2", "method3", "method4"];
 const MODELS = ["ResNet-18"];
 const UNLEARN_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+const PREV_TRAINED_MODELS = [
+  "Trained Model 1",
+  "Trained Model 2",
+  "Trained Model 3",
+];
+const PREV_UNLEARNED_MODELS = [
+  "Unlearned Model 1",
+  "Unlearned Model 2",
+  "Unlearned Model 3",
+];
 
 export default function Settings() {
-  const [trainingMode, setTrainingMode] = useState(0);
-  const [unlearningMode, setUnlearningMode] = useState(0);
-  const [defenseMode, setDefenseMode] = useState(0);
+  const [trainingMode, setTrainingMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
+  const [unlearningMode, setUnlearningMode] = useState<0 | 1 | 2>(0); // 0: Previous, 1: Predefined, 2: Custom
+  const [defenseMode, setDefenseMode] = useState<0 | 1 | 2>(0); // 0: Previous, 1: Predefined, 2: Custom
 
   // training configuration
   const [model, setModel] = useState("ResNet-18");
@@ -45,15 +55,21 @@ export default function Settings() {
   const handlePredefinedClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
     if (id === "training-predefined") setTrainingMode(0);
-    else if (id === "unlearning-predefined") setUnlearningMode(0);
-    else if (id === "defense-predefined") setDefenseMode(0);
+    else if (id === "unlearning-predefined") setUnlearningMode(1);
+    else if (id === "defense-predefined") setDefenseMode(1);
   };
 
   const handleCustomClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
     if (id === "training-custom") setTrainingMode(1);
-    else if (id === "unlearning-custom") setUnlearningMode(1);
-    else if (id === "defense-custom") setDefenseMode(1);
+    else if (id === "unlearning-custom") setUnlearningMode(2);
+    else if (id === "defense-custom") setDefenseMode(2);
+  };
+
+  const handlePrevClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const id = e.currentTarget.id;
+    if (id === "unlearning-previous") setUnlearningMode(0);
+    else if (id === "defense-previous") setDefenseMode(0);
   };
 
   const handleSelectUnlearningMethod = (
@@ -89,7 +105,7 @@ export default function Settings() {
     <section>
       <Title title="Settings" />
       {/* Training Configuration */}
-      <ContentBox height={240}>
+      <ContentBox height={216}>
         <div className={styles["subset-wrapper"]}>
           <SubTitle subtitle="Training Configuration" />
           <div
@@ -167,9 +183,29 @@ export default function Settings() {
         </div>
       </ContentBox>
       {/* Unlearning Configuration */}
-      <ContentBox height={214}>
+      <ContentBox height={215}>
         <div className={styles["subset-wrapper"]}>
           <SubTitle subtitle="Unlearning Configuration" />
+          <div
+            id="unlearning-previous"
+            onClick={handlePrevClick}
+            className={styles.custom}
+          >
+            <div>
+              <FontAwesomeIcon
+                className={styles.icon}
+                icon={unlearningMode === 0 ? faCircleCheck : faCircle}
+              />
+              <span>Trained Model</span>
+            </div>
+            <select className={styles["predefined-select"]}>
+              {PREV_TRAINED_MODELS.map((model, idx) => (
+                <option key={idx} value={model} className={styles.option}>
+                  {model}
+                </option>
+              ))}
+            </select>
+          </div>
           <div
             id="unlearning-predefined"
             onClick={handlePredefinedClick}
@@ -179,7 +215,7 @@ export default function Settings() {
               <div>
                 <FontAwesomeIcon
                   className={styles.icon}
-                  icon={unlearningMode ? faCircle : faCircleCheck}
+                  icon={unlearningMode === 1 ? faCircleCheck : faCircle}
                 />
                 <label>Predefined</label>
               </div>
@@ -228,7 +264,7 @@ export default function Settings() {
             <div>
               <FontAwesomeIcon
                 className={styles.icon}
-                icon={unlearningMode ? faCircleCheck : faCircle}
+                icon={unlearningMode === 2 ? faCircleCheck : faCircle}
               />
               <span>Custom</span>
             </div>
@@ -251,6 +287,26 @@ export default function Settings() {
         <div className={styles["subset-wrapper"]}>
           <SubTitle subtitle="Defense Configuration" />
           <div
+            id="defense-previous"
+            onClick={handlePrevClick}
+            className={styles.custom}
+          >
+            <div>
+              <FontAwesomeIcon
+                className={styles.icon}
+                icon={defenseMode === 0 ? faCircleCheck : faCircle}
+              />
+              <span>Unlearned Model</span>
+            </div>
+            <select className={styles["predefined-select"]}>
+              {PREV_UNLEARNED_MODELS.map((model, idx) => (
+                <option key={idx} value={model} className={styles.option}>
+                  {model}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div
             id="defense-predefined"
             onClick={handlePredefinedClick}
             className={styles.predefined}
@@ -259,7 +315,7 @@ export default function Settings() {
               <div>
                 <FontAwesomeIcon
                   className={styles.icon}
-                  icon={defenseMode ? faCircle : faCircleCheck}
+                  icon={defenseMode === 1 ? faCircleCheck : faCircle}
                 />
                 <label>Predefined</label>
               </div>
@@ -301,7 +357,7 @@ export default function Settings() {
             <div>
               <FontAwesomeIcon
                 className={styles.icon}
-                icon={defenseMode ? faCircleCheck : faCircle}
+                icon={defenseMode === 2 ? faCircleCheck : faCircle}
               />
               <span>Custom</span>
             </div>
