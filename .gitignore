@@ -1,1 +1,4 @@
+**/__pycache__/
 backend/data/
+backend/umap_visualizations/
+backend/saved_models/

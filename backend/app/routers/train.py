@@ -19,7 +19,7 @@ async def start_training(request: TrainingRequest, background_tasks: BackgroundT
     background_tasks.add_task(run_training, request, status)
     return {"message": "Training started"}
 
-@router.get("/status")
+@router.get("/train/status")
 async def get_status():
     return {
         "is_training": status.is_training,

@@ -13,6 +13,7 @@ pnpm dev
 
 ## Backend
 ```shell
+cd backend
 hatch shell
 hatch run start
 
@@ -22,11 +23,12 @@ e.g.
 POST /train
 {
   "seed": 42,
-  "batch_size": 64,
-  "learning_rate": 0.001,
-  "epochs": 20
+  "batch_size": 128,
+  "learning_rate": 0.002,
+  "epochs": 10
 }
 
 GET /status
 ```
-Docs: http://127.0.0.1:8000/docs
+API 추가할 때: router -> service -> main 순 구현
+Swagger: http://127.0.0.1:8000/docs

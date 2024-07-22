@@ -4,11 +4,21 @@ import torch.optim as optim
 import asyncio
 import time
 import sys
-from ..models.neural_network import get_resnet18
-from ..utils.helpers import set_seed, get_data_loaders, get_layer_activations
-from .visualization import compute_umap_embeddings
+import os
+from app.models.neural_network import get_resnet18
+from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
+from app.services.visualization import compute_umap_embeddings
 
-async def train_model(model, train_loader, criterion, optimizer, device, epochs, status):
+async def train_model(model, 
+                      train_loader, 
+                      criterion, 
+                      optimizer, 
+                      device, 
+                      epochs, 
+                      status, 
+                      model_name, 
+                      dataset_name, 
+                      learning_rate):
     model.train()
     status.start_time = time.time()
     status.total_epochs = epochs
@@ -59,6 +69,19 @@ async def train_model(model, train_loader, criterion, optimizer, device, epochs,
     
     print()  # Print a newline at the end of training
 
+    # Save the trained model
+    save_dir = 'saved_models'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    model_filename = f"train_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
+    model_path = os.path.join(save_dir, model_filename)
+    torch.save(model.state_dict(), model_path)
+    print(f"Model saved to {model_path}")
+
+    return model
+
+
 async def run_training(request, status):
     print(f"Starting training with {request.epochs} epochs...")
     set_seed(request.seed)
@@ -71,7 +94,17 @@ async def run_training(request, status):
 
     status.is_training = True
     status.progress = 0
-    await train_model(model, train_loader, criterion, optimizer, device, request.epochs, status)
+    await train_model(model=model, 
+                      train_loader=train_loader, 
+                      criterion=criterion, 
+                      optimizer=optimizer, 
+                      device=device, 
+                      epochs=request.epochs, 
+                      status=status,
+                      model_name="resnet18",
+                      dataset_name="CIFAR10",
+                      learning_rate=request.learning_rate,
+                      )
 
     subset_indices = torch.randperm(len(train_set))[:5000]
     subset_loader = torch.utils.data.DataLoader(

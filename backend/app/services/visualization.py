@@ -37,7 +37,7 @@ def compute_umap_embeddings(activations, labels, save_dir='umap_visualizations')
         plt.tight_layout()
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f'umap_layer_{i+1}_{timestamp}.svg'
+        filename = f'{timestamp}_umap_layer_{i+1}.svg'
         filepath = os.path.join(save_dir, filename)
         
         plt.savefig(filepath, format='svg', dpi=300, bbox_inches='tight')

@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+from app.models.neural_network import get_resnet18
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -46,3 +47,10 @@ def get_layer_activations(model, data_loader, device, num_samples=5000):
                 break
 
     return [np.concatenate(act)[:num_samples] for act in activations]
+
+def load_model(model_path, num_classes=10, device='cuda'):
+    model = get_resnet18(num_classes=num_classes)
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.to(device)
+    model.eval()
+    return model
