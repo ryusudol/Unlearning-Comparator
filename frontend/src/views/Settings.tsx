@@ -8,7 +8,6 @@ import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import Input from "../components/Input";
 import SubTitle from "../components/SubTitle";
-import Button from "../components/Button";
 
 const DATASETS = ["CIFAR-10", "MNIST"];
 const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise"];
@@ -27,7 +26,7 @@ export default function Settings() {
   const [trainingEpochs, setTrainingEpochs] = useState(0);
   const [trainingBatchSize, setTrainingBatchSize] = useState(0);
   const [trainingLearningRate, setTrainingLearningRate] = useState(0);
-  const [trainingCustomFile, setTrainingCustomFile] = useState(0);
+  const [trainingCustomFile, setTrainingCustomFile] = useState<File>();
 
   // unlearning configuration
   const [unlearningMethod, setUnlearningMethod] = useState("SalUn");
@@ -35,13 +34,13 @@ export default function Settings() {
   const [unlearningBatchSize, setUnlearningBatchSize] = useState(0);
   const [unlearningRate, setUnlearningRate] = useState(0);
   const [unlearningEpochs, setUnlearningEpochs] = useState(0);
-  const [unlearningCustomFile, setUnlearningCustomFile] = useState(0);
+  const [unlearningCustomFile, setUnlearningCustomFile] = useState<File>();
 
   const [defenseMethod, setDefenseMethod] = useState("method1");
   const [defenseParameter1, setDefenseParameter1] = useState(0);
   const [defenseParameter2, setDefenseParameter2] = useState(0);
   const [defenseParameter3, setDefenseParameter3] = useState(0);
-  const [defenseCustomFile, setDefenseCustomFile] = useState();
+  const [defenseCustomFile, setDefenseCustomFile] = useState<File>();
 
   const handlePredefinedClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -69,6 +68,21 @@ export default function Settings() {
   ) => {
     const method = e.currentTarget.value;
     setDefenseMethod(method);
+  };
+
+  const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const id = e.currentTarget.id;
+    const uploadedFile = e.currentTarget.files
+      ? e.currentTarget.files[0]
+      : null;
+    if (!uploadedFile) return;
+    else if (id === "custom-training") setTrainingCustomFile(uploadedFile);
+    else if (id === "custom-unlearning") setUnlearningCustomFile(uploadedFile);
+    else if (id === "custom-defense") setDefenseCustomFile(uploadedFile);
+  };
+
+  const handleRunBtnClick = async () => {
+    console.log("Run Button Clicked !");
   };
 
   return (
@@ -137,13 +151,20 @@ export default function Settings() {
               />
               <span>Custom</span>
             </div>
-            <label htmlFor="custom">
+            <label htmlFor="custom-training">
               <div className={styles["upload-btn"]}>Click to upload</div>
             </label>
-            <input className={styles["file-input"]} type="file" id="custom" />
+            <input
+              onChange={handleCustomFileUpload}
+              className={styles["file-input"]}
+              type="file"
+              id="custom-training"
+            />
           </div>
         </div>
-        <Button buttonText="Run" />
+        <div onClick={handleRunBtnClick} className={styles["button-wrapper"]}>
+          Run
+        </div>
       </ContentBox>
       {/* Unlearning Configuration */}
       <ContentBox height={214}>
@@ -211,13 +232,19 @@ export default function Settings() {
               />
               <span>Custom</span>
             </div>
-            <label htmlFor="custom">
+            <label htmlFor="custom-unlearning">
               <div className={styles["upload-btn"]}>Click to upload</div>
             </label>
-            <input className={styles["file-input"]} type="file" id="custom" />
+            <input
+              className={styles["file-input"]}
+              type="file"
+              id="custom-unlearning"
+            />
           </div>
         </div>
-        <Button buttonText="Run" />
+        <div onClick={handleRunBtnClick} className={styles["button-wrapper"]}>
+          Run
+        </div>
       </ContentBox>
       {/* Defense Configuration */}
       <ContentBox height={194}>
@@ -278,13 +305,19 @@ export default function Settings() {
               />
               <span>Custom</span>
             </div>
-            <label htmlFor="custom">
+            <label htmlFor="custom-defense">
               <div className={styles["upload-btn"]}>Click to upload</div>
             </label>
-            <input className={styles["file-input"]} type="file" id="custom" />
+            <input
+              className={styles["file-input"]}
+              type="file"
+              id="custom-defense"
+            />
           </div>
         </div>
-        <Button buttonText="Run" />
+        <div onClick={handleRunBtnClick} className={styles["button-wrapper"]}>
+          Run
+        </div>
       </ContentBox>
     </section>
   );
