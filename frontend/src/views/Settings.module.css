@@ -30,7 +30,7 @@
   align-items: center;
   background-color: white;
   width: 140px;
-  height: 20px;
+  height: 18px;
   border: 1px solid var(--border-color);
   border-radius: 2px;
   cursor: pointer;
@@ -46,6 +46,8 @@
   width: 140px;
   height: 18px;
   padding: 0px 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .option {
