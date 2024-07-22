@@ -70,7 +70,7 @@ async def train_model(model,
     print()  # Print a newline at the end of training
 
     # Save the trained model
-    save_dir = 'saved_models'
+    save_dir = 'trained_models'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
