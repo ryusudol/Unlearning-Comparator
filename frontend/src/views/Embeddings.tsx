@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./Embeddings.module.css";
 
-import Title from "../views/Title";
-import ContentBox from "../views/ContentBox";
-import SubTitle from "../views/SubTitle";
+import Title from "../components/Title";
+import ContentBox from "../components/ContentBox";
+import SubTitle from "../components/SubTitle";
 
 export default function Settings() {
   return (

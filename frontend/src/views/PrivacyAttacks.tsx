@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./PrivacyAttacks.module.css";
 
-import Title from "../views/Title";
-import SubTitle from "../views/SubTitle";
-import ContentBox from "../views/ContentBox";
+import Title from "../components/Title";
+import SubTitle from "../components/SubTitle";
+import ContentBox from "../components/ContentBox";
 
 export default function PrivacyAttacks() {
   return (
