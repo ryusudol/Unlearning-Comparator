@@ -1,7 +1,7 @@
 # Machine Unlearning Dashboard
 It's a Machine Unlearning Dashboard that provides training, evaluation of unlearning, and attack simulation.
 
-## How to start
+## How to start the frontend
 
 * Install [pnpm](https://pnpm.io/installation) to set up the development environment.
 
