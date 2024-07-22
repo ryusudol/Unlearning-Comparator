@@ -1,9 +1,6 @@
 # Machine Unlearning Dashboard
 It's a Machine Unlearning Dashboard that provides training, evaluation of unlearning, and attack simulation.
 
-## Frontend Design
-<img src="https://github.com/gnueaj/mu-dashboard/blob/main/frontend/public/design.png" alt="a web design image" />
-
 ## How to start the frontend
 
 * Install [pnpm](https://pnpm.io/installation) to set up the development environment.
