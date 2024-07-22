@@ -33,6 +33,7 @@ export default function Settings() {
   const [trainingEpochs, setTrainingEpochs] = useState(0);
   const [trainingBatchSize, setTrainingBatchSize] = useState(0);
   const [trainingLearningRate, setTrainingLearningRate] = useState(0);
+  const [trainingSeed, setTrainingSeed] = useState(0);
   const [trainingCustomFile, setTrainingCustomFile] = useState<File>();
 
   // unlearning configuration
@@ -115,7 +116,7 @@ export default function Settings() {
     <section>
       <Title title="Settings" />
       {/* Training Configuration */}
-      <ContentBox height={216}>
+      <ContentBox height={236}>
         <div className={styles["subset-wrapper"]}>
           <SubTitle subtitle="Training Configuration" />
           <div
@@ -162,6 +163,12 @@ export default function Settings() {
               labelName="Learning Rate"
               value={trainingLearningRate}
               setStateNumber={setTrainingLearningRate}
+              type="number"
+            />
+            <Input
+              labelName="Seed"
+              value={trainingSeed}
+              setStateNumber={setTrainingSeed}
               type="number"
             />
           </div>
