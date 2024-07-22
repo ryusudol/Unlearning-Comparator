@@ -52,7 +52,14 @@ export default function Input({
           onChange={handleNumberChange}
           className={styles.input}
           type="number"
-          value={value === 0 ? "" : value}
+          step="0.000001"
+          value={
+            value === 0 && labelName === "Learning Rate"
+              ? 0
+              : value === 0
+              ? ""
+              : value
+          }
           placeholder="Please enter a value"
         />
       )}
