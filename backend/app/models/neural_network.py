@@ -7,21 +7,21 @@ def get_resnet18(num_classes=10):
 
 class TrainingStatus:
     def __init__(self):
-        self.reset()
-
-    def reset(self):
         self.is_training = False
         self.progress = 0
         self.current_epoch = 0
         self.total_epochs = 0
         self.current_loss = 0
-        self.best_loss = float('inf')
+        self.best_loss = 9999.99
         self.current_accuracy = 0
         self.best_accuracy = 0
         self.start_time = None
         self.estimated_time_remaining = None
         self.umap_embeddings = None
         self.svg_files: Optional[List[str]] = None
+        
+    def reset(self):
+        self.__init__()
 
 class InferenceStatus:
     def __init__(self):
@@ -30,3 +30,8 @@ class InferenceStatus:
         self.current_step = ""
         self.umap_embeddings = None
         self.svg_files = None
+        self.start_time = None
+        self.estimated_time_remaining = None
+
+    def reset(self):
+        self.__init__()
