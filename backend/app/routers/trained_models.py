@@ -6,7 +6,7 @@ import os
 router = APIRouter()
 
 def get_trained_model_files() -> List[str]:
-    saved_models_dir = 'saved_models'
+    saved_models_dir = 'trained_models'
     if not os.path.exists(saved_models_dir):
         return []
     
