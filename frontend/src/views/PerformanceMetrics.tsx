@@ -8,7 +8,7 @@ export default function PerformanceMetrics() {
   return (
     <section className={styles.section}>
       <Title title="Performance Metrics" />
-      <ContentBox height={430}>
+      <ContentBox height={436}>
         <div className={styles.wrapper}></div>
       </ContentBox>
     </section>

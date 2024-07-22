@@ -10,7 +10,7 @@ export default function Settings() {
     <section>
       <Title title="Embeddings" />
       <div className={styles.section}>
-        <ContentBox height={462}>
+        <ContentBox height={458}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Original Model" />
             <img
@@ -20,7 +20,7 @@ export default function Settings() {
             />
           </div>
         </ContentBox>
-        <ContentBox height={462}>
+        <ContentBox height={458}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Unlearned Model" />
             <img

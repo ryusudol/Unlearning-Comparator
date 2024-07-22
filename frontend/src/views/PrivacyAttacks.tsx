@@ -9,12 +9,12 @@ export default function PrivacyAttacks() {
   return (
     <section>
       <Title title="Privacy Attacks" />
-      <ContentBox height={498}>
+      <ContentBox height={492}>
         <div className={styles.wrapper}>
           <SubTitle subtitle="Model Inversion Attack" />
         </div>
       </ContentBox>
-      <ContentBox height={428}>
+      <ContentBox height={436}>
         <div className={styles.wrapper}>
           <SubTitle subtitle="Membership Inference Attack" />
         </div>
