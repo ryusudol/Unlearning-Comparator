@@ -19,6 +19,11 @@ export default function Input({
   optionData,
   type,
 }: PropsType) {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = e.currentTarget.value;
+    if (setStateString) setStateString(selectedValue);
+  };
+
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const enteredValue = e.currentTarget.value;
     if (setStateNumber) setStateNumber(+enteredValue);
@@ -30,7 +35,12 @@ export default function Input({
         {labelName}
       </label>
       {type === "select" ? (
-        <select className={styles.input} id={labelName} value={value}>
+        <select
+          onChange={handleSelectChange}
+          className={styles.input}
+          id={labelName}
+          value={value}
+        >
           {optionData!.map((data, idx) => (
             <option key={idx} className={styles.option} value={data}>
               {data}
