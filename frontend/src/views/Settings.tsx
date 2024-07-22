@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Settings.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -14,16 +14,13 @@ const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise"];
 const METHODS = ["method1", "method2", "method3", "method4"];
 const MODELS = ["ResNet-18"];
 const UNLEARN_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-const PREV_TRAINED_MODELS = [
-  "Trained Model 1",
-  "Trained Model 2",
-  "Trained Model 3",
-];
 const PREV_UNLEARNED_MODELS = [
   "Unlearned Model 1",
   "Unlearned Model 2",
   "Unlearned Model 3",
 ];
+
+const API_URL = "http://localhost:8000";
 
 export default function Settings() {
   const [trainingMode, setTrainingMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
@@ -39,6 +36,7 @@ export default function Settings() {
   const [trainingCustomFile, setTrainingCustomFile] = useState<File>();
 
   // unlearning configuration
+  const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearningMethod, setUnlearningMethod] = useState("SalUn");
   const [unlearnClass, setUnlearnClass] = useState("0");
   const [unlearningBatchSize, setUnlearningBatchSize] = useState(0);
@@ -51,6 +49,18 @@ export default function Settings() {
   const [defenseParameter2, setDefenseParameter2] = useState(0);
   const [defenseParameter3, setDefenseParameter3] = useState(0);
   const [defenseCustomFile, setDefenseCustomFile] = useState<File>();
+
+  useEffect(() => {
+    const func = async () => {
+      const res = await fetch(`${API_URL}/trained_models`);
+      if (!res.ok) {
+        // TODO: Trained Models 불러올 때 에러 시 팝업 뜨는 기능 구현
+      }
+      const json = await res.json();
+      setTrainedModels(json);
+    };
+    func();
+  }, []);
 
   const handlePredefinedClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -199,7 +209,7 @@ export default function Settings() {
               <span>Trained Model</span>
             </div>
             <select className={styles["predefined-select"]}>
-              {PREV_TRAINED_MODELS.map((model, idx) => (
+              {trainedModels.map((model, idx) => (
                 <option key={idx} value={model} className={styles.option}>
                   {model}
                 </option>
