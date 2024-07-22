@@ -1,0 +1,21 @@
+.button-wrapper {
+  background-color: var(--button-bg-color);
+  width: 60px;
+  height: 27px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 17px;
+  font-weight: 500;
+  color: #fefefe;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-top: 6px;
+  position: relative;
+  left: 218px;
+}
+
+.button-wrapper:hover {
+  background-color: var(--button-hover-bg-color);
+}

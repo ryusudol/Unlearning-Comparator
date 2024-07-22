@@ -3,14 +3,19 @@ import styles from "./Histories.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import Button from "../components/Button";
 
 export default function Histories() {
+  const handleSaveBtnClick = () => {
+    console.log("Save Button Clicked !");
+  };
+
   return (
     <section>
       <Title title="Histories" />
       <ContentBox height={238}>
-        <Button buttonText="Save" />
+        <div onClick={handleSaveBtnClick} className={styles["button-wrapper"]}>
+          Save
+        </div>
       </ContentBox>
     </section>
   );
