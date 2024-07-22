@@ -86,6 +86,9 @@ async def run_training(request, status):
     print(f"Starting training with {request.epochs} epochs...")
     set_seed(request.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    if torch.backends.mps.is_available():
+        device = torch.device("mps")
 
     train_loader, train_set = get_data_loaders(request.batch_size)
     model = get_resnet18().to(device)
