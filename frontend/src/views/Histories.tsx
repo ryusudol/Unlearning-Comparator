@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./Histories.module.css";
 
-import Title from "../views/Title";
-import ContentBox from "../views/ContentBox";
-import Button from "../views/Button";
+import Title from "../components/Title";
+import ContentBox from "../components/ContentBox";
+import Button from "../components/Button";
 
 export default function Histories() {
   return (

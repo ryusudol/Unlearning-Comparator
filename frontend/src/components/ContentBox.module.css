@@ -1,6 +1,6 @@
 .section {
   position: relative;
-  margin: 4px 5px;
+  margin: 4px 2px;
   border-radius: 6px;
   border: 2px solid var(--border-color);
   padding: 8px 6px;

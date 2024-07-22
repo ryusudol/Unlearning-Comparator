@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import Title from "../views/Title";
-import ContentBox from "../views/ContentBox";
-import Input from "../views/Input";
-import SubTitle from "../views/SubTitle";
-import Button from "../views/Button";
+import Title from "../components/Title";
+import ContentBox from "../components/ContentBox";
+import Input from "../components/Input";
+import SubTitle from "../components/SubTitle";
+import Button from "../components/Button";
 
 const DATASETS = ["CIFAR-10", "MNIST"];
 const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise"];
