@@ -11,7 +11,7 @@ class TrainingStatus:
         self.current_epoch = 0
         self.total_epochs = 0
         self.current_loss = 0
-        self.best_loss = float('inf')
+        self.best_loss = 9999.99
         self.current_accuracy = 0
         self.best_accuracy = 0
         self.start_time = None

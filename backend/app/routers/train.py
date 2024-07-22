@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
-from ..services.training import run_training
-from ..models.neural_network import TrainingStatus
+from app.services.train import run_training
+from app.models.neural_network import TrainingStatus
 
 router = APIRouter()
 status = TrainingStatus()

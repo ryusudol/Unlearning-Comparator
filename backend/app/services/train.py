@@ -9,7 +9,7 @@ from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
 
-async def train_model(model, 
+async def train_model(model,
                       train_loader, 
                       criterion, 
                       optimizer, 
@@ -39,6 +39,10 @@ async def train_model(model,
             _, predicted = outputs.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
+
+            if i % 10 == 0:  # 10 배치마다 이벤트 루프에 제어권을 반환
+                await asyncio.sleep(0)
+                
         
         avg_loss = running_loss / len(train_loader)
         accuracy = 100. * correct / total
