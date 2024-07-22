@@ -3,11 +3,11 @@
 }
 
 .predefined {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .mode {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -16,6 +16,7 @@
 .custom {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 1px;
 }
 
 .icon {
@@ -28,12 +29,12 @@
   justify-content: flex-start;
   align-items: center;
   background-color: white;
-  width: 165px;
+  width: 140px;
   height: 20px;
   border: 1px solid var(--border-color);
   border-radius: 2px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   padding: 0px 4px;
 }
 
@@ -42,8 +43,8 @@
 }
 
 .predefined-select {
-  width: 165px;
-  height: 20px;
+  width: 140px;
+  height: 18px;
   padding: 0px 4px;
 }
 
@@ -53,12 +54,12 @@
 
 .button-wrapper {
   background-color: var(--button-bg-color);
-  width: 60px;
-  height: 27px;
+  width: 48px;
+  height: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 500;
   color: #fefefe;
   border-radius: 4px;
@@ -66,7 +67,7 @@
   transition: all 0.2s ease-in-out;
   margin-top: 6px;
   position: relative;
-  left: 218px;
+  left: 236px;
 }
 
 .button-wrapper:hover {
