@@ -20,6 +20,31 @@
 }
 
 .svg svg {
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
+  scale: 1;
+  cursor: pointer;
+}
+
+.svg svg:hover {
+  scale: 1.1;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.selected-svg {
+}
+
+.selected-svg svg {
+  position: relative;
+  bottom: 40px;
+  left: 12px;
+  width: 400px;
+  height: 400px;
+  z-index: -1;
 }

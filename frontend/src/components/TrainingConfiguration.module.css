@@ -63,3 +63,26 @@
 .button-wrapper:hover {
   background-color: var(--button-hover-bg-color);
 }
+
+.status-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-left: 20px;
+  height: 122px;
+}
+
+.status {
+  color: red;
+  font-size: 14px;
+}
+
+.status-detail-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-detail {
+  font-size: 12.4px;
+}
