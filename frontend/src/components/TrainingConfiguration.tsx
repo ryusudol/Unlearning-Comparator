@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import styles from "./TrainingConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -14,18 +14,27 @@ const DATASETS = ["CIFAR-10", "MNIST"];
 const API_URL = "http://localhost:8000";
 
 type PropsType = {
-  isLoading: boolean;
-  setIsLoading: (bool: boolean) => void;
   setSvgContents: (data: string[]) => void;
 };
 type Timer = ReturnType<typeof setInterval> | undefined;
+type StatusType = {
+  is_training: boolean;
+  progress: number;
+  current_epoch: number;
+  total_epochs: number;
+  current_loss: number;
+  best_loss: number;
+  current_accuracy: number;
+  best_accuracy: number;
+  estimated_time_remaining: number;
+};
 
-export default function TrainingConfiguration({
-  isLoading,
-  setIsLoading,
-  setSvgContents,
-}: PropsType) {
-  const [trainingMode, setTrainingMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
+export default function TrainingConfiguration({ setSvgContents }: PropsType) {
+  const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
+  const [isTraining, setIsTraining] = useState(false);
+  const [status, setStatus] = useState("Training...");
+  const [statusDetail, setStatusDetail] = useState<StatusType | undefined>();
+
   const [model, setModel] = useState("ResNet-18");
   const [dataset, setDataset] = useState("CIFAR-10");
   const [trainingEpochs, setTrainingEpochs] = useState(0);
@@ -33,48 +42,53 @@ export default function TrainingConfiguration({
   const [trainingLearningRate, setTrainingLearningRate] = useState(0);
   const [trainingSeed, setTrainingSeed] = useState(0);
   const [trainingCustomFile, setTrainingCustomFile] = useState<File>();
-  const [intervalId, setIntervalId] = useState<Timer>();
+
+  const intervalIdRef = useRef<Timer>();
+  const resultFetchedRef = useRef(false);
 
   const checkStatus = useCallback(async () => {
+    if (resultFetchedRef.current) return;
     try {
       const res = await fetch(`${API_URL}/train/status`);
       const data = await res.json();
-      if (!data.is_training) {
-        clearInterval(intervalId);
-        setIntervalId(undefined);
-        setIsLoading(false);
-        const res = await fetch(`${API_URL}/train/result`);
-        if (!res.ok) {
+      setStatusDetail(data);
+      if (data.progress === 100) setStatus("Embedding...");
+      if (!data.is_training && !resultFetchedRef.current) {
+        resultFetchedRef.current = true;
+        if (intervalIdRef.current) {
+          clearInterval(intervalIdRef.current);
+          intervalIdRef.current = undefined;
+        }
+        const resultRes = await fetch(`${API_URL}/train/result`);
+        if (!resultRes.ok) {
           alert("Error occurred while fetching the training result.");
-          setIsLoading(false);
           return;
         }
-        const data = await res.json();
+        const data = await resultRes.json();
         setSvgContents(data.svg_files);
+        setIsTraining(false);
+        setStatusDetail(undefined);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [intervalId, setIsLoading, setSvgContents]);
+  }, [setSvgContents]);
 
   useEffect(() => {
-    if (isLoading && !intervalId) {
-      const id = setInterval(checkStatus, 1000);
-      setIntervalId(id);
+    if (isTraining && !intervalIdRef.current) {
+      intervalIdRef.current = setInterval(checkStatus, 1000);
     }
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalIdRef.current) clearInterval(intervalIdRef.current);
     };
-  }, [isLoading, intervalId, checkStatus]);
+  }, [isTraining, checkStatus]);
 
   const handlePredefinedClick = () => {
-    setTrainingMode(0);
+    setMode(0);
   };
 
   const handleCustomClick = () => {
-    setTrainingMode(1);
+    setMode(1);
   };
 
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +100,9 @@ export default function TrainingConfiguration({
   };
 
   const handleRunBtnClick = async () => {
-    setIsLoading(true);
+    resultFetchedRef.current = false;
+    setIsTraining(true);
+    setStatus("Training...");
     try {
       if (
         trainingSeed === 0 ||
@@ -95,7 +111,7 @@ export default function TrainingConfiguration({
         trainingEpochs === 0
       ) {
         alert("Please enter valid numbers");
-        setIsLoading(false);
+        setIsTraining(false);
         return;
       }
       const data = {
@@ -111,15 +127,11 @@ export default function TrainingConfiguration({
       });
       if (!res.ok) {
         alert("Error occurred while sending a request for training.");
-        setIsLoading(false);
-        return;
+        setIsTraining(false);
       }
-      const json = await res.json();
-      console.log(json);
-      // TODO: 모달창에 Training Started . . .
     } catch (err) {
       console.log(err);
-      setIsLoading(false);
+      setIsTraining(false);
     }
   };
 
@@ -136,49 +148,83 @@ export default function TrainingConfiguration({
             <div>
               <FontAwesomeIcon
                 className={styles.icon}
-                icon={trainingMode ? faCircle : faCircleCheck}
+                icon={mode ? faCircle : faCircleCheck}
               />
               <span>Predefined</span>
             </div>
           </div>
-          <Input
-            labelName="Model"
-            value={model}
-            setStateString={setModel}
-            optionData={MODELS}
-            type="select"
-          />
-          <Input
-            labelName="Dataset"
-            value={dataset}
-            setStateString={setDataset}
-            optionData={DATASETS}
-            type="select"
-          />
-          <Input
-            labelName="Epochs"
-            value={trainingEpochs}
-            setStateNumber={setTrainingEpochs}
-            type="number"
-          />
-          <Input
-            labelName="Batch Size"
-            value={trainingBatchSize}
-            setStateNumber={setTrainingBatchSize}
-            type="number"
-          />
-          <Input
-            labelName="Learning Rate"
-            value={trainingLearningRate}
-            setStateNumber={setTrainingLearningRate}
-            type="number"
-          />
-          <Input
-            labelName="Seed"
-            value={trainingSeed}
-            setStateNumber={setTrainingSeed}
-            type="number"
-          />
+          {isTraining ? (
+            <div className={styles["status-wrapper"]}>
+              <span className={styles.status}>{status}</span>
+              {statusDetail && statusDetail.current_epoch >= 1 ? (
+                <div className={styles["status-detail-wrapper"]}>
+                  <span className={styles["status-detail"]}>
+                    Progress: {statusDetail.progress.toFixed(1)}%
+                  </span>
+                  <span className={styles["status-detail"]}>
+                    Epoch: {statusDetail.current_epoch}/
+                    {statusDetail.total_epochs}
+                  </span>
+                  <span className={styles["status-detail"]}>
+                    Current Loss: {statusDetail.current_loss.toFixed(3)}
+                  </span>
+                  <span className={styles["status-detail"]}>
+                    Best Loss: {statusDetail.best_loss.toFixed(3)}
+                  </span>
+                  <span className={styles["status-detail"]}>
+                    Current Accuracy: {statusDetail.current_accuracy}
+                  </span>
+                  <span className={styles["status-detail"]}>
+                    Best Accuracy: {statusDetail.best_accuracy}
+                  </span>
+                  <span className={styles["status-detail"]}>
+                    ETA: {statusDetail.estimated_time_remaining.toFixed(2)}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div>
+              <Input
+                labelName="Model"
+                value={model}
+                setStateString={setModel}
+                optionData={MODELS}
+                type="select"
+              />
+              <Input
+                labelName="Dataset"
+                value={dataset}
+                setStateString={setDataset}
+                optionData={DATASETS}
+                type="select"
+              />
+              <Input
+                labelName="Epochs"
+                value={trainingEpochs}
+                setStateNumber={setTrainingEpochs}
+                type="number"
+              />
+              <Input
+                labelName="Batch Size"
+                value={trainingBatchSize}
+                setStateNumber={setTrainingBatchSize}
+                type="number"
+              />
+              <Input
+                labelName="Learning Rate"
+                value={trainingLearningRate}
+                setStateNumber={setTrainingLearningRate}
+                type="number"
+              />
+              <Input
+                labelName="Seed"
+                value={trainingSeed}
+                setStateNumber={setTrainingSeed}
+                type="number"
+              />
+            </div>
+          )}
         </div>
         <div
           id="training-custom"
@@ -188,7 +234,7 @@ export default function TrainingConfiguration({
           <div>
             <FontAwesomeIcon
               className={styles.icon}
-              icon={trainingMode ? faCircleCheck : faCircle}
+              icon={mode ? faCircleCheck : faCircle}
             />
             <span>Custom</span>
           </div>
