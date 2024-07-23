@@ -63,15 +63,3 @@
 .button-wrapper:hover {
   background-color: var(--button-hover-bg-color);
 }
-
-.predefined-select {
-  width: 140px;
-  height: 18px;
-  padding: 0px 4px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.option {
-  font-size: 12px;
-}

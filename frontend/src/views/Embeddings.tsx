@@ -5,22 +5,47 @@ import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 
-export default function Settings() {
+type PropsType = {
+  svgContents: string[];
+};
+
+export default function Settings({ svgContents }: PropsType) {
+  const createMarkup = (svg: string) => {
+    return { __html: svg };
+  };
+
+  console.log(svgContents);
+
   return (
     <section>
       <Title title="Embeddings" />
       <div className={styles.section}>
-        <ContentBox height={436}>
+        <ContentBox height={456}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Original Model" />
-            <img
-              className={styles.img}
-              src="/model1.png"
-              alt="Embedding model img1"
-            />
+            {svgContents && (
+              <div className={styles["svg-wrapper"]}>
+                <div
+                  className={styles.svg}
+                  dangerouslySetInnerHTML={createMarkup(svgContents[0])}
+                />
+                <div
+                  className={styles.svg}
+                  dangerouslySetInnerHTML={createMarkup(svgContents[1])}
+                />
+                <div
+                  className={styles.svg}
+                  dangerouslySetInnerHTML={createMarkup(svgContents[2])}
+                />
+                <div
+                  className={styles.svg}
+                  dangerouslySetInnerHTML={createMarkup(svgContents[3])}
+                />
+              </div>
+            )}
           </div>
         </ContentBox>
-        <ContentBox height={436}>
+        <ContentBox height={456}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Unlearned Model" />
             <img
