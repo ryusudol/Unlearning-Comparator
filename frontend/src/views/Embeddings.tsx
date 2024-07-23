@@ -52,25 +52,25 @@ export default function Settings({ svgContents }: PropsType) {
               <div className={styles["content-wrapper"]}>
                 <div className={styles["svg-wrapper"]}>
                   <div
-                    id="0"
+                    id="1"
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(modifiedSvgs[0])}
                   />
                   <div
-                    id="1"
+                    id="2"
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(modifiedSvgs[1])}
                   />
                   <div
-                    id="2"
+                    id="3"
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(modifiedSvgs[2])}
                   />
                   <div
-                    id="3"
+                    id="4"
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(modifiedSvgs[3])}
@@ -80,7 +80,7 @@ export default function Settings({ svgContents }: PropsType) {
                   <div
                     className={styles["selected-svg"]}
                     dangerouslySetInnerHTML={createMarkup(
-                      svgContents[selectedId]
+                      svgContents[selectedId - 1]
                     )}
                   />
                 )}
