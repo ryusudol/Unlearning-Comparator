@@ -1,5 +1,5 @@
 .wrapper {
-  margin: 0px 0px 4px 35px;
+  margin: 0px 0px 3px 35px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -11,9 +11,11 @@
 }
 
 .input {
-  width: 165px;
+  width: 140px;
   height: 18px;
   padding: 0px 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .input:focus {

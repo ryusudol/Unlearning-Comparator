@@ -1,7 +1,8 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
-from ..services.training import run_training
-from ..models.neural_network import TrainingStatus
+from app.services.train import run_training
+from app.models.neural_network import TrainingStatus
+
 
 router = APIRouter()
 status = TrainingStatus()
@@ -15,7 +16,8 @@ class TrainingRequest(BaseModel):
 @router.post("/train")
 async def start_training(request: TrainingRequest, background_tasks: BackgroundTasks):
     if status.is_training:
-        return {"message": "Training is already in progress"}
+        raise HTTPException(status_code=400, detail="Training is already in progress")
+    status.reset()  # Reset status before starting new training
     background_tasks.add_task(run_training, request, status)
     return {"message": "Training started"}
 
@@ -32,3 +34,18 @@ async def get_status():
         "best_accuracy": status.best_accuracy,
         "estimated_time_remaining": status.estimated_time_remaining
     }
+
+@router.get("/train/result")
+async def get_training_result():
+    if status.is_training:
+        raise HTTPException(status_code=400, detail="Training is still in progress")
+    if status.svg_files is None:
+        raise HTTPException(status_code=404, detail="No training results available")
+    return {"svg_files": status.svg_files}
+
+@router.post("/train/cancel")
+async def cancel_training():
+    if not status.is_training:
+        raise HTTPException(status_code=400, detail="No training in progress")
+    status.cancel_requested = True
+    return {"message": "Cancellation requested. Training will stop after the current epoch."}

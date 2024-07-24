@@ -9,7 +9,7 @@ export default function PrivacyAttacks() {
   return (
     <section>
       <Title title="Privacy Attacks" />
-      <ContentBox height={492}>
+      <ContentBox height={521}>
         <div className={styles.wrapper}>
           <SubTitle subtitle="Model Inversion Attack" />
         </div>
