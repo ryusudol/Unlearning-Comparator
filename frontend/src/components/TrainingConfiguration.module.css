@@ -79,8 +79,10 @@
 }
 
 .status-detail-wrapper {
+  height: 122px;
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
 }
 
 .status-detail {

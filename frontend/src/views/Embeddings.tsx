@@ -89,11 +89,6 @@ export default function Settings({ svgContents }: PropsType) {
         <ContentBox height={495}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Unlearned Model" />
-            <img
-              className={styles.img}
-              src="/model2.png"
-              alt="Embedding model img2"
-            />
           </div>
         </ContentBox>
       </div>

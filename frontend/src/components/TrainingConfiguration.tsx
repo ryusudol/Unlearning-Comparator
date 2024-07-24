@@ -32,11 +32,12 @@ type StatusType = {
 export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isTraining, setIsTraining] = useState(false);
+  const [isInferencing, setIsInferencing] = useState(false);
   const [status, setStatus] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<StatusType | undefined>();
 
-  const [model, setModel] = useState("ResNet-18");
-  const [dataset, setDataset] = useState("CIFAR-10");
+  const [model, setModel] = useState(MODELS[0]);
+  const [dataset, setDataset] = useState(DATASETS[0]);
   const [trainingEpochs, setTrainingEpochs] = useState(0);
   const [trainingBatchSize, setTrainingBatchSize] = useState(0);
   const [trainingLearningRate, setTrainingLearningRate] = useState(0);
@@ -46,7 +47,7 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   const intervalIdRef = useRef<Timer>();
   const resultFetchedRef = useRef(false);
 
-  const checkStatus = useCallback(async () => {
+  const checkTrainStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
     try {
       const res = await fetch(`${API_URL}/train/status`);
@@ -74,14 +75,35 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
     }
   }, [setSvgContents]);
 
+  const checkInferenceStatus = useCallback(async () => {
+    if (resultFetchedRef.current) return;
+    try {
+      const res = await fetch(`${API_URL}/inference/status`);
+      const data = await res.json();
+      if (!data.is_inferencing && !resultFetchedRef.current) {
+        resultFetchedRef.current = true;
+        const resultRes = await fetch(`${API_URL}/inference/result`);
+        if (!resultRes.ok) {
+          alert("Error occurred while fetching the inference result.");
+          return;
+        }
+        const data = await resultRes.json();
+        setSvgContents(data.svg_files);
+        setIsInferencing(false);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }, [setSvgContents]);
+
   useEffect(() => {
     if (isTraining && !intervalIdRef.current) {
-      intervalIdRef.current = setInterval(checkStatus, 1000);
+      intervalIdRef.current = setInterval(checkTrainStatus, 2000);
     }
     return () => {
       if (intervalIdRef.current) clearInterval(intervalIdRef.current);
     };
-  }, [isTraining, checkStatus]);
+  }, [isTraining, checkTrainStatus]);
 
   const handlePredefinedClick = () => {
     setMode(0);
@@ -92,46 +114,71 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   };
 
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.currentTarget.files
-      ? e.currentTarget.files[0]
-      : null;
-    if (!uploadedFile) return;
-    setTrainingCustomFile(uploadedFile);
+    if (e.currentTarget.files && e.currentTarget.files.length > 0)
+      setTrainingCustomFile(e.currentTarget.files[0]);
   };
 
   const handleRunBtnClick = async () => {
     resultFetchedRef.current = false;
-    setIsTraining(true);
-    setStatus("Training . . .");
-    try {
-      if (
-        trainingSeed === 0 ||
-        trainingBatchSize === 0 ||
-        trainingLearningRate === 0 ||
-        trainingEpochs === 0
-      ) {
-        alert("Please enter valid numbers");
+    if (mode === 0) {
+      setIsTraining(true);
+      setStatus("Training . . .");
+      try {
+        if (
+          trainingSeed === 0 ||
+          trainingBatchSize === 0 ||
+          trainingLearningRate === 0 ||
+          trainingEpochs === 0
+        ) {
+          alert("Please enter valid numbers");
+          setIsTraining(false);
+          return;
+        }
+        const data = {
+          seed: trainingSeed,
+          batch_size: trainingBatchSize,
+          learning_rate: trainingLearningRate,
+          epochs: trainingEpochs,
+        };
+        const res = await fetch(`${API_URL}/train`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+          alert("Error occurred while sending a request for training.");
+          setIsTraining(false);
+        }
+      } catch (err) {
+        console.log(err);
         setIsTraining(false);
+      }
+    } else {
+      if (!trainingCustomFile) {
+        alert("Please upload a custom training file.");
         return;
       }
-      const data = {
-        seed: trainingSeed,
-        batch_size: trainingBatchSize,
-        learning_rate: trainingLearningRate,
-        epochs: trainingEpochs,
-      };
-      const res = await fetch(`${API_URL}/train`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        alert("Error occurred while sending a request for training.");
-        setIsTraining(false);
+      setIsInferencing(true);
+      try {
+        setStatus("Computing and saving UMAP embeddings . . .");
+        const formData = new FormData();
+        formData.append("weights_file", trainingCustomFile);
+        const res = await fetch(`${API_URL}/inference`, {
+          method: "POST",
+          // headers: { "Content-Type": "application/form-data" },
+          body: formData,
+        });
+        console.log(res);
+        if (res.ok) {
+          await checkInferenceStatus();
+        } else {
+          alert("Error occurred while sending a request for inference.");
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsInferencing(false);
       }
-    } catch (err) {
-      console.log(err);
-      setIsTraining(false);
     }
   };
 
