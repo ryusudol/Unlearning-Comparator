@@ -39,3 +39,6 @@ Swagger: http://127.0.0.1:8000/docs
 - 트레이닝이 완료되면 /train/result GET 요청을 보내 SVG 파일 리스트를 받음
 
 ### Inference
+- /inference POST 요청을 보내 Inference를 시작
+- 주기적으로 /inference/status 엔드포인트로 GET 요청을 보내 Inference 진행 상황을 확인
+- Inference가 완료되면 /inference/result GET 요청을 보내 SVG 파일 리스트를 받음

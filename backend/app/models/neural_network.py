@@ -28,10 +28,10 @@ class InferenceStatus:
         self.is_inferencing = False
         self.progress = 0
         self.current_step = ""
-        self.umap_embeddings = None
-        self.svg_files = None
         self.start_time = None
         self.estimated_time_remaining = None
+        self.umap_embeddings = None
+        self.svg_files = None
 
     def reset(self):
         self.__init__()
