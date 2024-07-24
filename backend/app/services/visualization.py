@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from umap import UMAP
 import os
 from datetime import datetime
-from ..config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_RANDOM_STATE, UMAP_N_JOBS
+from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_RANDOM_STATE, UMAP_N_JOBS
 
 def compute_umap_embeddings(activations, labels, save_dir='umap_visualizations'):
     umap_embeddings = {}

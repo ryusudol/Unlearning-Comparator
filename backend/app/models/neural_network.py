@@ -19,6 +19,7 @@ class TrainingStatus:
         self.estimated_time_remaining = None
         self.umap_embeddings = None
         self.svg_files: Optional[List[str]] = None
+        self.cancel_requested = False  
         
     def reset(self):
         self.__init__()

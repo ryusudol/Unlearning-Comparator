@@ -3,6 +3,7 @@ import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.models.neural_network import get_resnet18
+from app.config.settings import DATA_SIZE
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -20,7 +21,7 @@ def get_data_loaders(batch_size):
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     return train_loader, train_set
 
-def get_layer_activations(model, data_loader, device, num_samples=5000):
+def get_layer_activations(model, data_loader, device, num_samples=DATA_SIZE):
     model.eval()
     activations = [[], [], [], []]
     with torch.no_grad():

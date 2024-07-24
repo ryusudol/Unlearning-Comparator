@@ -7,6 +7,7 @@ from fastapi import UploadFile, BackgroundTasks
 from app.models.neural_network import get_resnet18, InferenceStatus
 from app.utils.helpers import get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
+from app.config.settings import DATA_SIZE
 
 async def start_inference(weights_file: UploadFile, background_tasks: BackgroundTasks, status: InferenceStatus):
     file_content = await weights_file.read()
@@ -39,7 +40,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         status.current_step = "Preparing data"
         status.progress = 40
         _, test_set = get_data_loaders(batch_size=64)
-        subset_indices = torch.randperm(len(test_set))[:5000]
+        subset_indices = torch.randperm(len(test_set))[:DATA_SIZE]
         subset_loader = torch.utils.data.DataLoader(
             torch.utils.data.Subset(test_set, subset_indices),
             batch_size=64, shuffle=False)
@@ -58,19 +59,6 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         status.progress = 80
         labels = torch.tensor([test_set.targets[i] for i in subset_indices])
         umap_embeddings, svg_files = compute_umap_embeddings(activations, labels) # 임베딩 저장
-
-        # # Save SVG files
-        # status.current_step = "Saving SVG files"
-        # status.progress = 90
-        # save_dir = 'umap_visualizations'
-        # if not os.path.exists(save_dir):
-        #     os.makedirs(save_dir)
-        
-        # for layer, svg_content in svg_files.items():
-        #     filename = f'umap_infersence_layer_{layer}.svg'
-        #     filepath = os.path.join(save_dir, filename)
-        #     with open(filepath, 'wb') as f:
-        #         f.write(svg_content)
 
         status.umap_embeddings = umap_embeddings
         status.svg_files = list(svg_files.values())

@@ -42,3 +42,10 @@ async def get_training_result():
     if status.svg_files is None:
         raise HTTPException(status_code=404, detail="No training results available")
     return {"svg_files": status.svg_files}
+
+@router.post("/train/cancel")
+async def cancel_training():
+    if not status.is_training:
+        raise HTTPException(status_code=400, detail="No training in progress")
+    status.cancel_requested = True
+    return {"message": "Cancellation requested. Training will stop after the current epoch."}
