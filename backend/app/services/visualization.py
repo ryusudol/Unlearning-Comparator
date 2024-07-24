@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_RANDOM_STATE, UMAP_N_JOBS
 
-def compute_umap_embeddings(activations, labels, forget_class = -1, save_dir='umap_visualizations'):
+def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir='umap_visualizations'):
     umap_embeddings = {}
     svg_files = {}
     
@@ -34,7 +34,7 @@ def compute_umap_embeddings(activations, labels, forget_class = -1, save_dir='um
                            markerfacecolor=colors[i], markersize=10) for i in range(10)]
         
         plt.legend(handles=legend_elements, title="Classes", loc='upper right', 
-                   bbox_to_anchor=(0.98, 0.98), fontsize='large', title_fontsize='large')
+                   bbox_to_anchor=(0.99, 0.99), fontsize='x-large', title_fontsize='x-large')
         plt.axis('off')
         plt.text(0.5, -0.05, f'Layer {i+1}', 
                  fontsize=24, ha='center', va='bottom', transform=plt.gca().transAxes)
