@@ -142,7 +142,3 @@ async def run_training(request, status):
     finally:
         status.is_training = False
         status.cancel_requested = False
-
-async def run_unlearning(request, status):
-    # Implement unlearning logic here
-    pass

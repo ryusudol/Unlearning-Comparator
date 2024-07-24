@@ -5,11 +5,14 @@ import os
 from datetime import datetime
 from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_RANDOM_STATE, UMAP_N_JOBS
 
-def compute_umap_embeddings(activations, labels, save_dir='umap_visualizations'):
+def compute_umap_embeddings(activations, labels, forget_class = -1, save_dir='umap_visualizations'):
     umap_embeddings = {}
     svg_files = {}
     
     class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    if(forget_class != -1):
+        class_names[forget_class] += " (forget)"
+
     colors = plt.cm.tab10(np.linspace(0, 1, 10))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -24,20 +27,15 @@ def compute_umap_embeddings(activations, labels, save_dir='umap_visualizations')
         embedding = umap.fit_transform(act.reshape(act.shape[0], -1))
         umap_embeddings[i+1] = embedding
         
-        plt.figure(figsize=(12, 11))  # 높이를 약간 증가시켜 제목을 위한 공간 확보
+        plt.figure(figsize=(12, 11))
         scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='tab10', s=20, alpha=0.7)
         
         legend_elements = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i], 
                            markerfacecolor=colors[i], markersize=10) for i in range(10)]
         
-        # 범례 위치를 그림 내부 오른쪽 상단으로 변경
         plt.legend(handles=legend_elements, title="Classes", loc='upper right', 
                    bbox_to_anchor=(0.98, 0.98), fontsize='large', title_fontsize='large')
-
-        # 축과 tick 제거
         plt.axis('off')
-        
-        # 제목을 그래프 하단에 추가
         plt.text(0.5, -0.05, f'Layer {i+1}', 
                  fontsize=24, ha='center', va='bottom', transform=plt.gca().transAxes)
 
