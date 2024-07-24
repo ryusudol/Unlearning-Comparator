@@ -44,7 +44,8 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   const [trainingSeed, setTrainingSeed] = useState(0);
   const [trainingCustomFile, setTrainingCustomFile] = useState<File>();
 
-  const intervalIdRef = useRef<Timer>();
+  const trainIntervalIdRef = useRef<Timer>();
+  const inferenceIntervalIdRef = useRef<Timer>();
   const resultFetchedRef = useRef(false);
 
   const checkTrainStatus = useCallback(async () => {
@@ -56,9 +57,9 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
       if (data.progress === 100) setStatus("Embedding . . .");
       if (!data.is_training && !resultFetchedRef.current) {
         resultFetchedRef.current = true;
-        if (intervalIdRef.current) {
-          clearInterval(intervalIdRef.current);
-          intervalIdRef.current = undefined;
+        if (trainIntervalIdRef.current) {
+          clearInterval(trainIntervalIdRef.current);
+          trainIntervalIdRef.current = undefined;
         }
         const resultRes = await fetch(`${API_URL}/train/result`);
         if (!resultRes.ok) {
@@ -82,6 +83,10 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
       const data = await res.json();
       if (!data.is_inferencing && !resultFetchedRef.current) {
         resultFetchedRef.current = true;
+        if (inferenceIntervalIdRef.current) {
+          clearInterval(inferenceIntervalIdRef.current);
+          inferenceIntervalIdRef.current = undefined;
+        }
         const resultRes = await fetch(`${API_URL}/inference/result`);
         if (!resultRes.ok) {
           alert("Error occurred while fetching the inference result.");
@@ -97,20 +102,21 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   }, [setSvgContents]);
 
   useEffect(() => {
-    if (isTraining && !intervalIdRef.current) {
-      intervalIdRef.current = setInterval(checkTrainStatus, 1000);
+    if (isTraining && !trainIntervalIdRef.current) {
+      trainIntervalIdRef.current = setInterval(checkTrainStatus, 1000);
     }
     return () => {
-      if (intervalIdRef.current) clearInterval(intervalIdRef.current);
+      if (trainIntervalIdRef.current) clearInterval(trainIntervalIdRef.current);
     };
   }, [isTraining, checkTrainStatus]);
 
   useEffect(() => {
-    if (isInferencing && !intervalIdRef.current) {
-      intervalIdRef.current = setInterval(checkInferenceStatus, 5000);
+    if (isInferencing && !inferenceIntervalIdRef.current) {
+      inferenceIntervalIdRef.current = setInterval(checkInferenceStatus, 5000);
     }
     return () => {
-      if (intervalIdRef.current) clearInterval(intervalIdRef.current);
+      if (inferenceIntervalIdRef.current)
+        clearInterval(inferenceIntervalIdRef.current);
     };
   }, [isInferencing, checkInferenceStatus]);
 
@@ -288,15 +294,29 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
             />
             <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
-          <label htmlFor="custom-training">
-            <div className={styles["upload-btn"]}>Click to upload</div>
-          </label>
-          <input
-            onChange={handleCustomFileUpload}
-            className={styles["file-input"]}
-            type="file"
-            id="custom-training"
-          />
+          {isInferencing ? (
+            <span className={styles["infer-status"]}>{status}</span>
+          ) : (
+            <div>
+              <label htmlFor="custom-training">
+                {trainingCustomFile ? (
+                  <div className={styles["upload"]}>
+                    <span className={styles["upload-text"]}>
+                      {trainingCustomFile.name}
+                    </span>
+                  </div>
+                ) : (
+                  <div className={styles["upload"]}>Click to upload</div>
+                )}
+              </label>
+              <input
+                onChange={handleCustomFileUpload}
+                className={styles["file-input"]}
+                type="file"
+                id="custom-training"
+              />
+            </div>
+          )}
         </div>
       </div>
       <div

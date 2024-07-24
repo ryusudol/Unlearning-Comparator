@@ -24,11 +24,11 @@
   margin-right: 4px;
 }
 
-.upload-btn {
+.upload {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: white;
+  background-color: #efefef;
   width: 140px;
   height: 18px;
   border: 1px solid var(--border-color);
@@ -36,6 +36,14 @@
   cursor: pointer;
   font-size: 13px;
   padding: 0px 4px;
+  transition: all 0.12s ease-in-out;
+}
+
+.upload-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .file-input {
@@ -76,6 +84,12 @@
 .status {
   color: red;
   font-size: 14px;
+}
+
+.infer-status {
+  width: 140px;
+  color: red;
+  font-size: 11px;
 }
 
 .status-detail-wrapper {
