@@ -29,7 +29,10 @@ def compute_umap_embeddings(activations, labels, save_dir='umap_visualizations')
         
         legend_elements = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i], 
                            markerfacecolor=colors[i], markersize=10) for i in range(10)]
-        plt.legend(handles=legend_elements, title="Classes", loc='center left', bbox_to_anchor=(1, 0.5))
+        
+        # 범례 위치를 그림 내부 오른쪽 상단으로 변경
+        plt.legend(handles=legend_elements, title="Classes", loc='upper right', 
+                   bbox_to_anchor=(0.98, 0.98), fontsize='large', title_fontsize='large')
 
         plt.title(f'UMAP Embedding for Layer {i+1}')
         plt.xlabel('UMAP 1')

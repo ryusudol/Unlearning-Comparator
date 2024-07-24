@@ -125,7 +125,7 @@ async def run_training(request, status):
                                   )
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(train_set))[:5000]
+            subset_indices = torch.randperm(len(train_set))[:DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(train_set, subset_indices),
                 batch_size=64, shuffle=False)
@@ -133,7 +133,7 @@ async def run_training(request, status):
             print("\nComputing and saving UMAP embeddings...")
             activations = get_layer_activations(model, subset_loader, device)
             labels = torch.tensor([train_set.targets[i] for i in subset_indices])
-            umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels, status)
+            umap_embeddings, svg_files = compute_umap_embeddings(activations, labels)
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())
             print("Training and visualization completed!")
