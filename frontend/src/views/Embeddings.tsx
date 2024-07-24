@@ -45,7 +45,7 @@ export default function Settings({ svgContents }: PropsType) {
     <section>
       <Title title="Embeddings" />
       <div className={styles.section}>
-        <ContentBox height={456}>
+        <ContentBox height={495}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Original Model" />
             {svgContents && (
@@ -88,7 +88,7 @@ export default function Settings({ svgContents }: PropsType) {
             )}
           </div>
         </ContentBox>
-        <ContentBox height={456}>
+        <ContentBox height={495}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Unlearned Model" />
             <img

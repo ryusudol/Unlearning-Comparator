@@ -43,8 +43,7 @@
 .selected-svg svg {
   position: relative;
   bottom: 40px;
-  left: 12px;
-  width: 400px;
-  height: 400px;
+  width: 450px;
+  height: 450px;
   z-index: -1;
 }
