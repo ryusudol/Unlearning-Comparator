@@ -86,3 +86,13 @@
 .status-detail {
   font-size: 12.4px;
 }
+
+.label-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.predefined-label {
+  font-size: var(--select-font-size);
+}

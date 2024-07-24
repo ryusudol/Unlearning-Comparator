@@ -4,11 +4,12 @@ import styles from "./Input.module.css";
 
 type PropsType = {
   labelName: string;
-  value: string | number;
+  value: string | number | undefined;
   setStateString?: (data: string) => void;
   setStateNumber?: (data: number) => void;
   optionData?: string[];
   type: "select" | "number";
+  disabled?: boolean;
 };
 
 export default function Input({
@@ -18,6 +19,7 @@ export default function Input({
   setStateNumber,
   optionData,
   type,
+  disabled,
 }: PropsType) {
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.currentTarget.value;
@@ -40,6 +42,7 @@ export default function Input({
           className={styles.input}
           id={labelName}
           value={value}
+          disabled={disabled}
         >
           {optionData!.map((data, idx) => (
             <option key={idx} className={styles.option} value={data}>
@@ -52,14 +55,7 @@ export default function Input({
           onChange={handleNumberChange}
           className={styles.input}
           type="number"
-          step="0.000001"
-          value={
-            value === 0 && labelName === "Learning Rate"
-              ? 0
-              : value === 0
-              ? ""
-              : value
-          }
+          value={value === 0 ? undefined : value}
           placeholder="Please enter a value"
         />
       )}

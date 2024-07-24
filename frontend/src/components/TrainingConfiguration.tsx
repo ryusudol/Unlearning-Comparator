@@ -32,7 +32,7 @@ type StatusType = {
 export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isTraining, setIsTraining] = useState(false);
-  const [status, setStatus] = useState("Training...");
+  const [status, setStatus] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<StatusType | undefined>();
 
   const [model, setModel] = useState("ResNet-18");
@@ -52,7 +52,7 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
       const res = await fetch(`${API_URL}/train/status`);
       const data = await res.json();
       setStatusDetail(data);
-      if (data.progress === 100) setStatus("Embedding...");
+      if (data.progress === 100) setStatus("Embedding . . .");
       if (!data.is_training && !resultFetchedRef.current) {
         resultFetchedRef.current = true;
         if (intervalIdRef.current) {
@@ -102,7 +102,7 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   const handleRunBtnClick = async () => {
     resultFetchedRef.current = false;
     setIsTraining(true);
-    setStatus("Training...");
+    setStatus("Training . . .");
     try {
       if (
         trainingSeed === 0 ||
@@ -145,12 +145,14 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
           className={styles.predefined}
         >
           <div className={styles.mode}>
-            <div>
+            <div className={styles["label-wrapper"]}>
               <FontAwesomeIcon
                 className={styles.icon}
                 icon={mode ? faCircle : faCircleCheck}
               />
-              <span>Predefined</span>
+              <span className={styles["predefined-label"]}>
+                Predefined Settings
+              </span>
             </div>
           </div>
           {isTraining ? (
@@ -231,12 +233,12 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
           onClick={handleCustomClick}
           className={styles.custom}
         >
-          <div>
+          <div className={styles["label-wrapper"]}>
             <FontAwesomeIcon
               className={styles.icon}
               icon={mode ? faCircleCheck : faCircle}
             />
-            <span>Custom</span>
+            <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
           <label htmlFor="custom-training">
             <div className={styles["upload-btn"]}>Click to upload</div>

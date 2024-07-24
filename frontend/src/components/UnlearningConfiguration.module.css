@@ -64,12 +64,26 @@
   background-color: var(--button-hover-bg-color);
 }
 
+.label-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.predefined-label {
+  font-size: var(--select-font-size);
+}
+
 .predefined-select {
   width: 140px;
   height: 18px;
   padding: 0px 4px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.predefined-select:focus {
+  outline: none;
 }
 
 .option {
