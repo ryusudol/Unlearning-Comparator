@@ -36,7 +36,6 @@ export default function Settings({ svgContents }: PropsType) {
 
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
-    console.log(id);
     setSelectedId(parseInt(id));
     setIsSelected(true);
   };

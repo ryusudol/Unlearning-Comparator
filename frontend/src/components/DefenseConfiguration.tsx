@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "./TrainingConfiguration.module.css";
+import styles from "./DefenseConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -9,15 +9,16 @@ import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
 
 const METHODS = ["method1", "method2", "method3", "method4"];
-const PREV_UNLEARNED_MODELS = [
-  "Unlearned Model 1",
-  "Unlearned Model 2",
-  "Unlearned Model 3",
-];
+const UNLEARNED_MODELS = ["Model 1", "Model 2", "Model 3"];
 
 export default function DefenseConfiguration() {
-  const [defenseMode, setDefenseMode] = useState<0 | 1 | 2>(0); // 0: Previous, 1: Predefined, 2: Custom
+  const [defenseMode, setDefenseMode] = useState<0 | 1>(0);
   const [defenseMethod, setDefenseMethod] = useState("method1");
+  const [unlearnedModels, setUnlearnedModels] =
+    useState<string[]>(UNLEARNED_MODELS);
+  const [selectedUnlearnedModel, setSelectedUnlearnedModel] = useState(
+    UNLEARNED_MODELS[0]
+  );
   const [defenseParameter1, setDefenseParameter1] = useState(0);
   const [defenseParameter2, setDefenseParameter2] = useState(0);
   const [defenseParameter3, setDefenseParameter3] = useState(0);
@@ -40,16 +41,12 @@ export default function DefenseConfiguration() {
   //   func();
   // }, []);
 
-  const handlePrevClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePredefinedClick = () => {
     setDefenseMode(0);
   };
 
-  const handlePredefinedClick = () => {
-    setDefenseMode(1);
-  };
-
   const handleCustomClick = () => {
-    setDefenseMode(2);
+    setDefenseMode(1);
   };
 
   const handleSelectDefenseMethod = (
@@ -96,37 +93,19 @@ export default function DefenseConfiguration() {
       <div className={styles["subset-wrapper"]}>
         <SubTitle subtitle="Defense Configuration" />
         <div
-          id="defense-previous"
-          onClick={handlePrevClick}
-          className={styles.custom}
-        >
-          <div>
-            <FontAwesomeIcon
-              className={styles.icon}
-              icon={defenseMode === 0 ? faCircleCheck : faCircle}
-            />
-            <span>Unlearned Model</span>
-          </div>
-          <select className={styles["predefined-select"]}>
-            {PREV_UNLEARNED_MODELS.map((model, idx) => (
-              <option key={idx} value={model} className={styles.option}>
-                {model}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div
           id="defense-predefined"
           onClick={handlePredefinedClick}
           className={styles.predefined}
         >
           <div className={styles.mode}>
-            <div>
+            <div className={styles["label-wrapper"]}>
               <FontAwesomeIcon
                 className={styles.icon}
-                icon={defenseMode === 1 ? faCircleCheck : faCircle}
+                icon={defenseMode ? faCircle : faCircleCheck}
               />
-              <label>Predefined</label>
+              <label className={styles["predefined-label"]}>
+                Predefined Method
+              </label>
             </div>
             <select
               onChange={handleSelectDefenseMethod}
@@ -139,6 +118,13 @@ export default function DefenseConfiguration() {
               ))}
             </select>
           </div>
+          <Input
+            labelName="Unlearned Model"
+            value={selectedUnlearnedModel}
+            setStateString={setSelectedUnlearnedModel}
+            optionData={unlearnedModels}
+            type="select"
+          />
           <Input
             labelName="parameter_1"
             value={defenseParameter1}
@@ -163,12 +149,12 @@ export default function DefenseConfiguration() {
           onClick={handleCustomClick}
           className={styles.custom}
         >
-          <div>
+          <div className={styles["label-wrapper"]}>
             <FontAwesomeIcon
               className={styles.icon}
-              icon={defenseMode === 2 ? faCircleCheck : faCircle}
+              icon={defenseMode ? faCircleCheck : faCircle}
             />
-            <span>Custom</span>
+            <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
           <label htmlFor="custom-defense">
             <div className={styles["upload-btn"]}>Click to upload</div>

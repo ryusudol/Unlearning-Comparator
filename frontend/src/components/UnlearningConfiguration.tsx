@@ -8,15 +8,20 @@ import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
 
-const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise"];
+const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise", "Retrain"];
 const UNLEARN_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 const API_URL = "http://localhost:8000";
 
 export default function UnlearningConfiguration() {
-  const [unlearningMode, setUnlearningMode] = useState<0 | 1 | 2>(0); // 0: Previous, 1: Predefined, 2: Custom
+  const [unlearningMode, setUnlearningMode] = useState<0 | 1>(0);
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
-  const [unlearningMethod, setUnlearningMethod] = useState("SalUn");
+  const [selectedTrainedModel, setSelectedTrainedModel] = useState<
+    string | undefined
+  >(trainedModels[0]);
+  const [unlearningMethod, setUnlearningMethod] = useState(
+    UNLEARNING_METHODS[0]
+  );
   const [unlearnClass, setUnlearnClass] = useState("0");
   const [unlearningBatchSize, setUnlearningBatchSize] = useState(0);
   const [unlearningRate, setUnlearningRate] = useState(0);
@@ -47,16 +52,12 @@ export default function UnlearningConfiguration() {
     setUnlearningMethod(method);
   };
 
-  const handlePrevClick = () => {
+  const handlePredefinedClick = () => {
     setUnlearningMode(0);
   };
 
-  const handlePredefinedClick = () => {
-    setUnlearningMode(1);
-  };
-
   const handleCustomClick = () => {
-    setUnlearningMode(2);
+    setUnlearningMode(1);
   };
 
   const handleRunBtnClick = async () => {
@@ -88,37 +89,19 @@ export default function UnlearningConfiguration() {
       <div className={styles["subset-wrapper"]}>
         <SubTitle subtitle="Unlearning Configuration" />
         <div
-          id="unlearning-previous"
-          onClick={handlePrevClick}
-          className={styles.custom}
-        >
-          <div>
-            <FontAwesomeIcon
-              className={styles.icon}
-              icon={unlearningMode === 0 ? faCircleCheck : faCircle}
-            />
-            <span>Trained Model</span>
-          </div>
-          <select className={styles["predefined-select"]}>
-            {trainedModels.map((model, idx) => (
-              <option key={idx} value={model} className={styles.option}>
-                {model}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div
           id="unlearning-predefined"
           onClick={handlePredefinedClick}
           className={styles.predefined}
         >
           <div className={styles.mode}>
-            <div>
+            <div className={styles["label-wrapper"]}>
               <FontAwesomeIcon
                 className={styles.icon}
-                icon={unlearningMode === 1 ? faCircleCheck : faCircle}
+                icon={unlearningMode ? faCircle : faCircleCheck}
               />
-              <label>Predefined</label>
+              <label className={styles["predefined-label"]}>
+                Predefined Model
+              </label>
             </div>
             <select
               onChange={handleSelectUnlearningMethod}
@@ -131,6 +114,14 @@ export default function UnlearningConfiguration() {
               ))}
             </select>
           </div>
+          <Input
+            labelName="Trained Model"
+            value={selectedTrainedModel}
+            setStateString={setSelectedTrainedModel}
+            optionData={trainedModels}
+            type="select"
+            disabled={unlearningMethod === "Retrain"}
+          />
           <Input
             labelName="Unlearn Class"
             value={unlearnClass}
@@ -162,12 +153,12 @@ export default function UnlearningConfiguration() {
           onClick={handleCustomClick}
           className={styles.custom}
         >
-          <div>
+          <div className={styles["label-wrapper"]}>
             <FontAwesomeIcon
               className={styles.icon}
-              icon={unlearningMode === 2 ? faCircleCheck : faCircle}
+              icon={unlearningMode ? faCircleCheck : faCircle}
             />
-            <span>Custom</span>
+            <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
           <label htmlFor="custom-unlearning">
             <div className={styles["upload-btn"]}>Click to upload</div>
