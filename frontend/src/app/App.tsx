@@ -8,16 +8,25 @@ import PerformanceMetrics from "../views/PerformanceMetrics";
 import PrivacyAttacks from "../views/PrivacyAttacks";
 
 export default function App() {
-  const [svgContents, setSvgContents] = useState<string[]>([]);
+  const [originalSvgContents, setOriginalSvgContents] = useState<string[]>([]);
+  const [unlearnedSvgContents, setUnlearnedSvgContents] = useState<string[]>(
+    []
+  );
 
   return (
     <section id={styles["body-wrapper"]}>
       <div>
-        <Settings setSvgContents={setSvgContents} />
+        <Settings
+          setOriginalSvgContents={setOriginalSvgContents}
+          setUnlearnedSvgContents={setUnlearnedSvgContents}
+        />
         <Histories />
       </div>
       <div>
-        <Embeddings svgContents={svgContents} />
+        <Embeddings
+          originalSvgContents={originalSvgContents}
+          unlearnedSvgContents={unlearnedSvgContents}
+        />
         <PerformanceMetrics />
       </div>
       <PrivacyAttacks />

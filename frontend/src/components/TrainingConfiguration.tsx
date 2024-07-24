@@ -15,7 +15,7 @@ const API_URL = "http://localhost:8000";
 
 type PropsType = {
   setTrainedModels: (models: string[]) => void;
-  setSvgContents: (data: string[]) => void;
+  setOriginalSvgContents: (data: string[]) => void;
 };
 type Timer = ReturnType<typeof setInterval> | undefined;
 type StatusType = {
@@ -32,7 +32,7 @@ type StatusType = {
 
 export default function TrainingConfiguration({
   setTrainedModels,
-  setSvgContents,
+  setOriginalSvgContents,
 }: PropsType) {
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isTraining, setIsTraining] = useState(false);
@@ -72,7 +72,7 @@ export default function TrainingConfiguration({
           return;
         }
         const data = await resultRes.json();
-        setSvgContents(data.svg_files);
+        setOriginalSvgContents(data.svg_files);
         setIsTraining(false);
         setStatusDetail(undefined);
         const trainedModelsRes = await fetch(`${API_URL}/trained_models`);
@@ -86,7 +86,7 @@ export default function TrainingConfiguration({
     } catch (err) {
       console.log(err);
     }
-  }, [setSvgContents, setTrainedModels]);
+  }, [setOriginalSvgContents, setTrainedModels]);
 
   const checkInferenceStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
@@ -105,13 +105,13 @@ export default function TrainingConfiguration({
           return;
         }
         const resultData = await resultRes.json();
-        setSvgContents(resultData.svg_files);
+        setOriginalSvgContents(resultData.svg_files);
         setIsInferencing(false);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [setSvgContents]);
+  }, [setOriginalSvgContents]);
 
   useEffect(() => {
     if (isTraining && !trainIntervalIdRef.current) {

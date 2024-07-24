@@ -8,10 +8,14 @@ import DefenseConfiguration from "../components/DefenseConfiguration";
 const API_URL = "http://localhost:8000";
 
 type PropsType = {
-  setSvgContents: (data: string[]) => void;
+  setOriginalSvgContents: (data: string[]) => void;
+  setUnlearnedSvgContents: (data: string[]) => void;
 };
 
-export default function Settings({ setSvgContents }: PropsType) {
+export default function Settings({
+  setOriginalSvgContents,
+  setUnlearnedSvgContents,
+}: PropsType) {
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
 
   useEffect(() => {
@@ -36,9 +40,12 @@ export default function Settings({ setSvgContents }: PropsType) {
       <Title title="Settings" />
       <TrainingConfiguration
         setTrainedModels={setTrainedModels}
-        setSvgContents={setSvgContents}
+        setOriginalSvgContents={setOriginalSvgContents}
       />
-      <UnlearningConfiguration trainedModels={trainedModels} />
+      <UnlearningConfiguration
+        trainedModels={trainedModels}
+        setUnlearnedSvgContents={setUnlearnedSvgContents}
+      />
       <DefenseConfiguration />
     </section>
   );
