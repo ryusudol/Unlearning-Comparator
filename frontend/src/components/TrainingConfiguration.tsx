@@ -353,14 +353,13 @@ export default function TrainingConfiguration({
             <span className={styles["cancel-msg"]}>
               Cancelling the training...
             </span>
-          ) : (
-            <div onClick={handleCancelBtnClick} className={styles.button}>
-              Cancel
-            </div>
-          )
+          ) : // <div onClick={handleCancelBtnClick} className={styles.button}>
+          //   Cancel
+          // </div>
+          null
         ) : null}
         <div
-          style={{ left: `${isTraining ? "0px" : "236px"}` }}
+          style={{ left: `${isTraining ? "236px" : "236px"}` }}
           onClick={handleRunBtnClick}
           className={styles.button}
         >
