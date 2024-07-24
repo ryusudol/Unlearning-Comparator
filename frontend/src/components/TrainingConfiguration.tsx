@@ -87,8 +87,8 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
           alert("Error occurred while fetching the inference result.");
           return;
         }
-        const data = await resultRes.json();
-        setSvgContents(data.svg_files);
+        const resultData = await resultRes.json();
+        setSvgContents(resultData.svg_files);
         setIsInferencing(false);
       }
     } catch (err) {
@@ -98,12 +98,21 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
 
   useEffect(() => {
     if (isTraining && !intervalIdRef.current) {
-      intervalIdRef.current = setInterval(checkTrainStatus, 2000);
+      intervalIdRef.current = setInterval(checkTrainStatus, 1000);
     }
     return () => {
       if (intervalIdRef.current) clearInterval(intervalIdRef.current);
     };
   }, [isTraining, checkTrainStatus]);
+
+  useEffect(() => {
+    if (isInferencing && !intervalIdRef.current) {
+      intervalIdRef.current = setInterval(checkInferenceStatus, 5000);
+    }
+    return () => {
+      if (intervalIdRef.current) clearInterval(intervalIdRef.current);
+    };
+  }, [isInferencing, checkInferenceStatus]);
 
   const handlePredefinedClick = () => {
     setMode(0);
@@ -121,19 +130,18 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
   const handleRunBtnClick = async () => {
     resultFetchedRef.current = false;
     if (mode === 0) {
+      if (
+        trainingSeed === 0 ||
+        trainingBatchSize === 0 ||
+        trainingLearningRate === 0 ||
+        trainingEpochs === 0
+      ) {
+        alert("Please enter valid numbers");
+        return;
+      }
       setIsTraining(true);
       setStatus("Training . . .");
       try {
-        if (
-          trainingSeed === 0 ||
-          trainingBatchSize === 0 ||
-          trainingLearningRate === 0 ||
-          trainingEpochs === 0
-        ) {
-          alert("Please enter valid numbers");
-          setIsTraining(false);
-          return;
-        }
         const data = {
           seed: trainingSeed,
           batch_size: trainingBatchSize,
@@ -165,18 +173,14 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
         formData.append("weights_file", trainingCustomFile);
         const res = await fetch(`${API_URL}/inference`, {
           method: "POST",
-          // headers: { "Content-Type": "application/form-data" },
           body: formData,
         });
-        console.log(res);
-        if (res.ok) {
-          await checkInferenceStatus();
-        } else {
+        if (!res.ok) {
           alert("Error occurred while sending a request for inference.");
+          setIsInferencing(false);
         }
       } catch (err) {
         console.error(err);
-      } finally {
         setIsInferencing(false);
       }
     }
