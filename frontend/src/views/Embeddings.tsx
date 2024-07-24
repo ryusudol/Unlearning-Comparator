@@ -11,7 +11,6 @@ type PropsType = {
 
 export default function Settings({ svgContents }: PropsType) {
   const [modifiedSvgs, setModifiedSvgs] = useState<string[]>([]);
-  const [isSelected, setIsSelected] = useState(false);
   const [selectedId, setSelectedId] = useState<number | undefined>();
 
   useEffect(() => {
@@ -28,6 +27,7 @@ export default function Settings({ svgContents }: PropsType) {
 
     const modified = svgContents.map(modifySvg) as string[];
     setModifiedSvgs(modified);
+    setSelectedId(svgContents ? 4 : undefined);
   }, [svgContents]);
 
   const createMarkup = (svg: string) => {
@@ -37,7 +37,6 @@ export default function Settings({ svgContents }: PropsType) {
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
     setSelectedId(parseInt(id));
-    setIsSelected(true);
   };
 
   return (
@@ -75,7 +74,7 @@ export default function Settings({ svgContents }: PropsType) {
                     dangerouslySetInnerHTML={createMarkup(modifiedSvgs[3])}
                   />
                 </div>
-                {isSelected && selectedId && (
+                {selectedId && (
                   <div
                     className={styles["selected-svg"]}
                     dangerouslySetInnerHTML={createMarkup(

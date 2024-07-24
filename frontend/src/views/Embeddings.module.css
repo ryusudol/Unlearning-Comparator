@@ -14,14 +14,15 @@
 }
 
 .svg-wrapper {
+  width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: flex-start;
 }
 
 .svg svg {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   scale: 1;
   cursor: pointer;
 }
@@ -42,7 +43,7 @@
 
 .selected-svg svg {
   position: relative;
-  bottom: 40px;
+  bottom: 32px;
   width: 450px;
   height: 450px;
   z-index: -1;

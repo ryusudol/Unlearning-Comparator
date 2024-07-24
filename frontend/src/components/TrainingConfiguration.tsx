@@ -161,9 +161,6 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
               {statusDetail && statusDetail.current_epoch >= 1 ? (
                 <div className={styles["status-detail-wrapper"]}>
                   <span className={styles["status-detail"]}>
-                    Progress: {statusDetail.progress.toFixed(1)}%
-                  </span>
-                  <span className={styles["status-detail"]}>
                     Epoch: {statusDetail.current_epoch}/
                     {statusDetail.total_epochs}
                   </span>
@@ -180,7 +177,7 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
                     Best Accuracy: {statusDetail.best_accuracy}
                   </span>
                   <span className={styles["status-detail"]}>
-                    ETA: {statusDetail.estimated_time_remaining.toFixed(2)}
+                    ETA: {statusDetail.estimated_time_remaining.toFixed(2)}s
                   </span>
                 </div>
               ) : null}
