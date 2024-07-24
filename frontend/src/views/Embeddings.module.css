@@ -22,12 +22,11 @@
 
 .svg svg {
   border: 1px solid var(--title-bg-color);
-  border-radius: 2px;
   width: 60px;
   height: 60px;
   scale: 1;
   cursor: pointer;
-  margin-left: 4px;
+  margin-left: -1px;
 }
 
 .svg svg:hover {

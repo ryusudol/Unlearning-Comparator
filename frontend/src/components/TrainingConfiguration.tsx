@@ -37,6 +37,7 @@ export default function TrainingConfiguration({
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isTraining, setIsTraining] = useState(false);
   const [isInferencing, setIsInferencing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [status, setStatus] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<StatusType | undefined>();
 
@@ -142,6 +143,22 @@ export default function TrainingConfiguration({
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0)
       setTrainingCustomFile(e.currentTarget.files[0]);
+  };
+
+  const handleCancelBtnClick = async () => {
+    try {
+      setIsCancelling(true);
+      const res = await fetch(`${API_URL}/train/cancel`, { method: "POST" });
+      if (!res.ok) {
+        alert("Error occurred while cancelling the training.");
+        return;
+      }
+      resultFetchedRef.current = true;
+      setIsTraining(false);
+      setIsCancelling(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleRunBtnClick = async () => {
@@ -330,12 +347,25 @@ export default function TrainingConfiguration({
           )}
         </div>
       </div>
-      <div
-        onClick={handleRunBtnClick}
-        id="training-run"
-        className={styles["button-wrapper"]}
-      >
-        Run
+      <div className={styles["button-wrapper"]}>
+        {isTraining ? (
+          isCancelling ? (
+            <span className={styles["cancel-msg"]}>
+              Cancelling the training...
+            </span>
+          ) : (
+            <div onClick={handleCancelBtnClick} className={styles.button}>
+              Cancel
+            </div>
+          )
+        ) : null}
+        <div
+          style={{ left: `${isTraining ? "0px" : "236px"}` }}
+          onClick={handleRunBtnClick}
+          className={styles.button}
+        >
+          Run
+        </div>
       </div>
     </ContentBox>
   );

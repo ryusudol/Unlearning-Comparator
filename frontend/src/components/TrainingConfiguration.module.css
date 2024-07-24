@@ -50,7 +50,19 @@
   display: none;
 }
 
+.cancel-msg {
+  font-size: 12px;
+  color: red;
+}
+
 .button-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.button {
   background-color: var(--button-bg-color);
   width: 48px;
   height: 24px;
@@ -62,13 +74,12 @@
   color: #fefefe;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: background-color 0.1s ease-in-out;
   margin-top: 6px;
   position: relative;
-  left: 236px;
 }
 
-.button-wrapper:hover {
+.button:hover {
   background-color: var(--button-hover-bg-color);
 }
 
