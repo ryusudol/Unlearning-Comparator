@@ -24,11 +24,11 @@
   margin-right: 4px;
 }
 
-.upload-btn {
+.upload {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: white;
+  background-color: #efefef;
   width: 140px;
   height: 18px;
   border: 1px solid var(--border-color);
@@ -38,11 +38,30 @@
   padding: 0px 4px;
 }
 
+.upload-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
 .file-input {
   display: none;
 }
 
+.cancel-msg {
+  font-size: 12px;
+  color: red;
+}
+
 .button-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.button {
   background-color: var(--button-bg-color);
   width: 48px;
   height: 24px;
@@ -54,13 +73,12 @@
   color: #fefefe;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: background-color 0.1s ease-in-out;
   margin-top: 6px;
   position: relative;
-  left: 236px;
 }
 
-.button-wrapper:hover {
+.button:hover {
   background-color: var(--button-hover-bg-color);
 }
 
@@ -80,6 +98,31 @@
   padding: 0px 4px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.status-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-left: 20px;
+  height: 102px;
+}
+
+.status {
+  color: red;
+  font-size: 14px;
+}
+
+.status-detail-wrapper {
+  height: 102px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.status-detail {
+  font-size: 12.4px;
 }
 
 .predefined-select:focus {

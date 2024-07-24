@@ -6,12 +6,26 @@ import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 
 type PropsType = {
-  svgContents: string[];
+  originalSvgContents: string[];
+  unlearnedSvgContents: string[];
 };
 
-export default function Settings({ svgContents }: PropsType) {
-  const [modifiedSvgs, setModifiedSvgs] = useState<string[]>([]);
-  const [selectedId, setSelectedId] = useState<number | undefined>();
+export default function Settings({
+  originalSvgContents,
+  unlearnedSvgContents,
+}: PropsType) {
+  const [modifiedOriginalSvgs, setModifiedOriginalSvgs] = useState<string[]>(
+    []
+  );
+  const [modifiedUnlearnedSvgs, setModifiedUnlearnedSvgs] = useState<string[]>(
+    []
+  );
+  const [selectedOriginalId, setSelectedOriginalId] = useState<
+    number | undefined
+  >();
+  const [selectedUnlearnedId, setSelectedUnlearnedId] = useState<
+    number | undefined
+  >();
 
   useEffect(() => {
     const modifySvg = (svg: string) => {
@@ -25,18 +39,44 @@ export default function Settings({ svgContents }: PropsType) {
       return new XMLSerializer().serializeToString(svgDoc);
     };
 
-    const modified = svgContents.map(modifySvg) as string[];
-    setModifiedSvgs(modified);
-    setSelectedId(svgContents ? 4 : undefined);
-  }, [svgContents]);
+    const modified = originalSvgContents.map(modifySvg) as string[];
+    setModifiedOriginalSvgs(modified);
+    setSelectedOriginalId(originalSvgContents ? 4 : undefined);
+  }, [originalSvgContents]);
+
+  useEffect(() => {
+    const modifySvg = (svg: string) => {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svg, "image/svg+xml");
+      const legend = svgDoc.getElementById("legend_1");
+
+      if (!legend || !legend.parentNode) return;
+      legend.parentNode.removeChild(legend);
+
+      return new XMLSerializer().serializeToString(svgDoc);
+    };
+
+    const modified = unlearnedSvgContents.map(modifySvg) as string[];
+    setModifiedUnlearnedSvgs(modified);
+    setSelectedUnlearnedId(unlearnedSvgContents ? 4 : undefined);
+  }, [unlearnedSvgContents]);
 
   const createMarkup = (svg: string) => {
     return { __html: svg };
   };
 
-  const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleOriginalThumbnailClick = (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
     const id = e.currentTarget.id;
-    setSelectedId(parseInt(id));
+    setSelectedOriginalId(parseInt(id));
+  };
+
+  const handleUnlearnedThumbnailClick = (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
+    const id = e.currentTarget.id;
+    setSelectedUnlearnedId(parseInt(id));
   };
 
   return (
@@ -46,39 +86,47 @@ export default function Settings({ svgContents }: PropsType) {
         <ContentBox height={495}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Original Model" />
-            {svgContents && (
+            {originalSvgContents && (
               <div className={styles["content-wrapper"]}>
                 <div className={styles["svg-wrapper"]}>
                   <div
                     id="1"
-                    onClick={handleThumbnailClick}
+                    onClick={handleOriginalThumbnailClick}
                     className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(modifiedSvgs[0])}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedOriginalSvgs[0]
+                    )}
                   />
                   <div
                     id="2"
-                    onClick={handleThumbnailClick}
+                    onClick={handleOriginalThumbnailClick}
                     className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(modifiedSvgs[1])}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedOriginalSvgs[1]
+                    )}
                   />
                   <div
                     id="3"
-                    onClick={handleThumbnailClick}
+                    onClick={handleOriginalThumbnailClick}
                     className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(modifiedSvgs[2])}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedOriginalSvgs[2]
+                    )}
                   />
                   <div
                     id="4"
-                    onClick={handleThumbnailClick}
+                    onClick={handleOriginalThumbnailClick}
                     className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(modifiedSvgs[3])}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedOriginalSvgs[3]
+                    )}
                   />
                 </div>
-                {selectedId && (
+                {selectedOriginalId && (
                   <div
                     className={styles["selected-svg"]}
                     dangerouslySetInnerHTML={createMarkup(
-                      svgContents[selectedId - 1]
+                      originalSvgContents[selectedOriginalId - 1]
                     )}
                   />
                 )}
@@ -89,6 +137,52 @@ export default function Settings({ svgContents }: PropsType) {
         <ContentBox height={495}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Unlearned Model" />
+            {unlearnedSvgContents && (
+              <div className={styles["content-wrapper"]}>
+                <div className={styles["svg-wrapper"]}>
+                  <div
+                    id="1"
+                    onClick={handleUnlearnedThumbnailClick}
+                    className={styles.svg}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedUnlearnedSvgs[0]
+                    )}
+                  />
+                  <div
+                    id="2"
+                    onClick={handleUnlearnedThumbnailClick}
+                    className={styles.svg}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedUnlearnedSvgs[1]
+                    )}
+                  />
+                  <div
+                    id="3"
+                    onClick={handleUnlearnedThumbnailClick}
+                    className={styles.svg}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedUnlearnedSvgs[2]
+                    )}
+                  />
+                  <div
+                    id="4"
+                    onClick={handleUnlearnedThumbnailClick}
+                    className={styles.svg}
+                    dangerouslySetInnerHTML={createMarkup(
+                      modifiedUnlearnedSvgs[3]
+                    )}
+                  />
+                </div>
+                {selectedUnlearnedId && (
+                  <div
+                    className={styles["selected-svg"]}
+                    dangerouslySetInnerHTML={createMarkup(
+                      unlearnedSvgContents[selectedUnlearnedId - 1]
+                    )}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </ContentBox>
       </div>

@@ -36,7 +36,6 @@
   cursor: pointer;
   font-size: 13px;
   padding: 0px 4px;
-  transition: all 0.12s ease-in-out;
 }
 
 .upload-text {
@@ -83,6 +82,16 @@
   background-color: var(--button-hover-bg-color);
 }
 
+.label-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.predefined-label {
+  font-size: var(--select-font-size);
+}
+
 .status-wrapper {
   display: flex;
   flex-direction: column;
@@ -112,14 +121,4 @@
 
 .status-detail {
   font-size: 12.4px;
-}
-
-.label-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.predefined-label {
-  font-size: var(--select-font-size);
 }
