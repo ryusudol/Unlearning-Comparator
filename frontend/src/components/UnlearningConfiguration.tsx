@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from "./UnlearningConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -11,11 +11,12 @@ import Input from "../components/Input";
 const UNLEARNING_METHODS = ["SalUn", "Boundary", "Instance-wise", "Retrain"];
 const UNLEARN_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-const API_URL = "http://localhost:8000";
+type PropsType = {
+  trainedModels: string[];
+};
 
-export default function UnlearningConfiguration() {
+export default function UnlearningConfiguration({ trainedModels }: PropsType) {
   const [unlearningMode, setUnlearningMode] = useState<0 | 1>(0);
-  const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [selectedTrainedModel, setSelectedTrainedModel] = useState<
     string | undefined
   >(trainedModels[0]);
@@ -27,23 +28,6 @@ export default function UnlearningConfiguration() {
   const [unlearningRate, setUnlearningRate] = useState(0);
   const [unlearningEpochs, setUnlearningEpochs] = useState(0);
   const [unlearningCustomFile, setUnlearningCustomFile] = useState<File>();
-
-  useEffect(() => {
-    const func = async () => {
-      try {
-        const res = await fetch(`${API_URL}/trained_models`);
-        if (!res.ok) {
-          alert("Error occurred while fetching trained models.");
-          return;
-        }
-        const json = await res.json();
-        setTrainedModels(json);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    func();
-  }, []);
 
   const handleSelectUnlearningMethod = (
     e: React.ChangeEvent<HTMLSelectElement>

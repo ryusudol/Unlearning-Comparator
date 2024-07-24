@@ -9,11 +9,12 @@ import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
 
 const MODELS = ["ResNet-18"];
-const DATASETS = ["CIFAR-10", "MNIST"];
+const DATASETS = ["CIFAR-10", "VggFace"];
 
 const API_URL = "http://localhost:8000";
 
 type PropsType = {
+  setTrainedModels: (models: string[]) => void;
   setSvgContents: (data: string[]) => void;
 };
 type Timer = ReturnType<typeof setInterval> | undefined;
@@ -29,7 +30,10 @@ type StatusType = {
   estimated_time_remaining: number;
 };
 
-export default function TrainingConfiguration({ setSvgContents }: PropsType) {
+export default function TrainingConfiguration({
+  setTrainedModels,
+  setSvgContents,
+}: PropsType) {
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isTraining, setIsTraining] = useState(false);
   const [isInferencing, setIsInferencing] = useState(false);
@@ -70,11 +74,18 @@ export default function TrainingConfiguration({ setSvgContents }: PropsType) {
         setSvgContents(data.svg_files);
         setIsTraining(false);
         setStatusDetail(undefined);
+        const trainedModelsRes = await fetch(`${API_URL}/trained_models`);
+        if (!trainedModelsRes.ok) {
+          alert("Error occurred while fetching trained models.");
+          return;
+        }
+        const trainedModels = await trainedModelsRes.json();
+        setTrainedModels(trainedModels);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [setSvgContents]);
+  }, [setSvgContents, setTrainedModels]);
 
   const checkInferenceStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
