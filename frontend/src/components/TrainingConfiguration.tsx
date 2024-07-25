@@ -37,7 +37,6 @@ export default function TrainingConfiguration({
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isTraining, setIsTraining] = useState(false);
   const [isInferencing, setIsInferencing] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
   const [status, setStatus] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<StatusType | undefined>();
 
@@ -145,77 +144,81 @@ export default function TrainingConfiguration({
       setTrainingCustomFile(e.currentTarget.files[0]);
   };
 
-  const handleCancelBtnClick = async () => {
-    try {
-      setIsCancelling(true);
-      const res = await fetch(`${API_URL}/train/cancel`, { method: "POST" });
-      if (!res.ok) {
-        alert("Error occurred while cancelling the training.");
-        return;
-      }
-      resultFetchedRef.current = true;
-      setIsTraining(false);
-      setIsCancelling(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRunBtnClick = async () => {
-    resultFetchedRef.current = false;
-    if (mode === 0) {
-      if (
-        trainingSeed === 0 ||
-        trainingBatchSize === 0 ||
-        trainingLearningRate === 0 ||
-        trainingEpochs === 0
-      ) {
-        alert("Please enter valid numbers");
-        return;
-      }
-      setIsTraining(true);
-      setStatus("Training . . .");
+  const handleBtnClick = async () => {
+    if (isTraining) {
       try {
-        const data = {
-          seed: trainingSeed,
-          batch_size: trainingBatchSize,
-          learning_rate: trainingLearningRate,
-          epochs: trainingEpochs,
-        };
-        const res = await fetch(`${API_URL}/train`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        setStatus("Cancelling the training...");
+        const res = await fetch(`${API_URL}/train/cancel`, { method: "POST" });
         if (!res.ok) {
-          alert("Error occurred while sending a request for training.");
-          setIsTraining(false);
+          alert("Error occurred while cancelling the training.");
+          return;
         }
-      } catch (err) {
-        console.log(err);
+        resultFetchedRef.current = true;
         setIsTraining(false);
-      }
-    } else {
-      if (!trainingCustomFile) {
-        alert("Please upload a custom training file.");
-        return;
-      }
-      setIsInferencing(true);
-      try {
-        setStatus("Computing and saving UMAP embeddings . . .");
-        const formData = new FormData();
-        formData.append("weights_file", trainingCustomFile);
-        const res = await fetch(`${API_URL}/inference`, {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) {
-          alert("Error occurred while sending a request for inference.");
-          setIsInferencing(false);
-        }
       } catch (err) {
         console.error(err);
-        setIsInferencing(false);
+      }
+    } else {
+      resultFetchedRef.current = false;
+      if (mode === 0) {
+        if (
+          trainingSeed === 0 ||
+          trainingBatchSize === 0 ||
+          trainingLearningRate === 0 ||
+          trainingEpochs === 0
+        ) {
+          alert("Please enter valid numbers");
+          return;
+        }
+        setIsTraining(true);
+        setStatusDetail(undefined);
+        setStatus("Training . . .");
+        try {
+          const data = {
+            seed: trainingSeed,
+            batch_size: trainingBatchSize,
+            learning_rate: trainingLearningRate,
+            epochs: trainingEpochs,
+          };
+          const res = await fetch(`${API_URL}/train`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (!res.ok) {
+            alert("Error occurred while sending a request for training.");
+            setIsTraining(false);
+          }
+        } catch (err) {
+          console.log(err);
+          setIsTraining(false);
+        }
+      } else {
+        if (!trainingCustomFile) {
+          alert("Please upload a custom training file.");
+          return;
+        }
+        setIsInferencing(true);
+        try {
+          setStatus("Computing and saving UMAP embeddings . . .");
+          const formData = new FormData();
+          formData.append("weights_file", trainingCustomFile);
+          const res = await fetch(`${API_URL}/inference`, {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) {
+            alert("Error occurred while sending a request for inference.");
+            setIsInferencing(false);
+            return;
+          }
+          setTimeout(() => {
+            setStatus("Embedding...");
+          }, 10000);
+        } catch (err) {
+          console.error(err);
+          setIsInferencing(false);
+        }
       }
     }
   };
@@ -348,22 +351,8 @@ export default function TrainingConfiguration({
         </div>
       </div>
       <div className={styles["button-wrapper"]}>
-        {isTraining ? (
-          isCancelling ? (
-            <span className={styles["cancel-msg"]}>
-              Cancelling the training...
-            </span>
-          ) : // <div onClick={handleCancelBtnClick} className={styles.button}>
-          //   Cancel
-          // </div>
-          null
-        ) : null}
-        <div
-          style={{ left: `${isTraining ? "236px" : "236px"}` }}
-          onClick={handleRunBtnClick}
-          className={styles.button}
-        >
-          Run
+        <div onClick={handleBtnClick} className={styles.button}>
+          {isTraining ? "Cancel" : "Run"}
         </div>
       </div>
     </ContentBox>
