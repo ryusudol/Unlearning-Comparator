@@ -200,7 +200,7 @@ export default function TrainingConfiguration({
         }
         setIsInferencing(true);
         try {
-          setStatus("Computing and saving UMAP embeddings . . .");
+          setStatus("Inferencing . . .");
           const formData = new FormData();
           formData.append("weights_file", trainingCustomFile);
           const res = await fetch(`${API_URL}/inference`, {
@@ -213,7 +213,7 @@ export default function TrainingConfiguration({
             return;
           }
           setTimeout(() => {
-            setStatus("Embedding...");
+            setStatus("Embedding . . .");
           }, 10000);
         } catch (err) {
           console.error(err);
@@ -224,7 +224,7 @@ export default function TrainingConfiguration({
   };
 
   return (
-    <ContentBox height={236}>
+    <ContentBox height={232}>
       <div className={styles["subset-wrapper"]}>
         <SubTitle subtitle="Training Configuration" />
         <div
