@@ -183,7 +183,7 @@ export default function UnlearningConfiguration({
                 icon={mode ? faCircle : faCircleCheck}
               />
               <label className={styles["predefined-label"]}>
-                Predefined Model
+                Predefined Method
               </label>
             </div>
             <select
