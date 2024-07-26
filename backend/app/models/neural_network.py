@@ -1,6 +1,6 @@
 import torch.nn as nn
 from torchvision import models
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 def get_resnet18(num_classes=10):
     return models.resnet18(weights=None, num_classes=num_classes)
@@ -15,12 +15,17 @@ class TrainingStatus:
         self.best_loss = 9999.99
         self.current_accuracy = 0
         self.best_accuracy = 0
+        self.test_loss = 0
+        self.test_accuracy = 0
+        self.best_test_accuracy = 0
+        self.train_class_accuracies: Dict[int, float] = {}
+        self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None
         self.estimated_time_remaining = None
         self.umap_embeddings = None
         self.svg_files: Optional[List[str]] = None
-        self.cancel_requested = False  
-        
+        self.cancel_requested = False
+
     def reset(self):
         self.__init__()
 
@@ -47,6 +52,11 @@ class UnlearningStatus:
         self.best_loss = 9999.99
         self.current_accuracy = 0
         self.best_accuracy = 0
+        self.test_loss = 0
+        self.test_accuracy = 0
+        self.best_test_accuracy = 0
+        self.train_class_accuracies: Dict[int, float] = {}
+        self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None
         self.estimated_time_remaining = None
         self.umap_embeddings = None

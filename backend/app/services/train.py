@@ -10,8 +10,38 @@ from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
 from app.config.settings import DATA_SIZE
 
+async def evaluate_model(model, test_loader, criterion, device):
+    model.eval()
+    test_loss = 0
+    correct = 0
+    total = 0
+    class_correct = [0] * 10
+    class_total = [0] * 10
+    
+    with torch.no_grad():
+        for data in test_loader:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            test_loss += loss.item()
+            _, predicted = outputs.max(1)
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+            
+            c = (predicted == labels).squeeze()
+            for i in range(len(labels)):
+                label = labels[i]
+                class_correct[label] += c[i].item()
+                class_total[label] += 1
+    
+    accuracy = 100. * correct / total
+    class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
+    
+    return test_loss / len(test_loader), accuracy, class_accuracies
+
 async def train_model(model,
-                      train_loader, 
+                      train_loader,
+                      test_loader,
                       criterion, 
                       optimizer, 
                       device, 
@@ -31,6 +61,9 @@ async def train_model(model,
         running_loss = 0.0
         correct = 0
         total = 0
+        class_correct = [0] * 10
+        class_total = [0] * 10
+        
         for i, data in enumerate(train_loader, 0):
             if status.cancel_requested:
                 break
@@ -45,45 +78,61 @@ async def train_model(model,
             _, predicted = outputs.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
+            
+            c = (predicted == labels).squeeze()
+            for i in range(labels.size(0)):
+                label = labels[i]
+                class_correct[label] += c[i].item()
+                class_total[label] += 1
 
-            if i % 10 == 0:  # 제어권 반환
-                await asyncio.sleep(0)
-                
+            await asyncio.sleep(0)
         
-        avg_loss = running_loss / len(train_loader)
-        accuracy = 100. * correct / total
+        train_loss = running_loss / len(train_loader)
+        train_accuracy = 100. * correct / total
+        train_class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
+        
+        # Evaluate on test set
+        test_loss, test_accuracy, test_class_accuracies = await evaluate_model(model, test_loader, criterion, device)
+        
         status.current_epoch = epoch + 1
         status.progress = (epoch + 1) / epochs * 100
-        status.current_loss = avg_loss
-        status.current_accuracy = accuracy
-        if avg_loss < status.best_loss:
-            status.best_loss = avg_loss
-        if accuracy > status.best_accuracy:
-            status.best_accuracy = accuracy
+        status.current_loss = train_loss
+        status.current_accuracy = train_accuracy
+        status.test_loss = test_loss
+        status.test_accuracy = test_accuracy
+        status.train_class_accuracies = train_class_accuracies
+        status.test_class_accuracies = test_class_accuracies
+        
+        if train_loss < status.best_loss:
+            status.best_loss = train_loss
+        if train_accuracy > status.best_accuracy:
+            status.best_accuracy = train_accuracy
+        if test_accuracy > status.best_test_accuracy:
+            status.best_test_accuracy = test_accuracy
         
         elapsed_time = time.time() - status.start_time
         estimated_total_time = elapsed_time / (epoch + 1) * epochs
         status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
         
-        # Terminal output
-        print(f"\rEpoch [{epoch+1}/{epochs}] "
-              f"Loss: {avg_loss:.4f} "
-              f"Acc: {accuracy:.2f}% "
-              f"Best Loss: {status.best_loss:.4f} "
-              f"Best Acc: {status.best_accuracy:.2f}% "
-              f"Progress: {status.progress:.2f}% "
-              f"ETA: {status.estimated_time_remaining:.2f}s", end="")
-        sys.stdout.flush()  # Ensure the output is immediately displayed
+        print(f"\nEpoch [{epoch+1}/{epochs}]")
+        print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
+        print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
+        print(f"Best Train Acc: {status.best_accuracy:.2f}%")
+        print(f"Best Test Acc: {status.best_test_accuracy:.2f}%")
+        print("Train Class Accuracies:")
+        for i, acc in train_class_accuracies.items():
+            print(f"  Class {i}: {acc:.2f}%")
+        print("Test Class Accuracies:")
+        for i, acc in test_class_accuracies.items():
+            print(f"  Class {i}: {acc:.2f}%")
+        print(f"Progress: {status.progress:.2f}%, ETA: {status.estimated_time_remaining:.2f}s")
         
-        await asyncio.sleep(0)  # Allow other tasks to run
+        sys.stdout.flush()
+        await asyncio.sleep(0)
     
     print()  # Print a newline at the end of training
 
-    # Save the trained model
     if not status.cancel_requested:
-        print()  # Print a newline at the end of training
-
-        # Save the trained model
         save_dir = 'trained_models'
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -95,7 +144,6 @@ async def train_model(model,
 
     return model
 
-
 async def run_training(request, status):
     print(f"Starting training with {request.epochs} epochs...")
     set_seed(request.seed)
@@ -104,7 +152,7 @@ async def run_training(request, status):
     if torch.backends.mps.is_available():
         device = torch.device("mps")
 
-    train_loader, train_set = get_data_loaders(request.batch_size)
+    train_loader, test_loader, train_set = get_data_loaders(request.batch_size)
     model = get_resnet18().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=request.learning_rate)
@@ -113,7 +161,8 @@ async def run_training(request, status):
     status.progress = 0
     try:
         model = await train_model(model=model, 
-                                  train_loader=train_loader, 
+                                  train_loader=train_loader,
+                                  test_loader=test_loader,
                                   criterion=criterion, 
                                   optimizer=optimizer, 
                                   device=device, 

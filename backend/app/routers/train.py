@@ -32,6 +32,10 @@ async def get_status():
         "best_loss": status.best_loss,
         "current_accuracy": status.current_accuracy,
         "best_accuracy": status.best_accuracy,
+        "test_loss": status.test_loss,
+        "test_accuracy": status.test_accuracy,
+        "train_class_accuracies": status.train_class_accuracies,
+        "test_class_accuracies": status.test_class_accuracies,
         "estimated_time_remaining": status.estimated_time_remaining
     }
 
