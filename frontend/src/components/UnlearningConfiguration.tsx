@@ -168,7 +168,7 @@ export default function UnlearningConfiguration({
   };
 
   return (
-    <ContentBox height={215}>
+    <ContentBox height={236}>
       <div className={styles["subset-wrapper"]}>
         <SubTitle subtitle="Unlearning Configuration" />
         <div
@@ -183,7 +183,7 @@ export default function UnlearningConfiguration({
                 icon={mode ? faCircle : faCircleCheck}
               />
               <label className={styles["predefined-label"]}>
-                Predefined Model
+                Predefined Method
               </label>
             </div>
             <select
@@ -265,23 +265,34 @@ export default function UnlearningConfiguration({
         <div
           id="unlearning-custom"
           onClick={handleCustomClick}
-          className={styles.custom}
+          className={styles["custom-wrapper"]}
         >
-          <div className={styles["label-wrapper"]}>
-            <FontAwesomeIcon
-              className={styles.icon}
-              icon={mode ? faCircleCheck : faCircle}
+          <div className={styles.custom}>
+            <div className={styles["label-wrapper"]}>
+              <FontAwesomeIcon
+                className={styles.icon}
+                icon={mode ? faCircleCheck : faCircle}
+              />
+              <span className={styles["predefined-label"]}>Custom Model</span>
+            </div>
+            <label htmlFor="custom-unlearning">
+              <div className={styles["upload"]}>Click to upload</div>
+            </label>
+            <input
+              className={styles["file-input"]}
+              type="file"
+              id="custom-unlearning"
             />
-            <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
-          <label htmlFor="custom-unlearning">
-            <div className={styles["upload"]}>Click to upload</div>
-          </label>
-          <input
-            className={styles["file-input"]}
-            type="file"
-            id="custom-unlearning"
-          />
+          <div>
+            <Input
+              labelName="Forget Class"
+              value={unlearningClass}
+              setStateString={setUnlearningClass}
+              optionData={UNLEARN_CLASSES}
+              type="select"
+            />
+          </div>
         </div>
       </div>
       <div className={styles["button-wrapper"]}>

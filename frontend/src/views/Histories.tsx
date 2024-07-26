@@ -12,7 +12,7 @@ export default function Histories() {
   return (
     <section>
       <Title title="Histories" />
-      <ContentBox height={278}>
+      <ContentBox height={260}>
         <div onClick={handleSaveBtnClick} className={styles["button-wrapper"]}>
           Save
         </div>
