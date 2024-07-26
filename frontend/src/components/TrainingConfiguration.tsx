@@ -18,15 +18,21 @@ type PropsType = {
   setOriginalSvgContents: (data: string[]) => void;
 };
 type Timer = ReturnType<typeof setInterval> | undefined;
+type ClassAccuracies = {
+  [key: string]: number;
+};
 type StatusType = {
   is_training: boolean;
-  progress: number;
   current_epoch: number;
   total_epochs: number;
   current_loss: number;
   best_loss: number;
   current_accuracy: number;
   best_accuracy: number;
+  test_loss: number;
+  test_accuracy: number;
+  train_class_accuracies: ClassAccuracies;
+  test_class_accuracies: ClassAccuracies;
   estimated_time_remaining: number;
 };
 
@@ -248,6 +254,7 @@ export default function TrainingConfiguration({
               <span className={styles.status}>{status}</span>
               {statusDetail && statusDetail.current_epoch >= 1 ? (
                 <div className={styles["status-detail-wrapper"]}>
+                  {/* TODO: class accuracy 표시 */}
                   <span className={styles["status-detail"]}>
                     Epoch: {statusDetail.current_epoch}/
                     {statusDetail.total_epochs}
