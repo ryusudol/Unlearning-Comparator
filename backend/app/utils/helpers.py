@@ -1,3 +1,4 @@
+import asyncio
 import torch
 import numpy as np
 from torchvision import datasets, transforms
@@ -26,11 +27,12 @@ def get_data_loaders(batch_size):
     
     return train_loader, test_loader, train_set
 
-def get_layer_activations(model, data_loader, device, num_samples=DATA_SIZE):
+async def get_layer_activations(model, data_loader, device, num_samples=DATA_SIZE):
     model.eval()
     activations = [[], [], [], []]
     with torch.no_grad():
         for inputs, _ in data_loader:
+            await asyncio.sleep(0)
             inputs = inputs.to(device)
             x = model.conv1(inputs)
             x = model.bn1(x)

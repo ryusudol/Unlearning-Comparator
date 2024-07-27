@@ -39,7 +39,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Preparing data...")
         status.current_step = "Preparing data"
         status.progress = 40
-        _, test_set = get_data_loaders(batch_size=64)
+        _, _, test_set = get_data_loaders(batch_size=64)
         subset_indices = torch.randperm(len(test_set))[:DATA_SIZE]
         subset_loader = torch.utils.data.DataLoader(
             torch.utils.data.Subset(test_set, subset_indices),
@@ -50,7 +50,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Extracting activations...")
         status.current_step = "Extracting activations"
         status.progress = 60
-        activations = get_layer_activations(model, subset_loader, device)
+        activations = await get_layer_activations(model, subset_loader, device)
         await asyncio.sleep(0)  # Allow other tasks to run
 
         # Compute UMAP embeddings
@@ -58,7 +58,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         status.current_step = "Computing UMAP embeddings"
         status.progress = 80
         labels = torch.tensor([test_set.targets[i] for i in subset_indices])
-        umap_embeddings, svg_files = compute_umap_embeddings(activations, labels) # 임베딩 저장
+        umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels) # 임베딩 저장
 
         status.umap_embeddings = umap_embeddings
         status.svg_files = list(svg_files.values())

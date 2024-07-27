@@ -1,3 +1,4 @@
+import asyncio
 import numpy as np
 import matplotlib.pyplot as plt
 from umap import UMAP
@@ -5,7 +6,7 @@ import os
 from datetime import datetime
 from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_RANDOM_STATE, UMAP_N_JOBS
 
-def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir='umap_visualizations'):
+async def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir='umap_visualizations'):
     umap_embeddings = {}
     svg_files = {}
     
@@ -26,7 +27,7 @@ def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir='umap
                     n_jobs=UMAP_N_JOBS)
         embedding = umap.fit_transform(act.reshape(act.shape[0], -1))
         umap_embeddings[i+1] = embedding
-        
+
         plt.figure(figsize=(12, 11))
         scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='tab10', s=20, alpha=0.7)
         
@@ -48,8 +49,11 @@ def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir='umap
         plt.savefig(filepath, format='svg', dpi=300, bbox_inches='tight', pad_inches=0.1)
         plt.close()
         
+        await asyncio.sleep(0)
+        
         with open(filepath, 'rb') as f:
             svg_files[i+1] = f.read()
-    
+        
+        
     print("\nUMAP embeddings computation and saving completed!")
     return umap_embeddings, svg_files

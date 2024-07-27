@@ -204,9 +204,9 @@ async def run_unlearning(request, status):
                 batch_size=64, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
-            activations = get_layer_activations(model, subset_loader, device)
+            activations = await get_layer_activations(model, subset_loader, device)
             labels = torch.tensor([train_set.targets[i] for i in subset_indices])
-            umap_embeddings, svg_files = compute_umap_embeddings(activations, labels, forget_class=request.forget_class)
+            umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels, forget_class=request.forget_class)
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())
             print("Unlearning and visualization completed!")
