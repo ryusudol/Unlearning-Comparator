@@ -1,8 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, File, UploadFile, Form
 from pydantic import BaseModel, Field
 from app.services.unlearn_retrain import run_unlearning
+from app.services.unlearn_RL import run_unlearning_RL
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
+import os
+import tempfile
 
 router = APIRouter()
 status = UnlearningStatus()
@@ -21,6 +24,38 @@ async def start_unlearning(request: UnlearningRequest, background_tasks: Backgro
     status.reset()  # Reset status before starting new unlearning
     background_tasks.add_task(run_unlearning, request, status)
     return {"message": "Unlearning started"}
+
+@router.post("/unlearn/rl")
+async def start_unlearning_rl(
+    background_tasks: BackgroundTasks,
+    weights_file: UploadFile = File(...),
+    seed: int = Form(UNLEARN_SEED),
+    batch_size: int = Form(...),
+    learning_rate: float = Form(...),
+    epochs: int = Form(...),
+    forget_class: int = Form(...)
+):
+    if status.is_unlearning:
+        raise HTTPException(status_code=400, detail="Unlearning is already in progress")
+    status.reset()  # Reset status before starting new unlearning
+
+    # Create a temporary file to store the uploaded weights
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pth") as temp_file:
+        temp_file.write(await weights_file.read())
+        temp_file_path = temp_file.name
+
+    request = UnlearningRequest(
+        seed=seed,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        epochs=epochs,
+        forget_class=forget_class
+    )
+
+    # Pass the temporary file path to the run_unlearning_RL function
+    background_tasks.add_task(run_unlearning_RL, request, status, temp_file_path)
+    
+    return {"message": "RL Unlearning started"}
 
 @router.get("/unlearn/status")
 async def get_unlearning_status():

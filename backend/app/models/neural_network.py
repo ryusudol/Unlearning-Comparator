@@ -36,12 +36,16 @@ class InferenceStatus:
         self.current_step = ""
         self.start_time = None
         self.estimated_time_remaining = None
+        self.train_accuracy = 0
+        self.test_accuracy = 0
+        self.train_class_accuracies: Dict[int, float] = {}
+        self.test_class_accuracies: Dict[int, float] = {}
         self.umap_embeddings = None
         self.svg_files = None
 
     def reset(self):
         self.__init__()
-
+        
 class UnlearningStatus:
     def __init__(self):
         self.is_unlearning = False
