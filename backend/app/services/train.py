@@ -155,7 +155,7 @@ async def train_model(model,
         print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
         print(f"Best Train Acc: {status.best_accuracy:.2f}%")
         print(f"Best Test Acc: {status.best_test_accuracy:.2f}%")
-        print(f"Current LR: {current_lr:.2f}")
+        print(f"Current LR: {current_lr:.5f}")
         print(f"Best model so far was at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
         print("Train Class Accuracies:")
         for i, acc in train_class_accuracies.items():
@@ -163,7 +163,7 @@ async def train_model(model,
         print("Test Class Accuracies:")
         for i, acc in test_class_accuracies.items():
             print(f"  Class {i}: {acc:.2f}%")
-        print(f"Progress: {status.progress:.2f}%, ETA: {status.estimated_time_remaining:.2f}s")
+        print(f"Progress: {status.progress:.5f}%, ETA: {status.estimated_time_remaining:.2f}s")
         
         sys.stdout.flush()
         
@@ -203,7 +203,7 @@ async def run_training(request, status):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        optimizer, milestones=[40, 80, 120], gamma=0.1
+        optimizer, milestones=[20, 35], gamma=0.1
     )
     status.is_training = True
     status.progress = 0
