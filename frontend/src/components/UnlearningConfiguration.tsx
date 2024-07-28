@@ -18,7 +18,7 @@ import {
   initialState,
 } from "../reducers/unlearningReducer";
 import { Status, Props, Timer } from "../types/unlearning_config";
-import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../utils/unlearning";
+import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
 
 const API_URL = "http://localhost:8000";
 
@@ -85,12 +85,10 @@ export default function UnlearningConfiguration({
     dispatch({ type: "UPDATE_METHOD", payload: method });
   };
 
-  const handlePredefinedClick = () => {
-    setMode(0);
-  };
-
-  const handleCustomClick = () => {
-    setMode(1);
+  const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const id = e.currentTarget.id;
+    if (id === "predefined") setMode(0);
+    else if (id === "custom") setMode(1);
   };
 
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,27 +114,37 @@ export default function UnlearningConfiguration({
       } catch (err) {
         console.error(err);
       }
-    }
-    if (mode === 0) {
-      if (
-        state.epochs === 0 ||
-        state.batch_size === 0 ||
-        state.learning_rate === 0
-      ) {
-        alert("Please enter valid numbers");
-        return;
-      }
-      setIsUnlearning(true);
-      setStatus("Unlearning . . .");
-      if (state.method === "Retrain") {
+    } else {
+      if (mode === 0) {
+        if (
+          state.epochs === 0 ||
+          state.batch_size === 0 ||
+          state.learning_rate === 0
+        ) {
+          alert("Please enter valid numbers");
+          return;
+        }
+        setIsUnlearning(true);
+        setStatus("Unlearning . . .");
         try {
+          const method = state.method;
+          const end =
+            method === "Fine-Tuning"
+              ? "ft"
+              : method === "Random-Label"
+              ? "rl"
+              : method === "Gradient-Ascent"
+              ? "ga"
+              : method === "Fisher"
+              ? "fisher"
+              : "retrain";
           const data = {
             batch_size: state.batch_size,
             learning_rate: state.learning_rate,
             epochs: state.epochs,
             forget_class: state.forget_class,
           };
-          const res = await fetch(`${API_URL}/unlearn/retrain`, {
+          const res = await fetch(`${API_URL}/unlearn/${end}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -149,31 +157,31 @@ export default function UnlearningConfiguration({
           console.error(err);
           setIsUnlearning(false);
         }
-      }
-    } else {
-      if (!customFile) {
-        alert("Please upload a custom unlearning file.");
-        return;
-      }
-      setIsUnlearning(true);
-      try {
-        const formData = new FormData();
-        formData.append("weights_file", customFile);
-        // TODO: 백엔드 측 custom file로 unlearning 수행하는 기능 개발되면 URL 변경할 것
-        const res = await fetch(`${API_URL}/unlearn-custom`, {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) {
-          alert(
-            "Error occurred while sending a request for unlearning a custom file."
-          );
-          setIsUnlearning(false);
+      } else {
+        if (!customFile) {
+          alert("Please upload a custom unlearning file.");
           return;
         }
-      } catch (err) {
-        console.error(err);
-        setIsUnlearning(false);
+        setIsUnlearning(true);
+        try {
+          const formData = new FormData();
+          formData.append("weights_file", customFile);
+          // TODO: 백엔드 측 custom file로 unlearning 수행하는 기능 개발되면 URL 변경할 것
+          const res = await fetch(`${API_URL}/unlearn-custom`, {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) {
+            alert(
+              "Error occurred while sending a request for unlearning a custom file."
+            );
+            setIsUnlearning(false);
+            return;
+          }
+        } catch (err) {
+          console.error(err);
+          setIsUnlearning(false);
+        }
       }
     }
   };
@@ -183,8 +191,8 @@ export default function UnlearningConfiguration({
       <div className={styles["subset-wrapper"]}>
         <SubTitle subtitle="Unlearning Configuration" />
         <div
-          id="unlearning-predefined"
-          onClick={handlePredefinedClick}
+          id="predefined"
+          onClick={handleSectionClick}
           className={styles.predefined}
         >
           <div className={styles.mode}>
@@ -275,8 +283,8 @@ export default function UnlearningConfiguration({
         </div>
         {/* TODO: Custom canceling status 표시 */}
         <div
-          id="unlearning-custom"
-          onClick={handleCustomClick}
+          id="custom"
+          onClick={handleSectionClick}
           className={styles["custom-wrapper"]}
         >
           <div className={styles.custom}>
