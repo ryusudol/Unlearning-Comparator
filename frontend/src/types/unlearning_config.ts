@@ -26,7 +26,6 @@ export interface Action {
 
 export interface Props {
   trainedModels: string[];
-  setUnlearnedSvgContents: (data: string[]) => void;
 }
 
 export type Timer = ReturnType<typeof setInterval> | undefined;
