@@ -8,7 +8,7 @@ import os
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
-from app.config.settings import DATA_SIZE
+from app.config.settings import UMAP_DATA_SIZE
 
 async def evaluate_model(model, test_loader, criterion, device):
     model.eval()
@@ -198,7 +198,7 @@ async def run_unlearning(request, status):
                                     )
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(train_set))[:DATA_SIZE]
+            subset_indices = torch.randperm(len(train_set))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(train_set, subset_indices),
                 batch_size=64, shuffle=False)

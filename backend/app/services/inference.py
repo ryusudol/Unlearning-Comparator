@@ -8,7 +8,7 @@ from fastapi import UploadFile, BackgroundTasks
 from app.models.neural_network import get_resnet18, InferenceStatus
 from app.utils.helpers import get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
-from app.config.settings import DATA_SIZE
+from app.config.settings import UMAP_DATA_SIZE
 
 async def calculate_accuracy(model, data_loader, device):
     correct = 0
@@ -97,7 +97,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Extracting activations...")
         status.current_step = "Extracting activations"
         status.progress = 90
-        subset_indices = torch.randperm(len(train_set))[:DATA_SIZE]
+        subset_indices = torch.randperm(len(train_set))[:UMAP_DATA_SIZE]
         subset_loader = torch.utils.data.DataLoader(
             torch.utils.data.Subset(train_set, subset_indices),
             batch_size=64, shuffle=False)

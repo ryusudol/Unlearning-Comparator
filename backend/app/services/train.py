@@ -5,10 +5,24 @@ import asyncio
 import time
 import sys
 import os
+import matplotlib.pyplot as plt
+import copy
+
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
-from app.config.settings import DATA_SIZE
+from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, WEIGHT_DECAY
+
+def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate, is_best=False):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    prefix = "best_" if is_best else ""
+    model_filename = f"{prefix}train_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
+    model_path = os.path.join(save_dir, model_filename)
+    
+    torch.save(model.state_dict(), model_path)
+    print(f"{'Best ' if is_best else ''}Model saved to {model_path}")
 
 async def evaluate_model(model, test_loader, criterion, device):
     model.eval()
@@ -43,7 +57,8 @@ async def train_model(model,
                       train_loader,
                       test_loader,
                       criterion, 
-                      optimizer, 
+                      optimizer,
+                      scheduler,
                       device, 
                       epochs, 
                       status, 
@@ -54,7 +69,15 @@ async def train_model(model,
     status.start_time = time.time()
     status.total_epochs = epochs
     
+    best_test_acc = 0.0
+    best_model = None
+    best_epoch = 0
+
+    train_accuracies = []
+    test_accuracies = []
+
     for epoch in range(epochs):
+        await asyncio.sleep(0)
         if status.cancel_requested:
             print("\nTraining cancelled.")
             break
@@ -73,8 +96,8 @@ async def train_model(model,
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+
             running_loss += loss.item()
-            
             _, predicted = outputs.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
@@ -87,6 +110,7 @@ async def train_model(model,
 
             await asyncio.sleep(0)
         
+        scheduler.step()
         train_loss = running_loss / len(train_loader)
         train_accuracy = 100. * correct / total
         train_class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
@@ -94,6 +118,16 @@ async def train_model(model,
         # Evaluate on test set
         test_loss, test_accuracy, test_class_accuracies = await evaluate_model(model, test_loader, criterion, device)
         
+        train_accuracies.append(train_accuracy)
+        test_accuracies.append(test_accuracy)
+
+        if test_accuracy > best_test_acc:
+            best_test_acc = test_accuracy
+            best_model = copy.deepcopy(model)
+            best_epoch = epoch + 1
+            save_model(best_model, 'trained_models', model_name, dataset_name, epochs, learning_rate, is_best=True)
+            print(f"New best model saved at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
+
         status.current_epoch = epoch + 1
         status.progress = (epoch + 1) / epochs * 100
         status.current_loss = train_loss
@@ -114,11 +148,15 @@ async def train_model(model,
         estimated_total_time = elapsed_time / (epoch + 1) * epochs
         status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
         
+        current_lr = optimizer.param_groups[0]['lr']
+
         print(f"\nEpoch [{epoch+1}/{epochs}]")
         print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
         print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
         print(f"Best Train Acc: {status.best_accuracy:.2f}%")
         print(f"Best Test Acc: {status.best_test_accuracy:.2f}%")
+        print(f"Current LR: {current_lr:.2f}")
+        print(f"Best model so far was at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
         print("Train Class Accuracies:")
         for i, acc in train_class_accuracies.items():
             print(f"  Class {i}: {acc:.2f}%")
@@ -128,19 +166,27 @@ async def train_model(model,
         print(f"Progress: {status.progress:.2f}%, ETA: {status.estimated_time_remaining:.2f}s")
         
         sys.stdout.flush()
-        await asyncio.sleep(0)
+        
     
     print()  # Print a newline at the end of training
 
     if not status.cancel_requested:
         save_dir = 'trained_models'
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        
-        model_filename = f"train_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
-        model_path = os.path.join(save_dir, model_filename)
-        torch.save(model.state_dict(), model_path)
-        print(f"Model saved to {model_path}")
+        save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(range(1, epochs + 1), train_accuracies, label='Train Accuracy')
+        plt.plot(range(1, epochs + 1), test_accuracies, label='Test Accuracy')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy (%)')
+        plt.title(f'Training and Test Accuracy for {model_name} on {dataset_name}')
+        plt.legend()
+        plt.grid(True)
+        plot_filename = f"accuracy_plot_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.png"
+        plot_path = os.path.join(save_dir, plot_filename)
+        plt.savefig(plot_path)
+        plt.close()
+        print(f"Accuracy plot saved to {plot_path}")
 
     return model
 
@@ -155,8 +201,10 @@ async def run_training(request, status):
     train_loader, test_loader, train_set = get_data_loaders(request.batch_size)
     model = get_resnet18().to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=request.learning_rate)
-
+    optimizer = torch.optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, milestones=[40, 80, 120], gamma=0.1
+    )
     status.is_training = True
     status.progress = 0
     try:
@@ -164,7 +212,8 @@ async def run_training(request, status):
                                   train_loader=train_loader,
                                   test_loader=test_loader,
                                   criterion=criterion, 
-                                  optimizer=optimizer, 
+                                  optimizer=optimizer,
+                                  scheduler=scheduler,
                                   device=device, 
                                   epochs=request.epochs, 
                                   status=status,
@@ -174,7 +223,7 @@ async def run_training(request, status):
                                   )
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(train_set))[:DATA_SIZE]
+            subset_indices = torch.randperm(len(train_set))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(train_set, subset_indices),
                 batch_size=64, shuffle=False)

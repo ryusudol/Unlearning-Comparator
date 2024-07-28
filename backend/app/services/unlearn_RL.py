@@ -10,7 +10,7 @@ from torch.utils.data import ConcatDataset, Subset
 from app.models.neural_network import get_resnet18, UnlearningStatus
 from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
-from app.config.settings import DATA_SIZE
+from app.config.settings import UMAP_DATA_SIZE
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
@@ -65,13 +65,15 @@ async def unlearn_model_RL(model,
         
         forget_dataset = forget_loader.dataset
         retain_dataset = retain_loader.dataset
+        full_dataset = ConcatDataset([forget_dataset, retain_dataset])
         
         new_targets = np.random.randint(0, num_classes, len(forget_dataset.indices))
         for i, idx in enumerate(forget_dataset.indices):
             forget_dataset.dataset.targets[idx] = new_targets[i]
-        
         combined_dataset = ConcatDataset([forget_dataset, retain_dataset])
+        
         combined_loader = torch.utils.data.DataLoader(combined_dataset, batch_size=forget_loader.batch_size, shuffle=True)
+        full_loader = torch.utils.data.DataLoader(full_dataset, batch_size=forget_loader.batch_size, shuffle=True)
         
         model.train()
         running_loss = 0.0
@@ -102,7 +104,7 @@ async def unlearn_model_RL(model,
         train_accuracy = 100. * correct / total
         
         # Evaluate on training data to get class accuracies
-        _, _, train_class_accuracies = await evaluate_model(model, combined_loader, criterion, device)
+        _, _, train_class_accuracies = await evaluate_model(model, full_loader, criterion, device)
         
         # Evaluate on test data
         test_loss, test_accuracy, test_class_accuracies = await evaluate_model(model, test_loader, criterion, device)
@@ -202,7 +204,7 @@ async def run_unlearning_RL(request, status, model_path):
                                        num_classes=10)
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(train_set))[:DATA_SIZE]
+            subset_indices = torch.randperm(len(train_set))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
                 Subset(train_set, subset_indices),
                 batch_size=64, shuffle=False)

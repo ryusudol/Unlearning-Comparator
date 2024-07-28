@@ -1,39 +1,30 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, File, UploadFile, Form
+from fastapi import APIRouter, BackgroundTasks, HTTPException, File, UploadFile, Form, Depends
 from pydantic import BaseModel, Field
 from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
-import os
-import tempfile
-
+import os, tempfile, json
 router = APIRouter()
 status = UnlearningStatus()
 
 class UnlearningRequest(BaseModel):
-    seed: int = Field(default=UNLEARN_SEED)
-    batch_size: int
-    learning_rate: float
-    epochs: int
-    forget_class: int
+    seed: int = UNLEARN_SEED
+    batch_size: int = Field(default=64, description="Batch size for unlearning")
+    learning_rate: float = 0.001
+    epochs: int = Field(default=5, ge=1, description="Number of unlearning epochs")
+    forget_class: int = Field(..., ge=0, lt=10, description="Class to forget (0-9)")
 
-@router.post("/unlearn/retrain")
-async def start_unlearning(request: UnlearningRequest, background_tasks: BackgroundTasks):
-    if status.is_unlearning:
-        raise HTTPException(status_code=400, detail="Unlearning is already in progress")
-    status.reset()  # Reset status before starting new unlearning
-    background_tasks.add_task(run_unlearning, request, status)
-    return {"message": "Unlearning started"}
+async def parse_unlearning_request(
+    request: str = Form(...),
+) -> UnlearningRequest:
+    return UnlearningRequest(**json.loads(request))
 
 @router.post("/unlearn/rl")
 async def start_unlearning_rl(
     background_tasks: BackgroundTasks,
     weights_file: UploadFile = File(...),
-    seed: int = Form(UNLEARN_SEED),
-    batch_size: int = Form(...),
-    learning_rate: float = Form(...),
-    epochs: int = Form(...),
-    forget_class: int = Form(...)
+    request: UnlearningRequest = Depends(parse_unlearning_request)
 ):
     if status.is_unlearning:
         raise HTTPException(status_code=400, detail="Unlearning is already in progress")
@@ -43,14 +34,6 @@ async def start_unlearning_rl(
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pth") as temp_file:
         temp_file.write(await weights_file.read())
         temp_file_path = temp_file.name
-
-    request = UnlearningRequest(
-        seed=seed,
-        batch_size=batch_size,
-        learning_rate=learning_rate,
-        epochs=epochs,
-        forget_class=forget_class
-    )
 
     # Pass the temporary file path to the run_unlearning_RL function
     background_tasks.add_task(run_unlearning_RL, request, status, temp_file_path)
