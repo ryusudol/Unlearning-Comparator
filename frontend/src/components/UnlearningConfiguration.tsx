@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useReducer,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import styles from "./UnlearningConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -7,56 +13,30 @@ import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
-
-const UNLEARNING_METHODS = [
-  "Fine-Tuning",
-  "Random-Label",
-  "Gradient-Ascent",
-  "Fisher",
-  "Retrain",
-];
-const UNLEARN_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+import {
+  unlearningConfigReducer,
+  initialState,
+} from "../reducers/unlearningReducer";
+import { Status, Props, Timer } from "../types/unlearning_config";
+import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../utils/unlearning";
 
 const API_URL = "http://localhost:8000";
-
-type StatusType = {
-  is_unlearning: boolean;
-  progress: number;
-  current_epoch: number;
-  total_epochs: number;
-  current_loss: number;
-  best_loss: number;
-  current_accuracy: number;
-  best_accuracy: number;
-  estimated_time_remaining: number;
-  forget_class: number;
-};
-type Timer = ReturnType<typeof setInterval> | undefined;
-type PropsType = {
-  trainedModels: string[];
-  setUnlearnedSvgContents: (data: string[]) => void;
-};
 
 export default function UnlearningConfiguration({
   trainedModels,
   setUnlearnedSvgContents,
-}: PropsType) {
-  const [mode, setMode] = useState<0 | 1>(0);
+}: Props) {
+  const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isUnlearning, setIsUnlearning] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [selectedTrainedModel, setSelectedTrainedModel] = useState<
-    string | undefined
-  >(trainedModels[0]);
-  const [unlearningMethod, setUnlearningMethod] = useState(
-    UNLEARNING_METHODS[0]
-  );
-  const [unlearningClass, setUnlearningClass] = useState("0");
-  const [unlearningBatchSize, setUnlearningBatchSize] = useState(0);
-  const [unlearningRate, setUnlearningRate] = useState(0);
-  const [unlearningEpochs, setUnlearningEpochs] = useState(0);
-  // const [unlearningCustomFile, setUnlearningCustomFile] = useState<File>();
+  const [customFile, setCustomFile] = useState<File>();
   const [status, setStatus] = useState("Training . . .");
-  const [statusDetail, setStatusDetail] = useState<StatusType | undefined>();
+  const [statusDetail, setStatusDetail] = useState<Status | undefined>();
+  const [trainedModel, setTrainedModel] = useState<string | undefined>(
+    trainedModels[0]
+  );
+
+  const [state, dispatch] = useReducer(unlearningConfigReducer, initialState);
 
   const unlearningIntervalIdRef = useRef<Timer>();
   const resultFetchedRef = useRef(false);
@@ -102,7 +82,7 @@ export default function UnlearningConfiguration({
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const method = e.currentTarget.value;
-    setUnlearningMethod(method);
+    dispatch({ type: "UPDATE_METHOD", payload: method });
   };
 
   const handlePredefinedClick = () => {
@@ -113,42 +93,48 @@ export default function UnlearningConfiguration({
     setMode(1);
   };
 
-  const handleCancelBtnClick = async () => {
-    // try {
-    //   setIsCancelling(true);
-    //   const res = await fetch(`${API_URL}/unlearn/cancel`, { method: "POST" });
-    //   if (!res.ok) {
-    //     alert("Error occurred while cancelling the unlearning.");
-    //     return;
-    //   }
-    //   resultFetchedRef.current = true;
-    //   setIsUnlearning(false);
-    //   setIsCancelling(false);
-    // } catch (err) {
-    //   console.error(err);
-    // }
+  const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.currentTarget.files && e.currentTarget.files.length > 0)
+      setCustomFile(e.currentTarget.files[0]);
   };
 
-  const handleRunBtnClick = async () => {
+  const handleBtnClick = async () => {
     resultFetchedRef.current = false;
+    if (isUnlearning) {
+      try {
+        setIsCancelling(true);
+        const res = await fetch(`${API_URL}/unlearn/cancel`, {
+          method: "POST",
+        });
+        if (!res.ok) {
+          alert("Error occurred while cancelling the unlearning.");
+          return;
+        }
+        resultFetchedRef.current = true;
+        setIsUnlearning(false);
+        setIsCancelling(false);
+      } catch (err) {
+        console.error(err);
+      }
+    }
     if (mode === 0) {
       if (
-        unlearningBatchSize === 0 ||
-        unlearningRate === 0 ||
-        unlearningEpochs === 0
+        state.epochs === 0 ||
+        state.batch_size === 0 ||
+        state.learning_rate === 0
       ) {
         alert("Please enter valid numbers");
         return;
       }
       setIsUnlearning(true);
       setStatus("Unlearning . . .");
-      if (unlearningMethod === "Retrain") {
+      if (state.method === "Retrain") {
         try {
           const data = {
-            batch_size: unlearningBatchSize,
-            learning_rate: unlearningRate,
-            epochs: unlearningEpochs,
-            forget_class: unlearningClass,
+            batch_size: state.batch_size,
+            learning_rate: state.learning_rate,
+            epochs: state.epochs,
+            forget_class: state.forget_class,
           };
           const res = await fetch(`${API_URL}/unlearn/retrain`, {
             method: "POST",
@@ -163,6 +149,31 @@ export default function UnlearningConfiguration({
           console.error(err);
           setIsUnlearning(false);
         }
+      }
+    } else {
+      if (!customFile) {
+        alert("Please upload a custom unlearning file.");
+        return;
+      }
+      setIsUnlearning(true);
+      try {
+        const formData = new FormData();
+        formData.append("weights_file", customFile);
+        // TODO: 백엔드 측 custom file로 unlearning 수행하는 기능 개발되면 URL 변경할 것
+        const res = await fetch(`${API_URL}/unlearn-custom`, {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) {
+          alert(
+            "Error occurred while sending a request for unlearning a custom file."
+          );
+          setIsUnlearning(false);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        setIsUnlearning(false);
       }
     }
   };
@@ -228,40 +239,41 @@ export default function UnlearningConfiguration({
             <div>
               <Input
                 labelName="Trained Model"
-                value={selectedTrainedModel}
-                setStateString={setSelectedTrainedModel}
+                value={trainedModel}
+                setStateString={setTrainedModel}
                 optionData={trainedModels}
                 type="select"
-                disabled={unlearningMethod === "Retrain"}
+                disabled={state.method === "Retrain"}
               />
               <Input
                 labelName="Forget Class"
-                value={unlearningClass}
-                setStateString={setUnlearningClass}
+                value={state.forget_class}
+                dispatch={dispatch}
                 optionData={UNLEARN_CLASSES}
                 type="select"
               />
               <Input
                 labelName="Epochs"
-                value={unlearningEpochs}
-                setStateNumber={setUnlearningEpochs}
+                value={state.epochs}
+                dispatch={dispatch}
                 type="number"
               />
               <Input
                 labelName="Batch Size"
-                value={unlearningBatchSize}
-                setStateNumber={setUnlearningBatchSize}
+                value={state.batch_size}
+                dispatch={dispatch}
                 type="number"
               />
               <Input
                 labelName="Learning Rate"
-                value={unlearningRate}
-                setStateNumber={setUnlearningRate}
+                value={state.learning_rate}
+                dispatch={dispatch}
                 type="number"
               />
             </div>
           )}
         </div>
+        {/* TODO: Custom canceling status 표시 */}
         <div
           id="unlearning-custom"
           onClick={handleCustomClick}
@@ -279,6 +291,7 @@ export default function UnlearningConfiguration({
               <div className={styles["upload"]}>Click to upload</div>
             </label>
             <input
+              onChange={handleCustomFileUpload}
               className={styles["file-input"]}
               type="file"
               id="custom-unlearning"
@@ -287,8 +300,8 @@ export default function UnlearningConfiguration({
           <div>
             <Input
               labelName="Forget Class"
-              value={unlearningClass}
-              setStateString={setUnlearningClass}
+              value={state.forget_class}
+              dispatch={dispatch}
               optionData={UNLEARN_CLASSES}
               type="select"
             />
@@ -296,22 +309,8 @@ export default function UnlearningConfiguration({
         </div>
       </div>
       <div className={styles["button-wrapper"]}>
-        {isUnlearning ? (
-          isCancelling ? (
-            <span className={styles["cancel-msg"]}>
-              Cancelling the training...
-            </span>
-          ) : null
-        ) : // <div onClick={handleCancelBtnClick} className={styles.button}>
-        //   Cancel
-        // </div>
-        null}
-        <div
-          style={{ left: `${isUnlearning ? "236px" : "236px"}` }}
-          onClick={handleRunBtnClick}
-          className={styles.button}
-        >
-          Run
+        <div onClick={handleBtnClick} className={styles.button}>
+          {isUnlearning ? "Cancel" : "Run"}
         </div>
       </div>
     </ContentBox>
