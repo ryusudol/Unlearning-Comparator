@@ -203,7 +203,7 @@ async def run_training(request, status):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        optimizer, milestones=list(map(int, DECREASING_LR.split(","))), gamma=0.2
+        optimizer, milestones=DECREASING_LR, gamma=0.2
     )
     status.is_training = True
     status.progress = 0
