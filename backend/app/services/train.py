@@ -11,7 +11,7 @@ import copy
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
 from app.services.visualization import compute_umap_embeddings
-from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, WEIGHT_DECAY
+from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, WEIGHT_DECAY, DECREASING_LR
 
 def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate, is_best=False):
     if not os.path.exists(save_dir):
@@ -203,7 +203,7 @@ async def run_training(request, status):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        optimizer, milestones=[20, 35], gamma=0.1
+        optimizer, milestones=list(map(int, DECREASING_LR.split(","))), gamma=0.2
     )
     status.is_training = True
     status.progress = 0
