@@ -26,14 +26,14 @@ export interface Configuration {
   seed: number;
 }
 
+export interface Action {
+  type: string;
+  payload: string | number;
+}
+
 export interface Props {
   setTrainedModels: (models: string[]) => void;
   setOriginalSvgContents: (data: string[]) => void;
 }
 
 export type Timer = ReturnType<typeof setInterval> | undefined;
-
-export interface Action {
-  type: string;
-  payload: string | number;
-}

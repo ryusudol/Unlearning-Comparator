@@ -27,11 +27,12 @@ export default function TrainingConfiguration({
   setTrainedModels,
   setOriginalSvgContents,
 }: Props) {
+  // TODO: RESET dispatch
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isLoading, setIsLoading] = useState<0 | 1 | 2>(0); // 0: Idle, 1: Training, 2: Inferencing
   const [statusMsg, setStatusMsg] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<Status | undefined>();
-  const [trainingCustomFile, setTrainingCustomFile] = useState<File>();
+  const [customFile, setCustomFile] = useState<File>();
 
   const [state, dispatch] = useReducer(configurationReducer, initialState);
 
@@ -120,7 +121,7 @@ export default function TrainingConfiguration({
 
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.currentTarget.files && e.currentTarget.files.length > 0)
-      setTrainingCustomFile(e.currentTarget.files[0]);
+      setCustomFile(e.currentTarget.files[0]);
   };
 
   const handleBtnClick = async () => {
@@ -173,7 +174,7 @@ export default function TrainingConfiguration({
           setIsLoading(0);
         }
       } else {
-        if (!trainingCustomFile) {
+        if (!customFile) {
           alert("Please upload a custom training file.");
           return;
         }
@@ -181,7 +182,7 @@ export default function TrainingConfiguration({
         try {
           setStatusMsg("Inferencing . . .");
           const formData = new FormData();
-          formData.append("weights_file", trainingCustomFile);
+          formData.append("weights_file", customFile);
           const res = await fetch(`${API_URL}/inference`, {
             method: "POST",
             body: formData,
@@ -306,10 +307,10 @@ export default function TrainingConfiguration({
           ) : (
             <div>
               <label htmlFor="custom-training">
-                {trainingCustomFile ? (
+                {customFile ? (
                   <div className={styles["upload"]}>
                     <span className={styles["upload-text"]}>
-                      {trainingCustomFile.name}
+                      {customFile.name}
                     </span>
                   </div>
                 ) : (
