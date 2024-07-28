@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { useDispatch } from "react-redux";
 import styles from "./TrainingConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -13,28 +14,56 @@ import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
-import {
-  initialState,
-  configurationReducer,
-} from "../reducers/trainingReducer";
+import { MODELS, DATASET } from "../constants/training";
 import { Status, Props, Timer } from "../types/training_config";
+import { svgsActions } from "../store/svgs";
+import { Action, Configuration } from "../types/training_config";
 
 const API_URL = "http://localhost:8000";
-const MODELS = ["ResNet-18", "ResNet-34"];
-const DATASET = ["CIFAR-10", "VggFace"];
 
-export default function TrainingConfiguration({
-  setTrainedModels,
-  setOriginalSvgContents,
-}: Props) {
-  // TODO: RESET dispatch
+export const initialState = {
+  model: "ResNet-18",
+  dataset: "CIFAR-10",
+  epochs: 10,
+  batch_size: 64,
+  learning_rate: 0.002,
+  seed: 42,
+};
+
+export const configurationReducer = (
+  state: Configuration,
+  action: Action
+): Configuration => {
+  switch (action.type) {
+    case "UPDATE_MODEL":
+      return { ...state, model: action.payload as string };
+    case "UPDATE_DATASET":
+      return { ...state, dataset: action.payload as string };
+    case "UPDATE_EPOCHS":
+      return { ...state, epochs: action.payload as number };
+    case "UPDATE_BATCH_SIZE":
+      return { ...state, batch_size: action.payload as number };
+    case "UPDATE_LEARNING_RATE":
+      return { ...state, learning_rate: action.payload as number };
+    case "UPDATE_SEED":
+      return { ...state, seed: action.payload as number };
+    default:
+      return state;
+  }
+};
+
+export default function TrainingConfiguration({ setTrainedModels }: Props) {
+  const dispatch = useDispatch();
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isLoading, setIsLoading] = useState<0 | 1 | 2>(0); // 0: Idle, 1: Training, 2: Inferencing
   const [statusMsg, setStatusMsg] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<Status | undefined>();
   const [customFile, setCustomFile] = useState<File>();
 
-  const [state, dispatch] = useReducer(configurationReducer, initialState);
+  const [configState, configDispatch] = useReducer(
+    configurationReducer,
+    initialState
+  );
 
   const trainIntervalIdRef = useRef<Timer>();
   const inferenceIntervalIdRef = useRef<Timer>();
@@ -59,7 +88,7 @@ export default function TrainingConfiguration({
           return;
         }
         const data = await resultRes.json();
-        setOriginalSvgContents(data.svg_files);
+        dispatch(svgsActions.saveOriginalSvgs(data.svg_files));
         setIsLoading(0);
         setStatusDetail(undefined);
         const trainedModelsRes = await fetch(`${API_URL}/trained_models`);
@@ -73,7 +102,7 @@ export default function TrainingConfiguration({
     } catch (err) {
       console.log(err);
     }
-  }, [setOriginalSvgContents, setTrainedModels]);
+  }, [dispatch, setTrainedModels]);
 
   const checkInferenceStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
@@ -92,13 +121,13 @@ export default function TrainingConfiguration({
           return;
         }
         const resultData = await resultRes.json();
-        setOriginalSvgContents(resultData.svg_files);
+        dispatch(svgsActions.saveOriginalSvgs(resultData.svg_files));
         setIsLoading(0);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [setOriginalSvgContents]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (isLoading === 1 && !trainIntervalIdRef.current) {
@@ -142,10 +171,10 @@ export default function TrainingConfiguration({
       resultFetchedRef.current = false;
       if (mode === 0) {
         if (
-          state.seed === 0 ||
-          state.batch_size === 0 ||
-          state.learning_rate === 0 ||
-          state.learning_rate === 0
+          configState.seed === 0 ||
+          configState.batch_size === 0 ||
+          configState.learning_rate === 0 ||
+          configState.learning_rate === 0
         ) {
           alert("Please enter valid numbers");
           return;
@@ -155,10 +184,10 @@ export default function TrainingConfiguration({
         setStatusMsg("Training . . .");
         try {
           const data = {
-            seed: state.seed,
-            batch_size: state.batch_size,
-            learning_rate: state.learning_rate,
-            epochs: state.epochs,
+            seed: configState.seed,
+            batch_size: configState.batch_size,
+            learning_rate: configState.learning_rate,
+            epochs: configState.epochs,
           };
           const res = await fetch(`${API_URL}/train`, {
             method: "POST",
@@ -194,7 +223,7 @@ export default function TrainingConfiguration({
           }
           setTimeout(() => {
             setStatusMsg("Embedding . . .");
-          }, 10000);
+          }, 250 * 1000);
         } catch (err) {
           console.error(err);
           setIsLoading(0);
@@ -255,40 +284,40 @@ export default function TrainingConfiguration({
             <div>
               <Input
                 labelName="Model"
-                value={state.model}
-                dispatch={dispatch}
+                value={configState.model}
+                dispatch={configDispatch}
                 optionData={MODELS}
                 type="select"
               />
               <Input
                 labelName="Dataset"
-                value={state.dataset}
-                dispatch={dispatch}
+                value={configState.dataset}
+                dispatch={configDispatch}
                 optionData={DATASET}
                 type="select"
               />
               <Input
                 labelName="Epochs"
-                value={state.epochs}
-                dispatch={dispatch}
+                value={configState.epochs}
+                dispatch={configDispatch}
                 type="number"
               />
               <Input
                 labelName="Batch Size"
-                value={state.batch_size}
-                dispatch={dispatch}
+                value={configState.batch_size}
+                dispatch={configDispatch}
                 type="number"
               />
               <Input
                 labelName="Learning Rate"
-                value={state.learning_rate}
-                dispatch={dispatch}
+                value={configState.learning_rate}
+                dispatch={configDispatch}
                 type="number"
               />
               <Input
                 labelName="Seed"
-                value={state.seed}
-                dispatch={dispatch}
+                value={configState.seed}
+                dispatch={configDispatch}
                 type="number"
               />
             </div>

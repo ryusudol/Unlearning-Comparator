@@ -5,6 +5,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
+import { useDispatch } from "react-redux";
 import styles from "./UnlearningConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -13,40 +14,69 @@ import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
-import {
-  unlearningConfigReducer,
-  initialState,
-} from "../reducers/unlearningReducer";
 import { Status, Props, Timer } from "../types/unlearning_config";
 import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
+import { svgsActions } from "../store/svgs";
+import { Action, Configuration } from "../types/unlearning_config";
 
 const API_URL = "http://localhost:8000";
 
-export default function UnlearningConfiguration({
-  trainedModels,
-  setUnlearnedSvgContents,
-}: Props) {
+export const initialState = {
+  method: "Fine-Tuning",
+  forget_class: "0",
+  epochs: 10,
+  batch_size: 64,
+  learning_rate: 0.002,
+};
+
+export const unlearningConfigReducer = (
+  state: Configuration,
+  action: Action
+): Configuration => {
+  switch (action.type) {
+    case "UPDATE_METHOD":
+      return { ...state, method: action.payload as string };
+    case "UPDATE_FORGET_CLASS":
+      return { ...state, forget_class: action.payload as string };
+    case "UPDATE_EPOCHS":
+      return { ...state, epochs: action.payload as number };
+    case "UPDATE_BATCH_SIZE":
+      return { ...state, batch_size: action.payload as number };
+    case "UPDATE_LEARNING_RATE":
+      return { ...state, learning_rate: action.payload as number };
+    default:
+      return state;
+  }
+};
+
+export default function UnlearningConfiguration({ trainedModels }: Props) {
+  const dispatch = useDispatch();
+
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isUnlearning, setIsUnlearning] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [customFile, setCustomFile] = useState<File>();
-  const [status, setStatus] = useState("Training . . .");
+  const [statusMsg, setStatusMsg] = useState("Unlearning . . .");
   const [statusDetail, setStatusDetail] = useState<Status | undefined>();
   const [trainedModel, setTrainedModel] = useState<string | undefined>(
     trainedModels[0]
   );
 
-  const [state, dispatch] = useReducer(unlearningConfigReducer, initialState);
+  const [configState, configDispatch] = useReducer(
+    unlearningConfigReducer,
+    initialState
+  );
 
   const unlearningIntervalIdRef = useRef<Timer>();
   const resultFetchedRef = useRef(false);
 
-  const checkTrainStatus = useCallback(async () => {
+  const checkUnlearningStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
     try {
       const res = await fetch(`${API_URL}/unlearn/status`);
       const data = await res.json();
       setStatusDetail(data);
+      if (data.progress === 100) setStatusMsg("Embedding . . .");
       if (!data.is_unlearning && !resultFetchedRef.current) {
         resultFetchedRef.current = true;
         if (unlearningIntervalIdRef.current) {
@@ -59,30 +89,33 @@ export default function UnlearningConfiguration({
           return;
         }
         const data = await resultRes.json();
-        setUnlearnedSvgContents(data.svg_files);
+        dispatch(svgsActions.saveUnlearnedSvgs(data.svg_files));
         setIsUnlearning(false);
         setStatusDetail(undefined);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [setUnlearnedSvgContents]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (isUnlearning && !unlearningIntervalIdRef.current) {
-      unlearningIntervalIdRef.current = setInterval(checkTrainStatus, 1000);
+      unlearningIntervalIdRef.current = setInterval(
+        checkUnlearningStatus,
+        1000
+      );
     }
     return () => {
       if (unlearningIntervalIdRef.current)
         clearInterval(unlearningIntervalIdRef.current);
     };
-  }, [checkTrainStatus, isUnlearning]);
+  }, [checkUnlearningStatus, isUnlearning]);
 
   const handleSelectUnlearningMethod = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const method = e.currentTarget.value;
-    dispatch({ type: "UPDATE_METHOD", payload: method });
+    configDispatch({ type: "UPDATE_METHOD", payload: method });
   };
 
   const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -117,17 +150,17 @@ export default function UnlearningConfiguration({
     } else {
       if (mode === 0) {
         if (
-          state.epochs === 0 ||
-          state.batch_size === 0 ||
-          state.learning_rate === 0
+          configState.epochs === 0 ||
+          configState.batch_size === 0 ||
+          configState.learning_rate === 0
         ) {
           alert("Please enter valid numbers");
           return;
         }
         setIsUnlearning(true);
-        setStatus("Unlearning . . .");
+        setStatusMsg("Unlearning . . .");
         try {
-          const method = state.method;
+          const method = configState.method;
           const end =
             method === "Fine-Tuning"
               ? "ft"
@@ -139,10 +172,10 @@ export default function UnlearningConfiguration({
               ? "fisher"
               : "retrain";
           const data = {
-            batch_size: state.batch_size,
-            learning_rate: state.learning_rate,
-            epochs: state.epochs,
-            forget_class: state.forget_class,
+            batch_size: configState.batch_size,
+            learning_rate: configState.learning_rate,
+            epochs: configState.epochs,
+            forget_class: configState.forget_class,
           };
           const res = await fetch(`${API_URL}/unlearn/${end}`, {
             method: "POST",
@@ -218,7 +251,7 @@ export default function UnlearningConfiguration({
           </div>
           {isUnlearning ? (
             <div className={styles["status-wrapper"]}>
-              <span className={styles.status}>{status}</span>
+              <span className={styles.status}>{statusMsg}</span>
               {statusDetail && statusDetail.current_epoch >= 1 ? (
                 <div className={styles["status-detail-wrapper"]}>
                   <span className={styles["status-detail"]}>
@@ -251,31 +284,31 @@ export default function UnlearningConfiguration({
                 setStateString={setTrainedModel}
                 optionData={trainedModels}
                 type="select"
-                disabled={state.method === "Retrain"}
+                disabled={configState.method === "Retrain"}
               />
               <Input
                 labelName="Forget Class"
-                value={state.forget_class}
-                dispatch={dispatch}
+                value={configState.forget_class}
+                dispatch={configDispatch}
                 optionData={UNLEARN_CLASSES}
                 type="select"
               />
               <Input
                 labelName="Epochs"
-                value={state.epochs}
-                dispatch={dispatch}
+                value={configState.epochs}
+                dispatch={configDispatch}
                 type="number"
               />
               <Input
                 labelName="Batch Size"
-                value={state.batch_size}
-                dispatch={dispatch}
+                value={configState.batch_size}
+                dispatch={configDispatch}
                 type="number"
               />
               <Input
                 labelName="Learning Rate"
-                value={state.learning_rate}
-                dispatch={dispatch}
+                value={configState.learning_rate}
+                dispatch={configDispatch}
                 type="number"
               />
             </div>
@@ -308,8 +341,8 @@ export default function UnlearningConfiguration({
           <div>
             <Input
               labelName="Forget Class"
-              value={state.forget_class}
-              dispatch={dispatch}
+              value={configState.forget_class}
+              dispatch={configDispatch}
               optionData={UNLEARN_CLASSES}
               type="select"
             />

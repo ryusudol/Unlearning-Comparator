@@ -33,7 +33,6 @@ export interface Action {
 
 export interface Props {
   setTrainedModels: (models: string[]) => void;
-  setOriginalSvgContents: (data: string[]) => void;
 }
 
 export type Timer = ReturnType<typeof setInterval> | undefined;
