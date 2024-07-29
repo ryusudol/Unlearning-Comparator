@@ -1,5 +1,5 @@
 #body-wrapper {
   display: grid;
-  grid-template-columns: 305px 930px 420px;
-  justify-content: center;
+  grid-template-columns: 305px 930px 430px;
+  justify-content: flex-start;
 }
