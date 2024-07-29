@@ -198,7 +198,7 @@ async def run_training(request, status):
     if torch.backends.mps.is_available():
         device = torch.device("mps")
 
-    train_loader, test_loader, train_set = get_data_loaders(request.batch_size)
+    train_loader, test_loader, train_set, test_set = get_data_loaders(request.batch_size)
     model = get_resnet18().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
@@ -223,14 +223,14 @@ async def run_training(request, status):
                                   )
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(train_set))[:UMAP_DATA_SIZE]
+            subset_indices = torch.randperm(len(test_set))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
-                torch.utils.data.Subset(train_set, subset_indices),
-                batch_size=64, shuffle=False)
+                torch.utils.data.Subset(test_set, subset_indices),
+                batch_size=256, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
             activations = await get_layer_activations(model, subset_loader, device)
-            labels = torch.tensor([train_set.targets[i] for i in subset_indices])
+            labels = torch.tensor([test_set.targets[i] for i in subset_indices])
             umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels)
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())

@@ -167,7 +167,7 @@ async def run_unlearning_RL(request, status, model_path):
     if torch.backends.mps.is_available():
         device = torch.device("mps")
 
-    train_loader, test_loader, train_set = get_data_loaders(request.batch_size)
+    train_loader, test_loader, train_set, test_set = get_data_loaders(request.batch_size)
     
     model = get_resnet18().to(device)
     model.load_state_dict(torch.load(model_path, map_location=device))
@@ -204,14 +204,14 @@ async def run_unlearning_RL(request, status, model_path):
                                        num_classes=10)
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(train_set))[:UMAP_DATA_SIZE]
+            subset_indices = torch.randperm(len(test_set))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
-                Subset(train_set, subset_indices),
-                batch_size=64, shuffle=False)
+                Subset(test_set, subset_indices),
+                batch_size=256, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
             activations = await get_layer_activations(model, subset_loader, device)
-            labels = torch.tensor([train_set.targets[i] for i in subset_indices])
+            labels = torch.tensor([test_set.targets[i] for i in subset_indices])
             umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels, forget_class=request.forget_class)
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())

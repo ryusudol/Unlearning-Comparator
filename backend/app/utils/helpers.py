@@ -31,7 +31,7 @@ def get_data_loaders(batch_size):
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=8)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=8)
     
-    return train_loader, test_loader, train_set
+    return train_loader, test_loader, train_set, test_set
 
 async def get_layer_activations(model, data_loader, device, num_samples=UMAP_DATA_SIZE):
     model.eval()
