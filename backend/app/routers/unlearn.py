@@ -1,10 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, File, UploadFile, Form, Depends
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Form
 from pydantic import BaseModel, Field
 from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
-import tempfile, json
+import json
+import os
 
 router = APIRouter()
 status = UnlearningStatus()
@@ -12,14 +13,29 @@ status = UnlearningStatus()
 class UnlearningRequest(BaseModel):
     seed: int = UNLEARN_SEED
     batch_size: int = Field(default=128, description="Batch size for unlearning")
-    learning_rate: float = 0.01
+    learning_rate: float = Field(default=0.01, description="Learning rate for unlearning")
     epochs: int = Field(default=5, ge=1, description="Number of unlearning epochs")
-    forget_class: int = Field(..., ge=0, lt=10, description="Class to forget (0-9)")
+    forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
+    weights_filename: str = Field(default=".", description="Filename of the weights in trained_models folder")
 
-async def parse_unlearning_request(
-    request: str = Form(...),
-) -> UnlearningRequest:
-    return UnlearningRequest(**json.loads(request))
+@router.post("/unlearn/rl")
+async def start_unlearning_rl(
+    background_tasks: BackgroundTasks,
+    request: UnlearningRequest
+):
+    if status.is_unlearning:
+        raise HTTPException(status_code=400, detail="Unlearning is already in progress")
+    status.reset()  # Reset status before starting new unlearning
+
+    # Check if the weights file exists
+    weights_path = os.path.join('trained_models', request.weights_filename)
+    if not os.path.exists(weights_path):
+        raise HTTPException(status_code=404, detail=f"Weights file '{request.weights_filename}' not found in trained_models folder")
+
+    # Pass the weights file path to the run_unlearning_RL function
+    background_tasks.add_task(run_unlearning_RL, request, status, weights_path)
+    
+    return {"message": "RL Unlearning started"}
 
 @router.post("/unlearn/retrain")
 async def start_unlearning_retrain(request: UnlearningRequest, background_tasks: BackgroundTasks):
@@ -28,26 +44,6 @@ async def start_unlearning_retrain(request: UnlearningRequest, background_tasks:
     status.reset()  # Reset status before starting new unlearning
     background_tasks.add_task(run_unlearning, request, status)
     return {"message": "Unlearning (retrain) started"}
-
-@router.post("/unlearn/rl")
-async def start_unlearning_rl(
-    background_tasks: BackgroundTasks,
-    weights_file: UploadFile = File(...),
-    request: UnlearningRequest = Depends(parse_unlearning_request)
-):
-    if status.is_unlearning:
-        raise HTTPException(status_code=400, detail="Unlearning is already in progress")
-    status.reset()  # Reset status before starting new unlearning
-
-    # Create a temporary file to store the uploaded weights
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pth") as temp_file:
-        temp_file.write(await weights_file.read())
-        temp_file_path = temp_file.name
-
-    # Pass the temporary file path to the run_unlearning_RL function
-    background_tasks.add_task(run_unlearning_RL, request, status, temp_file_path)
-    
-    return {"message": "RL Unlearning started"}
 
 @router.get("/unlearn/status")
 async def get_unlearning_status():

@@ -29,7 +29,7 @@ async def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir
         umap_embeddings[i+1] = embedding
 
         plt.figure(figsize=(12, 11))
-        scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='tab10', s=20, alpha=0.7)
+        scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='tab10', s=15, alpha=0.7)
         
         legend_elements = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i], 
                            markerfacecolor=colors[i], markersize=10) for i in range(10)]
