@@ -239,7 +239,7 @@ async def run_unlearning_FT(request, status, weights_path):
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=DECREASING_LR, gamma=0.2)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[5], gamma=0.5)
 
     status.is_unlearning = True
     status.progress = 0
