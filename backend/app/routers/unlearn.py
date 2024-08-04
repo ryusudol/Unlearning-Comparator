@@ -2,9 +2,9 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Form
 from pydantic import BaseModel, Field
 from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
+from app.services.unlearn_GA import run_unlearning_GA  # New import
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
-import json
 import os
 
 router = APIRouter()
@@ -36,6 +36,25 @@ async def start_unlearning_rl(
     background_tasks.add_task(run_unlearning_RL, request, status, weights_path)
     
     return {"message": "RL Unlearning started"}
+
+@router.post("/unlearn/ga")  # New endpoint for GA unlearning
+async def start_unlearning_ga(
+    background_tasks: BackgroundTasks,
+    request: UnlearningRequest
+):
+    if status.is_unlearning:
+        raise HTTPException(status_code=400, detail="Unlearning is already in progress")
+    status.reset()  # Reset status before starting new unlearning
+
+    # Check if the weights file exists
+    weights_path = os.path.join('trained_models', request.weights_filename)
+    if not os.path.exists(weights_path):
+        raise HTTPException(status_code=404, detail=f"Weights file '{request.weights_filename}' not found in trained_models folder")
+
+    # Pass the weights file path to the run_unlearning_GA function
+    background_tasks.add_task(run_unlearning_GA, request, status, weights_path)
+    
+    return {"message": "GA Unlearning started"}
 
 @router.post("/unlearn/retrain")
 async def start_unlearning_retrain(request: UnlearningRequest, background_tasks: BackgroundTasks):
