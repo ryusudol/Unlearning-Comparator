@@ -1,17 +1,17 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.train import run_training
 from app.models.neural_network import TrainingStatus
-
+from app.config.settings import BATCH_SIZE, LEARNING_RATE, EPOCHS
 
 router = APIRouter()
 status = TrainingStatus()
 
 class TrainingRequest(BaseModel):
-    seed: int
-    batch_size: int
-    learning_rate: float
-    epochs: int
+    seed: int = Field(default=1234, description="Random seed for reproducibility")
+    batch_size: int = Field(default=BATCH_SIZE, description="Batch size for training")
+    learning_rate: float = Field(default=LEARNING_RATE, description="Learning rate for optimizer")
+    epochs: int = Field(default=EPOCHS, description="Number of training epochs")
 
 @router.post("/train")
 async def start_training(request: TrainingRequest, background_tasks: BackgroundTasks):
@@ -32,6 +32,10 @@ async def get_status():
         "best_loss": status.best_loss,
         "current_accuracy": status.current_accuracy,
         "best_accuracy": status.best_accuracy,
+        "test_loss": status.test_loss,
+        "test_accuracy": status.test_accuracy,
+        "train_class_accuracies": status.train_class_accuracies,
+        "test_class_accuracies": status.test_class_accuracies,
         "estimated_time_remaining": status.estimated_time_remaining
     }
 

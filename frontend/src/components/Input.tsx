@@ -1,12 +1,14 @@
 import React from "react";
 
 import styles from "./Input.module.css";
+import { Action } from "../types/training_config";
 
 type PropsType = {
   labelName: string;
   value: string | number | undefined;
   setStateString?: (data: string) => void;
   setStateNumber?: (data: number) => void;
+  dispatch?: (action: Action) => void;
   optionData?: string[];
   type: "select" | "number";
   disabled?: boolean;
@@ -17,18 +19,30 @@ export default function Input({
   value,
   setStateString,
   setStateNumber,
+  dispatch,
   optionData,
   type,
   disabled,
 }: PropsType) {
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = e.currentTarget.value;
-    if (setStateString) setStateString(selectedValue);
-  };
-
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const enteredValue = e.currentTarget.value;
-    if (setStateNumber) setStateNumber(+enteredValue);
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLSelectElement>
+      | React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { id, value } = e.currentTarget;
+    if (setStateString) setStateString(value);
+    else if (setStateNumber) setStateNumber(+value);
+    else if (dispatch)
+      dispatch({
+        type: `UPDATE_${id.toUpperCase().replace(" ", "_")}`,
+        payload:
+          id === "Epochs" ||
+          id === "Batch Size" ||
+          id === "Learning Rate" ||
+          id === "Seed"
+            ? +value
+            : value,
+      });
   };
 
   return (
@@ -38,7 +52,7 @@ export default function Input({
       </label>
       {type === "select" ? (
         <select
-          onChange={handleSelectChange}
+          onChange={handleChange}
           className={styles.input}
           id={labelName}
           value={value}
@@ -52,7 +66,8 @@ export default function Input({
         </select>
       ) : (
         <input
-          onChange={handleNumberChange}
+          id={labelName}
+          onChange={handleChange}
           className={styles.input}
           type="number"
           value={value === 0 ? undefined : value}

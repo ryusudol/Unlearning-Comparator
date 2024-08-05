@@ -23,9 +23,9 @@ e.g.
 POST /train
 {
   "seed": 42,
-  "batch_size": 64,
-  "learning_rate": 0.001,
-  "epochs": 10
+  "batch_size": 128,
+  "learning_rate": 0.01,
+  "epochs": 30
 }
 
 GET /status

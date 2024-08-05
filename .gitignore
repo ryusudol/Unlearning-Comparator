@@ -2,3 +2,4 @@
 backend/data/
 backend/umap_visualizations/
 backend/trained_models/
+backend/unlearned_models/

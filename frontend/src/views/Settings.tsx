@@ -7,11 +7,7 @@ import DefenseConfiguration from "../components/DefenseConfiguration";
 
 const API_URL = "http://localhost:8000";
 
-type PropsType = {
-  setSvgContents: (data: string[]) => void;
-};
-
-export default function Settings({ setSvgContents }: PropsType) {
+export default function Settings() {
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
 
   useEffect(() => {
@@ -34,10 +30,7 @@ export default function Settings({ setSvgContents }: PropsType) {
   return (
     <section>
       <Title title="Settings" />
-      <TrainingConfiguration
-        setTrainedModels={setTrainedModels}
-        setSvgContents={setSvgContents}
-      />
+      <TrainingConfiguration setTrainedModels={setTrainedModels} />
       <UnlearningConfiguration trainedModels={trainedModels} />
       <DefenseConfiguration />
     </section>

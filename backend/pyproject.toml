@@ -25,13 +25,13 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "fastapi==0.109.0",  # 최신 버전: 0.109.0 (2024년 7월 기준)
-  "uvicorn==0.27.0",   # 최신 버전: 0.27.0
-  "torch==2.1.2",      # 최신 안정 버전: 2.1.2 (CUDA 12.1)
-  "torchvision==0.16.2", # 최신 안정 버전: 0.16.2 (torch 2.1.2와 호환)
-  "numpy>=1.26.3",     # 최신 버전: 1.26.3
-  "umap-learn==0.5.5", # 최신 버전: 0.5.5
-  "scikit-learn==1.4.0", # 최신 버전: 1.4.0
+  "fastapi==0.109.0",  # 
+  "uvicorn==0.27.0",   # 
+  "torch==2.1.2",      # (CUDA 12.1)
+  "torchvision==0.16.2", # (torch 2.1.2)
+  "numpy>=1.26.3",     # 
+  "umap-learn==0.5.5", #
+  "scikit-learn==1.4.0", #
   "packaging>=21.0",
   "matplotlib",
   "python-multipart",
