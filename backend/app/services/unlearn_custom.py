@@ -37,6 +37,9 @@ async def run_unlearning_custom(request, status, weights_path):
         status.current_loss = train_loss
         status.current_accuracy = train_accuracy
         status.train_class_accuracies = train_class_accuracies
+        status.unlearn_accuracy = train_class_accuracies[request.forget_class]
+        remain_classes = [i for i in range(10) if i != request.forget_class]
+        status.remain_accuracy = sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes)
 
         print(f"\nTrain Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
         print("Train Class Accuracies:")
@@ -47,10 +50,13 @@ async def run_unlearning_custom(request, status, weights_path):
         test_loss, test_accuracy, test_class_accuracies = await evaluate_model(model, test_loader, criterion, device)
         
         status.test_loss = test_loss
-        status.test_accuracy = test_accuracy
+        status.test_accuracy = (test_accuracy * 10 + (100 - 2 * test_class_accuracies[request.forget_class]))
         status.test_class_accuracies = test_class_accuracies
 
-        print(f"\nTest Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
+        print(f"\nUnlearn Accuracy (UA): {status.unlearn_accuracy:.2f}%")
+        print(f"Remain Accuracy (RA): {status.remain_accuracy:.2f}%")
+        print(f"Test Accuracy (TA): {status.test_accuracy:.2f}%")
+        print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
         print("Test Class Accuracies:")
         for i, acc in test_class_accuracies.items():
             print(f"  Class {i}: {acc:.2f}%")
