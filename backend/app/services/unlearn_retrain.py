@@ -180,6 +180,7 @@ async def run_unlearning(request, status):
                 dataset = test_set
 
             subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+            subset = torch.utils.data.Subset(dataset, subset_indices)
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(dataset, subset_indices),
                 batch_size=256, shuffle=False)
