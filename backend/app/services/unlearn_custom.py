@@ -87,9 +87,15 @@ async def run_unlearning_custom(request, status, weights_path):
 
     except Exception as e:
         print(f"An error occurred during custom unlearning: {str(e)}")
+    
+    return status  # Return the status object
+
+async def main(request, status, weights_path):
+    try:
+        updated_status = await run_unlearning_custom(request, status, weights_path)
+        return updated_status
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
-
-    # Clean up the uploaded weights file
-    os.remove(weights_path)
+        # Clean up the uploaded weights file
+        os.remove(weights_path)

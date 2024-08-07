@@ -4,7 +4,8 @@ from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
 from app.services.unlearn_GA import run_unlearning_GA 
 from app.services.unlearn_FT import run_unlearning_FT
-from app.services.unlearn_custom import run_unlearning_custom
+from app.services.unlearn_custom import run_unlearning_custom, main
+
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
 import os
@@ -118,7 +119,10 @@ async def start_unlearning_custom(
         buffer.write(content)
 
     request = CustomUnlearningRequest(forget_class=forget_class)
-    background_tasks.add_task(run_unlearning_custom, request, status, weights_path)
+    
+    # Use the new main function in the background task
+    background_tasks.add_task(main, request, status, weights_path)
+    
     return {"message": "Custom Unlearning started"}
 
 @router.get("/unlearn/result")
