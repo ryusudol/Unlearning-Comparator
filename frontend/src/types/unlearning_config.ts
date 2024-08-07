@@ -25,6 +25,8 @@ export interface Action {
 }
 
 export interface Props {
+  isRunning: number;
+  setIsRunning: (val: number) => void;
   trainedModels: string[];
 }
 
