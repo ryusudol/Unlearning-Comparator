@@ -56,6 +56,7 @@ export const Renderer = ({
 
     return (
       <g
+        key={i}
         onMouseEnter={() => {
           setHoveredCell({
             xLabel: d.x,
@@ -69,7 +70,6 @@ export const Renderer = ({
         cursor="pointer"
       >
         <rect
-          key={i}
           r={4}
           x={xScale(d.x)}
           y={yScale(d.y)}
@@ -97,9 +97,7 @@ export const Renderer = ({
   const xLabels = allXGroups.map((name, i) => {
     const x = xScale(name);
 
-    if (!x) {
-      return null;
-    }
+    if (!x) return null;
 
     return (
       <text
@@ -118,9 +116,7 @@ export const Renderer = ({
   const yLabels = allYGroups.map((name, i) => {
     const y = yScale(name);
 
-    if (!y) {
-      return null;
-    }
+    if (!y) return null;
 
     return (
       <text
