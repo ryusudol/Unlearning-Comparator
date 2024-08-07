@@ -85,6 +85,7 @@ export default function UnlearningConfiguration({
           unlearningIntervalIdRef.current = undefined;
         }
         const resultRes = await fetch(`${API_URL}/unlearn/result`);
+        console.log(resultRes);
         if (!resultRes.ok) {
           alert("Error occurred while fetching the unlearning result.");
           return;
@@ -97,13 +98,13 @@ export default function UnlearningConfiguration({
     } catch (err) {
       console.log(err);
     }
-  }, [dispatch]);
+  }, [dispatch, setIsRunning]);
 
   useEffect(() => {
     if (isRunning && !unlearningIntervalIdRef.current) {
       unlearningIntervalIdRef.current = setInterval(
         checkUnlearningStatus,
-        1000
+        5000
       );
     }
     return () => {
@@ -132,7 +133,7 @@ export default function UnlearningConfiguration({
     } else if (method === Constants.FISHER) {
       // TODO: Fisher default 값 추가
     } else {
-      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 50 });
+      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 30 });
       configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.01 });
       configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
     }
@@ -212,13 +213,14 @@ export default function UnlearningConfiguration({
         }
       } else {
         if (!customFile) {
-          alert("Please upload a custom unlearning file.");
+          alert("Please upload a weight file for unlearning.");
           return;
         }
         setIsRunning(2);
         try {
           const formData = new FormData();
           formData.append("weights_file", customFile);
+          formData.append("forget_class", configState.forget_class.toString());
           const res = await fetch(`${API_URL}/unlearn/custom`, {
             method: "POST",
             body: formData,

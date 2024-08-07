@@ -15,7 +15,7 @@ export const Constants = {
     "Fine-Tuning",
     "Random-Label",
     "Gradient-Ascent",
-    "Fisher",
+    // "Fisher",
     "Retrain",
   ],
   UNLEARN_CLASSES: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
