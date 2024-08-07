@@ -1,9 +1,10 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
 from app.services.unlearn_GA import run_unlearning_GA 
 from app.services.unlearn_FT import run_unlearning_FT
+from app.services.unlearn_custom import run_unlearning_custom
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
 import os
@@ -18,6 +19,9 @@ class UnlearningRequest(BaseModel):
     epochs: int = Field(default=5, ge=1, description="Number of unlearning epochs")
     forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
     weights_filename: str = Field(default=".", description="Filename of the weights in trained_models folder")
+
+class CustomUnlearningRequest(BaseModel):
+    forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
 
 @router.post("/unlearn/rl")
 async def start_unlearning_rl(
@@ -110,3 +114,26 @@ async def cancel_unlearning():
         raise HTTPException(status_code=400, detail="No unlearning in progress")
     status.cancel_requested = True
     return {"message": "Cancellation requested. Unlearning will stop after the current epoch."}
+
+@router.post("/unlearn/custom")
+async def start_unlearning_custom(
+    background_tasks: BackgroundTasks,
+    forget_class: int = Form(..., ge=0, lt=10),
+    weights_file: UploadFile = File(...)
+):
+    if status.is_unlearning:
+        raise HTTPException(status_code=400, detail="Unlearning is already in progress")
+    status.reset()
+
+    # Save the uploaded weights file
+    weights_filename = f"custom_weights_{weights_file.filename}"
+    weights_path = os.path.join('uploaded_models', weights_filename)
+    os.makedirs('uploaded_models', exist_ok=True)
+    
+    with open(weights_path, "wb") as buffer:
+        content = await weights_file.read()
+        buffer.write(content)
+
+    request = CustomUnlearningRequest(forget_class=forget_class)
+    background_tasks.add_task(run_unlearning_custom, request, status, weights_path)
+    return {"message": "Custom Unlearning started"}

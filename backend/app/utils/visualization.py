@@ -52,7 +52,7 @@ async def compute_umap_embeddings(activations,
         
         if forget_labels is not None:
             legend_elements.append(plt.Line2D([0], [0], marker='x', color='k', label='Forget Data', 
-                       markerfacecolor='k', markersize=10, markeredgewidth=2,
+                       markerfacecolor='k', markersize=10, markeredgewidth=3,
                        linestyle='None', markeredgecolor='k'))
         
         plt.legend(handles=legend_elements, title="Predicted Classes", loc='upper right', 
