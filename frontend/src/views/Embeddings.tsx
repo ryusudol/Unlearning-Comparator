@@ -70,7 +70,7 @@ export default function Settings() {
       <div className={styles.section}>
         <ContentBox height={495}>
           <div className={styles.wrapper}>
-            <SubTitle subtitle="Original Model" />
+            <SubTitle subtitle="Retrained Model" />
             {originalSvgs && (
               <div className={styles["content-wrapper"]}>
                 <div className={styles["svg-wrapper"]}>

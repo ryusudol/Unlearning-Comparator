@@ -23,7 +23,7 @@ export default function Archives() {
   return (
     <section>
       <Title title="Archives" />
-      <ContentBox height={260}>
+      <ContentBox height={213}>
         <div className={styles["heatmap-wrapper"]}>
           <Heatmap width={480} height={120} data={data} />
         </div>

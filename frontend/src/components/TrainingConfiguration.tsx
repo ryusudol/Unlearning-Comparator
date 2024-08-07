@@ -22,7 +22,7 @@ const API_URL = "http://localhost:8000";
 export const initialState = {
   model: "ResNet-18",
   dataset: "CIFAR-10",
-  epochs: 50,
+  epochs: 30,
   learning_rate: 0.01,
   batch_size: 128,
   seed: 1,
@@ -103,7 +103,7 @@ export default function TrainingConfiguration({
     } catch (err) {
       console.log(err);
     }
-  }, [dispatch, setTrainedModels]);
+  }, [dispatch, setIsRunning, setTrainedModels]);
 
   const checkInferenceStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
@@ -128,7 +128,7 @@ export default function TrainingConfiguration({
     } catch (err) {
       console.log(err);
     }
-  }, [dispatch]);
+  }, [dispatch, setIsRunning]);
 
   useEffect(() => {
     if (isRunning === 1 && !trainIntervalIdRef.current) {
