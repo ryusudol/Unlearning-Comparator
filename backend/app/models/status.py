@@ -48,12 +48,9 @@ class UnlearningStatus:
         self.current_epoch = 0
         self.total_epochs = 0
         self.current_loss = 0
-        self.best_loss = 9999.99
         self.current_accuracy = 0
-        self.best_accuracy = 0
         self.test_loss = 0
         self.test_accuracy = 0
-        self.best_test_accuracy = 0
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None

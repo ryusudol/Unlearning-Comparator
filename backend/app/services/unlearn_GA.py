@@ -87,12 +87,6 @@ async def unlearn_GA_model(model,
         status.train_class_accuracies = train_class_accuracies
         status.test_class_accuracies = test_class_accuracies
         
-        if train_loss < status.best_loss:
-            status.best_loss = train_loss
-        if train_accuracy > status.best_accuracy:
-            status.best_accuracy = train_accuracy
-        if test_accuracy > status.best_test_accuracy:
-            status.best_test_accuracy = test_accuracy
         
         elapsed_time = time.time() - status.start_time
         estimated_total_time = elapsed_time / (epoch + 1) * epochs
@@ -103,8 +97,6 @@ async def unlearn_GA_model(model,
         print(f"\nEpoch [{epoch+1}/{epochs}]")
         print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
         print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
-        print(f"Best Train Acc: {status.best_accuracy:.2f}%")
-        print(f"Best Test Acc: {status.best_test_accuracy:.2f}%")
         print(f"Current LR: {current_lr}")
         print("Train Class Accuracies:")
         for i, acc in train_class_accuracies.items():
@@ -187,7 +179,16 @@ async def run_unlearning_GA(request, status, weights_path):
             
             print("\nComputing and saving UMAP embeddings...")
             activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)
-            umap_embeddings, svg_files = await compute_umap_embeddings(activations, predicted_labels, forget_class=request.forget_class)
+            
+            # Create forget_labels
+            forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
+            
+            umap_embeddings, svg_files = await compute_umap_embeddings(
+                activations, 
+                predicted_labels, 
+                forget_class=request.forget_class,
+                forget_labels=forget_labels
+            )
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())
             print("GA Unlearning and visualization completed!")

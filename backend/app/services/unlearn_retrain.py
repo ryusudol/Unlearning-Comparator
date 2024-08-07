@@ -86,13 +86,9 @@ async def unlearn_retrain_model(model,
         status.train_class_accuracies = train_class_accuracies
         status.test_class_accuracies = test_class_accuracies
         
-        if train_loss < status.best_loss:
-            status.best_loss = train_loss
-        if train_accuracy > status.best_accuracy:
-            status.best_accuracy = train_accuracy
-        if test_accuracy > status.best_test_accuracy:
-            status.best_test_accuracy = test_accuracy
-        
+        if test_accuracy > best_test_acc:
+            best_test_acc = test_accuracy
+
         elapsed_time = time.time() - status.start_time
         estimated_total_time = elapsed_time / (epoch + 1) * epochs
         status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
@@ -102,8 +98,7 @@ async def unlearn_retrain_model(model,
         print(f"\nEpoch [{epoch+1}/{epochs}]")
         print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
         print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
-        print(f"Best Train Acc: {status.best_accuracy:.2f}%")
-        print(f"Best Test Acc: {status.best_test_accuracy:.2f}%")
+        print(f"Best Test Acc: {best_test_acc:.2f}%")
         print(f"Current LR: {current_lr:.5f}")
         print(f"Best model so far was at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
         print("Train Class Accuracies:")
@@ -183,15 +178,25 @@ async def run_unlearning(request, status):
                 dataset = train_set
             else:
                 dataset = test_set
+
             subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(dataset, subset_indices),
                 batch_size=256, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
-            activations, _ = await get_layer_activations_and_predictions(model, subset_loader, device)
-            labels = torch.tensor([dataset.targets[i] for i in subset_indices])
-            umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels, forget_class=request.forget_class)
+            activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)
+            # labels = torch.tensor([dataset.targets[i] for i in subset_indices])
+            
+            # Create forget_labels
+            forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
+            
+            umap_embeddings, svg_files = await compute_umap_embeddings(
+                activations, 
+                predicted_labels, 
+                forget_class=request.forget_class,
+                forget_labels=forget_labels
+            )
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())
             print("Unlearning and visualization completed!")

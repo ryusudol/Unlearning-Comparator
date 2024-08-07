@@ -1,5 +1,6 @@
 import sys
 import torch
+import torch.nn as nn
 import os
 import tempfile
 import asyncio
@@ -7,7 +8,7 @@ import time
 from app.models.neural_network import get_resnet18, InferenceStatus
 from app.utils.helpers import get_data_loaders
 from app.utils.visualization import compute_umap_embeddings
-from app.utils.evaluation import get_layer_activations_and_predictions, calculate_accuracy
+from app.utils.evaluation import get_layer_activations_and_predictions, evaluate_model
 from app.config.settings import UMAP_DATA_SIZE, UMAP_DATASET
 
 async def run_inference(file_content: bytes, status: InferenceStatus):
@@ -42,7 +43,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Calculating train set accuracy...")
         status.current_step = "Calculating train accuracy"
         status.progress = 60
-        train_accuracy, train_class_accuracies = await calculate_accuracy(model, train_loader, device)
+        _, train_accuracy, train_class_accuracies = await evaluate_model(model=model, data_loader=train_loader, criterion=nn.CrossEntropyLoss(), device=device)
         status.train_accuracy = train_accuracy
         status.train_class_accuracies = train_class_accuracies
         await asyncio.sleep(0)  # Allow other tasks to run
@@ -51,7 +52,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Calculating test set accuracy...")
         status.current_step = "Calculating test accuracy"
         status.progress = 80
-        test_accuracy, test_class_accuracies = await calculate_accuracy(model, test_loader, device)
+        _, test_accuracy, test_class_accuracies = await evaluate_model(model=model, data_loader=test_loader, criterion=nn.CrossEntropyLoss(), device=device)
         status.test_accuracy = test_accuracy
         status.test_class_accuracies = test_class_accuracies
         await asyncio.sleep(0)  # Allow other tasks to run

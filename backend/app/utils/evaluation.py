@@ -1,5 +1,6 @@
 import asyncio
 import torch
+
 import numpy as np
 from app.config.settings import UMAP_DATA_SIZE
 
