@@ -9,49 +9,10 @@ import matplotlib.pyplot as plt
 import copy
 
 from app.models.neural_network import get_resnet18
-from app.utils.helpers import set_seed, get_data_loaders, get_layer_activations
-from app.services.visualization import compute_umap_embeddings
-from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, WEIGHT_DECAY, DECREASING_LR
-
-def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate, is_best=False):
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    
-    prefix = "best_" if is_best else ""
-    model_filename = f"{prefix}train_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
-    model_path = os.path.join(save_dir, model_filename)
-    
-    torch.save(model.state_dict(), model_path)
-    print(f"{'Best ' if is_best else ''}Model saved to {model_path}")
-
-async def evaluate_model(model, test_loader, criterion, device):
-    model.eval()
-    test_loss = 0
-    correct = 0
-    total = 0
-    class_correct = [0] * 10
-    class_total = [0] * 10
-    
-    with torch.no_grad():
-        for data in test_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            test_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total += labels.size(0)
-            correct += predicted.eq(labels).sum().item()
-            
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
-    
-    accuracy = 100. * correct / total
-    class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
-    
-    return test_loss / len(test_loader), accuracy, class_accuracies
+from app.utils.helpers import set_seed, get_data_loaders, save_model
+from app.utils.visualization import compute_umap_embeddings
+from app.utils.evaluation import get_layer_activations_and_predictions, evaluate_model
+from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, UMAP_DATASET, WEIGHT_DECAY, DECREASING_LR
 
 async def train_model(model,
                       train_loader,
@@ -223,14 +184,18 @@ async def run_training(request, status):
                                   )
         
         if not status.cancel_requested:
-            subset_indices = torch.randperm(len(test_set))[:UMAP_DATA_SIZE]
+            if UMAP_DATASET == 'train':
+                dataset = train_set
+            else:
+                dataset = test_set
+            subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
-                torch.utils.data.Subset(test_set, subset_indices),
+                torch.utils.data.Subset(dataset, subset_indices),
                 batch_size=256, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
-            activations = await get_layer_activations(model, subset_loader, device)
-            labels = torch.tensor([test_set.targets[i] for i in subset_indices])
+            activations, _ = await get_layer_activations_and_predictions(model, subset_loader, device)
+            labels = torch.tensor([dataset.targets[i] for i in subset_indices])
             umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels)
             status.umap_embeddings = umap_embeddings
             status.svg_files = list(svg_files.values())

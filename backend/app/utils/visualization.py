@@ -46,9 +46,8 @@ async def compute_umap_embeddings(activations, labels, forget_class=-1, save_dir
         filename = f'{timestamp}_umap_layer_{i+1}.svg'
         filepath = os.path.join(save_dir, filename)
         
-        if i == 3:
-            plt.savefig(filepath, format='svg', dpi=300, bbox_inches='tight', pad_inches=0.1)
-        plt.close()
+        
+        plt.savefig(filepath, format='svg', dpi=300, bbox_inches='tight', pad_inches=0.1)
         
         await asyncio.sleep(0)
         

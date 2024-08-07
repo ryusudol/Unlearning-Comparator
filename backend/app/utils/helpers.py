@@ -1,10 +1,9 @@
-import asyncio
+import os
 import torch
 import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.models.neural_network import get_resnet18
-from app.config.settings import UMAP_DATA_SIZE
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -12,6 +11,13 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
+
+def load_model(model_path, num_classes=10, device='cuda'):
+    model = get_resnet18(num_classes=num_classes)
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.to(device)
+    model.eval()
+    return model
 
 def get_data_loaders(batch_size):
     train_transform = transforms.Compose([
@@ -33,38 +39,13 @@ def get_data_loaders(batch_size):
     
     return train_loader, test_loader, train_set, test_set
 
-async def get_layer_activations(model, data_loader, device, num_samples=UMAP_DATA_SIZE):
-    model.eval()
-    activations = [[], [], [], []]
-    with torch.no_grad():
-        for inputs, _ in data_loader:
-            await asyncio.sleep(0)
-            inputs = inputs.to(device)
-            x = model.conv1(inputs)
-            x = model.bn1(x)
-            x = model.relu(x)
-            x = model.maxpool(x)
-
-            x = model.layer1(x)
-            activations[0].append(x.cpu().numpy())
-
-            x = model.layer2(x)
-            activations[1].append(x.cpu().numpy())
-
-            x = model.layer3(x)
-            activations[2].append(x.cpu().numpy())
-
-            x = model.layer4(x)
-            activations[3].append(x.cpu().numpy())
-
-            if sum(len(a) for a in activations[0]) >= num_samples:
-                break
-
-    return [np.concatenate(act)[:num_samples] for act in activations]
-
-def load_model(model_path, num_classes=10, device='cuda'):
-    model = get_resnet18(num_classes=num_classes)
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.to(device)
-    model.eval()
-    return model
+def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate, is_best=False):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    prefix = "best_" if is_best else ""
+    model_filename = f"{prefix}train_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
+    model_path = os.path.join(save_dir, model_filename)
+    
+    torch.save(model.state_dict(), model_path)
+    print(f"{'Best ' if is_best else ''}Model saved to {model_path}")
