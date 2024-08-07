@@ -19,8 +19,8 @@ export const Renderer = ({
     return Array.from(xSet);
   }, [data]);
   const allYGroups = useMemo(() => {
-    const xSet = new Set(data.map((d) => d.y));
-    return Array.from(xSet);
+    const ySet = new Set(data.map((d) => d.y));
+    return Array.from(ySet);
   }, [data]);
 
   const [min = 0, max = 0] = d3.extent(data.map((d) => d.value));
@@ -36,26 +36,24 @@ export const Renderer = ({
   const yScale = useMemo(() => {
     return d3
       .scaleBand()
-      .range([boundsHeight, 0])
+      .range([0, boundsHeight])
       .domain(allYGroups)
       .padding(0.01);
   }, [allYGroups, boundsHeight]);
 
-  var colorScale = d3
-    .scaleSequential()
-    .interpolator(d3.interpolateInferno)
-    .domain([min, max]);
+  const luminanceScale = d3.scaleLinear().domain([min, max]).range([0.2, 0.9]);
 
   const allShapes = data.map((d, i) => {
     const x = xScale(d.x);
     const y = yScale(d.y);
 
-    if (d.value === null || !x || !y) {
-      return null;
-    }
+    if (d.value === null || !x || !y) return null;
+
+    const luminance = luminanceScale(d.value);
+    const cellColor = d3.interpolateGreys(luminance);
 
     return (
-      <g
+      <rect
         key={i}
         onMouseEnter={() => {
           setHoveredCell({
@@ -68,29 +66,16 @@ export const Renderer = ({
         }}
         onMouseLeave={() => setHoveredCell(null)}
         cursor="pointer"
-      >
-        <rect
-          r={4}
-          x={xScale(d.x)}
-          y={yScale(d.y)}
-          width={xScale.bandwidth()}
-          height={yScale.bandwidth()}
-          opacity={1}
-          fill={colorScale(d.value)}
-          rx={3}
-          stroke="white"
-        />
-        <text
-          x={x + xScale.bandwidth() / 2}
-          y={y + yScale.bandwidth() / 2}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize="14"
-          fill="lightgray"
-        >
-          {d.value.toFixed(1)}
-        </text>
-      </g>
+        r={4}
+        x={xScale(d.x)}
+        y={yScale(d.y)}
+        width={xScale.bandwidth()}
+        height={yScale.bandwidth()}
+        opacity={1}
+        fill={cellColor}
+        rx={3}
+        stroke="white"
+      />
     );
   });
 
@@ -103,7 +88,7 @@ export const Renderer = ({
       <text
         key={i}
         x={x + xScale.bandwidth() / 2}
-        y={boundsHeight + 10}
+        y={-8}
         textAnchor="middle"
         dominantBaseline="middle"
         fontSize={10}
@@ -113,7 +98,7 @@ export const Renderer = ({
     );
   });
 
-  const yLabels = allYGroups.map((name, i) => {
+  const yLabels = allYGroups.reverse().map((name, i) => {
     const y = yScale(name);
 
     if (!y) return null;
