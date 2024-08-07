@@ -47,31 +47,6 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
     
     return activations, predictions
 
-async def calculate_accuracy(model, data_loader, device):
-    correct = 0
-    total = 0
-    class_correct = [0] * 10
-    class_total = [0] * 10
-
-    with torch.no_grad():
-        for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
-
-    accuracy = 100 * correct / total
-    class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
-
-    return accuracy, class_accuracies
-
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
     total_loss = 0

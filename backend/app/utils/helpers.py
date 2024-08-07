@@ -44,7 +44,7 @@ def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate,
         os.makedirs(save_dir)
     
     prefix = "best_" if is_best else ""
-    model_filename = f"{prefix}train_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
+    model_filename = f"{prefix}{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
     model_path = os.path.join(save_dir, model_filename)
     
     torch.save(model.state_dict(), model_path)

@@ -50,15 +50,18 @@ class UnlearningStatus:
         self.current_loss = 0
         self.current_accuracy = 0
         self.test_loss = 0
-        self.test_accuracy = 0
-        self.train_class_accuracies: Dict[int, float] = {}
-        self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None
         self.estimated_time_remaining = None
         self.umap_embeddings = None
-        self.svg_files: Optional[List[str]] = None
         self.cancel_requested = False
         self.forget_class = None
+
+        self.unlearn_accuracy = 0 # UA 
+        self.remain_accuracy = 0 # RA
+        self.test_accuracy = 0 # TA
+        self.train_class_accuracies: Dict[int, float] = {} # Train Metrics
+        self.test_class_accuracies: Dict[int, float] = {} # Test Metrics
+        self.svg_files: Optional[List[str]] = None
 
     def reset(self):
         self.__init__()

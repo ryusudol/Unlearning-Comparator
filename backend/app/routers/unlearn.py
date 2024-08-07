@@ -100,21 +100,6 @@ async def get_unlearning_status():
         "forget_class": status.forget_class
     }
 
-@router.get("/unlearn/result")
-async def get_unlearning_result():
-    if status.is_unlearning:
-        raise HTTPException(status_code=400, detail="Unlearning is still in progress")
-    if status.svg_files is None:
-        raise HTTPException(status_code=404, detail="No unlearning results available")
-    return {"svg_files": status.svg_files}
-
-@router.post("/unlearn/cancel")
-async def cancel_unlearning():
-    if not status.is_unlearning:
-        raise HTTPException(status_code=400, detail="No unlearning in progress")
-    status.cancel_requested = True
-    return {"message": "Cancellation requested. Unlearning will stop after the current epoch."}
-
 @router.post("/unlearn/custom")
 async def start_unlearning_custom(
     background_tasks: BackgroundTasks,
@@ -137,3 +122,18 @@ async def start_unlearning_custom(
     request = CustomUnlearningRequest(forget_class=forget_class)
     background_tasks.add_task(run_unlearning_custom, request, status, weights_path)
     return {"message": "Custom Unlearning started"}
+
+@router.get("/unlearn/result")
+async def get_unlearning_result():
+    if status.is_unlearning:
+        raise HTTPException(status_code=400, detail="Unlearning is still in progress")
+    if status.svg_files is None:
+        raise HTTPException(status_code=404, detail="No unlearning results available")
+    return {"svg_files": status.svg_files}
+
+@router.post("/unlearn/cancel")
+async def cancel_unlearning():
+    if not status.is_unlearning:
+        raise HTTPException(status_code=400, detail="No unlearning in progress")
+    status.cancel_requested = True
+    return {"message": "Cancellation requested. Unlearning will stop after the current epoch."}

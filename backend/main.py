@@ -1,7 +1,6 @@
-from app.routers import models
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import train, unlearn, inference
+from app.routers import train, unlearn, inference, models
 
 app = FastAPI()
 

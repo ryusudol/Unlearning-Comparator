@@ -43,7 +43,7 @@ async def compute_umap_embeddings(activations,
             # Plot forget points with 'x' marker
             forget_mask = forget_labels
             plt.scatter(embedding[forget_mask, 0], embedding[forget_mask, 1], 
-                        c=labels[forget_mask], cmap='tab10', s=50, alpha=0.7, marker='x', linewidths=3)
+                        c=labels[forget_mask], cmap='tab10', s=50, alpha=0.7, marker='x', linewidths=2.5)
         else:
             scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='tab10', s=20, alpha=0.7)
         
