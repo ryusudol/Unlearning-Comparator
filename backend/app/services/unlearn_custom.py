@@ -50,7 +50,7 @@ async def run_unlearning_custom(request, status, weights_path):
         test_loss, test_accuracy, test_class_accuracies = await evaluate_model(model, test_loader, criterion, device)
         
         status.test_loss = test_loss
-        status.test_accuracy = (test_accuracy * 10 + (100 - 2 * test_class_accuracies[request.forget_class]))
+        status.test_accuracy = (test_accuracy * 10 + (100 - 2 * test_class_accuracies[request.forget_class])) / 10.0
         status.test_class_accuracies = test_class_accuracies
 
         print(f"\nUnlearn Accuracy (UA): {status.unlearn_accuracy:.2f}%")
