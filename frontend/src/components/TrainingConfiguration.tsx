@@ -11,8 +11,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import ContentBox from "../components/ContentBox";
-import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
 import { MODELS, DATASET } from "../constants/training";
 import { Status, Props, Timer } from "../types/training_config";
@@ -24,10 +22,10 @@ const API_URL = "http://localhost:8000";
 export const initialState = {
   model: "ResNet-18",
   dataset: "CIFAR-10",
-  epochs: 10,
-  batch_size: 64,
-  learning_rate: 0.002,
-  seed: 42,
+  epochs: 50,
+  learning_rate: 0.01,
+  batch_size: 128,
+  seed: 1,
 };
 
 export const configurationReducer = (
@@ -52,10 +50,13 @@ export const configurationReducer = (
   }
 };
 
-export default function TrainingConfiguration({ setTrainedModels }: Props) {
+export default function TrainingConfiguration({
+  isRunning,
+  setIsRunning,
+  setTrainedModels,
+}: Props) {
   const dispatch = useDispatch();
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
-  const [isLoading, setIsLoading] = useState<0 | 1 | 2>(0); // 0: Idle, 1: Training, 2: Inferencing
   const [statusMsg, setStatusMsg] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<Status | undefined>();
   const [customFile, setCustomFile] = useState<File>();
@@ -89,7 +90,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
         }
         const data = await resultRes.json();
         dispatch(svgsActions.saveOriginalSvgs(data.svg_files));
-        setIsLoading(0);
+        setIsRunning(0);
         setStatusDetail(undefined);
         const trainedModelsRes = await fetch(`${API_URL}/trained_models`);
         if (!trainedModelsRes.ok) {
@@ -122,7 +123,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
         }
         const resultData = await resultRes.json();
         dispatch(svgsActions.saveOriginalSvgs(resultData.svg_files));
-        setIsLoading(0);
+        setIsRunning(0);
       }
     } catch (err) {
       console.log(err);
@@ -130,9 +131,9 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isLoading === 1 && !trainIntervalIdRef.current) {
+    if (isRunning === 1 && !trainIntervalIdRef.current) {
       trainIntervalIdRef.current = setInterval(checkTrainStatus, 1000);
-    } else if (isLoading === 2 && !inferenceIntervalIdRef.current) {
+    } else if (isRunning === 2 && !inferenceIntervalIdRef.current) {
       inferenceIntervalIdRef.current = setInterval(checkInferenceStatus, 5000);
     }
     return () => {
@@ -140,7 +141,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
       if (inferenceIntervalIdRef.current)
         clearInterval(inferenceIntervalIdRef.current);
     };
-  }, [isLoading, checkTrainStatus, checkInferenceStatus]);
+  }, [isRunning, checkTrainStatus, checkInferenceStatus]);
 
   const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -154,7 +155,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
   };
 
   const handleBtnClick = async () => {
-    if (isLoading === 1) {
+    if (isRunning === 1) {
       try {
         setStatusMsg("Cancelling the training...");
         const res = await fetch(`${API_URL}/train/cancel`, { method: "POST" });
@@ -163,7 +164,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
           return;
         }
         resultFetchedRef.current = true;
-        setIsLoading(0);
+        setIsRunning(0);
       } catch (err) {
         console.error(err);
       }
@@ -179,7 +180,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
           alert("Please enter valid numbers");
           return;
         }
-        setIsLoading(1);
+        setIsRunning(1);
         setStatusDetail(undefined);
         setStatusMsg("Training . . .");
         try {
@@ -196,18 +197,18 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
           });
           if (!res.ok) {
             alert("Error occurred while sending a request for training.");
-            setIsLoading(0);
+            setIsRunning(0);
           }
         } catch (err) {
           console.log(err);
-          setIsLoading(0);
+          setIsRunning(0);
         }
       } else {
         if (!customFile) {
           alert("Please upload a custom training file.");
           return;
         }
-        setIsLoading(2);
+        setIsRunning(2);
         try {
           setStatusMsg("Inferencing . . .");
           const formData = new FormData();
@@ -218,7 +219,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
           });
           if (!res.ok) {
             alert("Error occurred while sending a request for inference.");
-            setIsLoading(0);
+            setIsRunning(0);
             return;
           }
           setTimeout(() => {
@@ -226,16 +227,15 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
           }, 250 * 1000);
         } catch (err) {
           console.error(err);
-          setIsLoading(0);
+          setIsRunning(0);
         }
       }
     }
   };
 
   return (
-    <ContentBox height={232}>
+    <>
       <div className={styles["subset-wrapper"]}>
-        <SubTitle subtitle="Training Configuration" />
         <div
           id="predefined"
           onClick={handleSectionClick}
@@ -252,7 +252,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
               </span>
             </div>
           </div>
-          {isLoading === 1 ? (
+          {isRunning === 1 ? (
             <div className={styles["status-wrapper"]}>
               <span className={styles.status}>{statusMsg}</span>
               {statusDetail && statusDetail.current_epoch >= 1 ? (
@@ -303,14 +303,14 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
                 type="number"
               />
               <Input
-                labelName="Batch Size"
-                value={configState.batch_size}
+                labelName="Learning Rate"
+                value={configState.learning_rate}
                 dispatch={configDispatch}
                 type="number"
               />
               <Input
-                labelName="Learning Rate"
-                value={configState.learning_rate}
+                labelName="Batch Size"
+                value={configState.batch_size}
                 dispatch={configDispatch}
                 type="number"
               />
@@ -331,7 +331,7 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
             />
             <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
-          {isLoading === 2 ? (
+          {isRunning === 2 ? (
             <span className={styles["infer-status"]}>{statusMsg}</span>
           ) : (
             <div>
@@ -358,9 +358,9 @@ export default function TrainingConfiguration({ setTrainedModels }: Props) {
       </div>
       <div className={styles["button-wrapper"]}>
         <div onClick={handleBtnClick} className={styles.button}>
-          {isLoading === 1 ? "Cancel" : "Run"}
+          {isRunning === 1 ? "Cancel" : "Run"}
         </div>
       </div>
-    </ContentBox>
+    </>
   );
 }

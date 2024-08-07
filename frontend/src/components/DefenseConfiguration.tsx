@@ -4,8 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import ContentBox from "../components/ContentBox";
-import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
 
 const METHODS = ["method1", "method2", "method3", "method4"];
@@ -89,9 +87,8 @@ export default function DefenseConfiguration() {
   };
 
   return (
-    <ContentBox height={194}>
+    <div>
       <div className={styles["subset-wrapper"]}>
-        <SubTitle subtitle="Defense Configuration" />
         <div
           id="defense-predefined"
           onClick={handlePredefinedClick}
@@ -173,6 +170,6 @@ export default function DefenseConfiguration() {
       >
         Run
       </div>
-    </ContentBox>
+    </div>
   );
 }

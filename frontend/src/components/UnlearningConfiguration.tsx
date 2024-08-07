@@ -11,49 +11,50 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import ContentBox from "../components/ContentBox";
-import SubTitle from "../components/SubTitle";
 import Input from "../components/Input";
 import { Status, Props, Timer } from "../types/unlearning_config";
-import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
+import { Constants } from "../constants/unlearning";
 import { svgsActions } from "../store/svgs";
 import { Action, Configuration } from "../types/unlearning_config";
 
 const API_URL = "http://localhost:8000";
 
 export const initialState = {
-  method: "Fine-Tuning",
+  method: Constants.FINE_TUNING,
   forget_class: "0",
   epochs: 10,
-  batch_size: 64,
-  learning_rate: 0.002,
+  learning_rate: 0.02,
+  batch_size: 128,
 };
 
-export const unlearningConfigReducer = (
+export const unlearningConfigurationReducer = (
   state: Configuration,
   action: Action
 ): Configuration => {
   switch (action.type) {
-    case "UPDATE_METHOD":
+    case Constants.UPDATE_METHOD:
       return { ...state, method: action.payload as string };
-    case "UPDATE_FORGET_CLASS":
+    case Constants.UPDATE_FORGET_CLASS:
       return { ...state, forget_class: action.payload as string };
-    case "UPDATE_EPOCHS":
+    case Constants.UPDATE_EPOCHS:
       return { ...state, epochs: action.payload as number };
-    case "UPDATE_BATCH_SIZE":
+    case Constants.UPDATE_BATCH_SIZE:
       return { ...state, batch_size: action.payload as number };
-    case "UPDATE_LEARNING_RATE":
+    case Constants.UPDATE_LEARNING_RATE:
       return { ...state, learning_rate: action.payload as number };
     default:
       return state;
   }
 };
 
-export default function UnlearningConfiguration({ trainedModels }: Props) {
+export default function UnlearningConfiguration({
+  isRunning,
+  setIsRunning,
+  trainedModels,
+}: Props) {
   const dispatch = useDispatch();
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
-  const [isUnlearning, setIsUnlearning] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [customFile, setCustomFile] = useState<File>();
   const [statusMsg, setStatusMsg] = useState("Unlearning . . .");
@@ -63,7 +64,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
   );
 
   const [configState, configDispatch] = useReducer(
-    unlearningConfigReducer,
+    unlearningConfigurationReducer,
     initialState
   );
 
@@ -90,7 +91,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
         }
         const data = await resultRes.json();
         dispatch(svgsActions.saveUnlearnedSvgs(data.svg_files));
-        setIsUnlearning(false);
+        setIsRunning(0);
         setStatusDetail(undefined);
       }
     } catch (err) {
@@ -99,7 +100,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isUnlearning && !unlearningIntervalIdRef.current) {
+    if (isRunning && !unlearningIntervalIdRef.current) {
       unlearningIntervalIdRef.current = setInterval(
         checkUnlearningStatus,
         1000
@@ -109,13 +110,32 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
       if (unlearningIntervalIdRef.current)
         clearInterval(unlearningIntervalIdRef.current);
     };
-  }, [checkUnlearningStatus, isUnlearning]);
+  }, [checkUnlearningStatus, isRunning]);
 
   const handleSelectUnlearningMethod = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const method = e.currentTarget.value;
-    configDispatch({ type: "UPDATE_METHOD", payload: method });
+    configDispatch({ type: Constants.UPDATE_METHOD, payload: method });
+    if (method === Constants.FINE_TUNING) {
+      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 10 });
+      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.02 });
+      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
+    } else if (method === Constants.RANDOM_LABEL) {
+      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 3 });
+      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.01 });
+      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
+    } else if (method === Constants.GRADIENT_ASCENT) {
+      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 3 });
+      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.0001 });
+      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
+    } else if (method === Constants.FISHER) {
+      // TODO: Fisher default 값 추가
+    } else {
+      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 50 });
+      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.01 });
+      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
+    }
   };
 
   const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -131,7 +151,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
 
   const handleBtnClick = async () => {
     resultFetchedRef.current = false;
-    if (isUnlearning) {
+    if (isRunning) {
       try {
         setIsCancelling(true);
         const res = await fetch(`${API_URL}/unlearn/cancel`, {
@@ -142,7 +162,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
           return;
         }
         resultFetchedRef.current = true;
-        setIsUnlearning(false);
+        setIsRunning(0);
         setIsCancelling(false);
       } catch (err) {
         console.error(err);
@@ -157,18 +177,18 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
           alert("Please enter valid numbers");
           return;
         }
-        setIsUnlearning(true);
+        setIsRunning(1);
         setStatusMsg("Unlearning . . .");
         try {
           const method = configState.method;
           const end =
-            method === "Fine-Tuning"
+            method === Constants.FINE_TUNING
               ? "ft"
-              : method === "Random-Label"
+              : method === Constants.RANDOM_LABEL
               ? "rl"
-              : method === "Gradient-Ascent"
+              : method === Constants.GRADIENT_ASCENT
               ? "ga"
-              : method === "Fisher"
+              : method === Constants.FISHER
               ? "fisher"
               : "retrain";
           const data = {
@@ -184,23 +204,22 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
           });
           if (!res.ok) {
             alert("Error occurred while sending a request for retraining.");
-            setIsUnlearning(false);
+            setIsRunning(0);
           }
         } catch (err) {
           console.error(err);
-          setIsUnlearning(false);
+          setIsRunning(0);
         }
       } else {
         if (!customFile) {
           alert("Please upload a custom unlearning file.");
           return;
         }
-        setIsUnlearning(true);
+        setIsRunning(2);
         try {
           const formData = new FormData();
           formData.append("weights_file", customFile);
-          // TODO: 백엔드 측 custom file로 unlearning 수행하는 기능 개발되면 URL 변경할 것
-          const res = await fetch(`${API_URL}/unlearn-custom`, {
+          const res = await fetch(`${API_URL}/unlearn/custom`, {
             method: "POST",
             body: formData,
           });
@@ -208,21 +227,20 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
             alert(
               "Error occurred while sending a request for unlearning a custom file."
             );
-            setIsUnlearning(false);
+            setIsRunning(0);
             return;
           }
         } catch (err) {
           console.error(err);
-          setIsUnlearning(false);
+          setIsRunning(0);
         }
       }
     }
   };
 
   return (
-    <ContentBox height={236}>
+    <>
       <div className={styles["subset-wrapper"]}>
-        <SubTitle subtitle="Unlearning Configuration" />
         <div
           id="predefined"
           onClick={handleSectionClick}
@@ -242,14 +260,14 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
               onChange={handleSelectUnlearningMethod}
               className={styles["predefined-select"]}
             >
-              {UNLEARNING_METHODS.map((method, idx) => (
+              {Constants.UNLEARNING_METHODS.map((method, idx) => (
                 <option key={idx} className={styles.option} value={method}>
                   {method}
                 </option>
               ))}
             </select>
           </div>
-          {isUnlearning ? (
+          {isRunning ? (
             <div className={styles["status-wrapper"]}>
               <span className={styles.status}>{statusMsg}</span>
               {statusDetail && statusDetail.current_epoch >= 1 ? (
@@ -290,7 +308,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
                 labelName="Forget Class"
                 value={configState.forget_class}
                 dispatch={configDispatch}
-                optionData={UNLEARN_CLASSES}
+                optionData={Constants.UNLEARN_CLASSES}
                 type="select"
               />
               <Input
@@ -343,7 +361,7 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
               labelName="Forget Class"
               value={configState.forget_class}
               dispatch={configDispatch}
-              optionData={UNLEARN_CLASSES}
+              optionData={Constants.UNLEARN_CLASSES}
               type="select"
             />
           </div>
@@ -351,9 +369,9 @@ export default function UnlearningConfiguration({ trainedModels }: Props) {
       </div>
       <div className={styles["button-wrapper"]}>
         <div onClick={handleBtnClick} className={styles.button}>
-          {isUnlearning ? "Cancel" : "Run"}
+          {isRunning ? "Cancel" : "Run"}
         </div>
       </div>
-    </ContentBox>
+    </>
   );
 }
