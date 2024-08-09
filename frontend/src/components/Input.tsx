@@ -1,14 +1,8 @@
-import React from "react";
-
 import styles from "./Input.module.css";
-import { Action } from "../types/training_config";
 
 type PropsType = {
   labelName: string;
-  value: string | number | undefined;
-  setStateString?: (data: string) => void;
-  setStateNumber?: (data: number) => void;
-  dispatch?: (action: Action) => void;
+  defaultValue: string | number | undefined;
   optionData?: string[];
   type: "select" | "number";
   disabled?: boolean;
@@ -16,46 +10,26 @@ type PropsType = {
 
 export default function Input({
   labelName,
-  value,
-  setStateString,
-  setStateNumber,
-  dispatch,
+  defaultValue,
   optionData,
   type,
   disabled,
 }: PropsType) {
-  const handleChange = (
-    e:
-      | React.ChangeEvent<HTMLSelectElement>
-      | React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { id, value } = e.currentTarget;
-    if (setStateString) setStateString(value);
-    else if (setStateNumber) setStateNumber(+value);
-    else if (dispatch)
-      dispatch({
-        type: `UPDATE_${id.toUpperCase().replace(" ", "_")}`,
-        payload:
-          id === "Epochs" ||
-          id === "Batch Size" ||
-          id === "Learning Rate" ||
-          id === "Seed"
-            ? +value
-            : value,
-      });
-  };
+  const words = labelName.split(" ");
+  const label = words.length < 3 ? labelName : `${words[1]} ${words[2]}`;
+  const name = labelName.toLowerCase().replaceAll(" ", "_");
 
   return (
     <div className={styles.wrapper}>
-      <label className={styles.label} htmlFor={labelName}>
-        {labelName}
+      <label className={styles.label} htmlFor={label}>
+        {label}
       </label>
       {type === "select" ? (
         <select
-          onChange={handleChange}
+          id={label}
+          name={name}
           className={styles.input}
-          id={labelName}
-          value={value}
+          defaultValue={defaultValue}
           disabled={disabled}
         >
           {optionData!.map((data, idx) => (
@@ -66,12 +40,13 @@ export default function Input({
         </select>
       ) : (
         <input
-          id={labelName}
-          onChange={handleChange}
+          id={label}
+          name={name}
           className={styles.input}
-          type="number"
-          value={value === 0 ? undefined : value}
+          defaultValue={defaultValue}
           placeholder="Please enter a value"
+          type="number"
+          step={labelName === "Learning Rate" ? 0.0001 : 1}
         />
       )}
     </div>

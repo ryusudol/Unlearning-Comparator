@@ -13,6 +13,7 @@ export default function Settings() {
   const [mode, setMode] = useState(0); // 0: Training, 1: Unlearning, 2:Defense
   const [operationStatus, setOperationStatus] = useState(0); // 0: Idle, 1: Predefined, 2: Custom
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
+  const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
   useEffect(() => {
     const func = async () => {
@@ -31,9 +32,7 @@ export default function Settings() {
     func();
   }, []);
 
-  const handleConfigurationModeChange = (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleConfigModeChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     setMode(+e.currentTarget.id);
   };
 
@@ -44,7 +43,7 @@ export default function Settings() {
         <ConfigurationModeSelector
           mode={mode}
           status={operationStatus}
-          onClick={handleConfigurationModeChange}
+          onClick={handleConfigModeChange}
         />
         {mode === 0 ? (
           <TrainingConfiguration
@@ -57,6 +56,7 @@ export default function Settings() {
             operationStatus={operationStatus}
             setOperationStatus={setOperationStatus}
             trainedModels={trainedModels}
+            setUnlearnedModels={setUnlearnedModels}
           />
         ) : (
           <DefenseConfiguration />

@@ -57,6 +57,7 @@
 }
 
 .button {
+  border: none;
   background-color: var(--button-bg-color);
   width: 48px;
   height: 24px;
