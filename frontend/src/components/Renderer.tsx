@@ -73,7 +73,6 @@ export const Renderer = ({
         height={yScale.bandwidth()}
         opacity={1}
         fill={cellColor}
-        rx={3}
         stroke="white"
       />
     );

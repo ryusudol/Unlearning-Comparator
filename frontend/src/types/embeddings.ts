@@ -1,3 +1,3 @@
 export interface SvgsState {
-  svgs: { originalSvgs: string[]; unlearnedSvgs: string[] };
+  svgs: { retrainedSvgs: string[]; unlearnedSvgs: string[] };
 }

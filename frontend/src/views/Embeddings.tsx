@@ -11,20 +11,20 @@ import { svgsActions } from "../store/svgs";
 export default function Settings() {
   const dispatch = useDispatch();
 
-  const originalSvgs = useSelector(
-    (state: SvgsState) => state.svgs.originalSvgs
+  const retrainedSvgs = useSelector(
+    (state: SvgsState) => state.svgs.retrainedSvgs
   );
   const unlearnedSvgs = useSelector(
     (state: SvgsState) => state.svgs.unlearnedSvgs
   );
 
-  const [modifiedOriginalSvgs, setModifiedOriginalSvgs] = useState<string[]>(
+  const [modifiedRetrainedSvgs, setModifiedRetrainedSvgs] = useState<string[]>(
     []
   );
   const [modifiedUnlearnedSvgs, setModifiedUnlearnedSvgs] = useState<string[]>(
     []
   );
-  const [selectedOriginalId, setSelectedOriginalId] = useState<
+  const [selectedRetrainedId, setSelectedRetrainedId] = useState<
     number | undefined
   >();
   const [selectedUnlearnedId, setSelectedUnlearnedId] = useState<
@@ -32,7 +32,7 @@ export default function Settings() {
   >();
 
   useEffect(() => {
-    dispatch(svgsActions.retrieveOriginalSvgs());
+    dispatch(svgsActions.retrieveRetrainedSvgs());
     dispatch(svgsActions.retrieveUnlearnedSvgs());
   }, [dispatch]);
 
@@ -45,13 +45,13 @@ export default function Settings() {
       legend.parentNode.removeChild(legend);
       return new XMLSerializer().serializeToString(svgDoc);
     };
-    const modifiedOriginalSvgs = originalSvgs.map(modifySvg) as string[];
+    const modifiedRetrainedSvgs = retrainedSvgs.map(modifySvg) as string[];
     const modifiedUnlearnedSvgs = unlearnedSvgs.map(modifySvg) as string[];
-    setModifiedOriginalSvgs(modifiedOriginalSvgs);
+    setModifiedRetrainedSvgs(modifiedRetrainedSvgs);
     setModifiedUnlearnedSvgs(modifiedUnlearnedSvgs);
-    setSelectedOriginalId(originalSvgs ? 4 : undefined);
+    setSelectedRetrainedId(retrainedSvgs ? 4 : undefined);
     setSelectedUnlearnedId(unlearnedSvgs ? 4 : undefined);
-  }, [originalSvgs, unlearnedSvgs]);
+  }, [retrainedSvgs, unlearnedSvgs]);
 
   const createMarkup = (svg: string) => {
     return { __html: svg };
@@ -60,7 +60,7 @@ export default function Settings() {
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
     const idNum = +id.split("-")[1];
-    if (id.includes("o")) setSelectedOriginalId(idNum);
+    if (id.includes("o")) setSelectedRetrainedId(idNum);
     else if (id.includes("u")) setSelectedUnlearnedId(idNum);
   };
 
@@ -71,7 +71,7 @@ export default function Settings() {
         <ContentBox height={495}>
           <div className={styles.wrapper}>
             <SubTitle subtitle="Retrained Model" />
-            {originalSvgs && (
+            {retrainedSvgs && (
               <div className={styles["content-wrapper"]}>
                 <div className={styles["svg-wrapper"]}>
                   <div
@@ -79,7 +79,7 @@ export default function Settings() {
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[0]
+                      modifiedRetrainedSvgs[0]
                     )}
                   />
                   <div
@@ -87,7 +87,7 @@ export default function Settings() {
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[1]
+                      modifiedRetrainedSvgs[1]
                     )}
                   />
                   <div
@@ -95,7 +95,7 @@ export default function Settings() {
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[2]
+                      modifiedRetrainedSvgs[2]
                     )}
                   />
                   <div
@@ -103,15 +103,15 @@ export default function Settings() {
                     onClick={handleThumbnailClick}
                     className={styles.svg}
                     dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[3]
+                      modifiedRetrainedSvgs[3]
                     )}
                   />
                 </div>
-                {selectedOriginalId && (
+                {selectedRetrainedId && (
                   <div
                     className={styles["selected-svg"]}
                     dangerouslySetInnerHTML={createMarkup(
-                      originalSvgs[selectedOriginalId - 1]
+                      retrainedSvgs[selectedRetrainedId - 1]
                     )}
                   />
                 )}

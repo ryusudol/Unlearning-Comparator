@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { useDispatch } from "react-redux";
 import styles from "./TrainingConfiguration.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
@@ -14,7 +13,6 @@ import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import Input from "../components/Input";
 import { MODELS, DATASET } from "../constants/training";
 import { Status, Props, Timer } from "../types/training_config";
-import { svgsActions } from "../store/svgs";
 import { Action, Configuration } from "../types/training_config";
 
 const API_URL = "http://localhost:8000";
@@ -51,11 +49,10 @@ export const configurationReducer = (
 };
 
 export default function TrainingConfiguration({
-  isRunning,
-  setIsRunning,
+  operationStatus,
+  setOperationStatus,
   setTrainedModels,
 }: Props) {
-  const dispatch = useDispatch();
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [statusMsg, setStatusMsg] = useState("Training . . .");
   const [statusDetail, setStatusDetail] = useState<Status | undefined>();
@@ -88,9 +85,7 @@ export default function TrainingConfiguration({
           alert("Error occurred while fetching the training result.");
           return;
         }
-        const data = await resultRes.json();
-        dispatch(svgsActions.saveOriginalSvgs(data.svg_files));
-        setIsRunning(0);
+        setOperationStatus(0);
         setStatusDetail(undefined);
         const trainedModelsRes = await fetch(`${API_URL}/trained_models`);
         if (!trainedModelsRes.ok) {
@@ -103,7 +98,7 @@ export default function TrainingConfiguration({
     } catch (err) {
       console.log(err);
     }
-  }, [dispatch, setIsRunning, setTrainedModels]);
+  }, [setOperationStatus, setTrainedModels]);
 
   const checkInferenceStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
@@ -122,18 +117,18 @@ export default function TrainingConfiguration({
           return;
         }
         const resultData = await resultRes.json();
-        dispatch(svgsActions.saveOriginalSvgs(resultData.svg_files));
-        setIsRunning(0);
+        console.log(resultData);
+        setOperationStatus(0);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [dispatch, setIsRunning]);
+  }, [setOperationStatus]);
 
   useEffect(() => {
-    if (isRunning === 1 && !trainIntervalIdRef.current) {
+    if (operationStatus === 1 && !trainIntervalIdRef.current) {
       trainIntervalIdRef.current = setInterval(checkTrainStatus, 1000);
-    } else if (isRunning === 2 && !inferenceIntervalIdRef.current) {
+    } else if (operationStatus === 2 && !inferenceIntervalIdRef.current) {
       inferenceIntervalIdRef.current = setInterval(checkInferenceStatus, 5000);
     }
     return () => {
@@ -141,7 +136,7 @@ export default function TrainingConfiguration({
       if (inferenceIntervalIdRef.current)
         clearInterval(inferenceIntervalIdRef.current);
     };
-  }, [isRunning, checkTrainStatus, checkInferenceStatus]);
+  }, [operationStatus, checkTrainStatus, checkInferenceStatus]);
 
   const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -155,7 +150,7 @@ export default function TrainingConfiguration({
   };
 
   const handleBtnClick = async () => {
-    if (isRunning === 1) {
+    if (operationStatus === 1) {
       try {
         setStatusMsg("Cancelling the training...");
         const res = await fetch(`${API_URL}/train/cancel`, { method: "POST" });
@@ -164,7 +159,7 @@ export default function TrainingConfiguration({
           return;
         }
         resultFetchedRef.current = true;
-        setIsRunning(0);
+        setOperationStatus(0);
       } catch (err) {
         console.error(err);
       }
@@ -180,7 +175,7 @@ export default function TrainingConfiguration({
           alert("Please enter valid numbers");
           return;
         }
-        setIsRunning(1);
+        setOperationStatus(1);
         setStatusDetail(undefined);
         setStatusMsg("Training . . .");
         try {
@@ -197,18 +192,18 @@ export default function TrainingConfiguration({
           });
           if (!res.ok) {
             alert("Error occurred while sending a request for training.");
-            setIsRunning(0);
+            setOperationStatus(0);
           }
         } catch (err) {
           console.log(err);
-          setIsRunning(0);
+          setOperationStatus(0);
         }
       } else {
         if (!customFile) {
           alert("Please upload a custom training file.");
           return;
         }
-        setIsRunning(2);
+        setOperationStatus(2);
         try {
           setStatusMsg("Inferencing . . .");
           const formData = new FormData();
@@ -219,7 +214,7 @@ export default function TrainingConfiguration({
           });
           if (!res.ok) {
             alert("Error occurred while sending a request for inference.");
-            setIsRunning(0);
+            setOperationStatus(0);
             return;
           }
           setTimeout(() => {
@@ -227,7 +222,7 @@ export default function TrainingConfiguration({
           }, 250 * 1000);
         } catch (err) {
           console.error(err);
-          setIsRunning(0);
+          setOperationStatus(0);
         }
       }
     }
@@ -252,7 +247,7 @@ export default function TrainingConfiguration({
               </span>
             </div>
           </div>
-          {isRunning === 1 ? (
+          {operationStatus === 1 ? (
             <div className={styles["status-wrapper"]}>
               <span className={styles.status}>{statusMsg}</span>
               {statusDetail && statusDetail.current_epoch >= 1 ? (
@@ -331,7 +326,7 @@ export default function TrainingConfiguration({
             />
             <span className={styles["predefined-label"]}>Custom Model</span>
           </div>
-          {isRunning === 2 ? (
+          {operationStatus === 2 ? (
             <span className={styles["infer-status"]}>{statusMsg}</span>
           ) : (
             <div>
@@ -358,7 +353,7 @@ export default function TrainingConfiguration({
       </div>
       <div className={styles["button-wrapper"]}>
         <div onClick={handleBtnClick} className={styles.button}>
-          {isRunning === 1 ? "Cancel" : "Run"}
+          {operationStatus === 1 ? "Cancel" : "Run"}
         </div>
       </div>
     </>

@@ -19,8 +19,19 @@ import { Action, Configuration } from "../types/unlearning_config";
 
 const API_URL = "http://localhost:8000";
 
+const FINE_TUNING = "Fine-Tuning";
+const RANDOM_LABEL = "Random-Label";
+const GRADIENT_ASCENT = "Gradient-Ascent";
+const FISHER = "Fisher";
+
+const UPDATE_METHOD = "UPDATE_METHOD";
+const UPDATE_FORGET_CLASS = "UPDATE_FORGET_CLASS";
+const UPDATE_EPOCHS = "UPDATE_EPOCHS";
+const UPDATE_BATCH_SIZE = "UPDATE_BATCH_SIZE";
+const UPDATE_LEARNING_RATE = "UPDATE_LEARNING_RATE";
+
 export const initialState = {
-  method: Constants.FINE_TUNING,
+  method: FINE_TUNING,
   forget_class: "0",
   epochs: 10,
   learning_rate: 0.02,
@@ -32,15 +43,15 @@ export const unlearningConfigurationReducer = (
   action: Action
 ): Configuration => {
   switch (action.type) {
-    case Constants.UPDATE_METHOD:
+    case UPDATE_METHOD:
       return { ...state, method: action.payload as string };
-    case Constants.UPDATE_FORGET_CLASS:
+    case UPDATE_FORGET_CLASS:
       return { ...state, forget_class: action.payload as string };
-    case Constants.UPDATE_EPOCHS:
+    case UPDATE_EPOCHS:
       return { ...state, epochs: action.payload as number };
-    case Constants.UPDATE_BATCH_SIZE:
+    case UPDATE_BATCH_SIZE:
       return { ...state, batch_size: action.payload as number };
-    case Constants.UPDATE_LEARNING_RATE:
+    case UPDATE_LEARNING_RATE:
       return { ...state, learning_rate: action.payload as number };
     default:
       return state;
@@ -48,11 +59,14 @@ export const unlearningConfigurationReducer = (
 };
 
 export default function UnlearningConfiguration({
-  isRunning,
-  setIsRunning,
+  operationStatus,
+  setOperationStatus,
   trainedModels,
 }: Props) {
   const dispatch = useDispatch();
+
+  const unlearningIntervalIdRef = useRef<Timer>();
+  const resultFetchedRef = useRef(false);
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
   const [isCancelling, setIsCancelling] = useState(false);
@@ -67,9 +81,6 @@ export default function UnlearningConfiguration({
     unlearningConfigurationReducer,
     initialState
   );
-
-  const unlearningIntervalIdRef = useRef<Timer>();
-  const resultFetchedRef = useRef(false);
 
   const checkUnlearningStatus = useCallback(async () => {
     if (resultFetchedRef.current) return;
@@ -92,16 +103,16 @@ export default function UnlearningConfiguration({
         }
         const data = await resultRes.json();
         dispatch(svgsActions.saveUnlearnedSvgs(data.svg_files));
-        setIsRunning(0);
+        setOperationStatus(0);
         setStatusDetail(undefined);
       }
     } catch (err) {
       console.log(err);
     }
-  }, [dispatch, setIsRunning]);
+  }, [dispatch, setOperationStatus]);
 
   useEffect(() => {
-    if (isRunning && !unlearningIntervalIdRef.current) {
+    if (operationStatus && !unlearningIntervalIdRef.current) {
       unlearningIntervalIdRef.current = setInterval(
         checkUnlearningStatus,
         5000
@@ -111,31 +122,31 @@ export default function UnlearningConfiguration({
       if (unlearningIntervalIdRef.current)
         clearInterval(unlearningIntervalIdRef.current);
     };
-  }, [checkUnlearningStatus, isRunning]);
+  }, [checkUnlearningStatus, operationStatus]);
 
   const handleSelectUnlearningMethod = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const method = e.currentTarget.value;
-    configDispatch({ type: Constants.UPDATE_METHOD, payload: method });
-    if (method === Constants.FINE_TUNING) {
-      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 10 });
-      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.02 });
-      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
-    } else if (method === Constants.RANDOM_LABEL) {
-      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 3 });
-      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.01 });
-      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
-    } else if (method === Constants.GRADIENT_ASCENT) {
-      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 3 });
-      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.0001 });
-      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
-    } else if (method === Constants.FISHER) {
-      // TODO: Fisher default 값 추가
-    } else {
-      configDispatch({ type: Constants.UPDATE_EPOCHS, payload: 30 });
-      configDispatch({ type: Constants.UPDATE_LEARNING_RATE, payload: 0.01 });
-      configDispatch({ type: Constants.UPDATE_BATCH_SIZE, payload: 128 });
+    configDispatch({ type: UPDATE_METHOD, payload: method });
+    if (method === FINE_TUNING) {
+      configDispatch({ type: UPDATE_EPOCHS, payload: 10 });
+      configDispatch({ type: UPDATE_LEARNING_RATE, payload: 0.02 });
+      configDispatch({ type: UPDATE_BATCH_SIZE, payload: 128 });
+    } else if (method === RANDOM_LABEL) {
+      configDispatch({ type: UPDATE_EPOCHS, payload: 3 });
+      configDispatch({ type: UPDATE_LEARNING_RATE, payload: 0.01 });
+      configDispatch({ type: UPDATE_BATCH_SIZE, payload: 128 });
+    } else if (method === GRADIENT_ASCENT) {
+      configDispatch({ type: UPDATE_EPOCHS, payload: 3 });
+      configDispatch({ type: UPDATE_LEARNING_RATE, payload: 0.0001 });
+      configDispatch({ type: UPDATE_BATCH_SIZE, payload: 128 });
+    }
+    // TODO: Fisher default 값 추가
+    else {
+      configDispatch({ type: UPDATE_EPOCHS, payload: 30 });
+      configDispatch({ type: UPDATE_LEARNING_RATE, payload: 0.01 });
+      configDispatch({ type: UPDATE_BATCH_SIZE, payload: 128 });
     }
   };
 
@@ -152,7 +163,7 @@ export default function UnlearningConfiguration({
 
   const handleBtnClick = async () => {
     resultFetchedRef.current = false;
-    if (isRunning) {
+    if (operationStatus) {
       try {
         setIsCancelling(true);
         const res = await fetch(`${API_URL}/unlearn/cancel`, {
@@ -163,7 +174,7 @@ export default function UnlearningConfiguration({
           return;
         }
         resultFetchedRef.current = true;
-        setIsRunning(0);
+        setOperationStatus(0);
         setIsCancelling(false);
       } catch (err) {
         console.error(err);
@@ -178,18 +189,18 @@ export default function UnlearningConfiguration({
           alert("Please enter valid numbers");
           return;
         }
-        setIsRunning(1);
+        setOperationStatus(1);
         setStatusMsg("Unlearning . . .");
         try {
           const method = configState.method;
           const end =
-            method === Constants.FINE_TUNING
+            method === FINE_TUNING
               ? "ft"
-              : method === Constants.RANDOM_LABEL
+              : method === RANDOM_LABEL
               ? "rl"
-              : method === Constants.GRADIENT_ASCENT
+              : method === GRADIENT_ASCENT
               ? "ga"
-              : method === Constants.FISHER
+              : method === FISHER
               ? "fisher"
               : "retrain";
           const data = {
@@ -205,18 +216,18 @@ export default function UnlearningConfiguration({
           });
           if (!res.ok) {
             alert("Error occurred while sending a request for retraining.");
-            setIsRunning(0);
+            setOperationStatus(0);
           }
         } catch (err) {
           console.error(err);
-          setIsRunning(0);
+          setOperationStatus(0);
         }
       } else {
         if (!customFile) {
           alert("Please upload a weight file for unlearning.");
           return;
         }
-        setIsRunning(2);
+        setOperationStatus(2);
         try {
           const formData = new FormData();
           formData.append("weights_file", customFile);
@@ -229,12 +240,12 @@ export default function UnlearningConfiguration({
             alert(
               "Error occurred while sending a request for unlearning a custom file."
             );
-            setIsRunning(0);
+            setOperationStatus(0);
             return;
           }
         } catch (err) {
           console.error(err);
-          setIsRunning(0);
+          setOperationStatus(0);
         }
       }
     }
@@ -269,7 +280,7 @@ export default function UnlearningConfiguration({
               ))}
             </select>
           </div>
-          {isRunning ? (
+          {operationStatus ? (
             <div className={styles["status-wrapper"]}>
               <span className={styles.status}>{statusMsg}</span>
               {statusDetail && statusDetail.current_epoch >= 1 ? (
@@ -371,7 +382,7 @@ export default function UnlearningConfiguration({
       </div>
       <div className={styles["button-wrapper"]}>
         <div onClick={handleBtnClick} className={styles.button}>
-          {isRunning ? "Cancel" : "Run"}
+          {operationStatus ? "Cancel" : "Run"}
         </div>
       </div>
     </>

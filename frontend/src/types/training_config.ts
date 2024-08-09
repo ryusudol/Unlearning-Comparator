@@ -32,8 +32,8 @@ export interface Action {
 }
 
 export interface Props {
-  isRunning: number;
-  setIsRunning: (val: number) => void;
+  operationStatus: number;
+  setOperationStatus: (val: number) => void;
   setTrainedModels: (models: string[]) => void;
 }
 
