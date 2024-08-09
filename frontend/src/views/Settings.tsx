@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import styles from "./Settings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
+import ConfigurationModeSelector from "../components/ConfigurationModeSelector";
 import TrainingConfiguration from "../components/TrainingConfiguration";
 import UnlearningConfiguration from "../components/UnlearningConfiguration";
 import DefenseConfiguration from "../components/DefenseConfiguration";
@@ -10,8 +10,8 @@ import DefenseConfiguration from "../components/DefenseConfiguration";
 const API_URL = "http://localhost:8000";
 
 export default function Settings() {
-  const [configurationMode, setConfigurationMode] = useState(0); // 0: Training, 1: Unlearning, 2:Defense
-  const [isRunning, setIsRunning] = useState(0);
+  const [mode, setMode] = useState(0); // 0: Training, 1: Unlearning, 2:Defense
+  const [operationStatus, setOperationStatus] = useState(0); // 0: Idle, 1: Predefined, 2: Custom
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
 
   useEffect(() => {
@@ -34,55 +34,28 @@ export default function Settings() {
   const handleConfigurationModeChange = (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
-    setConfigurationMode(+e.currentTarget.id);
+    setMode(+e.currentTarget.id);
   };
 
   return (
     <section>
       <Title title="Settings" />
       <ContentBox height={252}>
-        <div className={styles["mode-button-wrapper"]}>
-          <button
-            disabled={isRunning !== 0}
-            onClick={handleConfigurationModeChange}
-            id="0"
-            className={
-              styles[configurationMode === 0 ? "selected-mode" : "mode-button"]
-            }
-          >
-            Training
-          </button>
-          <button
-            disabled={isRunning !== 0}
-            onClick={handleConfigurationModeChange}
-            id="1"
-            className={
-              styles[configurationMode === 1 ? "selected-mode" : "mode-button"]
-            }
-          >
-            Unlearning
-          </button>
-          <button
-            disabled={isRunning !== 0}
-            onClick={handleConfigurationModeChange}
-            id="2"
-            className={
-              styles[configurationMode === 2 ? "selected-mode" : "mode-button"]
-            }
-          >
-            Defense
-          </button>
-        </div>
-        {configurationMode === 0 ? (
+        <ConfigurationModeSelector
+          mode={mode}
+          status={operationStatus}
+          onClick={handleConfigurationModeChange}
+        />
+        {mode === 0 ? (
           <TrainingConfiguration
-            isRunning={isRunning}
-            setIsRunning={setIsRunning}
+            operationStatus={operationStatus}
+            setOperationStatus={setOperationStatus}
             setTrainedModels={setTrainedModels}
           />
-        ) : configurationMode === 1 ? (
+        ) : mode === 1 ? (
           <UnlearningConfiguration
-            isRunning={isRunning}
-            setIsRunning={setIsRunning}
+            operationStatus={operationStatus}
+            setOperationStatus={setOperationStatus}
             trainedModels={trainedModels}
           />
         ) : (
