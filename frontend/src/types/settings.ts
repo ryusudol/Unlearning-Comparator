@@ -25,17 +25,18 @@ export interface ClassAccuracies {
 
 export interface TrainingStatus {
   is_training: boolean;
+  progress: number;
   current_epoch: number;
   total_epochs: number;
   current_loss: number;
-  best_loss: number;
   current_accuracy: number;
+  best_loss: number;
   best_accuracy: number;
   test_loss: number;
   test_accuracy: number;
   train_class_accuracies: ClassAccuracies;
   test_class_accuracies: ClassAccuracies;
-  estimated_time_remaining: number;
+  estimated_time_remaining: number | null;
 }
 
 export interface UnlearningStatus {
@@ -44,13 +45,16 @@ export interface UnlearningStatus {
   current_epoch: number;
   total_epochs: number;
   current_loss: number;
-  best_loss: number;
   current_accuracy: number;
-  best_accuracy: number;
-  estimated_time_remaining: number;
+  test_loss: number;
+  test_accuracy: number;
+  train_class_accuracies: ClassAccuracies;
+  test_class_accuracies: ClassAccuracies;
+  estimated_time_remaining: number | null;
   forget_class: number;
 }
 
+// Temporarily created
 export interface DefenseStatus {
   is_defensing: boolean;
   progress: number;
@@ -60,7 +64,7 @@ export interface DefenseStatus {
   best_loss: number;
   current_accuracy: number;
   best_accuracy: number;
-  estimated_time_remaining: number;
+  estimated_time_remaining: number | null;
   forget_class: number;
 }
 

@@ -1,20 +1,20 @@
 .button {
   border: none;
   background-color: var(--button-bg-color);
-  width: 60px;
-  height: 30px;
+  width: 48px;
+  height: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: #fefefe;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.1s ease-in-out;
-  margin-top: 10px;
+  margin-top: 8px;
   position: relative;
-  left: 336px;
+  left: 216px;
 }
 
 .button:hover {

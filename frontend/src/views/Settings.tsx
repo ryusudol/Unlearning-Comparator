@@ -3,7 +3,7 @@ import styles from "./Settings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import ConfigurationModeSelector from "../components/UI/ConfigurationModeSelector";
+import ConfigSelector from "../components/UI/ConfigSelector";
 import Training from "../components/UI/Training";
 import Unlearning from "../components/UI/Unlearning";
 import Defense from "../components/UI/Defense";
@@ -24,8 +24,8 @@ export default function Settings() {
   return (
     <section className={styles.settings}>
       <Title title="Settings" />
-      <ContentBox height={325}>
-        <ConfigurationModeSelector
+      <ContentBox height={253}>
+        <ConfigSelector
           mode={mode}
           status={operationStatus}
           onClick={handleConfigModeChange}

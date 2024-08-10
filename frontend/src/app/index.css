@@ -1,11 +1,11 @@
 :root {
   --title-font-size: 16px;
   --subtitle-font-size: 16px;
-  --select-font-size: 18px;
-  --input-font-size: 16px;
+  --select-font-size: 14px;
+  --input-font-size: 13px;
 
-  --custom-upload-btn-width: 180px;
-  --custom-upload-btn-height: 22px;
+  --custom-upload-btn-width: 120px;
+  --custom-upload-btn-height: 18px;
 
   --title-text-color: #383838;
   --title-bg-color: #e7e7e7;
@@ -26,7 +26,7 @@ body {
   height: 100vh;
   weight: 100vw;
   margin: 0;
-  padding: 5px;
+  padding: 5px 0px;
   display: flex;
   justify-content: center;
   align-items: flex-start;

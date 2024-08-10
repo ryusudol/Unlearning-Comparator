@@ -50,50 +50,52 @@ export default function Defense({
     console.log(configState);
   };
 
-  return operationStatus ? (
-    <OperationStatus indicator={indicator} status={status} />
-  ) : (
+  return (
     <form onSubmit={handleRunBtnClick}>
-      <div>
-        <div
-          id="predefined"
-          onClick={handleSectionClick}
-          className={styles.predefined}
-        >
-          <div className={styles.mode}>
-            <div className={styles["label-wrapper"]}>
-              <FontAwesomeIcon
-                className={styles.icon}
-                icon={mode ? faCircle : faCircleCheck}
-              />
-              <label className={styles.label}>Predefined Method</label>
+      {operationStatus ? (
+        <OperationStatus
+          identifier="defense"
+          indicator={indicator}
+          status={status}
+        />
+      ) : (
+        <div>
+          <div id="predefined" onClick={handleSectionClick}>
+            <div className={styles.mode}>
+              <div className={styles["label-wrapper"]}>
+                <FontAwesomeIcon
+                  className={styles.icon}
+                  icon={mode ? faCircle : faCircleCheck}
+                />
+                <label className={styles.label}>Predefined Method</label>
+              </div>
+              <select name="method" className={styles.select}>
+                {DEFENSE_METHODS.map((method, idx) => (
+                  <option key={idx} className={styles.option} value={method}>
+                    {method}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select name="method" className={styles.select}>
-              {DEFENSE_METHODS.map((method, idx) => (
-                <option key={idx} className={styles.option} value={method}>
-                  {method}
-                </option>
-              ))}
-            </select>
+            <Input
+              labelName="Unlearned Model"
+              defaultValue={selectedUnlearnedModel}
+              optionData={UNLEARNED_MODELS}
+              type="select"
+            />
+            <Input labelName="Parameter 1" defaultValue={0} type="number" />
+            <Input labelName="Parameter 2" defaultValue={0} type="number" />
+            <Input labelName="Parameter 3" defaultValue={0} type="number" />
           </div>
-          <Input
-            labelName="Unlearned Model"
-            defaultValue={selectedUnlearnedModel}
-            optionData={UNLEARNED_MODELS}
-            type="select"
-          />
-          <Input labelName="Parameter 1" defaultValue={0} type="number" />
-          <Input labelName="Parameter 2" defaultValue={0} type="number" />
-          <Input labelName="Parameter 3" defaultValue={0} type="number" />
+          <div id="custom" onClick={handleSectionClick}>
+            <CustomFileInput
+              mode={mode}
+              customFile={customFile}
+              handleCustomFileUpload={handleCustomFileUpload}
+            />
+          </div>
         </div>
-        <div id="custom" onClick={handleSectionClick}>
-          <CustomFileInput
-            mode={mode}
-            customFile={customFile}
-            handleCustomFileUpload={handleCustomFileUpload}
-          />
-        </div>
-      </div>
+      )}
       <RunButton operationStatus={operationStatus} />
     </form>
   );
