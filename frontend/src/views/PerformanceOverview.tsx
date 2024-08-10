@@ -1,8 +1,8 @@
-import styles from "./Archives.module.css";
+import styles from "./PerformanceOverview.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import { Heatmap } from "../components/Heatmap";
+import { Heatmap } from "../components/UI/Heatmap";
 import { HeatmapData } from "../types/archives";
 
 let data: HeatmapData[] = [];
@@ -19,11 +19,11 @@ for (let i = 0; i < 6; i++) {
   }
 }
 
-export default function Archives() {
+export default function PerformanceOverview() {
   return (
-    <section>
-      <Title title="Archives" />
-      <ContentBox height={213}>
+    <section className={styles["performance-overview"]}>
+      <Title title="Performance Overview" />
+      <ContentBox height={325}>
         <div className={styles["heatmap-wrapper"]}>
           <Heatmap width={480} height={120} data={data} />
         </div>

@@ -1,8 +1,5 @@
-.section {
+.performance-metrics {
+  width: 840px;
   display: flex;
   flex-direction: column;
-}
-
-.wrapper {
-  width: 900px;
 }

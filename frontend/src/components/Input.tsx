@@ -33,7 +33,7 @@ export default function Input({
           disabled={disabled}
         >
           {optionData!.map((data, idx) => (
-            <option key={idx} className={styles.option} value={data}>
+            <option key={idx} value={data}>
               {data}
             </option>
           ))}

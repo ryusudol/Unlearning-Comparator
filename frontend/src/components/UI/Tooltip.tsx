@@ -1,6 +1,6 @@
 import styles from "./Tooltip.module.css";
 
-import { TooltipProps, TooltipRowProps } from "../types/archives";
+import { TooltipProps, TooltipRowProps } from "../../types/archives";
 
 export const Tooltip = ({ interactionData, width, height }: TooltipProps) => {
   if (!interactionData) {

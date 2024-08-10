@@ -1,0 +1,29 @@
+.subset-wrapper {
+  width: 100%;
+}
+
+.predefined {
+  margin-bottom: 6px;
+}
+
+.mode {
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icon {
+  width: 11px;
+  margin-right: 4px;
+}
+
+.label-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.label {
+  font-size: var(--select-font-size);
+}

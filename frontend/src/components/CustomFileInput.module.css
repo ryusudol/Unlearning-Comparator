@@ -1,0 +1,45 @@
+.input-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.icon {
+  width: 11px;
+  margin-right: 4px;
+}
+
+.upload {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #efefef;
+  width: 180px;
+  height: 22px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0px 4px;
+}
+
+.upload-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.file-input {
+  display: none;
+}
+
+.label-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.label {
+  font-size: var(--select-font-size);
+}

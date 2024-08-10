@@ -3,7 +3,7 @@ import styles from "./Heatmap.module.css";
 
 import { Renderer } from "./Renderer";
 import { Tooltip } from "./Tooltip";
-import { HeatmapProps, InteractionData } from "../types/archives";
+import { HeatmapProps, InteractionData } from "../../types/archives";
 
 export const Heatmap = ({ width, height, data }: HeatmapProps) => {
   const [hoveredCell, setHoveredCell] = useState<InteractionData | null>(null);

@@ -4,7 +4,6 @@ import styles from "./Embeddings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import SubTitle from "../components/SubTitle";
 import { SvgsState } from "../types/embeddings";
 import { svgsActions } from "../store/svgs";
 
@@ -68,9 +67,8 @@ export default function Settings() {
     <section>
       <Title title="Embeddings" />
       <div className={styles.section}>
-        <ContentBox height={495}>
+        <ContentBox height={660}>
           <div className={styles.wrapper}>
-            <SubTitle subtitle="Retrained Model" />
             {retrainedSvgs && (
               <div className={styles["content-wrapper"]}>
                 <div className={styles["svg-wrapper"]}>
@@ -112,57 +110,6 @@ export default function Settings() {
                     className={styles["selected-svg"]}
                     dangerouslySetInnerHTML={createMarkup(
                       retrainedSvgs[selectedRetrainedId - 1]
-                    )}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </ContentBox>
-        <ContentBox height={495}>
-          <div className={styles.wrapper}>
-            <SubTitle subtitle="Unlearned Model" />
-            {unlearnedSvgs && (
-              <div className={styles["content-wrapper"]}>
-                <div className={styles["svg-wrapper"]}>
-                  <div
-                    id="u-1"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[0]
-                    )}
-                  />
-                  <div
-                    id="u-2"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[1]
-                    )}
-                  />
-                  <div
-                    id="u-3"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[2]
-                    )}
-                  />
-                  <div
-                    id="u-4"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[3]
-                    )}
-                  />
-                </div>
-                {selectedUnlearnedId && (
-                  <div
-                    className={styles["selected-svg"]}
-                    dangerouslySetInnerHTML={createMarkup(
-                      unlearnedSvgs[selectedUnlearnedId - 1]
                     )}
                   />
                 )}
