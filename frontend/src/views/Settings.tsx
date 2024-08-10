@@ -4,9 +4,9 @@ import styles from "./Settings.module.css";
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import ConfigurationModeSelector from "../components/UI/ConfigurationModeSelector";
-import TrainingConfiguration from "../components/UI/TrainingConfiguration";
-import UnlearningConfiguration from "../components/UI/UnlearningConfiguration";
-import DefenseConfiguration from "../components/UI/DefenseConfiguration";
+import Training from "../components/UI/Training";
+import Unlearning from "../components/UI/Unlearning";
+import Defense from "../components/UI/Defense";
 import { useFetchModels } from "../hooks/useFetchModels";
 
 export default function Settings() {
@@ -31,20 +31,20 @@ export default function Settings() {
           onClick={handleConfigModeChange}
         />
         {mode === 0 ? (
-          <TrainingConfiguration
+          <Training
             operationStatus={operationStatus}
             setOperationStatus={setOperationStatus}
             setTrainedModels={setTrainedModels}
           />
         ) : mode === 1 ? (
-          <UnlearningConfiguration
+          <Unlearning
             operationStatus={operationStatus}
             setOperationStatus={setOperationStatus}
             trainedModels={trainedModels}
             setUnlearnedModels={setUnlearnedModels}
           />
         ) : (
-          <DefenseConfiguration
+          <Defense
             operationStatus={operationStatus}
             setOperationStatus={setOperationStatus}
             unlearnedModels={unlearnedModels}

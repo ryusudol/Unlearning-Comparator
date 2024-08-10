@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "./DefenseConfiguration.module.css";
+import styles from "./Defense.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -15,7 +15,7 @@ import {
 } from "../../types/settings";
 import { DEFENSE_METHODS, UNLEARNED_MODELS } from "../../constants/defense";
 
-export default function DefenseConfiguration({
+export default function Defense({
   operationStatus,
   setOperationStatus,
   unlearnedModels,

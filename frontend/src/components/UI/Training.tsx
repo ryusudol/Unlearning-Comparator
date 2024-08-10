@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import styles from "./TrainingConfiguration.module.css";
+import styles from "./Training.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -27,7 +27,7 @@ const initialState = {
   seed: 1,
 };
 
-export default function TrainingConfiguration({
+export default function Training({
   operationStatus,
   setOperationStatus,
   setTrainedModels,

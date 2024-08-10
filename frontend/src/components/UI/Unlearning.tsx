@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import styles from "./UnlearningConfiguration.module.css";
+import styles from "./Unlearning.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
