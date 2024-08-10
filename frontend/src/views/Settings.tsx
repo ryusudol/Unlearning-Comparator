@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./Settings.module.css";
 
 import Title from "../components/Title";
@@ -7,8 +7,7 @@ import ConfigurationModeSelector from "../components/UI/ConfigurationModeSelecto
 import TrainingConfiguration from "../components/UI/TrainingConfiguration";
 import UnlearningConfiguration from "../components/UI/UnlearningConfiguration";
 import DefenseConfiguration from "../components/UI/DefenseConfiguration";
-
-const API_URL = "http://localhost:8000";
+import { useFetchModels } from "../hooks/useFetchModels";
 
 export default function Settings() {
   const [mode, setMode] = useState(0); // 0: Training, 1: Unlearning, 2:Defense
@@ -16,22 +15,7 @@ export default function Settings() {
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
-  useEffect(() => {
-    const func = async () => {
-      try {
-        const res = await fetch(`${API_URL}/trained_models`);
-        if (!res.ok) {
-          alert("Error occurred while fetching trained models.");
-          return;
-        }
-        const json = await res.json();
-        setTrainedModels(json);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    func();
-  }, []);
+  useFetchModels(setTrainedModels, "trained_models");
 
   const handleConfigModeChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     setMode(+e.currentTarget.id);
@@ -60,7 +44,11 @@ export default function Settings() {
             setUnlearnedModels={setUnlearnedModels}
           />
         ) : (
-          <DefenseConfiguration />
+          <DefenseConfiguration
+            operationStatus={operationStatus}
+            setOperationStatus={setOperationStatus}
+            unlearnedModels={unlearnedModels}
+          />
         )}
       </ContentBox>
     </section>
