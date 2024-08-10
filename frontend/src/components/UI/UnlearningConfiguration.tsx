@@ -129,7 +129,7 @@ export default function UnlearningConfiguration({
     <OperationStatus indicator={indicator} status={status} />
   ) : (
     <form onSubmit={handleBtnClick}>
-      <div className={styles["subset-wrapper"]}>
+      <div>
         <div
           id="predefined"
           onClick={handleSectionClick}

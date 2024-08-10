@@ -1,10 +1,14 @@
 import styles from "./OperationStatus.module.css";
 
-import { TrainingStatus, UnlearningStatus } from "../types/settings";
+import {
+  TrainingStatus,
+  UnlearningStatus,
+  DefenseStatus,
+} from "../types/settings";
 
 interface Props {
   indicator: string;
-  status: TrainingStatus | UnlearningStatus | undefined;
+  status: TrainingStatus | UnlearningStatus | DefenseStatus | undefined;
 }
 
 export default function OperationStatus({ indicator, status }: Props) {
