@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./Settings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import ConfigurationModeSelector from "../components/UI/ConfigurationModeSelector";
-import TrainingConfiguration from "../components/UI/TrainingConfiguration";
-import UnlearningConfiguration from "../components/UI/UnlearningConfiguration";
-import DefenseConfiguration from "../components/UI/DefenseConfiguration";
-
-const API_URL = "http://localhost:8000";
+import ConfigSelector from "../components/UI/ConfigSelector";
+import Training from "../components/UI/Training";
+import Unlearning from "../components/UI/Unlearning";
+import Defense from "../components/UI/Defense";
+import { useFetchModels } from "../hooks/useFetchModels";
 
 export default function Settings() {
   const [mode, setMode] = useState(0); // 0: Training, 1: Unlearning, 2:Defense
@@ -16,22 +15,7 @@ export default function Settings() {
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
-  useEffect(() => {
-    const func = async () => {
-      try {
-        const res = await fetch(`${API_URL}/trained_models`);
-        if (!res.ok) {
-          alert("Error occurred while fetching trained models.");
-          return;
-        }
-        const json = await res.json();
-        setTrainedModels(json);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    func();
-  }, []);
+  useFetchModels(setTrainedModels, "trained_models");
 
   const handleConfigModeChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     setMode(+e.currentTarget.id);
@@ -40,27 +24,31 @@ export default function Settings() {
   return (
     <section className={styles.settings}>
       <Title title="Settings" />
-      <ContentBox height={325}>
-        <ConfigurationModeSelector
+      <ContentBox height={253}>
+        <ConfigSelector
           mode={mode}
           status={operationStatus}
           onClick={handleConfigModeChange}
         />
         {mode === 0 ? (
-          <TrainingConfiguration
+          <Training
             operationStatus={operationStatus}
             setOperationStatus={setOperationStatus}
             setTrainedModels={setTrainedModels}
           />
         ) : mode === 1 ? (
-          <UnlearningConfiguration
+          <Unlearning
             operationStatus={operationStatus}
             setOperationStatus={setOperationStatus}
             trainedModels={trainedModels}
             setUnlearnedModels={setUnlearnedModels}
           />
         ) : (
-          <DefenseConfiguration />
+          <Defense
+            operationStatus={operationStatus}
+            setOperationStatus={setOperationStatus}
+            unlearnedModels={unlearnedModels}
+          />
         )}
       </ContentBox>
     </section>

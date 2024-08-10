@@ -16,7 +16,7 @@ export async function fetchModelFiles(end: string) {
   const response = await fetch(`${API_URL}/${end}`);
 
   if (!response.ok) {
-    alert("Error occurred while fetching models.");
+    alert("Failed to fetch models.");
     return;
   }
 

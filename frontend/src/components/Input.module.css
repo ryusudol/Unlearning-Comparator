@@ -1,9 +1,9 @@
 .wrapper {
-  margin: 0px 0px 5px 55px;
+  margin: 0px 0px 3px 35px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 342px;
+  width: 230px;
 }
 
 .label {
@@ -11,10 +11,9 @@
 }
 
 .input {
-  font-size: 15px;
-  width: 180px;
-  height: 22px;
-  padding: 0px 4px;
+  width: 120px;
+  height: 18px;
+  padding: 0 4px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

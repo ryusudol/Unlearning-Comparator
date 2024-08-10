@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import styles from "./TrainingConfiguration.module.css";
+import styles from "./Training.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -27,7 +27,7 @@ const initialState = {
   seed: 1,
 };
 
-export default function TrainingConfiguration({
+export default function Training({
   operationStatus,
   setOperationStatus,
   setTrainedModels,
@@ -86,68 +86,70 @@ export default function TrainingConfiguration({
     );
   };
 
-  return operationStatus ? (
-    <OperationStatus indicator={indicator} status={status} />
-  ) : (
+  return (
     <form onSubmit={handleBtnClick}>
-      <div className={styles["subset-wrapper"]}>
-        <div
-          id="predefined"
-          onClick={handleSectionClick}
-          className={styles.predefined}
-        >
-          <div className={styles.mode}>
-            <div className={styles["label-wrapper"]}>
-              <FontAwesomeIcon
-                className={styles.icon}
-                icon={mode ? faCircle : faCircleCheck}
+      {operationStatus ? (
+        <OperationStatus
+          identifier="training"
+          indicator={indicator}
+          status={status}
+        />
+      ) : (
+        <div>
+          <div id="predefined" onClick={handleSectionClick}>
+            <div className={styles.mode}>
+              <div className={styles["label-wrapper"]}>
+                <FontAwesomeIcon
+                  className={styles.icon}
+                  icon={mode ? faCircle : faCircleCheck}
+                />
+                <span className={styles["label"]}>Predefined Settings</span>
+              </div>
+            </div>
+            <div>
+              <Input
+                labelName="Model"
+                defaultValue={initialState.model}
+                optionData={MODELS}
+                type="select"
               />
-              <span className={styles["label"]}>Predefined Settings</span>
+              <Input
+                labelName="Dataset"
+                defaultValue={initialState.dataset}
+                optionData={DATASET}
+                type="select"
+              />
+              <Input
+                labelName="Epochs"
+                defaultValue={initialState.epochs}
+                type="number"
+              />
+              <Input
+                labelName="Learning Rate"
+                defaultValue={initialState.learning_rate}
+                type="number"
+              />
+              <Input
+                labelName="Batch Size"
+                defaultValue={initialState.batch_size}
+                type="number"
+              />
+              <Input
+                labelName="Seed"
+                defaultValue={initialState.seed}
+                type="number"
+              />
             </div>
           </div>
-          <div>
-            <Input
-              labelName="Model"
-              defaultValue={initialState.model}
-              optionData={MODELS}
-              type="select"
-            />
-            <Input
-              labelName="Dataset"
-              defaultValue={initialState.dataset}
-              optionData={DATASET}
-              type="select"
-            />
-            <Input
-              labelName="Epochs"
-              defaultValue={initialState.epochs}
-              type="number"
-            />
-            <Input
-              labelName="Learning Rate"
-              defaultValue={initialState.learning_rate}
-              type="number"
-            />
-            <Input
-              labelName="Batch Size"
-              defaultValue={initialState.batch_size}
-              type="number"
-            />
-            <Input
-              labelName="Seed"
-              defaultValue={initialState.seed}
-              type="number"
+          <div id="custom" onClick={handleSectionClick}>
+            <CustomFileInput
+              mode={mode}
+              customFile={customFile}
+              handleCustomFileUpload={handleCustomFileUpload}
             />
           </div>
         </div>
-        <div id="custom" onClick={handleSectionClick}>
-          <CustomFileInput
-            mode={mode}
-            customFile={customFile}
-            handleCustomFileUpload={handleCustomFileUpload}
-          />
-        </div>
-      </div>
+      )}
       <RunButton operationStatus={operationStatus} />
     </form>
   );

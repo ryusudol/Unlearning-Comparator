@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import styles from "./UnlearningConfiguration.module.css";
+import styles from "./Unlearning.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -125,83 +125,89 @@ export default function UnlearningConfiguration({
     );
   };
 
-  return operationStatus ? (
-    <OperationStatus indicator={indicator} status={status} />
-  ) : (
+  return (
     <form onSubmit={handleBtnClick}>
-      <div className={styles["subset-wrapper"]}>
-        <div
-          id="predefined"
-          onClick={handleSectionClick}
-          className={styles.predefined}
-        >
-          <div className={styles.mode}>
-            <div className={styles["label-wrapper"]}>
-              <FontAwesomeIcon
-                className={styles.icon}
-                icon={mode ? faCircle : faCircleCheck}
-              />
-              <label className={styles.label}>Predefined Method</label>
+      {operationStatus ? (
+        <OperationStatus
+          identifier="unlearning"
+          indicator={indicator}
+          status={status}
+        />
+      ) : (
+        <div>
+          <div
+            id="predefined"
+            onClick={handleSectionClick}
+            className={styles.predefined}
+          >
+            <div className={styles.mode}>
+              <div className={styles["label-wrapper"]}>
+                <FontAwesomeIcon
+                  className={styles.icon}
+                  icon={mode ? faCircle : faCircleCheck}
+                />
+                <label className={styles.label}>Predefined Method</label>
+              </div>
+              <select
+                name="method"
+                onChange={handleSelectUnlearningMethod}
+                className={styles["predefined-select"]}
+              >
+                {UNLEARNING_METHODS.map((method, idx) => (
+                  <option key={idx} value={method}>
+                    {method}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              name="method"
-              onChange={handleSelectUnlearningMethod}
-              className={styles["predefined-select"]}
-            >
-              {UNLEARNING_METHODS.map((method, idx) => (
-                <option key={idx} value={method}>
-                  {method}
-                </option>
-              ))}
-            </select>
+            <div>
+              <Input
+                labelName="Trained Model"
+                defaultValue={trainedModels[0]}
+                optionData={trainedModels}
+                type="select"
+                disabled={initialState.method === "Retrain"}
+              />
+              <Input
+                labelName="Predefined Forget Class"
+                defaultValue={initialState.forget_class}
+                optionData={UNLEARN_CLASSES}
+                type="select"
+              />
+              <Input
+                labelName="Epochs"
+                defaultValue={initialState.epochs}
+                type="number"
+              />
+              <Input
+                labelName="Batch Size"
+                defaultValue={initialState.batch_size}
+                type="number"
+              />
+              <Input
+                labelName="Learning Rate"
+                defaultValue={initialState.learning_rate}
+                type="number"
+              />
+            </div>
           </div>
-          <div>
-            <Input
-              labelName="Trained Model"
-              defaultValue={trainedModels[0]}
-              optionData={trainedModels}
-              type="select"
-              disabled={initialState.method === "Retrain"}
+          <div id="custom" onClick={handleSectionClick}>
+            <CustomFileInput
+              mode={mode}
+              customFile={customFile}
+              handleCustomFileUpload={handleCustomFileUpload}
             />
-            <Input
-              labelName="Predefined Forget Class"
-              defaultValue={initialState.forget_class}
-              optionData={UNLEARN_CLASSES}
-              type="select"
-            />
-            <Input
-              labelName="Epochs"
-              defaultValue={initialState.epochs}
-              type="number"
-            />
-            <Input
-              labelName="Batch Size"
-              defaultValue={initialState.batch_size}
-              type="number"
-            />
-            <Input
-              labelName="Learning Rate"
-              defaultValue={initialState.learning_rate}
-              type="number"
-            />
-          </div>
-        </div>
-        <div id="custom" onClick={handleSectionClick}>
-          <CustomFileInput
-            mode={mode}
-            customFile={customFile}
-            handleCustomFileUpload={handleCustomFileUpload}
-          />
-          <div>
-            <Input
-              labelName="Custom Forget Class"
-              defaultValue={initialState.forget_class}
-              optionData={UNLEARN_CLASSES}
-              type="select"
-            />
+            <div>
+              <Input
+                labelName="Custom Forget Class"
+                defaultValue={initialState.forget_class}
+                optionData={UNLEARN_CLASSES}
+                type="select"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <RunButton operationStatus={operationStatus} />
     </form>
   );

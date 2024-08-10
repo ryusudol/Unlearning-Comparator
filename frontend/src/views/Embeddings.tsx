@@ -64,11 +64,11 @@ export default function Settings() {
   };
 
   return (
-    <section>
+    <section className={styles.embeddings}>
       <Title title="Embeddings" />
       <div className={styles.section}>
-        <ContentBox height={660}>
-          <div className={styles.wrapper}>
+        <ContentBox height={626}>
+          <div>
             {retrainedSvgs && (
               <div className={styles["content-wrapper"]}>
                 <div className={styles["svg-wrapper"]}>

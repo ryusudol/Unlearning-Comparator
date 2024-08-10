@@ -1,4 +1,4 @@
-import styles from "./ConfigurationModeSelector.module.css";
+import styles from "./ConfigSelector.module.css";
 
 interface Props {
   mode: number;
@@ -6,11 +6,7 @@ interface Props {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function ConfigurationModeSelector({
-  mode,
-  status,
-  onClick,
-}: Props) {
+export default function ConfigSelector({ mode, status, onClick }: Props) {
   return (
     <div className={styles["mode-button-wrapper"]}>
       <button

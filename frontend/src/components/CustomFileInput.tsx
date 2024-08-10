@@ -16,7 +16,7 @@ export default function CustomFileInput({
   handleCustomFileUpload,
 }: Props) {
   return (
-    <div className={styles["input-wrapper"]}>
+    <div className={styles.wrapper}>
       <div className={styles["label-wrapper"]}>
         <FontAwesomeIcon
           className={styles.icon}

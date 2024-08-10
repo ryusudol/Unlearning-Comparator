@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import * as d3 from "d3";
 
 import { RendererProps } from "../../types/archives";

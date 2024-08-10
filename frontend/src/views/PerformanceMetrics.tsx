@@ -7,7 +7,7 @@ export default function PerformanceMetrics() {
   return (
     <section className={styles["performance-metrics"]}>
       <Title title="Performance Metrics" />
-      <ContentBox height={325}>
+      <ContentBox height={253}>
         <div></div>
       </ContentBox>
     </section>

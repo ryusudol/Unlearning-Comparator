@@ -6,7 +6,7 @@ import { Heatmap } from "../components/UI/Heatmap";
 import { HeatmapData } from "../types/archives";
 
 let data: HeatmapData[] = [];
-const xAxis = ["UA", "RA", "MIA", "TA", "RTE", "Avg"];
+const xAxis = ["UA", "RA", "TA", "RTE", "Avg", "Retrain"];
 const yAxis = ["U1", "U2+D1", "U3+D2"];
 
 for (let i = 0; i < 6; i++) {
@@ -23,9 +23,9 @@ export default function PerformanceOverview() {
   return (
     <section className={styles["performance-overview"]}>
       <Title title="Performance Overview" />
-      <ContentBox height={325}>
+      <ContentBox height={253}>
         <div className={styles["heatmap-wrapper"]}>
-          <Heatmap width={480} height={120} data={data} />
+          <Heatmap width={460} height={140} data={data} />
         </div>
       </ContentBox>
     </section>
