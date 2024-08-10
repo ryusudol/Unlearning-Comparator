@@ -1,15 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const ORIGINAL_SVGS = "originalSvgs";
+const RETRAINED_SVGS = "retrainedSvgs";
 const UNLEARNED_SVGS = "unlearnedSvgs";
 
 interface SvgsState {
-  originalSvgs: string[];
+  retrainedSvgs: string[];
   unlearnedSvgs: string[];
 }
 
 const initialSvgsState: SvgsState = {
-  originalSvgs: [],
+  retrainedSvgs: [],
   unlearnedSvgs: [],
 };
 
@@ -17,13 +17,16 @@ const svgsSlice = createSlice({
   name: "svgs",
   initialState: initialSvgsState,
   reducers: {
-    saveOriginalSvgs(state, action) {
-      state.originalSvgs = action.payload;
-      sessionStorage.setItem(ORIGINAL_SVGS, JSON.stringify(state.originalSvgs));
+    saveRetrainedSvgs(state, action) {
+      state.retrainedSvgs = action.payload;
+      sessionStorage.setItem(
+        RETRAINED_SVGS,
+        JSON.stringify(state.retrainedSvgs)
+      );
     },
 
-    retrieveOriginalSvgs(state) {
-      const serializedSvgs = sessionStorage.getItem(ORIGINAL_SVGS);
+    retrieveRetrainedSvgs(state) {
+      const serializedSvgs = sessionStorage.getItem(RETRAINED_SVGS);
       if (!serializedSvgs) return;
       try {
         const parsedSvgs = JSON.parse(serializedSvgs);
@@ -32,19 +35,19 @@ const svgsSlice = createSlice({
           parsedSvgs.length === 4 &&
           parsedSvgs.every((item: any) => typeof item === "string")
         ) {
-          state.originalSvgs = parsedSvgs;
+          state.retrainedSvgs = parsedSvgs;
         } else {
-          state.originalSvgs = [];
+          state.retrainedSvgs = [];
         }
       } catch (err) {
         console.error(err);
-        state.originalSvgs = [];
+        state.retrainedSvgs = [];
       }
     },
 
-    clearOriginalSvgs(state) {
-      sessionStorage.removeItem(ORIGINAL_SVGS);
-      state.originalSvgs = [];
+    clearRetrainedSvgs(state) {
+      sessionStorage.removeItem(RETRAINED_SVGS);
+      state.retrainedSvgs = [];
     },
 
     saveUnlearnedSvgs(state, action) {

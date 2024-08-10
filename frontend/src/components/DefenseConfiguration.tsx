@@ -117,27 +117,23 @@ export default function DefenseConfiguration() {
           </div>
           <Input
             labelName="Unlearned Model"
-            value={selectedUnlearnedModel}
-            setStateString={setSelectedUnlearnedModel}
+            defaultValue={selectedUnlearnedModel}
             optionData={unlearnedModels}
             type="select"
           />
           <Input
             labelName="parameter_1"
-            value={defenseParameter1}
-            setStateNumber={setDefenseParameter1}
+            defaultValue={defenseParameter1}
             type="number"
           />
           <Input
             labelName="parameter_2"
-            value={defenseParameter2}
-            setStateNumber={setDefenseParameter2}
+            defaultValue={defenseParameter2}
             type="number"
           />
           <Input
             labelName="parameter_3"
-            value={defenseParameter3}
-            setStateNumber={setDefenseParameter3}
+            defaultValue={defenseParameter3}
             type="number"
           />
         </div>
