@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import styles from "./Settings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import ConfigurationModeSelector from "../components/ConfigurationModeSelector";
-import TrainingConfiguration from "../components/TrainingConfiguration";
-import UnlearningConfiguration from "../components/UnlearningConfiguration";
-import DefenseConfiguration from "../components/DefenseConfiguration";
+import ConfigurationModeSelector from "../components/UI/ConfigurationModeSelector";
+import TrainingConfiguration from "../components/UI/TrainingConfiguration";
+import UnlearningConfiguration from "../components/UI/UnlearningConfiguration";
+import DefenseConfiguration from "../components/UI/DefenseConfiguration";
 
 const API_URL = "http://localhost:8000";
 
@@ -37,9 +38,9 @@ export default function Settings() {
   };
 
   return (
-    <section>
+    <section className={styles.settings}>
       <Title title="Settings" />
-      <ContentBox height={252}>
+      <ContentBox height={325}>
         <ConfigurationModeSelector
           mode={mode}
           status={operationStatus}

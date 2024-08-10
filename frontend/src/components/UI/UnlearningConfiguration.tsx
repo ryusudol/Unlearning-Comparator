@@ -5,17 +5,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import Input from "../components/Input";
-import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
+import Input from "../Input";
+import OperationStatus from "../OperationStatus";
+import CustomFileInput from "../CustomFileInput";
+import RunButton from "../RunButton";
+import { useInterval } from "../../hooks/useInterval";
+import { execute, monitorStatus } from "../../http";
+import {
+  UNLEARNING_METHODS,
+  UNLEARN_CLASSES,
+} from "../../constants/unlearning";
 import {
   UnlearningStatus,
   UnlearningProps,
   Timer,
   UnlearningConfigurationData,
-} from "../types/settings";
-import { useInterval } from "../hooks/useInterval";
-import { execute, monitorStatus } from "../http";
-import OperationStatus from "./OperationStatus";
+} from "../../types/settings";
 
 export default function UnlearningConfiguration({
   operationStatus,
@@ -136,9 +141,7 @@ export default function UnlearningConfiguration({
                 className={styles.icon}
                 icon={mode ? faCircle : faCircleCheck}
               />
-              <label className={styles["predefined-label"]}>
-                Predefined Method
-              </label>
+              <label className={styles.label}>Predefined Method</label>
             </div>
             <select
               name="method"
@@ -146,7 +149,7 @@ export default function UnlearningConfiguration({
               className={styles["predefined-select"]}
             >
               {UNLEARNING_METHODS.map((method, idx) => (
-                <option key={idx} className={styles.option} value={method}>
+                <option key={idx} value={method}>
                   {method}
                 </option>
               ))}
@@ -183,30 +186,12 @@ export default function UnlearningConfiguration({
             />
           </div>
         </div>
-        {/* TODO: Custom canceling status 표시 */}
-        <div
-          id="custom"
-          onClick={handleSectionClick}
-          className={styles["custom-wrapper"]}
-        >
-          <div className={styles.custom}>
-            <div className={styles["label-wrapper"]}>
-              <FontAwesomeIcon
-                className={styles.icon}
-                icon={mode ? faCircleCheck : faCircle}
-              />
-              <span className={styles["predefined-label"]}>Custom Model</span>
-            </div>
-            <label htmlFor="custom-unlearning">
-              <div className={styles["upload"]}>Click to upload</div>
-            </label>
-            <input
-              onChange={handleCustomFileUpload}
-              className={styles["file-input"]}
-              type="file"
-              id="custom-unlearning"
-            />
-          </div>
+        <div id="custom" onClick={handleSectionClick}>
+          <CustomFileInput
+            mode={mode}
+            customFile={customFile}
+            handleCustomFileUpload={handleCustomFileUpload}
+          />
           <div>
             <Input
               labelName="Custom Forget Class"
@@ -217,11 +202,7 @@ export default function UnlearningConfiguration({
           </div>
         </div>
       </div>
-      <div className={styles["button-wrapper"]}>
-        <button className={styles.button}>
-          {operationStatus ? "Cancel" : "Run"}
-        </button>
-      </div>
+      <RunButton operationStatus={operationStatus} />
     </form>
   );
 }

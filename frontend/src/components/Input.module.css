@@ -1,9 +1,9 @@
 .wrapper {
-  margin: 0px 0px 3px 35px;
+  margin: 0px 0px 5px 55px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 250px;
+  width: 342px;
 }
 
 .label {
@@ -11,8 +11,9 @@
 }
 
 .input {
-  width: 140px;
-  height: 18px;
+  font-size: 15px;
+  width: 180px;
+  height: 22px;
   padding: 0px 4px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -20,8 +21,4 @@
 
 .input:focus {
   outline: none;
-}
-
-.option {
-  font-size: 12px;
 }

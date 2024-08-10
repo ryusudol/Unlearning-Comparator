@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import Input from "../components/Input";
+import Input from "../Input";
 
 const METHODS = ["method1", "method2", "method3", "method4"];
 const UNLEARNED_MODELS = ["Model 1", "Model 2", "Model 3"];

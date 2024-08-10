@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import * as d3 from "d3";
 
-import { RendererProps } from "../types/archives";
+import { RendererProps } from "../../types/archives";
 
 const MARGIN = { top: 15, right: 100, bottom: 15, left: 135 };
 
