@@ -29,7 +29,7 @@ export function getAccuracies(
     ) {
       for (let key in (status as UnlearningStatus).test_class_accuracies)
         accuracies.push(
-          (status as UnlearningStatus).test_class_accuracies[key]
+          (status as UnlearningStatus).test_class_accuracies![key]
         );
     }
   } else {
