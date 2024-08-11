@@ -129,7 +129,13 @@ export async function execute(
       }
       setOperationStatus(1);
       setStatus(undefined);
-      setIndicator(isTraining ? "Training . . ." : "Unlearning . . .");
+      setIndicator(
+        isTraining
+          ? "Training . . ."
+          : `Unlearning Class ${
+              (configState as unknown as UnlearningStatus).forget_class
+            } . . .`
+      );
       try {
         const method = (configState as UnlearningConfigurationData).method;
         const end =
