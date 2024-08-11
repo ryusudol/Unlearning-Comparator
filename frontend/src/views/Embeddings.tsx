@@ -4,10 +4,11 @@ import styles from "./Embeddings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
+import SvgViewer from "../components/UI/SvgViewer";
 import { SvgsState } from "../types/embeddings";
 import { svgsActions } from "../store/svgs";
 
-export default function Settings() {
+export default function Embeddings() {
   const dispatch = useDispatch();
 
   const retrainedSvgs = useSelector(
@@ -52,72 +53,34 @@ export default function Settings() {
     setSelectedUnlearnedId(unlearnedSvgs ? 4 : undefined);
   }, [retrainedSvgs, unlearnedSvgs]);
 
-  const createMarkup = (svg: string) => {
-    return { __html: svg };
-  };
-
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
     const idNum = +id.split("-")[1];
-    if (id.includes("o")) setSelectedRetrainedId(idNum);
+    if (id.includes("r")) setSelectedRetrainedId(idNum);
     else if (id.includes("u")) setSelectedUnlearnedId(idNum);
   };
 
   return (
     <section className={styles.embeddings}>
       <Title title="Embeddings" />
-      <div className={styles.section}>
-        <ContentBox height={626}>
-          <div>
-            {retrainedSvgs && (
-              <div className={styles["content-wrapper"]}>
-                <div className={styles["svg-wrapper"]}>
-                  <div
-                    id="o-1"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedRetrainedSvgs[0]
-                    )}
-                  />
-                  <div
-                    id="o-2"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedRetrainedSvgs[1]
-                    )}
-                  />
-                  <div
-                    id="o-3"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedRetrainedSvgs[2]
-                    )}
-                  />
-                  <div
-                    id="o-4"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedRetrainedSvgs[3]
-                    )}
-                  />
-                </div>
-                {selectedRetrainedId && (
-                  <div
-                    className={styles["selected-svg"]}
-                    dangerouslySetInnerHTML={createMarkup(
-                      retrainedSvgs[selectedRetrainedId - 1]
-                    )}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </ContentBox>
-      </div>
+      <ContentBox height={626}>
+        <div className={styles["viewers-wrapper"]}>
+          <SvgViewer
+            mode="r"
+            svgs={retrainedSvgs}
+            handleThumbnailClick={handleThumbnailClick}
+            modifiedSvgs={modifiedRetrainedSvgs}
+            selectedSvgId={selectedRetrainedId}
+          />
+          <SvgViewer
+            mode="u"
+            svgs={unlearnedSvgs}
+            handleThumbnailClick={handleThumbnailClick}
+            modifiedSvgs={modifiedUnlearnedSvgs}
+            selectedSvgId={selectedUnlearnedId}
+          />
+        </div>
+      </ContentBox>
     </section>
   );
 }

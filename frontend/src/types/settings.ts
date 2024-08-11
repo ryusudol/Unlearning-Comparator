@@ -49,7 +49,7 @@ export interface UnlearningStatus {
   test_loss: number;
   test_accuracy: number;
   train_class_accuracies: ClassAccuracies;
-  test_class_accuracies: ClassAccuracies;
+  test_class_accuracies: ClassAccuracies | null;
   estimated_time_remaining: number | null;
   forget_class: number;
 }

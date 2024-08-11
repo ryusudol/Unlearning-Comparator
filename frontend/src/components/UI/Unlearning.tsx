@@ -105,6 +105,7 @@ export default function UnlearningConfiguration({
       mode === 0
         ? fd.get("predefined_forget_class")
         : fd.get("custom_forget_class");
+    fd.delete("method");
     fd.delete("predefined_forget_class");
     fd.delete("custom_forget_class");
     const configState = Object.fromEntries(
@@ -175,16 +176,19 @@ export default function UnlearningConfiguration({
                 type="select"
               />
               <Input
+                key={initialState.epochs}
                 labelName="Epochs"
                 defaultValue={initialState.epochs}
                 type="number"
               />
               <Input
+                key={initialState.batch_size}
                 labelName="Batch Size"
                 defaultValue={initialState.batch_size}
                 type="number"
               />
               <Input
+                key={initialState.learning_rate}
                 labelName="Learning Rate"
                 defaultValue={initialState.learning_rate}
                 type="number"
