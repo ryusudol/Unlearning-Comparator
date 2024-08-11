@@ -2,45 +2,8 @@
   width: 990px;
 }
 
-.img {
-  width: 340px;
-  margin: 32px 0 0 50px;
-}
-
-.svg-wrapper {
+.viewers-wrapper {
   width: 100%;
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-}
-
-.svg svg {
-  border: 1px solid var(--title-bg-color);
-  width: 60px;
-  height: 60px;
-  scale: 1;
-  cursor: pointer;
-  margin-left: -1px;
-}
-
-.svg svg:hover {
-  scale: 1.1;
-}
-
-.content-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.selected-svg {
-}
-
-.selected-svg svg {
-  position: relative;
-  bottom: 32px;
-  width: 450px;
-  height: 450px;
-  z-index: -1;
+  justify-content: space-around;
 }
