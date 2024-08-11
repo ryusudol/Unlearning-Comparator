@@ -176,16 +176,19 @@ export default function UnlearningConfiguration({
                 type="select"
               />
               <Input
+                key={initialState.epochs}
                 labelName="Epochs"
                 defaultValue={initialState.epochs}
                 type="number"
               />
               <Input
+                key={initialState.batch_size}
                 labelName="Batch Size"
                 defaultValue={initialState.batch_size}
                 type="number"
               />
               <Input
+                key={initialState.learning_rate}
                 labelName="Learning Rate"
                 defaultValue={initialState.learning_rate}
                 type="number"
