@@ -1,19 +1,16 @@
 import React, { useState } from "react";
-import styles from "./Defense.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-regular-svg-icons";
-import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
 import Input from "../Input";
+import PredefinedInput from "../PredefinedInput";
+import CustomInput from "../CustomInput";
 import RunButton from "../RunButton";
-import CustomFileInput from "../CustomFileInput";
 import OperationStatus from "../OperationStatus";
+import { DEFENSE_METHODS, UNLEARNED_MODELS } from "../../constants/defense";
 import {
   DefenseProps,
   DefenseStatus,
   DefenseConfigurationData,
 } from "../../types/settings";
-import { DEFENSE_METHODS, UNLEARNED_MODELS } from "../../constants/defense";
 
 export default function Defense({
   operationStatus,
@@ -61,22 +58,7 @@ export default function Defense({
       ) : (
         <div>
           <div id="predefined" onClick={handleSectionClick}>
-            <div className={styles.mode}>
-              <div className={styles["label-wrapper"]}>
-                <FontAwesomeIcon
-                  className={styles.icon}
-                  icon={mode ? faCircle : faCircleCheck}
-                />
-                <label className={styles.label}>Predefined Method</label>
-              </div>
-              <select name="method" className={styles.select}>
-                {DEFENSE_METHODS.map((method, idx) => (
-                  <option key={idx} className={styles.option} value={method}>
-                    {method}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <PredefinedInput mode={mode} optionData={DEFENSE_METHODS} />
             <Input
               labelName="Unlearned Model"
               defaultValue={selectedUnlearnedModel}
@@ -88,7 +70,7 @@ export default function Defense({
             <Input labelName="Parameter 3" defaultValue={0} type="number" />
           </div>
           <div id="custom" onClick={handleSectionClick}>
-            <CustomFileInput
+            <CustomInput
               mode={mode}
               customFile={customFile}
               handleCustomFileUpload={handleCustomFileUpload}

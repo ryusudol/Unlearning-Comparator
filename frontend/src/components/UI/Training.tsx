@@ -1,13 +1,10 @@
 import React, { useState, useCallback, useRef } from "react";
-import styles from "./Training.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-regular-svg-icons";
-import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
 import Input from "../Input";
+import PredefinedInput from "../PredefinedInput";
+import CustomInput from "../CustomInput";
 import RunButton from "../RunButton";
 import OperationStatus from "../OperationStatus";
-import CustomFileInput from "../CustomFileInput";
 import { useInterval } from "../../hooks/useInterval";
 import { MODELS, DATASET } from "../../constants/training";
 import { execute, monitorStatus } from "../../http";
@@ -17,15 +14,6 @@ import {
   TrainingProps,
   Timer,
 } from "../../types/settings";
-
-const initialState = {
-  model: "ResNet-18",
-  dataset: "CIFAR-10",
-  epochs: 30,
-  learning_rate: 0.01,
-  batch_size: 128,
-  seed: 1,
-};
 
 export default function Training({
   operationStatus,
@@ -97,52 +85,32 @@ export default function Training({
       ) : (
         <div>
           <div id="predefined" onClick={handleSectionClick}>
-            <div className={styles.mode}>
-              <div className={styles["label-wrapper"]}>
-                <FontAwesomeIcon
-                  className={styles.icon}
-                  icon={mode ? faCircle : faCircleCheck}
-                />
-                <span className={styles["label"]}>Predefined Settings</span>
-              </div>
-            </div>
+            <PredefinedInput mode={mode} />
             <div>
               <Input
                 labelName="Model"
-                defaultValue={initialState.model}
+                defaultValue={"ResNet-18"}
                 optionData={MODELS}
                 type="select"
               />
               <Input
                 labelName="Dataset"
-                defaultValue={initialState.dataset}
+                defaultValue={"CIFAR-10"}
                 optionData={DATASET}
                 type="select"
               />
-              <Input
-                labelName="Epochs"
-                defaultValue={initialState.epochs}
-                type="number"
-              />
+              <Input labelName="Epochs" defaultValue={30} type="number" />
               <Input
                 labelName="Learning Rate"
-                defaultValue={initialState.learning_rate}
+                defaultValue={0.01}
                 type="number"
               />
-              <Input
-                labelName="Batch Size"
-                defaultValue={initialState.batch_size}
-                type="number"
-              />
-              <Input
-                labelName="Seed"
-                defaultValue={initialState.seed}
-                type="number"
-              />
+              <Input labelName="Batch Size" defaultValue={128} type="number" />
+              <Input labelName="Seed" defaultValue={1} type="number" />
             </div>
           </div>
           <div id="custom" onClick={handleSectionClick}>
-            <CustomFileInput
+            <CustomInput
               mode={mode}
               customFile={customFile}
               handleCustomFileUpload={handleCustomFileUpload}
