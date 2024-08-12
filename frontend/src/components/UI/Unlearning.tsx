@@ -32,6 +32,7 @@ export default function UnlearningConfiguration({
   const fetchedResult = useRef(false);
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
+  const [isRetrain, setIsRetrain] = useState(false);
   const [customFile, setCustomFile] = useState<File>();
   const [indicator, setIndicator] = useState("Unlearning . . .");
   const [status, setStatus] = useState<UnlearningStatus | undefined>();
@@ -52,9 +53,10 @@ export default function UnlearningConfiguration({
       setIndicator,
       setStatus,
       setUnlearnedModels,
-      dispatch
+      dispatch,
+      isRetrain
     );
-  }, [dispatch, setOperationStatus, setUnlearnedModels]);
+  }, [dispatch, setOperationStatus, setUnlearnedModels, isRetrain]);
 
   useInterval(operationStatus, interval, checkUnlearningStatus);
 
@@ -75,6 +77,7 @@ export default function UnlearningConfiguration({
     } else {
       epochs = 30;
       learning_rate = 0.01;
+      setIsRetrain(true);
     }
 
     setInitialState({
