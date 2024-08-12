@@ -100,6 +100,7 @@ export async function execute(
   fetchedResult.current = false;
   const isTraining = identifier === "train";
   if (operationStatus) {
+    // cancelling
     try {
       setIndicator("Cancelling . . .");
       const res = await fetch(`${API_URL}/${identifier}/cancel`, {
@@ -109,7 +110,6 @@ export async function execute(
         alert("Error occurred while cancelling.");
         return;
       }
-      fetchedResult.current = true;
       setOperationStatus(0);
     } catch (err) {
       console.error(err);
