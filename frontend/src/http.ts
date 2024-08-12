@@ -13,16 +13,22 @@ import {
 const API_URL = "http://localhost:8000";
 
 export async function fetchModelFiles(end: string) {
-  const response = await fetch(`${API_URL}/${end}`);
+  try {
+    const response = await fetch(`${API_URL}/${end}`);
 
-  if (!response.ok) {
-    alert("Failed to fetch models.");
-    return;
+    if (!response.ok) {
+      alert("Failed to fetch model files.");
+      throw new Error(
+        `Failed to fetch model files. HTTP status: ${response.status}`
+      );
+    }
+
+    const models = await response.json();
+    return models;
+  } catch (error) {
+    console.error("fetchModelFiles error: ", error);
+    throw error;
   }
-
-  const models = await response.json();
-
-  return models;
 }
 
 export async function monitorStatus(
@@ -40,34 +46,50 @@ export async function monitorStatus(
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
   const isUnlearning = identifier === "unlearn";
+
   if (fetchedResult.current) return;
+
   try {
     const response = await fetch(`${API_URL}/${identifier}/status`);
+
     if (!response.ok) {
-      console.error("Failed to fetch status");
-      return;
+      alert(`Failed to fetch ${identifier} status.`);
+      throw new Error(
+        `Failed to fetch ${identifier} status. HTTP status: ${response.status}`
+      );
     }
+
     const data = await response.json();
+
     if (!isInference) setStatus!(data);
+
     if (
       data.progress === 100 &&
       (!data.is_training || !data.is_inferencing || !data.is_unlearning) &&
       !fetchedResult.current
     ) {
       setIndicator("Embedding . . .");
+
       fetchedResult.current = true;
+
       if (interval.current) {
         clearInterval(interval.current);
         interval.current = undefined;
       }
+
       const resultResponse = await fetch(`${API_URL}/${identifier}/result`);
+
+      setOperationStatus(0);
+
       if (!resultResponse.ok) {
         alert("Error occurred while fetching the result.");
-        setOperationStatus(0);
-        return;
+        throw new Error(
+          `Failed to fetch ${identifier} result. HTTP status: ${response.status}`
+        );
       }
-      setOperationStatus(0);
+
       if (!isInference) setStatus!(undefined);
+
       if (isTraining) {
         const models = await fetchModelFiles("trained_models");
         setModelFiles!(models);
@@ -78,9 +100,10 @@ export async function monitorStatus(
         // setModelFiles!(models);
       }
     }
-  } catch (err) {
+  } catch (error) {
     setOperationStatus(0);
-    console.error(err);
+    console.error("monitorStatus error: ", error);
+    throw error;
   }
 }
 
@@ -98,22 +121,29 @@ export async function execute(
   customFile: File | undefined
 ) {
   fetchedResult.current = false;
+
   const isTraining = identifier === "train";
+
   if (operationStatus) {
     // cancelling
     try {
       setIndicator("Cancelling . . .");
-      const res = await fetch(`${API_URL}/${identifier}/cancel`, {
+
+      const response = await fetch(`${API_URL}/${identifier}/cancel`, {
         method: "POST",
       });
-      if (!res.ok) {
-        alert("Error occurred while cancelling.");
-        return;
+
+      setOperationStatus(0);
+
+      if (!response.ok) {
+        alert(`Failed to cancel running.`);
+        throw new Error(
+          `Failed to cancel running. HTTP status: ${response.status}`
+        );
       }
-      setOperationStatus(0);
-    } catch (err) {
-      console.error(err);
-      setOperationStatus(0);
+    } catch (error) {
+      console.error("execute of cancelling error: ", error);
+      throw error;
     }
   } else {
     if (mode === 0) {
@@ -127,6 +157,7 @@ export async function execute(
         alert("Please enter valid numbers");
         return;
       }
+
       setOperationStatus(1);
       setStatus(undefined);
       setIndicator(
@@ -136,6 +167,7 @@ export async function execute(
               (configState as unknown as UnlearningStatus).forget_class
             } . . .`
       );
+
       try {
         const method = (configState as UnlearningConfigurationData).method;
         const end =
@@ -160,7 +192,8 @@ export async function execute(
               forget_class: (configState as UnlearningConfigurationData)
                 .forget_class,
             };
-        const res = await fetch(
+
+        const response = await fetch(
           `${API_URL}/${isTraining ? "train" : `unlearn/${end}`}`,
           {
             method: "POST",
@@ -168,13 +201,17 @@ export async function execute(
             body: JSON.stringify(data),
           }
         );
-        if (!res.ok) {
-          alert("Failed to run.");
-          setOperationStatus(0);
+
+        if (!response.ok) {
+          alert(`Failed to ${identifier}.`);
+          throw new Error(
+            `Failed to ${identifier} with the predefined settings. HTTP status: ${response.status}`
+          );
         }
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
         setOperationStatus(0);
+        console.error("execute of predefined running error: ", error);
+        throw error;
       }
     } else {
       // custom
@@ -182,9 +219,12 @@ export async function execute(
         alert("Please upload a custom file.");
         return;
       }
+
       setOperationStatus(2);
+
       try {
         setIndicator(isTraining ? "Inferencing . . ." : "Unlearning . . .");
+
         const formData = new FormData();
         formData.append("weights_file", customFile);
         if (!isTraining) {
@@ -193,21 +233,25 @@ export async function execute(
             (configState as UnlearningConfigurationData).forget_class.toString()
           );
         }
-        const res = await fetch(
+
+        const response = await fetch(
           `${API_URL}/${isTraining ? "inference" : "unlearn/custom"}`,
           {
             method: "POST",
             body: formData,
           }
         );
-        if (!res.ok) {
-          alert("Failed to run with the custom file.");
-          setOperationStatus(0);
-          return;
+
+        if (!response.ok) {
+          alert(`Failed to ${identifier} with the custom file.`);
+          throw new Error(
+            `Failed to ${identifier}. HTTP status: ${response.status}`
+          );
         }
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
         setOperationStatus(0);
+        console.error("execute of custom running error: ", error);
+        throw error;
       }
     }
   }
