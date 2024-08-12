@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./CustomFileInput.module.css";
+import styles from "./CustomInput.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
@@ -10,7 +10,7 @@ interface Props {
   handleCustomFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function CustomFileInput({
+export default function CustomInput({
   mode,
   customFile,
   handleCustomFileUpload,

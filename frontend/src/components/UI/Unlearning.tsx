@@ -1,13 +1,11 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import styles from "./Unlearning.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-regular-svg-icons";
-import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
 import Input from "../Input";
+import PredefinedInput from "../PredefinedInput";
+import CustomInput from "../CustomInput";
 import OperationStatus from "../OperationStatus";
-import CustomFileInput from "../CustomFileInput";
 import RunButton from "../RunButton";
 import { useInterval } from "../../hooks/useInterval";
 import { execute, monitorStatus } from "../../http";
@@ -60,7 +58,7 @@ export default function UnlearningConfiguration({
 
   useInterval(operationStatus, interval, checkUnlearningStatus);
 
-  const handleSelectUnlearningMethod = (
+  const handleUnlearningMethodSelection = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const method = e.currentTarget.value;
@@ -78,6 +76,7 @@ export default function UnlearningConfiguration({
       epochs = 30;
       learning_rate = 0.01;
     }
+
     setInitialState({
       ...initialState,
       method,
@@ -105,12 +104,15 @@ export default function UnlearningConfiguration({
       mode === 0
         ? fd.get("predefined_forget_class")
         : fd.get("custom_forget_class");
+
     fd.delete("method");
     fd.delete("predefined_forget_class");
     fd.delete("custom_forget_class");
+
     const configState = Object.fromEntries(
       fd.entries()
     ) as unknown as UnlearningConfigurationData;
+
     configState.forget_class = forgetClass as string;
 
     execute(
@@ -141,26 +143,11 @@ export default function UnlearningConfiguration({
             onClick={handleSectionClick}
             className={styles.predefined}
           >
-            <div className={styles.mode}>
-              <div className={styles["label-wrapper"]}>
-                <FontAwesomeIcon
-                  className={styles.icon}
-                  icon={mode ? faCircle : faCircleCheck}
-                />
-                <label className={styles.label}>Predefined Method</label>
-              </div>
-              <select
-                name="method"
-                onChange={handleSelectUnlearningMethod}
-                className={styles["predefined-select"]}
-              >
-                {UNLEARNING_METHODS.map((method, idx) => (
-                  <option key={idx} value={method}>
-                    {method}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <PredefinedInput
+              mode={mode}
+              handleMethodSelection={handleUnlearningMethodSelection}
+              optionData={UNLEARNING_METHODS}
+            />
             <div>
               <Input
                 labelName="Trained Model"
@@ -196,7 +183,7 @@ export default function UnlearningConfiguration({
             </div>
           </div>
           <div id="custom" onClick={handleSectionClick}>
-            <CustomFileInput
+            <CustomInput
               mode={mode}
               customFile={customFile}
               handleCustomFileUpload={handleCustomFileUpload}
