@@ -41,7 +41,8 @@ export async function monitorStatus(
     | ((data: TrainingStatus | undefined) => void)
     | ((data: UnlearningStatus | undefined) => void),
   setModelFiles?: (files: string[]) => void,
-  dispatch?: Dispatch
+  dispatch?: Dispatch,
+  isRetrain?: boolean
 ) {
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
@@ -95,7 +96,8 @@ export async function monitorStatus(
         setModelFiles!(models);
       } else if (isUnlearning) {
         const data = await resultResponse.json();
-        dispatch!(svgsActions.saveUnlearnedSvgs(data.svg_files));
+        if (isRetrain) dispatch!(svgsActions.saveRetrainedSvgs(data.svg_files));
+        else dispatch!(svgsActions.saveUnlearnedSvgs(data.svg_files));
         // const models = await fetchModelFiles("unlearned_models");
         // setModelFiles!(models);
       }
@@ -123,6 +125,8 @@ export async function execute(
   fetchedResult.current = false;
 
   const isTraining = identifier === "train";
+  const forgetClass =
+    "forget_class" in configState ? configState.forget_class : undefined;
 
   if (operationStatus) {
     // cancelling
@@ -161,11 +165,7 @@ export async function execute(
       setOperationStatus(1);
       setStatus(undefined);
       setIndicator(
-        isTraining
-          ? "Training . . ."
-          : `Unlearning Class ${
-              (configState as unknown as UnlearningStatus).forget_class
-            } . . .`
+        isTraining ? "Training . . ." : `Unlearning Class ${forgetClass} . . .`
       );
 
       try {
@@ -221,10 +221,14 @@ export async function execute(
       }
 
       setOperationStatus(2);
+      setStatus(undefined);
+      setIndicator(
+        isTraining
+          ? "Inferencing . . ."
+          : `Unlearning Class ${forgetClass} . . .`
+      );
 
       try {
-        setIndicator(isTraining ? "Inferencing . . ." : "Unlearning . . .");
-
         const formData = new FormData();
         formData.append("weights_file", customFile);
         if (!isTraining) {

@@ -29,29 +29,29 @@ export default function SvgViewer({
       <SubTitle subtitle={subtitle} />
       {svgs && (
         <div className={styles["content-wrapper"]}>
-          <div className={styles["svg-wrapper"]}>
+          <div className={styles.thumbnails}>
             <div
               id={`${mode}-1`}
               onClick={handleThumbnailClick}
-              className={styles.svg}
+              className={styles.thumbnail}
               dangerouslySetInnerHTML={createMarkup(modifiedSvgs[0])}
             />
             <div
               id={`${mode}-2`}
               onClick={handleThumbnailClick}
-              className={styles.svg}
+              className={styles.thumbnail}
               dangerouslySetInnerHTML={createMarkup(modifiedSvgs[1])}
             />
             <div
               id={`${mode}-3`}
               onClick={handleThumbnailClick}
-              className={styles.svg}
+              className={styles.thumbnail}
               dangerouslySetInnerHTML={createMarkup(modifiedSvgs[2])}
             />
             <div
               id={`${mode}-4`}
               onClick={handleThumbnailClick}
-              className={styles.svg}
+              className={styles.thumbnail}
               dangerouslySetInnerHTML={createMarkup(modifiedSvgs[3])}
             />
           </div>
