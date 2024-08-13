@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BarChart,
   Bar,
@@ -7,7 +6,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 
 import SubTitle from "../components/SubTitle";
@@ -84,39 +82,38 @@ const data = [
     rte: 6.01,
   },
 ];
-const width = 240;
-const height = 110;
 
 interface Props {
+  title: string;
   dataKey: "ua" | "ra" | "ta" | "rte";
-  color: "4E79A7" | "F28E2B" | "E15759" | "76B7B2";
+  color: string;
 }
 
-export default function CustomBarChart({ dataKey, color }: Props) {
+export default function CustomBarChart({ title, dataKey, color }: Props) {
   return (
     <div>
-      <SubTitle subtitle="Unlearning Accuracy" fontSize={12} />
-      <ResponsiveContainer width={width} height={height}>
-        <BarChart
-          data={data}
-          margin={{
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: -42,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis fontSize={9} dataKey="class" />
-          <YAxis fontSize={9} />
-          <Tooltip />
-          <Bar
-            dataKey={dataKey}
-            fill={`#${color}`}
-            activeBar={<Rectangle fill="pink" stroke="blue" />}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      <SubTitle subtitle={title} fontSize={12} />
+      <BarChart
+        width={240}
+        height={110}
+        data={data}
+        margin={{
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: -42,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis fontSize={9} dataKey="class" />
+        <YAxis fontSize={9} />
+        <Tooltip />
+        <Bar
+          dataKey={dataKey}
+          fill={color}
+          activeBar={<Rectangle fill="pink" stroke="blue" />}
+        />
+      </BarChart>
     </div>
   );
 }
