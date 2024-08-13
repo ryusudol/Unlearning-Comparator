@@ -133,6 +133,7 @@ export async function execute(
     if (window.confirm("Are you sure you want to cancel?")) {
       try {
         setIndicator("Cancelling . . .");
+        setStatus(undefined);
 
         const response = await fetch(`${API_URL}/${identifier}/cancel`, {
           method: "POST",
