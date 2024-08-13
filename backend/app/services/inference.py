@@ -26,7 +26,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("\nLoading model...")
         status.current_step = "Loading model"
         status.progress = 20
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         model = get_resnet18().to(device)
         model.load_state_dict(torch.load(tmp_path, map_location=device))
         model.eval()

@@ -130,10 +130,7 @@ async def unlearn_GA_model(model,
 async def run_unlearning_GA(request, status, weights_path):
     print(f"Starting GA unlearning for class {request.forget_class} with {request.epochs} epochs...")
     set_seed(request.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    if torch.backends.mps.is_available():
-        device = torch.device("mps")
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
     train_loader, test_loader, train_set, test_set = get_data_loaders(request.batch_size)
 
