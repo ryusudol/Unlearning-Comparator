@@ -1,12 +1,13 @@
 import { useState } from "react";
 import styles from "./OperationStatus.module.css";
 
+import ProgressBar from "../components/UI/ProgressBar";
+import { getAccuracies } from "../util";
 import {
   TrainingStatus,
   UnlearningStatus,
   DefenseStatus,
 } from "../types/settings";
-import { getAccuracies } from "../util";
 
 const MODES: Mode[] = ["Test", "Train"];
 
@@ -85,13 +86,14 @@ export default function OperationStatus({
             <span className={styles["status-detail"]}>
               ETA: {status.estimated_time_remaining!.toFixed(2)}s
             </span>
+            <ProgressBar eta={status.estimated_time_remaining} />
           </div>
         )}
         <div className={styles["class-accuracies"]}>
           {accuracies.length !== 0 &&
             accuracies.map((acc, idx) => (
               <span key={idx} className={styles.accuracy}>
-                Class {idx}: {acc.toFixed(1)}
+                Class {idx}: {acc.toFixed(1)}%
               </span>
             ))}
         </div>
