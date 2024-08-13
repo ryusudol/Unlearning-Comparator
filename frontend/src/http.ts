@@ -1,7 +1,5 @@
 import React from "react";
 
-import { svgsActions } from "./store/svgs";
-import { Dispatch } from "@reduxjs/toolkit";
 import {
   TrainingConfigurationData,
   UnlearningConfigurationData,
@@ -41,8 +39,7 @@ export async function monitorStatus(
     | ((data: TrainingStatus | undefined) => void)
     | ((data: UnlearningStatus | undefined) => void),
   setModelFiles?: (files: string[]) => void,
-  dispatch?: Dispatch,
-  isRetrain?: boolean
+  saveSvgs?: (svgs: string[]) => void
 ) {
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
@@ -96,8 +93,7 @@ export async function monitorStatus(
         setModelFiles!(models);
       } else if (isUnlearning) {
         const data = await response.json();
-        if (isRetrain) dispatch!(svgsActions.saveRetrainedSvgs(data.svg_files));
-        else dispatch!(svgsActions.saveUnlearnedSvgs(data.svg_files));
+        saveSvgs!(data.svg_files);
         // const models = await fetchModelFiles("unlearned_models");
         // setModelFiles!(models);
       }
