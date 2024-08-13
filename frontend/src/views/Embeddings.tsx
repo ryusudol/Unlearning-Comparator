@@ -72,6 +72,7 @@ export default function Embeddings() {
             modifiedSvgs={modifiedRetrainedSvgs}
             selectedSvgId={selectedRetrainedId}
           />
+          <div className={styles.divider} />
           <SvgViewer
             mode="u"
             svgs={unlearnedSvgs}
