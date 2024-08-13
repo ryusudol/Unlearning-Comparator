@@ -1,5 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import React, { useContext, useState, useRef, useCallback } from "react";
 import styles from "./Unlearning.module.css";
 
 import Input from "../Input";
@@ -7,6 +6,7 @@ import PredefinedInput from "../PredefinedInput";
 import CustomInput from "../CustomInput";
 import OperationStatus from "../OperationStatus";
 import RunButton from "../RunButton";
+import { SvgContext } from "../../store/svg-context";
 import { useInterval } from "../../hooks/useInterval";
 import { execute, monitorStatus } from "../../http";
 import {
@@ -20,29 +20,30 @@ import {
   UnlearningConfigurationData,
 } from "../../types/settings";
 
+const initialValue = {
+  method: "Fine-Tuning",
+  forget_class: "0",
+  epochs: 10,
+  learning_rate: 0.02,
+  batch_size: 128,
+};
+
 export default function UnlearningConfiguration({
   operationStatus,
   setOperationStatus,
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
-  const dispatch = useDispatch();
+  const { saveUnlearnedSvgs } = useContext(SvgContext);
 
   const interval = useRef<Timer>();
   const fetchedResult = useRef(false);
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
-  const [isRetrain, setIsRetrain] = useState(false);
   const [customFile, setCustomFile] = useState<File>();
   const [indicator, setIndicator] = useState("Unlearning . . .");
   const [status, setStatus] = useState<UnlearningStatus | undefined>();
-  const [initialState, setInitialState] = useState({
-    method: "Fine-Tuning",
-    forget_class: "0",
-    epochs: 10,
-    learning_rate: 0.02,
-    batch_size: 128,
-  });
+  const [initialState, setInitialState] = useState(initialValue);
 
   const checkUnlearningStatus = useCallback(async () => {
     monitorStatus(
@@ -53,10 +54,9 @@ export default function UnlearningConfiguration({
       setIndicator,
       setStatus,
       setUnlearnedModels,
-      dispatch,
-      isRetrain
+      saveUnlearnedSvgs
     );
-  }, [dispatch, setOperationStatus, setUnlearnedModels, isRetrain]);
+  }, [setOperationStatus, setUnlearnedModels, saveUnlearnedSvgs]);
 
   useInterval(operationStatus, interval, checkUnlearningStatus);
 
@@ -77,7 +77,6 @@ export default function UnlearningConfiguration({
     } else {
       epochs = 30;
       learning_rate = 0.01;
-      setIsRetrain(true);
     }
 
     setInitialState({
@@ -118,7 +117,7 @@ export default function UnlearningConfiguration({
 
     configState.forget_class = forgetClass as string;
 
-    execute(
+    await execute(
       "unlearn",
       fetchedResult,
       operationStatus,
@@ -129,6 +128,8 @@ export default function UnlearningConfiguration({
       setStatus,
       customFile
     );
+
+    setInitialState(initialValue);
   };
 
   return (

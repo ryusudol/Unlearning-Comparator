@@ -1,22 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState, useEffect, useContext } from "react";
 import styles from "./Embeddings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SvgViewer from "../components/UI/SvgViewer";
-import { SvgsState } from "../types/embeddings";
-import { svgsActions } from "../store/svgs";
+import { SvgContext } from "../store/svg-context";
 
 export default function Embeddings() {
-  const dispatch = useDispatch();
+  const { retrieveRetrainedSvgs, retrieveUnlearnedSvgs } =
+    useContext(SvgContext);
 
-  const retrainedSvgs = useSelector(
-    (state: SvgsState) => state.svgs.retrainedSvgs
-  );
-  const unlearnedSvgs = useSelector(
-    (state: SvgsState) => state.svgs.unlearnedSvgs
-  );
+  const retrainedSvgs = retrieveRetrainedSvgs();
+  const unlearnedSvgs = retrieveUnlearnedSvgs();
 
   const [modifiedRetrainedSvgs, setModifiedRetrainedSvgs] = useState<string[]>(
     []
@@ -30,11 +25,6 @@ export default function Embeddings() {
   const [selectedUnlearnedId, setSelectedUnlearnedId] = useState<
     number | undefined
   >();
-
-  useEffect(() => {
-    dispatch(svgsActions.retrieveRetrainedSvgs());
-    dispatch(svgsActions.retrieveUnlearnedSvgs());
-  }, [dispatch]);
 
   useEffect(() => {
     const modifySvg = (svg: string) => {
