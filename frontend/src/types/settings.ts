@@ -36,7 +36,7 @@ export interface TrainingStatus {
   test_accuracy: number;
   train_class_accuracies: ClassAccuracies;
   test_class_accuracies: ClassAccuracies;
-  estimated_time_remaining: number | null;
+  estimated_time_remaining: number | undefined;
 }
 
 export interface UnlearningStatus {
@@ -50,7 +50,7 @@ export interface UnlearningStatus {
   test_accuracy: number;
   train_class_accuracies: ClassAccuracies;
   test_class_accuracies: ClassAccuracies | null;
-  estimated_time_remaining: number | null;
+  estimated_time_remaining: number | undefined;
   forget_class: number;
 }
 
@@ -64,7 +64,7 @@ export interface DefenseStatus {
   best_loss: number;
   current_accuracy: number;
   best_accuracy: number;
-  estimated_time_remaining: number | null;
+  estimated_time_remaining: number | undefined;
   forget_class: number;
 }
 

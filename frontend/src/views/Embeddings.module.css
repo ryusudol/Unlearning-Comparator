@@ -6,4 +6,12 @@
   width: 100%;
   display: flex;
   justify-content: space-around;
+  align-items: center;
+}
+
+.divider {
+  height: 500px;
+  width: 1.4px;
+  background-color: #dfdfdf;
+  margin: 0px 3px;
 }

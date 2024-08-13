@@ -12,7 +12,6 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
     
     with torch.no_grad():
         for inputs, _ in data_loader:
-            await asyncio.sleep(0)
             inputs = inputs.to(device)
             
             # Get predictions

@@ -1,7 +1,5 @@
 import React from "react";
 
-import { svgsActions } from "./store/svgs";
-import { Dispatch } from "@reduxjs/toolkit";
 import {
   TrainingConfigurationData,
   UnlearningConfigurationData,
@@ -41,8 +39,7 @@ export async function monitorStatus(
     | ((data: TrainingStatus | undefined) => void)
     | ((data: UnlearningStatus | undefined) => void),
   setModelFiles?: (files: string[]) => void,
-  dispatch?: Dispatch,
-  isRetrain?: boolean
+  saveSvgs?: (svgs: string[]) => void
 ) {
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
@@ -78,11 +75,11 @@ export async function monitorStatus(
         interval.current = undefined;
       }
 
-      const resultResponse = await fetch(`${API_URL}/${identifier}/result`);
+      const response = await fetch(`${API_URL}/${identifier}/result`);
 
       setOperationStatus(0);
 
-      if (!resultResponse.ok) {
+      if (!response.ok) {
         alert("Error occurred while fetching the result.");
         throw new Error(
           `Failed to fetch ${identifier} result. HTTP status: ${response.status}`
@@ -95,9 +92,8 @@ export async function monitorStatus(
         const models = await fetchModelFiles("trained_models");
         setModelFiles!(models);
       } else if (isUnlearning) {
-        const data = await resultResponse.json();
-        if (isRetrain) dispatch!(svgsActions.saveRetrainedSvgs(data.svg_files));
-        else dispatch!(svgsActions.saveUnlearnedSvgs(data.svg_files));
+        const data = await response.json();
+        saveSvgs!(data.svg_files);
         // const models = await fetchModelFiles("unlearned_models");
         // setModelFiles!(models);
       }
@@ -129,25 +125,28 @@ export async function execute(
     "forget_class" in configState ? configState.forget_class : undefined;
 
   if (operationStatus) {
-    // cancelling
-    try {
-      setIndicator("Cancelling . . .");
+    // cancel
+    if (window.confirm("Are you sure you want to cancel?")) {
+      try {
+        setIndicator("Cancelling . . .");
+        setStatus(undefined);
 
-      const response = await fetch(`${API_URL}/${identifier}/cancel`, {
-        method: "POST",
-      });
+        const response = await fetch(`${API_URL}/${identifier}/cancel`, {
+          method: "POST",
+        });
 
-      setOperationStatus(0);
+        setOperationStatus(0);
 
-      if (!response.ok) {
-        alert(`Failed to cancel running.`);
-        throw new Error(
-          `Failed to cancel running. HTTP status: ${response.status}`
-        );
+        if (!response.ok) {
+          alert(`Failed to cancel running.`);
+          throw new Error(
+            `Failed to cancel running. HTTP status: ${response.status}`
+          );
+        }
+      } catch (error) {
+        console.error("execute of cancelling error: ", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("execute of cancelling error: ", error);
-      throw error;
     }
   } else {
     if (mode === 0) {
