@@ -94,5 +94,6 @@ async def main(request, status, weights_path):
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
+        status.progress = 100
         # Clean up the uploaded weights file
         os.remove(weights_path)
