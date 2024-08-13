@@ -10,6 +10,7 @@ import {
 } from "../types/settings";
 
 const MODES: Mode[] = ["Test", "Train"];
+let prevETA: number, ETA: number | undefined;
 
 type Mode = "Test" | "Train";
 type Identifier = "training" | "unlearning" | "defense";
@@ -35,6 +36,19 @@ export default function OperationStatus({
     identifier,
     status
   );
+
+  if (status && status.estimated_time_remaining && status.current_epoch === 1) {
+    prevETA = status.estimated_time_remaining;
+    ETA = status.estimated_time_remaining;
+  } else if (
+    status &&
+    status.estimated_time_remaining &&
+    status.current_epoch > 1
+  ) {
+    ETA = prevETA;
+  } else {
+    ETA = undefined;
+  }
 
   return (
     <div className={styles["status-wrapper"]}>
@@ -86,7 +100,7 @@ export default function OperationStatus({
             <span className={styles["status-detail"]}>
               ETA: {status.estimated_time_remaining!.toFixed(2)}s
             </span>
-            <ProgressBar eta={status.estimated_time_remaining} />
+            <ProgressBar eta={ETA} />
           </div>
         )}
         <div className={styles["class-accuracies"]}>
