@@ -7,7 +7,7 @@ import RunButton from "../RunButton";
 import OperationStatus from "../OperationStatus";
 import { useInterval } from "../../hooks/useInterval";
 import { MODELS, DATASET } from "../../constants/training";
-import { execute, monitorStatus } from "../../http";
+import { executeRunning, fetchRunningStatus } from "../../http";
 import {
   TrainingStatus,
   TrainingConfigurationData,
@@ -29,7 +29,7 @@ export default function Training({
   const [customFile, setCustomFile] = useState<File>();
 
   const checkStatus = useCallback(async () => {
-    monitorStatus(
+    fetchRunningStatus(
       mode === 0 ? "train" : "inference",
       fetchedResult,
       interval,
@@ -61,7 +61,7 @@ export default function Training({
       fd.entries()
     ) as unknown as TrainingConfigurationData;
 
-    execute(
+    executeRunning(
       "train",
       fetchedResult,
       operationStatus,
