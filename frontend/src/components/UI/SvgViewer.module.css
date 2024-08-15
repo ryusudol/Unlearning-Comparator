@@ -15,7 +15,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .thumbnail svg {
@@ -24,7 +24,6 @@
   height: 50px;
   scale: 1;
   cursor: pointer;
-  margin-left: -1px;
 }
 
 .thumbnail svg:hover {
@@ -32,10 +31,9 @@
 }
 
 .selected-svg svg {
-  margin-top: 60px;
+  margin-top: 50px;
   position: relative;
   bottom: 32px;
   width: 100%;
   height: 100%;
-  z-index: -1;
 }
