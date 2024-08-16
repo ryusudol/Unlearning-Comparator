@@ -1,5 +1,5 @@
 # Machine Unlearning Dashboard
-It's a Machine Unlearning Dashboard that provides training, evaluation of unlearning, and attack simulation.
+It's MU (Machine Unlearning) Dashboard that provides training, evaluation of unlearning, and attack simulation.
 
 ## How to start the frontend
 
