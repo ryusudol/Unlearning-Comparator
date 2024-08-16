@@ -1,11 +1,12 @@
 .performance-overview {
-  width: 288px;
+  width: 400px;
 }
 
 .heatmap-wrapper {
   width: 100%;
+  padding: 8px 0;
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
