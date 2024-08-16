@@ -6,7 +6,7 @@ import PredefinedInput from "../PredefinedInput";
 import CustomInput from "../CustomInput";
 import OperationStatus from "../OperationStatus";
 import RunButton from "../RunButton";
-import { RetrainConfigContext } from "../../store/retraining-config-context";
+import { RetrainingConfigContext } from "../../store/retraining-config-context";
 import { UnlearningConfigContext } from "../../store/unlearning-config-context";
 import { MetricsContext } from "../../store/metrics-context";
 import { SvgsContext } from "../../store/svgs-context";
@@ -38,7 +38,7 @@ export default function UnlearningConfiguration({
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
-  const { saveRetrainingConfig } = useContext(RetrainConfigContext);
+  const { saveRetrainingConfig } = useContext(RetrainingConfigContext);
   const { saveUnlearningConfig } = useContext(UnlearningConfigContext);
   const { saveMetrics } = useContext(MetricsContext);
   const { saveRetrainedSvgs, saveUnlearnedSvgs } = useContext(SvgsContext);
@@ -47,11 +47,13 @@ export default function UnlearningConfiguration({
   const fetchedResult = useRef(false);
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
-  const [method, setMethod] = useState("");
+  const [method, setMethod] = useState("Fine-Tuning");
   const [customFile, setCustomFile] = useState<File>();
   const [indicator, setIndicator] = useState("Unlearning . . .");
   const [status, setStatus] = useState<UnlearningStatus | undefined>();
   const [initialState, setInitialState] = useState(initialValue);
+
+  const isRetrain = method === "Retrain";
 
   const checkUnlearningStatus = useCallback(async () => {
     fetchRunningStatus(
@@ -62,13 +64,13 @@ export default function UnlearningConfiguration({
       setIndicator,
       setStatus,
       setUnlearnedModels,
-      method === "Retrain" ? saveRetrainedSvgs : saveUnlearnedSvgs,
+      isRetrain ? saveRetrainedSvgs : saveUnlearnedSvgs,
       saveMetrics
     );
   }, [
     setOperationStatus,
     setUnlearnedModels,
-    method,
+    isRetrain,
     saveRetrainedSvgs,
     saveUnlearnedSvgs,
     saveMetrics,
@@ -122,20 +124,22 @@ export default function UnlearningConfiguration({
 
     configState.forget_class = forgetClass as string;
 
-    method === "Retrain"
-      ? saveRetrainingConfig({
-          epochs: configState.epochs,
-          learningRate: configState.learning_rate,
-          batchSize: configState.batch_size,
-          forgetClass: configState.forget_class,
-        })
-      : saveUnlearningConfig({
-          method,
-          epochs: configState.epochs,
-          learningRate: configState.learning_rate,
-          batchSize: configState.batch_size,
-          forgetClass: configState.forget_class,
-        });
+    if (isRetrain) {
+      saveRetrainingConfig({
+        epochs: configState.epochs,
+        learningRate: configState.learning_rate,
+        batchSize: configState.batch_size,
+        forgetClass: configState.forget_class,
+      });
+    } else {
+      saveUnlearningConfig({
+        method,
+        epochs: configState.epochs,
+        learningRate: configState.learning_rate,
+        batchSize: configState.batch_size,
+        forgetClass: configState.forget_class,
+      });
+    }
 
     await executeRunning(
       "unlearn",
@@ -178,7 +182,7 @@ export default function UnlearningConfiguration({
                 defaultValue={trainedModels[0]}
                 optionData={trainedModels}
                 type="select"
-                disabled={initialState.method === "Retrain"}
+                disabled={isRetrain}
               />
               <Input
                 labelName="Predefined Forget Class"

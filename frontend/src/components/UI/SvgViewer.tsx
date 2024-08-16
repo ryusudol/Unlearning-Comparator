@@ -3,7 +3,7 @@ import styles from "./SvgViewer.module.css";
 
 import SubTitle from "../SubTitle";
 import Explanation from "./Explanation";
-import { RetrainConfigContext } from "../../store/retraining-config-context";
+import { RetrainingConfigContext } from "../../store/retraining-config-context";
 import { UnlearningConfigContext } from "../../store/unlearning-config-context";
 import { SvgsContext } from "../../store/svgs-context";
 
@@ -28,7 +28,7 @@ export default function SvgViewer({
   const { method, retrieveUnlearningConfig } = useContext(
     UnlearningConfigContext
   );
-  const { retrieveRetrainingConfig } = useContext(RetrainConfigContext);
+  const { retrieveRetrainingConfig } = useContext(RetrainingConfigContext);
 
   useEffect(() => {
     retrieveRetrainingConfig();

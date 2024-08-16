@@ -8,7 +8,7 @@ import {
 
 const RETRAINING_CONFIG = "retraining-config";
 
-export const RetrainConfigContext = createContext<ConfigurationContextType>({
+export const RetrainingConfigContext = createContext<ConfigurationContextType>({
   epochs: 0,
   learningRate: 0,
   batchSize: 0,
@@ -19,14 +19,17 @@ export const RetrainConfigContext = createContext<ConfigurationContextType>({
     epochs: 0,
     learningRate: 0,
     batchSize: 0,
-    forgetClass: "-1",
+    forgetClass: "0",
   }),
   clearRetrainingConfig: () => {},
 });
 
-function ConfigReducer(state: Configuration, action: Action): Configuration {
+function retrainingConfigReducer(
+  state: Configuration,
+  action: Action
+): Configuration {
   switch (action.type) {
-    case "SAVE_SETTINGS":
+    case "SAVE_RETRAINING_CONFIG":
       const config = action.payload;
       sessionStorage.setItem(RETRAINING_CONFIG, JSON.stringify(config));
       return {
@@ -37,7 +40,7 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
         forgetClass: config.forgetClass,
       };
 
-    case "RETRIEVE_SETTINGS":
+    case "RETRIEVE_RETRAINING_CONFIG":
       const savedSettings = sessionStorage.getItem(RETRAINING_CONFIG);
       if (!savedSettings)
         return {
@@ -45,7 +48,7 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
           epochs: 0,
           learningRate: 0,
           batchSize: 0,
-          forgetClass: "-1",
+          forgetClass: "0",
         };
       try {
         const parsedSettings: Configuration = JSON.parse(savedSettings);
@@ -63,18 +66,18 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
           epochs: 0,
           learningRate: 0,
           batchSize: 0,
-          forgetClass: "-1",
+          forgetClass: "0",
         };
       }
 
-    case "CLEAR_SETTINGS":
+    case "CLEAR_RETRAINING_CONFIG":
       sessionStorage.removeItem(RETRAINING_CONFIG);
       return {
         ...state,
         epochs: 0,
         learningRate: 0,
         batchSize: 0,
-        forgetClass: "-1",
+        forgetClass: "0",
       };
 
     default:
@@ -82,24 +85,24 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
   }
 }
 
-export default function SettingsContextProvider({
+export default function RetrainingConfigContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [config, dispatch] = useReducer(ConfigReducer, {
+  const [config, dispatch] = useReducer(retrainingConfigReducer, {
     epochs: 0,
     learningRate: 0,
     batchSize: 0,
-    forgetClass: "",
+    forgetClass: "0",
   });
 
   function handleSaveSettings(config: Configuration) {
-    dispatch({ type: "SAVE_SETTINGS", payload: config });
+    dispatch({ type: "SAVE_RETRAINING_CONFIG", payload: config });
   }
 
   function handleRetrieveSettings() {
-    dispatch({ type: "RETRIEVE_SETTINGS" });
+    dispatch({ type: "RETRIEVE_RETRAINING_CONFIG" });
     return {
       epochs: config.epochs,
       learningRate: config.learningRate,
@@ -109,7 +112,7 @@ export default function SettingsContextProvider({
   }
 
   function handleClearSettings() {
-    dispatch({ type: "CLEAR_SETTINGS" });
+    dispatch({ type: "CLEAR_RETRAINING_CONFIG" });
   }
 
   const ctxValue: ConfigurationContextType = {
@@ -124,8 +127,8 @@ export default function SettingsContextProvider({
   };
 
   return (
-    <RetrainConfigContext.Provider value={ctxValue}>
+    <RetrainingConfigContext.Provider value={ctxValue}>
       {children}
-    </RetrainConfigContext.Provider>
+    </RetrainingConfigContext.Provider>
   );
 }

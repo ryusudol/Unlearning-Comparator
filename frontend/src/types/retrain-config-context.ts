@@ -12,6 +12,6 @@ export interface ConfigurationContextType extends Configuration {
 }
 
 export type Action =
-  | { type: "SAVE_SETTINGS"; payload: Configuration }
-  | { type: "RETRIEVE_SETTINGS" }
-  | { type: "CLEAR_SETTINGS" };
+  | { type: "SAVE_RETRAINING_CONFIG"; payload: Configuration }
+  | { type: "RETRIEVE_RETRAINING_CONFIG" }
+  | { type: "CLEAR_RETRAINING_CONFIG" };

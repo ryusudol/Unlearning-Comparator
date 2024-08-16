@@ -9,7 +9,7 @@ import {
 const UNLEARNING_CONFIG = "unlearning-config";
 
 export const UnlearningConfigContext = createContext<ConfigurationContextType>({
-  method: "",
+  method: "Fine-Tuning",
   epochs: 0,
   learningRate: 0,
   batchSize: 0,
@@ -17,7 +17,7 @@ export const UnlearningConfigContext = createContext<ConfigurationContextType>({
 
   saveUnlearningConfig: (config: Configuration) => {},
   retrieveUnlearningConfig: () => ({
-    method: "",
+    method: "Fine-Tuning",
     epochs: 0,
     learningRate: 0,
     batchSize: 0,
@@ -28,7 +28,7 @@ export const UnlearningConfigContext = createContext<ConfigurationContextType>({
 
 function ConfigReducer(state: Configuration, action: Action): Configuration {
   switch (action.type) {
-    case "SAVE_SETTINGS":
+    case "SAVE_UNLEARNING_CONFIG":
       const config = action.payload;
       sessionStorage.setItem(UNLEARNING_CONFIG, JSON.stringify(config));
       return {
@@ -40,12 +40,12 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
         forgetClass: config.forgetClass,
       };
 
-    case "RETRIEVE_SETTINGS":
+    case "RETRIEVE_UNLEARNING_CONFIG":
       const savedSettings = sessionStorage.getItem(UNLEARNING_CONFIG);
       if (!savedSettings)
         return {
           ...state,
-          method: "",
+          method: "Fine-Tuning",
           epochs: 0,
           learningRate: 0,
           batchSize: 0,
@@ -65,7 +65,7 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
         console.error(error);
         return {
           ...state,
-          method: "",
+          method: "Fine-Tuning",
           epochs: 0,
           learningRate: 0,
           batchSize: 0,
@@ -73,11 +73,11 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
         };
       }
 
-    case "CLEAR_SETTINGS":
+    case "CLEAR_UNLEARNING_CONFIG":
       sessionStorage.removeItem(UNLEARNING_CONFIG);
       return {
         ...state,
-        method: "",
+        method: "Fine-Tuning",
         epochs: 0,
         learningRate: 0,
         batchSize: 0,
@@ -89,13 +89,13 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
   }
 }
 
-export default function SettingsContextProvider({
+export default function UnlearningConfigContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [config, dispatch] = useReducer(ConfigReducer, {
-    method: "",
+    method: "Fine-Tuning",
     epochs: 0,
     learningRate: 0,
     batchSize: 0,
@@ -103,11 +103,11 @@ export default function SettingsContextProvider({
   });
 
   function handleSaveSettings(config: Configuration) {
-    dispatch({ type: "SAVE_SETTINGS", payload: config });
+    dispatch({ type: "SAVE_UNLEARNING_CONFIG", payload: config });
   }
 
   function handleRetrieveSettings() {
-    dispatch({ type: "RETRIEVE_SETTINGS" });
+    dispatch({ type: "RETRIEVE_UNLEARNING_CONFIG" });
     return {
       method: config.method,
       epochs: config.epochs,
@@ -118,7 +118,7 @@ export default function SettingsContextProvider({
   }
 
   function handleClearSettings() {
-    dispatch({ type: "CLEAR_SETTINGS" });
+    dispatch({ type: "CLEAR_UNLEARNING_CONFIG" });
   }
 
   const ctxValue: ConfigurationContextType = {
