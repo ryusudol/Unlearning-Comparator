@@ -4,15 +4,15 @@ import styles from "./Embeddings.module.css";
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SvgViewer from "../components/UI/SvgViewer";
-import { SvgContext } from "../store/svg-context";
+import { SvgsContext } from "../store/svgs-context";
 
 export default function Embeddings() {
-  const { retrainedSvgs, unlearnedSvgs } = useContext(SvgContext);
+  const { retrainedSvgs, unlearnedSvgs } = useContext(SvgsContext);
 
   const [edittedRetrainSvgs, setEdittedetrainSvgs] = useState<string[]>([]);
-  const [EdittedUnlearnSvgs, setEdittedUnlearnSvgs] = useState<string[]>([]);
-  const [retrainFocus, setRetrainFocus] = useState<number | undefined>();
-  const [unlearnFocus, setUnlearnFocus] = useState<number | undefined>();
+  const [edittedUnlearnSvgs, setEdittedUnlearnSvgs] = useState<string[]>([]);
+  const [retrainFocus, setRetrainFocus] = useState<number | undefined>(4);
+  const [unlearnFocus, setUnlearnFocus] = useState<number | undefined>(4);
 
   useEffect(() => {
     const modifySvg = (svg: string) => {
@@ -54,7 +54,7 @@ export default function Embeddings() {
             mode="u"
             svgs={unlearnedSvgs}
             handleThumbnailClick={handleThumbnailClick}
-            modifiedSvgs={EdittedUnlearnSvgs}
+            modifiedSvgs={edittedUnlearnSvgs}
             selectedSvgId={unlearnFocus}
           />
         </div>

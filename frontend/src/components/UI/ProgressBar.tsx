@@ -5,7 +5,7 @@ interface Props {
   eta: number | undefined;
 }
 
-const TIME_UNIT = 1000;
+const TIME_UNIT = 500;
 
 export default function ProgressBar({ eta }: Props) {
   const [elapsedTime, setElapsedTime] = useState(0);

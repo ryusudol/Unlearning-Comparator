@@ -54,3 +54,23 @@ export function getAccuracies(
 
   return { isTraining, isUnlearning, accuracies };
 }
+
+export function getDefaultUnlearningConfig(method: string) {
+  let epochs, learning_rate;
+
+  if (method === "Fine-Tuning") {
+    epochs = 10;
+    learning_rate = 0.02;
+  } else if (method === "Random-Label") {
+    epochs = 3;
+    learning_rate = 0.01;
+  } else if (method === "Gradient-Ascent") {
+    epochs = 3;
+    learning_rate = 0.0001;
+  } else {
+    epochs = 30;
+    learning_rate = 0.01;
+  }
+
+  return { epochs, learning_rate };
+}

@@ -3,15 +3,24 @@ import ReactDOM from "react-dom/client";
 
 import "./app/index.css";
 import App from "./app/App";
-import SvgContextProvider from "./store/svg-context";
+import RetrainingConfigContextProvider from "./store/retraining-config-context";
+import UnlearningConfigContextProvider from "./store/unlearning-config-context";
+import MetricsContextProvider from "./store/metrics-context";
+import SvgsContextProvider from "./store/svgs-context";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <SvgContextProvider>
-      <App />
-    </SvgContextProvider>
+    <RetrainingConfigContextProvider>
+      <UnlearningConfigContextProvider>
+        <MetricsContextProvider>
+          <SvgsContextProvider>
+            <App />
+          </SvgsContextProvider>
+        </MetricsContextProvider>
+      </UnlearningConfigContextProvider>
+    </RetrainingConfigContextProvider>
   </React.StrictMode>
 );

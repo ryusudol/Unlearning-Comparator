@@ -7,6 +7,20 @@ import {
   UnlearningStatus,
   Timer,
 } from "./types/settings";
+import { Metrics } from "./types/metrics-context";
+
+interface Accuracies {
+  [key: string]: number;
+}
+
+interface ResultType {
+  remain_accuracy: number;
+  svg_files: string[];
+  test_accuracy: number;
+  test_class_accuracies: Accuracies;
+  train_class_accuracies: Accuracies;
+  unlearn_accuracy: number;
+}
 
 const API_URL = "http://localhost:8000";
 
@@ -15,7 +29,6 @@ export async function fetchModelFiles(end: string) {
     const response = await fetch(`${API_URL}/${end}`);
 
     if (!response.ok) {
-      alert("Failed to fetch model files.");
       throw new Error(
         `Failed to fetch model files. HTTP status: ${response.status}`
       );
@@ -29,7 +42,7 @@ export async function fetchModelFiles(end: string) {
   }
 }
 
-export async function monitorStatus(
+export async function fetchRunningStatus(
   identifier: "train" | "inference" | "unlearn",
   fetchedResult: React.MutableRefObject<boolean>,
   interval: React.MutableRefObject<Timer>,
@@ -39,7 +52,8 @@ export async function monitorStatus(
     | ((data: TrainingStatus | undefined) => void)
     | ((data: UnlearningStatus | undefined) => void),
   setModelFiles?: (files: string[]) => void,
-  saveSvgs?: (svgs: string[]) => void
+  saveSvgs?: (svgs: string[]) => void,
+  saveMetrics?: (metrics: Metrics) => void
 ) {
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
@@ -91,21 +105,30 @@ export async function monitorStatus(
       if (isTraining) {
         const models = await fetchModelFiles("trained_models");
         setModelFiles!(models);
-      } else if (isUnlearning) {
-        const data = await response.json();
-        saveSvgs!(data.svg_files);
+      } else if (isUnlearning && saveSvgs && saveMetrics) {
+        const data: ResultType = await response.json();
+
+        const ua = data.unlearn_accuracy;
+        const ra = data.remain_accuracy;
+        const ta = data.test_accuracy;
+        const rte = 0; // TODO: rte 수정
+        const avg = (ua + ra + ta + rte) / 4;
+
+        saveSvgs(data.svg_files);
+        saveMetrics({ ua, ra, ta, rte, avg });
+
         // const models = await fetchModelFiles("unlearned_models");
         // setModelFiles!(models);
       }
     }
   } catch (error) {
     setOperationStatus(0);
-    console.error("monitorStatus error: ", error);
+    console.error("fetchRunningStatus error: ", error);
     throw error;
   }
 }
 
-export async function execute(
+export async function executeRunning(
   identifier: "train" | "unlearn",
   fetchedResult: React.MutableRefObject<boolean>,
   operationStatus: number,
@@ -144,7 +167,7 @@ export async function execute(
           );
         }
       } catch (error) {
-        console.error("execute of cancelling error: ", error);
+        console.error("executeRunning of cancelling error: ", error);
         throw error;
       }
     }
@@ -184,6 +207,16 @@ export async function execute(
               batch_size: configState.batch_size,
               learning_rate: configState.learning_rate,
             }
+          : method
+          ? {
+              weights_filename: (configState as UnlearningConfigurationData)
+                .trained_model,
+              epochs: configState.epochs,
+              batch_size: configState.batch_size,
+              learning_rate: configState.learning_rate,
+              forget_class: (configState as UnlearningConfigurationData)
+                .forget_class,
+            }
           : {
               epochs: configState.epochs,
               batch_size: configState.batch_size,
@@ -209,7 +242,7 @@ export async function execute(
         }
       } catch (error) {
         setOperationStatus(0);
-        console.error("execute of predefined running error: ", error);
+        console.error("executeRunning of predefined running error: ", error);
         throw error;
       }
     } else {
@@ -253,7 +286,7 @@ export async function execute(
         }
       } catch (error) {
         setOperationStatus(0);
-        console.error("execute of custom running error: ", error);
+        console.error("executeRunning of custom running error: ", error);
         throw error;
       }
     }

@@ -1,17 +1,35 @@
 import { createContext, useReducer } from "react";
 
-import { State, Action, SvgContextType } from "../types/svg";
+import { Svgs, Action, SvgsContextType } from "../types/svgs-context";
 
 const RETRAINED_SVGS = "retrainedSvgs";
 const UNLEARNED_SVGS = "unlearnedSvgs";
-const initialState: State = { retrainedSvgs: [], unlearnedSvgs: [] };
 
-function svgReducer(state: State, action: Action) {
+export const SvgsContext = createContext<SvgsContextType>({
+  retrainedSvgs: [],
+  unlearnedSvgs: [],
+
+  saveRetrainedSvgs: () => {},
+  saveUnlearnedSvgs: () => {},
+
+  retrieveRetrainedSvgs: () => [],
+  retrieveUnlearnedSvgs: () => [],
+
+  clearRetrainedSvgs: () => {},
+  clearUnlearnedSvgs: () => {},
+});
+
+function ContentReducer(state: Svgs, action: Action): Svgs {
   switch (action.type) {
     case "SAVE_RETRAINED_SVGS":
       const newRetrainedSvgs = action.payload;
       sessionStorage.setItem(RETRAINED_SVGS, JSON.stringify(newRetrainedSvgs));
       return { ...state, retrainedSvgs: newRetrainedSvgs };
+
+    case "SAVE_UNLEARNED_SVGS":
+      const newdUnlearnedSvgs = action.payload;
+      sessionStorage.setItem(UNLEARNED_SVGS, JSON.stringify(newdUnlearnedSvgs));
+      return { ...state, unlearnedSvgs: newdUnlearnedSvgs };
 
     case "RETRIEVE_RETRAINED_SVGS":
       const savedRetrainedSvgs = sessionStorage.getItem(RETRAINED_SVGS);
@@ -19,7 +37,7 @@ function svgReducer(state: State, action: Action) {
         return { ...state, retrainedSvgs: [] as string[] };
       try {
         let parsedRetrainedSvgs: string[];
-        const parsedSvgs = JSON.parse(savedRetrainedSvgs);
+        const parsedSvgs: string[] = JSON.parse(savedRetrainedSvgs);
         if (
           Array.isArray(parsedSvgs) &&
           parsedSvgs.length === 4 &&
@@ -30,19 +48,10 @@ function svgReducer(state: State, action: Action) {
           parsedRetrainedSvgs = [];
         }
         return { ...state, retrainedSvgs: parsedRetrainedSvgs };
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
         return { ...state, retrainedSvgs: [] as string[] };
       }
-
-    case "CLEAR_RETRAINED_SVGS":
-      sessionStorage.removeItem(RETRAINED_SVGS);
-      return { ...state, retrainedSvgs: [] as string[] };
-
-    case "SAVE_UNLEARNED_SVGS":
-      const newdUnlearnedSvgs = action.payload;
-      sessionStorage.setItem(UNLEARNED_SVGS, JSON.stringify(newdUnlearnedSvgs));
-      return { ...state, unlearnedSvgs: newdUnlearnedSvgs };
 
     case "RETRIEVE_UNLEARNED_SVGS":
       const savedUnlearnedSvgs = sessionStorage.getItem(UNLEARNED_SVGS);
@@ -50,7 +59,7 @@ function svgReducer(state: State, action: Action) {
         return { ...state, unlearnedSvgs: [] as string[] };
       try {
         let parsedUnlearnedSvgs: string[];
-        const parsedSvgs = JSON.parse(savedUnlearnedSvgs);
+        const parsedSvgs: string[] = JSON.parse(savedUnlearnedSvgs);
         if (
           Array.isArray(parsedSvgs) &&
           parsedSvgs.length === 4 &&
@@ -61,10 +70,14 @@ function svgReducer(state: State, action: Action) {
           parsedUnlearnedSvgs = [] as string[];
         }
         return { ...state, unlearnedSvgs: parsedUnlearnedSvgs };
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
         return { ...state, unlearnedSvgs: [] as string[] };
       }
+
+    case "CLEAR_RETRAINED_SVGS":
+      sessionStorage.removeItem(RETRAINED_SVGS);
+      return { ...state, retrainedSvgs: [] as string[] };
 
     case "CLEAR_UNLEARNED_SVGS":
       sessionStorage.removeItem(UNLEARNED_SVGS);
@@ -75,60 +88,60 @@ function svgReducer(state: State, action: Action) {
   }
 }
 
-export const SvgContext = createContext<SvgContextType>({
-  retrainedSvgs: [],
-  unlearnedSvgs: [],
-  saveRetrainedSvgs: () => {},
-  retrieveRetrainedSvgs: () => [],
-  clearRetrainedSvgs: () => {},
-  saveUnlearnedSvgs: () => {},
-  retrieveUnlearnedSvgs: () => [],
-  clearUnlearnedSvgs: () => {},
-});
-
-export default function SvgContextProvider({
+export default function SvgsContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [svgState, svgDispatch] = useReducer(svgReducer, initialState);
+  const [contentState, dispatch] = useReducer(ContentReducer, {
+    retrainedSvgs: [],
+    unlearnedSvgs: [],
+  });
 
+  // Save
   function handleSaveRetrainedSvgs(svgs: string[]) {
-    svgDispatch({ type: "SAVE_RETRAINED_SVGS", payload: svgs });
-  }
-
-  function handleRetrieveRetrainedSvgs() {
-    svgDispatch({ type: "RETRIEVE_RETRAINED_SVGS" });
-    return svgState.retrainedSvgs;
-  }
-
-  function handleClearRetrainedSvgs() {
-    svgDispatch({ type: "CLEAR_RETRAINED_SVGS" });
+    dispatch({ type: "SAVE_RETRAINED_SVGS", payload: svgs });
   }
 
   function handleSaveUnlearnedSvgs(svgs: string[]) {
-    svgDispatch({ type: "SAVE_UNLEARNED_SVGS", payload: svgs });
+    dispatch({ type: "SAVE_UNLEARNED_SVGS", payload: svgs });
   }
 
-  function handleRetrieveUnlearnedSvgs() {
-    svgDispatch({ type: "RETRIEVE_UNLEARNED_SVGS" });
-    return svgState.unlearnedSvgs;
+  // Retrieve
+  const handleRetrieveRetrainedSvgs = function handleRetrieveRetrainedSvgs() {
+    dispatch({ type: "RETRIEVE_RETRAINED_SVGS" });
+    return contentState.retrainedSvgs;
+  };
+
+  const handleRetrieveUnlearnedSvgs = function handleRetrieveUnlearnedSvgs() {
+    dispatch({ type: "RETRIEVE_UNLEARNED_SVGS" });
+    return contentState.unlearnedSvgs;
+  };
+
+  // Clear
+  function handleClearRetrainedSvgs() {
+    dispatch({ type: "CLEAR_RETRAINED_SVGS" });
   }
 
   function handleClearUnlearnedSvgs() {
-    svgDispatch({ type: "CLEAR_UNLEARNED_SVGS" });
+    dispatch({ type: "CLEAR_UNLEARNED_SVGS" });
   }
 
-  const ctxValue: SvgContextType = {
-    retrainedSvgs: svgState.retrainedSvgs,
-    unlearnedSvgs: svgState.unlearnedSvgs,
+  const ctxValue: SvgsContextType = {
+    retrainedSvgs: contentState.retrainedSvgs,
+    unlearnedSvgs: contentState.unlearnedSvgs,
+
     saveRetrainedSvgs: handleSaveRetrainedSvgs,
-    retrieveRetrainedSvgs: handleRetrieveRetrainedSvgs,
-    clearRetrainedSvgs: handleClearRetrainedSvgs,
     saveUnlearnedSvgs: handleSaveUnlearnedSvgs,
+
+    retrieveRetrainedSvgs: handleRetrieveRetrainedSvgs,
     retrieveUnlearnedSvgs: handleRetrieveUnlearnedSvgs,
+
+    clearRetrainedSvgs: handleClearRetrainedSvgs,
     clearUnlearnedSvgs: handleClearUnlearnedSvgs,
   };
 
-  return <SvgContext.Provider value={ctxValue}>{children}</SvgContext.Provider>;
+  return (
+    <SvgsContext.Provider value={ctxValue}>{children}</SvgsContext.Provider>
+  );
 }
