@@ -1,5 +1,5 @@
 .wrapper {
-  width: 480px;
+  width: 540px;
   height: 620px;
 }
 
@@ -31,7 +31,7 @@
 }
 
 .selected-svg svg {
-  margin-top: 50px;
+  margin-top: 30px;
   position: relative;
   bottom: 32px;
   width: 100%;
