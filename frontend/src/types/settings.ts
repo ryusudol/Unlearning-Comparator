@@ -80,6 +80,7 @@ export interface TrainingConfigurationData {
 
 export interface UnlearningConfigurationData {
   method: string;
+  trained_model: string;
   forget_class: string;
   epochs: number;
   batch_size: number;

@@ -114,7 +114,7 @@ export default function UnlearningConfiguration({
         ? fd.get("predefined_forget_class")
         : fd.get("custom_forget_class");
 
-    fd.delete("method");
+    if (isRetrain) fd.delete("method");
     fd.delete("predefined_forget_class");
     fd.delete("custom_forget_class");
 
@@ -134,6 +134,7 @@ export default function UnlearningConfiguration({
     } else {
       saveUnlearningConfig({
         method,
+        trainedModel: configState.trained_model,
         epochs: configState.epochs,
         learningRate: configState.learning_rate,
         batchSize: configState.batch_size,

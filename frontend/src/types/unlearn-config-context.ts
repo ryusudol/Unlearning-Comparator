@@ -1,5 +1,6 @@
 export interface Configuration {
   method: string;
+  trainedModel: string;
   epochs: number;
   learningRate: number;
   batchSize: number;

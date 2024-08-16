@@ -10,6 +10,7 @@ const UNLEARNING_CONFIG = "unlearning-config";
 
 export const UnlearningConfigContext = createContext<ConfigurationContextType>({
   method: "Fine-Tuning",
+  trainedModel: "",
   epochs: 0,
   learningRate: 0,
   batchSize: 0,
@@ -18,6 +19,7 @@ export const UnlearningConfigContext = createContext<ConfigurationContextType>({
   saveUnlearningConfig: (config: Configuration) => {},
   retrieveUnlearningConfig: () => ({
     method: "Fine-Tuning",
+    trainedModel: "",
     epochs: 0,
     learningRate: 0,
     batchSize: 0,
@@ -34,6 +36,7 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
       return {
         ...state,
         method: config.method,
+        trainedModel: config.trainedModel,
         epochs: config.epochs,
         learningRate: config.learningRate,
         batchSize: config.batchSize,
@@ -46,26 +49,29 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
         return {
           ...state,
           method: "Fine-Tuning",
+          trainedModel: "",
           epochs: 0,
           learningRate: 0,
           batchSize: 0,
           forgetClass: "-1",
         };
       try {
-        const parsedSettings: Configuration = JSON.parse(savedSettings);
+        const parsedConfig: Configuration = JSON.parse(savedSettings);
         return {
           ...state,
-          method: parsedSettings.method,
-          epochs: parsedSettings.epochs,
-          learningRate: parsedSettings.learningRate,
-          batchSize: parsedSettings.batchSize,
-          forgetClass: parsedSettings.forgetClass,
+          method: parsedConfig.method,
+          trainedModel: parsedConfig.trainedModel,
+          epochs: parsedConfig.epochs,
+          learningRate: parsedConfig.learningRate,
+          batchSize: parsedConfig.batchSize,
+          forgetClass: parsedConfig.forgetClass,
         };
       } catch (error) {
         console.error(error);
         return {
           ...state,
           method: "Fine-Tuning",
+          trainedModel: "",
           epochs: 0,
           learningRate: 0,
           batchSize: 0,
@@ -78,6 +84,7 @@ function ConfigReducer(state: Configuration, action: Action): Configuration {
       return {
         ...state,
         method: "Fine-Tuning",
+        trainedModel: "",
         epochs: 0,
         learningRate: 0,
         batchSize: 0,
@@ -96,6 +103,7 @@ export default function UnlearningConfigContextProvider({
 }) {
   const [config, dispatch] = useReducer(ConfigReducer, {
     method: "Fine-Tuning",
+    trainedModel: "",
     epochs: 0,
     learningRate: 0,
     batchSize: 0,
@@ -110,6 +118,7 @@ export default function UnlearningConfigContextProvider({
     dispatch({ type: "RETRIEVE_UNLEARNING_CONFIG" });
     return {
       method: config.method,
+      trainedModel: "",
       epochs: config.epochs,
       learningRate: config.learningRate,
       batchSize: config.batchSize,
@@ -123,6 +132,7 @@ export default function UnlearningConfigContextProvider({
 
   const ctxValue: ConfigurationContextType = {
     method: config.method,
+    trainedModel: config.trainedModel,
     epochs: config.epochs,
     learningRate: config.learningRate,
     batchSize: config.batchSize,

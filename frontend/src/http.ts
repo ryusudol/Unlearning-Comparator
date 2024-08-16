@@ -207,6 +207,16 @@ export async function executeRunning(
               batch_size: configState.batch_size,
               learning_rate: configState.learning_rate,
             }
+          : method
+          ? {
+              weights_filename: (configState as UnlearningConfigurationData)
+                .trained_model,
+              epochs: configState.epochs,
+              batch_size: configState.batch_size,
+              learning_rate: configState.learning_rate,
+              forget_class: (configState as UnlearningConfigurationData)
+                .forget_class,
+            }
           : {
               epochs: configState.epochs,
               batch_size: configState.batch_size,
