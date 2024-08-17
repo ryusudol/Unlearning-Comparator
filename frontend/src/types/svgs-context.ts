@@ -1,17 +1,17 @@
 export interface Svgs {
-  retrainedSvgs: string[];
-  unlearnedSvgs: string[];
+  retrainingSvgs: string[];
+  unlearningSvgs: string[];
 }
 
 export interface SvgsContextType extends Svgs {
-  saveRetrainedSvgs: (svgs: string[]) => void;
-  saveUnlearnedSvgs: (svgs: string[]) => void;
+  saveRetrainingSvgs: (svgs: string[]) => void;
+  saveUnlearningSvgs: (svgs: string[]) => void;
 
-  retrieveRetrainedSvgs: () => string[];
-  retrieveUnlearnedSvgs: () => string[];
+  retrieveRetrainingSvgs: () => string[];
+  retrieveUnlearningSvgs: () => string[];
 
-  clearRetrainedSvgs: () => void;
-  clearUnlearnedSvgs: () => void;
+  clearRetrainingSvgs: () => void;
+  clearUnlearningSvgs: () => void;
 }
 
 export type Action =

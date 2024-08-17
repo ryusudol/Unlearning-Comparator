@@ -7,7 +7,7 @@ import SvgViewer from "../components/UI/SvgViewer";
 import { SvgsContext } from "../store/svgs-context";
 
 export default function Embeddings() {
-  const { retrainedSvgs, unlearnedSvgs } = useContext(SvgsContext);
+  const { retrainingSvgs, unlearningSvgs } = useContext(SvgsContext);
 
   const [edittedRetrainSvgs, setEdittedetrainSvgs] = useState<string[]>([]);
   const [edittedUnlearnSvgs, setEdittedUnlearnSvgs] = useState<string[]>([]);
@@ -24,11 +24,11 @@ export default function Embeddings() {
       return new XMLSerializer().serializeToString(svgDoc);
     };
 
-    setEdittedetrainSvgs(retrainedSvgs.map(modifySvg) as string[]);
-    setEdittedUnlearnSvgs(unlearnedSvgs.map(modifySvg) as string[]);
-    setRetrainFocus(retrainedSvgs ? 4 : undefined);
-    setUnlearnFocus(unlearnedSvgs ? 4 : undefined);
-  }, [retrainedSvgs, unlearnedSvgs]);
+    setEdittedetrainSvgs(retrainingSvgs.map(modifySvg) as string[]);
+    setEdittedUnlearnSvgs(unlearningSvgs.map(modifySvg) as string[]);
+    setRetrainFocus(retrainingSvgs ? 4 : undefined);
+    setUnlearnFocus(unlearningSvgs ? 4 : undefined);
+  }, [retrainingSvgs, unlearningSvgs]);
 
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -44,7 +44,7 @@ export default function Embeddings() {
         <div className={styles["viewers-wrapper"]}>
           <SvgViewer
             mode="r"
-            svgs={retrainedSvgs}
+            svgs={retrainingSvgs}
             handleThumbnailClick={handleThumbnailClick}
             modifiedSvgs={edittedRetrainSvgs}
             selectedSvgId={retrainFocus}
@@ -52,7 +52,7 @@ export default function Embeddings() {
           <div className={styles.divider} />
           <SvgViewer
             mode="u"
-            svgs={unlearnedSvgs}
+            svgs={unlearningSvgs}
             handleThumbnailClick={handleThumbnailClick}
             modifiedSvgs={edittedUnlearnSvgs}
             selectedSvgId={unlearnFocus}

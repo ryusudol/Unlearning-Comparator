@@ -22,7 +22,7 @@ export default function SvgViewer({
   modifiedSvgs,
   selectedSvgId,
 }: Props) {
-  const { retrieveRetrainedSvgs, retrieveUnlearnedSvgs } =
+  const { retrieveRetrainingSvgs, retrieveUnlearningSvgs } =
     useContext(SvgsContext);
 
   const { method, retrieveUnlearningConfig } = useContext(
@@ -33,8 +33,8 @@ export default function SvgViewer({
   useEffect(() => {
     retrieveRetrainingConfig();
     retrieveUnlearningConfig();
-    retrieveRetrainedSvgs();
-    retrieveUnlearnedSvgs();
+    retrieveRetrainingSvgs();
+    retrieveUnlearningSvgs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
