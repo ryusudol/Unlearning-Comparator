@@ -41,7 +41,12 @@ export default function UnlearningConfiguration({
   const { saveRetrainingConfig } = useContext(RetrainingConfigContext);
   const { saveUnlearningConfig } = useContext(UnlearningConfigContext);
   const { saveMetrics } = useContext(MetricsContext);
-  const { saveRetrainedSvgs, saveUnlearnedSvgs } = useContext(SvgsContext);
+  const {
+    saveRetrainingSvgs,
+    saveUnlearningSvgs,
+    clearRetrainingSvgs,
+    clearUnlearningSvgs,
+  } = useContext(SvgsContext);
 
   const interval = useRef<Timer>();
   const fetchedResult = useRef(false);
@@ -64,15 +69,15 @@ export default function UnlearningConfiguration({
       setIndicator,
       setStatus,
       setUnlearnedModels,
-      isRetrain ? saveRetrainedSvgs : saveUnlearnedSvgs,
+      isRetrain ? saveRetrainingSvgs : saveUnlearningSvgs,
       saveMetrics
     );
   }, [
     setOperationStatus,
     setUnlearnedModels,
     isRetrain,
-    saveRetrainedSvgs,
-    saveUnlearnedSvgs,
+    saveRetrainingSvgs,
+    saveUnlearningSvgs,
     saveMetrics,
   ]);
 
@@ -131,6 +136,7 @@ export default function UnlearningConfiguration({
         batchSize: configState.batch_size,
         forgetClass: configState.forget_class,
       });
+      clearRetrainingSvgs();
     } else {
       saveUnlearningConfig({
         method,
@@ -140,6 +146,7 @@ export default function UnlearningConfiguration({
         batchSize: configState.batch_size,
         forgetClass: configState.forget_class,
       });
+      clearUnlearningSvgs();
     }
 
     await executeRunning(
@@ -154,7 +161,8 @@ export default function UnlearningConfiguration({
       customFile
     );
 
-    setInitialState(initialValue);
+    setInitialState(initialState);
+    setMethod("Fine-Tuning");
   };
 
   return (
