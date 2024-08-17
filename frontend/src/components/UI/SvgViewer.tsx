@@ -49,7 +49,7 @@ export default function SvgViewer({
       <SubTitle subtitle={subtitle} />
       {svgs && (
         <div className={styles["content-wrapper"]}>
-          <div className={styles["sub-wrapper"]}>
+          <div className={styles.header}>
             {(mode === "r" || (mode === "u" && method !== "")) && (
               <Explanation mode={mode} />
             )}
