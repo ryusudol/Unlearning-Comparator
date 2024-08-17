@@ -47,28 +47,30 @@ export default function SvgViewer({
   return (
     <div className={styles.wrapper}>
       <SubTitle subtitle={subtitle} />
-      {svgs.length > 0 && (mode === "r" || (mode === "u" && method !== "")) && (
-        <Explanation mode={mode} />
-      )}
       {svgs && (
         <div className={styles["content-wrapper"]}>
-          <div className={styles.thumbnails}>
-            {modifiedSvgs.map((svg, idx) => (
-              <div
-                id={`${mode}-${idx + 1}`}
-                onClick={handleThumbnailClick}
-                className={
-                  styles[
-                    `${
-                      selectedSvgId === idx + 1
-                        ? "selected-thumbnail"
-                        : "thumbnail"
-                    }`
-                  ]
-                }
-                dangerouslySetInnerHTML={createMarkup(svg)}
-              />
-            ))}
+          <div className={styles["sub-wrapper"]}>
+            {(mode === "r" || (mode === "u" && method !== "")) && (
+              <Explanation mode={mode} />
+            )}
+            <div className={styles.thumbnails}>
+              {modifiedSvgs.map((svg, idx) => (
+                <div
+                  id={`${mode}-${idx + 1}`}
+                  onClick={handleThumbnailClick}
+                  className={
+                    styles[
+                      `${
+                        selectedSvgId === idx + 1
+                          ? "selected-thumbnail"
+                          : "thumbnail"
+                      }`
+                    ]
+                  }
+                  dangerouslySetInnerHTML={createMarkup(svg)}
+                />
+              ))}
+            </div>
           </div>
           {selectedSvgId && (
             <div

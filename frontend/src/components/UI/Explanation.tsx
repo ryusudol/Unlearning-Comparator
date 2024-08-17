@@ -19,14 +19,20 @@ export default function RunningExplanation({ mode }: Props) {
 
   return (
     <p className={styles.explanation}>
-      <span className={styles.bold}>Method</span>
-      <span>{`: ${mode === "r" ? "Retrain" : unlearningMethod}, `}</span>
-      <span className={styles.bold}>Epochs</span>
-      <span>{`: ${mode === "r" ? retrainedEpochs : unlearningEpochs}, `}</span>
-      <span className={styles.bold}>Forget Class</span>
-      <span>{`: ${
-        mode === "r" ? retrainedForgetClass : unlearningForgetClass
-      }`}</span>
+      <p>
+        <span className={styles.bold}>Method</span>
+        <span>{`: ${mode === "r" ? "Retrain" : unlearningMethod}`}</span>
+      </p>
+      <p>
+        <span className={styles.bold}>Forget Class</span>
+        <span>{`: ${
+          mode === "r" ? retrainedForgetClass : unlearningForgetClass
+        }`}</span>
+      </p>
+      <p>
+        <span className={styles.bold}>Epochs</span>
+        <span>{`: ${mode === "r" ? retrainedEpochs : unlearningEpochs}`}</span>
+      </p>
     </p>
   );
 }

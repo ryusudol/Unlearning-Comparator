@@ -3,6 +3,13 @@
   height: 620px;
 }
 
+.sub-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .content-wrapper {
   display: flex;
   flex-direction: column;
@@ -15,7 +22,6 @@
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  margin-top: 10px;
 }
 
 .thumbnail svg {
@@ -44,9 +50,8 @@
 }
 
 .selected-svg svg {
-  margin-top: 42px;
   position: relative;
   bottom: 32px;
-  width: 100%;
-  height: 100%;
+  width: 590px;
+  height: 604px;
 }
