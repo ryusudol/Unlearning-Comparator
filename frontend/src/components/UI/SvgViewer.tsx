@@ -53,30 +53,22 @@ export default function SvgViewer({
       {svgs && (
         <div className={styles["content-wrapper"]}>
           <div className={styles.thumbnails}>
-            <div
-              id={`${mode}-1`}
-              onClick={handleThumbnailClick}
-              className={styles.thumbnail}
-              dangerouslySetInnerHTML={createMarkup(modifiedSvgs[0])}
-            />
-            <div
-              id={`${mode}-2`}
-              onClick={handleThumbnailClick}
-              className={styles.thumbnail}
-              dangerouslySetInnerHTML={createMarkup(modifiedSvgs[1])}
-            />
-            <div
-              id={`${mode}-3`}
-              onClick={handleThumbnailClick}
-              className={styles.thumbnail}
-              dangerouslySetInnerHTML={createMarkup(modifiedSvgs[2])}
-            />
-            <div
-              id={`${mode}-4`}
-              onClick={handleThumbnailClick}
-              className={styles.thumbnail}
-              dangerouslySetInnerHTML={createMarkup(modifiedSvgs[3])}
-            />
+            {modifiedSvgs.map((svg, idx) => (
+              <div
+                id={`${mode}-${idx + 1}`}
+                onClick={handleThumbnailClick}
+                className={
+                  styles[
+                    `${
+                      selectedSvgId === idx + 1
+                        ? "selected-thumbnail"
+                        : "thumbnail"
+                    }`
+                  ]
+                }
+                dangerouslySetInnerHTML={createMarkup(svg)}
+              />
+            ))}
           </div>
           {selectedSvgId && (
             <div

@@ -30,8 +30,21 @@
   scale: 1.1;
 }
 
+.selected-thumbnail {
+  z-index: 10;
+}
+
+.selected-thumbnail svg {
+  border: 1px solid #bbbbbb;
+  width: 50px;
+  height: 50px;
+  scale: 1;
+  cursor: pointer;
+  scale: 1.18;
+}
+
 .selected-svg svg {
-  margin-top: 30px;
+  margin-top: 42px;
   position: relative;
   bottom: 32px;
   width: 100%;
