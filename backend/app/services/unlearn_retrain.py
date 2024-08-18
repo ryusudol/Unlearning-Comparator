@@ -39,7 +39,6 @@ async def unlearn_retrain_model(model,
     test_accuracies = []
 
     for epoch in range(epochs):
-        await asyncio.sleep(0)
         if status.cancel_requested:
             print("\nUnlearning cancelled.")
             break
@@ -47,7 +46,9 @@ async def unlearn_retrain_model(model,
         
         # Training loop (without forget class)
         for i, data in enumerate(train_loader, 0):
+            await asyncio.sleep(0)
             if status.cancel_requested:
+                print("\nTraining cancelled mid-batch.")
                 break
             inputs, labels = data[0].to(device), data[1].to(device)
             optimizer.zero_grad()
@@ -57,7 +58,6 @@ async def unlearn_retrain_model(model,
             optimizer.step()
 
             running_loss += loss.item()
-            await asyncio.sleep(0)
         
         scheduler.step()
 
@@ -180,7 +180,7 @@ async def run_unlearning(request, status):
             subset = torch.utils.data.Subset(dataset, subset_indices)
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(dataset, subset_indices),
-                batch_size=256, shuffle=False)
+                batch_size=UMAP_DATA_SIZE, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
             activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)

@@ -49,7 +49,9 @@ async def train_model(model,
         class_total = [0] * 10
         
         for i, data in enumerate(train_loader, 0):
+            await asyncio.sleep(0)
             if status.cancel_requested:
+                print("\nTraining cancelled mid-batch.")
                 break
             inputs, labels = data[0].to(device), data[1].to(device)
             optimizer.zero_grad()
@@ -69,8 +71,6 @@ async def train_model(model,
                 class_correct[label] += c[i].item()
                 class_total[label] += 1
 
-            await asyncio.sleep(0)
-        
         scheduler.step()
         train_loss = running_loss / len(train_loader)
         train_accuracy = 100. * correct / total
@@ -188,7 +188,7 @@ async def run_training(request, status):
             subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
             subset_loader = torch.utils.data.DataLoader(
                 torch.utils.data.Subset(dataset, subset_indices),
-                batch_size=256, shuffle=False)
+                batch_size=UMAP_DATA_SIZE, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
             activations, _ = await get_layer_activations_and_predictions(model, subset_loader, device)

@@ -167,7 +167,7 @@ async def run_unlearning_RL(request, status, weights_path):
                 dataset = test_set
             subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
             subset = torch.utils.data.Subset(dataset, subset_indices)
-            subset_loader = torch.utils.data.DataLoader(subset, batch_size=256, shuffle=False)
+            subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
             activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)

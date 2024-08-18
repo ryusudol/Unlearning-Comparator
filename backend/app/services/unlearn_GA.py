@@ -44,7 +44,9 @@ async def unlearn_GA_model(model,
         
         # Training loop with Gradient Ascent for forget class
         for i, (inputs, labels) in enumerate(forget_loader):
+            await asyncio.sleep(0)
             if status.cancel_requested:
+                print("\nTraining cancelled mid-batch.")
                 break
             inputs, labels = inputs.to(device), labels.to(device)
             
@@ -54,11 +56,9 @@ async def unlearn_GA_model(model,
             loss.backward()
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)
-
             optimizer.step()
-
             running_loss += loss.item()
-            await asyncio.sleep(0)
+            
 
         scheduler.step()
 
@@ -172,7 +172,7 @@ async def run_unlearning_GA(request, status, weights_path):
                 dataset = test_set
             subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
             subset = torch.utils.data.Subset(dataset, subset_indices)
-            subset_loader = torch.utils.data.DataLoader(subset, batch_size=256, shuffle=False)
+            subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
             
             print("\nComputing and saving UMAP embeddings...")
             activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)

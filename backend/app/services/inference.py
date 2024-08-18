@@ -36,7 +36,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Preparing data...")
         status.current_step = "Preparing data"
         status.progress = 40
-        train_loader, test_loader, train_set, test_set = get_data_loaders(batch_size=256)
+        train_loader, test_loader, train_set, test_set = get_data_loaders(batch_size=1024)
         await asyncio.sleep(0)  # Allow other tasks to run
 
         # Calculate accuracy for train set
@@ -82,7 +82,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
         subset_loader = torch.utils.data.DataLoader(
             torch.utils.data.Subset(dataset, subset_indices),
-            batch_size=256, shuffle=False)
+            batch_size=UMAP_DATA_SIZE, shuffle=False)
         activations, _ = await get_layer_activations_and_predictions(model, subset_loader, device)
         await asyncio.sleep(0)  # Allow other tasks to run
 
@@ -107,4 +107,3 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         status.is_inferencing = False
         elapsed_time = time.time() - status.start_time
         status.estimated_time_remaining = max(0, 100 - status.progress) * elapsed_time / status.progress
-
