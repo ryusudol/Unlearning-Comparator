@@ -36,10 +36,7 @@ async def unlearn_GA_model(model,
     test_accuracies = []
 
     for epoch in range(epochs):
-        await asyncio.sleep(0)
-        if status.cancel_requested:
-            print("\nUnlearning cancelled.")
-            break
+        
         running_loss = 0.0
         
         # Training loop with Gradient Ascent for forget class
@@ -59,7 +56,10 @@ async def unlearn_GA_model(model,
             optimizer.step()
             running_loss += loss.item()
             
-
+        await asyncio.sleep(0)
+        if status.cancel_requested:
+            print("\nUnlearning cancelled.")
+            break
         scheduler.step()
 
         # Evaluate on forget set (training set)

@@ -36,10 +36,7 @@ async def unlearn_FT_model(model,
     test_accuracies = []
 
     for epoch in range(epochs):
-        await asyncio.sleep(0)
-        if status.cancel_requested:
-            print("\nUnlearning cancelled.")
-            break
+        
         running_loss = 0.0
         
         # Training loop with Fine-Tuning for retained classes
@@ -56,13 +53,14 @@ async def unlearn_FT_model(model,
             loss.backward()
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)
-
             optimizer.step()
-
             running_loss += loss.item()
 
         scheduler.step()
-
+        await asyncio.sleep(0)
+        if status.cancel_requested:
+            print("\nUnlearning cancelled.")
+            break
         # Evaluate on full train set
         train_loss, train_accuracy, train_class_accuracies = await evaluate_model(model, train_loader, criterion, device)
         

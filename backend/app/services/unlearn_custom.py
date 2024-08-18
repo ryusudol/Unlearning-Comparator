@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
-import asyncio
-import time
 import os
-import sys
+
 
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders

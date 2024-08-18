@@ -39,11 +39,7 @@ async def unlearn_retrain_model(model,
     test_accuracies = []
 
     for epoch in range(epochs):
-        if status.cancel_requested:
-            print("\nUnlearning cancelled.")
-            break
         running_loss = 0.0
-        
         # Training loop (without forget class)
         for i, data in enumerate(train_loader, 0):
             await asyncio.sleep(0)
@@ -56,9 +52,12 @@ async def unlearn_retrain_model(model,
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-
             running_loss += loss.item()
-        
+
+        await asyncio.sleep(0)
+        if status.cancel_requested:
+            print("\nUnlearning cancelled.")
+            break
         scheduler.step()
 
         # Evaluate on full training set (including forget class)
@@ -72,11 +71,6 @@ async def unlearn_retrain_model(model,
 
         if test_accuracy > best_test_acc:
             best_test_acc = test_accuracy
-            best_model = copy.deepcopy(model)
-            best_epoch = epoch + 1
-            save_model(best_model, 'unlearned_models', model_name, dataset_name, epochs, learning_rate, is_best=True)
-            print(f"New best model saved at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
-
         status.current_epoch = epoch + 1
         status.progress = (epoch + 1) / epochs * 100
         status.current_loss = train_loss
@@ -85,9 +79,6 @@ async def unlearn_retrain_model(model,
         status.test_accuracy = test_accuracy
         status.train_class_accuracies = train_class_accuracies
         status.test_class_accuracies = test_class_accuracies
-        
-        if test_accuracy > best_test_acc:
-            best_test_acc = test_accuracy
 
         elapsed_time = time.time() - status.start_time
         estimated_total_time = elapsed_time / (epoch + 1) * epochs

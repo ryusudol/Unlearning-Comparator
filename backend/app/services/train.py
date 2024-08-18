@@ -82,12 +82,12 @@ async def train_model(model,
         train_accuracies.append(train_accuracy)
         test_accuracies.append(test_accuracy)
 
-        if test_accuracy > best_test_acc:
-            best_test_acc = test_accuracy
-            best_model = copy.deepcopy(model)
-            best_epoch = epoch + 1
-            save_model(best_model, 'trained_models', model_name, dataset_name, epochs, learning_rate, is_best=True)
-            print(f"New best model saved at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
+        # if test_accuracy > best_test_acc:
+        #     best_test_acc = test_accuracy
+        #     best_model = copy.deepcopy(model)
+        #     best_epoch = epoch + 1
+        #     save_model(best_model, 'trained_models', model_name, dataset_name, epochs, learning_rate, is_best=True)
+        #     print(f"New best model saved at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
 
         status.current_epoch = epoch + 1
         status.progress = (epoch + 1) / epochs * 100

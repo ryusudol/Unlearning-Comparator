@@ -35,14 +35,12 @@ async def unlearn_RL_model(model,
     test_accuracies = []
 
     for epoch in range(epochs):
-        await asyncio.sleep(0)
-        if status.cancel_requested:
-            print("\nUnlearning cancelled.")
-            break
+        
         running_loss = 0.0
         
         # Training loop with random labeling for forget class
         for i, (inputs, labels) in enumerate(train_loader):
+            await asyncio.sleep(0)
             if status.cancel_requested:
                 break
             inputs, labels = inputs.to(device), labels.to(device)
@@ -59,8 +57,11 @@ async def unlearn_RL_model(model,
             optimizer.step()
 
             running_loss += loss.item()
-            await asyncio.sleep(0)
-        
+            
+        await asyncio.sleep(0)
+        if status.cancel_requested:
+            print("\nUnlearning cancelled.")
+            break
         scheduler.step()
 
         # Evaluate on training set
