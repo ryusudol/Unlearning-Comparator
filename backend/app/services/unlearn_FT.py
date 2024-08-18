@@ -36,9 +36,7 @@ async def unlearn_FT_model(model,
     test_accuracies = []
 
     for epoch in range(epochs):
-        
         running_loss = 0.0
-        
         # Training loop with Fine-Tuning for retained classes
         for i, (inputs, labels) in enumerate(retain_loader):
             await asyncio.sleep(0)
@@ -56,11 +54,11 @@ async def unlearn_FT_model(model,
             optimizer.step()
             running_loss += loss.item()
 
-        scheduler.step()
         await asyncio.sleep(0)
         if status.cancel_requested:
             print("\nUnlearning cancelled.")
             break
+        scheduler.step()
         # Evaluate on full train set
         train_loss, train_accuracy, train_class_accuracies = await evaluate_model(model, train_loader, criterion, device)
         

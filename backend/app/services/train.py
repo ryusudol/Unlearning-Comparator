@@ -31,7 +31,7 @@ async def train_model(model,
     status.total_epochs = epochs
     
     best_test_acc = 0.0
-    best_model = None
+    # best_model = None
     best_epoch = 0
 
     train_accuracies = []
