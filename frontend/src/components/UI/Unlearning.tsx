@@ -1,4 +1,10 @@
-import React, { useContext, useState, useRef, useCallback } from "react";
+import React, {
+  useContext,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+} from "react";
 import styles from "./Unlearning.module.css";
 
 import Input from "../Input";
@@ -10,7 +16,6 @@ import { RetrainingConfigContext } from "../../store/retraining-config-context";
 import { UnlearningConfigContext } from "../../store/unlearning-config-context";
 import { MetricsContext } from "../../store/metrics-context";
 import { SvgsContext } from "../../store/svgs-context";
-import { useInterval } from "../../hooks/useInterval";
 import { executeRunning, fetchRunningStatus } from "../../http";
 import { getDefaultUnlearningConfig } from "../../util";
 import {
@@ -61,7 +66,7 @@ export default function Unlearning({
   const isRetrain = method === "Retrain";
 
   const checkUnlearningStatus = useCallback(async () => {
-    fetchRunningStatus(
+    await fetchRunningStatus(
       "unlearn",
       fetchedResult,
       interval,
@@ -73,15 +78,39 @@ export default function Unlearning({
       saveMetrics
     );
   }, [
-    setOperationStatus,
-    setUnlearnedModels,
     isRetrain,
+    saveMetrics,
     saveRetrainingSvgs,
     saveUnlearningSvgs,
-    saveMetrics,
+    setOperationStatus,
+    setUnlearnedModels,
   ]);
 
-  useInterval(operationStatus, interval, checkUnlearningStatus);
+  useEffect(() => {
+    let isMounted = true;
+    const runInterval = async () => {
+      if (isMounted && operationStatus) {
+        await checkUnlearningStatus();
+        interval.current = setTimeout(runInterval, 1000);
+      }
+    };
+
+    if (operationStatus) {
+      runInterval();
+    } else {
+      if (interval.current) {
+        clearTimeout(interval.current);
+        interval.current = undefined;
+      }
+    }
+
+    return () => {
+      isMounted = false;
+      if (interval.current) {
+        clearTimeout(interval.current);
+      }
+    };
+  }, [checkUnlearningStatus, operationStatus]);
 
   const handleUnlearningMethodSelection = (
     e: React.ChangeEvent<HTMLSelectElement>

@@ -61,7 +61,7 @@ export default function Training({
       fd.entries()
     ) as unknown as TrainingConfigurationData;
 
-    executeRunning(
+    await executeRunning(
       "train",
       fetchedResult,
       operationStatus,
@@ -72,6 +72,8 @@ export default function Training({
       setStatus,
       customFile
     );
+
+    // TODO: training 후 initialState로 복구시키기
   };
 
   return (
