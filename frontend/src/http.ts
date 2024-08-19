@@ -58,9 +58,9 @@ export async function fetchRunningStatus(
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
   const isUnlearning = identifier === "unlearn";
-
+  console.log(API_URL, identifier);
   if (fetchedResult.current) return;
-
+  console.log(API_URL, identifier);
   try {
     const response = await fetch(`${API_URL}/${identifier}/status`);
 

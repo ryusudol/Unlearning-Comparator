@@ -32,7 +32,7 @@ const initialValue = {
   batch_size: 128,
 };
 
-export default function UnlearningConfiguration({
+export default function Unlearning({
   operationStatus,
   setOperationStatus,
   trainedModels,
