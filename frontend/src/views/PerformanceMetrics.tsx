@@ -10,27 +10,49 @@ export default function PerformanceMetrics() {
     <section className={styles["performance-metrics"]}>
       <Title title="Performance Metrics" />
       <ContentBox height={253}>
-        <div>
+        <div className={styles.wrapper}>
           <div className={styles["barchart-row"]}>
+            <p className={styles.category}>Retrain</p>
             <CustomBarChart
-              title="Unlearning Accuracy"
+              title="Unlearning Accuracy (UA)"
               dataKey="ua"
               color={TABLEAU10[0]}
             />
             <CustomBarChart
-              title="Remaining Accuracy"
+              title="Remaining Accuracy (RA)"
               dataKey="ra"
               color={TABLEAU10[1]}
             />
-          </div>
-          <div className={styles["barchart-row"]}>
             <CustomBarChart
-              title="Test Accuracy"
+              title="Test Accuracy (TA)"
               dataKey="ta"
               color={TABLEAU10[2]}
             />
             <CustomBarChart
-              title="Run-Time Efficiency"
+              title="Membership Inference Attack (MIA)"
+              dataKey="rte"
+              color={TABLEAU10[3]}
+            />
+          </div>
+          <div className={styles["barchart-row"]}>
+            <p className={styles.category}>Unlearning</p>
+            <CustomBarChart
+              title="Unlearning Accuracy (UA)"
+              dataKey="ua"
+              color={TABLEAU10[0]}
+            />
+            <CustomBarChart
+              title="Remaining Accuracy (RA)"
+              dataKey="ra"
+              color={TABLEAU10[1]}
+            />
+            <CustomBarChart
+              title="Test Accuracy (TA)"
+              dataKey="ta"
+              color={TABLEAU10[2]}
+            />
+            <CustomBarChart
+              title="Membership Inference Attack (MIA)"
               dataKey="rte"
               color={TABLEAU10[3]}
             />
