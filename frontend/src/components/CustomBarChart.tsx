@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import styles from "./CustomBarChart.module.css";
 
 import SubTitle from "../components/SubTitle";
 
@@ -92,16 +93,18 @@ interface Props {
 export default function CustomBarChart({ title, dataKey, color }: Props) {
   return (
     <div>
-      <SubTitle subtitle={title} fontSize={12} />
+      <div className={styles["title-wrapper"]}>
+        <SubTitle subtitle={title} fontSize={12} />
+      </div>
       <BarChart
-        width={240}
+        width={216}
         height={110}
         data={data}
         margin={{
           top: 0,
           right: 0,
           bottom: 0,
-          left: -42,
+          left: -36,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
