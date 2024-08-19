@@ -9,7 +9,7 @@ export async function useInterval(
 ) {
   useEffect(() => {
     if (operationStatus && !interval.current)
-      interval.current = setInterval(checkFn, 5000);
+      interval.current = setInterval(checkFn, 1000);
     return () => {
       if (interval.current) clearInterval(interval.current);
     };
