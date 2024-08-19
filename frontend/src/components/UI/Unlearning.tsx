@@ -1,10 +1,4 @@
-import React, {
-  useContext,
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { useContext, useState, useRef, useCallback } from "react";
 import styles from "./Unlearning.module.css";
 
 import Input from "../Input";
@@ -18,6 +12,7 @@ import { MetricsContext } from "../../store/metrics-context";
 import { SvgsContext } from "../../store/svgs-context";
 import { executeRunning, fetchRunningStatus } from "../../http";
 import { getDefaultUnlearningConfig } from "../../util";
+import { useInterval } from "../../hooks/useInterval";
 import {
   UNLEARNING_METHODS,
   UNLEARN_CLASSES,
@@ -86,31 +81,7 @@ export default function Unlearning({
     setUnlearnedModels,
   ]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const runInterval = async () => {
-      if (isMounted && operationStatus) {
-        await checkUnlearningStatus();
-        interval.current = setTimeout(runInterval, 1000);
-      }
-    };
-
-    if (operationStatus) {
-      runInterval();
-    } else {
-      if (interval.current) {
-        clearTimeout(interval.current);
-        interval.current = undefined;
-      }
-    }
-
-    return () => {
-      isMounted = false;
-      if (interval.current) {
-        clearTimeout(interval.current);
-      }
-    };
-  }, [checkUnlearningStatus, operationStatus]);
+  useInterval(operationStatus, interval, checkUnlearningStatus);
 
   const handleUnlearningMethodSelection = (
     e: React.ChangeEvent<HTMLSelectElement>
