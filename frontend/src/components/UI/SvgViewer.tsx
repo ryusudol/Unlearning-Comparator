@@ -25,9 +25,7 @@ export default function SvgViewer({
   const { retrieveRetrainingSvgs, retrieveUnlearningSvgs } =
     useContext(SvgsContext);
 
-  const { method, retrieveUnlearningConfig } = useContext(
-    UnlearningConfigContext
-  );
+  const { retrieveUnlearningConfig } = useContext(UnlearningConfigContext);
   const { retrieveRetrainingConfig } = useContext(RetrainingConfigContext);
 
   useEffect(() => {
@@ -47,12 +45,10 @@ export default function SvgViewer({
   return (
     <div className={styles.wrapper}>
       <SubTitle subtitle={subtitle} />
-      {svgs && (
+      {svgs.length === 4 && (
         <div className={styles["content-wrapper"]}>
           <div className={styles.header}>
-            {(mode === "r" || (mode === "u" && method !== "")) && (
-              <Explanation mode={mode} />
-            )}
+            <Explanation mode={mode} />
             <div className={styles.thumbnails}>
               {modifiedSvgs.map((svg, idx) => (
                 <div
