@@ -9,6 +9,12 @@
   margin-right: 4px;
 }
 
+.icon-disabled {
+  width: 11px;
+  margin-right: 4px;
+  opacity: 0.4;
+}
+
 .upload {
   display: flex;
   justify-content: flex-start;
@@ -23,7 +29,22 @@
   padding: 0px 4px;
 }
 
-.upload-text {
+.upload-disabled {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #efefef;
+  color: var(--light-grey-font-color);
+  width: 120px;
+  height: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  cursor: not-allowed;
+  font-size: 13px;
+  padding: 0px 4px;
+}
+
+.upload span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -41,5 +62,10 @@
 }
 
 .label {
+  font-size: var(--select-font-size);
+}
+
+.label-disabled {
+  color: var(--light-grey-font-color);
   font-size: var(--select-font-size);
 }

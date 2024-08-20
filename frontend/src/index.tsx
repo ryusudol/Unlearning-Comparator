@@ -7,6 +7,7 @@ import RetrainingConfigContextProvider from "./store/retraining-config-context";
 import UnlearningConfigContextProvider from "./store/unlearning-config-context";
 import MetricsContextProvider from "./store/metrics-context";
 import SvgsContextProvider from "./store/svgs-context";
+import BaselineContextProvider from "./store/baseline-context";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -17,7 +18,9 @@ root.render(
       <UnlearningConfigContextProvider>
         <MetricsContextProvider>
           <SvgsContextProvider>
-            <App />
+            <BaselineContextProvider>
+              <App />
+            </BaselineContextProvider>
           </SvgsContextProvider>
         </MetricsContextProvider>
       </UnlearningConfigContextProvider>

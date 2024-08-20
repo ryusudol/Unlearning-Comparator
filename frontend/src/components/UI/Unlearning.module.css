@@ -3,3 +3,48 @@
   flex-direction: column;
   margin-bottom: 3px;
 }
+
+.forget {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0 13px;
+}
+
+.forget select {
+  height: 24px;
+}
+
+.forget select:focus {
+  outline: none;
+}
+
+.forget div {
+  background-color: var(--button-bg-color);
+  width: 90px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fefefe;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+  position: relative;
+  animation: backgroundBrightness 2s infinite;
+}
+
+.forget div:hover {
+  background-color: var(--button-hover-bg-color);
+}
+
+@keyframes backgroundBrightness {
+  0%,
+  100% {
+    background-color: #101827;
+  }
+  50% {
+    background-color: #898989;
+  }
+}

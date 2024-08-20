@@ -8,21 +8,23 @@ interface Props {
   mode: 0 | 1;
   handleMethodSelection?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   optionData?: string[];
+  disabled?: boolean;
 }
 
 export default function PredefinedInput({
   mode,
   handleMethodSelection,
   optionData,
+  disabled,
 }: Props) {
   return (
     <div className={styles.mode}>
       <div className={styles["label-wrapper"]}>
         <FontAwesomeIcon
-          className={styles.icon}
+          className={styles[disabled ? "icon-disabled" : "icon"]}
           icon={mode ? faCircle : faCircleCheck}
         />
-        <label className={styles.label}>
+        <label className={styles[disabled ? "label-disabled" : "label"]}>
           Predefined {optionData ? "Method" : "Setting"}
         </label>
       </div>
@@ -31,6 +33,7 @@ export default function PredefinedInput({
           name="method"
           onChange={handleMethodSelection}
           className={styles["predefined-select"]}
+          disabled={disabled}
         >
           {optionData.map((method, idx) => (
             <option key={idx} value={method}>

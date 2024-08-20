@@ -16,7 +16,18 @@
   margin-right: 4px;
 }
 
+.icon-disabled {
+  width: 11px;
+  margin-right: 4px;
+  opacity: 0.25;
+}
+
 .label {
+  font-size: var(--select-font-size);
+}
+
+.label-disabled {
+  color: var(--light-grey-font-color);
   font-size: var(--select-font-size);
 }
 
