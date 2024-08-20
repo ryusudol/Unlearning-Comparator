@@ -24,8 +24,8 @@ const height = yAxis.length < 4 ? 55 * yAxis.length : 220;
 export default function PerformanceOverview() {
   return (
     <section className={styles["performance-overview"]}>
-      <Title title="Performance Overview" />
-      <ContentBox height={253}>
+      <ContentBox height={275}>
+        <Title title="Performance Overview" />
         <div className={styles["heatmap-wrapper"]}>
           <Heatmap width={550} height={height} data={data} />
         </div>

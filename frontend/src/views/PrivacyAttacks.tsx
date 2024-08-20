@@ -6,8 +6,8 @@ import ContentBox from "../components/ContentBox";
 export default function PrivacyAttacks() {
   return (
     <section className={styles["privacy-attacks"]}>
-      <Title title="Privacy Attacks" />
-      <ContentBox height={626}>
+      <ContentBox height={652}>
+        <Title title="Privacy Attacks" />
         <div className={styles.wrapper}></div>
       </ContentBox>
     </section>
