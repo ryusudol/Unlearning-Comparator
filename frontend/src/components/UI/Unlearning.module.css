@@ -7,10 +7,11 @@
 .forget {
   display: flex;
   justify-content: space-between;
-  margin: 4px 0 13px;
+  margin: 6px 0 11px;
 }
 
 .forget select {
+  width: 120px;
   height: 24px;
 }
 
@@ -36,6 +37,7 @@
 }
 
 .forget div:hover {
+  animation: none;
   background-color: var(--button-hover-bg-color);
 }
 

@@ -135,8 +135,6 @@ export default function Unlearning({
       fd.entries()
     ) as unknown as UnlearningConfigurationData;
 
-    console.log(configState);
-
     if (isRetrain) {
       saveRetrainingConfig({
         epochs: configState.epochs,
