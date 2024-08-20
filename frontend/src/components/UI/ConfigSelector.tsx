@@ -20,7 +20,11 @@ export default function ConfigSelector({ mode, status, onClick }: Props) {
           >
             {el}
           </button>
-          {mode === idx && idx !== 2 && <div className={styles.arrow} />}
+          {idx !== 2 && (
+            <div
+              className={styles[mode === idx ? "selected-arrow" : "arrow"]}
+            />
+          )}
         </div>
       ))}
     </div>
