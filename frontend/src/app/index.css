@@ -1,5 +1,4 @@
 :root {
-  --title-font-size: 16px;
   --subtitle-font-size: 16px;
   --select-font-size: 14px;
   --input-font-size: 13px;
@@ -8,7 +7,7 @@
   --custom-upload-btn-height: 18px;
 
   --title-text-color: #383838;
-  --title-bg-color: #e7e7e7;
+  --title-bg-color: #efefef;
 
   --border-color: #898989;
 

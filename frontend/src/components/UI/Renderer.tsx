@@ -22,7 +22,7 @@ interface RendererProps {
   setHoveredCell: (cell: HoveredCell | null) => void;
 }
 
-const MARGIN = { top: 15, right: 100, bottom: 0, left: 135 };
+const MARGIN = { top: 16, right: 100, bottom: 0, left: 135 };
 const FONT_SIZE = 12;
 
 export const Renderer: React.FC<RendererProps> = ({
