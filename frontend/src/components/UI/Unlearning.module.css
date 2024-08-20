@@ -7,46 +7,26 @@
 .forget {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 6px 0 11px;
+}
+
+.forget label {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .forget select {
   width: 120px;
-  height: 24px;
+  height: 18px;
 }
 
 .forget select:focus {
   outline: none;
 }
 
-.forget div {
-  background-color: var(--button-bg-color);
-  width: 90px;
-  height: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 500;
-  color: #fefefe;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.1s ease-in-out;
-  position: relative;
-  animation: backgroundBrightness 2s infinite;
-}
-
-.forget div:hover {
-  animation: none;
-  background-color: var(--button-hover-bg-color);
-}
-
-@keyframes backgroundBrightness {
-  0%,
-  100% {
-    background-color: #101827;
-  }
-  50% {
-    background-color: #898989;
-  }
+.asterisk {
+  font-size: 10px;
+  color: #d12d48;
+  margin: 0 6px 2px 1px;
 }

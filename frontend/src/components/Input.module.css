@@ -6,16 +6,12 @@
   width: 230px;
 }
 
-.label {
+.wrapper label {
   font-size: var(--input-font-size);
 }
 
-.label-disabled {
-  color: var(--light-grey-font-color);
-  font-size: var(--input-font-size);
-}
-
-.input {
+.wrapper input,
+.wrapper select {
   width: 120px;
   height: 18px;
   padding: 0 4px;
@@ -23,15 +19,7 @@
   white-space: nowrap;
 }
 
-.input:focus {
+.wrapper input:focus,
+.wrapper select:focus {
   outline: none;
-}
-
-.input-disabled {
-  width: 120px;
-  height: 18px;
-  padding: 0 4px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--light-grey-font-color);
 }

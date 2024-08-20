@@ -5,7 +5,7 @@
   align-items: center;
 }
 
-.label-wrapper {
+.mode div {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,22 +16,11 @@
   margin-right: 4px;
 }
 
-.icon-disabled {
-  width: 11px;
-  margin-right: 4px;
-  opacity: 0.25;
-}
-
-.label {
+.mode label {
   font-size: var(--select-font-size);
 }
 
-.label-disabled {
-  color: var(--light-grey-font-color);
-  font-size: var(--select-font-size);
-}
-
-.predefined-select {
+.mode select {
   width: var(--custom-upload-btn-width);
   height: var(--custom-upload-btn-height);
   padding: 0px 4px;
@@ -39,6 +28,6 @@
   white-space: nowrap;
 }
 
-.predefined-select:focus {
+.mode select:focus {
   outline: none;
 }
