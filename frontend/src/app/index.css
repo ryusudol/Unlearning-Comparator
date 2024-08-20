@@ -1,5 +1,4 @@
 :root {
-  --title-font-size: 16px;
   --subtitle-font-size: 16px;
   --select-font-size: 14px;
   --input-font-size: 13px;
@@ -8,12 +7,15 @@
   --custom-upload-btn-height: 18px;
 
   --title-text-color: #383838;
-  --title-bg-color: #e7e7e7;
+  --title-bg-color: #efefef;
 
   --border-color: #898989;
 
   --button-bg-color: #101827;
   --button-hover-bg-color: #585858;
+  --disabled-button-bg-color: #aeaeae;
+
+  --light-grey-font-color: #aeaeae;
 }
 
 * {
@@ -41,4 +43,8 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
 }

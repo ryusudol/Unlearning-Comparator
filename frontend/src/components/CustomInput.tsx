@@ -8,30 +8,36 @@ interface Props {
   mode: 0 | 1;
   customFile: File | undefined;
   handleCustomFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 export default function CustomInput({
   mode,
   customFile,
   handleCustomFileUpload,
+  disabled,
 }: Props) {
   return (
     <div className={styles.wrapper}>
       <div className={styles["label-wrapper"]}>
         <FontAwesomeIcon
-          className={styles.icon}
+          className={styles[disabled ? "icon-disabled" : "icon"]}
           icon={mode ? faCircleCheck : faCircle}
         />
-        <span className={styles["label"]}>Custom Model</span>
+        <span className={styles[disabled ? "label-disabled" : "label"]}>
+          Custom Model
+        </span>
       </div>
       <div>
         <label htmlFor="custom-training">
           {customFile ? (
-            <div className={styles["upload"]}>
-              <span className={styles["upload-text"]}>{customFile.name}</span>
+            <div className={styles[disabled ? "upload-disabled" : "upload"]}>
+              <span>{customFile.name}</span>
             </div>
           ) : (
-            <div className={styles["upload"]}>Click to upload</div>
+            <div className={styles[disabled ? "upload-disabled" : "upload"]}>
+              Click to upload
+            </div>
           )}
         </label>
         <input
@@ -39,6 +45,7 @@ export default function CustomInput({
           className={styles["file-input"]}
           type="file"
           id="custom-training"
+          disabled={disabled}
         />
       </div>
     </div>

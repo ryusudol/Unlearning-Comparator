@@ -8,31 +8,25 @@ interface Props {
 
 export default function ConfigSelector({ mode, status, onClick }: Props) {
   return (
-    <div className={styles["mode-button-wrapper"]}>
-      <button
-        disabled={status !== 0}
-        onClick={onClick}
-        id="0"
-        className={styles[mode === 0 ? "selected-mode" : "mode-button"]}
-      >
-        Training
-      </button>
-      <button
-        disabled={status !== 0}
-        onClick={onClick}
-        id="1"
-        className={styles[mode === 1 ? "selected-mode" : "mode-button"]}
-      >
-        Unlearning
-      </button>
-      <button
-        disabled={status !== 0}
-        onClick={onClick}
-        id="2"
-        className={styles[mode === 2 ? "selected-mode" : "mode-button"]}
-      >
-        Defense
-      </button>
+    <div className={styles.wrapper}>
+      {["Training", "Unlearning", "Defense"].map((el, idx) => (
+        <div>
+          <button
+            key={idx}
+            disabled={status !== 0}
+            onClick={onClick}
+            id={idx.toString()}
+            className={styles[mode === idx ? "selected-mode" : "mode-button"]}
+          >
+            {el}
+          </button>
+          {idx !== 2 && (
+            <div
+              className={styles[mode === idx ? "selected-arrow" : "arrow"]}
+            />
+          )}
+        </div>
+      ))}
     </div>
   );
 }
