@@ -53,11 +53,8 @@ export default function OperationStatus({
   return (
     <div className={styles["status-wrapper"]}>
       <div className={styles.header}>
-        <span className={styles.status}>{indicator}</span>
-        <select
-          onChange={handleModeSelection}
-          className={styles["class-accuracy-selector"]}
-        >
+        <span>{indicator}</span>
+        <select onChange={handleModeSelection}>
           {MODES.map((mode, idx) => (
             <option key={idx} value={mode}>
               {mode}
@@ -67,46 +64,40 @@ export default function OperationStatus({
       </div>
       <div className={styles.content}>
         {status && status.current_epoch >= 1 && (
-          <div className={styles["status-detail-wrapper"]}>
-            <span className={styles["status-detail"]}>
+          <div>
+            <span>
               Epoch: {status.current_epoch}/{status.total_epochs}
             </span>
-            <span className={styles["status-detail"]}>
-              Current Loss: {status.current_loss.toFixed(3)}
-            </span>
-            <span className={styles["status-detail"]}>
-              Current Accuracy: {status.current_accuracy.toFixed(3)}
-            </span>
+            <span>Current Loss: {status.current_loss.toFixed(3)}</span>
+            <span>Current Accuracy: {status.current_accuracy.toFixed(3)}</span>
             {isTraining ? (
-              <span className={styles["status-detail"]}>
+              <span>
                 Best Loss: {(status as TrainingStatus).best_loss.toFixed(3)}
               </span>
             ) : (
-              <span className={styles["status-detail"]}>
+              <span>
                 Test Loss: {(status as UnlearningStatus).test_loss.toFixed(3)}
               </span>
             )}
             {isTraining ? (
-              <span className={styles["status-detail"]}>
+              <span>
                 Best Accuracy:{" "}
                 {(status as TrainingStatus).best_accuracy.toFixed(3)}
               </span>
             ) : (
-              <span className={styles["status-detail"]}>
+              <span>
                 Test Accuracy:{" "}
                 {(status as UnlearningStatus).test_accuracy.toFixed(3)}
               </span>
             )}
-            <span className={styles["status-detail"]}>
-              ETA: {status.estimated_time_remaining!.toFixed(2)}s
-            </span>
+            <span>ETA: {status.estimated_time_remaining!.toFixed(2)}s</span>
             <ProgressBar eta={ETA} />
           </div>
         )}
-        <div className={styles["class-accuracies"]}>
+        <div className={styles.accuracies}>
           {accuracies.length !== 0 &&
             accuracies.map((acc, idx) => (
-              <span key={idx} className={styles.accuracy}>
+              <span key={idx}>
                 Class {idx}: {acc.toFixed(1)}%
               </span>
             ))}

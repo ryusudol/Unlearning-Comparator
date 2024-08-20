@@ -2,15 +2,11 @@ import styles from "./RunButton.module.css";
 
 interface Props {
   operationStatus: number;
-  disabled?: boolean;
 }
 
-export default function RunButton({ operationStatus, disabled }: Props) {
+export default function RunButton({ operationStatus }: Props) {
   return (
-    <button
-      className={styles[disabled ? "button-disabled" : "button"]}
-      disabled={disabled}
-    >
+    <button className={styles.button}>
       {operationStatus ? "Cancel" : "Run"}
     </button>
   );

@@ -9,10 +9,10 @@ import {
 const BASELINE = "baseline";
 
 export const BaselineContext = createContext<BaselineContextType>({
-  baseline: -1,
+  baseline: 0,
 
   saveBaseline: (baseline: number) => {},
-  retrieveBaseline: () => -1,
+  retrieveBaseline: () => 0,
   clearBaseline: () => {},
 });
 
@@ -31,7 +31,7 @@ function BaselineReducer(state: Baseline, action: Action): Baseline {
       if (!savedBaseline)
         return {
           ...state,
-          baseline: -1,
+          baseline: 0,
         };
       try {
         const parsedBaseline: Baseline = JSON.parse(savedBaseline);
@@ -43,7 +43,7 @@ function BaselineReducer(state: Baseline, action: Action): Baseline {
         console.error(error);
         return {
           ...state,
-          baseline: -1,
+          baseline: 0,
         };
       }
 
@@ -51,7 +51,7 @@ function BaselineReducer(state: Baseline, action: Action): Baseline {
       sessionStorage.removeItem(BASELINE);
       return {
         ...state,
-        baseline: -1,
+        baseline: 0,
       };
 
     default:
@@ -65,7 +65,7 @@ export default function BaselineContextProvider({
   children: React.ReactNode;
 }) {
   const [baseline, dispatch] = useReducer(BaselineReducer, {
-    baseline: -1,
+    baseline: 0,
   });
 
   function handleSaveSettings(baseline: number) {
