@@ -20,3 +20,22 @@
 .button:hover {
   background-color: var(--button-hover-bg-color);
 }
+
+.button-disabled {
+  border: none;
+  background-color: var(--disabled-button-bg-color);
+  width: 48px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fefefe;
+  border-radius: 4px;
+  cursor: not-allowed;
+  transition: background-color 0.1s ease-in-out;
+  margin-top: 8px;
+  position: relative;
+  left: 216px;
+}

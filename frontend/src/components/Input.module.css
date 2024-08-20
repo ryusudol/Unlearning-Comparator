@@ -10,6 +10,11 @@
   font-size: var(--input-font-size);
 }
 
+.label-disabled {
+  color: var(--light-grey-font-color);
+  font-size: var(--input-font-size);
+}
+
 .input {
   width: 120px;
   height: 18px;
@@ -20,4 +25,13 @@
 
 .input:focus {
   outline: none;
+}
+
+.input-disabled {
+  width: 120px;
+  height: 18px;
+  padding: 0 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--light-grey-font-color);
 }
