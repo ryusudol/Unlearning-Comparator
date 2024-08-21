@@ -23,8 +23,8 @@ export default function Settings() {
 
   return (
     <section className={styles.settings}>
-      <ContentBox height={275}>
-        <Title title="Settings" />
+      <Title title="Settings" />
+      <ContentBox height={253}>
         <ConfigSelector
           mode={mode}
           status={operationStatus}

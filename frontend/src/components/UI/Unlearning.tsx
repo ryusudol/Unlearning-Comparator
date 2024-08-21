@@ -139,7 +139,7 @@ export default function Unlearning({
       clearRetrainingSvgs();
     } else {
       saveUnlearningConfig({
-        method,
+        method: mode === 0 ? method : "Custom File",
         trainedModel: configState.trained_model,
         epochs: configState.epochs,
         learningRate: configState.learning_rate,

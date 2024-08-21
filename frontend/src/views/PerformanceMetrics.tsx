@@ -8,8 +8,8 @@ import { TABLEAU10 } from "../constants/tableau10";
 export default function PerformanceMetrics() {
   return (
     <section className={styles["performance-metrics"]}>
-      <ContentBox height={275}>
-        <Title title="Performance Metrics" />
+      <Title title="Performance Metrics" />
+      <ContentBox height={253}>
         <div className={styles.wrapper}>
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Retrain</p>
