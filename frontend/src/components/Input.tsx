@@ -21,17 +21,11 @@ export default function Input({
 
   return (
     <div className={styles.wrapper}>
-      <label
-        className={styles[disabled ? "label-disabled" : "label"]}
-        htmlFor={label}
-      >
-        {label}
-      </label>
+      <label htmlFor={label}>{label}</label>
       {type === "select" ? (
         <select
           id={label}
           name={name}
-          className={styles.input}
           defaultValue={defaultValue}
           disabled={disabled}
         >
@@ -45,12 +39,10 @@ export default function Input({
         <input
           id={label}
           name={name}
-          className={styles[disabled ? "input-disabled" : "input"]}
           defaultValue={defaultValue}
           placeholder="Please enter a value"
           type="number"
           step={labelName === "Learning Rate" ? 0.0001 : 1}
-          disabled={disabled}
         />
       )}
     </div>

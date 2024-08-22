@@ -39,8 +39,8 @@ export default function Embeddings() {
 
   return (
     <section className={styles.embeddings}>
-      <ContentBox height={652}>
-        <Title title="Embeddings" />
+      <Title title="Embeddings" />
+      <ContentBox height={627}>
         <div className={styles["viewers-wrapper"]}>
           <SvgViewer
             mode="r"

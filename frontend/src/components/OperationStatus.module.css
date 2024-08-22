@@ -8,28 +8,6 @@
   margin-left: 12px;
 }
 
-.status {
-  color: red;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.content {
-  display: flex;
-}
-
-.status-detail-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  margin-left: 4px;
-}
-
-.status-detail {
-  font-size: 12px;
-  margin-bottom: 2px;
-}
-
 .header {
   width: 100%;
   display: flex;
@@ -38,7 +16,13 @@
   margin-bottom: 5px;
 }
 
-.class-accuracy-selector {
+.header span {
+  color: red;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.header select {
   width: 80px;
   height: 20px;
   border: 1px solid #c4c7cb;
@@ -47,17 +31,33 @@
   font-size: 13px;
 }
 
-.class-accuracy-selector:focus {
+.header select:focus {
   outline: none;
 }
 
-.class-accuracies {
+.content {
+  display: flex;
+}
+
+.content div:first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-left: 4px;
+}
+
+.content div:first-child span {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.accuracies {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   margin-left: 18px;
 }
 
-.accuracy {
+.accuracies span {
   font-size: 11.6px;
 }

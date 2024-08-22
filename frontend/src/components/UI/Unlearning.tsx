@@ -1,5 +1,7 @@
 import React, { useContext, useState, useRef, useCallback } from "react";
 import styles from "./Unlearning.module.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAsterisk } from "@fortawesome/free-solid-svg-icons";
 
 import Input from "../Input";
 import PredefinedInput from "../PredefinedInput";
@@ -39,7 +41,7 @@ export default function Unlearning({
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
-  const { baseline, saveBaseline } = useContext(BaselineContext);
+  const { saveBaseline } = useContext(BaselineContext);
   const { saveRetrainingConfig } = useContext(RetrainingConfigContext);
   const { saveUnlearningConfig } = useContext(UnlearningConfigContext);
   const { saveMetrics } = useContext(MetricsContext);
@@ -54,7 +56,6 @@ export default function Unlearning({
   const fetchedResult = useRef(false);
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
-  const [forgetClass, setForgetClass] = useState(0);
   const [method, setMethod] = useState("Fine-Tuning");
   const [customFile, setCustomFile] = useState<File>();
   const [indicator, setIndicator] = useState("Unlearning . . .");
@@ -62,7 +63,6 @@ export default function Unlearning({
   const [initialState, setInitialState] = useState(initialValue);
 
   const isRetrain = method === "Retrain";
-  const isBaselineSelected = baseline === -1;
 
   const checkUnlearningStatus = useCallback(async () => {
     await fetchRunningStatus(
@@ -88,11 +88,7 @@ export default function Unlearning({
   useInterval(operationStatus, interval, checkUnlearningStatus);
 
   const handleForgetClassSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setForgetClass(+e.currentTarget.value);
-  };
-
-  const handleBaselineSet = () => {
-    saveBaseline(forgetClass);
+    saveBaseline(+e.currentTarget.value);
   };
 
   const handleUnlearningMethodSelection = (
@@ -112,11 +108,9 @@ export default function Unlearning({
   };
 
   const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isBaselineSelected) {
-      const id = e.currentTarget.id;
-      if (id === "predefined") setMode(0);
-      else if (id === "custom") setMode(1);
-    }
+    const id = e.currentTarget.id;
+    if (id === "predefined") setMode(0);
+    else if (id === "custom") setMode(1);
   };
 
   const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +139,7 @@ export default function Unlearning({
       clearRetrainingSvgs();
     } else {
       saveUnlearningConfig({
-        method,
+        method: mode === 0 ? method : "Custom File",
         trainedModel: configState.trained_model,
         epochs: configState.epochs,
         learningRate: configState.learning_rate,
@@ -183,6 +177,10 @@ export default function Unlearning({
       ) : (
         <div>
           <div className={styles.forget}>
+            <div>
+              <FontAwesomeIcon icon={faAsterisk} className={styles.asterisk} />
+              <label htmlFor="forget-class">Forget Class</label>
+            </div>
             <select
               onChange={handleForgetClassSelect}
               name="forget_class"
@@ -190,11 +188,10 @@ export default function Unlearning({
             >
               {UNLEARN_CLASSES.map((el, idx) => (
                 <option key={idx} value={el}>
-                  Forget Class {el}
+                  {el}
                 </option>
               ))}
             </select>
-            <div onClick={handleBaselineSet}>Set Baseline</div>
           </div>
           <div
             id="predefined"
@@ -205,7 +202,6 @@ export default function Unlearning({
               mode={mode}
               handleMethodSelection={handleUnlearningMethodSelection}
               optionData={UNLEARNING_METHODS}
-              disabled={isBaselineSelected}
             />
             <div>
               <Input
@@ -213,28 +209,25 @@ export default function Unlearning({
                 defaultValue={trainedModels[0]}
                 optionData={trainedModels}
                 type="select"
-                disabled={isBaselineSelected}
+                disabled={isRetrain}
               />
               <Input
                 key={initialState.epochs}
                 labelName="Epochs"
                 defaultValue={initialState.epochs}
                 type="number"
-                disabled={isBaselineSelected}
               />
               <Input
                 key={initialState.batch_size}
                 labelName="Batch Size"
                 defaultValue={initialState.batch_size}
                 type="number"
-                disabled={isBaselineSelected}
               />
               <Input
                 key={initialState.learning_rate}
                 labelName="Learning Rate"
                 defaultValue={initialState.learning_rate}
                 type="number"
-                disabled={isBaselineSelected}
               />
             </div>
           </div>
@@ -243,15 +236,11 @@ export default function Unlearning({
               mode={mode}
               customFile={customFile}
               handleCustomFileUpload={handleCustomFileUpload}
-              disabled={isBaselineSelected}
             />
           </div>
         </div>
       )}
-      <RunButton
-        operationStatus={operationStatus}
-        disabled={isBaselineSelected}
-      />
+      <RunButton operationStatus={operationStatus} />
     </form>
   );
 }

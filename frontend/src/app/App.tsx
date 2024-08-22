@@ -9,10 +9,10 @@ import PrivacyAttacks from "../views/PrivacyAttacks";
 import { BaselineContext } from "../store/baseline-context";
 
 export default function App() {
-  const { clearBaseline } = useContext(BaselineContext);
+  const { saveBaseline } = useContext(BaselineContext);
 
   useEffect(() => {
-    clearBaseline();
+    saveBaseline(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
