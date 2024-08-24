@@ -22,7 +22,6 @@ import {
 } from "../../constants/unlearning";
 import {
   UnlearningStatus,
-  UnlearningProps,
   Timer,
   UnlearningConfigurationData,
 } from "../../types/settings";
@@ -34,6 +33,13 @@ const initialValue = {
   learning_rate: 0.02,
   batch_size: 128,
 };
+
+export interface UnlearningProps {
+  operationStatus: number;
+  setOperationStatus: (val: 0 | 1 | 2) => void;
+  trainedModels: string[];
+  setUnlearnedModels: (models: string[]) => void;
+}
 
 export default function Unlearning({
   operationStatus,

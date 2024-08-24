@@ -1,23 +1,3 @@
-// Props
-export interface TrainingProps {
-  operationStatus: number;
-  setOperationStatus: (val: number) => void;
-  setTrainedModels: (models: string[]) => void;
-}
-
-export interface UnlearningProps {
-  operationStatus: number;
-  setOperationStatus: (val: number) => void;
-  trainedModels: string[];
-  setUnlearnedModels: (models: string[]) => void;
-}
-
-export interface DefenseProps {
-  operationStatus: number;
-  setOperationStatus: (val: number) => void;
-  unlearnedModels: string[];
-}
-
 // Status
 export interface ClassAccuracies {
   [key: string]: number;
