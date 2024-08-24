@@ -6,11 +6,13 @@ import CustomInput from "../CustomInput";
 import RunButton from "../RunButton";
 import OperationStatus from "../OperationStatus";
 import { DEFENSE_METHODS, UNLEARNED_MODELS } from "../../constants/defense";
-import {
-  DefenseProps,
-  DefenseStatus,
-  DefenseConfigurationData,
-} from "../../types/settings";
+import { DefenseStatus, DefenseConfigurationData } from "../../types/settings";
+
+export interface DefenseProps {
+  operationStatus: number;
+  setOperationStatus: (val: 0 | 1 | 2) => void;
+  unlearnedModels: string[];
+}
 
 export default function Defense({
   operationStatus,

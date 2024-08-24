@@ -46,7 +46,7 @@ export async function fetchRunningStatus(
   identifier: "train" | "inference" | "unlearn",
   fetchedResult: React.MutableRefObject<boolean>,
   interval: React.MutableRefObject<Timer>,
-  setOperationStatus: (status: number) => void,
+  setOperationStatus: (status: 0 | 1 | 2) => void,
   setIndicator: (msg: string) => void,
   setStatus:
     | ((data: TrainingStatus | undefined) => void)
@@ -132,7 +132,7 @@ export async function executeRunning(
   identifier: "train" | "unlearn",
   fetchedResult: React.MutableRefObject<boolean>,
   operationStatus: number,
-  setOperationStatus: (status: number) => void,
+  setOperationStatus: (status: 0 | 1 | 2) => void,
   setIndicator: (msg: string) => void,
   mode: number,
   configState: TrainingConfigurationData | UnlearningConfigurationData,

@@ -11,9 +11,14 @@ import { executeRunning, fetchRunningStatus } from "../../http";
 import {
   TrainingStatus,
   TrainingConfigurationData,
-  TrainingProps,
   Timer,
 } from "../../types/settings";
+
+export interface TrainingProps {
+  operationStatus: number;
+  setOperationStatus: (val: 0 | 1 | 2) => void;
+  setTrainedModels: (models: string[]) => void;
+}
 
 export default function Training({
   operationStatus,
