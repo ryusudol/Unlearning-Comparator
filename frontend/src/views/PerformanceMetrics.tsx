@@ -14,48 +14,48 @@ export default function PerformanceMetrics() {
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Retrain</p>
             <CustomBarChart
-              title="Unlearning Accuracy (UA)"
+              title="Unlearning Accuracy"
               dataKey="ua"
               color={TABLEAU10[0]}
             />
             <CustomBarChart
-              title="Remaining Accuracy (RA)"
+              title="Remaining Accuracy"
               dataKey="ra"
               color={TABLEAU10[1]}
             />
             <CustomBarChart
-              title="Test Accuracy (TA)"
+              title="Test Accuracy"
               dataKey="ta"
               color={TABLEAU10[2]}
             />
-            <CustomBarChart
-              title="Membership Inference Attack (MIA)"
+            {/* <CustomBarChart
+              title="Membership Inference Attack"
               dataKey="rte"
               color={TABLEAU10[3]}
-            />
+            /> */}
           </div>
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Unlearning</p>
             <CustomBarChart
-              title="Unlearning Accuracy (UA)"
+              title="Unlearning Accuracy"
               dataKey="ua"
               color={TABLEAU10[0]}
             />
             <CustomBarChart
-              title="Remaining Accuracy (RA)"
+              title="Remaining Accuracy"
               dataKey="ra"
               color={TABLEAU10[1]}
             />
             <CustomBarChart
-              title="Test Accuracy (TA)"
+              title="Test Accuracy"
               dataKey="ta"
               color={TABLEAU10[2]}
             />
-            <CustomBarChart
-              title="Membership Inference Attack (MIA)"
+            {/* <CustomBarChart
+              title="Membership Inference Attack"
               dataKey="rte"
               color={TABLEAU10[3]}
-            />
+            /> */}
           </div>
         </div>
       </ContentBox>
