@@ -97,14 +97,14 @@ export default function CustomBarChart({ title, dataKey, color }: Props) {
         <SubTitle subtitle={title} fontSize={12} />
       </div>
       <BarChart
-        width={216}
+        width={160}
         height={110}
         data={data}
         margin={{
           top: 0,
           right: 0,
           bottom: 0,
-          left: -36,
+          left: -40,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
