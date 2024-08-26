@@ -1,7 +1,7 @@
 .box {
   position: relative;
   margin: 0 2px;
-  border: 1px solid var(--border-color);
+  border: 1.5px solid var(--border-color);
   padding: 3px 6px;
   display: flex;
   flex-direction: column;

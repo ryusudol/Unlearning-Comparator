@@ -1,5 +1,5 @@
 .performance-metrics {
-  width: 972px;
+  width: 572px;
   display: flex;
   flex-direction: column;
 }
@@ -24,5 +24,5 @@
   justify-content: center;
   align-items: center;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 13px;
 }
