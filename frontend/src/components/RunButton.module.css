@@ -13,8 +13,9 @@
   cursor: pointer;
   transition: background-color 0.1s ease-in-out;
   margin-top: 8px;
-  position: relative;
-  left: 216px;
+  position: absolute;
+  left: 222px;
+  bottom: 10px;
 }
 
 .button:hover {
