@@ -16,6 +16,7 @@
   --disabled-button-bg-color: #aeaeae;
 
   --light-grey-font-color: #aeaeae;
+  --dark-font-color: #030712;
 }
 
 * {
@@ -30,7 +31,7 @@ body {
   margin: 0;
   padding: 5px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   font-family: "pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",

@@ -28,6 +28,7 @@
 
 .selected {
   background-color: white;
+  color: var(--dark-font-color);
 }
 
 .button:first-child.selected {
