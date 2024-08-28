@@ -145,7 +145,7 @@ export default function Unlearning({
       clearRetrainingSvgs();
     } else {
       saveUnlearningConfig({
-        method: mode === 0 ? method : "Custom File",
+        method: mode === 0 ? method : `Custom - ${customFile}`,
         trainedModel: configState.trained_model,
         epochs: configState.epochs,
         learningRate: configState.learning_rate,
