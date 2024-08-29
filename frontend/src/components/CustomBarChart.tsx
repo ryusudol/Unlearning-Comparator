@@ -14,79 +14,59 @@ import SubTitle from "../components/SubTitle";
 const data = [
   {
     class: 0,
-    ua: 5.23,
-    ra: 5.87,
-    ta: 5.67,
-    rte: 5.78,
+    training_accuracy: 0.87,
+    test_accuracy: 0.83,
   },
   {
     class: 1,
-    ua: 6.89,
-    ra: 6.43,
-    ta: 6.01,
-    rte: 6.12,
+    training_accuracy: 0.92,
+    test_accuracy: 0.89,
   },
   {
     class: 2,
-    ua: 4.34,
-    ra: 4.09,
-    ta: 4.45,
-    rte: 4.45,
+    training_accuracy: 0.78,
+    test_accuracy: 0.76,
   },
   {
     class: 3,
-    ua: 5.9,
-    ra: 5.65,
-    ta: 5.89,
-    rte: 5.89,
+    training_accuracy: 0.85,
+    test_accuracy: 0.82,
   },
   {
     class: 4,
-    ua: 4.56,
-    ra: 4.21,
-    ta: 4.34,
-    rte: 4.34,
+    training_accuracy: 0.79,
+    test_accuracy: 0.77,
   },
   {
     class: 5,
-    ua: 6.01,
-    ra: 5.76,
-    ta: 5.9,
-    rte: 5.9,
+    training_accuracy: 0.88,
+    test_accuracy: 0.86,
   },
   {
     class: 6,
-    ua: 5.67,
-    ra: 5.32,
-    ta: 5.56,
-    rte: 5.56,
+    training_accuracy: 0.83,
+    test_accuracy: 0.81,
   },
   {
     class: 7,
-    ua: 4.23,
-    ra: 4.98,
-    ta: 4.12,
-    rte: 4.23,
+    training_accuracy: 0.76,
+    test_accuracy: 0.74,
   },
   {
     class: 8,
-    ua: 5.78,
-    ra: 5.54,
-    ta: 5.67,
-    rte: 5.67,
+    training_accuracy: 0.84,
+    test_accuracy: 0.82,
   },
   {
     class: 9,
-    ua: 6.12,
-    ra: 6.1,
-    ta: 6.23,
-    rte: 6.01,
+    training_accuracy: 0.91,
+    test_accuracy: 0.88,
   },
 ];
 
 interface Props {
   title: string;
-  dataKey: "ua" | "ra" | "ta" | "rte";
+  dataKey: "training" | "test";
   color: string;
 }
 
@@ -94,10 +74,10 @@ export default function CustomBarChart({ title, dataKey, color }: Props) {
   return (
     <div>
       <div className={styles["title-wrapper"]}>
-        <SubTitle subtitle={title} fontSize={12} />
+        <SubTitle subtitle={title} fontSize={11} />
       </div>
       <BarChart
-        width={160}
+        width={210}
         height={110}
         data={data}
         margin={{
@@ -112,7 +92,7 @@ export default function CustomBarChart({ title, dataKey, color }: Props) {
         <YAxis fontSize={9} />
         <Tooltip />
         <Bar
-          dataKey={dataKey}
+          dataKey={`${dataKey}_accuracy`}
           fill={color}
           activeBar={<Rectangle fill="pink" stroke="blue" />}
         />
