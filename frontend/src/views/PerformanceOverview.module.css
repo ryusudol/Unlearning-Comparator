@@ -2,11 +2,39 @@
   width: 912px;
 }
 
-.heatmap-wrapper {
-  width: 100%;
-  padding: 4px 0;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+.table {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(min-content, max-content));
+  border: 0.5px solid #ddd;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.table-header,
+.table-row {
+  display: contents;
+  font-size: 13px;
+}
+
+.table-header div,
+.table-row div {
+  padding: 8px;
+  border: 0.5px solid #ddd;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-row div {
+  font-size: 12px;
+}
+
+.table-header div {
+  font-weight: bold;
+  background-color: #f2f2f2;
+}
+
+.table-row:nth-child(even) {
+  background-color: #f9f9f9;
 }

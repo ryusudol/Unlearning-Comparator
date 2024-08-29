@@ -1,11 +1,11 @@
 .status-wrapper {
-  width: 240px;
+  width: 100%;
   height: 168px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  margin-left: 12px;
+  padding: 0 3px;
 }
 
 .header {

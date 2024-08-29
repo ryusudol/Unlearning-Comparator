@@ -49,3 +49,7 @@ input:disabled,
 select:disabled {
   cursor: not-allowed;
 }
+
+form {
+  width: 100%;
+}

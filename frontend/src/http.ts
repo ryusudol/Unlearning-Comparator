@@ -7,7 +7,7 @@ import {
   UnlearningStatus,
   Timer,
 } from "./types/settings";
-import { Metrics } from "./types/metrics-context";
+import { Overview, OverviewItem } from "./types/overview-context";
 
 interface Accuracies {
   [key: string]: number;
@@ -53,7 +53,9 @@ export async function fetchRunningStatus(
     | ((data: UnlearningStatus | undefined) => void),
   setModelFiles?: (files: string[]) => void,
   saveSvgs?: (svgs: string[]) => void,
-  saveMetrics?: (metrics: Metrics) => void
+  saveOverview?: (overview: Overview) => void,
+  retrieveOverview?: () => Overview,
+  selectedID?: number
 ) {
   const isTraining = identifier === "train";
   const isInference = identifier === "inference";
@@ -73,7 +75,7 @@ export async function fetchRunningStatus(
 
     const data = await response.json();
 
-    if (!isInference) setStatus!(data);
+    if (!isInference && setStatus) setStatus(data);
 
     if (
       data.progress === 100 &&
@@ -105,18 +107,35 @@ export async function fetchRunningStatus(
       if (isTraining) {
         const models = await fetchModelFiles("trained_models");
         setModelFiles!(models);
-      } else if (isUnlearning && saveSvgs && saveMetrics) {
+      } else if (isUnlearning && saveSvgs && saveOverview) {
         const data: ResultType = await response.json();
 
         const ua = data.unlearn_accuracy;
         const ra = data.remain_accuracy;
         const ta = data.test_accuracy;
         const rte = 0; // TODO: rte 수정
-        const avg = (ua + ra + ta + rte) / 4;
+        // TODO: const mia = data.mia; 추가
 
         saveSvgs(data.svg_files);
-        saveMetrics({ ua, ra, ta, rte, avg });
 
+        if (retrieveOverview && selectedID) {
+          const overview = retrieveOverview().overview;
+          const currOverview = overview[selectedID];
+          const remainingOverview = overview.filter(
+            (_, idx) => idx !== selectedID
+          );
+          const updatedOverview: OverviewItem = {
+            ...currOverview,
+            ua,
+            ra,
+            ta,
+            rte,
+          };
+
+          saveOverview({ overview: [...remainingOverview, updatedOverview] });
+        }
+
+        // TODO: unlearning 수행 완료 후 fetchModelFiles 실행
         // const models = await fetchModelFiles("unlearned_models");
         // setModelFiles!(models);
       }

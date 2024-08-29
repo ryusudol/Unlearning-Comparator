@@ -1,0 +1,26 @@
+.forget {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 3px 0 11px;
+}
+
+.forget label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.forget select {
+  width: 120px;
+  height: 18px;
+}
+
+.forget select:focus {
+  outline: none;
+}
+
+.asterisk {
+  font-size: 10px;
+  color: #d12d48;
+  margin: 0 6px 2px 1px;
+}
