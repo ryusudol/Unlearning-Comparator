@@ -1,37 +1,33 @@
 import { useContext } from "react";
 import styles from "./Explanation.module.css";
 
-import { RetrainingConfigContext } from "../../store/retraining-config-context";
-import { UnlearningConfigContext } from "../../store/unlearning-config-context";
+import { OverviewContext } from "../../store/overview-context";
+import { SelectedIDContext } from "../../store/selected-id-context";
 
 interface Props {
   mode: "r" | "u";
 }
 
 export default function RunningExplanation({ mode }: Props) {
-  const { epochs: retrainedEpochs, forgetClass: retrainedForgetClass } =
-    useContext(RetrainingConfigContext);
-  const {
-    method: unlearningMethod,
-    epochs: unlearningEpochs,
-    forgetClass: unlearningForgetClass,
-  } = useContext(UnlearningConfigContext);
+  const { overview } = useContext(OverviewContext);
+  const { selectedID } = useContext(SelectedIDContext);
 
   return (
     <p className={styles.explanation}>
       <p>
         <span className={styles.bold}>Method</span>
-        <span>{`: ${mode === "r" ? "Retrain" : unlearningMethod}`}</span>
-      </p>
-      <p>
-        <span className={styles.bold}>Forget Class</span>
         <span>{`: ${
-          mode === "r" ? retrainedForgetClass : unlearningForgetClass
+          mode === "r" ? "Retrain" : overview[selectedID]?.unlearn
         }`}</span>
       </p>
       <p>
+        <span className={styles.bold}>Forget Class</span>
+        <span>: {overview[selectedID]?.forgetClass}</span>
+      </p>
+      <p>
         <span className={styles.bold}>Epochs</span>
-        <span>{`: ${mode === "r" ? retrainedEpochs : unlearningEpochs}`}</span>
+        {/* TODO: Retrain일 때 Epoch 값 수정하기 */}
+        <span>{`: ${mode === "r" ? 30 : overview[selectedID]?.epochs}`}</span>
       </p>
     </p>
   );

@@ -6,15 +6,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #fefefe;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.1s ease-in-out;
   margin-top: 8px;
-  position: relative;
-  left: 216px;
+  position: absolute;
+  left: 222px;
+  bottom: 10px;
 }
 
 .button:hover {
