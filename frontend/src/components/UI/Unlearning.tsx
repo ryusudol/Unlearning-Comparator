@@ -1,30 +1,26 @@
 import React, { useContext, useState, useRef, useCallback } from "react";
 import styles from "./Unlearning.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAsterisk } from "@fortawesome/free-solid-svg-icons";
 
+import ForgetClassSelector from "../ForgetClassSelector";
 import Input from "../Input";
 import PredefinedInput from "../PredefinedInput";
 import CustomInput from "../CustomInput";
 import OperationStatus from "../OperationStatus";
 import RunButton from "../RunButton";
-import { BaselineContext } from "../../store/baseline-context";
-import { RetrainingConfigContext } from "../../store/retraining-config-context";
-import { UnlearningConfigContext } from "../../store/unlearning-config-context";
-import { MetricsContext } from "../../store/metrics-context";
+import { OverviewContext } from "../../store/overview-context";
 import { SvgsContext } from "../../store/svgs-context";
+import { BaselineContext } from "../../store/baseline-context";
 import { executeRunning, fetchRunningStatus } from "../../http";
 import { getDefaultUnlearningConfig } from "../../util";
 import { useInterval } from "../../hooks/useInterval";
-import {
-  UNLEARNING_METHODS,
-  UNLEARN_CLASSES,
-} from "../../constants/unlearning";
+import { UNLEARNING_METHODS } from "../../constants/unlearning";
 import {
   UnlearningStatus,
   Timer,
   UnlearningConfigurationData,
 } from "../../types/settings";
+import { OverviewItem } from "../../types/overview-context";
+import { SelectedIDContext } from "../../store/selected-id-context";
 
 const initialValue = {
   method: "Fine-Tuning",
@@ -47,16 +43,10 @@ export default function Unlearning({
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
+  const { saveOverview, retrieveOverview } = useContext(OverviewContext);
+  const { saveRetrainingSvgs, saveUnlearningSvgs } = useContext(SvgsContext);
+  const { selectedID } = useContext(SelectedIDContext);
   const { saveBaseline } = useContext(BaselineContext);
-  const { saveRetrainingConfig } = useContext(RetrainingConfigContext);
-  const { saveUnlearningConfig } = useContext(UnlearningConfigContext);
-  const { saveMetrics } = useContext(MetricsContext);
-  const {
-    saveRetrainingSvgs,
-    saveUnlearningSvgs,
-    clearRetrainingSvgs,
-    clearUnlearningSvgs,
-  } = useContext(SvgsContext);
 
   const interval = useRef<Timer>();
   const fetchedResult = useRef(false);
@@ -80,22 +70,22 @@ export default function Unlearning({
       setStatus,
       setUnlearnedModels,
       isRetrain ? saveRetrainingSvgs : saveUnlearningSvgs,
-      saveMetrics
+      saveOverview,
+      retrieveOverview,
+      selectedID
     );
   }, [
     isRetrain,
-    saveMetrics,
+    retrieveOverview,
+    saveOverview,
     saveRetrainingSvgs,
     saveUnlearningSvgs,
+    selectedID,
     setOperationStatus,
     setUnlearnedModels,
   ]);
 
   useInterval(operationStatus, interval, checkUnlearningStatus);
-
-  const handleForgetClassSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    saveBaseline(+e.currentTarget.value);
-  };
 
   const handleUnlearningMethodSelection = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -135,25 +125,34 @@ export default function Unlearning({
       fd.entries()
     ) as unknown as UnlearningConfigurationData;
 
-    if (isRetrain) {
-      saveRetrainingConfig({
-        epochs: configState.epochs,
-        learningRate: configState.learning_rate,
-        batchSize: configState.batch_size,
-        forgetClass: configState.forget_class,
-      });
-      clearRetrainingSvgs();
-    } else {
-      saveUnlearningConfig({
-        method: mode === 0 ? method : `Custom - ${customFile}`,
-        trainedModel: configState.trained_model,
-        epochs: configState.epochs,
-        learningRate: configState.learning_rate,
-        batchSize: configState.batch_size,
-        forgetClass: configState.forget_class,
-      });
-      clearUnlearningSvgs();
-    }
+    // An example of trained_model: best_train_resnet18_CIFAR10_30epochs_0.01lr.pth
+    const model = configState.trained_model.split("_")[2];
+    const dataset = configState.trained_model.split("_")[3];
+    let newOverview: OverviewItem = {
+      forgetClass: configState.forget_class,
+      model: model === "resnet18" ? "ResNet-18" : "ResNet-34",
+      dataset: dataset === "CIFAR10" ? "CIFAR-10" : "VggFace",
+      unlearn: isRetrain
+        ? "Retrain"
+        : mode === 0
+        ? configState.method
+        : `Custom - ${customFile!.name}`,
+      trained_model: configState.trained_model,
+      defense: "-",
+      epochs: configState.epochs,
+      learningRate: configState.learning_rate,
+      batchSize: configState.batch_size,
+      ua: 0,
+      ra: 0,
+      ta: 0,
+      mia: 0,
+      avg_gap: 0,
+      rte: 0,
+    };
+    const savedOverview = retrieveOverview().overview;
+    const overview = [...savedOverview, newOverview];
+    saveOverview({ overview });
+    saveBaseline(+configState.forget_class);
 
     await executeRunning(
       "unlearn",
@@ -182,23 +181,7 @@ export default function Unlearning({
         />
       ) : (
         <div>
-          <div className={styles.forget}>
-            <div>
-              <FontAwesomeIcon icon={faAsterisk} className={styles.asterisk} />
-              <label htmlFor="forget-class">Forget Class</label>
-            </div>
-            <select
-              onChange={handleForgetClassSelect}
-              name="forget_class"
-              id="forget-class"
-            >
-              {UNLEARN_CLASSES.map((el, idx) => (
-                <option key={idx} value={el}>
-                  {el}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ForgetClassSelector width={265} />
           <div
             id="predefined"
             onClick={handleSectionClick}

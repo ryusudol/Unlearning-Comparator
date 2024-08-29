@@ -4,7 +4,7 @@
 
 .table {
   display: grid;
-  grid-template-columns: 54px 86px 75px 100px 85px 59px 63px 56px 47px 47px 47px 50px 76px 50px;
+  grid-template-columns: repeat(15, minmax(min-content, max-content));
   border: 0.5px solid #ddd;
   overflow: hidden;
   margin-top: 3px;
@@ -13,7 +13,7 @@
 .table-header,
 .table-row {
   display: contents;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .table-header div,
@@ -24,6 +24,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.table-row div {
+  font-size: 12px;
 }
 
 .table-header div {

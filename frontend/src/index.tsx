@@ -5,7 +5,7 @@ import "./app/index.css";
 import App from "./app/App";
 import RetrainingConfigContextProvider from "./store/retraining-config-context";
 import UnlearningConfigContextProvider from "./store/unlearning-config-context";
-import MetricsContextProvider from "./store/metrics-context";
+import MetricsContextProvider from "./store/overview-context";
 import SvgsContextProvider from "./store/svgs-context";
 import BaselineContextProvider from "./store/baseline-context";
 
