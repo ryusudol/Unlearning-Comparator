@@ -32,6 +32,10 @@ async def training(request, status):
 
     while training_thread.is_alive():
         await asyncio.sleep(0.1)  # Check status every 100ms
+        # if status.cancel_requested:
+        #     print("Cancel requested. Stopping training thread...")
+        #     training_thread.stop()
+        #     break
 
     if training_thread.exception:
         print(f"An error occurred during training: {str(training_thread.exception)}")

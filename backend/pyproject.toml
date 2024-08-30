@@ -35,6 +35,7 @@ dependencies = [
   "packaging>=21.0",
   "matplotlib",
   "python-multipart",
+  "seaborn",
 ]
 
 

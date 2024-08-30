@@ -1,6 +1,5 @@
 import asyncio
 import os
-
 from app.threads.unlearn_custom_thread import UnlearningInference
 
 async def unlearning_custom(request, status, weights_path):

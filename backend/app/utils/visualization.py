@@ -1,4 +1,3 @@
-import asyncio
 import numpy as np
 import matplotlib.pyplot as plt
 from umap import UMAP
@@ -27,7 +26,7 @@ async def compute_umap_embeddings(activations,
                     n_neighbors=UMAP_N_NEIGHBORS,
                     min_dist=UMAP_MIN_DIST,
                     init=UMAP_INIT,
-                    random_state=UMAP_RANDOM_STATE,
+                    # random_state=UMAP_RANDOM_STATE,
                     n_jobs=UMAP_N_JOBS)
         embedding = umap.fit_transform(act.reshape(act.shape[0], -1))
         umap_embeddings[i+1] = embedding

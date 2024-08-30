@@ -1,6 +1,5 @@
 import threading
 import asyncio
-import torch
 import time
 import sys
 import os
@@ -53,8 +52,8 @@ class UnlearningRetrainThread(threading.Thread):
         for epoch in range(self.epochs):
             running_loss = 0.0
             for i, (inputs, labels) in enumerate(self.unlearning_loader):
-                await asyncio.sleep(0)
                 if self.status.cancel_requested:
+                    self.status.is_unlearning = False
                     print("\nTraining cancelled mid-batch.")
                     return
                 
@@ -69,6 +68,7 @@ class UnlearningRetrainThread(threading.Thread):
             
             await asyncio.sleep(0)
             if self.status.cancel_requested:
+                self.status.is_unlearning = False
                 print("\nUnlearning cancelled.")
                 return
             
@@ -125,16 +125,16 @@ class UnlearningRetrainThread(threading.Thread):
             save_dir = 'unlearned_models'
             save_model(self.model, save_dir, self.model_name, self.dataset_name, self.epochs, self.learning_rate)
 
-            plt.figure(figsize=(10, 6))
-            plt.plot(range(1, self.epochs + 1), train_accuracies, label='Train Accuracy')
-            plt.plot(range(1, self.epochs + 1), test_accuracies, label='Test Accuracy')
-            plt.xlabel('Epochs')
-            plt.ylabel('Accuracy (%)')
-            plt.title(f'Training and Test Accuracy for {self.model_name} on {self.dataset_name}')
-            plt.legend()
-            plt.grid(True)
-            plot_filename = f"accuracy_plot_{self.model_name}_{self.dataset_name}_{self.epochs}epochs_{self.learning_rate}lr.png"
-            plot_path = os.path.join(save_dir, plot_filename)
-            plt.savefig(plot_path)
-            plt.close()
-            print(f"Accuracy plot saved to {plot_path}")
+            # plt.figure(figsize=(10, 6))
+            # plt.plot(range(1, self.epochs + 1), train_accuracies, label='Train Accuracy')
+            # plt.plot(range(1, self.epochs + 1), test_accuracies, label='Test Accuracy')
+            # plt.xlabel('Epochs')
+            # plt.ylabel('Accuracy (%)')
+            # plt.title(f'Training and Test Accuracy for {self.model_name} on {self.dataset_name}')
+            # plt.legend()
+            # plt.grid(True)
+            # plot_filename = f"accuracy_plot_{self.model_name}_{self.dataset_name}_{self.epochs}epochs_{self.learning_rate}lr.png"
+            # plot_path = os.path.join(save_dir, plot_filename)
+            # plt.savefig(plot_path)
+            # plt.close()
+            # print(f"Accuracy plot saved to {plot_path}")

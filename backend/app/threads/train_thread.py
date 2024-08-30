@@ -1,6 +1,5 @@
 import threading
 import asyncio
-import torch
 import time
 import sys
 import os
@@ -58,6 +57,7 @@ class TrainingThread(threading.Thread):
             
             for i, (inputs, labels) in enumerate(self.train_loader):
                 if self.status.cancel_requested:
+                    self.status.is_training = False
                     print("\nTraining cancelled mid-batch.")
                     return
                 
@@ -81,6 +81,7 @@ class TrainingThread(threading.Thread):
                     class_total[label] += 1
             
             if self.status.cancel_requested:
+                self.status.is_training = False
                 print("\nTraining cancelled.")
                 return
             
