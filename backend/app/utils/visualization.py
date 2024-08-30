@@ -13,7 +13,7 @@ async def compute_umap_embeddings(activations,
                                   save_dir='umap_visualizations'):
     umap_embeddings = {}
     svg_files = {}
-    
+
     class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     if(forget_class != -1):
         class_names[forget_class] += " (forget)"
@@ -21,7 +21,7 @@ async def compute_umap_embeddings(activations,
     colors = plt.cm.tab10(np.linspace(0, 1, 10))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-        
+    
     for i, act in enumerate(activations):
         umap = UMAP(n_components=2, 
                     n_neighbors=UMAP_N_NEIGHBORS,
@@ -38,12 +38,14 @@ async def compute_umap_embeddings(activations,
         if forget_labels is not None:
             non_forget_mask = ~forget_labels
             scatter = plt.scatter(embedding[non_forget_mask, 0], embedding[non_forget_mask, 1], 
-                                  c=labels[non_forget_mask], cmap='tab10', s=20, alpha=0.7)
+                                  c=labels[non_forget_mask], cmap='tab10', s=20, alpha=0.7,
+                                  vmin=0, vmax=9)
             
             # Plot forget points with 'x' marker
             forget_mask = forget_labels
             plt.scatter(embedding[forget_mask, 0], embedding[forget_mask, 1], 
-                        c=labels[forget_mask], cmap='tab10', s=50, alpha=0.7, marker='x', linewidths=2.5)
+                        c=labels[forget_mask], cmap='tab10', s=50, alpha=0.7, marker='x', linewidths=2.5,
+                        vmin=0, vmax=9)
         else:
             scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='tab10', s=20, alpha=0.7)
         
@@ -69,8 +71,7 @@ async def compute_umap_embeddings(activations,
         
         plt.savefig(filepath, format='svg', dpi=300, bbox_inches='tight', pad_inches=0.1)
         
-        await asyncio.sleep(0)
-        
+
         with open(filepath, 'rb') as f:
             svg_files[i+1] = f.read()
         

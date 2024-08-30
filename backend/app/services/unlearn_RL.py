@@ -1,135 +1,17 @@
-import numpy as np
+import asyncio
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import asyncio
-import time
-import sys
-import os
-import matplotlib.pyplot as plt
 
+from app.threads.unlearn_RL_thread import UnlearningRLThread
 from app.models.neural_network import get_resnet18
-from app.utils.helpers import set_seed, get_data_loaders, save_model
+from app.utils.helpers import set_seed, get_data_loaders
 from app.utils.visualization import compute_umap_embeddings
-from app.utils.evaluation import get_layer_activations_and_predictions, evaluate_model
+from app.utils.evaluation import get_layer_activations_and_predictions
 from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, UMAP_DATASET, WEIGHT_DECAY, DECREASING_LR
 
-async def unlearn_RL_model(model,
-                           train_loader,
-                           test_loader,
-                           criterion, 
-                           optimizer,
-                           scheduler,
-                           device, 
-                           epochs, 
-                           status, 
-                           model_name, 
-                           dataset_name, 
-                           learning_rate,
-                           forget_class):
-    model.train()
-    status.start_time = time.time()
-    status.total_epochs = epochs
-    
-    train_accuracies = []
-    test_accuracies = []
-
-    for epoch in range(epochs):
-        
-        running_loss = 0.0
-        
-        # Training loop with random labeling for forget class
-        for i, (inputs, labels) in enumerate(train_loader):
-            await asyncio.sleep(0)
-            if status.cancel_requested:
-                break
-            inputs, labels = inputs.to(device), labels.to(device)
-            
-            # Assign random labels to the forget class
-            forget_mask = (labels == forget_class)
-            random_labels = torch.randint(0, 10, (forget_mask.sum(),), device=device)
-            labels[forget_mask] = random_labels
-
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-            running_loss += loss.item()
-            
-        await asyncio.sleep(0)
-        if status.cancel_requested:
-            print("\nUnlearning cancelled.")
-            break
-        scheduler.step()
-
-        # Evaluate on training set
-        train_loss, train_accuracy, train_class_accuracies = await evaluate_model(model, train_loader, criterion, device)
-        
-        # Evaluate on test set
-        test_loss, test_accuracy, test_class_accuracies = await evaluate_model(model, test_loader, criterion, device)
-        
-        train_accuracies.append(train_accuracy)
-        test_accuracies.append(test_accuracy)
-
-        # Save current model (last epochs)
-        if epoch == epochs - 1 :
-            save_dir = 'unlearned_models'
-            save_model(model, save_dir, model_name, dataset_name, epoch + 1, learning_rate)
-            print(f"Model saved after epoch {epoch + 1}")
-
-        # Update status
-        status.current_epoch = epoch + 1
-        status.progress = (epoch + 1) / epochs * 100
-        status.current_loss = train_loss
-        status.current_accuracy = train_accuracy
-        status.test_loss = test_loss
-        status.test_accuracy = test_accuracy
-        status.train_class_accuracies = train_class_accuracies
-        status.test_class_accuracies = test_class_accuracies
-        
-        
-        elapsed_time = time.time() - status.start_time
-        estimated_total_time = elapsed_time / (epoch + 1) * epochs
-        status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
-        
-        current_lr = optimizer.param_groups[0]['lr']
-
-        print(f"\nEpoch [{epoch+1}/{epochs}]")
-        print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
-        print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
-        print(f"Current LR: {current_lr:.5f}")
-        print("Train Class Accuracies:")
-        for i, acc in train_class_accuracies.items():
-            print(f"  Class {i}: {acc:.2f}%")
-        print("Test Class Accuracies:")
-        for i, acc in test_class_accuracies.items():
-            print(f"  Class {i}: {acc:.2f}%")
-        print(f"Progress: {status.progress:.5f}%, ETA: {status.estimated_time_remaining:.2f}s")
-        
-        sys.stdout.flush()
-        
-    print()  # Print a newline at the end of unlearning
-
-    if not status.cancel_requested:
-        plt.figure(figsize=(10, 6))
-        plt.plot(range(1, epochs + 1), train_accuracies, label='Train Accuracy')
-        plt.plot(range(1, epochs + 1), test_accuracies, label='Test Accuracy')
-        plt.xlabel('Epochs')
-        plt.ylabel('Accuracy (%)')
-        plt.title(f'Training and Test Accuracy for {model_name} on {dataset_name}')
-        plt.legend()
-        plt.grid(True)
-        plot_filename = f"accuracy_plot_{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.png"
-        plot_path = os.path.join(save_dir, plot_filename)
-        plt.savefig(plot_path)
-        plt.close()
-        print(f"Accuracy plot saved to {plot_path}")
-
-    return model
-
-async def run_unlearning_RL(request, status, weights_path):
+async def unlearning_RL(request, status, weights_path):
     print(f"Starting RL unlearning for class {request.forget_class} with {request.epochs} epochs...")
     set_seed(request.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
@@ -146,47 +28,55 @@ async def run_unlearning_RL(request, status, weights_path):
     status.is_unlearning = True
     status.progress = 0
     status.forget_class = request.forget_class
-    try:
-        model = await unlearn_RL_model(model=model, 
-                                       train_loader=train_loader,
-                                       test_loader=test_loader,
-                                       criterion=criterion, 
-                                       optimizer=optimizer,
-                                       scheduler=scheduler,
-                                       device=device, 
-                                       epochs=request.epochs, 
-                                       status=status,
-                                       model_name="resnet18",
-                                       dataset_name=f"CIFAR10_RL_forget_class_{request.forget_class}",
-                                       learning_rate=request.learning_rate,
-                                       forget_class=request.forget_class)
-        
-        if not status.cancel_requested:
-            if UMAP_DATASET == 'train':
-                dataset = train_set
-            else:
-                dataset = test_set
-            subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
-            subset = torch.utils.data.Subset(dataset, subset_indices)
-            subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
-            
-            print("\nComputing and saving UMAP embeddings...")
-            activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)
-            
-            # Create forget_labels
-            forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
-            
-            umap_embeddings, svg_files = await compute_umap_embeddings(
-                activations, 
-                predicted_labels, 
-                forget_class=request.forget_class,
-                forget_labels=forget_labels
-            )
-            status.umap_embeddings = umap_embeddings
-            status.svg_files = list(svg_files.values())
-            print("RL Unlearning and visualization completed!")
+
+    unlearning_thread = UnlearningRLThread(
+        model, train_loader, test_loader, criterion, optimizer, scheduler,
+        device, request.epochs, status, "resnet18", f"CIFAR10_RL_forget_class_{request.forget_class}",
+        request.learning_rate, request.forget_class
+    )
+    unlearning_thread.start()
+
+    while unlearning_thread.is_alive():
+        await asyncio.sleep(0.1)  # Check status every 100ms
+
+    if unlearning_thread.exception:
+        print(f"An error occurred during RL unlearning: {str(unlearning_thread.exception)}")
+        return status
+
+    if not status.cancel_requested:
+        model = unlearning_thread.model  # Get the updated model
+        if UMAP_DATASET == 'train':
+            dataset = train_set
         else:
-            print("RL Unlearning cancelled.")
+            dataset = test_set
+        subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        subset = torch.utils.data.Subset(dataset, subset_indices)
+        subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
+        
+        print("\nComputing and saving UMAP embeddings...")
+        activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)
+        
+        forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
+        
+        umap_embeddings, svg_files = await compute_umap_embeddings(
+            activations, 
+            predicted_labels, 
+            forget_class=request.forget_class,
+            forget_labels=forget_labels
+        )
+        status.umap_embeddings = umap_embeddings
+        status.svg_files = list(svg_files.values())
+        print("RL Unlearning and visualization completed!")
+    else:
+        print("RL Unlearning cancelled.")
+
+    return status
+
+async def run_unlearning_RL(request, status, weights_path):
+    try:
+        updated_status = await unlearning_RL(request, status, weights_path)
+        return updated_status
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
+        status.progress = 100

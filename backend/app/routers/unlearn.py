@@ -4,7 +4,7 @@ from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
 from app.services.unlearn_GA import run_unlearning_GA 
 from app.services.unlearn_FT import run_unlearning_FT
-from app.services.unlearn_custom import run_unlearning_custom, main
+from app.services.unlearn_custom import run_unlearning_custom
 
 from app.models.neural_network import UnlearningStatus
 from app.config.settings import UNLEARN_SEED
@@ -20,6 +20,7 @@ class UnlearningRequest(BaseModel):
     epochs: int = Field(default=5, ge=1, description="Number of unlearning epochs")
     forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
     weights_filename: str = Field(default=".", description="Filename of the weights in trained_models folder")
+    
 
 class CustomUnlearningRequest(BaseModel):
     forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
@@ -95,7 +96,7 @@ async def get_unlearning_status():
         "test_accuracy": status.test_accuracy,
         "train_class_accuracies": status.train_class_accuracies,
         "test_class_accuracies": status.test_class_accuracies,
-        "estimated_time_remaining": status.estimated_time_remaining,
+        "estimated_time_remaining": status.estimated_time_remaining + 60.0,
         "forget_class": status.forget_class
     }
 
@@ -121,7 +122,7 @@ async def start_unlearning_custom(
     request = CustomUnlearningRequest(forget_class=forget_class)
     
     # Use the new main function in the background task
-    background_tasks.add_task(main, request, status, weights_path)
+    background_tasks.add_task(run_unlearning_custom, request, status, weights_path)
     
     return {"message": "Custom Unlearning started"}
 
