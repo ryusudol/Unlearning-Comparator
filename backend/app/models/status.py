@@ -51,7 +51,7 @@ class UnlearningStatus:
         self.current_accuracy = 0
         self.test_loss = 0
         self.start_time = None
-        self.estimated_time_remaining = 1000.0
+        self.estimated_time_remaining = 0
         self.umap_embeddings = None
         self.cancel_requested = False
         self.forget_class = None

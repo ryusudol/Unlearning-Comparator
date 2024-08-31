@@ -21,7 +21,6 @@ async def training(request, status):
     optimizer = optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=DECREASING_LR, gamma=0.2)
 
-    status.is_training = True
     status.progress = 0
 
     training_thread = TrainingThread(
@@ -52,7 +51,11 @@ async def training(request, status):
         subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
         
         print("\nComputing and saving UMAP embeddings...")
-        activations, _ = await get_layer_activations_and_predictions(model, subset_loader, device)
+        activations, _ = await get_layer_activations_and_predictions(
+            model, 
+            subset_loader, 
+            device
+        )
         labels = torch.tensor([dataset.targets[i] for i in subset_indices])
         umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels)
         status.umap_embeddings = umap_embeddings
@@ -65,6 +68,7 @@ async def training(request, status):
 
 async def run_training(request, status):
     try:
+        status.is_training = True
         updated_status = await training(request, status)
         return updated_status
     finally:

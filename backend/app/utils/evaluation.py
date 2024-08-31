@@ -3,9 +3,16 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime
+from scipy.stats import gaussian_kde
 from app.config.settings import UMAP_DATA_SIZE
 
-async def get_layer_activations_and_predictions(model, data_loader, device, num_samples=UMAP_DATA_SIZE, forget_class=1):
+async def get_layer_activations_and_predictions(
+        model, 
+        data_loader, 
+        device, 
+        forget_class=-1,
+        num_samples=UMAP_DATA_SIZE
+    ):
     model.eval()
     activations = [[], [], [], []]
     predictions = []
@@ -58,11 +65,24 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
     # Generate timestamp for the filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
+    # Compute KDE
+    kde = gaussian_kde(max_logits)
+    x_range = np.linspace(max_logits.min(), max_logits.max(), 1000)
+    density = kde(x_range)
+
+    # Find max density and corresponding logit value
+    max_density_index = np.argmax(density)
+    max_density = density[max_density_index]
+    logit_at_max_density = x_range[max_density_index]
+
+    # Get the maximum logit value
+    max_logit = max_logits.max()
+    
     # Plot KDE of max logits
     plt.figure(figsize=(10, 6))
     sns.kdeplot(max_logits, fill=True)
-    plt.xlim(0, 100)
-    plt.ylim(0, 0.1)
+    plt.xlim(0, 50)
+    plt.ylim(0, 0.1)  # Set y-axis limit to slightly above max density
     plt.title("Distribution of Max Logit Values (Excluding Forget Class)")
     plt.xlabel("Max Logit Value")
     plt.ylabel("Density")
@@ -76,9 +96,11 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
     print(f"Mean max logit: {max_logits.mean():.4f}")
     print(f"Median max logit: {np.median(max_logits):.4f}")
     print(f"Min max logit: {max_logits.min():.4f}")
-    print(f"Max max logit: {max_logits.max():.4f}")
+    print(f"Max max logit: {max_logit:.4f}")
+    print(f"Max density: {max_density:.4f}")
+    print(f"Logit value at max density: {logit_at_max_density:.4f}")
     
-    return activations, predictions #, logits
+    return activations, predictions #, max_density, max_logit
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
@@ -106,5 +128,6 @@ async def evaluate_model(model, data_loader, criterion, device):
     
     accuracy = 100. * correct / total
     class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
-    
-    return total_loss / len(data_loader), accuracy, class_accuracies
+    avg_loss = total_loss / len(data_loader)
+
+    return avg_loss, accuracy, class_accuracies

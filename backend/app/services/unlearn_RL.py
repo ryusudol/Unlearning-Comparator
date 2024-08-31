@@ -24,7 +24,6 @@ async def unlearning_RL(request, status, weights_path):
     optimizer = optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=DECREASING_LR, gamma=0.2)
 
-    status.is_unlearning = True
     status.progress = 0
     status.forget_class = request.forget_class
 
@@ -53,7 +52,12 @@ async def unlearning_RL(request, status, weights_path):
         subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
         
         print("\nComputing and saving UMAP embeddings...")
-        activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)
+        activations, predicted_labels = await get_layer_activations_and_predictions(
+            model=model,
+            data_loader=subset_loader,
+            device=device,
+            forget_class=request.forget_class
+        )
         
         forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
         
@@ -73,6 +77,7 @@ async def unlearning_RL(request, status, weights_path):
 
 async def run_unlearning_RL(request, status, weights_path):
     try:
+        status.is_unlearning = True
         updated_status = await unlearning_RL(request, status, weights_path)
         return updated_status
     finally:

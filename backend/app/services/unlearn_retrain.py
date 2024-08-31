@@ -27,7 +27,6 @@ async def unlearning_retrain(request, status):
     optimizer = optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=DECREASING_LR, gamma=0.2)
 
-    status.is_unlearning = True
     status.progress = 0
     status.forget_class = request.forget_class
 
@@ -36,7 +35,6 @@ async def unlearning_retrain(request, status):
         device, request.epochs, status, "resnet18", f"CIFAR10_without_class_{request.forget_class}",
         request.learning_rate
     )
-    unlearning_thread.start()
 
     while unlearning_thread.is_alive():
         await asyncio.sleep(0.1)  # Check status every 100ms
@@ -57,7 +55,12 @@ async def unlearning_retrain(request, status):
         subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
         
         print("\nComputing and saving UMAP embeddings...")
-        activations, predicted_labels = await get_layer_activations_and_predictions(model, subset_loader, device)
+        activations, predicted_labels = await get_layer_activations_and_predictions(
+            model=model,
+            data_loader=subset_loader,
+            device=device,
+            forget_class=request.forget_class
+        )
         
         forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
         
@@ -77,6 +80,7 @@ async def unlearning_retrain(request, status):
 
 async def run_unlearning(request, status):
     try:
+        status.is_unlearning = True
         updated_status = await unlearning_retrain(request, status)
         return updated_status
     finally:
