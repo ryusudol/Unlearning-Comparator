@@ -4,7 +4,7 @@ export interface SelectedID {
 
 export interface SelectedIDContextType extends SelectedID {
   saveSelectedID: (id: number) => void;
-  retrieveSelectedID: () => SelectedID;
+  retrieveSelectedID: () => void;
   clearSelectedID: () => void;
 }
 

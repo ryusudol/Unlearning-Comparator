@@ -1,11 +1,8 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import styles from "./SvgViewer.module.css";
 
 import SubTitle from "../SubTitle";
 import Explanation from "./Explanation";
-import { RetrainingConfigContext } from "../../store/retraining-config-context";
-import { UnlearningConfigContext } from "../../store/unlearning-config-context";
-import { SvgsContext } from "../../store/svgs-context";
 
 interface Props {
   mode: "r" | "u";
@@ -22,20 +19,6 @@ export default function SvgViewer({
   modifiedSvgs,
   selectedSvgId,
 }: Props) {
-  const { retrieveRetrainingSvgs, retrieveUnlearningSvgs } =
-    useContext(SvgsContext);
-
-  const { retrieveUnlearningConfig } = useContext(UnlearningConfigContext);
-  const { retrieveRetrainingConfig } = useContext(RetrainingConfigContext);
-
-  useEffect(() => {
-    retrieveRetrainingConfig();
-    retrieveUnlearningConfig();
-    retrieveRetrainingSvgs();
-    retrieveUnlearningSvgs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const createMarkup = (svg: string) => {
     return { __html: svg };
   };
@@ -52,6 +35,7 @@ export default function SvgViewer({
             <div className={styles.thumbnails}>
               {modifiedSvgs.map((svg, idx) => (
                 <div
+                  key={idx}
                   id={`${mode}-${idx + 1}`}
                   onClick={handleThumbnailClick}
                   className={

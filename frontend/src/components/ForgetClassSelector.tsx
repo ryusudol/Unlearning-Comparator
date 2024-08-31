@@ -8,10 +8,13 @@ import { UNLEARN_CLASSES } from "../constants/unlearning";
 
 interface Props {
   width: number;
-  isBaseline?: boolean;
+  isTextShow?: boolean;
 }
 
-export default function ForgetClassSelector({ width, isBaseline }: Props) {
+export default function ForgetClassSelector({
+  width,
+  isTextShow = true,
+}: Props) {
   const { baseline, saveBaseline } = useContext(BaselineContext);
 
   const handleForgetClassSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -22,10 +25,10 @@ export default function ForgetClassSelector({ width, isBaseline }: Props) {
     <div style={{ width: `${width}px` }} className={styles.forget}>
       <div>
         <FontAwesomeIcon icon={faAsterisk} className={styles.asterisk} />
-        <label htmlFor="forget-class">Forget Class</label>
+        {isTextShow && <label htmlFor="forget-class">Forget Class</label>}
       </div>
       <select
-        onChange={isBaseline ? handleForgetClassSelect : undefined}
+        onChange={handleForgetClassSelect}
         name="forget_class"
         id="forget-class"
         value={baseline}

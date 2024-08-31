@@ -12,9 +12,7 @@ export const OverviewContext = createContext<OverviewContextType>({
   overview: [],
 
   saveOverview: (overview: Overview) => {},
-  retrieveOverview: () => {
-    return [] as unknown as Overview;
-  },
+  retrieveOverview: () => {},
   clearOverview: () => {},
 });
 
@@ -30,7 +28,11 @@ function overviewReducer(state: Overview, action: Action): Overview {
 
     case "RETRIEVE_OVERVIEW":
       const savedOverview = sessionStorage.getItem(OVERVIEW);
-      if (!savedOverview) return { ...state, overview: [] };
+      if (!savedOverview)
+        return {
+          ...state,
+          overview: [],
+        };
       try {
         const parsedOverview: Overview = JSON.parse(savedOverview);
         return {
@@ -39,7 +41,10 @@ function overviewReducer(state: Overview, action: Action): Overview {
         };
       } catch (error) {
         console.error(error);
-        return { ...state, overview: [] };
+        return {
+          ...state,
+          overview: [],
+        };
       }
 
     case "CLEAR_OVERVIEW":
@@ -66,7 +71,6 @@ export default function OverviewContextProvider({
 
   function handleRetrieveOverview() {
     dispatch({ type: "RETRIEVE_OVERVIEW" });
-    return { overview: overview.overview };
   }
 
   function handleClearOverview() {

@@ -31,6 +31,7 @@
   cursor: pointer;
   font-size: 13px;
   padding: 0px 4px;
+  margin-right: 4px;
 }
 
 .upload span {

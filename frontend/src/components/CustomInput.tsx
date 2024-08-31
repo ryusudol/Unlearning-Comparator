@@ -36,7 +36,6 @@ export default function CustomInput({
         </label>
         <input
           onChange={handleCustomFileUpload}
-          className={styles["file-input"]}
           type="file"
           id="custom-training"
         />

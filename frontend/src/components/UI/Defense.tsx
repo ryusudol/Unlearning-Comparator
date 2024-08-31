@@ -1,31 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import Input from "../Input";
 import PredefinedInput from "../PredefinedInput";
 import CustomInput from "../CustomInput";
 import RunButton from "../RunButton";
 import OperationStatus from "../OperationStatus";
-import { DEFENSE_METHODS, UNLEARNED_MODELS } from "../../constants/defense";
-import { DefenseStatus, DefenseConfigurationData } from "../../types/settings";
+import { DEFENSE_METHODS } from "../../constants/defense";
+import { DefenseConfigurationData } from "../../types/settings";
+import { RunningStatusContext } from "../../store/running-status-context";
 
 export interface DefenseProps {
-  operationStatus: number;
-  setOperationStatus: (val: 0 | 1 | 2) => void;
   unlearnedModels: string[];
 }
 
-export default function Defense({
-  operationStatus,
-  setOperationStatus,
-  unlearnedModels,
-}: DefenseProps) {
+export default function Defense({ unlearnedModels }: DefenseProps) {
+  const { isRunning, indicator, status } = useContext(RunningStatusContext);
+
   const [mode, setMode] = useState<0 | 1>(0);
-  const [indicator, setIndicator] = useState("");
   const [customFile, setCustomFile] = useState<File>();
-  const [status, setStatus] = useState<DefenseStatus | undefined>();
-  const [selectedUnlearnedModel, setSelectedUnlearnedModel] = useState(
-    UNLEARNED_MODELS[0]
-  );
 
   const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -51,7 +43,7 @@ export default function Defense({
 
   return (
     <form onSubmit={handleRunBtnClick}>
-      {operationStatus ? (
+      {isRunning ? (
         <OperationStatus
           identifier="defense"
           indicator={indicator}
@@ -63,8 +55,8 @@ export default function Defense({
             <PredefinedInput mode={mode} optionData={DEFENSE_METHODS} />
             <Input
               labelName="Unlearned Model"
-              defaultValue={selectedUnlearnedModel}
-              optionData={UNLEARNED_MODELS}
+              defaultValue={unlearnedModels[0]}
+              optionData={unlearnedModels}
               type="select"
             />
             <Input labelName="Parameter 1" defaultValue={0} type="number" />
@@ -80,7 +72,7 @@ export default function Defense({
           </div>
         </div>
       )}
-      <RunButton operationStatus={operationStatus} />
+      <RunButton isRunning={isRunning} />
     </form>
   );
 }

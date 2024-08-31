@@ -1,5 +1,5 @@
 export interface OverviewItem {
-  forgetClass: string;
+  forget_class: string;
   model: string;
   dataset: string;
   unlearn: string;
@@ -14,6 +14,8 @@ export interface OverviewItem {
   mia: number;
   avg_gap: number;
   rte: number;
+  retrain_svgs: string[];
+  unlearn_svgs: string[];
 }
 
 export interface Overview {
@@ -22,7 +24,7 @@ export interface Overview {
 
 export interface OverviewContextType extends Overview {
   saveOverview: (overview: Overview) => void;
-  retrieveOverview: () => Overview;
+  retrieveOverview: () => void;
   clearOverview: () => void;
 }
 
