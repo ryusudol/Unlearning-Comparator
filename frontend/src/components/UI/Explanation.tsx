@@ -13,7 +13,7 @@ export default function RunningExplanation({ mode }: Props) {
   const { selectedID } = useContext(SelectedIDContext);
 
   return (
-    <p className={styles.explanation}>
+    <div className={styles.explanation}>
       <p>
         <span className={styles.bold}>Method</span>
         <span>{`: ${
@@ -22,13 +22,13 @@ export default function RunningExplanation({ mode }: Props) {
       </p>
       <p>
         <span className={styles.bold}>Forget Class</span>
-        <span>: {overview[selectedID]?.forgetClass}</span>
+        <span>: {overview[selectedID]?.forget_class}</span>
       </p>
       <p>
         <span className={styles.bold}>Epochs</span>
         {/* TODO: Retrain일 때 Epoch 값 수정하기 */}
         <span>{`: ${mode === "r" ? 30 : overview[selectedID]?.epochs}`}</span>
       </p>
-    </p>
+    </div>
   );
 }

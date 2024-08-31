@@ -80,4 +80,11 @@ export interface Action {
   payload: string | number;
 }
 
-export type Timer = ReturnType<typeof setInterval> | undefined;
+export interface ResultType {
+  remain_accuracy: number;
+  svg_files: string[];
+  test_accuracy: number;
+  test_class_accuracies: ClassAccuracies;
+  train_class_accuracies: ClassAccuracies;
+  unlearn_accuracy: number;
+}

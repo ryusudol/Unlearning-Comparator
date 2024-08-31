@@ -52,19 +52,10 @@ export default function OperationStatus({
 
   return (
     <div className={styles["status-wrapper"]}>
-      <div className={styles.header}>
-        <span>{indicator}</span>
-        <select onChange={handleModeSelection}>
-          {MODES.map((mode, idx) => (
-            <option key={idx} value={mode}>
-              {mode}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className={styles.content}>
+      <div className={styles.column}>
+        <span className={styles.indicator}>{indicator}</span>
         {status && status.current_epoch >= 1 && (
-          <div>
+          <div className={styles.status}>
             <span>
               Epoch: {status.current_epoch}/{status.total_epochs}
             </span>
@@ -94,6 +85,15 @@ export default function OperationStatus({
             <ProgressBar eta={ETA} />
           </div>
         )}
+      </div>
+      <div className={styles.column}>
+        <select onChange={handleModeSelection}>
+          {MODES.map((mode, idx) => (
+            <option key={idx} value={mode}>
+              {mode}
+            </option>
+          ))}
+        </select>
         <div className={styles.accuracies}>
           {accuracies.length !== 0 &&
             accuracies.map((acc, idx) => (

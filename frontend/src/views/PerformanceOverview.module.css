@@ -3,38 +3,43 @@
 }
 
 .table {
+  max-width: 893px;
   display: grid;
   grid-template-columns: repeat(15, minmax(min-content, max-content));
-  border: 0.5px solid #ddd;
   overflow: hidden;
-  margin-top: 3px;
 }
 
 .table-header,
 .table-row {
   display: contents;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .table-header div,
 .table-row div {
-  padding: 8px;
-  border: 0.5px solid #ddd;
+  max-width: 110px;
+  padding: 8px 6px;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.table-row div:first-child {
+  border-left: 1px solid #ddd;
+}
+
+.first-row div {
+  border-top: 1px solid #ddd;
+}
+
 .table-row div {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .table-header div {
   font-weight: bold;
-  background-color: #f2f2f2;
-}
-
-.table-row:nth-child(even) {
-  background-color: #f9f9f9;
+  border: none;
 }

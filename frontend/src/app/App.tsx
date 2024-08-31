@@ -3,16 +3,21 @@ import styles from "./App.module.css";
 
 import Settings from "../views/Settings";
 import PerformanceOverview from "../views/PerformanceOverview";
-import Embeddings from "../views/Embeddings";
 import PerformanceMetrics from "../views/PerformanceMetrics";
-import PrivacyAttacks from "../views/PrivacyAttacks";
+import Embeddings from "../views/Embeddings";
+import Privacies from "../views/Privacies";
 import { BaselineContext } from "../store/baseline-context";
+import { SelectedIDContext } from "../store/selected-id-context";
+import { OverviewContext } from "../store/overview-context";
 
 export default function App() {
-  const { saveBaseline } = useContext(BaselineContext);
+  const { baseline, saveBaseline } = useContext(BaselineContext);
+  const { saveSelectedID } = useContext(SelectedIDContext);
+  const { overview } = useContext(OverviewContext);
 
   useEffect(() => {
-    saveBaseline(0);
+    saveBaseline(baseline ?? 0);
+    saveSelectedID(overview.length === 0 ? 0 : overview.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -25,7 +30,7 @@ export default function App() {
       </div>
       <div className={styles.row}>
         <Embeddings />
-        <PrivacyAttacks />
+        <Privacies />
       </div>
     </section>
   );

@@ -25,8 +25,8 @@ export default function PerformanceOverview() {
   return (
     <section className={styles["performance-overview"]}>
       <Title title="Performance Overview" />
-      <ContentBox height={253}>
-        <ForgetClassSelector width={223} isBaseline={true} />
+      <ContentBox height={238}>
+        <ForgetClassSelector width={60} isTextShow={false} />
         <div className={styles.table}>
           <div className={styles["table-header"]}>
             <div>ID</div>
@@ -45,9 +45,9 @@ export default function PerformanceOverview() {
             <div>Avg. Gap</div>
             <div>RTE</div>
           </div>
-          <div className={styles["table-row"]}>
+          <div className={`${styles["table-row"]} ${styles["first-row"]}`}>
             <div>0</div>
-            <div>ResNet-18</div>
+            <div>ResNet18</div>
             <div>CIFAR-10</div>
             <div>Retrain</div>
             <div>Basic</div>
@@ -64,12 +64,10 @@ export default function PerformanceOverview() {
           </div>
           <div className={styles["table-row"]}>
             <div>1</div>
-            <div>ResNet-18</div>
+            <div>ResNet18</div>
             <div>VggFace</div>
             <div>Gradient-Ascent</div>
-            <div style={{ maxWidth: "108px" }}>
-              best_train_resnet18_CIFAR10_30epochs_0.01lr.pth
-            </div>
+            <div>best_train_resnet18_CIFAR10_30epochs_0.01lr.pth</div>
             <div>Defense Y</div>
             <div>150</div>
             <div>0.005</div>

@@ -68,9 +68,15 @@ interface Props {
   title: string;
   dataKey: "training" | "test";
   color: string;
+  barWidth?: number;
 }
 
-export default function CustomBarChart({ title, dataKey, color }: Props) {
+export default function CustomBarChart({
+  title,
+  dataKey,
+  color,
+  barWidth,
+}: Props) {
   return (
     <div>
       <div className={styles["title-wrapper"]}>
@@ -78,7 +84,7 @@ export default function CustomBarChart({ title, dataKey, color }: Props) {
       </div>
       <BarChart
         width={210}
-        height={110}
+        height={105}
         data={data}
         margin={{
           top: 0,
@@ -95,6 +101,7 @@ export default function CustomBarChart({ title, dataKey, color }: Props) {
           dataKey={`${dataKey}_accuracy`}
           fill={color}
           activeBar={<Rectangle fill="pink" stroke="blue" />}
+          barSize={barWidth}
         />
       </BarChart>
     </div>

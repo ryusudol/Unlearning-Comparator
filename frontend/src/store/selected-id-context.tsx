@@ -6,15 +6,13 @@ import {
   Action,
 } from "../types/selected-id-context";
 
-const OVERVIEW = "overview";
+const SELECTED_ID = "selectedID";
 
 export const SelectedIDContext = createContext<SelectedIDContextType>({
   selectedID: 0,
 
   saveSelectedID: (id: number) => {},
-  retrieveSelectedID: () => {
-    return { selectedID: 0 } as SelectedID;
-  },
+  retrieveSelectedID: () => {},
   clearSelectedID: () => {},
 });
 
@@ -22,20 +20,20 @@ function selectedIDReducer(state: SelectedID, action: Action): SelectedID {
   switch (action.type) {
     case "SAVE_SELECTED_ID":
       const id = action.payload;
-      sessionStorage.setItem(OVERVIEW, JSON.stringify(id));
+      sessionStorage.setItem(SELECTED_ID, JSON.stringify(id));
       return {
         ...state,
         selectedID: id,
       };
 
     case "RETRIEVE_SELECTED_ID":
-      const savedOverview = sessionStorage.getItem(OVERVIEW);
-      if (!savedOverview) return { ...state, selectedID: 0 };
+      const savedSelectedID = sessionStorage.getItem(SELECTED_ID);
+      if (!savedSelectedID) return { ...state, selectedID: 0 };
       try {
-        const parsedOverview: SelectedID = JSON.parse(savedOverview);
+        const parsedSelectedID: SelectedID = JSON.parse(savedSelectedID);
         return {
           ...state,
-          selectedID: parsedOverview.selectedID,
+          selectedID: parsedSelectedID.selectedID,
         };
       } catch (error) {
         console.error(error);
@@ -43,7 +41,7 @@ function selectedIDReducer(state: SelectedID, action: Action): SelectedID {
       }
 
     case "CLEAR_SELECTED_ID":
-      sessionStorage.removeItem(OVERVIEW);
+      sessionStorage.removeItem(SELECTED_ID);
       return { ...state, selectedID: 0 };
 
     default:
@@ -51,7 +49,7 @@ function selectedIDReducer(state: SelectedID, action: Action): SelectedID {
   }
 }
 
-export default function OverviewContextProvider({
+export default function SelectedIDContextProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -66,7 +64,6 @@ export default function OverviewContextProvider({
 
   function handleRetrieveSelectedID() {
     dispatch({ type: "RETRIEVE_SELECTED_ID" });
-    return { selectedID: selectedID.selectedID };
   }
 
   function handleClearSelectedID() {

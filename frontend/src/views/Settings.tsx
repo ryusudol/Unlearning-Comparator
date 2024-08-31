@@ -13,7 +13,6 @@ type Mode = 0 | 1 | 2;
 
 export default function Settings() {
   const [configMode, setConfigMode] = useState<Mode>(0); // 0: Training, 1: Unlearning, 2:Defense
-  const [operationStatus, setOperationStatus] = useState<Mode>(0); // 0: Idle, 1: Predefined, 2: Custom
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
@@ -26,31 +25,17 @@ export default function Settings() {
   return (
     <section className={styles.settings}>
       <Title title="Settings" />
-      <ContentBox height={253}>
-        <ConfigSelector
-          mode={configMode}
-          status={operationStatus}
-          onClick={handleConfigModeChange}
-        />
+      <ContentBox height={238}>
+        <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
         {configMode === 0 ? (
-          <Training
-            operationStatus={operationStatus}
-            setOperationStatus={setOperationStatus}
-            setTrainedModels={setTrainedModels}
-          />
+          <Training setTrainedModels={setTrainedModels} />
         ) : configMode === 1 ? (
           <Unlearning
-            operationStatus={operationStatus}
-            setOperationStatus={setOperationStatus}
             trainedModels={trainedModels}
             setUnlearnedModels={setUnlearnedModels}
           />
         ) : (
-          <Defense
-            operationStatus={operationStatus}
-            setOperationStatus={setOperationStatus}
-            unlearnedModels={unlearnedModels}
-          />
+          <Defense unlearnedModels={unlearnedModels} />
         )}
       </ContentBox>
     </section>

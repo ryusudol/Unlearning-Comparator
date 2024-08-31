@@ -18,14 +18,16 @@ export function getAccuracies(
     if (
       isTraining &&
       status &&
-      (status as TrainingStatus).test_class_accuracies
+      (status as TrainingStatus).test_class_accuracies &&
+      !Array.isArray((status as TrainingStatus).test_class_accuracies)
     ) {
       for (let key in (status as TrainingStatus).test_class_accuracies)
         accuracies.push((status as TrainingStatus).test_class_accuracies[key]);
     } else if (
       isUnlearning &&
       status &&
-      (status as UnlearningStatus).test_class_accuracies
+      (status as UnlearningStatus).test_class_accuracies &&
+      !Array.isArray((status as UnlearningStatus).test_class_accuracies)
     ) {
       for (let key in (status as UnlearningStatus).test_class_accuracies)
         accuracies.push(
@@ -36,14 +38,16 @@ export function getAccuracies(
     if (
       isTraining &&
       status &&
-      (status as TrainingStatus).train_class_accuracies
+      (status as TrainingStatus).train_class_accuracies &&
+      !Array.isArray((status as TrainingStatus).train_class_accuracies)
     ) {
       for (let key in (status as TrainingStatus).train_class_accuracies)
         accuracies.push((status as TrainingStatus).train_class_accuracies[key]);
     } else if (
       isUnlearning &&
       status &&
-      (status as UnlearningStatus).train_class_accuracies
+      (status as UnlearningStatus).train_class_accuracies &&
+      !Array.isArray((status as UnlearningStatus).train_class_accuracies)
     ) {
       for (let key in (status as UnlearningStatus).train_class_accuracies)
         accuracies.push(

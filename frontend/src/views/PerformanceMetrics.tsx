@@ -9,7 +9,7 @@ export default function PerformanceMetrics() {
   return (
     <section className={styles["performance-metrics"]}>
       <Title title="Performance Metrics" />
-      <ContentBox height={253}>
+      <ContentBox height={238}>
         <div className={styles.wrapper}>
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Retrain</p>
@@ -17,11 +17,13 @@ export default function PerformanceMetrics() {
               title="Training Accuracy"
               dataKey="training"
               color={TABLEAU10[0]}
+              barWidth={6}
             />
             <CustomBarChart
               title="Test Accuracy"
               dataKey="test"
               color={TABLEAU10[1]}
+              barWidth={6}
             />
           </div>
           <div className={styles["barchart-row"]}>
@@ -30,11 +32,13 @@ export default function PerformanceMetrics() {
               title="Training Accuracy"
               dataKey="training"
               color={TABLEAU10[0]}
+              barWidth={6}
             />
             <CustomBarChart
               title="Test Accuracy"
               dataKey="test"
               color={TABLEAU10[1]}
+              barWidth={6}
             />
           </div>
         </div>
