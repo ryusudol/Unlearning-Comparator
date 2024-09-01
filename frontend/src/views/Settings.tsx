@@ -11,7 +11,11 @@ import { useFetchModels } from "../hooks/useFetchModels";
 
 type Mode = 0 | 1 | 2;
 
-export default function Settings() {
+interface Props {
+  height: number;
+}
+
+export default function Settings({ height }: Props) {
   const [configMode, setConfigMode] = useState<Mode>(0); // 0: Training, 1: Unlearning, 2:Defense
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
@@ -25,7 +29,7 @@ export default function Settings() {
   return (
     <section className={styles.settings}>
       <Title title="Settings" />
-      <ContentBox height={238}>
+      <ContentBox height={height}>
         <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
         {configMode === 0 ? (
           <Training setTrainedModels={setTrainedModels} />

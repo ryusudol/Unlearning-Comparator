@@ -1,49 +1,57 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import styles from "./Embeddings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SvgViewer from "../components/UI/SvgViewer";
+import retrainedData from "../constants/result_GT_1.json";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
+import { modifySvg } from "../util";
 
-export default function Embeddings() {
+interface Props {
+  height: number;
+}
+
+export default function Embeddings({ height }: Props) {
   const { overview } = useContext(OverviewContext);
   const { selectedID } = useContext(SelectedIDContext);
-
-  const retrainSvgs = useMemo(
-    () => overview[selectedID]?.retrain_svgs || [],
-    [overview, selectedID]
-  );
-  const unlearnSvgs = useMemo(
-    () => overview[selectedID]?.unlearn_svgs || [],
-    [overview, selectedID]
-  );
 
   const [edittedRetrainSvgs, setEdittedRetrainSvgs] = useState<string[]>([]);
   const [edittedUnlearnSvgs, setEdittedUnlearnSvgs] = useState<string[]>([]);
   const [retrainFocus, setRetrainFocus] = useState<number | undefined>(4);
   const [unlearnFocus, setUnlearnFocus] = useState<number | undefined>(4);
 
-  useEffect(() => {
-    const modifySvg = (svg: string) => {
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(svg, "image/svg+xml");
-      const legend = svgDoc.getElementById("legend_1");
-      if (!legend || !legend.parentNode) return;
-      legend.parentNode.removeChild(legend);
-      return new XMLSerializer().serializeToString(svgDoc);
-    };
+  const unlearnSvgs = useMemo(
+    () => overview[selectedID]?.unlearn_svgs || [],
+    [overview, selectedID]
+  );
+  const retrainByteSvgs = useMemo(
+    () => Object.values(retrainedData.svg_files),
+    []
+  );
 
-    setEdittedRetrainSvgs(
-      overview[selectedID]?.retrain_svgs.map(modifySvg) as string[]
-    );
+  const decoder = useCallback(
+    () => retrainByteSvgs.slice(0, 4).map(atob),
+    [retrainByteSvgs]
+  );
+  const retrainSvgs = useMemo(() => decoder(), [decoder]);
+
+  useEffect(() => {
+    setEdittedRetrainSvgs(retrainSvgs.map(modifySvg) as string[]);
     setEdittedUnlearnSvgs(
       overview[selectedID]?.unlearn_svgs.map(modifySvg) as string[]
     );
+
     setRetrainFocus(retrainSvgs ? 4 : undefined);
     setUnlearnFocus(unlearnSvgs ? 4 : undefined);
-  }, [overview, retrainSvgs, selectedID, unlearnSvgs]);
+  }, [decoder, overview, retrainSvgs, selectedID, unlearnSvgs]);
 
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -55,7 +63,7 @@ export default function Embeddings() {
   return (
     <section className={styles.embeddings}>
       <Title title="Embeddings" />
-      <ContentBox height={642}>
+      <ContentBox height={height}>
         <div className={styles["viewers-wrapper"]}>
           <SvgViewer
             mode="r"

@@ -25,10 +25,12 @@ export interface Overview {
 export interface OverviewContextType extends Overview {
   saveOverview: (overview: Overview) => void;
   retrieveOverview: () => void;
+  deleteLastOverviewItem: () => void;
   clearOverview: () => void;
 }
 
 export type Action =
   | { type: "SAVE_OVERVIEW"; payload: Overview }
   | { type: "RETRIEVE_OVERVIEW" }
+  | { type: "DELETE_LAST_OVERVIEW_ITEM" }
   | { type: "CLEAR_OVERVIEW" };

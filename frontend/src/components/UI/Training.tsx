@@ -2,8 +2,8 @@ import React, { useCallback, useRef, useContext, useEffect } from "react";
 
 import Input from "../Input";
 import PredefinedInput from "../PredefinedInput";
-import RunButton from "../RunButton";
 import OperationStatus from "../OperationStatus";
+import RunButton from "../RunButton";
 import { MODELS, DATASET } from "../../constants/training";
 import { RunningStatusContext } from "../../store/running-status-context";
 import {
@@ -23,18 +23,23 @@ export default function Training({ setTrainedModels }: TrainingProps) {
     isRunning,
     indicator,
     status,
+    initRunningStatus,
     saveRunningStatus,
-    clearRunningStatus,
+    updateIsRunning,
+    updateStatus,
   } = useContext(RunningStatusContext);
 
   const isRunningRef = useRef<boolean>(isRunning);
   const indicatorRef = useRef<string>(indicator);
+  const statusRef = useRef(status);
   const isResultFetched = useRef<boolean>(false);
 
   useEffect(() => {
     isRunningRef.current = isRunning;
     indicatorRef.current = indicator;
-  }, [indicator, isRunning]);
+    statusRef.current = status;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkStatus = useCallback(async () => {
     if (isResultFetched.current) return;
@@ -42,11 +47,10 @@ export default function Training({ setTrainedModels }: TrainingProps) {
     try {
       const trainingStatus = await fetchRunningStatus("train");
 
-      saveRunningStatus({
-        isRunning: isRunningRef.current,
-        indicator: indicatorRef.current,
-        status: trainingStatus,
-      });
+      if (isRunningRef.current !== trainingStatus.is_unlearning)
+        updateIsRunning(trainingStatus.is_unlearning);
+      if (statusRef.current?.progress !== trainingStatus.progress)
+        updateStatus(trainingStatus);
 
       if (
         !isResultFetched.current &&
@@ -61,16 +65,15 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         setTrainedModels(models);
 
         alert("A trained model has been saved.");
-        clearRunningStatus();
+        initRunningStatus();
       }
     } catch (error) {
       console.error("Failed to fetch unlearning status or reuslt:", error);
-      clearRunningStatus();
+      initRunningStatus();
       throw error;
     }
-  }, [clearRunningStatus, saveRunningStatus, setTrainedModels]);
+  }, [initRunningStatus, setTrainedModels, updateIsRunning, updateStatus]);
 
-  // useInterval(isRunningRef.current, checkStatus);
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
@@ -97,14 +100,14 @@ export default function Training({ setTrainedModels }: TrainingProps) {
 
     if (isRunning) {
       saveRunningStatus({
-        isRunning,
+        isRunning: true,
         indicator: "Cancelling . . .",
         status: undefined,
       });
 
       await cancelRunning("train");
 
-      clearRunningStatus();
+      initRunningStatus();
     } else {
       const isValid =
         configState.seed > 0 &&

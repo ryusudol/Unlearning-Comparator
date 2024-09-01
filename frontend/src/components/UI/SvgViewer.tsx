@@ -1,7 +1,6 @@
 import React from "react";
 import styles from "./SvgViewer.module.css";
 
-import SubTitle from "../SubTitle";
 import Explanation from "./Explanation";
 
 interface Props {
@@ -23,17 +22,14 @@ export default function SvgViewer({
     return { __html: svg };
   };
 
-  const subtitle = mode === "r" ? "Retrained Model" : "Unlearned Model";
-
   return (
     <div className={styles.wrapper}>
-      <SubTitle subtitle={subtitle} />
       {svgs.length === 4 && (
         <div className={styles["content-wrapper"]}>
           <div className={styles.header}>
             <Explanation mode={mode} />
             <div className={styles.thumbnails}>
-              {modifiedSvgs.map((svg, idx) => (
+              {modifiedSvgs?.map((svg, idx) => (
                 <div
                   key={idx}
                   id={`${mode}-${idx + 1}`}

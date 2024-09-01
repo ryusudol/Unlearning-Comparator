@@ -13,6 +13,7 @@ export const OverviewContext = createContext<OverviewContextType>({
 
   saveOverview: (overview: Overview) => {},
   retrieveOverview: () => {},
+  deleteLastOverviewItem: () => {},
   clearOverview: () => {},
 });
 
@@ -21,35 +22,32 @@ function overviewReducer(state: Overview, action: Action): Overview {
     case "SAVE_OVERVIEW":
       const overview = action.payload;
       sessionStorage.setItem(OVERVIEW, JSON.stringify(overview));
-      return {
-        ...state,
-        overview: overview.overview,
-      };
+      return { overview: overview.overview };
 
     case "RETRIEVE_OVERVIEW":
       const savedOverview = sessionStorage.getItem(OVERVIEW);
-      if (!savedOverview)
-        return {
-          ...state,
-          overview: [],
-        };
-      try {
+      if (savedOverview) {
         const parsedOverview: Overview = JSON.parse(savedOverview);
-        return {
-          ...state,
-          overview: parsedOverview.overview,
-        };
-      } catch (error) {
-        console.error(error);
-        return {
-          ...state,
-          overview: [],
-        };
+        return { overview: parsedOverview.overview };
       }
+      return state;
+
+    case "DELETE_LAST_OVERVIEW_ITEM":
+      const savedData = sessionStorage.getItem(OVERVIEW);
+      if (savedData) {
+        const parsedData: Overview = JSON.parse(savedData);
+        const updatedOverview = parsedData.overview.slice(0, -1);
+        sessionStorage.setItem(
+          OVERVIEW,
+          JSON.stringify({ overview: updatedOverview })
+        );
+        return { overview: updatedOverview };
+      }
+      return state;
 
     case "CLEAR_OVERVIEW":
       sessionStorage.removeItem(OVERVIEW);
-      return { ...state, overview: [] };
+      return { overview: [] };
 
     default:
       return state;
@@ -73,6 +71,10 @@ export default function OverviewContextProvider({
     dispatch({ type: "RETRIEVE_OVERVIEW" });
   }
 
+  function handleDeleteOverviewItem() {
+    dispatch({ type: "DELETE_LAST_OVERVIEW_ITEM" });
+  }
+
   function handleClearOverview() {
     dispatch({ type: "CLEAR_OVERVIEW" });
   }
@@ -82,6 +84,7 @@ export default function OverviewContextProvider({
 
     saveOverview: handleSaveOverview,
     retrieveOverview: handleRetrieveOverview,
+    deleteLastOverviewItem: handleDeleteOverviewItem,
     clearOverview: handleClearOverview,
   };
 

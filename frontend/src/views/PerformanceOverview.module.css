@@ -1,24 +1,59 @@
 .performance-overview {
-  width: 912px;
+  width: 922px;
 }
 
 .table {
-  max-width: 893px;
+  max-width: 904px;
   display: grid;
-  grid-template-columns: repeat(15, minmax(min-content, max-content));
+  /* grid-template-columns: repeat(12, minmax(min-content, max-content)); */
+  grid-template-columns: 54px 80px 80px 130px 130px 80px 55px 55px 55px 55px 75px 54px;
   overflow: hidden;
 }
 
-.table-header,
 .table-row {
+  display: contents;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.table-row div {
+  position: relative;
+  font-size: 13px;
+}
+
+.table-row div:first-child {
+  border-left: 1px solid #ddd;
+}
+
+.table-row div::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  pointer-events: none;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:not(.first-row):hover div::before {
+  background-color: rgba(108, 117, 125, 0.05);
+}
+
+.table-row.selected div::before {
+  background-color: rgba(108, 117, 125, 0.1);
+}
+
+.table-header {
   display: contents;
   font-size: 14px;
 }
 
 .table-header div,
 .table-row div {
-  max-width: 110px;
-  padding: 8px 6px;
+  max-width: 130px;
+  padding: 8px;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   text-align: left;
@@ -27,19 +62,60 @@
   white-space: nowrap;
 }
 
-.table-row div:first-child {
-  border-left: 1px solid #ddd;
+.first-row {
+  cursor: default;
 }
 
 .first-row div {
   border-top: 1px solid #ddd;
 }
 
-.table-row div {
-  font-size: 13px;
-}
-
 .table-header div {
   font-weight: bold;
   border: none;
+}
+
+.top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.legends {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.legend-title {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.bar {
+  width: 150px;
+  height: 20px;
+  position: relative;
+}
+
+.gradient {
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(to right, #e9a3c9, #f7f7f7, #a1d76a);
+}
+
+.legend-values {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 10px;
+  margin-top: 2px;
 }

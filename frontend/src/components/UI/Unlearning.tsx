@@ -13,6 +13,7 @@ import CustomInput from "../CustomInput";
 import PredefinedInput from "../PredefinedInput";
 import OperationStatus from "../OperationStatus";
 import ForgetClassSelector from "../ForgetClassSelector";
+import { MODELS, DATASET } from "../../constants/training";
 import { OverviewContext } from "../../store/overview-context";
 import { BaselineContext } from "../../store/baseline-context";
 import { SelectedIDContext } from "../../store/selected-id-context";
@@ -51,13 +52,17 @@ export default function Unlearning({
 }: UnlearningProps) {
   const { saveBaseline } = useContext(BaselineContext);
   const { selectedID, saveSelectedID } = useContext(SelectedIDContext);
-  const { overview, saveOverview } = useContext(OverviewContext);
+  const { overview, saveOverview, deleteLastOverviewItem } =
+    useContext(OverviewContext);
   const {
     isRunning,
     indicator,
     status,
+    initRunningStatus,
+    updateIsRunning,
+    updateIndicator,
+    updateStatus,
     saveRunningStatus,
-    clearRunningStatus,
   } = useContext(RunningStatusContext);
 
   const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
@@ -87,16 +92,10 @@ export default function Unlearning({
     try {
       const unlearningStatus = await fetchRunningStatus("unlearn");
 
-      if (
-        isRunningRef.current !== unlearningStatus.is_unlearning ||
-        statusRef.current?.progress !== unlearningStatus.progress
-      ) {
-        saveRunningStatus({
-          isRunning: unlearningStatus.is_unlearning,
-          indicator: indicatorRef.current,
-          status: unlearningStatus,
-        });
-      }
+      if (isRunningRef.current !== unlearningStatus.is_unlearning)
+        updateIsRunning(unlearningStatus.is_unlearning);
+      if (statusRef.current?.progress !== unlearningStatus.progress)
+        updateStatus(unlearningStatus);
 
       if (
         !isResultFetched.current &&
@@ -106,11 +105,7 @@ export default function Unlearning({
       ) {
         isResultFetched.current = true;
 
-        saveRunningStatus({
-          isRunning: isRunningRef.current,
-          indicator: "Embedding . . .",
-          status: unlearningStatus,
-        });
+        updateIndicator("Embedding . . .");
 
         const result: ResultType = await fetchUnlearningResult();
         const svgs = result.svg_files;
@@ -143,11 +138,8 @@ export default function Unlearning({
               unlearn_svgs: svgs,
             };
 
-        // TODO: 지우기
-        console.log(updatedOverview);
-
         saveOverview({ overview: [...remainingOverview, updatedOverview] });
-        clearRunningStatus();
+        initRunningStatus();
 
         // TODO: unlearning 완료 후 unlearned model 받아오기
         // const models = await fetchModelFiles("unlearned_models");
@@ -155,16 +147,18 @@ export default function Unlearning({
       }
     } catch (error) {
       console.error("Failed to fetch unlearning status or result:", error);
-      clearRunningStatus();
+      initRunningStatus();
       throw error;
     }
   }, [
-    isRetrain,
-    clearRunningStatus,
+    updateIsRunning,
+    updateStatus,
+    updateIndicator,
     overview,
-    saveOverview,
-    saveRunningStatus,
     selectedID,
+    isRetrain,
+    saveOverview,
+    initRunningStatus,
   ]);
 
   useEffect(() => {
@@ -257,12 +251,15 @@ export default function Unlearning({
 
     if (isRunning) {
       saveRunningStatus({
-        isRunning,
+        isRunning: true,
         indicator: "Cancelling . . .",
         status: undefined,
       });
 
       await cancelRunning("unlearn");
+
+      deleteLastOverviewItem();
+      initRunningStatus();
     } else {
       const isValid =
         mode === 0
@@ -319,6 +316,18 @@ export default function Unlearning({
             />
             <div>
               <Input
+                labelName="Model"
+                defaultValue={"ResNet-18"}
+                optionData={MODELS}
+                type="select"
+              />
+              <Input
+                labelName="Dataset"
+                defaultValue={"CIFAR-10"}
+                optionData={DATASET}
+                type="select"
+              />
+              <Input
                 labelName="Trained Model"
                 defaultValue={trainedModels[0]}
                 optionData={trainedModels}
@@ -332,15 +341,15 @@ export default function Unlearning({
                 type="number"
               />
               <Input
-                key={initialState.batch_size}
-                labelName="Batch Size"
-                defaultValue={initialState.batch_size}
-                type="number"
-              />
-              <Input
                 key={initialState.learning_rate}
                 labelName="Learning Rate"
                 defaultValue={initialState.learning_rate}
+                type="number"
+              />
+              <Input
+                key={initialState.batch_size}
+                labelName="Batch Size"
+                defaultValue={initialState.batch_size}
                 type="number"
               />
             </div>

@@ -4,11 +4,12 @@
 }
 
 .header {
-  width: 100%;
+  width: 105%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   z-index: 2;
+  margin-top: 6px;
 }
 
 .content-wrapper {
@@ -52,7 +53,7 @@
 
 .selected-svg svg {
   position: relative;
-  bottom: 32px;
-  width: 590px;
-  height: 604px;
+  bottom: 36px;
+  width: 600px;
+  height: 616px;
 }

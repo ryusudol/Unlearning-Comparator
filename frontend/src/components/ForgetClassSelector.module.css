@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 3px 0 11px;
+  margin-bottom: 5px;
 }
 
 .forget label {
@@ -19,8 +19,8 @@
   outline: none;
 }
 
-.asterisk {
-  font-size: 10px;
-  color: #d12d48;
-  margin: 0 6px 2px 1px;
+.icon {
+  font-size: 15px;
+  /* color: #e13d58; */
+  margin: 0 6px 0px 0px;
 }
