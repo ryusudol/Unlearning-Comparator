@@ -5,11 +5,15 @@ import ContentBox from "../components/ContentBox";
 import CustomBarChart from "../components/CustomBarChart";
 import { TABLEAU10 } from "../constants/tableau10";
 
-export default function PerformanceMetrics() {
+interface Props {
+  height: number;
+}
+
+export default function PerformanceMetrics({ height }: Props) {
   return (
     <section className={styles["performance-metrics"]}>
       <Title title="Performance Metrics" />
-      <ContentBox height={238}>
+      <ContentBox height={height}>
         <div className={styles.wrapper}>
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Retrain</p>

@@ -12,7 +12,7 @@ export const BaselineContext = createContext<BaselineContextType>({
   baseline: 0,
 
   saveBaseline: (baseline: number) => {},
-  retrieveBaseline: () => 0,
+  retrieveBaseline: () => {},
   clearBaseline: () => {},
 });
 
@@ -21,38 +21,19 @@ function BaselineReducer(state: Baseline, action: Action): Baseline {
     case "SAVE_BASELINE":
       const baseline = action.payload;
       sessionStorage.setItem(BASELINE, JSON.stringify(baseline));
-      return {
-        ...state,
-        baseline,
-      };
+      return { baseline };
 
     case "RETRIEVE_BASELINE":
       const savedBaseline = sessionStorage.getItem(BASELINE);
-      if (!savedBaseline)
-        return {
-          ...state,
-          baseline: 0,
-        };
-      try {
+      if (savedBaseline) {
         const parsedBaseline: Baseline = JSON.parse(savedBaseline);
-        return {
-          ...state,
-          baseline: parsedBaseline.baseline,
-        };
-      } catch (error) {
-        console.error(error);
-        return {
-          ...state,
-          baseline: 0,
-        };
+        return { baseline: parsedBaseline.baseline };
       }
+      return state;
 
     case "CLEAR_BASELINE":
       sessionStorage.removeItem(BASELINE);
-      return {
-        ...state,
-        baseline: 0,
-      };
+      return { baseline: 0 };
 
     default:
       return state;
@@ -74,7 +55,6 @@ export default function BaselineContextProvider({
 
   function handleRetrieveSettings() {
     dispatch({ type: "RETRIEVE_BASELINE" });
-    return baseline.baseline;
   }
 
   function handleClearSettings() {

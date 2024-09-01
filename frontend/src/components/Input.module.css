@@ -7,14 +7,15 @@
 }
 
 .wrapper label {
-  font-size: var(--input-font-size);
+  font-size: 13px;
 }
 
 .wrapper input,
 .wrapper select {
   width: 120px;
-  height: 18px;
+  height: 17px;
   padding: 0 4px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

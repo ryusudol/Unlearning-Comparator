@@ -4,6 +4,18 @@ import {
   DefenseStatus,
 } from "./types/settings";
 
+export function modifySvg(svg: string) {
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(svg, "image/svg+xml");
+  const legend = svgDoc.getElementById("legend_1");
+
+  if (!legend || !legend.parentNode) return;
+
+  legend.parentNode.removeChild(legend);
+
+  return new XMLSerializer().serializeToString(svgDoc);
+}
+
 export function getAccuracies(
   selectedMode: "Test" | "Train",
   identifier: "training" | "unlearning" | "defense",

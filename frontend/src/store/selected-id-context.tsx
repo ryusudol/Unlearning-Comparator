@@ -21,28 +21,19 @@ function selectedIDReducer(state: SelectedID, action: Action): SelectedID {
     case "SAVE_SELECTED_ID":
       const id = action.payload;
       sessionStorage.setItem(SELECTED_ID, JSON.stringify(id));
-      return {
-        ...state,
-        selectedID: id,
-      };
+      return { selectedID: id };
 
     case "RETRIEVE_SELECTED_ID":
       const savedSelectedID = sessionStorage.getItem(SELECTED_ID);
-      if (!savedSelectedID) return { ...state, selectedID: 0 };
-      try {
+      if (savedSelectedID) {
         const parsedSelectedID: SelectedID = JSON.parse(savedSelectedID);
-        return {
-          ...state,
-          selectedID: parsedSelectedID.selectedID,
-        };
-      } catch (error) {
-        console.error(error);
-        return { ...state, selectedID: 0 };
+        return { selectedID: parsedSelectedID.selectedID };
       }
+      return state;
 
     case "CLEAR_SELECTED_ID":
       sessionStorage.removeItem(SELECTED_ID);
-      return { ...state, selectedID: 0 };
+      return { selectedID: 0 };
 
     default:
       return state;

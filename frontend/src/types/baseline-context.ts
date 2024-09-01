@@ -4,7 +4,7 @@ export interface Baseline {
 
 export interface BaselineContextType extends Baseline {
   saveBaseline: (baseline: number) => void;
-  retrieveBaseline: () => number;
+  retrieveBaseline: () => void;
   clearBaseline: () => void;
 }
 
