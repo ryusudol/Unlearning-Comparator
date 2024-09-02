@@ -19,7 +19,7 @@ export default function Privacies({ height }: Props) {
               src="/logit.png"
               alt="logit img"
             />
-            <img className={styles["mia-img"]} src="/logit.png" alt="mia img" />
+            <img className={styles["mia-img"]} src="/mia.png" alt="mia img" />
           </div>
           <img
             className={styles["attack-img"]}
