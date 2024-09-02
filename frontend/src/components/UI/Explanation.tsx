@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import styles from "./Explanation.module.css";
 
-import retrainedData from "../../constants/result_GT_1.json";
+import { retrainedData } from "../../constants/gt";
 import { OverviewContext } from "../../store/overview-context";
 import { SelectedIDContext } from "../../store/selected-id-context";
 import { BaselineContext } from "../../store/baseline-context";
@@ -15,10 +15,10 @@ export default function RunningExplanation({ mode }: Props) {
   const { selectedID } = useContext(SelectedIDContext);
   const { baseline } = useContext(BaselineContext);
 
-  const overviewItem = overview[selectedID - 1];
-  const unlearnMethod = overviewItem?.unlearn.includes("Custom")
-    ? `${overviewItem?.unlearn.slice(0, 20)}...`
-    : overviewItem?.unlearn;
+  const overviewItem = overview[selectedID];
+  const unlearnMethod = overviewItem?.unlearning.includes("Custom")
+    ? `${overviewItem?.unlearning.slice(0, 20)}...`
+    : overviewItem?.unlearning;
 
   return (
     <div className={styles.explanation}>
@@ -33,7 +33,9 @@ export default function RunningExplanation({ mode }: Props) {
       <p>
         <span className={styles.bold}>Epochs</span>
         <span>{`: ${
-          mode === "r" ? retrainedData.unlearning.epochs : overviewItem?.epochs
+          mode === "r"
+            ? retrainedData[baseline].unlearning.epochs
+            : overviewItem?.epochs
         }`}</span>
       </p>
     </div>

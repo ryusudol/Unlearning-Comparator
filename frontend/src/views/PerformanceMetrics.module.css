@@ -12,9 +12,19 @@
   align-items: center;
 }
 
-.barchart-row {
+.subtitles {
+  width: 320px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  margin-left: 40px;
+}
+
+.barchart-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -26,4 +36,6 @@
   font-weight: 500;
   font-size: 13px;
   transform: rotate(-90deg);
+  margin-right: 6px;
+  margin-bottom: 30px;
 }

@@ -2,20 +2,22 @@ export interface OverviewItem {
   forget_class: string;
   model: string;
   dataset: string;
-  unlearn: string;
-  trained_model: string;
+  training: string;
+  unlearning: string;
   defense: string;
   epochs: number;
-  learningRate: number;
-  batchSize: number;
+  learning_rate: number;
+  batch_size: number;
   ua: number;
   ra: number;
   ta: number;
   mia: number;
   avg_gap: number;
   rte: number;
-  retrain_svgs: string[];
+  train_class_accuracies: { [key: string]: string };
+  test_class_accuracies: { [key: string]: string };
   unlearn_svgs: string[];
+  retrain_svgs: string[];
 }
 
 export interface Overview {

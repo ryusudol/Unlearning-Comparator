@@ -5,7 +5,6 @@ import { faEraser } from "@fortawesome/free-solid-svg-icons";
 
 import { UNLEARN_CLASSES } from "../constants/unlearning";
 import { BaselineContext } from "../store/baseline-context";
-import { SelectedIDContext } from "../store/selected-id-context";
 
 interface Props {
   width: number;
@@ -17,11 +16,9 @@ export default function ForgetClassSelector({
   isTextShow = true,
 }: Props) {
   const { baseline, saveBaseline } = useContext(BaselineContext);
-  const { saveSelectedID } = useContext(SelectedIDContext);
 
   const handleForgetClassSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     saveBaseline(+e.currentTarget.value);
-    saveSelectedID(0);
   };
 
   return (

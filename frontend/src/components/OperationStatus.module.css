@@ -2,22 +2,27 @@
   width: 100%;
   height: 168px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 0 3px;
 }
 
-.column {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
+.status-wrapper div:first-child {
+  margin-right: 24px;
 }
 
 .indicator {
   color: red;
   font-size: 15px;
   font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .column select {
@@ -27,15 +32,25 @@
   border-radius: 3px;
   padding: 0 2px;
   font-size: 13px;
+  margin-bottom: 6px;
 }
 
 .column select:focus {
   outline: none;
 }
 
+.status {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-left: 4px;
+}
+
 .status span {
   font-size: 12px;
 }
+
 .content {
   width: 263px;
   display: flex;
@@ -49,5 +64,5 @@
 }
 
 .accuracies span {
-  font-size: 11px;
+  font-size: 12px;
 }

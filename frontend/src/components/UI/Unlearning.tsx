@@ -15,7 +15,6 @@ import OperationStatus from "../OperationStatus";
 import ForgetClassSelector from "../ForgetClassSelector";
 import { MODELS, DATASET } from "../../constants/training";
 import { OverviewContext } from "../../store/overview-context";
-import { BaselineContext } from "../../store/baseline-context";
 import { SelectedIDContext } from "../../store/selected-id-context";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { getDefaultUnlearningConfig } from "../../util";
@@ -50,7 +49,6 @@ export default function Unlearning({
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
-  const { saveBaseline } = useContext(BaselineContext);
   const { selectedID, saveSelectedID } = useContext(SelectedIDContext);
   const { overview, saveOverview, deleteLastOverviewItem } =
     useContext(OverviewContext);
@@ -72,14 +70,12 @@ export default function Unlearning({
 
   const isResultFetched = useRef<boolean>(false);
   const isRunningRef = useRef<boolean>(isRunning);
-  const indicatorRef = useRef<string>(indicator);
   const statusRef = useRef<UnlearningStatus | undefined>(
     status as UnlearningStatus
   );
 
   useEffect(() => {
     isRunningRef.current = isRunning;
-    indicatorRef.current = indicator;
     statusRef.current = status as UnlearningStatus | undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -112,9 +108,13 @@ export default function Unlearning({
         const ua = result.unlearn_accuracy;
         const ra = result.remain_accuracy;
         const ta = result.test_accuracy;
-        // TODO: rte 수정
+        // TODO: rte, mia 구현되면 아래 수정
+        const mia = 0;
         const rte = 0;
-        // TODO: const mia = result.mia; 추가
+        const train_class_accuracies =
+          unlearningStatus.train_class_accuracies as { [key: string]: string };
+        const test_class_accuracies =
+          unlearningStatus.test_class_accuracies as { [key: string]: string };
 
         const currOverview = overview[selectedID];
         const remainingOverview = overview.filter(
@@ -126,7 +126,10 @@ export default function Unlearning({
               ua,
               ra,
               ta,
+              mia,
               rte,
+              train_class_accuracies,
+              test_class_accuracies,
               retrain_svgs: svgs,
             }
           : {
@@ -134,7 +137,10 @@ export default function Unlearning({
               ua,
               ra,
               ta,
+              mia,
               rte,
+              train_class_accuracies,
+              test_class_accuracies,
               unlearn_svgs: svgs,
             };
 
@@ -164,7 +170,7 @@ export default function Unlearning({
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
-    if (isRunningRef.current) {
+    if (isRunning) {
       intervalId = setInterval(checkStatus, 1000);
     }
 
@@ -173,7 +179,7 @@ export default function Unlearning({
         clearInterval(intervalId);
       }
     };
-  }, [checkStatus]);
+  }, [checkStatus, isRunning]);
 
   const handleUnlearningMethodSelection = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -217,34 +223,34 @@ export default function Unlearning({
       fd.entries()
     ) as unknown as ConfigurationData;
 
-    const dataset = configState.trained_model?.split("_")[3];
     const newOverviewItem: OverviewItem = {
       forget_class: configState.forget_class,
       model: "ResNet18",
-      dataset: dataset === "CIFAR10" ? "CIFAR-10" : "VggFace",
-      unlearn: isRetrain
+      dataset: configState.dataset === "CIFAR-10" ? "CIFAR-10" : "VggFace",
+      training: !isRetrain && mode === 0 ? configState.trained_model : "None",
+      unlearning: isRetrain
         ? "Retrain"
         : mode === 0
         ? configState.method
         : `Custom - ${customFile!.name}`,
-      trained_model: configState.trained_model,
-      defense: "-",
+      defense: "None",
       epochs: configState.epochs,
-      learningRate: configState.learning_rate,
-      batchSize: configState.batch_size,
+      learning_rate: configState.learning_rate,
+      batch_size: configState.batch_size,
       ua: 0,
       ra: 0,
       ta: 0,
       mia: 0,
       avg_gap: 0,
       rte: 0,
-      retrain_svgs: [],
+      train_class_accuracies: {},
+      test_class_accuracies: {},
       unlearn_svgs: [],
+      retrain_svgs: [],
     };
     const newOverview = [...overview, newOverviewItem];
 
     saveOverview({ overview: newOverview });
-    saveBaseline(+configState.forget_class);
     saveSelectedID(newOverview.length - 1);
 
     isResultFetched.current = false;
@@ -298,8 +304,8 @@ export default function Unlearning({
       {isRunning ? (
         <OperationStatus
           identifier="unlearning"
-          indicator={indicatorRef.current}
-          status={statusRef.current}
+          indicator={indicator}
+          status={status}
         />
       ) : (
         <div>
