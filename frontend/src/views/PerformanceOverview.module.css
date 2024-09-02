@@ -60,7 +60,7 @@
 .table-header div,
 .table-row div,
 .table-row details {
-  padding: 8px;
+  padding: 6px 8px;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   text-align: left;

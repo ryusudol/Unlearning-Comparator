@@ -8,13 +8,14 @@
 }
 
 .status-wrapper div:first-child {
-  margin-right: 24px;
+  margin-right: 38px;
 }
 
 .indicator {
   color: red;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
+  margin-top: 2px;
   margin-bottom: 6px;
 }
 
@@ -49,6 +50,7 @@
 
 .status span {
   font-size: 12px;
+  margin-bottom: 3px;
 }
 
 .content {

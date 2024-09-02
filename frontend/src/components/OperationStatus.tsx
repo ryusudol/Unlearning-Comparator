@@ -98,7 +98,7 @@ export default function OperationStatus({
           {accuracies.length !== 0 &&
             accuracies.map((acc, idx) => (
               <span key={idx}>
-                Class {idx}: {acc.toFixed(1)}%
+                Class {idx}: {acc.toFixed(3)}
               </span>
             ))}
         </div>
