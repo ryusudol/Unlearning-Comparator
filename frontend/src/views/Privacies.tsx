@@ -23,14 +23,14 @@ export default function Privacies({ height }: Props) {
                 alt="logit img"
               />
             </div>
-            <div>
+            {/* <div>
               <SubTitle subtitle="MIA" fontSize={14} />
               <img
                 className={styles["mia-img"]}
                 src="/logit.png"
                 alt="mia img"
               />
-            </div>
+            </div> */}
           </div>
           <SubTitle subtitle="Attack" fontSize={14} />
           <img
