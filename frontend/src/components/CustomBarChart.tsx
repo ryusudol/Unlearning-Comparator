@@ -46,7 +46,7 @@ export default function CustomBarChart({ data }: Props) {
         <XAxis fontSize={9} dataKey="class" />
         <YAxis fontSize={9} />
         {chartData.length > 0 && <Tooltip />}
-        <Bar dataKey="accuracy" barSize={8}>
+        <Bar dataKey="accuracy" barSize={10}>
           {chartData.map((entry, index) => (
             <Cell
               key={`cell-${index}`}

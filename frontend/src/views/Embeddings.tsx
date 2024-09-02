@@ -57,6 +57,7 @@ export default function Embeddings({ height }: Props) {
 
     setRetrainFocus(retrainSvgs ? 4 : undefined);
     setUnlearnFocus(unlearnSvgs ? 4 : undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {

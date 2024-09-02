@@ -15,14 +15,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
-.logit-img,
+.logit-img {
+  width: 220px;
+}
+
 .mia-img {
-  width: 226px;
+  width: 210px;
 }
 
 .attack-img {
-  width: 350px;
+  width: 345px;
 }

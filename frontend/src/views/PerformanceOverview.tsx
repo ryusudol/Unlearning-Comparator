@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import styles from "./PerformanceOverview.module.css";
 
 import ForgetClassSelector from "../components/ForgetClassSelector";
@@ -108,7 +108,7 @@ export default function PerformanceOverview({ height }: Props) {
             <TableCell value={retrainedTA === "0.000" ? 0 : retrainedTA} />
             <TableCell value={currRetrainedData.MIA} />
             <div>0</div>
-            <div>{currRetrainedData.RTE}</div>
+            <div>{currRetrainedData.RTE.toFixed(1)}</div>
             <div>{currRetrainedData.mean_logits.toFixed(2)}</div>
           </div>
           {filteredOverview?.map((el, idx) => {
