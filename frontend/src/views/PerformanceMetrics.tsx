@@ -5,7 +5,6 @@ import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 import CustomBarChart from "../components/CustomBarChart";
-import { TABLEAU10 } from "../constants/tableau10";
 import { retrainedData } from "../constants/gt";
 import { BaselineContext } from "../store/baseline-context";
 import { OverviewContext } from "../store/overview-context";
@@ -37,17 +36,9 @@ export default function PerformanceMetrics({ height }: Props) {
           </div>
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Retrain</p>
-            <CustomBarChart
-              data={currRetrainedData.train_class_accuracies}
-              dataKey="training"
-              color={TABLEAU10[0]}
-            />
+            <CustomBarChart data={currRetrainedData.train_class_accuracies} />
             <div style={{ width: "10px" }} />
-            <CustomBarChart
-              data={currRetrainedData.test_class_accuracies}
-              dataKey="test"
-              color={TABLEAU10[1]}
-            />
+            <CustomBarChart data={currRetrainedData.test_class_accuracies} />
           </div>
           <div className={styles["barchart-row"]}>
             <p className={styles.category}>Unlearning</p>
@@ -55,16 +46,12 @@ export default function PerformanceMetrics({ height }: Props) {
               data={
                 currOverviewItem ? currOverviewItem.train_class_accuracies : []
               }
-              dataKey="training"
-              color={TABLEAU10[0]}
             />
             <div style={{ width: "10px" }} />
             <CustomBarChart
               data={
                 currOverviewItem ? currOverviewItem.test_class_accuracies : []
               }
-              dataKey="test"
-              color={TABLEAU10[1]}
             />
           </div>
         </div>

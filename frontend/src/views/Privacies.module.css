@@ -11,14 +11,16 @@
 }
 
 .content-header {
+  width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .logit-img,
 .mia-img {
-  width: 200px;
+  width: 226px;
 }
 
 .attack-img {
