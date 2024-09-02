@@ -29,7 +29,7 @@ export default function CustomBarChart({ data, dataKey, color }: Props) {
     <div>
       <BarChart
         width={200}
-        height={110}
+        height={120}
         data={chartData}
         margin={{
           top: 0,
