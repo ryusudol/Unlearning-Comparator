@@ -57,7 +57,7 @@ export default function Embeddings({ height }: Props) {
 
     setRetrainFocus(retrainSvgs ? 4 : undefined);
     setUnlearnFocus(unlearnSvgs ? 4 : undefined);
-  }, [decoder, overview, retrainSvgs, selectedID, unlearnSvgs]);
+  }, []);
 
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
