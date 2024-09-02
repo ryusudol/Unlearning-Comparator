@@ -17,7 +17,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
   margin-left: 40px;
 }
 
@@ -37,5 +36,5 @@
   font-size: 13px;
   transform: rotate(-90deg);
   margin-right: 6px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
