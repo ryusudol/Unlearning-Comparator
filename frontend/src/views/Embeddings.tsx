@@ -10,9 +10,10 @@ import styles from "./Embeddings.module.css";
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SvgViewer from "../components/UI/SvgViewer";
-import retrainedData from "../constants/result_GT_1.json";
+import { retrainedData } from "../constants/gt";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
+import { BaselineContext } from "../store/baseline-context";
 import { modifySvg } from "../util";
 
 interface Props {
@@ -22,19 +23,24 @@ interface Props {
 export default function Embeddings({ height }: Props) {
   const { overview } = useContext(OverviewContext);
   const { selectedID } = useContext(SelectedIDContext);
+  const { baseline } = useContext(BaselineContext);
 
   const [edittedRetrainSvgs, setEdittedRetrainSvgs] = useState<string[]>([]);
   const [edittedUnlearnSvgs, setEdittedUnlearnSvgs] = useState<string[]>([]);
   const [retrainFocus, setRetrainFocus] = useState<number | undefined>(4);
   const [unlearnFocus, setUnlearnFocus] = useState<number | undefined>(4);
 
-  const unlearnSvgs = useMemo(
-    () => overview[selectedID]?.unlearn_svgs || [],
-    [overview, selectedID]
+  const currOverview = overview.filter(
+    (item) => item.forget_class === baseline.toString()
   );
+
   const retrainByteSvgs = useMemo(
-    () => Object.values(retrainedData.svg_files),
-    []
+    () => Object.values(retrainedData[baseline].svg_files),
+    [baseline]
+  );
+  const unlearnSvgs = useMemo(
+    () => currOverview[selectedID]?.unlearn_svgs || [],
+    [currOverview, selectedID]
   );
 
   const decoder = useCallback(

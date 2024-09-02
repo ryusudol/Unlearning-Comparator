@@ -1,4 +1,4 @@
-import { useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import styles from "./App.module.css";
 
 import Settings from "../views/Settings";
@@ -9,17 +9,17 @@ import Privacies from "../views/Privacies";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { OverviewContext } from "../store/overview-context";
-import { RunningStatusContext } from "../store/running-status-context";
 
 const UPPER_HEIGHT = 265;
 const LOWER_HEIGHT = 615;
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const { baseline, saveBaseline, retrieveBaseline } =
     useContext(BaselineContext);
   const { saveSelectedID } = useContext(SelectedIDContext);
   const { overview, retrieveOverview } = useContext(OverviewContext);
-  const { initRunningStatus } = useContext(RunningStatusContext);
 
   useEffect(() => {
     retrieveBaseline();
@@ -28,11 +28,13 @@ export default function App() {
     saveBaseline(baseline ?? 0);
     saveSelectedID(overview.length === 0 ? 0 : overview.length - 1);
 
-    console.log(overview.length);
-
-    initRunningStatus();
+    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overview.length]);
+
+  if (isLoading) {
+    return <div>Loading . . .</div>;
+  }
 
   return (
     <section className={styles["body-wrapper"]}>

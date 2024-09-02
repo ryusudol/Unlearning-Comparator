@@ -53,18 +53,20 @@ export interface TrainingConfigurationData {
   model: string;
   dataset: string;
   epochs: number;
-  batch_size: number;
   learning_rate: number;
+  batch_size: number;
   seed: number;
 }
 
 export interface UnlearningConfigurationData {
   method: string;
+  model: string;
+  dataset: string;
   trained_model: string;
   forget_class: string;
   epochs: number;
-  batch_size: number;
   learning_rate: number;
+  batch_size: number;
 }
 
 export interface DefenseConfigurationData {
@@ -81,10 +83,10 @@ export interface Action {
 }
 
 export interface ResultType {
-  remain_accuracy: number;
-  svg_files: string[];
-  test_accuracy: number;
-  test_class_accuracies: ClassAccuracies;
-  train_class_accuracies: ClassAccuracies;
   unlearn_accuracy: number;
+  remain_accuracy: number;
+  test_accuracy: number;
+  train_class_accuracies: ClassAccuracies;
+  test_class_accuracies: ClassAccuracies;
+  svg_files: string[];
 }

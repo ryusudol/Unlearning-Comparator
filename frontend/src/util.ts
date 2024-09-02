@@ -90,3 +90,12 @@ export function getDefaultUnlearningConfig(method: string) {
 
   return { epochs, learning_rate };
 }
+
+export const getColorForValue = (value: number) => {
+  if (value >= 0.95) return "#a1d76a";
+  if (value >= 0.9) return "#d9ef8b";
+  if (value >= 0.85) return "#f7f7f7";
+  if (value >= 0.8) return "#fde0ef";
+  if (value >= 0.75) return "#f1b6da";
+  return "#e9a3c9";
+};

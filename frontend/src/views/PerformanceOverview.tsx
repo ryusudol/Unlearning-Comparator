@@ -7,44 +7,17 @@ import ContentBox from "../components/ContentBox";
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
-import retrainData from "../constants/result_GT_1.json";
-
-const getColorForValue = (value: number) => {
-  if (value >= 0.95) return "#a1d76a";
-  if (value >= 0.9) return "#d9ef8b";
-  if (value >= 0.85) return "#f7f7f7";
-  if (value >= 0.8) return "#fde0ef";
-  if (value >= 0.75) return "#f1b6da";
-  return "#e9a3c9";
-};
+import { retrainedData } from "../constants/gt";
+import { getColorForValue } from "../util";
 
 const TableCell = ({ value }: { value: number | string }) => {
-  const style = {
-    backgroundColor: getColorForValue(Number(value)),
-  };
-
-  return <div style={style}>{value}</div>;
-};
-
-const Legend = ({
-  title,
-  min,
-  max,
-}: {
-  title: string;
-  min: number;
-  max: number;
-}) => {
   return (
-    <div className={styles.legend}>
-      <div className={styles["legend-title"]}>{title}</div>
-      <div className={styles.bar}>
-        <div className={styles.gradient}></div>
-        <div className={styles["legend-values"]}>
-          <span>{min}</span>
-          <span>{max}</span>
-        </div>
-      </div>
+    <div
+      style={{
+        backgroundColor: getColorForValue(Number(value)),
+      }}
+    >
+      {value}
     </div>
   );
 };
@@ -71,17 +44,31 @@ export default function PerformanceOverview({ height }: Props) {
     saveSelectedID(idx);
   };
 
+  const currRetrainedData = retrainedData[baseline];
+  const retrainedUA = currRetrainedData.unlearn_accuracy;
+  const retrainedRA = currRetrainedData.remain_accuracy;
+  const retrainedTA = currRetrainedData.test_accuracy;
+
   return (
     <section className={styles["performance-overview"]}>
       <Title title="Performance Overview" />
       <ContentBox height={height}>
         <div className={styles.top}>
           <ForgetClassSelector width={70} isTextShow={false} />
-          <Legend title="Acc" min={0} max={1} />
+          <div className={styles.legend}>
+            <div className={styles["legend-title"]}>Acc</div>
+            <div className={styles.bar}>
+              <div className={styles.gradient}></div>
+              <div className={styles["legend-values"]}>
+                <span>0</span>
+                <span>1</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div className={styles.table}>
           <div className={styles["table-header"]}>
-            <div>Index</div>
+            <div>ID</div>
             <div>Model</div>
             <div>Dataset</div>
             <div>Training</div>
@@ -93,20 +80,36 @@ export default function PerformanceOverview({ height }: Props) {
             <div>MIA</div>
             <div>Avg. Gap</div>
             <div>RTE</div>
+            <div>Logit</div>
           </div>
           <div className={`${styles["table-row"]} ${styles["first-row"]}`}>
+            <div>{currRetrainedData.id}</div>
+            <div>{currRetrainedData.model}</div>
+            <div>{currRetrainedData.dataset}</div>
+            <div>{currRetrainedData.training}</div>
+            <details style={{ cursor: "pointer" }}>
+              <summary>{currRetrainedData.unlearning.method}</summary>
+              <p style={{ height: "4px" }} />
+              <p>
+                <strong>Epochs</strong>: {currRetrainedData.unlearning.epochs}
+              </p>
+              <p>
+                <strong>Learning Rate</strong>:{" "}
+                {currRetrainedData.unlearning.learning_rate}
+              </p>
+              <p>
+                <strong>Batch Size</strong>:{" "}
+                {currRetrainedData.unlearning.batch_size}
+              </p>
+            </details>
+            <div>{currRetrainedData.defense}</div>
+            <TableCell value={retrainedUA === "0.000" ? 0 : retrainedUA} />
+            <TableCell value={retrainedRA === "0.000" ? 0 : retrainedRA} />
+            <TableCell value={retrainedTA === "0.000" ? 0 : retrainedTA} />
+            <TableCell value={currRetrainedData.MIA} />
             <div>0</div>
-            <div>{retrainData.model}</div>
-            <div>{retrainData.dataset}</div>
-            <div>{retrainData.training}</div>
-            <div>{retrainData.unlearning.method}</div>
-            <div>{retrainData.defense}</div>
-            <TableCell value={retrainData.unlearn_accuracy} />
-            <TableCell value={retrainData.remain_accuracy} />
-            <TableCell value={retrainData.test_accuracy} />
-            <TableCell value={retrainData.MIA} />
-            <div>0.0</div>
-            <div>{retrainData.RTE}</div>
+            <div>{currRetrainedData.RTE}</div>
+            <div>{currRetrainedData.mean_logits.toFixed(2)}</div>
           </div>
           {filteredOverview?.map((el, idx) => {
             const ua = Number((el.ua / 100).toFixed(3));
@@ -123,15 +126,28 @@ export default function PerformanceOverview({ height }: Props) {
                 <div>{idx + 1}</div>
                 <div>{el.model}</div>
                 <div>{el.dataset}</div>
-                <div>-</div>
-                <div>{el.unlearn}</div>
+                <div>{el.training}</div>
+                <details>
+                  <summary>{el.unlearning}</summary>
+                  <p style={{ height: "4px" }} />
+                  <p>
+                    <strong>Epochs</strong>: {el.epochs}
+                  </p>
+                  <p>
+                    <strong>Learning Rate</strong>: {el.learning_rate}
+                  </p>
+                  <p>
+                    <strong>Batch Size</strong>: {el.batch_size}
+                  </p>
+                </details>
                 <div>{el.defense}</div>
-                <TableCell value={ua} />
-                <TableCell value={ra} />
-                <TableCell value={ta} />
+                <TableCell value={ua === 0 ? 0 : ua} />
+                <TableCell value={ra === 0 ? 0 : ra} />
+                <TableCell value={ta === 0 ? 0 : ta} />
                 <TableCell value={el.mia} />
                 <div>{el.avg_gap}</div>
                 <div>{el.rte}</div>
+                <div>Yet</div>
               </div>
             );
           })}
