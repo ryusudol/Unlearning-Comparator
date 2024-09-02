@@ -2,11 +2,16 @@ import threading
 import asyncio
 import torch
 import torch.nn as nn
-
+import numpy as np
+import json
+import os
+import uuid
+import base64
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
-from app.utils.evaluation import evaluate_model
-from app.config.settings import UNLEARN_SEED
+from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
+from app.utils.visualization import compute_umap_embeddings
+from app.config.settings import UNLEARN_SEED, UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningInference(threading.Thread):
     def __init__(self, request, status, weights_path):
@@ -35,7 +40,7 @@ class UnlearningInference(threading.Thread):
         finally:
             if self.loop:
                 self.loop.close()
-
+        
     async def async_run(self):
         if self.stopped():
             return
@@ -43,7 +48,7 @@ class UnlearningInference(threading.Thread):
         print(f"Starting custom unlearning inference for class {self.request.forget_class}...")
         set_seed(UNLEARN_SEED)
         device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-        train_loader, test_loader, _, _ = get_data_loaders(128)
+        train_loader, test_loader, train_set, test_set = get_data_loaders(128)
         self.model = get_resnet18().to(device)
         self.model.load_state_dict(torch.load(self.weights_path, map_location=device))
         criterion = nn.CrossEntropyLoss()
@@ -64,30 +69,102 @@ class UnlearningInference(threading.Thread):
         if self.stopped():
             return
 
-        print(f"\nTrain Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
-        print("Train Class Accuracies:")
-        for i, acc in train_class_accuracies.items():
-            print(f"  Class {i}: {acc:.2f}%")
-
-        if self.stopped():
-            return
-
         # Evaluate on test set
         test_loss, test_accuracy, test_class_accuracies = await evaluate_model(self.model, test_loader, criterion, device)
         self.status.test_loss = test_loss
-        self.status.test_accuracy = (test_accuracy * 10 + (100 - 2 * test_class_accuracies[self.request.forget_class])) / 10.0
+        self.status.test_accuracy = (test_accuracy * 10.0 - test_class_accuracies[self.request.forget_class]) / 9.0
         self.status.test_class_accuracies = test_class_accuracies
         self.status.progress = 80
+
+        print("Train Class Accuracies:")
+        for i, acc in self.status.train_class_accuracies.items():
+            print(f"  Class {i}: {acc:.3f}")
+        print("Test Class Accuracies:")
+        for i, acc in self.status.test_class_accuracies.items():
+            print(f"  Class {i}: {acc:.3f}")
 
         if self.stopped():
             return
 
-        print(f"\nUnlearn Accuracy (UA): {self.status.unlearn_accuracy:.2f}%")
-        print(f"Remain Accuracy (RA): {self.status.remain_accuracy:.2f}%")
-        print(f"Test Accuracy (TA): {self.status.test_accuracy:.2f}%")
-        print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
-        print("Test Class Accuracies:")
-        for i, acc in test_class_accuracies.items():
-            print(f"  Class {i}: {acc:.2f}%")
+        # UMAP and activation calculation logic
+        logits = None
+        mean_logits = None
+        umap_embeddings = None
+        svg_files = None
+        if not self.status.cancel_requested and self.model is not None:
+            print("Getting data loaders for UMAP")
+            dataset = train_set if UMAP_DATASET == 'train' else test_set
+            subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+            subset = torch.utils.data.Subset(dataset, subset_indices)
+            subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
+            
+            print("Computing layer activations")
+            activations, predicted_labels, logits, mean_logits = await get_layer_activations_and_predictions(
+                model=self.model,
+                data_loader=subset_loader,
+                device=device,
+                forget_class=self.request.forget_class
+            )
+            self.status.progress = 90
 
+            print("Computing UMAP embeddings")
+            forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
+            umap_embeddings, svg_files = await compute_umap_embeddings(
+                activations, 
+                predicted_labels, 
+                forget_class=self.request.forget_class,
+                forget_labels=forget_labels
+            )
+            self.status.umap_embeddings = umap_embeddings
+            self.status.svg_files = svg_files
+            self.status.progress = 100
+
+            print("Custom Unlearning inference and visualization completed!")
+        else:
+            print("Custom Unlearning cancelled or model not available.")
+
+        # Encode SVG files
+        encoded_svg_files = {
+            f"{layer}": base64.b64encode(svg).decode('utf-8') 
+            for layer, svg in self.status.svg_files.items()
+        }
+
+        # Prepare results dictionary
+        results = {
+            "id": uuid.uuid4().hex[:4],
+            "forget_class": self.request.forget_class,
+            "model": "ResNet18",
+            "dataset": "CIFAR-10",
+            "training": "None",
+            "unlearning": {
+                "method": "Retrain",
+                "epochs": 30,
+                "batch_size": 128,
+                "learning_rate": 0.01,
+            },
+            "defense": "None",
+            "unlearn_accuracy": f"{self.status.unlearn_accuracy:.3f}",
+            "remain_accuracy": f"{self.status.remain_accuracy:.3f}",
+            "test_accuracy": f"{self.status.test_accuracy:.3f}",
+            "MIA": 0,
+            "RTE": 1480.0,
+            "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
+            "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
+            "logits": logits.tolist() if isinstance(logits, (np.ndarray, torch.Tensor)) else logits,
+            "mean_logits": float(mean_logits) if mean_logits is not None else None,
+            "embeddings": {k: v.tolist() if isinstance(v, (np.ndarray, torch.Tensor)) else v for k, v in umap_embeddings.items()},
+            "svg_files": encoded_svg_files,  # 레이어별로 구분된 Base64로 인코딩된 SVG 파일들
+        }
+
+        def json_serializable(obj):
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            raise TypeError(f"Type {type(obj)} not serializable")
+
+        # Save results to JSON file
+        os.makedirs('data', exist_ok=True)
+        with open(f'data/result_{results["id"]}.json', 'w') as f:
+            json.dump(results, f, indent=2, default=json_serializable)
+
+        print(f"Results saved to data/result_{results['id']}.json")
         print("Custom Unlearning inference completed!")

@@ -100,7 +100,7 @@ async def get_layer_activations_and_predictions(
     print(f"Max density: {max_density:.4f}")
     print(f"Logit value at max density: {logit_at_max_density:.4f}")
     
-    return activations, predictions #, max_density, max_logit
+    return activations, predictions, max_logits, max_logits.mean()
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
@@ -126,8 +126,11 @@ async def evaluate_model(model, data_loader, criterion, device):
                 class_correct[label] += c[i].item()
                 class_total[label] += 1
     
-    accuracy = 100. * correct / total
-    class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
+    accuracy = correct / total
+    class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
     avg_loss = total_loss / len(data_loader)
-
+    print(f"Total correct: {correct}, Total samples: {total}")
+    print(f"Overall accuracy: {accuracy:.3f}")
+    for i in range(10):
+        print(f"Class {i} correct: {class_correct[i]}, total: {class_total[i]}, accuracy: {class_accuracies[i]:.4f}")
     return avg_loss, accuracy, class_accuracies

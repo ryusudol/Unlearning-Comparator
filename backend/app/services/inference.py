@@ -83,7 +83,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         subset_loader = torch.utils.data.DataLoader(
             torch.utils.data.Subset(dataset, subset_indices),
             batch_size=UMAP_DATA_SIZE, shuffle=False)
-        activations, _ = await get_layer_activations_and_predictions(
+        activations, _, _, _ = await get_layer_activations_and_predictions(
             model, 
             subset_loader, 
             device

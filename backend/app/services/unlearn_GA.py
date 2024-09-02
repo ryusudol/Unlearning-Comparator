@@ -57,7 +57,7 @@ async def unlearning_GA(request, status, weights_path):
         subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
         
         print("\nComputing and saving UMAP embeddings...")
-        activations, predicted_labels = await get_layer_activations_and_predictions(
+        activations, predicted_labels, logits, mean_logits = await get_layer_activations_and_predictions(
             model=model,
             data_loader=subset_loader,
             device=device,

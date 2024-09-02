@@ -51,7 +51,7 @@ async def training(request, status):
         subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
         
         print("\nComputing and saving UMAP embeddings...")
-        activations, _ = await get_layer_activations_and_predictions(
+        activations, _, _, _ = await get_layer_activations_and_predictions(
             model, 
             subset_loader, 
             device
