@@ -159,7 +159,7 @@ export default function Training({ setTrainedModels }: TrainingProps) {
           </div>
         </div>
       )}
-      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[10px] left-[262px]">
+      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[14px] left-[262px]">
         {isRunning ? "Cancel" : "Run"}
       </Button>
     </form>

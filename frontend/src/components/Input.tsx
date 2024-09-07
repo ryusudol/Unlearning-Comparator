@@ -29,19 +29,23 @@ export default function MyInput({
   const name = labelName.toLowerCase().replaceAll(" ", "_");
 
   return (
-    <div className="flex justify-between items-center ml-[50px]">
-      <label className="text-[14px]" htmlFor={label}>
+    <div className="flex justify-between items-center ml-[50px] mb-[3px]">
+      <label className="text-[15px]" htmlFor={label}>
         {label}
       </label>
       {optionData ? (
         <Select onOpenChange={setOpen} name={name} disabled={disabled}>
           <SelectTrigger
             id={label}
-            className="w-[130px] h-[18px] bg-white text-black pl-2 pr-1"
+            className="w-[130px] h-[21px] bg-white text-black pl-2 pr-1 text-[13px]"
           >
             <SelectValue
               placeholder={
-                defaultValue ? defaultValue.toString().slice(0, 13) + "..." : ""
+                defaultValue
+                  ? defaultValue.toString().length > 13
+                    ? defaultValue.toString().slice(0, 13) + "..."
+                    : defaultValue
+                  : ""
               }
             />
           </SelectTrigger>
@@ -49,7 +53,7 @@ export default function MyInput({
             {optionData.map((datum, idx) => {
               const data = datum.slice(0, 13) + "...";
               return (
-                <SelectItem key={idx} value={datum} className="text-[12px]">
+                <SelectItem key={idx} value={datum} className="text-[13px]">
                   {open ? datum : data}
                 </SelectItem>
               );
@@ -60,7 +64,7 @@ export default function MyInput({
         <Input
           type="number"
           id={label}
-          className="w-[130px] h-[18px] px-2 text-[12px] overflow-ellipsis whitespace-nowrap"
+          className="w-[130px] h-[21px] px-2 text-[13px] overflow-ellipsis whitespace-nowrap"
           name={name}
           defaultValue={defaultValue}
           placeholder="Please enter a value"

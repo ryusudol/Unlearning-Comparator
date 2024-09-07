@@ -12,19 +12,19 @@ interface Props {
 
 export default function CustomInput({ mode, handleCustomFileUpload }: Props) {
   return (
-    <div className="w-full flex justify-between items-center mb-[3px]">
+    <div className="w-full flex justify-between items-center">
       <div className="flex justify-center items-center">
         <FontAwesomeIcon
           className="w-[11px] mr-1"
           icon={mode ? faCircleCheck : faCircle}
         />
-        <span className="text-[14px]">Custom Model</span>
+        <label>Custom Model</label>
       </div>
       <Input
         onChange={handleCustomFileUpload}
         type="file"
         id="custom-training"
-        className="w-[130px] h-[18px] text-[12px] cursor-pointer file:hidden py-0 px-2"
+        className="w-[130px] h-[21px] text-[13px] cursor-pointer file:hidden py-0 px-2"
       />
     </div>
   );

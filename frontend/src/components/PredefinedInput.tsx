@@ -29,14 +29,12 @@ export default function PredefinedInput({
           className="w-[11px] mr-1"
           icon={mode ? faCircle : faCircleCheck}
         />
-        <label className="font-medium">
-          Predefined {optionData ? "Method" : "Setting"}
-        </label>
+        <label>Predefined {optionData ? "Method" : "Setting"}</label>
       </div>
       {optionData && (
         // onValueChange -> handleMethodSelection 함수 붙이기
         <Select name="method">
-          <SelectTrigger className="w-[130px] h-[18px] px-1 whitespace-nowrap overflow-ellipsis focus:outline-none bg-white text-black">
+          <SelectTrigger className="w-[130px] h-[20px] px-1 whitespace-nowrap overflow-ellipsis focus:outline-none bg-white text-black">
             <SelectValue placeholder={optionData[0]} />
           </SelectTrigger>
           <SelectContent className="bg-white text-black">

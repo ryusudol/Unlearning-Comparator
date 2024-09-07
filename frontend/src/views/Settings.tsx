@@ -27,16 +27,16 @@ export default function Settings({ height }: Props) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[330px] relative px-[6px] py-[3px] flex flex-col justify-start items-start border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[330px] relative p-[6px] flex flex-col justify-start items-start border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
-      <div className="flex justify-between">
+      <div className="w-full flex justify-between">
         <div className="flex items-center">
           <SettingsIcon />
           <h5 className="font-semibold ml-[3px]">Settings</h5>
         </div>
         <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
       </div>
-      <div className="w-full h-[226px] py-[6px] px-[10px] rounded-[6px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
+      <div className="w-full h-[248px] py-[6px] px-[10px] rounded-[6px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
         {configMode === 0 ? (
           <Training setTrainedModels={setTrainedModels} />
         ) : configMode === 1 ? (

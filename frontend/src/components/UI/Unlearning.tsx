@@ -5,7 +5,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import styles from "./Unlearning.module.css";
 import { Button } from "./button";
 
 import Input from "../Input";
@@ -307,11 +306,7 @@ export default function Unlearning({
         />
       ) : (
         <div>
-          <div
-            id="predefined"
-            onClick={handleSectionClick}
-            className={styles.predefined}
-          >
+          <div id="predefined" onClick={handleSectionClick}>
             <PredefinedInput
               mode={mode}
               handleMethodSelection={handleUnlearningMethodSelection}
@@ -359,7 +354,7 @@ export default function Unlearning({
           </div>
         </div>
       )}
-      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[10px] left-[262px]">
+      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[14px] left-[262px]">
         {isRunning ? "Cancel" : "Run"}
       </Button>
     </form>

@@ -10,8 +10,8 @@ import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { OverviewContext } from "../store/overview-context";
 
-const UPPER_HEIGHT = 264;
-const LOWER_HEIGHT = 750;
+const UPPER_HEIGHT = 290;
+const LOWER_HEIGHT = 720;
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
