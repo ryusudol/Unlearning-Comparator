@@ -47,8 +47,8 @@ export default function Header() {
             <SelectTrigger className="w-[128px] h-6 bg-white text-black">
               <SelectValue placeholder="Select a forget class" />
             </SelectTrigger>
-            <SelectContent className="bg-white text-black">
-              {["231a"].map((el, idx) => (
+            <SelectContent defaultValue="231a" className="bg-white text-black">
+              {["231a", "7g9b", "6k3a", "j30a"].map((el, idx) => (
                 <SelectItem className="font-black" key={idx} value={el}>
                   {el}
                 </SelectItem>
