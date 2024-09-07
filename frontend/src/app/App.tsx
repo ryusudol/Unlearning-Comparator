@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import Header from "../components/Header";
 import Settings from "../views/Settings";
 import PerformanceOverview from "../views/PerformanceOverview";
-import PerformanceMetrics from "../views/PerformanceMetrics";
+import Accuracies from "../views/Accuracies";
 import Embeddings from "../views/Embeddings";
 import Privacies from "../views/Privacies";
 import { BaselineContext } from "../store/baseline-context";
@@ -42,7 +42,7 @@ export default function App() {
       <div className="flex">
         <Settings height={UPPER_HEIGHT} />
         <PerformanceOverview height={UPPER_HEIGHT} />
-        <PerformanceMetrics height={UPPER_HEIGHT} />
+        <Accuracies height={UPPER_HEIGHT} />
       </div>
       <div className="flex">
         <Embeddings height={LOWER_HEIGHT} />

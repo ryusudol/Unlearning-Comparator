@@ -58,9 +58,7 @@ export default function DataTable<TData, TValue>({
       <div className="flex items-center my-1">
         <Input
           placeholder="Filter forget class..."
-          value={
-            (table.getColumn("forgetClass")?.getFilterValue() as string) ?? ""
-          }
+          value={(table.getColumn("forget")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("forgetClass")?.setFilterValue(event.target.value)
           }

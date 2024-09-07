@@ -7,7 +7,7 @@ export type Overview = {
   id: string;
   model: string;
   dataset: string;
-  forgetClass: string;
+  forget: string;
   training: string;
   unlearning: string;
   defense: string;
@@ -34,15 +34,16 @@ export const columns: ColumnDef<Overview>[] = [
     header: "Dataset",
   },
   {
-    accessorKey: "forgetClass",
-    header: "Forget Class",
+    accessorKey: "forget",
+    header: "Forget",
   },
   {
     accessorKey: "training",
     header: "Training",
     cell: ({ row }) => {
-      const value = row.getValue("training");
-      return <div className="w-[95px]">{value as string}</div>;
+      const value = row.getValue("training") as string;
+      const formatted = value.length > 13 ? value.slice(0, 13) + "..." : value;
+      return <div className="w-[90px]">{formatted}</div>;
     },
   },
   {
@@ -50,7 +51,7 @@ export const columns: ColumnDef<Overview>[] = [
     header: "Unlearning",
     cell: ({ row }) => {
       const value = row.getValue("unlearning");
-      return <div className="w-[95px]">{value as string}</div>;
+      return <div className="w-[90px]">{value as string}</div>;
     },
   },
   {
@@ -58,7 +59,7 @@ export const columns: ColumnDef<Overview>[] = [
     header: "Defense",
     cell: ({ row }) => {
       const value = row.getValue("defense");
-      return <div className="w-[95px]">{value as string}</div>;
+      return <div className="w-[90px]">{value as string}</div>;
     },
   },
   {
