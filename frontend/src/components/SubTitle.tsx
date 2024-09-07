@@ -1,5 +1,3 @@
-import styles from "./SubTitle.module.css";
-
 type PropsType = {
   subtitle: string;
   fontSize?: number;
@@ -7,7 +5,10 @@ type PropsType = {
 
 export default function SubTitle({ subtitle, fontSize }: PropsType) {
   return (
-    <p className={styles.subtitle} style={{ fontSize: fontSize }}>
+    <p
+      className="font-[500] mb-[3px] text-center"
+      style={{ fontSize: fontSize }}
+    >
       {subtitle}
     </p>
   );

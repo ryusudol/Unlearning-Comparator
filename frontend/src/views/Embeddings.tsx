@@ -5,16 +5,14 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import styles from "./Embeddings.module.css";
 
-import Title from "../components/Title";
-import ContentBox from "../components/ContentBox";
 import SvgViewer from "../components/UI/SvgViewer";
 import { retrainedData } from "../constants/gt";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { BaselineContext } from "../store/baseline-context";
 import { modifySvg } from "../util";
+import { ChartScatterIcon } from "../components/UI/icons";
 
 interface Props {
   height: number;
@@ -68,27 +66,28 @@ export default function Embeddings({ height }: Props) {
   };
 
   return (
-    <section className={styles.embeddings}>
-      <Title title="Embeddings" />
-      <ContentBox height={height}>
-        <div className={styles["viewers-wrapper"]}>
-          <SvgViewer
-            mode="r"
-            svgs={retrainSvgs}
-            handleThumbnailClick={handleThumbnailClick}
-            modifiedSvgs={edittedRetrainSvgs}
-            selectedSvgId={retrainFocus}
-          />
-          <div className={styles.divider} />
-          <SvgViewer
-            mode="u"
-            svgs={unlearnSvgs}
-            handleThumbnailClick={handleThumbnailClick}
-            modifiedSvgs={edittedUnlearnSvgs}
-            selectedSvgId={unlearnFocus}
-          />
-        </div>
-      </ContentBox>
+    <section className="w-[1440px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
+      <div className="flex items-center">
+        <ChartScatterIcon />
+        <h5 className="font-semibold ml-[3px]">Embeddings</h5>
+      </div>
+      <div className="w-full flex justify-center items-center">
+        <SvgViewer
+          mode="r"
+          svgs={retrainSvgs}
+          handleThumbnailClick={handleThumbnailClick}
+          modifiedSvgs={edittedRetrainSvgs}
+          selectedSvgId={retrainFocus}
+        />
+        <div className="h-[700px] w-[1.4px] bg-[#dfdfdf] mx-[30px]" />
+        <SvgViewer
+          mode="u"
+          svgs={unlearnSvgs}
+          handleThumbnailClick={handleThumbnailClick}
+          modifiedSvgs={edittedUnlearnSvgs}
+          selectedSvgId={unlearnFocus}
+        />
+      </div>
     </section>
   );
 }

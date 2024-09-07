@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
+import { Button } from "./button";
 
 import Input from "../Input";
 import PredefinedInput from "../PredefinedInput";
 import CustomInput from "../CustomInput";
-import RunButton from "../RunButton";
 import OperationStatus from "../OperationStatus";
 import { DEFENSE_METHODS } from "../../constants/defense";
 import { DefenseConfigurationData } from "../../types/settings";
@@ -57,22 +57,22 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
               labelName="Unlearned Model"
               defaultValue={unlearnedModels[0]}
               optionData={unlearnedModels}
-              type="select"
             />
-            <Input labelName="Parameter 1" defaultValue={0} type="number" />
-            <Input labelName="Parameter 2" defaultValue={0} type="number" />
-            <Input labelName="Parameter 3" defaultValue={0} type="number" />
+            <Input labelName="Parameter 1" defaultValue={0} />
+            <Input labelName="Parameter 2" defaultValue={0} />
+            <Input labelName="Parameter 3" defaultValue={0} />
           </div>
           <div id="custom" onClick={handleSectionClick}>
             <CustomInput
               mode={mode}
-              customFile={customFile}
               handleCustomFileUpload={handleCustomFileUpload}
             />
           </div>
         </div>
       )}
-      <RunButton isRunning={isRunning} />
+      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[14px] left-[262px]">
+        {isRunning ? "Cancel" : "Run"}
+      </Button>
     </form>
   );
 }

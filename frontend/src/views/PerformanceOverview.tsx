@@ -1,26 +1,145 @@
 import { useContext, useEffect } from "react";
 import styles from "./PerformanceOverview.module.css";
 
-import ForgetClassSelector from "../components/ForgetClassSelector";
-import Title from "../components/Title";
-import ContentBox from "../components/ContentBox";
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { retrainedData } from "../constants/gt";
 import { getColorForValue } from "../util";
+import { SettingsIcon } from "../components/UI/icons";
+import DataTable from "../components/DataTable";
+import { Overview, columns } from "../components/Columns";
 
-const TableCell = ({ value }: { value: number | string }) => {
-  return (
-    <div
-      style={{
-        backgroundColor: getColorForValue(Number(value)),
-      }}
-    >
-      {value}
-    </div>
-  );
-};
+export const payments: Overview[] = [
+  {
+    id: "231a",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "0",
+    training: "-",
+    unlearning: "Retrain",
+    defense: "-",
+    ua: 0.977,
+    ra: 1.0,
+    ta: 0.936,
+    mia: 31.92,
+    avgGap: 0,
+    rte: 1480.1,
+    logits: 22.49,
+  },
+  {
+    id: "231b",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "1",
+    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    unlearning: "Random-Label",
+    defense: "-",
+    ua: 0.012,
+    ra: 0.948,
+    ta: 0.998,
+    mia: 31.92,
+    avgGap: 1.212,
+    rte: 1460.1,
+    logits: 21.77,
+  },
+  {
+    id: "231c",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "0",
+    training: "-",
+    unlearning: "Retrain",
+    defense: "-",
+    ua: 0.977,
+    ra: 1.0,
+    ta: 0.936,
+    mia: 31.92,
+    avgGap: 0,
+    rte: 1480.1,
+    logits: 22.49,
+  },
+  {
+    id: "231d",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "1",
+    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    unlearning: "Random-Label",
+    defense: "-",
+    ua: 0.012,
+    ra: 0.948,
+    ta: 0.998,
+    mia: 31.92,
+    avgGap: 1.212,
+    rte: 1460.1,
+    logits: 21.77,
+  },
+  {
+    id: "231c",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "0",
+    training: "-",
+    unlearning: "Retrain",
+    defense: "-",
+    ua: 0.977,
+    ra: 1.0,
+    ta: 0.936,
+    mia: 31.92,
+    avgGap: 0,
+    rte: 1480.1,
+    logits: 22.49,
+  },
+  {
+    id: "231a",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "0",
+    training: "-",
+    unlearning: "Retrain",
+    defense: "-",
+    ua: 0.977,
+    ra: 1.0,
+    ta: 0.936,
+    mia: 31.92,
+    avgGap: 0,
+    rte: 1480.1,
+    logits: 22.49,
+  },
+  {
+    id: "231d",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "1",
+    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    unlearning: "Random-Label",
+    defense: "-",
+    ua: 0.012,
+    ra: 0.948,
+    ta: 0.998,
+    mia: 31.92,
+    avgGap: 1.212,
+    rte: 1460.1,
+    logits: 21.77,
+  },
+  {
+    id: "231b",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forgetClass: "1",
+    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    unlearning: "Random-Label",
+    defense: "-",
+    ua: 0.012,
+    ra: 0.948,
+    ta: 0.998,
+    mia: 31.92,
+    avgGap: 1.212,
+    rte: 1460.1,
+    logits: 21.77,
+  },
+];
 
 interface Props {
   height: number;
@@ -50,109 +169,26 @@ export default function PerformanceOverview({ height }: Props) {
   const retrainedTA = currRetrainedData.test_accuracy;
 
   return (
-    <section className={styles["performance-overview"]}>
-      <Title title="Performance Overview" />
-      <ContentBox height={height}>
-        <div className={styles.top}>
-          <ForgetClassSelector width={70} isTextShow={false} />
-          <div className={styles.legend}>
-            <div className={styles["legend-title"]}>Acc</div>
-            <div className={styles.bar}>
-              <div className={styles.gradient}></div>
-              <div className={styles["legend-values"]}>
-                <span>0</span>
-                <span>1</span>
-              </div>
+    <section style={{ height: `${height}px` }} className="w-[1110px] p-[6px]">
+      <div className={styles.top}>
+        <div className="flex items-center">
+          <SettingsIcon />
+          <h5 className="font-semibold ml-[3px]">Overview</h5>
+        </div>
+        {/* <div className={styles.legend}>
+          <div className={styles["legend-title"]}>Acc</div>
+          <div className={styles.bar}>
+            <div className={styles.gradient}></div>
+            <div className={styles["legend-values"]}>
+              <span>0</span>
+              <span>1</span>
             </div>
           </div>
-        </div>
-        <div className={styles.table}>
-          <div className={styles["table-header"]}>
-            <div>ID</div>
-            <div>Model</div>
-            <div>Dataset</div>
-            <div>Training</div>
-            <div>Unlearning</div>
-            <div>Defense</div>
-            <div>UA</div>
-            <div>RA</div>
-            <div>TA</div>
-            <div>MIA</div>
-            <div>Avg. Gap</div>
-            <div>RTE</div>
-            <div>Logit</div>
-          </div>
-          <div className={`${styles["table-row"]} ${styles["first-row"]}`}>
-            <div>{currRetrainedData.id}</div>
-            <div>{currRetrainedData.model}</div>
-            <div>{currRetrainedData.dataset}</div>
-            <div>{currRetrainedData.training}</div>
-            <details style={{ cursor: "pointer" }}>
-              <summary>{currRetrainedData.unlearning.method}</summary>
-              <p style={{ height: "4px" }} />
-              <p>
-                <strong>Epochs</strong>: {currRetrainedData.unlearning.epochs}
-              </p>
-              <p>
-                <strong>Learning Rate</strong>:{" "}
-                {currRetrainedData.unlearning.learning_rate}
-              </p>
-              <p>
-                <strong>Batch Size</strong>:{" "}
-                {currRetrainedData.unlearning.batch_size}
-              </p>
-            </details>
-            <div>{currRetrainedData.defense}</div>
-            <TableCell value={retrainedUA === "0.000" ? 0 : retrainedUA} />
-            <TableCell value={retrainedRA === "0.000" ? 0 : retrainedRA} />
-            <TableCell value={retrainedTA === "0.000" ? 0 : retrainedTA} />
-            <TableCell value={currRetrainedData.MIA} />
-            <div>0</div>
-            <div>{currRetrainedData.RTE.toFixed(1)}</div>
-            <div>{currRetrainedData.mean_logits.toFixed(2)}</div>
-          </div>
-          {filteredOverview?.map((el, idx) => {
-            const ua = Number((el.ua / 100).toFixed(3));
-            const ra = Number((el.ra / 100).toFixed(3));
-            const ta = Number((el.ta / 100).toFixed(3));
-            return (
-              <div
-                key={idx}
-                onClick={() => handleTableRowClick(idx)}
-                className={`${styles["table-row"]} ${
-                  selectedID === idx ? styles.selected : ""
-                }`}
-              >
-                <div>{idx + 1}</div>
-                <div>{el.model}</div>
-                <div>{el.dataset}</div>
-                <div>{el.training}</div>
-                <details>
-                  <summary>{el.unlearning}</summary>
-                  <p style={{ height: "4px" }} />
-                  <p>
-                    <strong>Epochs</strong>: {el.epochs}
-                  </p>
-                  <p>
-                    <strong>Learning Rate</strong>: {el.learning_rate}
-                  </p>
-                  <p>
-                    <strong>Batch Size</strong>: {el.batch_size}
-                  </p>
-                </details>
-                <div>{el.defense}</div>
-                <TableCell value={ua === 0 ? 0 : ua} />
-                <TableCell value={ra === 0 ? 0 : ra} />
-                <TableCell value={ta === 0 ? 0 : ta} />
-                <TableCell value={el.mia} />
-                <div>{el.avg_gap}</div>
-                <div>{el.rte}</div>
-                <div>Yet</div>
-              </div>
-            );
-          })}
-        </div>
-      </ContentBox>
+        </div> */}
+      </div>
+      <div className="py-1">
+        <DataTable columns={columns} data={payments} />
+      </div>
     </section>
   );
 }

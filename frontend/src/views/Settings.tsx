@@ -1,13 +1,11 @@
 import { useState } from "react";
-import styles from "./Settings.module.css";
 
-import Title from "../components/Title";
-import ContentBox from "../components/ContentBox";
 import ConfigSelector from "../components/UI/ConfigSelector";
 import Training from "../components/UI/Training";
 import Unlearning from "../components/UI/Unlearning";
 import Defense from "../components/UI/Defense";
 import { useFetchModels } from "../hooks/useFetchModels";
+import { SettingsIcon } from "../components/UI/icons";
 
 type Mode = 0 | 1 | 2;
 
@@ -27,10 +25,18 @@ export default function Settings({ height }: Props) {
   };
 
   return (
-    <section className={styles.settings}>
-      <Title title="Settings" />
-      <ContentBox height={height}>
+    <section
+      style={{ height: `${height}px` }}
+      className="w-[330px] relative p-[6px] flex flex-col justify-start items-start border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+    >
+      <div className="w-full flex justify-between">
+        <div className="flex items-center">
+          <SettingsIcon />
+          <h5 className="font-semibold ml-[3px]">Settings</h5>
+        </div>
         <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
+      </div>
+      <div className="w-full h-[248px] py-[6px] px-[10px] rounded-[6px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
         {configMode === 0 ? (
           <Training setTrainedModels={setTrainedModels} />
         ) : configMode === 1 ? (
@@ -41,7 +47,7 @@ export default function Settings({ height }: Props) {
         ) : (
           <Defense unlearnedModels={unlearnedModels} />
         )}
-      </ContentBox>
+      </div>
     </section>
   );
 }
