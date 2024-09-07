@@ -1,7 +1,6 @@
-import styles from "./Privacies.module.css";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import ContentBox from "../components/ContentBox";
+import { SecurityCheckIcon } from "../components/UI/icons";
 import {
   ChartConfig,
   ChartContainer,
@@ -37,62 +36,57 @@ const chartConfig = {
 
 export default function Privacies({ height }: Props) {
   return (
-    <section className={styles["privacy-attacks"]}>
-      <ContentBox height={height}>
-        <div className={styles.wrapper}>
-          <div className={styles["content-header"]}>
-            <ChartContainer
-              config={chartConfig}
-              className="w-[220px] h-[200px]"
-            >
-              <AreaChart
-                accessibilityLayer
-                data={chartData}
-                margin={{
-                  left: 12,
-                  right: 12,
-                }}
-              >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value) => value.slice(0, 3)}
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dot" />}
-                />
-                <Area
-                  dataKey="mobile"
-                  type="natural"
-                  fill="var(--color-mobile)"
-                  fillOpacity={0.4}
-                  stroke="var(--color-mobile)"
-                  stackId="a"
-                />
-                <Area
-                  dataKey="desktop"
-                  type="natural"
-                  fill="var(--color-desktop)"
-                  fillOpacity={0.4}
-                  stroke="var(--color-desktop)"
-                  stackId="a"
-                />
-                <ChartLegend content={<ChartLegendContent />} />
-              </AreaChart>
-            </ChartContainer>
-            <img className={styles["mia-img"]} src="/mia.png" alt="mia img" />
-          </div>
-          <img
-            className={styles["attack-img"]}
-            src="/attack.png"
-            alt="attack img"
-          />
+    <section className="w-[460px] p-[6px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
+      <div className="w-full flex flex-col justify-center">
+        <div className="flex items-center">
+          <SecurityCheckIcon />
+          <h5 className="font-semibold ml-[3px]">Privacies</h5>
         </div>
-      </ContentBox>
+        <div className="w-full flex justify-center items-center mb-[5px]">
+          <ChartContainer config={chartConfig} className="w-[220px] h-[200px]">
+            <AreaChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                left: 12,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => value.slice(0, 3)}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              <Area
+                dataKey="mobile"
+                type="natural"
+                fill="var(--color-mobile)"
+                fillOpacity={0.4}
+                stroke="var(--color-mobile)"
+                stackId="a"
+              />
+              <Area
+                dataKey="desktop"
+                type="natural"
+                fill="var(--color-desktop)"
+                fillOpacity={0.4}
+                stroke="var(--color-desktop)"
+                stackId="a"
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+            </AreaChart>
+          </ChartContainer>
+          <img className="w-[210px]" src="/mia.png" alt="mia img" />
+        </div>
+        <img className="w-[345px]" src="/attack.png" alt="attack img" />
+      </div>
     </section>
   );
 }
