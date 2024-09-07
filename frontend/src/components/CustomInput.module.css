@@ -1,0 +1,46 @@
+.wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.icon {
+  width: 11px;
+  margin-right: 4px;
+}
+
+.label-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.label-wrapper span {
+  font-size: var(--select-font-size);
+}
+
+.upload {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #efefef;
+  width: 120px;
+  height: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0px 4px;
+  margin-right: 4px;
+}
+
+.upload span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.wrapper input {
+  display: none;
+}

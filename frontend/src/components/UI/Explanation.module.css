@@ -1,0 +1,10 @@
+.explanation {
+  width: 100%;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bold {
+  font-weight: bold;
+}

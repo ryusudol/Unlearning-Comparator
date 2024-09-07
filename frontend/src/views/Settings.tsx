@@ -1,38 +1,47 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import styles from "./Settings.module.css";
 
 import Title from "../components/Title";
-import TrainingConfiguration from "../components/TrainingConfiguration";
-import UnlearningConfiguration from "../components/UnlearningConfiguration";
-import DefenseConfiguration from "../components/DefenseConfiguration";
+import ContentBox from "../components/ContentBox";
+import ConfigSelector from "../components/UI/ConfigSelector";
+import Training from "../components/UI/Training";
+import Unlearning from "../components/UI/Unlearning";
+import Defense from "../components/UI/Defense";
+import { useFetchModels } from "../hooks/useFetchModels";
 
-const API_URL = "http://localhost:8000";
+type Mode = 0 | 1 | 2;
 
-export default function Settings() {
+interface Props {
+  height: number;
+}
+
+export default function Settings({ height }: Props) {
+  const [configMode, setConfigMode] = useState<Mode>(0); // 0: Training, 1: Unlearning, 2:Defense
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
+  const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
-  useEffect(() => {
-    const func = async () => {
-      try {
-        const res = await fetch(`${API_URL}/trained_models`);
-        if (!res.ok) {
-          alert("Error occurred while fetching trained models.");
-          return;
-        }
-        const json = await res.json();
-        setTrainedModels(json);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    func();
-  }, []);
+  useFetchModels(setTrainedModels, "trained_models");
+
+  const handleConfigModeChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setConfigMode(+e.currentTarget.id as Mode);
+  };
 
   return (
-    <section>
+    <section className={styles.settings}>
       <Title title="Settings" />
-      <TrainingConfiguration setTrainedModels={setTrainedModels} />
-      <UnlearningConfiguration trainedModels={trainedModels} />
-      <DefenseConfiguration />
+      <ContentBox height={height}>
+        <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
+        {configMode === 0 ? (
+          <Training setTrainedModels={setTrainedModels} />
+        ) : configMode === 1 ? (
+          <Unlearning
+            trainedModels={trainedModels}
+            setUnlearnedModels={setUnlearnedModels}
+          />
+        ) : (
+          <Defense unlearnedModels={unlearnedModels} />
+        )}
+      </ContentBox>
     </section>
   );
 }

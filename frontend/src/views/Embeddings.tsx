@@ -1,176 +1,94 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import styles from "./Embeddings.module.css";
 
 import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
-import SubTitle from "../components/SubTitle";
-import { SvgsState } from "../types/embeddings";
-import { svgsActions } from "../store/svgs";
+import SvgViewer from "../components/UI/SvgViewer";
+import { retrainedData } from "../constants/gt";
+import { OverviewContext } from "../store/overview-context";
+import { SelectedIDContext } from "../store/selected-id-context";
+import { BaselineContext } from "../store/baseline-context";
+import { modifySvg } from "../util";
 
-export default function Settings() {
-  const dispatch = useDispatch();
+interface Props {
+  height: number;
+}
 
-  const originalSvgs = useSelector(
-    (state: SvgsState) => state.svgs.originalSvgs
-  );
-  const unlearnedSvgs = useSelector(
-    (state: SvgsState) => state.svgs.unlearnedSvgs
+export default function Embeddings({ height }: Props) {
+  const { overview } = useContext(OverviewContext);
+  const { selectedID } = useContext(SelectedIDContext);
+  const { baseline } = useContext(BaselineContext);
+
+  const [edittedRetrainSvgs, setEdittedRetrainSvgs] = useState<string[]>([]);
+  const [edittedUnlearnSvgs, setEdittedUnlearnSvgs] = useState<string[]>([]);
+  const [retrainFocus, setRetrainFocus] = useState<number | undefined>(4);
+  const [unlearnFocus, setUnlearnFocus] = useState<number | undefined>(4);
+
+  const currOverview = overview.filter(
+    (item) => item.forget_class === baseline.toString()
   );
 
-  const [modifiedOriginalSvgs, setModifiedOriginalSvgs] = useState<string[]>(
-    []
+  const retrainByteSvgs = useMemo(
+    () => Object.values(retrainedData[baseline].svg_files),
+    [baseline]
   );
-  const [modifiedUnlearnedSvgs, setModifiedUnlearnedSvgs] = useState<string[]>(
-    []
+  const unlearnSvgs = useMemo(
+    () => currOverview[selectedID]?.unlearn_svgs || [],
+    [currOverview, selectedID]
   );
-  const [selectedOriginalId, setSelectedOriginalId] = useState<
-    number | undefined
-  >();
-  const [selectedUnlearnedId, setSelectedUnlearnedId] = useState<
-    number | undefined
-  >();
+
+  const decoder = useCallback(
+    () => retrainByteSvgs.slice(0, 4).map(atob),
+    [retrainByteSvgs]
+  );
+  const retrainSvgs = useMemo(() => decoder(), [decoder]);
 
   useEffect(() => {
-    dispatch(svgsActions.retrieveOriginalSvgs());
-    dispatch(svgsActions.retrieveUnlearnedSvgs());
-  }, [dispatch]);
+    setEdittedRetrainSvgs(retrainSvgs.map(modifySvg) as string[]);
+    setEdittedUnlearnSvgs(
+      overview[selectedID]?.unlearn_svgs.map(modifySvg) as string[]
+    );
 
-  useEffect(() => {
-    const modifySvg = (svg: string) => {
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(svg, "image/svg+xml");
-      const legend = svgDoc.getElementById("legend_1");
-      if (!legend || !legend.parentNode) return;
-      legend.parentNode.removeChild(legend);
-      return new XMLSerializer().serializeToString(svgDoc);
-    };
-    const modifiedOriginalSvgs = originalSvgs.map(modifySvg) as string[];
-    const modifiedUnlearnedSvgs = unlearnedSvgs.map(modifySvg) as string[];
-    setModifiedOriginalSvgs(modifiedOriginalSvgs);
-    setModifiedUnlearnedSvgs(modifiedUnlearnedSvgs);
-    setSelectedOriginalId(originalSvgs ? 4 : undefined);
-    setSelectedUnlearnedId(unlearnedSvgs ? 4 : undefined);
-  }, [originalSvgs, unlearnedSvgs]);
-
-  const createMarkup = (svg: string) => {
-    return { __html: svg };
-  };
+    setRetrainFocus(retrainSvgs ? 4 : undefined);
+    setUnlearnFocus(unlearnSvgs ? 4 : undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleThumbnailClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
     const idNum = +id.split("-")[1];
-    if (id.includes("o")) setSelectedOriginalId(idNum);
-    else if (id.includes("u")) setSelectedUnlearnedId(idNum);
+    if (id.includes("r")) setRetrainFocus(idNum);
+    else if (id.includes("u")) setUnlearnFocus(idNum);
   };
 
   return (
-    <section>
+    <section className={styles.embeddings}>
       <Title title="Embeddings" />
-      <div className={styles.section}>
-        <ContentBox height={495}>
-          <div className={styles.wrapper}>
-            <SubTitle subtitle="Original Model" />
-            {originalSvgs && (
-              <div className={styles["content-wrapper"]}>
-                <div className={styles["svg-wrapper"]}>
-                  <div
-                    id="o-1"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[0]
-                    )}
-                  />
-                  <div
-                    id="o-2"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[1]
-                    )}
-                  />
-                  <div
-                    id="o-3"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[2]
-                    )}
-                  />
-                  <div
-                    id="o-4"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedOriginalSvgs[3]
-                    )}
-                  />
-                </div>
-                {selectedOriginalId && (
-                  <div
-                    className={styles["selected-svg"]}
-                    dangerouslySetInnerHTML={createMarkup(
-                      originalSvgs[selectedOriginalId - 1]
-                    )}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </ContentBox>
-        <ContentBox height={495}>
-          <div className={styles.wrapper}>
-            <SubTitle subtitle="Unlearned Model" />
-            {unlearnedSvgs && (
-              <div className={styles["content-wrapper"]}>
-                <div className={styles["svg-wrapper"]}>
-                  <div
-                    id="u-1"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[0]
-                    )}
-                  />
-                  <div
-                    id="u-2"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[1]
-                    )}
-                  />
-                  <div
-                    id="u-3"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[2]
-                    )}
-                  />
-                  <div
-                    id="u-4"
-                    onClick={handleThumbnailClick}
-                    className={styles.svg}
-                    dangerouslySetInnerHTML={createMarkup(
-                      modifiedUnlearnedSvgs[3]
-                    )}
-                  />
-                </div>
-                {selectedUnlearnedId && (
-                  <div
-                    className={styles["selected-svg"]}
-                    dangerouslySetInnerHTML={createMarkup(
-                      unlearnedSvgs[selectedUnlearnedId - 1]
-                    )}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </ContentBox>
-      </div>
+      <ContentBox height={height}>
+        <div className={styles["viewers-wrapper"]}>
+          <SvgViewer
+            mode="r"
+            svgs={retrainSvgs}
+            handleThumbnailClick={handleThumbnailClick}
+            modifiedSvgs={edittedRetrainSvgs}
+            selectedSvgId={retrainFocus}
+          />
+          <div className={styles.divider} />
+          <SvgViewer
+            mode="u"
+            svgs={unlearnSvgs}
+            handleThumbnailClick={handleThumbnailClick}
+            modifiedSvgs={edittedUnlearnSvgs}
+            selectedSvgId={unlearnFocus}
+          />
+        </div>
+      </ContentBox>
     </section>
   );
 }

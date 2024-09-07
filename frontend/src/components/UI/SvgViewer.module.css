@@ -1,0 +1,59 @@
+.wrapper {
+  width: 540px;
+  height: 620px;
+}
+
+.header {
+  width: 105%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 2;
+  margin-top: 6px;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.thumbnails {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.thumbnail svg {
+  border: 1px solid var(--title-bg-color);
+  width: 50px;
+  height: 50px;
+  scale: 1;
+  cursor: pointer;
+}
+
+.thumbnail svg:hover {
+  scale: 1.1;
+}
+
+.selected-thumbnail {
+  z-index: 10;
+}
+
+.selected-thumbnail svg {
+  border: 1px solid #bbbbbb;
+  width: 50px;
+  height: 50px;
+  scale: 1;
+  cursor: pointer;
+  scale: 1.18;
+}
+
+.selected-svg svg {
+  position: relative;
+  bottom: 36px;
+  width: 600px;
+  height: 616px;
+}

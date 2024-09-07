@@ -48,20 +48,20 @@ class UnlearningStatus:
         self.current_epoch = 0
         self.total_epochs = 0
         self.current_loss = 0
-        self.best_loss = 9999.99
         self.current_accuracy = 0
-        self.best_accuracy = 0
         self.test_loss = 0
-        self.test_accuracy = 0
-        self.best_test_accuracy = 0
-        self.train_class_accuracies: Dict[int, float] = {}
-        self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None
-        self.estimated_time_remaining = None
+        self.estimated_time_remaining = 0
         self.umap_embeddings = None
-        self.svg_files: Optional[List[str]] = None
         self.cancel_requested = False
         self.forget_class = None
+
+        self.unlearn_accuracy = 0 # UA 
+        self.remain_accuracy = 0 # RA
+        self.test_accuracy = 0 # TA
+        self.train_class_accuracies: Dict[int, float] = {0} # Train Metrics
+        self.test_class_accuracies: Dict[int, float] = {0} # Test Metrics
+        self.svg_files: Optional[List[str]] = {0}
 
     def reset(self):
         self.__init__()

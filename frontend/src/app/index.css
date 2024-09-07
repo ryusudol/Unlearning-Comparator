@@ -1,16 +1,21 @@
 :root {
-  --title-font-size: 16px;
   --subtitle-font-size: 16px;
   --select-font-size: 14px;
-  --input-font-size: 13px;
+
+  --custom-upload-btn-width: 120px;
+  --custom-upload-btn-height: 18px;
 
   --title-text-color: #383838;
-  --title-bg-color: #e7e7e7;
+  --title-bg-color: #efefef;
 
   --border-color: #898989;
 
-  --button-bg-color: #cacaca;
-  --button-hover-bg-color: #aaaaaa;
+  --button-bg-color: #101827;
+  --button-hover-bg-color: #585858;
+  --disabled-button-bg-color: #aeaeae;
+
+  --light-grey-font-color: #aeaeae;
+  --dark-font-color: #030712;
 }
 
 * {
@@ -23,7 +28,10 @@ body {
   height: 100vh;
   weight: 100vw;
   margin: 0;
-  padding: 8px 6px;
+  padding: 5px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
   font-family: "pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
     "Helvetica Neue", sans-serif;
@@ -35,4 +43,12 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+form {
+  width: 100%;
 }

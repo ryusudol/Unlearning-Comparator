@@ -8,8 +8,8 @@ type PropsType = {
 
 export default function ContentBox({ children, height }: PropsType) {
   return (
-    <section className={styles.section} style={{ height: `${height}px` }}>
+    <div className={styles.box} style={{ height: `${height}px` }}>
       {children}
-    </section>
+    </div>
   );
 }

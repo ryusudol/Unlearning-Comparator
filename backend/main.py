@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import train, unlearn, inference, trained_models
+from app.routers import train, unlearn, inference, models
 
 app = FastAPI()
 
@@ -15,7 +15,8 @@ app.add_middleware(
 app.include_router(train.router)
 app.include_router(unlearn.router)
 app.include_router(inference.router)
-app.include_router(trained_models.router)
+app.include_router(models.router)
+
 
 @app.get("/")
 async def root():

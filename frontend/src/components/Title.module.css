@@ -1,14 +1,14 @@
 .title {
-  height: 22px;
-  font-size: var(--title-font-size);
-  font-weight: 500;
-  color: #383838;
+  width: calc(100% - 4px);
+  height: 20px;
+  position: relative;
+  right: 6px;
   background-color: var(--title-bg-color);
-  text-align: center;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin: 0px 2px;
-  padding: 0px 6px;
-  border-radius: 4px;
+  margin: 5px 0 0 8px;
+}
+
+.title h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 5px;
 }

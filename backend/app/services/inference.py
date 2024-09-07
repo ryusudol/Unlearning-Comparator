@@ -1,39 +1,15 @@
 import sys
 import torch
+import torch.nn as nn
 import os
 import tempfile
 import asyncio
 import time
-from fastapi import UploadFile, BackgroundTasks
 from app.models.neural_network import get_resnet18, InferenceStatus
-from app.utils.helpers import get_data_loaders, get_layer_activations
-from app.services.visualization import compute_umap_embeddings
-from app.config.settings import UMAP_DATA_SIZE
-
-async def calculate_accuracy(model, data_loader, device):
-    correct = 0
-    total = 0
-    class_correct = [0] * 10
-    class_total = [0] * 10
-
-    with torch.no_grad():
-        for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
-
-    accuracy = 100 * correct / total
-    class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
-
-    return accuracy, class_accuracies
+from app.utils.helpers import get_data_loaders
+from app.utils.visualization import compute_umap_embeddings
+from app.utils.evaluation import get_layer_activations_and_predictions, evaluate_model
+from app.config.settings import UMAP_DATA_SIZE, UMAP_DATASET
 
 async def run_inference(file_content: bytes, status: InferenceStatus):
     status.is_inferencing = True
@@ -50,7 +26,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("\nLoading model...")
         status.current_step = "Loading model"
         status.progress = 20
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         model = get_resnet18().to(device)
         model.load_state_dict(torch.load(tmp_path, map_location=device))
         model.eval()
@@ -60,14 +36,14 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Preparing data...")
         status.current_step = "Preparing data"
         status.progress = 40
-        train_loader, test_loader, train_set, test_set = get_data_loaders(batch_size=256)
+        train_loader, test_loader, train_set, test_set = get_data_loaders(batch_size=1024)
         await asyncio.sleep(0)  # Allow other tasks to run
 
         # Calculate accuracy for train set
         print("Calculating train set accuracy...")
         status.current_step = "Calculating train accuracy"
         status.progress = 60
-        train_accuracy, train_class_accuracies = await calculate_accuracy(model, train_loader, device)
+        _, train_accuracy, train_class_accuracies = await evaluate_model(model=model, data_loader=train_loader, criterion=nn.CrossEntropyLoss(), device=device)
         status.train_accuracy = train_accuracy
         status.train_class_accuracies = train_class_accuracies
         await asyncio.sleep(0)  # Allow other tasks to run
@@ -76,7 +52,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Calculating test set accuracy...")
         status.current_step = "Calculating test accuracy"
         status.progress = 80
-        test_accuracy, test_class_accuracies = await calculate_accuracy(model, test_loader, device)
+        _, test_accuracy, test_class_accuracies = await evaluate_model(model=model, data_loader=test_loader, criterion=nn.CrossEntropyLoss(), device=device)
         status.test_accuracy = test_accuracy
         status.test_class_accuracies = test_class_accuracies
         await asyncio.sleep(0)  # Allow other tasks to run
@@ -97,18 +73,28 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         print("Extracting activations...")
         status.current_step = "Extracting activations"
         status.progress = 90
-        subset_indices = torch.randperm(len(test_set))[:UMAP_DATA_SIZE]
+        
+        if UMAP_DATASET == 'train':
+            dataset = train_set
+        else:
+            dataset = test_set
+
+        subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
         subset_loader = torch.utils.data.DataLoader(
-            torch.utils.data.Subset(test_set, subset_indices),
-            batch_size=256, shuffle=False)
-        activations = await get_layer_activations(model, subset_loader, device)
+            torch.utils.data.Subset(dataset, subset_indices),
+            batch_size=UMAP_DATA_SIZE, shuffle=False)
+        activations, _, _, _ = await get_layer_activations_and_predictions(
+            model, 
+            subset_loader, 
+            device
+        )
         await asyncio.sleep(0)  # Allow other tasks to run
 
         # Compute UMAP embeddings
         print("Computing and saving UMAP embeddings...")
         status.current_step = "Computing UMAP embeddings"
         status.progress = 95
-        labels = torch.tensor([test_set.targets[i] for i in subset_indices])
+        labels = torch.tensor([dataset.targets[i] for i in subset_indices])
         umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels)
 
         status.umap_embeddings = umap_embeddings
@@ -125,4 +111,3 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         status.is_inferencing = False
         elapsed_time = time.time() - status.start_time
         status.estimated_time_remaining = max(0, 100 - status.progress) * elapsed_time / status.progress
-

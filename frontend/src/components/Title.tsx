@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./Title.module.css";
 
 type PropsType = {
@@ -6,5 +5,9 @@ type PropsType = {
 };
 
 export default function Title({ title }: PropsType) {
-  return <p className={styles.title}>{title}</p>;
+  return (
+    <div className={styles.title}>
+      <h4>{title}</h4>
+    </div>
+  );
 }
