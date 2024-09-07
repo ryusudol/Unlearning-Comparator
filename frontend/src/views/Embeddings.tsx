@@ -66,7 +66,7 @@ export default function Embeddings({ height }: Props) {
   };
 
   return (
-    <section className="w-[1440px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
+    <section className="w-[1440px] p-[6px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
       <div className="flex items-center">
         <ChartScatterIcon />
         <h5 className="font-semibold ml-[3px]">Embeddings</h5>

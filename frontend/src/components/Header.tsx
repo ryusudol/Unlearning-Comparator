@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "../components/UI/select";
 import { PlayCircleIcon } from "lucide-react";
+import { EraserIcon, NeuralNetworkIcon, GitCompareIcon } from "./UI/icons";
 
 export default function Header() {
   const [forgetClass, setForgetClass] = useState("0");
@@ -25,6 +26,7 @@ export default function Header() {
       </div>
       <ul className="flex text-[20px] font-semibold">
         <li className="flex items-center">
+          <EraserIcon className="text-white w-6 h-6 mr-[6px]" />
           <span className="mr-[10px]">Forget Class</span>
           <Select onValueChange={setForgetClass} value={forgetClass}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black">
@@ -42,6 +44,7 @@ export default function Header() {
           </Select>
         </li>
         <li className="flex items-center mx-10">
+          <NeuralNetworkIcon className="text-white w-6 h-6 mr-[6px]" />
           <span className="mr-[10px]">Baseline Model</span>
           <Select onValueChange={setBaselineModel} value={baselineModel}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black">
@@ -57,6 +60,7 @@ export default function Header() {
           </Select>
         </li>
         <li className="flex items-center">
+          <GitCompareIcon className="text-white w-6 h-6 mr-[6px]" />
           <span className="mr-[10px]">Comparison Model</span>
           <Select onValueChange={setComparisonModel} value={comparisonModel}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black">
@@ -73,9 +77,9 @@ export default function Header() {
         </li>
         <li
           onClick={handleApplyBtnClick}
-          className="ml-10 cursor-pointer flex items-center"
+          className="w-10 h-10 flex justify-center rounded-full items-center ml-10 cursor-pointer bg-transparent hover:bg-slate-900 transition"
         >
-          <PlayCircleIcon />
+          <PlayCircleIcon className="w-7 h-7" />
         </li>
       </ul>
     </div>

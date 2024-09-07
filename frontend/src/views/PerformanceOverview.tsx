@@ -1,12 +1,10 @@
 import { useContext, useEffect } from "react";
-import styles from "./PerformanceOverview.module.css";
 
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { retrainedData } from "../constants/gt";
-import { getColorForValue } from "../util";
-import { SettingsIcon } from "../components/UI/icons";
+import { AnalysisTextLinkIcon } from "../components/UI/icons";
 import DataTable from "../components/DataTable";
 import { Overview, columns } from "../components/Columns";
 
@@ -169,22 +167,25 @@ export default function PerformanceOverview({ height }: Props) {
   const retrainedTA = currRetrainedData.test_accuracy;
 
   return (
-    <section style={{ height: `${height}px` }} className="w-[1110px] p-[6px]">
-      <div className={styles.top}>
+    <section
+      style={{ height: `${height}px` }}
+      className="w-[1110px] p-[6px] relative"
+    >
+      <div className="w-full flex justify-between items-center">
         <div className="flex items-center">
-          <SettingsIcon />
+          <AnalysisTextLinkIcon />
           <h5 className="font-semibold ml-[3px]">Overview</h5>
         </div>
-        {/* <div className={styles.legend}>
-          <div className={styles["legend-title"]}>Acc</div>
-          <div className={styles.bar}>
-            <div className={styles.gradient}></div>
-            <div className={styles["legend-values"]}>
-              <span>0</span>
-              <span>1</span>
+        <div className="flex flex-col items-start absolute right-[6px] top-[6px]">
+          <div className="text-[12px]">Performance</div>
+          <div className="w-[250px] h-5 relative">
+            <div className="w-full h-[10px] bg-gradient-to-r from-[#0c0cff] via-[#f7f7f7] to-[#ff0303]"></div>
+            <div className="flex justify-between w-full text-[12px] mt-[2px]">
+              <span>Low</span>
+              <span>High</span>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
       <div className="py-1">
         <DataTable columns={columns} data={payments} />
