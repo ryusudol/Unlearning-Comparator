@@ -6,6 +6,8 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltipContent,
 } from "../components/UI/chart";
 
@@ -79,6 +81,7 @@ export default function Privacies({ height }: Props) {
                   stroke="var(--color-desktop)"
                   stackId="a"
                 />
+                <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
             </ChartContainer>
             <img className={styles["mia-img"]} src="/mia.png" alt="mia img" />
