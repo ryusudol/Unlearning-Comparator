@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import styles from "./Embeddings.module.css";
 
-import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SvgViewer from "../components/UI/SvgViewer";
 import { retrainedData } from "../constants/gt";
@@ -69,7 +68,6 @@ export default function Embeddings({ height }: Props) {
 
   return (
     <section className={styles.embeddings}>
-      <Title title="Embeddings" />
       <ContentBox height={height}>
         <div className={styles["viewers-wrapper"]}>
           <SvgViewer

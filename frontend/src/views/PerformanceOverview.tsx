@@ -1,8 +1,6 @@
 import { useContext, useEffect } from "react";
 import styles from "./PerformanceOverview.module.css";
 
-import ForgetClassSelector from "../components/ForgetClassSelector";
-import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
@@ -51,10 +49,8 @@ export default function PerformanceOverview({ height }: Props) {
 
   return (
     <section className={styles["performance-overview"]}>
-      <Title title="Performance Overview" />
       <ContentBox height={height}>
         <div className={styles.top}>
-          <ForgetClassSelector width={70} isTextShow={false} />
           <div className={styles.legend}>
             <div className={styles["legend-title"]}>Acc</div>
             <div className={styles.bar}>

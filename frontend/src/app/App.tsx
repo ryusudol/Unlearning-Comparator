@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import styles from "./App.module.css";
 
+import Header from "../components/Header";
 import Settings from "../views/Settings";
 import PerformanceOverview from "../views/PerformanceOverview";
 import PerformanceMetrics from "../views/PerformanceMetrics";
@@ -10,8 +10,8 @@ import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { OverviewContext } from "../store/overview-context";
 
-const UPPER_HEIGHT = 265;
-const LOWER_HEIGHT = 615;
+const UPPER_HEIGHT = 264;
+const LOWER_HEIGHT = 750;
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,13 +37,14 @@ export default function App() {
   }
 
   return (
-    <section className={styles["body-wrapper"]}>
-      <div className={styles.row}>
+    <section>
+      <Header />
+      <div className="flex">
         <Settings height={UPPER_HEIGHT} />
         <PerformanceOverview height={UPPER_HEIGHT} />
         <PerformanceMetrics height={UPPER_HEIGHT} />
       </div>
-      <div className={styles.row}>
+      <div className="flex">
         <Embeddings height={LOWER_HEIGHT} />
         <Privacies height={LOWER_HEIGHT} />
       </div>

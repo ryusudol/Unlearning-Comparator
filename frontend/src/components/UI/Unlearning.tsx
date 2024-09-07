@@ -6,13 +6,12 @@ import React, {
   useCallback,
 } from "react";
 import styles from "./Unlearning.module.css";
+import { Button } from "./button";
 
 import Input from "../Input";
-import RunButton from "../RunButton";
 import CustomInput from "../CustomInput";
 import PredefinedInput from "../PredefinedInput";
 import OperationStatus from "../OperationStatus";
-import ForgetClassSelector from "../ForgetClassSelector";
 import { MODELS, DATASET } from "../../constants/training";
 import { OverviewContext } from "../../store/overview-context";
 import { SelectedIDContext } from "../../store/selected-id-context";
@@ -185,7 +184,6 @@ export default function Unlearning({
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const selectedMethod = e.currentTarget.value;
-    setMethod(selectedMethod);
     const { epochs, learning_rate } =
       getDefaultUnlearningConfig(selectedMethod);
 
@@ -309,7 +307,6 @@ export default function Unlearning({
         />
       ) : (
         <div>
-          <ForgetClassSelector width={265} />
           <div
             id="predefined"
             onClick={handleSectionClick}
@@ -323,53 +320,48 @@ export default function Unlearning({
             <div>
               <Input
                 labelName="Model"
-                defaultValue={"ResNet-18"}
+                defaultValue={"ResNet18"}
                 optionData={MODELS}
-                type="select"
               />
               <Input
                 labelName="Dataset"
                 defaultValue={"CIFAR-10"}
                 optionData={DATASET}
-                type="select"
               />
               <Input
                 labelName="Trained Model"
                 defaultValue={trainedModels[0]}
                 optionData={trainedModels}
-                type="select"
                 disabled={isRetrain}
               />
               <Input
                 key={initialState.epochs}
                 labelName="Epochs"
                 defaultValue={initialState.epochs}
-                type="number"
               />
               <Input
                 key={initialState.learning_rate}
                 labelName="Learning Rate"
                 defaultValue={initialState.learning_rate}
-                type="number"
               />
               <Input
                 key={initialState.batch_size}
                 labelName="Batch Size"
                 defaultValue={initialState.batch_size}
-                type="number"
               />
             </div>
           </div>
           <div id="custom" onClick={handleSectionClick}>
             <CustomInput
               mode={mode}
-              customFile={customFile}
               handleCustomFileUpload={handleCustomFileUpload}
             />
           </div>
         </div>
       )}
-      <RunButton isRunning={isRunning} />
+      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[10px] left-[262px]">
+        {isRunning ? "Cancel" : "Run"}
+      </Button>
     </form>
   );
 }

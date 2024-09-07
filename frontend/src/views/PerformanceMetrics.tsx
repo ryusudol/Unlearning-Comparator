@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import styles from "./PerformanceMetrics.module.css";
 
-import Title from "../components/Title";
 import ContentBox from "../components/ContentBox";
 import SubTitle from "../components/SubTitle";
 import CustomBarChart from "../components/CustomBarChart";
@@ -27,7 +26,6 @@ export default function PerformanceMetrics({ height }: Props) {
 
   return (
     <section className={styles["performance-metrics"]}>
-      <Title title="Performance Metrics" />
       <ContentBox height={height}>
         <div className={styles.wrapper}>
           <div className={styles.subtitles}>

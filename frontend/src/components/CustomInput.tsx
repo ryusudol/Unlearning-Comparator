@@ -1,45 +1,31 @@
 import React from "react";
-import styles from "./CustomInput.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
+import { Input } from "../components/UI/input";
+
 interface Props {
   mode: 0 | 1;
-  customFile: File | undefined;
   handleCustomFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function CustomInput({
-  mode,
-  customFile,
-  handleCustomFileUpload,
-}: Props) {
+export default function CustomInput({ mode, handleCustomFileUpload }: Props) {
   return (
-    <div className={styles.wrapper}>
-      <div className={styles["label-wrapper"]}>
+    <div className="w-full flex justify-between items-center mb-[3px]">
+      <div className="flex justify-center items-center">
         <FontAwesomeIcon
-          className={styles.icon}
+          className="w-[11px] mr-1"
           icon={mode ? faCircleCheck : faCircle}
         />
-        <span>Custom Model</span>
+        <span className="text-[14px]">Custom Model</span>
       </div>
-      <div>
-        <label htmlFor="custom-training">
-          {customFile ? (
-            <div className={styles.upload}>
-              <span>{customFile.name}</span>
-            </div>
-          ) : (
-            <div className={styles.upload}>Click to upload</div>
-          )}
-        </label>
-        <input
-          onChange={handleCustomFileUpload}
-          type="file"
-          id="custom-training"
-        />
-      </div>
+      <Input
+        onChange={handleCustomFileUpload}
+        type="file"
+        id="custom-training"
+        className="w-[130px] h-[18px] text-[12px] cursor-pointer file:hidden py-0 px-2"
+      />
     </div>
   );
 }

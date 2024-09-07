@@ -1,9 +1,9 @@
 import React, { useCallback, useRef, useContext, useEffect } from "react";
+import { Button } from "./button";
 
 import Input from "../Input";
 import PredefinedInput from "../PredefinedInput";
 import OperationStatus from "../OperationStatus";
-import RunButton from "../RunButton";
 import { MODELS, DATASET } from "../../constants/training";
 import { RunningStatusContext } from "../../store/running-status-context";
 import {
@@ -144,28 +144,24 @@ export default function Training({ setTrainedModels }: TrainingProps) {
           <div>
             <Input
               labelName="Model"
-              defaultValue={"ResNet-18"}
+              defaultValue={"ResNet18"}
               optionData={MODELS}
-              type="select"
             />
             <Input
               labelName="Dataset"
               defaultValue={"CIFAR-10"}
               optionData={DATASET}
-              type="select"
             />
-            <Input labelName="Epochs" defaultValue={30} type="number" />
-            <Input
-              labelName="Learning Rate"
-              defaultValue={0.01}
-              type="number"
-            />
-            <Input labelName="Batch Size" defaultValue={128} type="number" />
-            <Input labelName="Seed" defaultValue={1} type="number" />
+            <Input labelName="Epochs" defaultValue={30} />
+            <Input labelName="Learning Rate" defaultValue={0.01} />
+            <Input labelName="Batch Size" defaultValue={128} />
+            <Input labelName="Seed" defaultValue={1} />
           </div>
         </div>
       )}
-      <RunButton isRunning={isRunning} />
+      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[10px] left-[262px]">
+        {isRunning ? "Cancel" : "Run"}
+      </Button>
     </form>
   );
 }

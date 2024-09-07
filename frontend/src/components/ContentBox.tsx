@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./ContentBox.module.css";
 
 type PropsType = {
   children?: React.ReactNode;
@@ -8,7 +7,10 @@ type PropsType = {
 
 export default function ContentBox({ children, height }: PropsType) {
   return (
-    <div className={styles.box} style={{ height: `${height}px` }}>
+    <div
+      className="relative p-[6px] flex flex-col justify-start items-start border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      style={{ height: `${height}px` }}
+    >
       {children}
     </div>
   );

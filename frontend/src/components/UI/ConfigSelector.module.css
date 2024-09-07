@@ -1,5 +1,5 @@
 .wrapper {
-  width: 100%;
+  width: 50%;
   height: 30px;
   background-color: #f0f0f0;
   display: flex;
@@ -14,16 +14,15 @@
   height: 100%;
   display: inline-block;
   color: #6a7280;
-  font-size: 14px;
-  padding: 0 11.2px;
+  font-size: 13px;
+  padding: 0 4px;
   position: relative;
-  margin-right: 10px;
   border: none;
   cursor: pointer;
 }
 
 .button span {
-  margin-left: 5px;
+  margin-left: 3px;
 }
 
 .selected {
@@ -41,7 +40,7 @@
   border-bottom-right-radius: 4px;
 }
 
-.first-arrow,
+/* .first-arrow,
 .second-arrow {
   width: 16px;
   height: 30px;
@@ -75,11 +74,4 @@
   border-bottom: 15px solid transparent;
   border-left: 10px solid #f0f0f0;
   right: 71.5px;
-}
-
-/* .second-arrow.grey {
-  border-top: 15px solid transparent;
-  border-bottom: 15px solid transparent;
-  border-left: 10px solid #f0f0f0;
-  right: 122px;
 } */
