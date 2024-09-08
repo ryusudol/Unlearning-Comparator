@@ -1,4 +1,4 @@
-import { useContext, useMemo, useCallback } from "react";
+import { useState, useContext, useMemo, useCallback } from "react";
 
 import SvgViewer from "../components/UI/SvgViewer";
 import { retrainedData } from "../constants/gt";
@@ -22,6 +22,9 @@ interface Props {
 }
 
 export default function Embeddings({ height }: Props) {
+  const [neighbors, setNeighbors] = useState([5]);
+  const [dist, setDist] = useState([0.1]);
+
   const { overview } = useContext(OverviewContext);
   const { selectedID } = useContext(SelectedIDContext);
   const { baseline } = useContext(BaselineContext);
@@ -59,33 +62,35 @@ export default function Embeddings({ height }: Props) {
           <ChartScatterIcon />
           <h5 className="font-semibold ml-[3px]">Embeddings</h5>
         </div>
-        <div className="w-[680px] flex justify-between items-center">
+        <div className="w-[680px] flex justify-end items-center">
           <div className="flex items-center">
-            <span className="mr-4">neighbors</span>
+            <span>neighbors</span>
             <div className="flex items-center">
-              <span className="text-[14px]">5</span>
               <Slider
+                onValueChange={(value: number[]) => setNeighbors(value)}
+                value={neighbors}
                 defaultValue={[5]}
-                className="w-44 mx-[6px]"
+                className="w-44 mx-2 cursor-pointer"
                 min={5}
                 max={15}
                 step={1}
               />
-              <span className="text-[14px]">15</span>
+              <span className="w-2 text-[14px]">{neighbors}</span>
             </div>
           </div>
-          <div className="flex items-center">
-            <span className="mr-4">min_dist</span>
+          <div className="flex items-center mx-8">
+            <span>min_dist</span>
             <div className="flex items-center">
-              <span className="text-[14px]">0.1</span>
               <Slider
+                onValueChange={(value: number[]) => setDist(value)}
+                value={dist}
                 defaultValue={[0.1]}
-                className="w-44 mx-[6px]"
+                className="w-44 mx-2 cursor-pointer"
                 min={0.1}
                 max={0.5}
                 step={0.05}
               />
-              <span className="text-[14px]">0.5</span>
+              <span className="w-4 text-[14px]">{dist}</span>
             </div>
           </div>
           <RepeatIcon

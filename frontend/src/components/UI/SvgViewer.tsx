@@ -12,10 +12,11 @@ export default function SvgViewer({ svg }: Props) {
     <div className="w-[630px] h-[668px]">
       {svg && (
         <div className="flex flex-col justify-center items-center">
-          <div
+          <img src="/embedding1.png" alt="embedding img" />
+          {/* <div
             className="relative bottom-9 w-[630px] h-[652px] -z-10 top-0"
             dangerouslySetInnerHTML={createMarkup(svg)}
-          />
+          /> */}
         </div>
       )}
     </div>
