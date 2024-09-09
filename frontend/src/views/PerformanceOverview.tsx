@@ -172,14 +172,14 @@ export default function PerformanceOverview({ height }: Props) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[1110px] p-[6px] relative border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1110px] p-[5px] relative border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="w-full flex justify-between items-center">
         <div className="flex items-center">
           <AnalysisTextLinkIcon />
           <h5 className="font-semibold ml-[3px]">Overview</h5>
         </div>
-        <div className="flex flex-col items-start absolute right-[6px] top-4">
+        <div className="flex flex-col items-start absolute right-[6px] top-3">
           <div className="text-[11px]">Performance</div>
           <div className="w-[250px] h-5 relative">
             <div
@@ -197,7 +197,7 @@ export default function PerformanceOverview({ height }: Props) {
           </div>
         </div>
       </div>
-      <div className="py-1">
+      <div className="">
         <DataTable columns={columns} data={payments} />
       </div>
     </section>

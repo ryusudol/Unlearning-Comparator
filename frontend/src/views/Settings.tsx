@@ -27,7 +27,7 @@ export default function Settings({ height }: Props) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[330px] relative p-[6px] flex flex-col justify-start items-start border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[330px] relative p-[5px] flex flex-col justify-start items-start border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="w-full flex justify-between">
         <div className="flex items-center">
