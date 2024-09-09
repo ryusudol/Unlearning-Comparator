@@ -57,7 +57,7 @@ export default function Embeddings({ height }: Props) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1440px] h-[720px] px-[6px] py-[4px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1440px] h-[720px] px-px] py-[4px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex justify-between items-center mb-[2px]">
         <div className="flex items-center">
@@ -102,20 +102,18 @@ export default function Embeddings({ height }: Props) {
         </div>
       </div>
       <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-        <div className="w-[116px] h-[650px] flex flex-col justify-center items-center">
+        <div className="w-[116px] h-[660px] flex flex-col justify-center items-center">
           {/* Legend - Metadata */}
-          <div className="w-full h-[98px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Metadata</span>
             <div className="flex flex-col justify-start items-start">
               <span className="text-[15px] font-light">Points: 2000</span>
-              <span className="text-[15px] font-light -my-[2px]">
-                Dimension: 8192
-              </span>
+              <span className="text-[15px] font-light">Dimension: 8192</span>
               <span className="text-[15px] font-light">Dataset: Train</span>
             </div>
           </div>
           {/* Legend - Controls */}
-          <div className="w-full h-[98px] flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Controls</span>
             <div>
               <div className="flex items-center">
@@ -133,7 +131,7 @@ export default function Embeddings({ height }: Props) {
             </div>
           </div>
           {/* Legend - Data Type */}
-          <div className="w-full h-20 flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <div className="w-full h-[85px] flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Data Type</span>
             <div>
               <div className="flex items-center text-[15px] font-light">
@@ -223,7 +221,7 @@ export default function Embeddings({ height }: Props) {
             </div>
           </div>
         </div>
-        <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
+        <div className="h-[660px] w-[1px] bg-[#dfdfdf] mx-[2px]" />
         <div className="flex flex-col justify-center items-center relative">
           <div className="absolute flex items-center space-x-2 top-8 right-1">
             <Switch id="highlight-1" checked={false} />
@@ -234,7 +232,7 @@ export default function Embeddings({ height }: Props) {
           <h5 className="relative top-2">Comparison Model</h5>
           <SvgViewer mode={0} svg={retrainSvgs[3]} />
         </div>
-        <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
+        <div className="h-[660px] w-[1px] bg-[#dfdfdf] mx-[2px]" />
         <div className="flex flex-col justify-center items-center relative">
           <div className="absolute flex items-center space-x-2 top-8 right-1">
             <Switch id="highlight-2" checked />

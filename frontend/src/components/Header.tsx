@@ -30,7 +30,7 @@ export default function Header() {
           <EraserIcon className="text-white w-6 h-6 mr-1" />
           <span className="mr-[10px]">Forget Class</span>
           <Select onValueChange={setForgetClass} value={forgetClass}>
-            <SelectTrigger className="w-[128px] h-6 bg-white text-black">
+            <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal">
               <SelectValue placeholder="0" />
             </SelectTrigger>
             <SelectContent className="bg-white text-black">
@@ -48,7 +48,7 @@ export default function Header() {
           <NeuralNetworkIcon className="text-white w-6 h-6 mr-1" />
           <span className="mr-[10px]">Comparison Model</span>
           <Select onValueChange={setBaselineModel} value={baselineModel}>
-            <SelectTrigger className="w-[128px] h-6 bg-white text-black">
+            <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal">
               <SelectValue placeholder="Select a forget class" />
             </SelectTrigger>
             <SelectContent defaultValue="231a" className="bg-white text-black">
@@ -73,7 +73,7 @@ export default function Header() {
           <GitCompareIcon className="text-white w-6 h-6 mr-1" />
           <span className="mr-[10px]">Proposed Model</span>
           <Select onValueChange={setComparisonModel} value={comparisonModel}>
-            <SelectTrigger className="w-[128px] h-6 bg-white text-black">
+            <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal">
               <SelectValue placeholder="Select a forget class" />
             </SelectTrigger>
             <SelectContent className="bg-white text-black">
