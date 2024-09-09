@@ -36,7 +36,10 @@ const chartConfig = {
 
 export default function Privacies({ height }: Props) {
   return (
-    <section className="w-[460px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
+    <section
+      style={{ height: `${height}px` }}
+      className="w-[460px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+    >
       <div className="w-full flex flex-col justify-center">
         <div className="flex items-center">
           <SecurityCheckIcon />

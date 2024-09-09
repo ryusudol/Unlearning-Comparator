@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Bar, BarChart, XAxis, YAxis, ReferenceLine } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, ReferenceLine, Label } from "recharts";
 
 import { retrainedData } from "../constants/gt";
 import { BaselineContext } from "../store/baseline-context";
@@ -191,13 +191,16 @@ export default function PerformanceMetrics({ height }: Props) {
         <Chart01Icon />
         <h5 className="font-semibold ml-[3px]">Accuracies</h5>
       </div>
-      <div className="w-full flex flex-col justify-center items-center">
-        <div className="flex justify-center items-center mt-[6px]">
+      <div className="w-full flex flex-col justify-start items-center">
+        <div className="flex justify-center items-center mt-[6px] -ml-6">
+          <p className="w-10 -rotate-90 origin-left translate-x-7 translate-y-[26px] text-[13px] text-[#808080]">
+            Classes
+          </p>
           <div className="flex flex-col justify-center items-center">
-            <h5 className="text-[14px] mb-2">Train</h5>
+            <h5 className="text-[14px] mb-2">Training Dataset</h5>
             <ChartContainer
               config={chartConfig}
-              className="w-[220px] h-[200px]"
+              className="w-[212px] h-[220px]"
             >
               <BarChart
                 accessibilityLayer
@@ -207,7 +210,7 @@ export default function PerformanceMetrics({ height }: Props) {
                   left: -40,
                   right: 0,
                   top: 0,
-                  bottom: 0,
+                  bottom: 8,
                 }}
               >
                 <YAxis
@@ -225,7 +228,14 @@ export default function PerformanceMetrics({ height }: Props) {
                   type="number"
                   domain={[-maxValue, maxValue]}
                   tickFormatter={(value) => value.toString()}
-                />
+                >
+                  <Label
+                    className="text-black -translate-y-[6px] text-[13px]"
+                    value="Accuracy Gap"
+                    offset={0}
+                    position="bottom"
+                  />
+                </XAxis>
                 <ReferenceLine x={0} stroke="#777" />
                 <ChartTooltip
                   cursor={false}
@@ -236,10 +246,10 @@ export default function PerformanceMetrics({ height }: Props) {
             </ChartContainer>
           </div>
           <div className="flex flex-col justify-center items-center">
-            <h5 className="text-[14px] mb-2">Test</h5>
+            <h5 className="text-[14px] mb-2">Test Dataset</h5>
             <ChartContainer
               config={chartConfig}
-              className="w-[220px] h-[200px]"
+              className="w-[212px] h-[220px]"
             >
               <BarChart
                 accessibilityLayer
@@ -249,7 +259,7 @@ export default function PerformanceMetrics({ height }: Props) {
                   left: -40,
                   right: 0,
                   top: 0,
-                  bottom: 0,
+                  bottom: 8,
                 }}
               >
                 <YAxis
@@ -267,7 +277,14 @@ export default function PerformanceMetrics({ height }: Props) {
                   type="number"
                   domain={[-maxValue, maxValue]}
                   tickFormatter={(value) => value.toString()}
-                />
+                >
+                  <Label
+                    className="text-black -translate-y-[6px] text-[13px]"
+                    value="Accuracy Gap"
+                    offset={0}
+                    position="bottom"
+                  />
+                </XAxis>
                 <ReferenceLine x={0} stroke="#777" />
                 <ChartTooltip
                   cursor={false}

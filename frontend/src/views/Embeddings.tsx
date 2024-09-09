@@ -57,7 +57,7 @@ export default function Embeddings({ height }: Props) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1440px] h-[720px] px-px] py-[4px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1440px] px-[5px] py-[4px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex justify-between items-center mb-[2px]">
         <div className="flex items-center">
@@ -109,7 +109,7 @@ export default function Embeddings({ height }: Props) {
             <div className="flex flex-col justify-start items-start">
               <span className="text-[15px] font-light">Points: 2000</span>
               <span className="text-[15px] font-light">Dimension: 8192</span>
-              <span className="text-[15px] font-light">Dataset: Train</span>
+              <span className="text-[15px] font-light">Dataset: Training</span>
             </div>
           </div>
           {/* Legend - Controls */}

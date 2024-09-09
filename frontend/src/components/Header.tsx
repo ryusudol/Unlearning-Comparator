@@ -7,8 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/UI/select";
-import { PlayCircleIcon } from "lucide-react";
-import { EraserIcon, NeuralNetworkIcon, GitCompareIcon } from "./UI/icons";
+import {
+  EraserIcon,
+  NeuralNetworkIcon,
+  GitCompareIcon,
+  PlayCircleIcon,
+} from "./UI/icons";
 
 export default function Header() {
   const [forgetClass, setForgetClass] = useState("0");

@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -19,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "./UI/table";
-import { Button } from "./UI/button";
 import { Input } from "./UI/input";
 
 interface DataTableProps<TData, TValue> {
@@ -40,17 +38,11 @@ export default function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: { sorting, columnFilters },
-    initialState: {
-      pagination: {
-        pageSize: 4,
-      },
-    },
   });
 
   return (
@@ -65,7 +57,7 @@ export default function DataTable<TData, TValue>({
           className="w-[140px] h-6"
         />
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border max-h-[222px] overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -114,26 +106,6 @@ export default function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-1">
-        <Button
-          className="cursor-pointer"
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          className="cursor-pointer"
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
       </div>
     </div>
   );
