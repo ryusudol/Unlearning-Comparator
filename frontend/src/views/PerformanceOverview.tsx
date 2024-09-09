@@ -179,8 +179,8 @@ export default function PerformanceOverview({ height }: Props) {
           <AnalysisTextLinkIcon />
           <h5 className="font-semibold ml-[3px]">Overview</h5>
         </div>
-        <div className="flex flex-col items-start absolute right-[6px] top-[6px]">
-          <div className="text-[12px]">Performance</div>
+        <div className="flex flex-col items-start absolute right-[6px] top-4">
+          <div className="text-[11px]">Performance</div>
           <div className="w-[250px] h-5 relative">
             <div
               className="w-full h-[10px]"
@@ -190,7 +190,7 @@ export default function PerformanceOverview({ height }: Props) {
                 )}, ${colorScale(0.5)}, ${colorScale(1)})`,
               }}
             ></div>
-            <div className="flex justify-between w-full text-[12px] mt-[2px]">
+            <div className="flex justify-between w-full text-[11px] mt-[2px]">
               <span>Low</span>
               <span>High</span>
             </div>

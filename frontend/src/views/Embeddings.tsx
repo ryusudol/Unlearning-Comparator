@@ -57,9 +57,9 @@ export default function Embeddings({ height }: Props) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1440px] h-[720px] p-[6px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1440px] h-[720px] px-[6px] py-[4px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-[2px]">
         <div className="flex items-center">
           <ChartScatterIcon />
           <h5 className="font-semibold ml-[3px]">Embeddings</h5>
@@ -227,18 +227,22 @@ export default function Embeddings({ height }: Props) {
         <div className="flex flex-col justify-center items-center relative">
           <div className="absolute flex items-center space-x-2 top-8 right-1">
             <Switch id="highlight-1" checked={false} />
-            <Label htmlFor="highlight-1">Highlight</Label>
+            <Label htmlFor="highlight-1" className="font-light">
+              Highlight
+            </Label>
           </div>
-          <h5 className="relative top-2">Baseline Model</h5>
+          <h5 className="relative top-2">Comparison Model</h5>
           <SvgViewer mode={0} svg={retrainSvgs[3]} />
         </div>
         <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
         <div className="flex flex-col justify-center items-center relative">
           <div className="absolute flex items-center space-x-2 top-8 right-1">
             <Switch id="highlight-2" checked />
-            <Label htmlFor="highlight-2">Highlight</Label>
+            <Label htmlFor="highlight-2" className="font-light">
+              Highlight
+            </Label>
           </div>
-          <h5 className="relative top-2">Comparison Model</h5>
+          <h5 className="relative top-2">Proposed Model</h5>
           <SvgViewer mode={1} svg={retrainSvgs[3]} />
         </div>
       </div>
