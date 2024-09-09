@@ -43,13 +43,13 @@ export default function Privacies({ height }: Props) {
           <h5 className="font-semibold ml-[3px]">Privacies</h5>
         </div>
         <div className="w-full flex justify-center items-center mb-[5px]">
-          <ChartContainer config={chartConfig} className="w-[220px] h-[200px]">
+          <ChartContainer config={chartConfig} className="w-[420px] h-[250px]">
             <AreaChart
               accessibilityLayer
               data={chartData}
               margin={{
-                left: 12,
-                right: 12,
+                left: 0,
+                right: 0,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -83,9 +83,10 @@ export default function Privacies({ height }: Props) {
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
-          <img className="w-[210px]" src="/mia.png" alt="mia img" />
         </div>
-        <img className="w-[345px]" src="/attack.png" alt="attack img" />
+        <div className="flex justify-center">
+          <img className="w-[345px]" src="/attack.png" alt="attack img" />
+        </div>
       </div>
     </section>
   );

@@ -46,13 +46,22 @@ export default function Header() {
         </li>
         <li className="flex items-center mx-[22px]">
           <NeuralNetworkIcon className="text-white w-6 h-6 mr-1" />
-          <span className="mr-[10px]">Baseline Model</span>
+          <span className="mr-[10px]">Comparison Model</span>
           <Select onValueChange={setBaselineModel} value={baselineModel}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black">
               <SelectValue placeholder="Select a forget class" />
             </SelectTrigger>
             <SelectContent defaultValue="231a" className="bg-white text-black">
-              {["231a", "7g9b", "6k3a", "j30a"].map((el, idx) => (
+              {[
+                "231a",
+                "7g9b",
+                "6k3a",
+                "j30a",
+                "qq78",
+                "p83h",
+                "v097",
+                "z8c0",
+              ].map((el, idx) => (
                 <SelectItem key={idx} value={el}>
                   {el}
                 </SelectItem>
@@ -62,13 +71,22 @@ export default function Header() {
         </li>
         <li className="flex items-center">
           <GitCompareIcon className="text-white w-6 h-6 mr-1" />
-          <span className="mr-[10px]">Comparison Model</span>
+          <span className="mr-[10px]">Proposed Model</span>
           <Select onValueChange={setComparisonModel} value={comparisonModel}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black">
               <SelectValue placeholder="Select a forget class" />
             </SelectTrigger>
             <SelectContent className="bg-white text-black">
-              {["231a"].map((el, idx) => (
+              {[
+                "231a",
+                "7g9b",
+                "6k3a",
+                "j30a",
+                "qq78",
+                "p83h",
+                "v097",
+                "z8c0",
+              ].map((el, idx) => (
                 <SelectItem key={idx} value={el}>
                   {el}
                 </SelectItem>

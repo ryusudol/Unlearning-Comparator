@@ -80,7 +80,7 @@ const trainAccuracyGap2 = [
   },
   {
     category: "C",
-    value: -0.03,
+    value: 0.02,
     fill: TABLEAU10[2],
   },
   {
@@ -110,12 +110,12 @@ const trainAccuracyGap2 = [
   },
   {
     category: "I",
-    value: 0.01,
+    value: -0.01,
     fill: TABLEAU10[8],
   },
   {
     category: "J",
-    value: 0.02,
+    value: 0.01,
     fill: TABLEAU10[9],
   },
 ];
