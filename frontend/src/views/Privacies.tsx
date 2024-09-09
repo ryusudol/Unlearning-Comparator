@@ -1,14 +1,14 @@
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { SecurityCheckIcon } from "../components/UI/icons";
+import { Button } from "../components/UI/button";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltipContent,
 } from "../components/UI/chart";
+import React from "react";
 
 interface Props {
   height: number;
@@ -35,24 +35,29 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function Privacies({ height }: Props) {
+  const handleBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const id = e.currentTarget.id;
+    console.log(id === "prev" ? "MIA Prev Clicked!" : "MIA Next Clicked!");
+  };
+
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[460px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
-      <div className="w-full flex flex-col justify-center">
+      <div className="w-full flex flex-col justify-center relative">
         <div className="flex items-center">
           <SecurityCheckIcon />
           <h5 className="font-semibold ml-[3px]">Privacies</h5>
         </div>
-        <div className="w-full flex justify-center items-center mb-[5px]">
-          <ChartContainer config={chartConfig} className="w-[420px] h-[250px]">
+        <div className="w-full flex flex-col justify-center items-center mb-[5px]">
+          <p className="text-[15px]">Membership Inference Attack</p>
+          <ChartContainer config={chartConfig} className="w-[420px] h-[182px]">
             <AreaChart
               accessibilityLayer
               data={chartData}
               margin={{
-                left: 0,
-                right: 0,
+                top: -20,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -83,12 +88,40 @@ export default function Privacies({ height }: Props) {
                 stroke="var(--color-desktop)"
                 stackId="a"
               />
-              <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
         </div>
-        <div className="flex justify-center">
-          <img className="w-[345px]" src="/attack.png" alt="attack img" />
+        <div className="flex flex-col justify-start items-center mt-1">
+          <p className="text-[15px] mb-1">Model Inversion Attack</p>
+          <div className="w-[468px] h-[444px] p-[5px] flex flex-col justify-start items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+            <div className="flex justify-between items-center text-[15px] font-light w-[300px]">
+              <p>Comparison Model</p>
+              <p>Proposed Model</p>
+            </div>
+            <img
+              className="w-[400px] h-[396px]"
+              src="/attack.png"
+              alt="attack img"
+            />
+          </div>
+        </div>
+        <div className="w-[70px] flex justify-between absolute bottom-[5px] right-[5px]">
+          <Button
+            id="prev"
+            onClick={handleBtnClick}
+            variant="outline"
+            className="w-8 h-[18px]"
+          >
+            {"<"}
+          </Button>
+          <Button
+            id="next"
+            onClick={handleBtnClick}
+            variant="outline"
+            className="w-8 h-[18px]"
+          >
+            {">"}
+          </Button>
         </div>
       </div>
     </section>
