@@ -17,8 +17,12 @@ import { SelectedIDContext } from "../../store/selected-id-context";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { getDefaultUnlearningConfig } from "../../util";
 import { OverviewItem } from "../../types/overview-context";
-import { UNLEARNING_METHODS } from "../../constants/unlearning";
 import { cancelRunning, fetchRunningStatus } from "../../https/utils";
+import { EraserIcon } from "./icons";
+import {
+  UNLEARNING_METHODS,
+  UNLEARN_CLASSES,
+} from "../../constants/unlearning";
 import {
   UnlearningConfigurationData,
   ResultType,
@@ -29,6 +33,13 @@ import {
   executePredefinedUnlearning,
   fetchUnlearningResult,
 } from "../../https/unlearning";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/UI/select";
 
 const initialValue = {
   method: "Fine-Tuning",
@@ -306,6 +317,30 @@ export default function Unlearning({
         />
       ) : (
         <div>
+          <div id="forget-class" className="flex justify-between items-center">
+            <div className="flex items-center">
+              <EraserIcon className="-ml-[2px] mr-[2px]" />
+              <label className="text-[15px]" htmlFor="forgetClass">
+                Forget Class
+              </label>
+            </div>
+            <Select name="forgetClass">
+              <SelectTrigger className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]">
+                <SelectValue placeholder={"0"} />
+              </SelectTrigger>
+              <SelectContent className="bg-white text-black overflow-ellipsis whitespace-nowrap">
+                {UNLEARN_CLASSES.map((forgetClass, idx) => (
+                  <SelectItem
+                    key={idx}
+                    value={forgetClass}
+                    className="text-[13px]"
+                  >
+                    {forgetClass}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div id="predefined" onClick={handleSectionClick}>
             <PredefinedInput
               mode={mode}

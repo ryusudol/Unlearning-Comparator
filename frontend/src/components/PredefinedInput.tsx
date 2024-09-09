@@ -23,7 +23,7 @@ export default function PredefinedInput({
   optionData,
 }: Props) {
   return (
-    <div className="mb-[3px] flex justify-between items-center">
+    <div className="flex justify-between items-center">
       <div className="flex justify-center items-center">
         <FontAwesomeIcon
           className="w-[11px] mr-1"
@@ -34,7 +34,7 @@ export default function PredefinedInput({
       {optionData && (
         // onValueChange -> handleMethodSelection 함수 붙이기
         <Select name="method">
-          <SelectTrigger className="w-[130px] h-[20px] px-1 whitespace-nowrap overflow-ellipsis focus:outline-none bg-white text-black">
+          <SelectTrigger className="w-[130px] h-[19px] pl-2 pr-1 whitespace-nowrap overflow-ellipsis focus:outline-none bg-white text-black">
             <SelectValue placeholder={optionData[0]} />
           </SelectTrigger>
           <SelectContent className="bg-white text-black">

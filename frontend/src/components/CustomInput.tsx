@@ -24,7 +24,7 @@ export default function CustomInput({ mode, handleCustomFileUpload }: Props) {
         onChange={handleCustomFileUpload}
         type="file"
         id="custom-training"
-        className="w-[130px] h-[21px] text-[13px] cursor-pointer file:hidden py-0 px-2"
+        className="w-[130px] h-[19px] text-[13px] cursor-pointer file:hidden py-0 px-2"
       />
     </div>
   );
