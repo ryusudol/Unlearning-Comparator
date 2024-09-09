@@ -66,30 +66,5 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    function ({ addUtilities }) {
-      const newUtilities = {
-        ".scrollbar-thin": {
-          scrollbarWidth: "thin",
-          "&::-webkit-scrollbar": {
-            width: "8px",
-            height: "8px",
-          },
-        },
-        ".scrollbar-thumb-gray": {
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#888",
-            borderRadius: "4px",
-          },
-        },
-        ".scrollbar-track-gray-lighter": {
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "#f1f1f1",
-          },
-        },
-      };
-      addUtilities(newUtilities, ["responsive", "hover"]);
-    },
-  ],
+  plugins: [require("tailwindcss-animate")],
 };
