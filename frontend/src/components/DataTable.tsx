@@ -58,9 +58,9 @@ export default function DataTable<TData, TValue>({
           className="w-[140px] h-6"
         />
       </div>
-      <div className="rounded-md border max-h-[222px] overflow-auto scrollbar-thin scrollbar-thumb-gray scrollbar-track-gray-lighter">
-        <Table>
-          <ScrollArea>
+      <div className="rounded-md border max-h-[222px] overflow-auto">
+        <ScrollArea>
+          <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -107,8 +107,8 @@ export default function DataTable<TData, TValue>({
                 </TableRow>
               )}
             </TableBody>
-          </ScrollArea>
-        </Table>
+          </Table>
+        </ScrollArea>
       </div>
     </div>
   );
