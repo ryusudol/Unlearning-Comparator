@@ -1,7 +1,15 @@
+import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { SecurityCheckIcon } from "../components/UI/icons";
 import { Button } from "../components/UI/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/UI/select";
 import {
   ChartConfig,
   ChartContainer,
@@ -34,7 +42,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+const ATTACKS = ["MSE", "PSNR", "LPIPS"];
+
 export default function Privacies({ height }: Props) {
+  const [attack, setAttack] = useState(ATTACKS[0]);
+
   const handleBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const id = e.currentTarget.id;
     console.log(id === "prev" ? "MIA Prev Clicked!" : "MIA Next Clicked!");
@@ -91,7 +103,21 @@ export default function Privacies({ height }: Props) {
             </AreaChart>
           </ChartContainer>
         </div>
-        <div className="flex flex-col justify-start items-center mt-1">
+        <div className="flex flex-col justify-start items-center relative">
+          <div className="absolute right-0 -top-1">
+            <Select onValueChange={setAttack}>
+              <SelectTrigger className="w-[70px] h-7 pr-1 bg-white text-black font-normal">
+                <SelectValue placeholder={attack} />
+              </SelectTrigger>
+              <SelectContent className="w-[70px] relative right-14">
+                {ATTACKS.map((el, idx) => (
+                  <SelectItem key={idx} value={el}>
+                    {el}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <p className="text-[15px] mb-1">Model Inversion Attack</p>
           <div className="w-[468px] h-[444px] p-[5px] flex flex-col justify-start items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <div className="flex justify-between items-center text-[15px] font-light w-[300px]">
@@ -99,7 +125,7 @@ export default function Privacies({ height }: Props) {
               <p>Proposed Model</p>
             </div>
             <img
-              className="w-[400px] h-[396px]"
+              className="w-[400px] h-[390px]"
               src="/attack.png"
               alt="attack img"
             />
