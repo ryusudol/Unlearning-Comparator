@@ -17,52 +17,105 @@ import {
 const trainAccuracyGap = [
   {
     category: "A",
-    value: parseFloat(retrainedData[0].train_class_accuracies[0]) - 0,
+    value: 0.03,
     fill: TABLEAU10[0],
   },
   {
     category: "B",
-    value: parseFloat(retrainedData[0].train_class_accuracies[1]) - 0.99,
+    value: 0.01,
     fill: TABLEAU10[1],
   },
   {
     category: "C",
-    value: parseFloat(retrainedData[0].train_class_accuracies[2]) - 1,
+    value: -0.04,
     fill: TABLEAU10[2],
   },
   {
     category: "D",
-    value: parseFloat(retrainedData[0].train_class_accuracies[3]) - 0.98,
+    value: 0.02,
     fill: TABLEAU10[3],
   },
   {
     category: "E",
-    value: parseFloat(retrainedData[0].train_class_accuracies[4]) - 1,
+    value: 0.01,
     fill: TABLEAU10[4],
   },
   {
     category: "F",
-    value: parseFloat(retrainedData[0].train_class_accuracies[5]) - 0.99,
+    value: -0.03,
     fill: TABLEAU10[5],
   },
   {
     category: "G",
-    value: parseFloat(retrainedData[0].train_class_accuracies[6]) - 0.96,
+    value: 0,
     fill: TABLEAU10[6],
   },
   {
     category: "H",
-    value: parseFloat(retrainedData[0].train_class_accuracies[7]) - 0.97,
+    value: -0.01,
     fill: TABLEAU10[7],
   },
   {
     category: "I",
-    value: parseFloat(retrainedData[0].train_class_accuracies[8]) - 0.98,
+    value: 0.01,
     fill: TABLEAU10[8],
   },
   {
     category: "J",
-    value: parseFloat(retrainedData[0].train_class_accuracies[9]) - 0.99,
+    value: 0.02,
+    fill: TABLEAU10[9],
+  },
+];
+
+const trainAccuracyGap2 = [
+  {
+    category: "A",
+    value: 0.01,
+    fill: TABLEAU10[0],
+  },
+  {
+    category: "B",
+    value: -0.01,
+    fill: TABLEAU10[1],
+  },
+  {
+    category: "C",
+    value: -0.03,
+    fill: TABLEAU10[2],
+  },
+  {
+    category: "D",
+    value: -0.02,
+    fill: TABLEAU10[3],
+  },
+  {
+    category: "E",
+    value: 0.01,
+    fill: TABLEAU10[4],
+  },
+  {
+    category: "F",
+    value: 0.02,
+    fill: TABLEAU10[5],
+  },
+  {
+    category: "G",
+    value: 0.04,
+    fill: TABLEAU10[6],
+  },
+  {
+    category: "H",
+    value: -0.01,
+    fill: TABLEAU10[7],
+  },
+  {
+    category: "I",
+    value: 0.01,
+    fill: TABLEAU10[8],
+  },
+  {
+    category: "J",
+    value: 0.02,
     fill: TABLEAU10[9],
   },
 ];
@@ -142,9 +195,7 @@ export default function PerformanceMetrics({ height }: Props) {
       <div className="w-full flex flex-col justify-center items-center">
         <div className="flex justify-center items-center mt-[6px]">
           <div className="flex flex-col justify-center items-center">
-            <h5 className="text-[14px] font-semibold mb-2">
-              Training Accuracies
-            </h5>
+            <h5 className="text-[14px] mb-2">Train</h5>
             <ChartContainer
               config={chartConfig}
               className="w-[220px] h-[200px]"
@@ -165,6 +216,7 @@ export default function PerformanceMetrics({ height }: Props) {
                   type="category"
                   tickLine={false}
                   axisLine={true}
+                  interval={0}
                   tickFormatter={(value) =>
                     chartConfig[value as keyof typeof chartConfig]?.label
                   }
@@ -185,14 +237,14 @@ export default function PerformanceMetrics({ height }: Props) {
             </ChartContainer>
           </div>
           <div className="flex flex-col justify-center items-center">
-            <h5 className="text-[14px] font-semibold mb-2">Test Accuracies</h5>
+            <h5 className="text-[14px] mb-2">Test</h5>
             <ChartContainer
               config={chartConfig}
-              style={{ width: "220px", height: "200px" }}
+              className="w-[220px] h-[200px]"
             >
               <BarChart
                 accessibilityLayer
-                data={trainAccuracyGap}
+                data={trainAccuracyGap2}
                 layout="vertical"
                 margin={{
                   left: -40,
@@ -206,6 +258,7 @@ export default function PerformanceMetrics({ height }: Props) {
                   type="category"
                   tickLine={false}
                   axisLine={true}
+                  interval={0}
                   tickFormatter={(value) =>
                     chartConfig[value as keyof typeof chartConfig]?.label
                   }
