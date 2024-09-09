@@ -111,14 +111,26 @@ export default function Embeddings({ height }: Props) {
         </div>
         <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
         <div className="w-[116px] h-[650px] flex flex-col justify-center items-center">
-          <div className="w-full h-[120px] flex flex-col justify-start items-start px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-            <span className="text-[15px] mb-1">Controls</span>
+          {/* Legend - Metadata */}
+          <div className="w-full h-[98px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+            <span className="text-[15px]">Metadata</span>
+            <div className="flex flex-col justify-start items-start">
+              <span className="text-[15px] font-light">Points: 2000</span>
+              <span className="text-[15px] font-light -my-[2px]">
+                Dimension: 8192
+              </span>
+              <span className="text-[15px] font-light">Dataset: Train</span>
+            </div>
+          </div>
+          {/* Legend - Controls */}
+          <div className="w-full h-[98px] flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+            <span className="text-[15px]">Controls</span>
             <div>
-              <div className="flex items-center mb-1">
+              <div className="flex items-center">
                 <CursorPointer01Icon className="scale-110 mr-[6px]" />
                 <span className="text-[15px] font-light">Details</span>
               </div>
-              <div className="flex items-center mb-1">
+              <div className="flex items-center -my-[2px]">
                 <ScrollVerticalIcon className="scale-110 mr-[6px]" />
                 <span className="text-[15px] font-light">Zooming</span>
               </div>
@@ -128,10 +140,11 @@ export default function Embeddings({ height }: Props) {
               </div>
             </div>
           </div>
-          <div className="w-full h-[94px] flex flex-col justify-start items-start my-2 px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-            <span className="text-[15px] mb-[6px]">Data Type</span>
+          {/* Legend - Data Type */}
+          <div className="w-full h-20 flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+            <span className="text-[15px]">Data Type</span>
             <div>
-              <div className="flex items-center text-[15px] font-light mb-[6px]">
+              <div className="flex items-center text-[15px] font-light">
                 <CircleIcon className="scale-75 mr-[6px]" />
                 <span>Retrained</span>
               </div>
@@ -141,76 +154,77 @@ export default function Embeddings({ height }: Props) {
               </div>
             </div>
           </div>
-          <div className="w-full flex flex-col justify-start items-start px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          {/* Legend - Predictions */}
+          <div className="w-full h-[358px] flex flex-col justify-start items-start px-[10px] py-[7px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Predictions</span>
             <div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[0]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">airplane</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[1]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">automobile</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[2]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">bird</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[3]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">cat</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[4]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">deer</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[5]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">dog</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[6]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">frog</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[7]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">horse</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[8]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">ship</span>
               </div>
               <div className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[9]}` }}
-                  className="w-[14px] h-[36px] mr-[6px]"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
                 <span className="text-[15px] font-light">truck</span>
               </div>

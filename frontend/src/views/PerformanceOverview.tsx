@@ -1,4 +1,5 @@
 import { useContext, useEffect } from "react";
+import * as d3 from "d3";
 
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
@@ -166,6 +167,8 @@ export default function PerformanceOverview({ height }: Props) {
   const retrainedRA = currRetrainedData.remain_accuracy;
   const retrainedTA = currRetrainedData.test_accuracy;
 
+  const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([1, 0]);
+
   return (
     <section
       style={{ height: `${height}px` }}
@@ -179,7 +182,14 @@ export default function PerformanceOverview({ height }: Props) {
         <div className="flex flex-col items-start absolute right-[6px] top-[6px]">
           <div className="text-[12px]">Performance</div>
           <div className="w-[250px] h-5 relative">
-            <div className="w-full h-[10px] bg-gradient-to-r from-[#0c0cff] via-[#f7f7f7] to-[#ff0303]"></div>
+            <div
+              className="w-full h-[10px]"
+              style={{
+                background: `linear-gradient(to right, ${colorScale(
+                  0
+                )}, ${colorScale(0.5)}, ${colorScale(1)})`,
+              }}
+            ></div>
             <div className="flex justify-between w-full text-[12px] mt-[2px]">
               <span>Low</span>
               <span>High</span>
