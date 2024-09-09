@@ -17,9 +17,12 @@ import { SelectedIDContext } from "../../store/selected-id-context";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { getDefaultUnlearningConfig } from "../../util";
 import { OverviewItem } from "../../types/overview-context";
-import { UNLEARNING_METHODS } from "../../constants/unlearning";
 import { cancelRunning, fetchRunningStatus } from "../../https/utils";
 import { EraserIcon } from "./icons";
+import {
+  UNLEARNING_METHODS,
+  UNLEARN_CLASSES,
+} from "../../constants/unlearning";
 import {
   UnlearningConfigurationData,
   ResultType,
@@ -326,19 +329,15 @@ export default function Unlearning({
                 <SelectValue placeholder={"0"} />
               </SelectTrigger>
               <SelectContent className="bg-white text-black overflow-ellipsis whitespace-nowrap">
-                {["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].map(
-                  (forgetClass, idx) => {
-                    return (
-                      <SelectItem
-                        key={idx}
-                        value={forgetClass}
-                        className="text-[13px]"
-                      >
-                        {forgetClass}
-                      </SelectItem>
-                    );
-                  }
-                )}
+                {UNLEARN_CLASSES.map((forgetClass, idx) => (
+                  <SelectItem
+                    key={idx}
+                    value={forgetClass}
+                    className="text-[13px]"
+                  >
+                    {forgetClass}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

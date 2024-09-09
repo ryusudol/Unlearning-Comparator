@@ -99,7 +99,7 @@ export default function Embeddings({ height }: Props) {
           />
         </div>
       </div>
-      <div className="w-[1428px] h-[683px] flex justify-around items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+      <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
         <div className="w-[116px] h-[650px] flex flex-col justify-center items-center">
           {/* Legend - Metadata */}
           <div className="w-full h-[98px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
