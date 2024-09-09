@@ -5,6 +5,10 @@ import { retrainedData } from "../constants/gt";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { BaselineContext } from "../store/baseline-context";
+import { Slider } from "../components/UI/slider";
+import { TABLEAU10 } from "../constants/tableau10";
+import { Label } from "../components/UI/label";
+import { Switch } from "../components/UI/switch";
 import {
   ChartScatterIcon,
   CircleIcon,
@@ -14,8 +18,6 @@ import {
   RepeatIcon,
   ScrollVerticalIcon,
 } from "../components/UI/icons";
-import { Slider } from "../components/UI/slider";
-import { TABLEAU10 } from "../constants/tableau10";
 
 interface Props {
   height: number;
@@ -222,12 +224,20 @@ export default function Embeddings({ height }: Props) {
           </div>
         </div>
         <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center relative">
+          <div className="absolute flex items-center space-x-2 top-6 right-1">
+            <Switch id="highlight-1" />
+            <Label htmlFor="highlight-1">Highlight</Label>
+          </div>
           <h5 className="mt-4">Baseline Model</h5>
           <SvgViewer svg={retrainSvgs[3]} />
         </div>
         <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center relative">
+          <div className="absolute flex items-center space-x-2 top-6 right-1">
+            <Switch id="highlight-2" />
+            <Label htmlFor="highlight-2">Highlight</Label>
+          </div>
           <h5 className="mt-4">Comparison Model</h5>
           <SvgViewer svg={retrainSvgs[3]} />
         </div>
