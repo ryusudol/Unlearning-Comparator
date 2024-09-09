@@ -225,21 +225,21 @@ export default function Embeddings({ height }: Props) {
         </div>
         <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
         <div className="flex flex-col justify-center items-center relative">
-          <div className="absolute flex items-center space-x-2 top-6 right-1">
-            <Switch id="highlight-1" />
+          <div className="absolute flex items-center space-x-2 top-8 right-1">
+            <Switch id="highlight-1" checked={false} />
             <Label htmlFor="highlight-1">Highlight</Label>
           </div>
-          <h5 className="mt-4">Baseline Model</h5>
-          <SvgViewer svg={retrainSvgs[3]} />
+          <h5 className="relative top-2">Baseline Model</h5>
+          <SvgViewer mode={0} svg={retrainSvgs[3]} />
         </div>
         <div className="h-[645px] w-[1.5px] bg-[#dfdfdf] mx-0" />
         <div className="flex flex-col justify-center items-center relative">
-          <div className="absolute flex items-center space-x-2 top-6 right-1">
-            <Switch id="highlight-2" />
+          <div className="absolute flex items-center space-x-2 top-8 right-1">
+            <Switch id="highlight-2" checked />
             <Label htmlFor="highlight-2">Highlight</Label>
           </div>
-          <h5 className="mt-4">Comparison Model</h5>
-          <SvgViewer svg={retrainSvgs[3]} />
+          <h5 className="relative top-2">Comparison Model</h5>
+          <SvgViewer mode={1} svg={retrainSvgs[3]} />
         </div>
       </div>
     </section>

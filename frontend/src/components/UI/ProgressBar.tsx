@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import styles from "./ProgressBar.module.css";
 
 interface Props {
   eta: number | undefined;
@@ -22,5 +21,5 @@ export default function ProgressBar({ eta }: Props) {
 
   const maxTime = eta && Math.round(eta * 1000);
 
-  return <progress className={styles.bar} value={elapsedTime} max={maxTime} />;
+  return <progress className="w-[138px]" value={elapsedTime} max={maxTime} />;
 }
