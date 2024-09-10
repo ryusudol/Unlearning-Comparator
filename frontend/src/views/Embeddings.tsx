@@ -1,14 +1,14 @@
 import { useState, useContext, useMemo, useCallback } from "react";
 
-import SvgViewer from "../components/UI/SvgViewer";
+import SvgViewer from "../components/SvgViewer";
 import { retrainedData } from "../constants/gt";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { BaselineContext } from "../store/baseline-context";
-import { Slider } from "../components/UI/slider";
+import { Slider } from "../components/ui/slider";
 import { TABLEAU10 } from "../constants/tableau10";
-import { Label } from "../components/UI/label";
-import { Switch } from "../components/UI/switch";
+import { Label } from "../components/ui/label";
+import { Switch } from "../components/ui/switch";
 import {
   ChartScatterIcon,
   CircleIcon,
@@ -17,7 +17,7 @@ import {
   MultiplicationSignIcon,
   RepeatIcon,
   ScrollVerticalIcon,
-} from "../components/UI/icons";
+} from "../components/ui/icons";
 
 interface Props {
   height: number;

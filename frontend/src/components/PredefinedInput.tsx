@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/UI/select";
+} from "./ui/select";
 
 interface Props {
   mode: 0 | 1;

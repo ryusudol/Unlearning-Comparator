@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
-import { Input } from "../components/UI/input";
+import { Input } from "./ui/input";
 
 interface Props {
   mode: 0 | 1;

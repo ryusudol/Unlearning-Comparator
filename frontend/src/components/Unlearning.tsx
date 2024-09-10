@@ -5,41 +5,38 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 
-import Input from "../Input";
-import CustomInput from "../CustomInput";
-import PredefinedInput from "../PredefinedInput";
-import OperationStatus from "../OperationStatus";
-import { MODELS, DATASET } from "../../constants/training";
-import { OverviewContext } from "../../store/overview-context";
-import { SelectedIDContext } from "../../store/selected-id-context";
-import { RunningStatusContext } from "../../store/running-status-context";
-import { getDefaultUnlearningConfig } from "../../util";
-import { OverviewItem } from "../../types/overview-context";
-import { cancelRunning, fetchRunningStatus } from "../../https/utils";
-import { EraserIcon } from "./icons";
-import {
-  UNLEARNING_METHODS,
-  UNLEARN_CLASSES,
-} from "../../constants/unlearning";
+import Input from "./Input";
+import CustomInput from "./CustomInput";
+import PredefinedInput from "./PredefinedInput";
+import OperationStatus from "./OperationStatus";
+import { MODELS, DATASET } from "../constants/training";
+import { OverviewContext } from "../store/overview-context";
+import { SelectedIDContext } from "../store/selected-id-context";
+import { RunningStatusContext } from "../store/running-status-context";
+import { getDefaultUnlearningConfig } from "../util";
+import { OverviewItem } from "../types/overview-context";
+import { cancelRunning, fetchRunningStatus } from "../https/utils";
+import { EraserIcon } from "./ui/icons";
+import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
 import {
   UnlearningConfigurationData,
   ResultType,
   UnlearningStatus,
-} from "../../types/settings";
+} from "../types/settings";
 import {
   executeCustomUnlearning,
   executePredefinedUnlearning,
   fetchUnlearningResult,
-} from "../../https/unlearning";
+} from "../https/unlearning";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/UI/select";
+} from "./ui/select";
 
 const initialValue = {
   method: "Fine-Tuning",

@@ -1,18 +1,18 @@
 import React, { useCallback, useRef, useContext, useEffect } from "react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 
-import Input from "../Input";
-import PredefinedInput from "../PredefinedInput";
-import OperationStatus from "../OperationStatus";
-import { MODELS, DATASET } from "../../constants/training";
-import { RunningStatusContext } from "../../store/running-status-context";
+import Input from "./Input";
+import PredefinedInput from "./PredefinedInput";
+import OperationStatus from "./OperationStatus";
+import { MODELS, DATASET } from "../constants/training";
+import { RunningStatusContext } from "../store/running-status-context";
 import {
   fetchRunningStatus,
   cancelRunning,
   fetchModelFiles,
-} from "../../https/utils";
-import { TrainingConfigurationData } from "../../types/settings";
-import { executeTraining } from "../../https/training";
+} from "../https/utils";
+import { TrainingConfigurationData } from "../types/settings";
+import { executeTraining } from "../https/training";
 
 export interface TrainingProps {
   setTrainedModels: (models: string[]) => void;

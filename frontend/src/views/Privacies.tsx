@@ -5,21 +5,21 @@ import {
   ImageDelete01Icon,
   SecurityCheckIcon,
   UserQuestion01Icon,
-} from "../components/UI/icons";
-import { Button } from "../components/UI/button";
+} from "../components/ui/icons";
+import { Button } from "../components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/UI/select";
+} from "../components/ui/select";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "../components/UI/chart";
+} from "../components/ui/chart";
 import React from "react";
 
 interface Props {

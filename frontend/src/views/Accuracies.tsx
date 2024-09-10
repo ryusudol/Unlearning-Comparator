@@ -6,13 +6,13 @@ import { BaselineContext } from "../store/baseline-context";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { TABLEAU10 } from "../constants/tableau10";
-import { Chart01Icon } from "../components/UI/icons";
+import { Chart01Icon } from "../components/ui/icons";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "../components/UI/chart";
+} from "../components/ui/chart";
 
 const trainAccuracyGap = [
   {

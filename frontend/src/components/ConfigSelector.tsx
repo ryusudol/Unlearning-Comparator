@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { RunningStatusContext } from "../../store/running-status-context";
+import { RunningStatusContext } from "../store/running-status-context";
 
 interface Props {
   mode: number;

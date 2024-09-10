@@ -5,7 +5,7 @@ import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { retrainedData } from "../constants/gt";
-import { AnalysisTextLinkIcon } from "../components/UI/icons";
+import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import DataTable from "../components/DataTable";
 import { Overview, columns } from "../components/Columns";
 
