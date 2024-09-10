@@ -6,8 +6,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/UI/select";
-import { Input } from "../components/UI/input";
+} from "./ui/select";
+import { Input } from "./ui/input";
 
 type PropsType = {
   labelName: string;

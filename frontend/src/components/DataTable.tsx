@@ -17,9 +17,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./UI/table";
-import { Input } from "./UI/input";
-import { ScrollArea } from "./UI/scroll-area";
+} from "./ui/table";
+import { Input } from "./ui/input";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

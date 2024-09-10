@@ -6,13 +6,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/UI/select";
+} from "./ui/select";
 import {
   EraserIcon,
   NeuralNetworkIcon,
   GitCompareIcon,
   PlayCircleIcon,
-} from "./UI/icons";
+} from "./ui/icons";
 
 export default function Header() {
   const [forgetClass, setForgetClass] = useState("0");

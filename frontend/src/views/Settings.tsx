@@ -1,11 +1,11 @@
 import { useState } from "react";
 
-import ConfigSelector from "../components/UI/ConfigSelector";
-import Training from "../components/UI/Training";
-import Unlearning from "../components/UI/Unlearning";
-import Defense from "../components/UI/Defense";
+import ConfigSelector from "../components/ConfigSelector";
+import Training from "../components/Training";
+import Unlearning from "../components/Unlearning";
+import Defense from "../components/Defense";
 import { useFetchModels } from "../hooks/useFetchModels";
-import { SettingsIcon } from "../components/UI/icons";
+import { SettingsIcon } from "../components/ui/icons";
 
 type Mode = 0 | 1 | 2;
 

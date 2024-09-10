@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import ProgressBar from "../components/UI/ProgressBar";
 import { getAccuracies } from "../util";
+import { Progress } from "./ui/progress";
 import {
   TrainingStatus,
   UnlearningStatus,
@@ -11,6 +11,7 @@ import {
 const MODES: Mode[] = ["Test", "Train"];
 let prevETA: number, ETA: number | undefined;
 
+const TIME_UNIT = 500;
 type Mode = "Test" | "Train";
 type Identifier = "training" | "unlearning" | "defense";
 interface Props {
@@ -25,6 +26,17 @@ export default function OperationStatus({
   status,
 }: Props) {
   const [selectedMode, setSelectedMode] = useState<Mode>(MODES[0]);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedTime((prevElapsedTime) => prevElapsedTime + TIME_UNIT);
+    }, TIME_UNIT);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleModeSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMode(e.currentTarget.value as Mode);
@@ -35,19 +47,18 @@ export default function OperationStatus({
     identifier,
     status
   );
+  const eta = status?.estimated_time_remaining;
 
-  if (status && status.estimated_time_remaining && status.current_epoch === 1) {
-    prevETA = status.estimated_time_remaining;
-    ETA = status.estimated_time_remaining;
-  } else if (
-    status &&
-    status.estimated_time_remaining &&
-    status.current_epoch > 1
-  ) {
+  if (status && eta && status.current_epoch === 1) {
+    prevETA = eta;
+    ETA = eta;
+  } else if (status && eta && status.current_epoch > 1) {
     ETA = prevETA;
   } else {
     ETA = undefined;
   }
+
+  const maxTime = ETA && Math.round(ETA * 1000);
 
   return (
     <div className="w-full h-[168px] flex justify-start items-start px-[3px]">
@@ -89,7 +100,7 @@ export default function OperationStatus({
             <span className="text-[12px] mb-[3px]">
               ETA: {status.estimated_time_remaining!.toFixed(2)}s
             </span>
-            <ProgressBar eta={ETA} />
+            <Progress className="w-[140px]" value={elapsedTime} max={maxTime} />
           </div>
         )}
       </div>

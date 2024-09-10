@@ -1,13 +1,13 @@
 import React, { useState, useContext } from "react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 
-import Input from "../Input";
-import PredefinedInput from "../PredefinedInput";
-import CustomInput from "../CustomInput";
-import OperationStatus from "../OperationStatus";
-import { DEFENSE_METHODS } from "../../constants/defense";
-import { DefenseConfigurationData } from "../../types/settings";
-import { RunningStatusContext } from "../../store/running-status-context";
+import Input from "./Input";
+import PredefinedInput from "./PredefinedInput";
+import CustomInput from "./CustomInput";
+import OperationStatus from "./OperationStatus";
+import { DEFENSE_METHODS } from "../constants/defense";
+import { DefenseConfigurationData } from "../types/settings";
+import { RunningStatusContext } from "../store/running-status-context";
 
 export interface DefenseProps {
   unlearnedModels: string[];
