@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import { SecurityCheckIcon } from "../components/UI/icons";
+import {
+  ImageDelete01Icon,
+  SecurityCheckIcon,
+  UserQuestion01Icon,
+} from "../components/UI/icons";
 import { Button } from "../components/UI/button";
 import {
   Select,
@@ -63,7 +67,10 @@ export default function Privacies({ height }: Props) {
           <h5 className="font-semibold ml-[3px]">Privacies</h5>
         </div>
         <div className="w-full flex flex-col justify-center items-center mb-[5px]">
-          <p className="text-[15px]">Membership Inference Attack</p>
+          <div className="w-full flex justify-start items-center mb-1">
+            <UserQuestion01Icon className="mr-[2px]" />
+            <p className="text-[15px]">Membership Inference Attack</p>
+          </div>
           <ChartContainer config={chartConfig} className="w-[420px] h-[182px]">
             <AreaChart
               accessibilityLayer
@@ -109,7 +116,7 @@ export default function Privacies({ height }: Props) {
               <SelectTrigger className="w-[70px] h-7 pr-1 bg-white text-black font-normal">
                 <SelectValue placeholder={attack} />
               </SelectTrigger>
-              <SelectContent className="w-[70px] relative right-14">
+              <SelectContent className="w-[70px]">
                 {ATTACKS.map((el, idx) => (
                   <SelectItem key={idx} value={el}>
                     {el}
@@ -118,7 +125,10 @@ export default function Privacies({ height }: Props) {
               </SelectContent>
             </Select>
           </div>
-          <p className="text-[15px] mb-1">Model Inversion Attack</p>
+          <div className="w-full flex justify-start items-center mb-1">
+            <ImageDelete01Icon className="mr-[2px]" />
+            <p className="text-[15px]">Model Inversion Attack</p>
+          </div>
           <div className="w-[468px] h-[444px] p-[5px] flex flex-col justify-start items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <div className="flex justify-between items-center text-[15px] font-light w-[300px]">
               <p>Comparison Model</p>
