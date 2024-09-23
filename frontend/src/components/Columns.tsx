@@ -20,6 +20,18 @@ export type Overview = {
   logits: number;
 };
 
+export const colors = [
+  "#F2AAA8",
+  "#F4B6B4",
+  "#F6C3C1",
+  "#F7CFCD",
+  "#FFFFFF",
+  "#CDD2F7",
+  "#C1C7F6",
+  "#B4BBF4",
+  "#A6A6F9",
+];
+
 export const columns: ColumnDef<Overview>[] = [
   {
     accessorKey: "id",

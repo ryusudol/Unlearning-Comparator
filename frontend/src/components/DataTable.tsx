@@ -24,11 +24,17 @@ import { ScrollArea } from "./ui/scroll-area";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  performanceMetrics: {
+    [key: string]: {
+      colorScale: d3.ScaleQuantile<string, never>;
+    };
+  };
 }
 
 export default function DataTable<TData, TValue>({
   columns,
   data,
+  performanceMetrics,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -86,14 +92,32 @@ export default function DataTable<TData, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      const columnId = cell.column.id;
+
+                      const isPerformanceMetric =
+                        performanceMetrics[columnId] !== undefined;
+
+                      let cellStyle = {};
+                      if (isPerformanceMetric) {
+                        const value = cell.getValue() as number;
+                        const { colorScale } = performanceMetrics[columnId];
+                        const color = colorScale(value);
+
+                        cellStyle = {
+                          backgroundColor: color,
+                        };
+                      }
+
+                      return (
+                        <TableCell key={cell.id} style={cellStyle}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))
               ) : (

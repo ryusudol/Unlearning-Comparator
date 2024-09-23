@@ -7,7 +7,7 @@ import { SelectedIDContext } from "../store/selected-id-context";
 import { retrainedData } from "../constants/gt";
 import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import DataTable from "../components/DataTable";
-import { Overview, columns } from "../components/Columns";
+import { Overview, colors, columns } from "../components/Columns";
 
 export const payments: Overview[] = [
   {
@@ -59,6 +59,22 @@ export const payments: Overview[] = [
     logits: 23.12,
   },
   {
+    id: "p83h",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forget: "3",
+    training: "-",
+    unlearning: "Retrain",
+    defense: "-",
+    ua: 0.004,
+    ra: 1.0,
+    ta: 0.981,
+    mia: 31.28,
+    avgGap: 0,
+    rte: 1491.7,
+    logits: 22.38,
+  },
+  {
     id: "j30a",
     model: "ResNet18",
     dataset: "CIFAR-10",
@@ -66,7 +82,7 @@ export const payments: Overview[] = [
     training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
     unlearning: "Gradient-Ascent",
     defense: "-",
-    ua: 0.012,
+    ua: 0.008,
     ra: 0.981,
     ta: 0.998,
     mia: 31.41,
@@ -89,22 +105,6 @@ export const payments: Overview[] = [
     avgGap: 0,
     rte: 1459.4,
     logits: 22.41,
-  },
-  {
-    id: "p83h",
-    model: "ResNet18",
-    dataset: "CIFAR-10",
-    forget: "3",
-    training: "-",
-    unlearning: "Retrain",
-    defense: "-",
-    ua: 0.004,
-    ra: 1.0,
-    ta: 0.981,
-    mia: 31.28,
-    avgGap: 0,
-    rte: 1491.7,
-    logits: 22.38,
   },
   {
     id: "v097",
@@ -138,7 +138,55 @@ export const payments: Overview[] = [
     rte: 1497.5,
     logits: 21.23,
   },
+  {
+    id: "j68d",
+    model: "ResNet18",
+    dataset: "CIFAR-10",
+    forget: "6",
+    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    unlearning: "Fint-Tuning",
+    defense: "-",
+    ua: 0.011,
+    ra: 0.978,
+    ta: 0.981,
+    mia: 30.11,
+    avgGap: 1.112,
+    rte: 1497.7,
+    logits: 21.76,
+  },
 ];
+
+const uaValues = payments.map((d) => d.ua);
+const raValues = payments.map((d) => d.ra);
+const taValues = payments.map((d) => d.ta);
+const miaValues = payments.map((d) => d.mia);
+const avgGapValues = payments.map((d) => d.avgGap);
+const rteValues = payments.map((d) => d.rte);
+const logitsValues = payments.map((d) => d.logits);
+
+const performanceMetrics = {
+  ua: {
+    colorScale: d3.scaleQuantile<string>().domain(uaValues).range(colors),
+  },
+  ra: {
+    colorScale: d3.scaleQuantile<string>().domain(raValues).range(colors),
+  },
+  ta: {
+    colorScale: d3.scaleQuantile<string>().domain(taValues).range(colors),
+  },
+  mia: {
+    colorScale: d3.scaleQuantile<string>().domain(miaValues).range(colors),
+  },
+  avgGap: {
+    colorScale: d3.scaleQuantile<string>().domain(avgGapValues).range(colors),
+  },
+  rte: {
+    colorScale: d3.scaleQuantile<string>().domain(rteValues).range(colors),
+  },
+  logits: {
+    colorScale: d3.scaleQuantile<string>().domain(logitsValues).range(colors),
+  },
+};
 
 interface Props {
   height: number;
@@ -167,7 +215,11 @@ export default function PerformanceOverview({ height }: Props) {
   const retrainedRA = currRetrainedData.remain_accuracy;
   const retrainedTA = currRetrainedData.test_accuracy;
 
-  const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([1, 0]);
+  const colorScale = d3
+    .scaleSequential<string>(
+      d3.interpolateRgbBasis(["#F2AAA8", "#FFFFFF", "#A6A6F9"])
+    )
+    .domain([1, 0]);
 
   return (
     <section
@@ -197,9 +249,11 @@ export default function PerformanceOverview({ height }: Props) {
           </div>
         </div>
       </div>
-      <div className="">
-        <DataTable columns={columns} data={payments} />
-      </div>
+      <DataTable
+        columns={columns}
+        data={payments}
+        performanceMetrics={performanceMetrics}
+      />
     </section>
   );
 }
