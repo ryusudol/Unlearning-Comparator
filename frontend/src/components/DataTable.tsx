@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -20,6 +20,7 @@ import {
 } from "./ui/table";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
+import { hexToRgba } from "../util";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,10 +37,9 @@ export default function DataTable<TData, TValue>({
   data,
   performanceMetrics,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
@@ -87,25 +87,39 @@ export default function DataTable<TData, TValue>({
             </TableHeader>
             <TableBody className="text-[13px]">
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
+                table.getRowModel().rows.map((row, rowIdx) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    onMouseEnter={() => setHoveredRowIndex(rowIdx)}
+                    onMouseLeave={() => setHoveredRowIndex(null)}
                   >
-                    {row.getVisibleCells().map((cell) => {
+                    {row.getVisibleCells().map((cell, idx) => {
                       const columnId = cell.column.id;
 
                       const isPerformanceMetric =
                         performanceMetrics[columnId] !== undefined;
 
-                      let cellStyle = {};
+                      let cellStyle = {},
+                        color = "",
+                        rgbaColor = "";
                       if (isPerformanceMetric) {
                         const value = cell.getValue() as number;
                         const { colorScale } = performanceMetrics[columnId];
-                        const color = colorScale(value);
+                        color = colorScale(value);
+                        rgbaColor = hexToRgba(color);
 
                         cellStyle = {
-                          backgroundColor: color,
+                          borderLeft:
+                            columnId === "ua"
+                              ? "1px solid rgb(229 231 235)"
+                              : "none",
+                          borderRight:
+                            idx === row.getVisibleCells().length - 1
+                              ? "none"
+                              : "1px solid rgb(229 231 235)",
+                          backgroundColor:
+                            hoveredRowIndex === rowIdx ? rgbaColor : color,
                         };
                       }
 
