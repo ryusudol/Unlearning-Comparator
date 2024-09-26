@@ -1,12 +1,12 @@
 import { useContext, useEffect } from "react";
 import * as d3 from "d3";
 
+import DataTable from "../components/DataTable";
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { retrainedData } from "../constants/gt";
 import { AnalysisTextLinkIcon } from "../components/ui/icons";
-import DataTable from "../components/DataTable";
 import { Overview, colors, columns } from "../components/Columns";
 
 export const payments: Overview[] = [
@@ -156,43 +156,41 @@ export const payments: Overview[] = [
   },
 ];
 
-const uaValues = payments.map((d) => d.ua);
-const raValues = payments.map((d) => d.ra);
-const taValues = payments.map((d) => d.ta);
-const miaValues = payments.map((d) => d.mia);
-const avgGapValues = payments.map((d) => d.avgGap);
-const rteValues = payments.map((d) => d.rte);
-const logitsValues = payments.map((d) => d.logits);
+const values = {
+  ua: payments.map((d) => d.ua),
+  ra: payments.map((d) => d.ra),
+  ta: payments.map((d) => d.ta),
+  mia: payments.map((d) => d.mia),
+  avgGap: payments.map((d) => d.avgGap),
+  rte: payments.map((d) => d.rte),
+  logits: payments.map((d) => d.logits),
+};
 
 const performanceMetrics = {
   ua: {
-    colorScale: d3.scaleQuantile<string>().domain(uaValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.ua).range(colors),
   },
   ra: {
-    colorScale: d3.scaleQuantile<string>().domain(raValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.ra).range(colors),
   },
   ta: {
-    colorScale: d3.scaleQuantile<string>().domain(taValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.ta).range(colors),
   },
   mia: {
-    colorScale: d3.scaleQuantile<string>().domain(miaValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.mia).range(colors),
   },
   avgGap: {
-    colorScale: d3.scaleQuantile<string>().domain(avgGapValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.avgGap).range(colors),
   },
   rte: {
-    colorScale: d3.scaleQuantile<string>().domain(rteValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.rte).range(colors),
   },
   logits: {
-    colorScale: d3.scaleQuantile<string>().domain(logitsValues).range(colors),
+    colorScale: d3.scaleQuantile<string>().domain(values.logits).range(colors),
   },
 };
 
-interface Props {
-  height: number;
-}
-
-export default function PerformanceOverview({ height }: Props) {
+export default function PerformanceOverview({ height }: { height: number }) {
   const { overview, retrieveOverview } = useContext(OverviewContext);
   const { baseline } = useContext(BaselineContext);
   const { selectedID, saveSelectedID } = useContext(SelectedIDContext);
