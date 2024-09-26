@@ -26,10 +26,10 @@ export const colors = [
   "#C1C7F6",
   "#CDD2F7",
   "#FFFFFF",
-  "#F2AAA8",
-  "#F4B6B4",
-  "#F6C3C1",
   "#F7CFCD",
+  "#F6C3C1",
+  "#F4B6B4",
+  "#F2AAA8",
 ];
 
 export const columns: ColumnDef<Overview>[] = [
