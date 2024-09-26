@@ -186,7 +186,10 @@ export default function PerformanceMetrics({ height }: Props) {
     ) / 100;
 
   return (
-    <section className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]">
+    <section
+      style={{ height: height }}
+      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+    >
       <div className="flex items-center">
         <Chart01Icon />
         <h5 className="font-semibold ml-[3px]">Accuracies</h5>
