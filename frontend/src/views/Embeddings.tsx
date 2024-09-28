@@ -1,14 +1,14 @@
 import { useState, useContext, useMemo, useCallback } from "react";
 
 import SvgViewer from "../components/SvgViewer";
+import ToggleGroup from "../components/ToggleGroup";
 import { retrainedData } from "../constants/gt";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { BaselineContext } from "../store/baseline-context";
 import { Slider } from "../components/ui/slider";
+import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
-import { Label } from "../components/ui/label";
-import { Switch } from "../components/ui/switch";
 import {
   ChartScatterIcon,
   CircleIcon,
@@ -17,6 +17,8 @@ import {
   MultiplicationSignIcon,
   RepeatIcon,
   ScrollVerticalIcon,
+  NeuralNetworkIcon,
+  GitCompareIcon,
 } from "../components/ui/icons";
 
 interface Props {
@@ -221,26 +223,28 @@ export default function Embeddings({ height }: Props) {
             </div>
           </div>
         </div>
-        <div className="h-[660px] w-[1px] bg-[#dfdfdf] mx-[2px]" />
+        <Separator
+          orientation="vertical"
+          className="h-[664px] w-[1px] mx-[2px]"
+        />
         <div className="flex flex-col justify-center items-center relative">
-          <div className="absolute flex items-center space-x-2 top-8 right-1">
-            <Switch id="highlight-1" checked={false} />
-            <Label htmlFor="highlight-1" className="font-light">
-              Highlight
-            </Label>
+          <div className="flex relative top-7 items-center">
+            <NeuralNetworkIcon className="mr-[2px]" />
+            <h5 className="ml-[2px]">Baseline Model</h5>
           </div>
-          <h5 className="relative top-2">Comparison Model</h5>
+          <ToggleGroup />
           <SvgViewer mode={0} svg={retrainSvgs[3]} />
         </div>
-        <div className="h-[660px] w-[1px] bg-[#dfdfdf] mx-[2px]" />
+        <Separator
+          orientation="vertical"
+          className="h-[664px] w-[1px] mx-[2px]"
+        />
         <div className="flex flex-col justify-center items-center relative">
-          <div className="absolute flex items-center space-x-2 top-8 right-1">
-            <Switch id="highlight-2" checked />
-            <Label htmlFor="highlight-2" className="font-light">
-              Highlight
-            </Label>
+          <div className="flex relative top-7 items-center">
+            <GitCompareIcon className="mr-[2px]" />
+            <h5 className="ml-[2px]">Comparison Model</h5>
           </div>
-          <h5 className="relative top-2">Proposed Model</h5>
+          <ToggleGroup />
           <SvgViewer mode={1} svg={retrainSvgs[3]} />
         </div>
       </div>
