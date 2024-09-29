@@ -31,7 +31,7 @@ const ChartComponent = ({ data, width, height }: Props) => {
     ) =>
       g
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisTop(x).ticks(12))
+        .call(d3.axisTop(x).ticks(0))
         .call((g) => g.select(".domain").attr("display", "none")),
     [height]
   );
@@ -42,9 +42,9 @@ const ChartComponent = ({ data, width, height }: Props) => {
       y: d3.ScaleLinear<number, number>
     ) =>
       g
-        .call(d3.axisRight(y).ticks(12 * k))
+        .call(d3.axisRight(y).ticks(0))
         .call((g) => g.select(".domain").attr("display", "none")),
-    [k]
+    []
   );
 
   const grid = useCallback(
@@ -166,9 +166,6 @@ const ChartComponent = ({ data, width, height }: Props) => {
     >
       <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
     </div>
-    // <div>
-    //   <svg ref={svgRef}></svg>
-    // </div>
   );
 };
 
