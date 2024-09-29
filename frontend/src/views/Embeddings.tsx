@@ -1,11 +1,7 @@
-import { useState, useContext, useMemo, useCallback } from "react";
+import { useState } from "react";
 
 import SvgViewer from "../components/SvgViewer";
 import ToggleGroup from "../components/ToggleGroup";
-import { retrainedData } from "../constants/gt";
-import { OverviewContext } from "../store/overview-context";
-import { SelectedIDContext } from "../store/selected-id-context";
-import { BaselineContext } from "../store/baseline-context";
 import { Slider } from "../components/ui/slider";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
@@ -28,29 +24,6 @@ interface Props {
 export default function Embeddings({ height }: Props) {
   const [neighbors, setNeighbors] = useState([5]);
   const [dist, setDist] = useState([0.1]);
-
-  const { overview } = useContext(OverviewContext);
-  const { selectedID } = useContext(SelectedIDContext);
-  const { baseline } = useContext(BaselineContext);
-
-  const currOverview = overview.filter(
-    (item) => item.forget_class === baseline.toString()
-  );
-
-  const retrainByteSvgs = useMemo(
-    () => Object.values(retrainedData[baseline].svg_files),
-    [baseline]
-  );
-  const unlearnSvgs = useMemo(
-    () => currOverview[selectedID]?.unlearn_svgs || [],
-    [currOverview, selectedID]
-  );
-
-  const decoder = useCallback(
-    () => retrainByteSvgs.slice(0, 4).map(atob),
-    [retrainByteSvgs]
-  );
-  const retrainSvgs = useMemo(() => decoder(), [decoder]);
 
   const handleReplayClick = () => {
     console.log("Replay Button Clicked !");
@@ -233,7 +206,7 @@ export default function Embeddings({ height }: Props) {
             <h5 className="ml-[2px]">Baseline Model</h5>
           </div>
           <ToggleGroup />
-          <SvgViewer mode={0} svg={retrainSvgs[3]} />
+          <SvgViewer mode="baseline" />
         </div>
         <Separator
           orientation="vertical"
@@ -245,7 +218,7 @@ export default function Embeddings({ height }: Props) {
             <h5 className="ml-[2px]">Comparison Model</h5>
           </div>
           <ToggleGroup />
-          <SvgViewer mode={1} svg={retrainSvgs[3]} />
+          <SvgViewer mode="comparison" />
         </div>
       </div>
     </section>
