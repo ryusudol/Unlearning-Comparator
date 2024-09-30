@@ -94,7 +94,12 @@
   padding: 0;
 }
 
+html {
+  overscroll-behavior: none;
+}
+
 body {
+  overscroll-behavior: none;
   height: 100vh;
   weight: 100vw;
   display: flex;
