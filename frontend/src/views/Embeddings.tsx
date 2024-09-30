@@ -1,6 +1,8 @@
-import { useState } from "react";
+import React, { useState, useRef, useMemo } from "react";
+import * as d3 from "d3";
+import { AiOutlineHome } from "react-icons/ai";
 
-import SvgViewer from "../components/SvgViewer";
+import Chart from "../components/Chart";
 import ToggleGroup from "../components/ToggleGroup";
 import { Slider } from "../components/ui/slider";
 import { Separator } from "../components/ui/separator";
@@ -17,6 +19,69 @@ import {
   GitCompareIcon,
 } from "../components/ui/icons";
 
+const classNames = [
+  "airplane",
+  "automobile",
+  "bird",
+  "cat",
+  "deer",
+  "dog",
+  "frog",
+  "horse",
+  "ship",
+  "truck",
+];
+const dotCount = 500;
+const generateData = () => {
+  const random = d3.randomNormal(0, 0.2);
+  const sqrt3 = Math.sqrt(3);
+
+  const result: number[][] = [];
+
+  result.push(
+    ...Array.from({ length: dotCount }, () => [
+      random() + sqrt3,
+      random() + 1,
+      0,
+    ]),
+    ...Array.from({ length: dotCount }, () => [
+      random() - sqrt3,
+      random() + 1,
+      1,
+    ]),
+    ...Array.from({ length: dotCount }, () => [random(), random() - 1, 2]),
+    ...Array.from({ length: dotCount }, () => [
+      random() + sqrt3,
+      random() - sqrt3,
+      3,
+    ]),
+    ...Array.from({ length: dotCount }, () => [
+      random() - sqrt3,
+      random() - sqrt3,
+      4,
+    ]),
+    ...Array.from({ length: dotCount }, () => [
+      random() + 2 * sqrt3,
+      random() + 1,
+      5,
+    ]),
+    ...Array.from({ length: dotCount }, () => [
+      random() - 2 * sqrt3,
+      random() + 1,
+      6,
+    ]),
+    ...Array.from({ length: dotCount }, () => [random() + 2, random() - 1, 7]),
+    ...Array.from({ length: dotCount }, () => [random() - 2, random() - 1, 8]),
+    ...Array.from({ length: dotCount }, () => [
+      random() * 1.5,
+      random() * 1.5,
+      9,
+    ])
+  );
+
+  return result;
+};
+
 interface Props {
   height: number;
 }
@@ -25,8 +90,21 @@ export default function Embeddings({ height }: Props) {
   const [neighbors, setNeighbors] = useState([5]);
   const [dist, setDist] = useState([0.1]);
 
+  const baselineChartRef = useRef<{ reset: () => void } | null>(null);
+  const comparisonChartRef = useRef<{ reset: () => void } | null>(null);
+
+  const data = useMemo(() => generateData(), []);
+
   const handleReplayClick = () => {
     console.log("Replay Button Clicked !");
+  };
+
+  const handleResetClick = (e: React.MouseEvent) => {
+    const id = e.currentTarget.id;
+    const ref = id === "baseline" ? baselineChartRef : comparisonChartRef;
+    if (ref.current && typeof ref.current.reset === "function") {
+      ref.current.reset();
+    }
   };
 
   return (
@@ -39,7 +117,7 @@ export default function Embeddings({ height }: Props) {
           <ChartScatterIcon />
           <h5 className="font-semibold ml-[3px]">Embeddings</h5>
         </div>
-        <div className="w-[680px] flex justify-end items-center">
+        <div className="w-[680px] flex justify-end items-center z-10">
           <div className="flex items-center">
             <span>neighbors</span>
             <div className="flex items-center">
@@ -82,13 +160,15 @@ export default function Embeddings({ height }: Props) {
           <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Metadata</span>
             <div className="flex flex-col justify-start items-start">
-              <span className="text-[15px] font-light">Points: 2000</span>
+              <span className="text-[15px] font-light">
+                Points: {dotCount * 10}
+              </span>
               <span className="text-[15px] font-light">Dimension: 8192</span>
               <span className="text-[15px] font-light">Dataset: Training</span>
             </div>
           </div>
           {/* Legend - Controls */}
-          <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Controls</span>
             <div>
               <div className="flex items-center">
@@ -106,7 +186,7 @@ export default function Embeddings({ height }: Props) {
             </div>
           </div>
           {/* Legend - Data Type */}
-          <div className="w-full h-[85px] flex flex-col justify-start items-start mb-[5px] px-[10px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <div className="w-full h-[85px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Data Type</span>
             <div>
               <div className="flex items-center text-[15px] font-light">
@@ -120,79 +200,20 @@ export default function Embeddings({ height }: Props) {
             </div>
           </div>
           {/* Legend - Predictions */}
-          <div className="w-full h-[358px] flex flex-col justify-start items-start px-[10px] py-[7px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <div className="w-full h-[358px] flex flex-col justify-start items-start pl-2 pr-[2px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
             <span className="text-[15px]">Predictions</span>
             <div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[0]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">airplane</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[1]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">automobile</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[2]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">bird</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[3]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">cat</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[4]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">deer</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[5]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">dog</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[6]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">frog</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[7]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">horse</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[8]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">ship</span>
-              </div>
-              <div className="flex items-center mb-[2px]">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[9]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
-                />
-                <span className="text-[15px] font-light">truck</span>
-              </div>
+              {classNames.map((className, idx) => (
+                <div className="flex items-center mb-[2px]">
+                  <div
+                    style={{ backgroundColor: `${TABLEAU10[idx]}` }}
+                    className="w-[14px] h-[30px] mr-1"
+                  />
+                  <span className="text-[15px] font-light">
+                    {idx} ({className})
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -200,25 +221,63 @@ export default function Embeddings({ height }: Props) {
           orientation="vertical"
           className="h-[664px] w-[1px] mx-[2px]"
         />
-        <div className="flex flex-col justify-center items-center relative">
+        <div className="flex flex-col items-center relative">
+          <div className="flex items-center absolute top-[30px] left-0">
+            <AiOutlineHome
+              id="baseline"
+              className="mr-1 scale-90 cursor-pointer"
+              onClick={handleResetClick}
+            />
+            <span className="text-[13px] font-light">
+              | Predictions: 6 | Ground Truth: 6
+            </span>
+          </div>
           <div className="flex relative top-7 items-center">
-            <NeuralNetworkIcon className="mr-[2px]" />
-            <h5 className="ml-[2px]">Baseline Model</h5>
+            <div className="flex items-center">
+              <NeuralNetworkIcon className="mr-[2px]" />
+              <h5 className="text-[15px] ml-[2px]">Baseline Model (id01)</h5>
+            </div>
           </div>
           <ToggleGroup />
-          <SvgViewer mode="baseline" />
+          <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
+            <Chart
+              data={data}
+              width={620}
+              height={630}
+              ref={baselineChartRef}
+            />
+          </div>
         </div>
         <Separator
           orientation="vertical"
           className="h-[664px] w-[1px] mx-[2px]"
         />
-        <div className="flex flex-col justify-center items-center relative">
+        <div className="flex flex-col items-center relative">
+          <div className="flex items-center absolute top-[30px] left-0">
+            <AiOutlineHome
+              id="comparison"
+              className="mr-1 scale-90 cursor-pointer"
+              onClick={handleResetClick}
+            />
+            <span className="text-[13px] font-light">
+              | Predictions: 6 | Ground Truth: 6
+            </span>
+          </div>
           <div className="flex relative top-7 items-center">
-            <GitCompareIcon className="mr-[2px]" />
-            <h5 className="ml-[2px]">Comparison Model</h5>
+            <div className="flex items-center">
+              <GitCompareIcon className="mr-[2px]" />
+              <h5 className="text-[15px] ml-[2px]">Comparison Model (id02)</h5>
+            </div>
           </div>
           <ToggleGroup />
-          <SvgViewer mode="comparison" />
+          <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
+            {/* <Chart
+              data={data}
+              width={620}
+              height={630}
+              ref={comparisonChartRef}
+            /> */}
+          </div>
         </div>
       </div>
     </section>

@@ -1,4 +1,10 @@
-import { useEffect, useRef, useCallback } from "react";
+import {
+  useImperativeHandle,
+  forwardRef,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import * as d3 from "d3";
 
 interface Props {
@@ -7,7 +13,7 @@ interface Props {
   height: number;
 }
 
-const ChartComponent = ({ data, width, height }: Props) => {
+const Chart = forwardRef(({ data, width, height }: Props, ref) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const k = height / width;
@@ -47,61 +53,29 @@ const ChartComponent = ({ data, width, height }: Props) => {
     []
   );
 
-  const grid = useCallback(
-    (
-      g: d3.Selection<SVGGElement, undefined, null, undefined>,
-      x: d3.ScaleLinear<number, number>,
-      y: d3.ScaleLinear<number, number>
-    ) =>
-      g
-        .attr("stroke", "currentColor")
-        .attr("stroke-opacity", 0.1)
-        .call((g) =>
-          g
-            .selectAll(".x")
-            .data(x.ticks(12))
-            .join(
-              (enter) =>
-                enter.append("line").attr("class", "x").attr("y2", height),
-              (update) => update,
-              (exit) => exit.remove()
-            )
-            .attr("x1", (d) => 0.5 + x(d))
-            .attr("x2", (d) => 0.5 + x(d))
-        )
-        .call((g) =>
-          g
-            .selectAll(".y")
-            .data(y.ticks(12 * k))
-            .join(
-              (enter) =>
-                enter.append("line").attr("class", "y").attr("x2", width),
-              (update) => update,
-              (exit) => exit.remove()
-            )
-            .attr("y1", (d) => 0.5 + y(d))
-            .attr("y2", (d) => 0.5 + y(d))
-        ),
-    [height, k, width]
-  );
+  const zoomRef = useRef<d3.ZoomBehavior<SVGRectElement, undefined>>();
+  const svgSelectionRef =
+    useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
 
   useEffect(() => {
     const chart = () => {
-      const zoom = d3
-        .zoom<SVGSVGElement, unknown>()
-        .scaleExtent([0.5, 32])
-        .on("zoom", zoomed);
-
       const svgElement = d3
-        .create("svg")
+        .create<SVGSVGElement>("svg")
         .attr("viewBox", [0, 0, width, height])
         .attr("width", width)
         .attr("height", height)
         .attr("preserveAspectRatio", "xMidYMid meet");
 
-      const gGrid = svgElement.append("g");
+      const gMain = svgElement.append("g");
 
-      const gDot = svgElement
+      const rect = gMain
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all");
+
+      const gDot = gMain
         .append("g")
         .attr("fill", "none")
         .attr("stroke-linecap", "round");
@@ -111,32 +85,34 @@ const ChartComponent = ({ data, width, height }: Props) => {
         .data(data as [number, number, number][])
         .join("path")
         .attr("d", (d) => `M${x(d[0])},${y(d[1])}h0`)
-        .attr("stroke", (d) => z(d[2]));
+        .attr("stroke", (d) => z(d[2]))
+        .style("pointer-events", "visiblePainted");
 
-      const gx = svgElement.append("g");
-      const gy = svgElement.append("g");
+      const gx = gMain.append("g");
+      const gy = gMain.append("g");
 
-      const svg = d3
-        .select(svgElement.node() as SVGSVGElement)
-        .call(zoom)
-        .call(zoom.transform, d3.zoomIdentity);
-
-      function zoomed({ transform }: { transform: d3.ZoomTransform }) {
+      function zoomed(event: d3.D3ZoomEvent<SVGRectElement, undefined>) {
+        const transform = event.transform;
+        gMain.attr("transform", transform.toString());
+        gDot.attr("stroke-width", 5 / transform.k);
         const zx = transform.rescaleX(x).interpolate(d3.interpolateRound);
         const zy = transform.rescaleY(y).interpolate(d3.interpolateRound);
-        gDot
-          .attr("transform", transform.toString())
-          .attr("stroke-width", 5 / transform.k);
         gx.call(xAxis, zx);
         gy.call(yAxis, zy);
-        gGrid.call(grid, zx, zy);
       }
 
-      return Object.assign(svg.node() as SVGSVGElement, {
-        reset() {
-          svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-        },
-      });
+      const zoom = d3
+        .zoom<SVGRectElement, undefined>()
+        .scaleExtent([0.5, 32])
+        .on("zoom", zoomed);
+
+      zoomRef.current = zoom;
+
+      rect.call(zoom);
+
+      svgSelectionRef.current = svgElement;
+
+      return svgElement.node() as SVGSVGElement;
     };
 
     const svgElement = chart();
@@ -152,7 +128,19 @@ const ChartComponent = ({ data, width, height }: Props) => {
         currentSvgRef.innerHTML = "";
       }
     };
-  }, [data, width, height, x, y, z, xAxis, yAxis, grid]);
+  }, [data, width, height, x, y, z, xAxis, yAxis]);
+
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      if (zoomRef.current && svgSelectionRef.current) {
+        svgSelectionRef.current
+          .select("rect")
+          .transition()
+          .duration(750)
+          .call(zoomRef.current.transform as any, d3.zoomIdentity);
+      }
+    },
+  }));
 
   return (
     <div
@@ -167,6 +155,6 @@ const ChartComponent = ({ data, width, height }: Props) => {
       <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
     </div>
   );
-};
+});
 
-export default ChartComponent;
+export default Chart;
