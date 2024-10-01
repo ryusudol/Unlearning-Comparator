@@ -1,6 +1,11 @@
 import { Label } from "../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import { Layers02Icon, ZoomInAreaIcon } from "../components/ui/icons";
+import {
+  Layers02Icon,
+  ZoomInAreaIcon,
+  NeuralNetworkIcon,
+  GitCompareIcon,
+} from "../components/ui/icons";
 
 interface Props {
   height: number;
@@ -14,11 +19,9 @@ export default function Correlations({ height }: Props) {
     >
       <div className="flex justify-between">
         <div className="flex items-center">
-          <div className="flex items-center">
+          <div className="flex items-center mr-2">
             <Layers02Icon />
-            <h5 className="font-semibold ml-[3px] mr-5">
-              Layer-Wise CKA Correlations
-            </h5>
+            <h5 className="font-semibold ml-[3px]">Layer-Wise Correlations</h5>
           </div>
           <ZoomInAreaIcon className="cursor-pointer" />
         </div>
@@ -40,7 +43,58 @@ export default function Correlations({ height }: Props) {
           </RadioGroup>
         </div>
       </div>
-      <div></div>
+      <div className="flex items-center">
+        <div className="flex -rotate-90 w-8 mr-[2px] relative">
+          <div className="flex flex-col items-center leading-4 relative right-[132px]">
+            <span className="text-[15px] font-light whitespace-nowrap">
+              Remaining Data
+            </span>
+            <span className="text-[11px] font-extralight whitespace-nowrap">
+              Layer After Unlearning
+            </span>
+          </div>
+          <div className="flex flex-col items-center leading-4 relative right-[18px]">
+            <span className="text-[15px] font-light whitespace-nowrap">
+              Forgetting Data
+            </span>
+            <span className="text-[11px] font-extralight whitespace-nowrap">
+              Layer After Unlearning
+            </span>
+          </div>
+        </div>
+        {/* Bubble Chart 1 */}
+        <div className="flex flex-col items-center -mt-1.5 mr-1">
+          <div className="flex items-center">
+            <NeuralNetworkIcon className="mr-[3px]" />
+            <span className="text-[15px]">Baseline Model (id01)</span>
+          </div>
+          <img src="/heatmap1.png" alt="heatmap img 1" />
+          <img src="/heatmap3.png" alt="heatmap img 3" />
+          <span className="text-[11px] font-extralight -mt-[5px]">
+            Layer Before Unlearning
+          </span>
+        </div>
+        {/* Bubble Chart 2 */}
+        <div className="flex flex-col items-center -mt-1.5">
+          <div className="flex items-center">
+            <GitCompareIcon className="mr-[3px]" />
+            <span className="text-[15px]">Comparison Model (id02)</span>
+          </div>
+          <img src="/heatmap2.png" alt="heatmap img 2" />
+          <img src="/heatmap4.png" alt="heatmap img 4" />
+          <span className="text-[11px] font-extralight -mt-[5px]">
+            Layer Before Unlearning
+          </span>
+        </div>
+        {/* Legend */}
+        <div className="flex flex-col items-center">
+          <img
+            src="/heatmap-legend.png"
+            alt="heatmap legend img"
+            className="ml-1"
+          />
+        </div>
+      </div>
     </section>
   );
 }
