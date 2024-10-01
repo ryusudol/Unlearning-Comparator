@@ -7,13 +7,17 @@ export default function ToggleGroup() {
       <div className="flex items-center space-x-2 relative top-6 left-[210px]">
         <span className="text-[13px] font-light mr-2">Forgetting:</span>
         <div className="flex items-center">
-          <Switch id="forget-data" className="mr-[5px]" />
+          <Switch id="forget-data" className="mr-[5px]" defaultChecked={true} />
           <Label htmlFor="forget-data" className="text-[13px] font-light">
             Data
           </Label>
         </div>
         <div className="flex items-center">
-          <Switch id="forget-class" className="mr-[5px]" />
+          <Switch
+            id="forget-class"
+            className="mr-[5px]"
+            defaultChecked={true}
+          />
           <Label htmlFor="forget-class" className="text-[13px] font-light">
             Class
           </Label>
@@ -22,13 +26,21 @@ export default function ToggleGroup() {
       <div className="flex space-x-2 relative top-6 left-[210px]">
         <span className="text-[13px] font-light mr-[6px]">Remaining:</span>
         <div className="flex items-center">
-          <Switch id="remaining-data" className="mr-[5px]" />
+          <Switch
+            id="remaining-data"
+            className="mr-[5px]"
+            defaultChecked={true}
+          />
           <Label htmlFor="remaining-data" className="text-[13px] font-light">
             Data
           </Label>
         </div>
         <div className="flex items-center">
-          <Switch id="remaining-class" className="mr-[5px]" />
+          <Switch
+            id="remaining-class"
+            className="mr-[5px]"
+            defaultChecked={true}
+          />
           <Label htmlFor="remaining-class" className="text-[13px] font-light">
             Class
           </Label>
