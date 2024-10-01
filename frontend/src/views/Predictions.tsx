@@ -10,6 +10,7 @@ import {
   RectangularIcon,
   NeuralNetworkIcon,
   GitCompareIcon,
+  ArrowDown01Icon,
 } from "../components/ui/icons";
 
 const sizeScale = d3.scaleSqrt().domain([0, 100]).range([0, 12.5]).nice();
@@ -22,7 +23,7 @@ export default function Predictions({ height }: Props) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center">
@@ -73,10 +74,7 @@ export default function Predictions({ height }: Props) {
           Ground Truth
         </span>
         {/* Bubble Chart 1 */}
-        <div
-          id="baseline-bubble-chart"
-          className="flex flex-col items-center -mt-1.5 mr-1"
-        >
+        <div className="flex flex-col items-center -mt-1.5 mr-1">
           <div className="flex items-center">
             <NeuralNetworkIcon className="mr-[3px]" />
             <span className="text-[15px]">Baseline Model (id01)</span>
@@ -87,10 +85,7 @@ export default function Predictions({ height }: Props) {
           </span>
         </div>
         {/* Bubble Chart 2 */}
-        <div
-          id="comparison-bubble-chart"
-          className="flex flex-col items-center -mt-1.5"
-        >
+        <div className="flex flex-col items-center -mt-1.5">
           <div className="flex items-center">
             <GitCompareIcon className="mr-[3px]" />
             <span className="text-[15px]">Comparison Model (id02)</span>
@@ -105,6 +100,9 @@ export default function Predictions({ height }: Props) {
           <BubbleLegend scale={sizeScale} />
           <img src="/bubble-legend.png" alt="bubble legend img" />
         </div>
+      </div>
+      <div className="flex items-center justify-center absolute w-8 h-[15px] rounded-b-lg border border-[rgba(0, 0, 0, 0.2)] border-[2px] -bottom-[15px] right-[224px] cursor-pointer">
+        <ArrowDown01Icon className="scale-150" />
       </div>
     </section>
   );
