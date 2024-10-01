@@ -5,7 +5,8 @@ import Settings from "../views/Settings";
 import PerformanceOverview from "../views/PerformanceOverview";
 import Accuracies from "../views/Accuracies";
 import Embeddings from "../views/Embeddings";
-import Privacies from "../views/Privacies";
+import Predictions from "../views/Predictions";
+import Correlations from "../views/Correlations";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
 import { OverviewContext } from "../store/overview-context";
@@ -46,7 +47,10 @@ export default function App() {
       </div>
       <div className="flex">
         <Embeddings height={LOWER_HEIGHT} />
-        <Privacies height={LOWER_HEIGHT} />
+        <div className="flex flex-col">
+          <Predictions height={257} />
+          <Correlations height={LOWER_HEIGHT - 257} />
+        </div>
       </div>
     </section>
   );
