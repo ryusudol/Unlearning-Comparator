@@ -40,6 +40,7 @@ export default function Correlations({ height }: Props) {
           </RadioGroup>
         </div>
       </div>
+      <div></div>
     </section>
   );
 }

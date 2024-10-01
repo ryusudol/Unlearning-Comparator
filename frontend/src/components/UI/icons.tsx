@@ -524,7 +524,7 @@ export const Layers02Icon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const PinIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const ChartBubble02Icon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
@@ -534,18 +534,28 @@ export const PinIcon = (props: React.SVGProps<SVGSVGElement>) => (
     fill={"none"}
     {...props}
   >
-    <path
-      d="M3 21L8.5 15.5"
+    <circle
+      cx="5"
+      cy="8"
+      r="3"
       stroke="currentColor"
       strokeWidth="1.5"
-      strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M13.3625 7.39582L15.7087 3.4855C15.8894 3.1843 16.2158 2.99365 16.5657 3.02451C19.0645 3.2449 20.7551 4.93548 20.9755 7.43434C21.0064 7.78425 20.8157 8.11058 20.5145 8.2913L16.6043 10.6374C16.2419 10.8549 16.0553 11.2766 16.1382 11.691L16.4198 13.0989C16.7856 14.9278 16.28 16.8229 15.0517 18.2266L14.2039 19.1956C13.8229 19.6309 13.1532 19.6532 12.7442 19.2442L4.7554 11.2554C4.34652 10.8465 4.36862 10.1771 4.80359 9.79608L5.769 8.95041C7.17262 7.72088 9.06839 7.21437 10.8982 7.58001L12.3091 7.86194C12.7234 7.94473 13.1451 7.75815 13.3625 7.39582Z"
+    <circle
+      cx="9"
+      cy="17"
+      r="4"
       stroke="currentColor"
       strokeWidth="1.5"
-      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle
+      cx="17"
+      cy="8"
+      r="5"
+      stroke="currentColor"
+      strokeWidth="1.5"
       strokeLinejoin="round"
     />
   </svg>
@@ -578,6 +588,25 @@ export const ZoomInAreaIcon = (props: React.SVGProps<SVGSVGElement>) => (
       clipRule="evenodd"
       d="M3.49985 1.00018L6.49994 1C7.05222 0.999966 7.49997 1.44765 7.5 1.99994C7.50003 2.55222 7.05235 2.99997 6.50006 3L3.49997 3.00018C3.22384 3.0002 3 3.22405 3 3.50018V6.5C3 7.05228 2.55228 7.5 2 7.5C1.44772 7.5 1 7.05228 1 6.5V3.50018C1 2.11953 2.1192 1.00027 3.49985 1.00018ZM9.5 2C9.5 1.44772 9.94772 1 10.5 1H13.5C14.0523 1 14.5 1.44772 14.5 2C14.5 2.55228 14.0523 3 13.5 3H10.5C9.94772 3 9.5 2.55228 9.5 2ZM16.5 1.99997C16.5 1.44768 16.9477 0.999981 17.5 1L20.5006 1.0001C21.8815 1.00015 23.0008 2.1197 23.0005 3.50055L23 6.50018C22.9999 7.05246 22.5521 7.5001 21.9998 7.5C21.4475 7.4999 20.9999 7.0521 21 6.49982L21.0005 3.50019C21.0006 3.22402 20.7767 3.00011 20.5006 3.0001L17.5 3C16.9477 2.99998 16.5 2.55225 16.5 1.99997ZM2 9.5C2.55228 9.5 3 9.94772 3 10.5V13.5C3 14.0523 2.55228 14.5 2 14.5C1.44772 14.5 1 14.0523 1 13.5V10.5C1 9.94772 1.44772 9.5 2 9.5ZM1.99966 16.5C2.55194 16.4998 2.99981 16.9474 3 17.4997L3.00103 20.5002C3.00112 20.7762 3.22495 21 3.50103 21H5.5C6.05228 21 6.5 21.4477 6.5 22C6.5 22.5523 6.05228 23 5.5 23H3.50103C2.12065 23 1.0015 21.8812 1.00103 20.5009L1 17.5003C0.999811 16.9481 1.44737 16.5002 1.99966 16.5Z"
       fill="currentColor"
+    />
+  </svg>
+);
+
+export const RectangularIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    color={"#000000"}
+    fill={"none"}
+    {...props}
+  >
+    <path
+      d="M22 3.5H2V20.5H22V3.5Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
     />
   </svg>
 );
