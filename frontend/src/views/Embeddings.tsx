@@ -271,6 +271,7 @@ export default function Embeddings({ height }: Props) {
           </div>
           <ToggleGroup />
           <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
+            <img src="/comparison.png" alt="comparison model img" />
             {/* <Chart
               data={data}
               width={620}
