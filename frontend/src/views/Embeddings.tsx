@@ -31,7 +31,7 @@ const classNames = [
   "ship",
   "truck",
 ];
-const dotCount = 500;
+const dotCount = 200;
 const generateData = () => {
   const random = d3.randomNormal(0, 0.2);
   const sqrt3 = Math.sqrt(3);

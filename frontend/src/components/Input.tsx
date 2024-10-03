@@ -34,7 +34,12 @@ export default function MyInput({
         {label}
       </label>
       {optionData ? (
-        <Select onOpenChange={setOpen} name={name} disabled={disabled}>
+        <Select
+          defaultValue={defaultValue as string | undefined}
+          onOpenChange={setOpen}
+          name={name}
+          disabled={disabled}
+        >
           <SelectTrigger
             id={label}
             className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]"

@@ -94,7 +94,7 @@ const Chart = forwardRef(({ data, width, height }: Props, ref) => {
       function zoomed(event: d3.D3ZoomEvent<SVGRectElement, undefined>) {
         const transform = event.transform;
         gMain.attr("transform", transform.toString());
-        gDot.attr("stroke-width", 5 / transform.k);
+        gDot.attr("stroke-width", 4 / transform.k);
         const zx = transform.rescaleX(x).interpolate(d3.interpolateRound);
         const zy = transform.rescaleY(y).interpolate(d3.interpolateRound);
         gx.call(xAxis, zx);
