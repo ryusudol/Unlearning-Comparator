@@ -33,7 +33,7 @@ export default function PredefinedInput({
       </div>
       {optionData && (
         // onValueChange -> handleMethodSelection 함수 붙이기
-        <Select name="method">
+        <Select defaultValue={optionData[0]} name="method">
           <SelectTrigger className="w-[130px] h-[19px] pl-2 pr-1 whitespace-nowrap overflow-ellipsis focus:outline-none bg-white text-black">
             <SelectValue placeholder={optionData[0]} />
           </SelectTrigger>

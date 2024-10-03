@@ -85,7 +85,8 @@ export interface Action {
 export interface ResultType {
   unlearn_accuracy: number;
   remain_accuracy: number;
-  test_accuracy: number;
+  test_unlearning_accuracy: number;
+  test_remaining_accuracy: number;
   train_class_accuracies: ClassAccuracies;
   test_class_accuracies: ClassAccuracies;
   svg_files: string[];

@@ -110,12 +110,11 @@ export default function Unlearning({
         updateIndicator("Embedding . . .");
 
         const result: ResultType = await fetchUnlearningResult();
-        const svgs = result.svg_files;
         const ua = result.unlearn_accuracy;
         const ra = result.remain_accuracy;
-        const ta = result.test_accuracy;
-        // TODO: rte, mia 구현되면 아래 수정
-        const mia = 0;
+        const tua = result.test_unlearning_accuracy;
+        const tra = result.test_remaining_accuracy;
+        // TODO: rte 구현되면 아래 수정
         const rte = 0;
         const train_class_accuracies =
           unlearningStatus.train_class_accuracies as { [key: string]: string };
@@ -131,23 +130,21 @@ export default function Unlearning({
               ...currOverview,
               ua,
               ra,
-              ta,
-              mia,
+              tua,
+              tra,
               rte,
               train_class_accuracies,
               test_class_accuracies,
-              retrain_svgs: svgs,
             }
           : {
               ...currOverview,
               ua,
               ra,
-              ta,
-              mia,
+              tua,
+              tra,
               rte,
               train_class_accuracies,
               test_class_accuracies,
-              unlearn_svgs: svgs,
             };
 
         saveOverview({ overview: [...remainingOverview, updatedOverview] });
@@ -244,15 +241,13 @@ export default function Unlearning({
       batch_size: configState.batch_size,
       ua: 0,
       ra: 0,
-      ta: 0,
-      mia: 0,
-      avg_gap: 0,
+      tua: 0,
+      tra: 0,
       rte: 0,
       train_class_accuracies: {},
       test_class_accuracies: {},
-      unlearn_svgs: [],
-      retrain_svgs: [],
     };
+
     const newOverview = [...overview, newOverviewItem];
 
     saveOverview({ overview: newOverview });
@@ -317,11 +312,11 @@ export default function Unlearning({
           <div id="forget-class" className="flex justify-between items-center">
             <div className="flex items-center">
               <EraserIcon className="-ml-[2px] mr-[2px]" />
-              <label className="text-[15px]" htmlFor="forgetClass">
+              <label className="text-[15px]" htmlFor="forget_class">
                 Forget Class
               </label>
             </div>
-            <Select name="forgetClass">
+            <Select defaultValue={UNLEARN_CLASSES[0]} name="forget_class">
               <SelectTrigger className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]">
                 <SelectValue placeholder={"0"} />
               </SelectTrigger>
