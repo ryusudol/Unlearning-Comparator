@@ -10,7 +10,7 @@ import os
 import matplotlib.pyplot as plt
 from app.utils.helpers import save_model
 from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
-from app.utils.visualization import compute_umap_embeddings
+from app.utils.visualization import compute_umap_embedding
 from app.config.settings import MAX_GRAD_NORM, UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningGAThread(threading.Thread):
@@ -172,7 +172,7 @@ class UnlearningGAThread(threading.Thread):
 
             print("Computing UMAP embeddings")
             forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
-            umap_embeddings, svg_files = await compute_umap_embeddings(
+            umap_embeddings, svg_files = await compute_umap_embedding(
                 activations, 
                 predicted_labels, 
                 forget_class=self.request.forget_class,

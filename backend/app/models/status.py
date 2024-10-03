@@ -36,7 +36,7 @@ class InferenceStatus:
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
         self.umap_embeddings = None
-        self.svg_files = None
+        self.svg_file = None
 
     def reset(self):
         self.__init__()
@@ -52,7 +52,7 @@ class UnlearningStatus:
         self.test_loss = 0
         self.start_time = None
         self.estimated_time_remaining = 0
-        self.umap_embeddings = None
+        self.umap_embedding = None
         self.cancel_requested = False
         self.forget_class = None
 
@@ -61,7 +61,7 @@ class UnlearningStatus:
         self.test_accuracy = 0 # TA
         self.train_class_accuracies: Dict[int, float] = {0} # Train Metrics
         self.test_class_accuracies: Dict[int, float] = {0} # Test Metrics
-        self.svg_files: Optional[List[str]] = {0}
+        self.svg_file: List[str] = None
 
     def reset(self):
         self.__init__()

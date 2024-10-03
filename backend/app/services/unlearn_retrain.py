@@ -6,7 +6,7 @@ import torch.optim as optim
 from app.threads.unlearn_retrain_thread import UnlearningRetrainThread
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
-from app.utils.visualization import compute_umap_embeddings
+from app.utils.visualization import compute_umap_embedding
 from app.utils.evaluation import get_layer_activations_and_predictions
 from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, UMAP_DATASET, WEIGHT_DECAY, DECREASING_LR
 
@@ -65,7 +65,7 @@ async def unlearning_retrain(request, status):
         
         forget_labels = torch.tensor([label == request.forget_class for _, label in subset])
         
-        umap_embeddings, svg_files = await compute_umap_embeddings(
+        umap_embeddings, svg_files = await compute_umap_embedding(
             activations, 
             predicted_labels, 
             forget_class=request.forget_class,

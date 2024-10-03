@@ -10,7 +10,7 @@ import base64
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
 from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
-from app.utils.visualization import compute_umap_embeddings
+from app.utils.visualization import compute_umap_embedding
 from app.config.settings import UNLEARN_SEED, UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningInference(threading.Thread):
@@ -89,7 +89,7 @@ class UnlearningInference(threading.Thread):
         # UMAP and activation calculation logic
         logits = None
         mean_logits = None
-        umap_embeddings = None
+        umap_embedding = None
         svg_files = None
         if not self.status.cancel_requested and self.model is not None:
             print("Getting data loaders for UMAP")
@@ -107,15 +107,15 @@ class UnlearningInference(threading.Thread):
             )
             self.status.progress = 90
 
-            print("Computing UMAP embeddings")
+            print("Computing UMAP embedding")
             forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
-            umap_embeddings, svg_files = await compute_umap_embeddings(
-                activations, 
+            umap_embedding, svg_files = await compute_umap_embedding(
+                activations[3], 
                 predicted_labels, 
                 forget_class=self.request.forget_class,
                 forget_labels=forget_labels
             )
-            self.status.umap_embeddings = umap_embeddings
+            self.status.umap_embeddings = umap_embedding
             self.status.svg_files = svg_files
             self.status.progress = 100
 
@@ -124,10 +124,7 @@ class UnlearningInference(threading.Thread):
             print("Custom Unlearning cancelled or model not available.")
 
         # Encode SVG files
-        encoded_svg_files = {
-            f"{layer}": base64.b64encode(svg).decode('utf-8') 
-            for layer, svg in self.status.svg_files.items()
-        }
+        encoded_svg_file = base64.b64encode(self.status.svg_file).decode('utf-8') if self.status.svg_file else None
 
         # Prepare results dictionary
         results = {
@@ -152,8 +149,8 @@ class UnlearningInference(threading.Thread):
             "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
             "logits": logits.tolist() if isinstance(logits, (np.ndarray, torch.Tensor)) else logits,
             "mean_logits": float(mean_logits) if mean_logits is not None else None,
-            "embeddings": {k: v.tolist() if isinstance(v, (np.ndarray, torch.Tensor)) else v for k, v in umap_embeddings.items()},
-            "svg_files": encoded_svg_files,  # 레이어별로 구분된 Base64로 인코딩된 SVG 파일들
+            "embedding": self.status.umap_embedding.tolist() if isinstance(self.status.umap_embedding, (np.ndarray, torch.Tensor)) else self.status.umap_embedding,
+            "svg_files": encoded_svg_file,  # 레이어별로 구분된 Base64로 인코딩된 SVG 파일들
         }
 
         def json_serializable(obj):

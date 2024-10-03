@@ -7,7 +7,7 @@ import asyncio
 import time
 from app.models.neural_network import get_resnet18, InferenceStatus
 from app.utils.helpers import get_data_loaders
-from app.utils.visualization import compute_umap_embeddings
+from app.utils.visualization import compute_umap_embedding
 from app.utils.evaluation import get_layer_activations_and_predictions, evaluate_model
 from app.config.settings import UMAP_DATA_SIZE, UMAP_DATASET
 
@@ -95,7 +95,7 @@ async def run_inference(file_content: bytes, status: InferenceStatus):
         status.current_step = "Computing UMAP embeddings"
         status.progress = 95
         labels = torch.tensor([dataset.targets[i] for i in subset_indices])
-        umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels)
+        umap_embeddings, svg_files = await compute_umap_embedding(activations, labels)
 
         status.umap_embeddings = umap_embeddings
         status.svg_files = list(svg_files.values())
