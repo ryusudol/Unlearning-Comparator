@@ -1,12 +1,12 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
+import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
 
 export type Overview = {
+  rank: number;
   id: string;
-  model: string;
-  dataset: string;
   forget: string;
   training: string;
   unlearning: string;
@@ -14,10 +14,9 @@ export type Overview = {
   ua: number;
   ra: number;
   ta: number;
-  mia: number;
-  avgGap: number;
+  tua: number;
+  tra: number;
   rte: number;
-  logits: number;
 };
 
 export const colors = [
@@ -38,16 +37,8 @@ export const columns: ColumnDef<Overview>[] = [
     header: "ID",
   },
   {
-    accessorKey: "model",
-    header: "Model",
-  },
-  {
-    accessorKey: "dataset",
-    header: "Dataset",
-  },
-  {
     accessorKey: "forget",
-    header: "Forget",
+    header: "Forget Class",
   },
   {
     accessorKey: "training",
@@ -113,7 +104,7 @@ export const columns: ColumnDef<Overview>[] = [
     },
   },
   {
-    accessorKey: "ta",
+    accessorKey: "tua",
     header: ({ column }) => {
       return (
         <Button
@@ -121,18 +112,18 @@ export const columns: ColumnDef<Overview>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          TA
+          TUA
           <ArrowUpDown className="w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("ta"));
+      const value = parseFloat(row.getValue("tua"));
       return <div className="ml-4">{value}</div>;
     },
   },
   {
-    accessorKey: "mia",
+    accessorKey: "tra",
     header: ({ column }) => {
       return (
         <Button
@@ -140,32 +131,13 @@ export const columns: ColumnDef<Overview>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          MIA
+          TRA
           <ArrowUpDown className="w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("mia"));
-      return <div className="ml-4">{value}</div>;
-    },
-  },
-  {
-    accessorKey: "avgGap",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="px-3"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Avg.Gap
-          <ArrowUpDown className="w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const value = parseFloat(row.getValue("avgGap"));
+      const value = parseFloat(row.getValue("tra"));
       return <div className="ml-4">{value}</div>;
     },
   },
@@ -188,23 +160,20 @@ export const columns: ColumnDef<Overview>[] = [
       return <div className="ml-4">{value}</div>;
     },
   },
+  // {
+  //   accessorKey: "rank",
+  //   header: "Rank",
+  //   cell: ({ row }) => {
+  //     const value = parseFloat(row.getValue("rank"));
+  //     return <div>{value}</div>;
+  //   },
+  // },
   {
-    accessorKey: "logits",
-    header: ({ column }) => {
-      return (
-        <Button
-          className="px-3"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Logits
-          <ArrowUpDown className="w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const value = parseFloat(row.getValue("logits"));
-      return <div className="ml-4">{value}</div>;
-    },
+    header: "Baseline",
+    cell: () => <Checkbox className="ml-2" />,
+  },
+  {
+    header: "Comparison",
+    cell: () => <Checkbox className="ml-2" />,
   },
 ];
