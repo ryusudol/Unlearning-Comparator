@@ -68,7 +68,7 @@ const Chart = forwardRef(({ data, width, height }: Props, ref) => {
 
       const gMain = svgElement.append("g");
 
-      const rect = gMain
+      const rect = svgElement
         .append("rect")
         .attr("width", width)
         .attr("height", height)
