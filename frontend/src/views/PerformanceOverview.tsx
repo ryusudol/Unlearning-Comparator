@@ -9,11 +9,11 @@ import { retrainedData } from "../constants/gt";
 import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import { Overview, colors, columns } from "../components/Columns";
 
-export const payments: Overview[] = [
+export const overviewData: Overview[] = [
   {
     id: "231a",
     forget: "0",
-    training: "-",
+    training: "7g9b",
     unlearning: "Retrain",
     defense: "-",
     ua: 0.013,
@@ -27,7 +27,7 @@ export const payments: Overview[] = [
   {
     id: "7g9b",
     forget: "1",
-    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    training: "6k3a",
     unlearning: "Random-Label",
     defense: "-",
     ua: 0.007,
@@ -41,7 +41,7 @@ export const payments: Overview[] = [
   {
     id: "6k3a",
     forget: "1",
-    training: "-",
+    training: "p83h",
     unlearning: "Fine-Tuning",
     defense: "-",
     ua: 0.01,
@@ -55,7 +55,7 @@ export const payments: Overview[] = [
   {
     id: "p83h",
     forget: "3",
-    training: "-",
+    training: "j30a",
     unlearning: "Retrain",
     defense: "-",
     ua: 0.004,
@@ -69,7 +69,7 @@ export const payments: Overview[] = [
   {
     id: "j30a",
     forget: "2",
-    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    training: "qq78",
     unlearning: "Gradient-Ascent",
     defense: "-",
     ua: 0.008,
@@ -83,7 +83,7 @@ export const payments: Overview[] = [
   {
     id: "qq78",
     forget: "2",
-    training: "-",
+    training: "v097",
     unlearning: "Fine-Tuning",
     defense: "-",
     ua: 0.011,
@@ -97,7 +97,7 @@ export const payments: Overview[] = [
   {
     id: "v097",
     forget: "1",
-    training: "-",
+    training: "z8c0",
     unlearning: "Random-Label",
     defense: "-",
     ua: 0.009,
@@ -111,7 +111,7 @@ export const payments: Overview[] = [
   {
     id: "z8c0",
     forget: "9",
-    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    training: "j68d",
     unlearning: "Gradient-Ascent",
     defense: "-",
     ua: 0.012,
@@ -125,7 +125,7 @@ export const payments: Overview[] = [
   {
     id: "j68d",
     forget: "6",
-    training: "best_train_resnet18_CIFAR10_30epochs_0.01lr.pth",
+    training: "231a",
     unlearning: "Fint-Tuning",
     defense: "-",
     ua: 0.011,
@@ -138,12 +138,12 @@ export const payments: Overview[] = [
   },
 ];
 const values = {
-  ua: payments.map((d) => d.ua),
-  ra: payments.map((d) => d.ra),
-  ta: payments.map((d) => d.ta),
-  tua: payments.map((d) => d.tua),
-  tra: payments.map((d) => d.tra),
-  rte: payments.map((d) => d.rte),
+  ua: overviewData.map((d) => d.ua),
+  ra: overviewData.map((d) => d.ra),
+  ta: overviewData.map((d) => d.ta),
+  tua: overviewData.map((d) => d.tua),
+  tra: overviewData.map((d) => d.tra),
+  rte: overviewData.map((d) => d.rte),
 };
 const performanceMetrics = {
   ua: {
@@ -225,7 +225,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
       </div>
       <DataTable
         columns={columns}
-        data={payments}
+        data={overviewData}
         performanceMetrics={performanceMetrics}
       />
     </section>

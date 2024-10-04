@@ -631,3 +631,63 @@ export const ArrowDown01Icon = (props: React.SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export const HelpCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    color={"#000000"}
+    fill={"none"}
+    {...props}
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="square"
+      strokeLinejoin="round"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M12 16.5H12.009H12Z"
+      fill="currentColor"
+    />
+    <path
+      d="M12 16.5H12.009"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10 9.5C10 8.39543 10.8954 7.5 12 7.5C13.1046 7.5 14 8.39543 14 9.5C14 9.89815 13.8837 10.2691 13.6831 10.5808C13.0854 11.5097 12 12.3954 12 13.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const Image01Icon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    color={"#000000"}
+    fill={"none"}
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4.5 1.75C2.98122 1.75 1.75 2.98122 1.75 4.5V19.5C1.75 21.0188 2.98122 22.25 4.5 22.25H19.5C21.0188 22.25 22.25 21.0188 22.25 19.5V4.5C22.25 2.98122 21.0188 1.75 19.5 1.75H4.5ZM20.2976 19.321C20.2976 19.8601 19.8605 20.2972 19.3214 20.2972H6.83594L14.3452 13.5388C15.0246 12.9274 16.0321 12.8543 16.7926 13.3613L20.2976 15.698V19.321ZM8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+      fill="currentColor"
+    />
+  </svg>
+);

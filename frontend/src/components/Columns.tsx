@@ -38,15 +38,18 @@ export const columns: ColumnDef<Overview>[] = [
   },
   {
     accessorKey: "forget",
-    header: "Forget Class",
+    header: "Forget",
+    cell: ({ row }) => {
+      const value = row.getValue("forget") as string;
+      return <div className="text-center mr-3">{value}</div>;
+    },
   },
   {
     accessorKey: "training",
     header: "Training",
     cell: ({ row }) => {
       const value = row.getValue("training") as string;
-      const formatted = value.length > 13 ? value.slice(0, 13) + "..." : value;
-      return <div className="w-[90px]">{formatted}</div>;
+      return <div>{value}</div>;
     },
   },
   {
@@ -165,15 +168,23 @@ export const columns: ColumnDef<Overview>[] = [
   //   header: "Rank",
   //   cell: ({ row }) => {
   //     const value = parseFloat(row.getValue("rank"));
-  //     return <div>{value}</div>;
+  //     return <div className="text-center">{value}</div>;
   //   },
   // },
   {
     header: "Baseline",
-    cell: () => <Checkbox className="ml-2" />,
+    cell: () => (
+      <div className="w-full ml-3">
+        <Checkbox className="ml-2" />
+      </div>
+    ),
   },
   {
     header: "Comparison",
-    cell: () => <Checkbox className="ml-2" />,
+    cell: () => (
+      <div className="w-full ml-5">
+        <Checkbox className="ml-2" />
+      </div>
+    ),
   },
 ];

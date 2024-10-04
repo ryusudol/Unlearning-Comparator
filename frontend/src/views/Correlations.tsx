@@ -62,7 +62,7 @@ export default function Correlations({ height }: Props) {
             </span>
           </div>
         </div>
-        {/* Bubble Chart 1 */}
+        {/* Heatmap 1 */}
         <div className="flex flex-col items-center -mt-1.5 mr-1">
           <div className="flex items-center">
             <NeuralNetworkIcon className="mr-[3px]" />
@@ -74,7 +74,7 @@ export default function Correlations({ height }: Props) {
             Layer Before Unlearning
           </span>
         </div>
-        {/* Bubble Chart 2 */}
+        {/* Heatmap 2 */}
         <div className="flex flex-col items-center -mt-1.5">
           <div className="flex items-center">
             <GitCompareIcon className="mr-[3px]" />
