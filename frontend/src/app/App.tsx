@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Settings from "../views/Settings";
 import PerformanceOverview from "../views/PerformanceOverview";
 import Accuracies from "../views/Accuracies";
-import Embeddings from "../views/Embeddings";
+import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
 import { BaselineContext } from "../store/baseline-context";
@@ -46,7 +46,7 @@ export default function App() {
         <Accuracies height={UPPER_HEIGHT} />
       </div>
       <div className="flex">
-        <Embeddings height={LOWER_HEIGHT} />
+        <Core height={LOWER_HEIGHT} />
         <div className="flex flex-col">
           <Predictions height={257} />
           <Correlations height={LOWER_HEIGHT - 257} />
