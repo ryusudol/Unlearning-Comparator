@@ -29,9 +29,8 @@ async def get_layer_activations_and_predictions(
             _, predicted = outputs.max(1)
             predictions.extend(predicted.cpu().numpy())
             
-            # Only add logits for non-forget classes
-            non_forget_mask = labels != forget_class
-            logits.extend(outputs[non_forget_mask].cpu().numpy())
+            # Add logits for all classes
+            logits.extend(outputs.cpu().numpy())
             
             # Get activations
             x = model.conv1(inputs)
@@ -57,7 +56,7 @@ async def get_layer_activations_and_predictions(
 
     activations = [np.concatenate(act)[:num_samples] for act in activations]
     predictions = np.array(predictions)[:num_samples]
-    logits = np.array(logits)
+    logits = np.array(logits)[:num_samples]
     
     # Calculate max logits
     max_logits = logits.max(axis=1)
@@ -78,21 +77,21 @@ async def get_layer_activations_and_predictions(
     # Get the maximum logit value
     max_logit = max_logits.max()
     
-    # Plot KDE of max logits
-    plt.figure(figsize=(10, 6))
-    sns.kdeplot(max_logits, fill=True)
-    plt.xlim(0, 50)
-    plt.ylim(0, 0.1)  # Set y-axis limit to slightly above max density
-    plt.title("Distribution of Max Logit Values (Excluding Forget Class)")
-    plt.xlabel("Max Logit Value")
-    plt.ylabel("Density")
+    # # Plot KDE of max logits
+    # plt.figure(figsize=(10, 6))
+    # sns.kdeplot(max_logits, fill=True)
+    # plt.xlim(0, 50)
+    # plt.ylim(0, 0.1)  # Set y-axis limit to slightly above max density
+    # plt.title("Distribution of Max Logit Values (All Classes)")
+    # plt.xlabel("Max Logit Value")
+    # plt.ylabel("Density")
     
-    # Save the plot with timestamp in the filename
-    plot_filename = f"max_logit_distribution_{timestamp}.png"
-    plt.savefig(plot_filename)
-    plt.close()
+    # # Save the plot with timestamp in the filename
+    # plot_filename = f"max_logit_distribution_{timestamp}.png"
+    # plt.savefig(plot_filename)
+    # plt.close()
     
-    print(f"Max logit distribution plot saved as {plot_filename}")
+    # print(f"Max logit distribution plot saved as {plot_filename}")
     print(f"Mean max logit: {max_logits.mean():.4f}")
     print(f"Median max logit: {np.median(max_logits):.4f}")
     print(f"Min max logit: {max_logits.min():.4f}")
@@ -100,7 +99,7 @@ async def get_layer_activations_and_predictions(
     print(f"Max density: {max_density:.4f}")
     print(f"Logit value at max density: {logit_at_max_density:.4f}")
     
-    return activations, predictions, max_logits, max_logits.mean()
+    return activations, predictions, logits, max_logits.mean()
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()

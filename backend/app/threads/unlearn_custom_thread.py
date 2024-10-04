@@ -6,7 +6,6 @@ import numpy as np
 import json
 import os
 import uuid
-import base64
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
 from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
@@ -87,10 +86,6 @@ class UnlearningInference(threading.Thread):
             return
 
         # UMAP and activation calculation logic
-        logits = None
-        mean_logits = None
-        umap_embedding = None
-        svg_files = None
         if not self.status.cancel_requested and self.model is not None:
             print("Getting data loaders for UMAP")
             dataset = train_set if UMAP_DATASET == 'train' else test_set
@@ -109,59 +104,67 @@ class UnlearningInference(threading.Thread):
 
             print("Computing UMAP embedding")
             forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
-            umap_embedding, svg_files = await compute_umap_embedding(
+            umap_embedding, _ = await compute_umap_embedding(
                 activations[3], 
                 predicted_labels, 
                 forget_class=self.request.forget_class,
                 forget_labels=forget_labels
             )
-            self.status.umap_embeddings = umap_embedding
-            self.status.svg_files = svg_files
             self.status.progress = 100
 
             print("Custom Unlearning inference and visualization completed!")
+
+            # Prepare detailed results
+            print(f"""
+                len(subset): {len(subset)}, len(subset_indices): {len(subset_indices)},
+                len(predicted_labels): {len(predicted_labels)}, len(activations[3]): {len(activations[3])},
+                len(logits): {len(logits)}, len(umap_embedding): {len(umap_embedding)}
+                """)
+            detailed_results = []
+            for i in range(len(subset)):
+                ground_truth = subset.dataset.targets[subset_indices[i]]
+                is_forget = ground_truth == self.request.forget_class
+                detailed_results.append({
+                    "index": i,
+                    "ground_truth": int(ground_truth),
+                    "predicted_class": int(predicted_labels[i]),
+                    "is_forget": bool(is_forget),
+                    # "activations": activations[3][i].tolist(),  # Last layer activations
+                    "umap_embedding": umap_embedding[i].tolist(),
+                    "logit": logits[i].tolist(),
+                })
+            
+            # Prepare results dictionary
+            results = {
+                "id": uuid.uuid4().hex[:4],
+                "forget_class": self.request.forget_class,
+                "model": "ResNet18",
+                "dataset": "CIFAR-10",
+                "training": "None",
+                "unlearning": {
+                    "method": "Retrain",
+                    "epochs": 30,
+                    "batch_size": 128,
+                    "learning_rate": 0.01,
+                },
+                "defense": "None",
+                "unlearn_accuracy": f"{self.status.unlearn_accuracy:.3f}",
+                "remain_accuracy": f"{self.status.remain_accuracy:.3f}",
+                "test_accuracy": f"{self.status.test_accuracy:.3f}",
+                "RTE": 1480.0,
+                "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
+                "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
+                "mean_logits": float(mean_logits) if mean_logits is not None else None,
+                "detailed_results": detailed_results
+            }
+
+            # Save results to JSON file
+            os.makedirs('data', exist_ok=True)
+            with open(f'data/{results["id"]}.json', 'w') as f:
+                json.dump(results, f, indent=2)
+
+            print(f"Results saved to data/{results['id']}.json")
         else:
             print("Custom Unlearning cancelled or model not available.")
 
-        # Encode SVG files
-        encoded_svg_file = base64.b64encode(self.status.svg_file).decode('utf-8') if self.status.svg_file else None
-
-        # Prepare results dictionary
-        results = {
-            "id": uuid.uuid4().hex[:4],
-            "forget_class": self.request.forget_class,
-            "model": "ResNet18",
-            "dataset": "CIFAR-10",
-            "training": "None",
-            "unlearning": {
-                "method": "Retrain",
-                "epochs": 30,
-                "batch_size": 128,
-                "learning_rate": 0.01,
-            },
-            "defense": "None",
-            "unlearn_accuracy": f"{self.status.unlearn_accuracy:.3f}",
-            "remain_accuracy": f"{self.status.remain_accuracy:.3f}",
-            "test_accuracy": f"{self.status.test_accuracy:.3f}",
-            "MIA": 0,
-            "RTE": 1480.0,
-            "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
-            "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
-            "logits": logits.tolist() if isinstance(logits, (np.ndarray, torch.Tensor)) else logits,
-            "mean_logits": float(mean_logits) if mean_logits is not None else None,
-            "embedding": self.status.umap_embedding.tolist() if isinstance(self.status.umap_embedding, (np.ndarray, torch.Tensor)) else self.status.umap_embedding,
-            "svg_files": encoded_svg_file,  # 레이어별로 구분된 Base64로 인코딩된 SVG 파일들
-        }
-
-        def json_serializable(obj):
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            raise TypeError(f"Type {type(obj)} not serializable")
-
-        # Save results to JSON file
-        os.makedirs('data', exist_ok=True)
-        with open(f'data/result_{results["id"]}.json', 'w') as f:
-            json.dump(results, f, indent=2, default=json_serializable)
-
-        print(f"Results saved to data/result_{results['id']}.json")
         print("Custom Unlearning inference completed!")
