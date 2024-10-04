@@ -125,7 +125,7 @@ export default function Embeddings({ height }: Props) {
                 onValueChange={(value: number[]) => setNeighbors(value)}
                 value={neighbors}
                 defaultValue={[5]}
-                className="w-44 mx-2 cursor-pointer"
+                className="w-[100px] mx-2 cursor-pointer"
                 min={5}
                 max={15}
                 step={1}
@@ -140,7 +140,7 @@ export default function Embeddings({ height }: Props) {
                 onValueChange={(value: number[]) => setDist(value)}
                 value={dist}
                 defaultValue={[0.1]}
-                className="w-44 mx-2 cursor-pointer"
+                className="w-[100px] mx-2 cursor-pointer"
                 min={0.1}
                 max={0.5}
                 step={0.05}
@@ -219,19 +219,14 @@ export default function Embeddings({ height }: Props) {
         </div>
         <Separator
           orientation="vertical"
-          className="h-[664px] w-[1px] mx-[2px]"
+          className="h-[660px] w-[1px] mx-[2px]"
         />
         <div className="flex flex-col items-center relative">
-          <div className="flex items-center absolute top-[30px] left-0">
-            <AiOutlineHome
-              id="baseline"
-              className="mr-1 scale-90 cursor-pointer"
-              onClick={handleResetClick}
-            />
-            <span className="text-[13px] font-light">
-              | Predictions: 6 | Ground Truth: 6
-            </span>
-          </div>
+          <AiOutlineHome
+            id="baseline"
+            className="mr-1 scale-90 cursor-pointer absolute top-[30px] left-0"
+            onClick={handleResetClick}
+          />
           <div className="flex relative top-7 items-center">
             <div className="flex items-center">
               <NeuralNetworkIcon className="mr-[2px]" />
@@ -250,19 +245,14 @@ export default function Embeddings({ height }: Props) {
         </div>
         <Separator
           orientation="vertical"
-          className="h-[664px] w-[1px] mx-[2px]"
+          className="h-[660px] w-[1px] mx-[2px]"
         />
         <div className="flex flex-col items-center relative">
-          <div className="flex items-center absolute top-[30px] left-0">
-            <AiOutlineHome
-              id="comparison"
-              className="mr-1 scale-90 cursor-pointer"
-              onClick={handleResetClick}
-            />
-            <span className="text-[13px] font-light">
-              | Predictions: 6 | Ground Truth: 6
-            </span>
-          </div>
+          <AiOutlineHome
+            id="comparison"
+            className="mr-1 scale-90 cursor-pointer absolute top-[30px] left-0"
+            onClick={handleResetClick}
+          />
           <div className="flex relative top-7 items-center">
             <div className="flex items-center">
               <GitCompareIcon className="mr-[2px]" />
@@ -271,13 +261,13 @@ export default function Embeddings({ height }: Props) {
           </div>
           <ToggleGroup />
           <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
-            <img src="/comparison.png" alt="comparison model img" />
-            {/* <Chart
+            {/* <img src="/comparison.png" alt="comparison model img" /> */}
+            <Chart
               data={data}
               width={620}
               height={630}
               ref={comparisonChartRef}
-            /> */}
+            />
           </div>
         </div>
       </div>
