@@ -24,12 +24,20 @@ export default function Header() {
   };
 
   return (
-    <div className="w-full text-white bg-black h-[66px] flex justify-center items-center px-4">
-      <div className="flex items-center text-[30px] font-semibold absolute left-4">
+    <div className="w-full text-white bg-black h-[66px] flex justify-start items-center px-4">
+      <div className="flex items-center text-[30px] font-semibold">
         <img className="scale-90" src="/logo.png" alt="logo img" />
-        <span className="ml-2">UnlearningVis</span>
+        <span className="ml-2">Title</span>
       </div>
-      <ul className="flex text-[20px] font-semibold">
+      <div className="ml-4">
+        <span className="mr-3 text-sm">
+          <strong>Model</strong>: Resnet18
+        </span>
+        <span className="text-sm">
+          <strong>Dataset</strong>: CIFAR-10
+        </span>
+      </div>
+      {/* <ul className="flex text-[20px] font-semibold">
         <li className="flex items-center">
           <EraserIcon className="text-white w-6 h-6 mr-1" />
           <span className="mr-[10px]">Forget Class</span>
@@ -50,7 +58,7 @@ export default function Header() {
         </li>
         <li className="flex items-center mx-[22px]">
           <NeuralNetworkIcon className="text-white w-6 h-6 mr-1" />
-          <span className="mr-[10px]">Comparison Model</span>
+          <span className="mr-[10px]">Baseline Model</span>
           <Select onValueChange={setBaselineModel} value={baselineModel}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal pr-1">
               <SelectValue placeholder="Select a forget class" />
@@ -75,7 +83,7 @@ export default function Header() {
         </li>
         <li className="flex items-center">
           <GitCompareIcon className="text-white w-6 h-6 mr-1" />
-          <span className="mr-[10px]">Proposed Model</span>
+          <span className="mr-[10px]">Comparison Model</span>
           <Select onValueChange={setComparisonModel} value={comparisonModel}>
             <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal pr-1">
               <SelectValue placeholder="Select a forget class" />
@@ -104,7 +112,7 @@ export default function Header() {
         >
           <PlayCircleIcon className="w-7 h-7" />
         </li>
-      </ul>
+      </ul> */}
     </div>
   );
 }
