@@ -122,11 +122,13 @@ class UnlearningInference(threading.Thread):
                 """)
             detailed_results = []
             for i in range(len(subset)):
+                original_index = subset_indices[i].item()
                 ground_truth = subset.dataset.targets[subset_indices[i]]
                 is_forget = ground_truth == self.request.forget_class
                 detailed_results.append({
                     "index": i,
                     "ground_truth": int(ground_truth),
+                    "original_index": int(original_index),
                     "predicted_class": int(predicted_labels[i]),
                     "is_forget": bool(is_forget),
                     # "activations": activations[3][i].tolist(),  # Last layer activations

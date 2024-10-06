@@ -137,7 +137,7 @@ async def get_unlearning_result():
         "test_accuracy": status.test_accuracy,
         "train_class_accuracies": status.train_class_accuracies,
         "test_class_accuracies": status.test_class_accuracies,
-        "svg_files": status.svg_files}
+        "svg_file": status.svg_file}
 
 @router.post("/unlearn/cancel")
 async def cancel_unlearning():
