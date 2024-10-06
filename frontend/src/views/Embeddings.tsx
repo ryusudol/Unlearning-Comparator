@@ -1,7 +1,7 @@
-import React, { useMemo, useRef } from "react";
-import * as d3 from "d3";
+import React, { useRef } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
+import f4f9 from "../constants/f4f9.json";
 import Chart from "../components/Chart";
 import ToggleGroup from "../components/ToggleGroup";
 import { Separator } from "../components/ui/separator";
@@ -29,60 +29,23 @@ const classNames = [
   "ship",
   "truck",
 ];
-const dotCount = 200;
-const generateData = () => {
-  const random = d3.randomNormal(0, 0.2);
-  const sqrt3 = Math.sqrt(3);
 
-  const result: number[][] = [];
-
-  result.push(
-    ...Array.from({ length: dotCount }, () => [
-      random() + sqrt3,
-      random() + 1,
-      0,
-    ]),
-    ...Array.from({ length: dotCount }, () => [
-      random() - sqrt3,
-      random() + 1,
-      1,
-    ]),
-    ...Array.from({ length: dotCount }, () => [random(), random() - 1, 2]),
-    ...Array.from({ length: dotCount }, () => [
-      random() + sqrt3,
-      random() - sqrt3,
-      3,
-    ]),
-    ...Array.from({ length: dotCount }, () => [
-      random() - sqrt3,
-      random() - sqrt3,
-      4,
-    ]),
-    ...Array.from({ length: dotCount }, () => [
-      random() + 2 * sqrt3,
-      random() + 1,
-      5,
-    ]),
-    ...Array.from({ length: dotCount }, () => [
-      random() - 2 * sqrt3,
-      random() + 1,
-      6,
-    ]),
-    ...Array.from({ length: dotCount }, () => [random() + 2, random() - 1, 7]),
-    ...Array.from({ length: dotCount }, () => [random() - 2, random() - 1, 8]),
-    ...Array.from({ length: dotCount }, () => [
-      random() * 1.5,
-      random() * 1.5,
-      9,
-    ])
-  );
-
-  return result;
-};
+const BaselineData = f4f9.detailed_results.map((result) => {
+  return [
+    result.umap_embedding[0],
+    result.umap_embedding[1],
+    result.ground_truth,
+  ];
+});
+const ComparisonData = f4f9.detailed_results.map((result) => {
+  return [
+    result.umap_embedding[0],
+    result.umap_embedding[1],
+    result.predicted_class,
+  ];
+});
 
 export default function Embeddings() {
-  const data = useMemo(() => generateData(), []);
-
   const baselineChartRef = useRef<{ reset: () => void } | null>(null);
   const comparisonChartRef = useRef<{ reset: () => void } | null>(null);
 
@@ -104,9 +67,7 @@ export default function Embeddings() {
             <HelpCircleIcon className="cursor-pointer" />
           </div>
           <div className="flex flex-col justify-start items-start">
-            <span className="text-[15px] font-light">
-              Points: {dotCount * 10}
-            </span>
+            <span className="text-[15px] font-light">Points: 2000</span>
             <span className="text-[15px] font-light">Dimension: 8192</span>
             <span className="text-[15px] font-light">Dataset: Training</span>
           </div>
@@ -148,7 +109,7 @@ export default function Embeddings() {
           <span className="text-[15px]">Predictions</span>
           <div>
             {classNames.map((className, idx) => (
-              <div className="flex items-center mb-[2px]">
+              <div key={idx} className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[idx]}` }}
                   className="w-[14px] h-[30px] mr-1"
@@ -179,7 +140,13 @@ export default function Embeddings() {
         </div>
         <ToggleGroup />
         <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
-          <Chart data={data} width={620} height={630} ref={baselineChartRef} />
+          {/* <img src="/comparison.png" alt="comparison model img" /> */}
+          <Chart
+            data={BaselineData}
+            width={620}
+            height={630}
+            ref={baselineChartRef}
+          />
         </div>
       </div>
       <Separator
@@ -200,9 +167,8 @@ export default function Embeddings() {
         </div>
         <ToggleGroup />
         <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
-          {/* <img src="/comparison.png" alt="comparison model img" /> */}
           <Chart
-            data={data}
+            data={ComparisonData}
             width={620}
             height={630}
             ref={comparisonChartRef}
