@@ -1,9 +1,5 @@
-import React, { useRef } from "react";
-import { AiOutlineHome } from "react-icons/ai";
-
+import ScatterPlot from "../components/ScatterPlot";
 import f4f9 from "../constants/f4f9.json";
-import Chart from "../components/Chart";
-import ToggleGroup from "../components/ToggleGroup";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import {
@@ -13,8 +9,6 @@ import {
   Drag01Icon,
   MultiplicationSignIcon,
   ScrollVerticalIcon,
-  NeuralNetworkIcon,
-  GitCompareIcon,
 } from "../components/ui/icons";
 
 const classNames = [
@@ -46,17 +40,6 @@ const ComparisonData = f4f9.detailed_results.map((result) => {
 });
 
 export default function Embeddings() {
-  const baselineChartRef = useRef<{ reset: () => void } | null>(null);
-  const comparisonChartRef = useRef<{ reset: () => void } | null>(null);
-
-  const handleResetClick = (e: React.MouseEvent) => {
-    const id = e.currentTarget.id;
-    const ref = id === "baseline" ? baselineChartRef : comparisonChartRef;
-    if (ref.current && typeof ref.current.reset === "function") {
-      ref.current.reset();
-    }
-  };
-
   return (
     <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
       <div className="w-[116px] h-[660px] flex flex-col justify-center items-center">
@@ -126,55 +109,13 @@ export default function Embeddings() {
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <div className="flex flex-col items-center relative">
-        <AiOutlineHome
-          id="baseline"
-          className="mr-1 scale-90 cursor-pointer absolute top-[7px] left-0"
-          onClick={handleResetClick}
-        />
-        <div className="flex relative top-1 items-center">
-          <div className="flex items-center">
-            <NeuralNetworkIcon className="mr-[2px]" />
-            <h5 className="text-[15px] ml-[2px]">Baseline Model (id01)</h5>
-          </div>
-        </div>
-        <ToggleGroup />
-        <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
-          {/* <img src="/comparison.png" alt="comparison model img" /> */}
-          <Chart
-            data={BaselineData}
-            width={620}
-            height={630}
-            ref={baselineChartRef}
-          />
-        </div>
-      </div>
+      <ScatterPlot mode="Baseline" data={BaselineData} />
+      {/* <img src="/comparison.png" alt="comparison model img" /> */}
       <Separator
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <div className="flex flex-col items-center relative">
-        <AiOutlineHome
-          id="comparison"
-          className="mr-1 scale-90 cursor-pointer absolute top-[7px] left-0"
-          onClick={handleResetClick}
-        />
-        <div className="flex relative top-1 items-center">
-          <div className="flex items-center">
-            <GitCompareIcon className="mr-[2px]" />
-            <h5 className="text-[15px] ml-[2px]">Comparison Model (id02)</h5>
-          </div>
-        </div>
-        <ToggleGroup />
-        <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
-          <Chart
-            data={ComparisonData}
-            width={620}
-            height={630}
-            ref={comparisonChartRef}
-          />
-        </div>
-      </div>
+      <ScatterPlot mode="Comparison" data={ComparisonData} />
     </div>
   );
 }
