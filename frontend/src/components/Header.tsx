@@ -1,39 +1,36 @@
-import { useState } from "react";
+// import { useState } from "react";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import {
-  EraserIcon,
-  NeuralNetworkIcon,
-  GitCompareIcon,
-  PlayCircleIcon,
-} from "./ui/icons";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "./ui/select";
+// import {
+//   EraserIcon,
+//   NeuralNetworkIcon,
+//   GitCompareIcon,
+//   PlayCircleIcon,
+// } from "./ui/icons";
 
 export default function Header() {
-  const [forgetClass, setForgetClass] = useState("0");
-  const [baselineModel, setBaselineModel] = useState("231a");
-  const [comparisonModel, setComparisonModel] = useState("231a");
+  // const [forgetClass, setForgetClass] = useState("0");
+  // const [baselineModel, setBaselineModel] = useState("231a");
+  // const [comparisonModel, setComparisonModel] = useState("231a");
 
-  const handleApplyBtnClick = () => {
-    console.log("Apply Button Clicked!");
-  };
+  // const handleApplyBtnClick = () => {
+  //   console.log("Apply Button Clicked!");
+  // };
 
   return (
     <div className="w-full text-white bg-black h-[66px] flex justify-start items-center px-4">
-      <div className="flex items-center text-[30px] font-semibold">
-        <img className="scale-90" src="/logo.png" alt="logo img" />
-        <span className="ml-2">Title</span>
-      </div>
-      <div className="ml-4">
-        <span className="mr-3 text-sm">
+      <span className="ml-2 text-[40px] font-semibold">Title</span>
+      <div className="ml-5 h-9 flex items-end">
+        <span className="mr-3 text-[11px]">
           <strong>Model</strong>: Resnet18
         </span>
-        <span className="text-sm">
+        <span className="text-[11px]">
           <strong>Dataset</strong>: CIFAR-10
         </span>
       </div>

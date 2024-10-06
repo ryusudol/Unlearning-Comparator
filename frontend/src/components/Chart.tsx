@@ -79,7 +79,12 @@ const Chart = forwardRef(({ data, width, height }: Props, ref) => {
         .attr("width", width)
         .attr("height", height)
         .style("fill", "none")
-        .style("pointer-events", "all");
+        .style("pointer-events", "all")
+        .style("cursor", "grab")
+        .on("mousemove", () => d3.select(rect.node()).style("cursor", "grab"))
+        .on("mousedown", () =>
+          d3.select(rect.node()).style("cursor", "grabbing")
+        );
 
       const gDot = gMain
         .append("g")
@@ -92,7 +97,8 @@ const Chart = forwardRef(({ data, width, height }: Props, ref) => {
         .join("path")
         .attr("d", (d) => `M${x(d[0])},${y(d[1])}h0`)
         .attr("stroke", (d) => z(d[2]))
-        .style("pointer-events", "visiblePainted");
+        .style("pointer-events", "visiblePainted")
+        .style("cursor", "pointer");
 
       const gx = gMain.append("g");
       const gy = gMain.append("g");
