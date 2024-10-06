@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import * as d3 from "d3";
 
+const API_URL = "http://localhost:8000";
 const dotSize = 2.5;
 const minZoom = 0.6;
 const maxZoom = 32;
@@ -19,10 +20,12 @@ interface Props {
 
 const Chart = React.memo(
   forwardRef(({ data, width, height }: Props, ref) => {
+    const tooltipRef = useRef<HTMLDivElement | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const svgSelectionRef =
       useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     const x = d3
       .scaleLinear()
@@ -89,20 +92,46 @@ const Chart = React.memo(
 
         const dots = gDot
           .selectAll("circle")
-          .data(data as [number, number, number][])
+          .data(data)
           .join("circle")
           .attr("cx", (d) => x(d[0]))
           .attr("cy", (d) => y(d[1]))
           .attr("r", dotSize)
           .attr("fill", (d) => z(d[2]))
           .style("cursor", "pointer")
-          .on("mouseenter", function () {
-            d3.select(this).style("cursor", "pointer");
-            console.log("dot enter");
+          .on("mouseenter", function (event, d) {
+            if (containerRef.current) {
+              const containerRect =
+                containerRef.current.getBoundingClientRect();
+              const tooltipWidth = 112;
+              const tooltipHeight = 112;
+              let xPos = event.clientX - containerRect.left + 10;
+              let yPos = event.clientY - containerRect.top + 10;
+
+              if (xPos + tooltipWidth > containerRect.width)
+                xPos = event.clientX - containerRect.left - tooltipWidth - 10;
+              if (yPos + tooltipHeight > containerRect.height)
+                yPos = event.clientY - containerRect.top - tooltipHeight - 10;
+
+              const index = d[3];
+              fetch(`${API_URL}/image/cifar10/${index}`)
+                .then((response) => response.blob())
+                .then((blob) => {
+                  const imageUrl = URL.createObjectURL(blob);
+                  if (tooltipRef.current) {
+                    tooltipRef.current.style.display = "block";
+                    tooltipRef.current.style.left = `${xPos}px`;
+                    tooltipRef.current.style.top = `${yPos}px`;
+                    tooltipRef.current.innerHTML = `<img src="${imageUrl}" width="100" height="100" />`;
+                  }
+                });
+            }
           })
           .on("mouseleave", function () {
-            d3.select(this).style("cursor", "default");
-            console.log("dot leave");
+            d3.select(this).style("cursor", "grab");
+            if (tooltipRef.current) {
+              tooltipRef.current.style.display = "none";
+            }
           });
 
         const gx = gMain.append("g");
@@ -150,26 +179,38 @@ const Chart = React.memo(
     useImperativeHandle(ref, () => ({
       reset: () => {
         if (zoomRef.current && svgSelectionRef.current) {
-          svgSelectionRef.current
-            .select("rect")
-            .transition()
-            .duration(750)
-            .call(zoomRef.current.transform as any, d3.zoomIdentity);
+          zoomRef.current.transform(
+            svgSelectionRef.current.transition().duration(750),
+            d3.zoomIdentity
+          );
         }
       },
     }));
 
     return (
       <div
+        ref={containerRef}
         style={{
           width: "100%",
           height: "100%",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          position: "relative",
         }}
       >
         <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
+        <div
+          ref={tooltipRef}
+          style={{
+            position: "absolute",
+            display: "none",
+            pointerEvents: "none",
+            backgroundColor: "white",
+            padding: "5px",
+            border: "1px solid black",
+          }}
+        ></div>
       </div>
     );
   })

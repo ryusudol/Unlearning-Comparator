@@ -1,5 +1,5 @@
 import ScatterPlot from "../components/ScatterPlot";
-import f4f9 from "../constants/f4f9.json";
+import data from "../constants/4f5c.json";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import {
@@ -24,18 +24,21 @@ const classNames = [
   "truck",
 ];
 
-const BaselineData = f4f9.detailed_results.map((result) => {
+// [x, y, class, img_idx]
+const BaselineData = data.detailed_results.map((result) => {
   return [
     result.umap_embedding[0],
     result.umap_embedding[1],
     result.ground_truth,
+    result.original_index,
   ];
 });
-const ComparisonData = f4f9.detailed_results.map((result) => {
+const ComparisonData = data.detailed_results.map((result) => {
   return [
     result.umap_embedding[0],
     result.umap_embedding[1],
     result.predicted_class,
+    result.original_index,
   ];
 });
 
