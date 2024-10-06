@@ -129,17 +129,17 @@ export default function Embeddings() {
       <div className="flex flex-col items-center relative">
         <AiOutlineHome
           id="baseline"
-          className="mr-1 scale-90 cursor-pointer absolute top-[30px] left-0"
+          className="mr-1 scale-90 cursor-pointer absolute top-[7px] left-0"
           onClick={handleResetClick}
         />
-        <div className="flex relative top-7 items-center">
+        <div className="flex relative top-1 items-center">
           <div className="flex items-center">
             <NeuralNetworkIcon className="mr-[2px]" />
             <h5 className="text-[15px] ml-[2px]">Baseline Model (id01)</h5>
           </div>
         </div>
         <ToggleGroup />
-        <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
+        <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
           {/* <img src="/comparison.png" alt="comparison model img" /> */}
           <Chart
             data={BaselineData}
@@ -156,17 +156,17 @@ export default function Embeddings() {
       <div className="flex flex-col items-center relative">
         <AiOutlineHome
           id="comparison"
-          className="mr-1 scale-90 cursor-pointer absolute top-[30px] left-0"
+          className="mr-1 scale-90 cursor-pointer absolute top-[7px] left-0"
           onClick={handleResetClick}
         />
-        <div className="flex relative top-7 items-center">
+        <div className="flex relative top-1 items-center">
           <div className="flex items-center">
             <GitCompareIcon className="mr-[2px]" />
             <h5 className="text-[15px] ml-[2px]">Comparison Model (id02)</h5>
           </div>
         </div>
         <ToggleGroup />
-        <div className="w-[630px] h-[668px] flex flex-col justify-center items-center">
+        <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
           <Chart
             data={ComparisonData}
             width={620}
