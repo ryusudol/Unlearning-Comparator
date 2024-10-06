@@ -85,7 +85,6 @@ class UnlearningGAThread(threading.Thread):
                     return
                 
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                
                 self.optimizer.zero_grad()
                 outputs = self.model(inputs)
                 loss = -self.criterion(outputs, labels)
@@ -99,7 +98,7 @@ class UnlearningGAThread(threading.Thread):
                 self.status.is_unlearning = False
                 print("\nTraining cancelled mid-batch.")
                 return
-            
+
             self.scheduler.step()
 
             # Evaluate on train set
@@ -145,7 +144,6 @@ class UnlearningGAThread(threading.Thread):
                 print(f"  Class {i}: {acc:.3f}")
             print(f"Progress: {self.status.progress:.2f}%, ETA: {self.status.estimated_time_remaining:.2f}s")
             
-            
         # Print a newline at the end of unlearning
         print()
         
@@ -181,7 +179,6 @@ class UnlearningGAThread(threading.Thread):
             self.status.umap_embeddings = umap_embeddings
             self.status.svg_files = svg_files
             self.status.progress = 100
-
             print("Custom Unlearning inference and visualization completed!")
         else:
             print("Custom Unlearning cancelled or model not available.")

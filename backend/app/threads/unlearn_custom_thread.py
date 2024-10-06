@@ -114,12 +114,6 @@ class UnlearningInference(threading.Thread):
 
             print("Custom Unlearning inference and visualization completed!")
 
-            # Prepare detailed results
-            print(f"""
-                len(subset): {len(subset)}, len(subset_indices): {len(subset_indices)},
-                len(predicted_labels): {len(predicted_labels)}, len(activations[3]): {len(activations[3])},
-                len(logits): {len(logits)}, len(umap_embedding): {len(umap_embedding)}
-                """)
             detailed_results = []
             for i in range(len(subset)):
                 original_index = subset_indices[i].item()
@@ -131,7 +125,6 @@ class UnlearningInference(threading.Thread):
                     "original_index": int(original_index),
                     "predicted_class": int(predicted_labels[i]),
                     "is_forget": bool(is_forget),
-                    # "activations": activations[3][i].tolist(),  # Last layer activations
                     "umap_embedding": umap_embedding[i].tolist(),
                     "logit": logits[i].tolist(),
                 })
@@ -140,8 +133,6 @@ class UnlearningInference(threading.Thread):
             results = {
                 "id": uuid.uuid4().hex[:4],
                 "forget_class": self.request.forget_class,
-                "model": "ResNet18",
-                "dataset": "CIFAR-10",
                 "training": "None",
                 "unlearning": {
                     "method": "Retrain",

@@ -120,19 +120,4 @@ class UnlearningFTThread(threading.Thread):
             
             sys.stdout.flush()
         
-        print()  # Print a newline at the end of unlearning
-
-        # if not self.status.cancel_requested:
-        #     plt.figure(figsize=(10, 6))
-        #     plt.plot(range(1, self.epochs + 1), train_accuracies, label='Train Accuracy')
-        #     plt.plot(range(1, self.epochs + 1), test_accuracies, label='Test Accuracy')
-        #     plt.xlabel('Epochs')
-        #     plt.ylabel('Accuracy (%)')
-        #     plt.title(f'Training and Test Accuracy for {self.model_name} on {self.dataset_name}')
-        #     plt.legend()
-        #     plt.grid(True)
-        #     plot_filename = f"accuracy_plot_{self.model_name}_{self.dataset_name}_{self.epochs}epochs_{self.learning_rate}lr.png"
-        #     plot_path = os.path.join('unlearned_models', plot_filename)
-        #     plt.savefig(plot_path)
-        #     plt.close()
-        #     print(f"Accuracy plot saved to {plot_path}")
+        print()  
