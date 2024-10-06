@@ -1,7 +1,7 @@
 import { useState, useRef, forwardRef } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
-import { GitCompareIcon } from "../components/ui/icons";
+import { NeuralNetworkIcon, GitCompareIcon } from "../components/ui/icons";
 import Chart from "../components/Chart";
 import { Switch } from "../components/ui/switch";
 import { Label } from "../components/ui/label";
@@ -35,7 +35,11 @@ const ScatterPlot = forwardRef(({ mode, data }: Props) => {
         onClick={handleResetClick}
       />
       <div className="flex items-center relative top-1">
-        <GitCompareIcon className="mr-[2px]" />
+        {mode === "Baseline" ? (
+          <NeuralNetworkIcon className="mr-[2px]" />
+        ) : (
+          <GitCompareIcon className="mr-[2px]" />
+        )}
         <h5 className="text-[15px] ml-[2px]">{mode} Model (id02)</h5>
       </div>
       <div>
