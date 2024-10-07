@@ -163,10 +163,10 @@ const Chart = React.memo(
                     <div style="display: flex; justify-content: center;">
                       <img src="${imageUrl}" width="100" height="100" />
                     </div>
-                    <div style="font-size: 12px; margin-top: 4px">Original Class: ${
+                    <div style="font-size: 12px; margin-top: 4px">Ground Truth: ${
                       d[2]
                     } (${classNames[d[2]]})</div>
-                    <div style="font-size: 12px;">Predicted Class: ${d[3]} (${
+                    <div style="font-size: 12px;">Prediction: ${d[3]} (${
                     classNames[d[3]]
                   })</div>
                   `;
@@ -234,43 +234,37 @@ const Chart = React.memo(
     }, [data, x, y, z]);
 
     useEffect(() => {
-      const updateDataOpacity = () => {
+      const updateOpacity = () => {
         if (circlesRef.current) {
           circlesRef.current.style("opacity", (d: any) => {
-            if (
+            const dataCondition =
               (d[2] === d[5] && !toggleOptions[0]) ||
-              (d[2] !== d[5] && !toggleOptions[1])
-            )
-              return 0.2;
+              (d[2] !== d[5] && !toggleOptions[1]);
+            const classCondition =
+              (d[3] === d[5] && !toggleOptions[2]) ||
+              (d[3] !== d[5] && !toggleOptions[3]);
+
+            if (dataCondition || classCondition) return 0.2;
             return 1;
           });
         }
+
         if (crossesRef.current) {
           crossesRef.current.style("opacity", (d: any) => {
-            if (
+            const dataCondition =
               (d[2] === d[5] && !toggleOptions[0]) ||
-              (d[2] !== d[5] && !toggleOptions[1])
-            )
-              return 0.2;
+              (d[2] !== d[5] && !toggleOptions[1]);
+            const classCondition =
+              (d[3] === d[5] && !toggleOptions[2]) ||
+              (d[3] !== d[5] && !toggleOptions[3]);
+
+            if (dataCondition || classCondition) return 0.2;
             return 1;
           });
         }
       };
-      // const updateClassOpacity = () => {
-      //   if (dotsRef.current) {
-      //     dotsRef.current.style("opacity", (d: any) => {
-      //       if (
-      //         (!toggleOptions[2] && d[3] === forgetClass) ||
-      //         (!toggleOptions[3] && d[3] !== forgetClass)
-      //       )
-      //         return 0.2;
-      //       return 1;
-      //     });
-      //   }
-      // };
 
-      updateDataOpacity();
-      // updateClassOpacity();
+      updateOpacity();
     }, [toggleOptions]);
 
     useImperativeHandle(ref, () => ({
