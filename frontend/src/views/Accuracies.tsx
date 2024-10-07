@@ -1,10 +1,8 @@
 import { useContext } from "react";
 import { Bar, BarChart, XAxis, YAxis, ReferenceLine, Label } from "recharts";
 
-import { retrainedData } from "../constants/gt";
-import { BaselineContext } from "../store/baseline-context";
-import { OverviewContext } from "../store/overview-context";
-import { SelectedIDContext } from "../store/selected-id-context";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { basicData } from "../constants/basicData";
 import { TABLEAU10 } from "../constants/tableau10";
 import { Chart01Icon } from "../components/ui/icons";
 import {
@@ -13,111 +11,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "../components/ui/chart";
-
-const trainAccuracyGap = [
-  {
-    category: "A",
-    value: 0.03,
-    fill: TABLEAU10[0],
-  },
-  {
-    category: "B",
-    value: 0.01,
-    fill: TABLEAU10[1],
-  },
-  {
-    category: "C",
-    value: -0.04,
-    fill: TABLEAU10[2],
-  },
-  {
-    category: "D",
-    value: 0.02,
-    fill: TABLEAU10[3],
-  },
-  {
-    category: "E",
-    value: 0.01,
-    fill: TABLEAU10[4],
-  },
-  {
-    category: "F",
-    value: -0.03,
-    fill: TABLEAU10[5],
-  },
-  {
-    category: "G",
-    value: 0,
-    fill: TABLEAU10[6],
-  },
-  {
-    category: "H",
-    value: -0.01,
-    fill: TABLEAU10[7],
-  },
-  {
-    category: "I",
-    value: 0.01,
-    fill: TABLEAU10[8],
-  },
-  {
-    category: "J",
-    value: 0.02,
-    fill: TABLEAU10[9],
-  },
-];
-const trainAccuracyGap2 = [
-  {
-    category: "A",
-    value: 0.01,
-    fill: TABLEAU10[0],
-  },
-  {
-    category: "B",
-    value: -0.01,
-    fill: TABLEAU10[1],
-  },
-  {
-    category: "C",
-    value: 0.02,
-    fill: TABLEAU10[2],
-  },
-  {
-    category: "D",
-    value: -0.02,
-    fill: TABLEAU10[3],
-  },
-  {
-    category: "E",
-    value: 0.01,
-    fill: TABLEAU10[4],
-  },
-  {
-    category: "F",
-    value: 0.02,
-    fill: TABLEAU10[5],
-  },
-  {
-    category: "G",
-    value: 0.04,
-    fill: TABLEAU10[6],
-  },
-  {
-    category: "H",
-    value: -0.01,
-    fill: TABLEAU10[7],
-  },
-  {
-    category: "I",
-    value: -0.01,
-    fill: TABLEAU10[8],
-  },
-  {
-    category: "J",
-    value: 0.01,
-    fill: TABLEAU10[9],
-  },
-];
 
 const chartConfig = {
   value: {
@@ -165,20 +58,63 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+interface ClassAccuracies {
+  "0": string;
+  "1": string;
+  "2": string;
+  "3": string;
+  "4": string;
+  "5": string;
+  "6": string;
+  "7": string;
+  "8": string;
+  "9": string;
+}
 interface Props {
   height: number;
 }
 
 export default function PerformanceMetrics({ height }: Props) {
-  const { baseline } = useContext(BaselineContext);
-  const { overview } = useContext(OverviewContext);
-  const { selectedID } = useContext(SelectedIDContext);
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
 
-  const currRetrainedData = retrainedData[baseline];
-  const currOverview = overview.filter(
-    (item) => item.forget_class === baseline.toString()
+  const baselineTrainAccuracies: ClassAccuracies =
+    basicData[+baseline].train_class_accuracies;
+  const comparisonTrainAccuracies: ClassAccuracies =
+    basicData[+comparison].train_class_accuracies;
+  const baselineTestAccuracies: ClassAccuracies =
+    basicData[+baseline].test_class_accuracies;
+  const comparisonTestAccuracies: ClassAccuracies =
+    basicData[+comparison].test_class_accuracies;
+
+  const trainAccuracyGap = Object.keys(baselineTrainAccuracies).map(
+    (key, idx) => {
+      const baselineValue = parseFloat(
+        baselineTrainAccuracies[key as keyof ClassAccuracies]
+      );
+      const comparisonValue = parseFloat(
+        comparisonTrainAccuracies[key as keyof ClassAccuracies]
+      );
+      return {
+        value: parseFloat((baselineValue - comparisonValue).toFixed(2)),
+        fill: TABLEAU10[idx],
+      };
+    }
   );
-  const currOverviewItem = currOverview[selectedID];
+
+  const testAccuracyGap = Object.keys(baselineTestAccuracies).map(
+    (key, idx) => {
+      const baselineValue = parseFloat(
+        baselineTestAccuracies[key as keyof ClassAccuracies]
+      );
+      const comparisonValue = parseFloat(
+        comparisonTestAccuracies[key as keyof ClassAccuracies]
+      );
+      return {
+        value: parseFloat((baselineValue - comparisonValue).toFixed(2)),
+        fill: TABLEAU10[idx],
+      };
+    }
+  );
 
   const maxValue =
     Math.ceil(
@@ -199,6 +135,7 @@ export default function PerformanceMetrics({ height }: Props) {
           <p className="w-10 -rotate-90 origin-left translate-x-7 translate-y-[26px] text-[13px] text-[#808080]">
             Classes
           </p>
+          {/* Training Dataset Bar Chart */}
           <div className="flex flex-col justify-center items-center">
             <h5 className="text-[14px] mb-2">Training Dataset</h5>
             <ChartContainer
@@ -248,6 +185,7 @@ export default function PerformanceMetrics({ height }: Props) {
               </BarChart>
             </ChartContainer>
           </div>
+          {/* Test Dataset Bar Chart */}
           <div className="flex flex-col justify-center items-center">
             <h5 className="text-[14px] mb-2">Test Dataset</h5>
             <ChartContainer
@@ -256,7 +194,7 @@ export default function PerformanceMetrics({ height }: Props) {
             >
               <BarChart
                 accessibilityLayer
-                data={trainAccuracyGap2}
+                data={testAccuracyGap}
                 layout="vertical"
                 margin={{
                   left: -40,

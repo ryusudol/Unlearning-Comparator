@@ -1,5 +1,8 @@
+import { useContext } from "react";
+
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import ScatterPlot from "../components/ScatterPlot";
-import data from "../constants/4f5c.json";
+import { basicData } from "../constants/basicData";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import {
@@ -24,19 +27,33 @@ export const classNames = [
   "truck",
 ];
 
-// [0: x, 1: y, 2: original_class, 3: predicted class, 4:img_idx], 5: forget_class
-const Data = data.detailed_results.map((result) => {
-  return [
-    result.umap_embedding[0],
-    result.umap_embedding[1],
-    result.ground_truth,
-    result.predicted_class,
-    result.original_index,
-    data.forget_class,
-  ];
-});
-
 export default function Embeddings() {
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
+
+  // [0: x, 1: y, 2: original_class, 3: predicted class, 4:img_idx], 5: forget_class
+  const BaselineData = basicData[+baseline].detailed_results.map((result) => {
+    return [
+      result.umap_embedding[0],
+      result.umap_embedding[1],
+      result.ground_truth,
+      result.predicted_class,
+      result.original_index,
+      basicData[+baseline].forget_class,
+    ];
+  });
+  const ComparisonData = basicData[+comparison].detailed_results.map(
+    (result) => {
+      return [
+        result.umap_embedding[0],
+        result.umap_embedding[1],
+        result.ground_truth,
+        result.predicted_class,
+        result.original_index,
+        basicData[+comparison].forget_class,
+      ];
+    }
+  );
+
   return (
     <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
       <div className="w-[116px] h-[660px] flex flex-col justify-center items-center">
@@ -75,12 +92,12 @@ export default function Embeddings() {
           <span className="text-[15px]">Data Type</span>
           <div>
             <div className="flex items-center text-[15px] font-light">
-              <CircleIcon className="scale-75 mr-[6px]" />
-              <span>Remain</span>
-            </div>
-            <div className="flex items-center text-[15px] font-light">
               <MultiplicationSignIcon className="scale-125 mr-[6px]" />
               <span>Forget</span>
+            </div>
+            <div className="flex items-center text-[15px] font-light">
+              <CircleIcon className="scale-75 mr-[6px]" />
+              <span>Remain</span>
             </div>
           </div>
         </div>
@@ -106,12 +123,12 @@ export default function Embeddings() {
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <ScatterPlot mode="Baseline" data={Data} />
+      <ScatterPlot mode="Baseline" data={BaselineData} />
       <Separator
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <ScatterPlot mode="Comparison" data={Data} />
+      <ScatterPlot mode="Comparison" data={ComparisonData} />
     </div>
   );
 }

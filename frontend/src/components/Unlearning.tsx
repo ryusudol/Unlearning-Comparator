@@ -13,7 +13,6 @@ import PredefinedInput from "./PredefinedInput";
 import OperationStatus from "./OperationStatus";
 import { MODELS, DATASET } from "../constants/training";
 import { OverviewContext } from "../store/overview-context";
-import { SelectedIDContext } from "../store/selected-id-context";
 import { RunningStatusContext } from "../store/running-status-context";
 import { getDefaultUnlearningConfig } from "../util";
 import { OverviewItem } from "../types/overview-context";
@@ -22,13 +21,13 @@ import { EraserIcon } from "./ui/icons";
 import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
 import {
   UnlearningConfigurationData,
-  ResultType,
+  // ResultType,
   UnlearningStatus,
 } from "../types/settings";
 import {
   executeCustomUnlearning,
   executePredefinedUnlearning,
-  fetchUnlearningResult,
+  // fetchUnlearningResult,
 } from "../https/unlearning";
 import {
   Select,
@@ -55,7 +54,6 @@ export default function Unlearning({
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
-  const { selectedID, saveSelectedID } = useContext(SelectedIDContext);
   const { overview, saveOverview, deleteLastOverviewItem } =
     useContext(OverviewContext);
   const {
@@ -109,45 +107,45 @@ export default function Unlearning({
 
         updateIndicator("Embedding . . .");
 
-        const result: ResultType = await fetchUnlearningResult();
-        const ua = result.unlearn_accuracy;
-        const ra = result.remain_accuracy;
-        const tua = result.test_unlearning_accuracy;
-        const tra = result.test_remaining_accuracy;
-        // TODO: rte 구현되면 아래 수정
-        const rte = 0;
-        const train_class_accuracies =
-          unlearningStatus.train_class_accuracies as { [key: string]: string };
-        const test_class_accuracies =
-          unlearningStatus.test_class_accuracies as { [key: string]: string };
+        // const result: ResultType = await fetchUnlearningResult();
+        // const ua = result.unlearn_accuracy;
+        // const ra = result.remain_accuracy;
+        // const tua = result.test_unlearning_accuracy;
+        // const tra = result.test_remaining_accuracy;
+        // // TODO: rte 구현되면 아래 수정
+        // const rte = 0;
+        // const train_class_accuracies =
+        //   unlearningStatus.train_class_accuracies as { [key: string]: string };
+        // const test_class_accuracies =
+        //   unlearningStatus.test_class_accuracies as { [key: string]: string };
 
-        const currOverview = overview[selectedID];
-        const remainingOverview = overview.filter(
-          (_, idx) => idx !== selectedID
-        );
-        const updatedOverview: OverviewItem = isRetrain
-          ? {
-              ...currOverview,
-              ua,
-              ra,
-              tua,
-              tra,
-              rte,
-              train_class_accuracies,
-              test_class_accuracies,
-            }
-          : {
-              ...currOverview,
-              ua,
-              ra,
-              tua,
-              tra,
-              rte,
-              train_class_accuracies,
-              test_class_accuracies,
-            };
+        // const currOverview = overview[selectedID];
+        // const remainingOverview = overview.filter(
+        //   (_, idx) => idx !== selectedID
+        // );
+        // const updatedOverview: OverviewItem = isRetrain
+        //   ? {
+        //       ...currOverview,
+        //       ua,
+        //       ra,
+        //       tua,
+        //       tra,
+        //       rte,
+        //       train_class_accuracies,
+        //       test_class_accuracies,
+        //     }
+        //   : {
+        //       ...currOverview,
+        //       ua,
+        //       ra,
+        //       tua,
+        //       tra,
+        //       rte,
+        //       train_class_accuracies,
+        //       test_class_accuracies,
+        //     };
 
-        saveOverview({ overview: [...remainingOverview, updatedOverview] });
+        // saveOverview({ overview: [...remainingOverview, updatedOverview] });
         initRunningStatus();
 
         // TODO: unlearning 완료 후 unlearned model 받아오기
@@ -159,16 +157,7 @@ export default function Unlearning({
       initRunningStatus();
       throw error;
     }
-  }, [
-    updateIsRunning,
-    updateStatus,
-    updateIndicator,
-    overview,
-    selectedID,
-    isRetrain,
-    saveOverview,
-    initRunningStatus,
-  ]);
+  }, [updateIsRunning, updateStatus, updateIndicator, initRunningStatus]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -251,7 +240,6 @@ export default function Unlearning({
     const newOverview = [...overview, newOverviewItem];
 
     saveOverview({ overview: newOverview });
-    saveSelectedID(newOverview.length - 1);
 
     isResultFetched.current = false;
 

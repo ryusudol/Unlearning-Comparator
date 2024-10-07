@@ -42,7 +42,7 @@ const ScatterPlot = ({ mode, data }: Props) => {
         )}
         <h5 className="text-[15px] ml-[2px]">{mode} Model (id)</h5>
       </div>
-      <div>
+      <div className="z-10">
         <div className="flex items-center space-x-2 relative left-[220px]">
           <span className="text-[13px] font-light mr-2">Data:</span>
           <div className="flex items-center">
