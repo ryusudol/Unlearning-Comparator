@@ -2,7 +2,7 @@ import threading
 import asyncio
 import torch
 import torch.nn as nn
-import numpy as np
+
 import json
 import os
 import uuid
@@ -105,7 +105,7 @@ class UnlearningInference(threading.Thread):
             print("Computing UMAP embedding")
             forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
             umap_embedding, _ = await compute_umap_embedding(
-                activations[3], 
+                activations, 
                 predicted_labels, 
                 forget_class=self.request.forget_class,
                 forget_labels=forget_labels
@@ -129,25 +129,26 @@ class UnlearningInference(threading.Thread):
                     "logit": logits[i].tolist(),
                 })
             
+            test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
+            test_remain_accuracy = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+            
             # Prepare results dictionary
             results = {
                 "id": uuid.uuid4().hex[:4],
                 "forget_class": self.request.forget_class,
-                "training": "None",
-                "unlearning": {
-                    "method": "Retrain",
-                    "epochs": 30,
-                    "batch_size": 128,
-                    "learning_rate": 0.01,
-                },
-                "defense": "None",
-                "unlearn_accuracy": f"{self.status.unlearn_accuracy:.3f}",
-                "remain_accuracy": f"{self.status.remain_accuracy:.3f}",
-                "test_accuracy": f"{self.status.test_accuracy:.3f}",
-                "RTE": 1480.0,
+                "phase": "Unlearning",
+                "method": "Custom",
+                "epochs": "N/A",
+                "batch_size": "N/A",
+                "learning_rate": "N/A",
+                "seed": UNLEARN_SEED,
+                "unlearn_accuracy": self.status.unlearn_accuracy,
+                "remain_accuracy": self.status.remain_accuracy,
+                "test_unlearn_accuracy": test_unlearn_accuracy,
+                "test_remain_accuracy": test_remain_accuracy,
+                "RTE": "N/A",
                 "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
                 "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
-                "mean_logits": float(mean_logits) if mean_logits is not None else None,
                 "detailed_results": detailed_results
             }
 

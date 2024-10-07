@@ -14,7 +14,7 @@ async def get_layer_activations_and_predictions(
         num_samples=UMAP_DATA_SIZE
     ):
     model.eval()
-    activations = [[], [], [], []]
+    activations = []
     predictions = []
     logits = []
     sample_count = 0
@@ -39,22 +39,18 @@ async def get_layer_activations_and_predictions(
             x = model.maxpool(x)
 
             x = model.layer1(x)
-            activations[0].append(x.cpu().numpy())
-
             x = model.layer2(x)
-            activations[1].append(x.cpu().numpy())
-
             x = model.layer3(x)
-            activations[2].append(x.cpu().numpy())
-
             x = model.layer4(x)
-            activations[3].append(x.cpu().numpy())
+            activations.append(x.cpu().numpy())
 
             sample_count += inputs.size(0)
             if sample_count >= num_samples:
                 break
 
-    activations = [np.concatenate(act)[:num_samples] for act in activations]
+    activations = np.concatenate(activations, axis=0)[:num_samples]
+    activations = activations.reshape(activations.shape[0], -1)
+
     predictions = np.array(predictions)[:num_samples]
     logits = np.array(logits)[:num_samples]
     
@@ -77,21 +73,6 @@ async def get_layer_activations_and_predictions(
     # Get the maximum logit value
     max_logit = max_logits.max()
     
-    # # Plot KDE of max logits
-    # plt.figure(figsize=(10, 6))
-    # sns.kdeplot(max_logits, fill=True)
-    # plt.xlim(0, 50)
-    # plt.ylim(0, 0.1)  # Set y-axis limit to slightly above max density
-    # plt.title("Distribution of Max Logit Values (All Classes)")
-    # plt.xlabel("Max Logit Value")
-    # plt.ylabel("Density")
-    
-    # # Save the plot with timestamp in the filename
-    # plot_filename = f"max_logit_distribution_{timestamp}.png"
-    # plt.savefig(plot_filename)
-    # plt.close()
-    
-    # print(f"Max logit distribution plot saved as {plot_filename}")
     print(f"Mean max logit: {max_logits.mean():.4f}")
     print(f"Median max logit: {np.median(max_logits):.4f}")
     print(f"Min max logit: {max_logits.min():.4f}")

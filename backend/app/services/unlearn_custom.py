@@ -12,7 +12,6 @@ async def unlearning_custom(request, status, weights_path):
     unlearning_thread.start()
 
     # thread start
-    
     while unlearning_thread.is_alive():
         if status.cancel_requested:
             unlearning_thread.stop()

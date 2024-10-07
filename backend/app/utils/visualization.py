@@ -27,7 +27,8 @@ async def compute_umap_embedding(activation,
                 init=UMAP_INIT,
                 # random_state=UMAP_RANDOM_STATE,
                 n_jobs=UMAP_N_JOBS)
-    embedding = umap.fit_transform(activation.reshape(activation.shape[0], -1))
+    # embedding = umap.fit_transform(activation.reshape(activation.shape[0], -1))
+    embedding = umap.fit_transform(activation)
     umap_embedding = embedding
     plt.figure(figsize=(12, 11))
     

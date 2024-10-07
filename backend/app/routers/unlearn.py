@@ -21,7 +21,6 @@ class UnlearningRequest(BaseModel):
     forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
     weights_filename: str = Field(default=".", description="Filename of the weights in trained_models folder")
     
-
 class CustomUnlearningRequest(BaseModel):
     forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
 

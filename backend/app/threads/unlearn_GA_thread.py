@@ -1,4 +1,3 @@
-import base64
 import json
 import threading
 import asyncio
@@ -7,11 +6,10 @@ import numpy as np
 import torch
 import time
 import os
-import matplotlib.pyplot as plt
-from app.utils.helpers import save_model
+from app.utils.helpers import save_model, set_seed
 from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
 from app.utils.visualization import compute_umap_embedding
-from app.config.settings import MAX_GRAD_NORM, UMAP_DATA_SIZE, UMAP_DATASET
+from app.config.settings import UNLEARN_SEED, MAX_GRAD_NORM, UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningGAThread(threading.Thread):
     def __init__(self, 
@@ -70,10 +68,12 @@ class UnlearningGAThread(threading.Thread):
     async def unlearn_GA_model(self):
         self.model.train()
         self.status.start_time = time.time()
-        self.status.total_epochs = self.request.epochs
-        
+        set_seed(UNLEARN_SEED)
+
         train_accuracies = []
         test_accuracies = []
+
+        start_time = time.time() 
 
         for epoch in range(self.request.epochs):
             running_loss = 0.0
@@ -119,13 +119,17 @@ class UnlearningGAThread(threading.Thread):
             # Update status
             self.status.current_epoch = epoch + 1
             self.status.progress = (epoch + 1) / self.request.epochs * 80
-            self.status.current_loss = train_loss
+
             self.status.current_accuracy = train_accuracy
-            self.status.test_loss = test_loss
             self.status.test_accuracy = test_accuracy
+
             self.status.train_class_accuracies = train_class_accuracies
             self.status.test_class_accuracies = test_class_accuracies
             
+            self.status.unlearn_accuracy = train_class_accuracies[self.request.forget_class]
+            remain_classes = [i for i in range(10) if i != self.request.forget_class]
+            self.status.remain_accuracy = sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+
             elapsed_time = time.time() - self.status.start_time
             estimated_total_time = elapsed_time / (epoch + 1) * self.request.epochs
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
@@ -144,14 +148,13 @@ class UnlearningGAThread(threading.Thread):
                 print(f"  Class {i}: {acc:.3f}")
             print(f"Progress: {self.status.progress:.2f}%, ETA: {self.status.estimated_time_remaining:.2f}s")
             
-        # Print a newline at the end of unlearning
         print()
-        
+        end_time = time.time()  # 종료 시간 기록
+        rte = end_time - start_time  # RTE 계산
+
         # UMAP and activation calculation logic
         logits = None
-        mean_logits = None
         umap_embeddings = None
-        svg_files = None
         if not self.stopped() and self.model is not None:
             print("Getting data loaders for UMAP")
             dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
@@ -160,7 +163,7 @@ class UnlearningGAThread(threading.Thread):
             subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
             
             print("Computing layer activations")
-            activations, predicted_labels, logits, mean_logits = await get_layer_activations_and_predictions(
+            activations, predicted_labels, logits, _ = await get_layer_activations_and_predictions(
                 model=self.model,
                 data_loader=subset_loader,
                 device=self.device,
@@ -170,50 +173,54 @@ class UnlearningGAThread(threading.Thread):
 
             print("Computing UMAP embeddings")
             forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
-            umap_embeddings, svg_files = await compute_umap_embedding(
+            umap_embeddings, _ = await compute_umap_embedding(
                 activations, 
                 predicted_labels, 
                 forget_class=self.request.forget_class,
                 forget_labels=forget_labels
             )
-            self.status.umap_embeddings = umap_embeddings
-            self.status.svg_files = svg_files
             self.status.progress = 100
             print("Custom Unlearning inference and visualization completed!")
         else:
             print("Custom Unlearning cancelled or model not available.")
 
-        # Encode SVG files
-        encoded_svg_files = {
-            f"{layer}": base64.b64encode(svg).decode('utf-8') 
-            for layer, svg in self.status.svg_files.items()
-        }
+        # Prepare detailed results
+        detailed_results = []
+        for i in range(len(subset)):
+            original_index = subset_indices[i].item()
+            ground_truth = subset.dataset.targets[subset_indices[i]]
+            is_forget = ground_truth == self.request.forget_class
+            detailed_results.append({
+                "index": i,
+                "ground_truth": int(ground_truth),
+                "original_index": int(original_index),
+                "predicted_class": int(predicted_labels[i]),
+                "is_forget": bool(is_forget),
+                "umap_embedding": umap_embeddings[i].tolist(),
+                "logit": logits[i].tolist(),
+            })
 
+        test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
+        test_remain_accuracy = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+        
         # Prepare results dictionary
         results = {
             "id": uuid.uuid4().hex[:4],
             "forget_class": self.request.forget_class,
-            "model": "ResNet18",
-            "dataset": "CIFAR-10",
-            "training": "None",
-            "unlearning": {
-                "method": "Gradient-Ascent",
-                "epochs": self.request.epochs,
-                "batch_size": self.request.batch_size,
-                "learning_rate": self.request.learning_rate,
-            },
-            "defense": "None",
-            "unlearn_accuracy": f"{self.status.unlearn_accuracy:.3f}",
-            "remain_accuracy": f"{self.status.remain_accuracy:.3f}",
-            "test_accuracy": f"{self.status.test_accuracy:.3f}",
-            "MIA": 0,
-            "RTE": 1480.0,
+            "phase": "Unlearning",
+            "method": "Gradient-Ascent",
+            "epochs": self.request.epochs,
+            "batch_size": self.request.batch_size,
+            "learning_rate": self.request.learning_rate,
+            "seed": UNLEARN_SEED,
+            "unlearn_accuracy": self.status.unlearn_accuracy,
+            "remain_accuracy": self.status.remain_accuracy,
+            "test_unlearn_accuracy": test_unlearn_accuracy,
+            "test_remain_accuracy": test_remain_accuracy,
+            "RTE": rte,
             "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
             "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
-            "logits": logits.tolist() if isinstance(logits, (np.ndarray, torch.Tensor)) else logits,
-            "mean_logits": float(mean_logits) if mean_logits is not None else None,
-            "embeddings": {k: v.tolist() if isinstance(v, (np.ndarray, torch.Tensor)) else v for k, v in umap_embeddings.items()},
-            "svg_files": encoded_svg_files,
+            "detailed_results": detailed_results
         }
 
         def json_serializable(obj):
@@ -226,5 +233,5 @@ class UnlearningGAThread(threading.Thread):
         with open(f'data/result_GA_{results["id"]}_forget_{self.request.forget_class}.json', 'w') as f:
             json.dump(results, f, indent=2, default=json_serializable)
 
-        print(f"Results saved to data/result_{results['id']}.json")
+        print(f"Results saved to data/result_GA_{results['id']}_forget_{self.request.forget_class}.json")
         print("Custom Unlearning inference completed!")
