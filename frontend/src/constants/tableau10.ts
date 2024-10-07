@@ -1,6 +1,6 @@
 export const TABLEAU10 = [
   "#1F77B4",
-  "#FF7F0#",
+  "#FF7F0E",
   "#2CA02C",
   "#D62728",
   "#9467BD",

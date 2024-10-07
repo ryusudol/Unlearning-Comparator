@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef } from "react";
+import { useState, useRef } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
 import { NeuralNetworkIcon, GitCompareIcon } from "../components/ui/icons";
@@ -14,10 +14,10 @@ type ChartRef = {
   reset: () => void;
 };
 
-const ScatterPlot = forwardRef(({ mode, data }: Props) => {
+const ScatterPlot = ({ mode, data }: Props) => {
   const [fDataShow, setFDataShow] = useState(true);
-  const [fClassShow, setFClassShow] = useState(true);
   const [rDataShow, setRDataShow] = useState(true);
+  const [fClassShow, setFClassShow] = useState(true);
   const [rClassShow, setRClassShow] = useState(true);
 
   const chartRef = useRef<ChartRef | null>(null);
@@ -44,61 +44,65 @@ const ScatterPlot = forwardRef(({ mode, data }: Props) => {
       </div>
       <div>
         <div className="flex items-center space-x-2 relative left-[220px]">
-          <span className="text-[13px] font-light mr-2">Forgotten:</span>
+          <span className="text-[13px] font-light mr-2">Data:</span>
           <div className="flex items-center">
             <Switch
-              id="forget-data"
+              id="data-forget"
               className="mr-[5px]"
               checked={fDataShow}
               onCheckedChange={setFDataShow}
             />
-            <Label htmlFor="forget-data" className="text-[13px] font-light">
-              Data
+            <Label htmlFor="data-forget" className="text-[13px] font-light">
+              Forget
             </Label>
           </div>
           <div className="flex items-center">
             <Switch
-              id="forget-class"
-              className="mr-[5px]"
-              checked={fClassShow}
-              onCheckedChange={setFClassShow}
-            />
-            <Label htmlFor="forget-class" className="text-[13px] font-light">
-              Class
-            </Label>
-          </div>
-        </div>
-        <div className="flex space-x-2 relative left-[220px]">
-          <span className="text-[13px] font-light mr-[6px]">Remained:</span>
-          <div className="flex items-center">
-            <Switch
-              id="remaining-data"
+              id="data-remain"
               className="mr-[5px]"
               checked={rDataShow}
               onCheckedChange={setRDataShow}
             />
-            <Label htmlFor="remaining-data" className="text-[13px] font-light">
-              Data
+            <Label htmlFor="data-remain" className="text-[13px] font-light">
+              Remain
+            </Label>
+          </div>
+        </div>
+        <div className="flex space-x-2 relative left-[220px]">
+          <span className="text-[13px] font-light mr-1">Class:</span>
+          <div className="flex items-center">
+            <Switch
+              id="class-forget"
+              className="mr-[5px]"
+              checked={fClassShow}
+              onCheckedChange={setFClassShow}
+            />
+            <Label htmlFor="class-forget" className="text-[13px] font-light">
+              Forget
             </Label>
           </div>
           <div className="flex items-center">
             <Switch
-              id="remaining-class"
+              id="class-remain"
               className="mr-[5px]"
               checked={rClassShow}
               onCheckedChange={setRClassShow}
             />
-            <Label htmlFor="remaining-class" className="text-[13px] font-light">
-              Class
+            <Label htmlFor="class-remain" className="text-[13px] font-light">
+              Remain
             </Label>
           </div>
         </div>
       </div>
       <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
-        <Chart data={data} ref={chartRef} />
+        <Chart
+          data={data}
+          toggleOptions={[fDataShow, rDataShow, fClassShow, rClassShow]}
+          ref={chartRef}
+        />
       </div>
     </div>
   );
-});
+};
 
 export default ScatterPlot;
