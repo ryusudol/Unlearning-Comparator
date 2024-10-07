@@ -24,7 +24,7 @@ export const classNames = [
   "truck",
 ];
 
-// [x, y, original class, predicted class, img_idx]
+// [0: x, 1: y, 2: original_class, 3: predicted class, 4:img_idx], 5: forget_class
 const Data = data.detailed_results.map((result) => {
   return [
     result.umap_embedding[0],
@@ -32,6 +32,7 @@ const Data = data.detailed_results.map((result) => {
     result.ground_truth,
     result.predicted_class,
     result.original_index,
+    data.forget_class,
   ];
 });
 
@@ -75,11 +76,11 @@ export default function Embeddings() {
           <div>
             <div className="flex items-center text-[15px] font-light">
               <CircleIcon className="scale-75 mr-[6px]" />
-              <span>Retrained</span>
+              <span>Remain</span>
             </div>
             <div className="flex items-center text-[15px] font-light">
               <MultiplicationSignIcon className="scale-125 mr-[6px]" />
-              <span>Forgotten</span>
+              <span>Forget</span>
             </div>
           </div>
         </div>

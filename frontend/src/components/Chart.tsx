@@ -3,7 +3,7 @@ import React, {
   forwardRef,
   useEffect,
   useRef,
-  useCallback,
+  useMemo,
 } from "react";
 import * as d3 from "d3";
 
@@ -11,61 +11,66 @@ import { classNames } from "../views/Embeddings";
 
 const API_URL = "http://localhost:8000";
 const dotSize = 3;
+const crossSize = 5;
 const minZoom = 0.6;
 const maxZoom = 32;
 const width = 650;
 const height = 630;
+const XSizeDivider = 1;
+const XStrokeWidth = 3;
 
 interface Props {
   data: number[][];
+  toggleOptions: boolean[];
 }
 
 const Chart = React.memo(
-  forwardRef(({ data }: Props, ref) => {
-    const svgSelectionRef =
-      useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
+  forwardRef(({ data, toggleOptions }: Props, ref) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const svgSelectionRef =
+      useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
+    const circlesRef = useRef<d3.Selection<
+      SVGCircleElement,
+      number[],
+      SVGGElement,
+      unknown
+    > | null>(null);
+    const crossesRef = useRef<d3.Selection<
+      SVGGElement,
+      number[],
+      SVGGElement,
+      unknown
+    > | null>(null);
 
-    const x = d3
-      .scaleLinear()
-      .domain(d3.extent(data, (d) => d[0]) as [number, number])
-      .nice()
-      .range([0, width]);
-
-    const y = d3
-      .scaleLinear()
-      .domain(d3.extent(data, (d) => d[1]) as [number, number])
-      .nice()
-      .range([height, 0]);
-
-    const z = d3
-      .scaleOrdinal<number, string>()
-      .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-      .range(d3.schemeCategory10);
-
-    const xAxis = useCallback(
-      (
-        g: d3.Selection<SVGGElement, undefined, null, undefined>,
-        x: d3.ScaleLinear<number, number>
-      ) =>
-        g
-          .attr("transform", `translate(0,${height})`)
-          .call(d3.axisTop(x).ticks(0))
-          .call((g) => g.select(".domain").attr("display", "none")),
-      []
+    const x = useMemo(
+      () =>
+        d3
+          .scaleLinear()
+          .domain(d3.extent(data, (d) => d[0]) as [number, number])
+          .nice()
+          .range([0, width]),
+      [data]
     );
 
-    const yAxis = useCallback(
-      (
-        g: d3.Selection<SVGGElement, undefined, null, undefined>,
-        y: d3.ScaleLinear<number, number>
-      ) =>
-        g
-          .call(d3.axisRight(y).ticks(0))
-          .call((g) => g.select(".domain").attr("display", "none")),
+    const y = useMemo(
+      () =>
+        d3
+          .scaleLinear()
+          .domain(d3.extent(data, (d) => d[1]) as [number, number])
+          .nice()
+          .range([height, 0]),
+      [data]
+    );
+
+    const z = useMemo(
+      () =>
+        d3
+          .scaleOrdinal<number, string>()
+          .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+          .range(d3.schemeCategory10),
       []
     );
 
@@ -92,70 +97,111 @@ const Chart = React.memo(
 
         const gDot = gMain.append("g");
 
-        const dots = gDot
-          .selectAll("circle")
-          .data(data)
+        const circles = gDot
+          .selectAll<SVGCircleElement, number[]>("circle")
+          .data(data.filter((d) => d[2] !== d[5]))
           .join("circle")
           .attr("cx", (d) => x(d[0]))
           .attr("cy", (d) => y(d[1]))
           .attr("r", dotSize)
           .attr("fill", (d) => z(d[3]))
-          .style("cursor", "pointer")
-          .on("mouseenter", function (event, d) {
-            if (containerRef.current) {
-              const containerRect =
-                containerRef.current.getBoundingClientRect();
-              const tooltipSize = 140;
-              let xPos = event.clientX - containerRect.left + 10;
-              let yPos = event.clientY - containerRect.top + 10;
+          .style("cursor", "pointer");
 
-              if (xPos + tooltipSize > containerRect.width)
-                xPos = event.clientX - containerRect.left - tooltipSize - 10;
-              if (yPos + tooltipSize > containerRect.height)
-                yPos = event.clientY - containerRect.top - tooltipSize - 10;
+        const crosses = gDot
+          .selectAll<SVGGElement, number[]>("g")
+          .data(data.filter((d) => d[2] === d[5]))
+          .join("g")
+          .attr("transform", (d) => `translate(${x(d[0])},${y(d[1])})`)
+          .each(function (d) {
+            const pos = crossSize / XSizeDivider;
 
-              const index = d[4];
-              fetch(`${API_URL}/image/cifar10/${index}`)
-                .then((response) => response.blob())
-                .then((blob) => {
-                  const imageUrl = URL.createObjectURL(blob);
-                  if (tooltipRef.current) {
-                    tooltipRef.current.style.display = "block";
-                    tooltipRef.current.style.left = `${xPos}px`;
-                    tooltipRef.current.style.top = `${yPos}px`;
-                    tooltipRef.current.innerHTML = `
-                      <div style="display: flex; justify-content: center;">
-                        <img src="${imageUrl}" width="100" height="100" />
-                      </div>
-                      <div style="font-size: 12px; margin-top: 4px">Original Class: ${
-                        d[2]
-                      } (${classNames[d[2]]})</div>
-                      <div style="font-size: 12px;">Predicted Class: ${d[3]} (${
-                      classNames[d[3]]
-                    })</div>
-                    `;
-                  }
-                });
-            }
+            d3.select(this)
+              .append("line")
+              .attr("x1", -pos)
+              .attr("y1", -pos)
+              .attr("x2", pos)
+              .attr("y2", pos)
+              .attr("stroke", z(d[3]))
+              .attr("stroke-width", XStrokeWidth);
+
+            d3.select(this)
+              .append("line")
+              .attr("x1", -pos)
+              .attr("y1", pos)
+              .attr("x2", pos)
+              .attr("y2", -pos)
+              .attr("stroke", z(d[3]))
+              .attr("stroke-width", XStrokeWidth);
           })
-          .on("mouseleave", function () {
-            d3.select(this).style("cursor", "grab");
-            if (tooltipRef.current) {
-              tooltipRef.current.style.display = "none";
-            }
-          });
+          .style("cursor", "pointer");
 
-        const gx = gMain.append("g");
-        const gy = gMain.append("g");
+        circlesRef.current = circles;
+        crossesRef.current = crosses;
+
+        function handleMouseEnter(event: any, d: number[]) {
+          if (containerRef.current) {
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const tooltipSize = 140;
+            let xPos = event.clientX - containerRect.left + 10;
+            let yPos = event.clientY - containerRect.top + 10;
+
+            if (xPos + tooltipSize > containerRect.width)
+              xPos = event.clientX - containerRect.left - tooltipSize - 10;
+            if (yPos + tooltipSize > containerRect.height)
+              yPos = event.clientY - containerRect.top - tooltipSize - 10;
+
+            const index = d[4];
+            fetch(`${API_URL}/image/cifar10/${index}`)
+              .then((response) => response.blob())
+              .then((blob) => {
+                const imageUrl = URL.createObjectURL(blob);
+                if (tooltipRef.current) {
+                  tooltipRef.current.style.display = "block";
+                  tooltipRef.current.style.left = `${xPos}px`;
+                  tooltipRef.current.style.top = `${yPos}px`;
+                  tooltipRef.current.innerHTML = `
+                    <div style="display: flex; justify-content: center;">
+                      <img src="${imageUrl}" width="100" height="100" />
+                    </div>
+                    <div style="font-size: 12px; margin-top: 4px">Original Class: ${
+                      d[2]
+                    } (${classNames[d[2]]})</div>
+                    <div style="font-size: 12px;">Predicted Class: ${d[3]} (${
+                    classNames[d[3]]
+                  })</div>
+                  `;
+                }
+              });
+          }
+        }
+
+        function handleMouseLeave(this: SVGElement) {
+          d3.select(this).style("cursor", "grab");
+          if (tooltipRef.current) {
+            tooltipRef.current.style.display = "none";
+          }
+        }
+
+        circles
+          .on("mouseenter", handleMouseEnter)
+          .on("mouseleave", handleMouseLeave);
+
+        crosses
+          .on("mouseenter", handleMouseEnter)
+          .on("mouseleave", handleMouseLeave);
 
         function zoomed(event: d3.D3ZoomEvent<SVGSVGElement, undefined>) {
           const transform = event.transform;
           gMain.attr("transform", transform.toString());
-          dots.attr("r", dotSize / transform.k);
-          const zx = transform.rescaleX(x).interpolate(d3.interpolateRound);
-          const zy = transform.rescaleY(y).interpolate(d3.interpolateRound);
-          gx.call(xAxis, zx);
-          gy.call(yAxis, zy);
+
+          circles.attr("r", dotSize / transform.k);
+
+          crosses.attr("transform", (d) => {
+            const xPos = x(d[0]);
+            const yPos = y(d[1]);
+            const scale = 1 / transform.k;
+            return `translate(${xPos},${yPos}) scale(${scale})`;
+          });
         }
 
         const zoom = d3
@@ -185,7 +231,47 @@ const Chart = React.memo(
           currentSvgRef.innerHTML = "";
         }
       };
-    }, [data, x, y, z, xAxis, yAxis]);
+    }, [data, x, y, z]);
+
+    useEffect(() => {
+      const updateDataOpacity = () => {
+        if (circlesRef.current) {
+          circlesRef.current.style("opacity", (d: any) => {
+            if (
+              (d[2] === d[5] && !toggleOptions[0]) ||
+              (d[2] !== d[5] && !toggleOptions[1])
+            )
+              return 0.2;
+            return 1;
+          });
+        }
+        if (crossesRef.current) {
+          crossesRef.current.style("opacity", (d: any) => {
+            if (
+              (d[2] === d[5] && !toggleOptions[0]) ||
+              (d[2] !== d[5] && !toggleOptions[1])
+            )
+              return 0.2;
+            return 1;
+          });
+        }
+      };
+      // const updateClassOpacity = () => {
+      //   if (dotsRef.current) {
+      //     dotsRef.current.style("opacity", (d: any) => {
+      //       if (
+      //         (!toggleOptions[2] && d[3] === forgetClass) ||
+      //         (!toggleOptions[3] && d[3] !== forgetClass)
+      //       )
+      //         return 0.2;
+      //       return 1;
+      //     });
+      //   }
+      // };
+
+      updateDataOpacity();
+      // updateClassOpacity();
+    }, [toggleOptions]);
 
     useImperativeHandle(ref, () => ({
       reset: () => {
