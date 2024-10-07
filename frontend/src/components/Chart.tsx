@@ -7,24 +7,26 @@ import React, {
 } from "react";
 import * as d3 from "d3";
 
+import { classNames } from "../views/Embeddings";
+
 const API_URL = "http://localhost:8000";
 const dotSize = 2.5;
 const minZoom = 0.6;
 const maxZoom = 32;
+const width = 650;
+const height = 630;
 
 interface Props {
   data: number[][];
-  width: number;
-  height: number;
 }
 
 const Chart = React.memo(
-  forwardRef(({ data, width, height }: Props, ref) => {
-    const tooltipRef = useRef<HTMLDivElement | null>(null);
-    const svgRef = useRef<SVGSVGElement | null>(null);
-    const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
+  forwardRef(({ data }: Props, ref) => {
     const svgSelectionRef =
       useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
+    const svgRef = useRef<SVGSVGElement | null>(null);
+    const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
+    const tooltipRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     const x = d3
@@ -53,7 +55,7 @@ const Chart = React.memo(
           .attr("transform", `translate(0,${height})`)
           .call(d3.axisTop(x).ticks(0))
           .call((g) => g.select(".domain").attr("display", "none")),
-      [height]
+      []
     );
 
     const yAxis = useCallback(
@@ -103,17 +105,16 @@ const Chart = React.memo(
             if (containerRef.current) {
               const containerRect =
                 containerRef.current.getBoundingClientRect();
-              const tooltipWidth = 112;
-              const tooltipHeight = 112;
+              const tooltipSize = 140;
               let xPos = event.clientX - containerRect.left + 10;
               let yPos = event.clientY - containerRect.top + 10;
 
-              if (xPos + tooltipWidth > containerRect.width)
-                xPos = event.clientX - containerRect.left - tooltipWidth - 10;
-              if (yPos + tooltipHeight > containerRect.height)
-                yPos = event.clientY - containerRect.top - tooltipHeight - 10;
+              if (xPos + tooltipSize > containerRect.width)
+                xPos = event.clientX - containerRect.left - tooltipSize - 10;
+              if (yPos + tooltipSize > containerRect.height)
+                yPos = event.clientY - containerRect.top - tooltipSize - 10;
 
-              const index = d[3];
+              const index = d[4];
               fetch(`${API_URL}/image/cifar10/${index}`)
                 .then((response) => response.blob())
                 .then((blob) => {
@@ -122,7 +123,17 @@ const Chart = React.memo(
                     tooltipRef.current.style.display = "block";
                     tooltipRef.current.style.left = `${xPos}px`;
                     tooltipRef.current.style.top = `${yPos}px`;
-                    tooltipRef.current.innerHTML = `<img src="${imageUrl}" width="100" height="100" />`;
+                    tooltipRef.current.innerHTML = `
+                      <div style="display: flex; justify-content: center;">
+                        <img src="${imageUrl}" width="100" height="100" />
+                      </div>
+                      <div style="font-size: 12px; margin-top: 4px">Original Class: ${
+                        d[2]
+                      } (${classNames[d[2]]})</div>
+                      <div style="font-size: 12px;">Predicted Class: ${d[3]} (${
+                      classNames[d[3]]
+                    })</div>
+                    `;
                   }
                 });
             }
@@ -174,7 +185,7 @@ const Chart = React.memo(
           currentSvgRef.innerHTML = "";
         }
       };
-    }, [data, width, height, x, y, z, xAxis, yAxis]);
+    }, [data, x, y, z, xAxis, yAxis]);
 
     useImperativeHandle(ref, () => ({
       reset: () => {
@@ -208,7 +219,9 @@ const Chart = React.memo(
             pointerEvents: "none",
             backgroundColor: "white",
             padding: "5px",
-            border: "1px solid black",
+            border: "1px solid rgba(0, 0, 0, 0.25)",
+            borderRadius: "4px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.25)",
           }}
         ></div>
       </div>
