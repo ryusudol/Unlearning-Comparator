@@ -11,7 +11,7 @@ import {
   ScrollVerticalIcon,
 } from "../components/ui/icons";
 
-const classNames = [
+export const classNames = [
   "airplane",
   "automobile",
   "bird",
@@ -24,19 +24,12 @@ const classNames = [
   "truck",
 ];
 
-// [x, y, class, img_idx]
-const BaselineData = data.detailed_results.map((result) => {
+// [x, y, original class, predicted class, img_idx]
+const Data = data.detailed_results.map((result) => {
   return [
     result.umap_embedding[0],
     result.umap_embedding[1],
     result.ground_truth,
-    result.original_index,
-  ];
-});
-const ComparisonData = data.detailed_results.map((result) => {
-  return [
-    result.umap_embedding[0],
-    result.umap_embedding[1],
     result.predicted_class,
     result.original_index,
   ];
@@ -112,13 +105,12 @@ export default function Embeddings() {
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <ScatterPlot mode="Baseline" data={BaselineData} />
-      {/* <img src="/comparison.png" alt="comparison model img" /> */}
+      <ScatterPlot mode="Baseline" data={Data} />
       <Separator
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <ScatterPlot mode="Comparison" data={ComparisonData} />
+      <ScatterPlot mode="Comparison" data={Data} />
     </div>
   );
 }

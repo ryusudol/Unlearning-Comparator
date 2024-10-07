@@ -95,7 +95,7 @@ const ScatterPlot = forwardRef(({ mode, data }: Props) => {
         </div>
       </div>
       <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
-        <Chart data={data} width={650} height={630} ref={chartRef} />
+        <Chart data={data} ref={chartRef} />
       </div>
     </div>
   );
