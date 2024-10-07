@@ -42,7 +42,7 @@ const ScatterPlot = ({ mode, data }: Props) => {
         )}
         <h5 className="text-[15px] ml-[2px]">{mode} Model (id)</h5>
       </div>
-      <div className="relative top-6 right-2">
+      <div>
         <div className="flex items-center space-x-2 relative left-[220px]">
           <span className="text-[13px] font-light mr-2">Data:</span>
           <div className="flex items-center">
@@ -94,7 +94,7 @@ const ScatterPlot = ({ mode, data }: Props) => {
           </div>
         </div>
       </div>
-      <div className="w-[630px] h-[620px] flex flex-col justify-center items-center">
+      <div className="w-[630px] h-[620px] flex flex-col justify-center items-center relative bottom-6">
         <Chart
           data={data}
           toggleOptions={[fDataShow, rDataShow, fClassShow, rClassShow]}
