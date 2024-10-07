@@ -10,7 +10,7 @@ import * as d3 from "d3";
 import { classNames } from "../views/Embeddings";
 
 const API_URL = "http://localhost:8000";
-const dotSize = 2.5;
+const dotSize = 3;
 const minZoom = 0.6;
 const maxZoom = 32;
 const width = 650;
