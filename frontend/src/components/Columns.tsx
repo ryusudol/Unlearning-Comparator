@@ -8,9 +8,12 @@ export type Overview = {
   rank: number;
   id: string;
   forget: string;
-  training: string;
-  unlearning: string;
-  defense: string;
+  phase: string;
+  method: string;
+  epochs: number | null;
+  lr: number | null;
+  batchSize: number | null;
+  seed: number;
   ua: number;
   ra: number;
   ta: number;
@@ -38,34 +41,58 @@ export const columns: ColumnDef<Overview>[] = [
   },
   {
     accessorKey: "forget",
-    header: "Forget",
+    header: "FC",
     cell: ({ row }) => {
       const value = row.getValue("forget") as string;
       return <div className="text-center mr-3">{value}</div>;
     },
   },
   {
-    accessorKey: "training",
-    header: "Training",
+    accessorKey: "phase",
+    header: "Phase",
     cell: ({ row }) => {
-      const value = row.getValue("training") as string;
+      const value = row.getValue("phase") as string;
       return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "unlearning",
-    header: "Unlearning",
+    accessorKey: "method",
+    header: "Method",
     cell: ({ row }) => {
-      const value = row.getValue("unlearning");
-      return <div className="w-[90px]">{value as string}</div>;
+      const value = row.getValue("method") as string;
+      return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "defense",
-    header: "Defense",
+    accessorKey: "epochs",
+    header: "Epochs",
     cell: ({ row }) => {
-      const value = row.getValue("defense");
-      return <div className="w-[90px]">{value as string}</div>;
+      const value = row.getValue("epochs") as string;
+      return <div>{value}</div>;
+    },
+  },
+  {
+    accessorKey: "lr",
+    header: "LR",
+    cell: ({ row }) => {
+      const value = row.getValue("lr") as string;
+      return <div>{value}</div>;
+    },
+  },
+  {
+    accessorKey: "batchSize",
+    header: "BS",
+    cell: ({ row }) => {
+      const value = row.getValue("batchSize") as string;
+      return <div>{value}</div>;
+    },
+  },
+  {
+    accessorKey: "seed",
+    header: "Seed",
+    cell: ({ row }) => {
+      const value = row.getValue("seed") as string;
+      return <div>{value}</div>;
     },
   },
   {

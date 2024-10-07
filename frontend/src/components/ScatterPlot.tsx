@@ -40,9 +40,9 @@ const ScatterPlot = ({ mode, data }: Props) => {
         ) : (
           <GitCompareIcon className="mr-[2px]" />
         )}
-        <h5 className="text-[15px] ml-[2px]">{mode} Model (id02)</h5>
+        <h5 className="text-[15px] ml-[2px]">{mode} Model (id)</h5>
       </div>
-      <div>
+      <div className="relative top-6 right-2">
         <div className="flex items-center space-x-2 relative left-[220px]">
           <span className="text-[13px] font-light mr-2">Data:</span>
           <div className="flex items-center">
