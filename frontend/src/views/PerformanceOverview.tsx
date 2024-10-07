@@ -5,7 +5,6 @@ import DataTable from "../components/DataTable";
 import { OverviewContext } from "../store/overview-context";
 import { BaselineContext } from "../store/baseline-context";
 import { SelectedIDContext } from "../store/selected-id-context";
-import { retrainedData } from "../constants/gt";
 import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import { Overview, colors, columns } from "../components/Columns";
 
@@ -211,10 +210,10 @@ export default function PerformanceOverview({ height }: { height: number }) {
     saveSelectedID(idx);
   };
 
-  const currRetrainedData = retrainedData[baseline];
-  const retrainedUA = currRetrainedData.unlearn_accuracy;
-  const retrainedRA = currRetrainedData.remain_accuracy;
-  const retrainedTA = currRetrainedData.test_accuracy;
+  // const currRetrainedData = retrainedData[baseline];
+  // const retrainedUA = currRetrainedData.unlearn_accuracy;
+  // const retrainedRA = currRetrainedData.remain_accuracy;
+  // const retrainedTA = currRetrainedData.test_accuracy;
 
   const colorScale = d3
     .scaleSequential<string>(
@@ -232,6 +231,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
           <AnalysisTextLinkIcon />
           <h5 className="font-semibold ml-[3px]">Overview</h5>
         </div>
+        {/* Legend */}
         <div className="flex flex-col items-start absolute right-[6px] top-3">
           <div className="text-[11px]">Performance</div>
           <div className="w-[250px] h-5 relative">

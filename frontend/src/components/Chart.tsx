@@ -10,15 +10,15 @@ import * as d3 from "d3";
 import { classNames } from "../views/Embeddings";
 
 const API_URL = "http://localhost:8000";
-const dotSize = 3.5;
+const dotSize = 3;
 const minZoom = 0.6;
 const maxZoom = 32;
 const width = 630;
 const height = 630;
 const XSizeDivider = 0.75;
-const XStrokeWidth = 5;
-const crossSize = 5;
-const defaultOpacity = 0.6;
+const XStrokeWidth = 3.5;
+const crossSize = 3.5;
+const defaultOpacity = 0.7;
 const loweredOpacity = 0.1;
 
 interface Props {

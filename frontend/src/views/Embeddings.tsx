@@ -1,5 +1,6 @@
 import ScatterPlot from "../components/ScatterPlot";
 import data from "../constants/4f5c.json";
+import data2 from "../constants/478e.json";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import {
@@ -25,14 +26,14 @@ export const classNames = [
 ];
 
 // [0: x, 1: y, 2: original_class, 3: predicted class, 4:img_idx], 5: forget_class
-const Data = data.detailed_results.map((result) => {
+const Data = data2.detailed_results.map((result) => {
   return [
     result.umap_embedding[0],
     result.umap_embedding[1],
     result.ground_truth,
     result.predicted_class,
     result.original_index,
-    data.forget_class,
+    data2.forget_class,
   ];
 });
 

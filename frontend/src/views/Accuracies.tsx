@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Bar, BarChart, XAxis, YAxis, ReferenceLine, Label } from "recharts";
 
-import { retrainedData } from "../constants/gt";
 import { BaselineContext } from "../store/baseline-context";
 import { OverviewContext } from "../store/overview-context";
 import { SelectedIDContext } from "../store/selected-id-context";
@@ -174,7 +173,7 @@ export default function PerformanceMetrics({ height }: Props) {
   const { overview } = useContext(OverviewContext);
   const { selectedID } = useContext(SelectedIDContext);
 
-  const currRetrainedData = retrainedData[baseline];
+  // const currRetrainedData = retrainedData[baseline];
   const currOverview = overview.filter(
     (item) => item.forget_class === baseline.toString()
   );
