@@ -94,7 +94,9 @@ export default function PerformanceMetrics({ height }: Props) {
       const comparisonValue = parseFloat(
         comparisonTrainAccuracies[key as keyof ClassAccuracies]
       );
+      const categoryLetter = String.fromCharCode(65 + idx);
       return {
+        category: categoryLetter,
         value: parseFloat((baselineValue - comparisonValue).toFixed(2)),
         fill: TABLEAU10[idx],
       };
@@ -109,7 +111,9 @@ export default function PerformanceMetrics({ height }: Props) {
       const comparisonValue = parseFloat(
         comparisonTestAccuracies[key as keyof ClassAccuracies]
       );
+      const categoryLetter = String.fromCharCode(65 + idx);
       return {
+        category: categoryLetter,
         value: parseFloat((baselineValue - comparisonValue).toFixed(2)),
         fill: TABLEAU10[idx],
       };
