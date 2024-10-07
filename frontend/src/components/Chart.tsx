@@ -43,7 +43,7 @@ const Chart = React.memo(
 
     const z = d3
       .scaleOrdinal<number, string>()
-      .domain(data.map((d) => d[2]))
+      .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
       .range(d3.schemeCategory10);
 
     const xAxis = useCallback(
@@ -99,7 +99,7 @@ const Chart = React.memo(
           .attr("cx", (d) => x(d[0]))
           .attr("cy", (d) => y(d[1]))
           .attr("r", dotSize)
-          .attr("fill", (d) => z(d[2]))
+          .attr("fill", (d) => z(d[3]))
           .style("cursor", "pointer")
           .on("mouseenter", function (event, d) {
             if (containerRef.current) {
