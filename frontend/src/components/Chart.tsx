@@ -10,14 +10,16 @@ import * as d3 from "d3";
 import { classNames } from "../views/Embeddings";
 
 const API_URL = "http://localhost:8000";
-const dotSize = 3;
-const crossSize = 5;
+const dotSize = 3.5;
 const minZoom = 0.6;
 const maxZoom = 32;
-const width = 650;
+const width = 630;
 const height = 630;
-const XSizeDivider = 1;
-const XStrokeWidth = 3;
+const XSizeDivider = 0.75;
+const XStrokeWidth = 5;
+const crossSize = 5;
+const defaultOpacity = 0.6;
+const loweredOpacity = 0.1;
 
 interface Props {
   data: number[][];
@@ -70,7 +72,7 @@ const Chart = React.memo(
         d3
           .scaleOrdinal<number, string>()
           .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-          .range(d3.schemeCategory10),
+          .range(d3.schemeTableau10),
       []
     );
 
@@ -161,7 +163,7 @@ const Chart = React.memo(
                   tooltipRef.current.style.top = `${yPos}px`;
                   tooltipRef.current.innerHTML = `
                     <div style="display: flex; justify-content: center;">
-                      <img src="${imageUrl}" width="100" height="100" />
+                      <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
                     </div>
                     <div style="font-size: 12px; margin-top: 4px">Ground Truth: ${
                       d[2]
@@ -244,8 +246,8 @@ const Chart = React.memo(
               (d[3] === d[5] && !toggleOptions[2]) ||
               (d[3] !== d[5] && !toggleOptions[3]);
 
-            if (dataCondition || classCondition) return 0.2;
-            return 1;
+            if (dataCondition || classCondition) return loweredOpacity;
+            return defaultOpacity;
           });
         }
 
@@ -258,8 +260,8 @@ const Chart = React.memo(
               (d[3] === d[5] && !toggleOptions[2]) ||
               (d[3] !== d[5] && !toggleOptions[3]);
 
-            if (dataCondition || classCondition) return 0.2;
-            return 1;
+            if (dataCondition || classCondition) return loweredOpacity;
+            return defaultOpacity;
           });
         }
       };
