@@ -1,25 +1,22 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
 
 export type Overview = {
-  rank: number;
   id: string;
-  forget: string;
+  forget: number;
   phase: string;
   method: string;
-  epochs: number | null;
-  lr: number | null;
-  batchSize: number | null;
+  epochs: number | string;
+  lr: number | string;
+  batchSize: number | string;
   seed: number;
   ua: number;
   ra: number;
-  ta: number;
   tua: number;
   tra: number;
-  rte: number;
+  rte: number | string;
 };
 
 export const colors = [
@@ -199,19 +196,11 @@ export const columns: ColumnDef<Overview>[] = [
   //   },
   // },
   {
+    id: "baseline",
     header: "Baseline",
-    cell: () => (
-      <div className="w-full ml-3">
-        <Checkbox className="ml-2" />
-      </div>
-    ),
   },
   {
+    id: "comparison",
     header: "Comparison",
-    cell: () => (
-      <div className="w-full ml-5">
-        <Checkbox className="ml-2" />
-      </div>
-    ),
   },
 ];

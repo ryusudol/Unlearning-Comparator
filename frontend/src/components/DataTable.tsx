@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -8,6 +8,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  CellContext,
 } from "@tanstack/react-table";
 
 import {
@@ -19,15 +20,17 @@ import {
   TableRow,
 } from "./ui/table";
 import { Input } from "./ui/input";
-import { ScrollArea } from "./ui/scroll-area";
 import { hexToRgba } from "../util";
+import { Checkbox } from "./ui/checkbox";
+import { ScrollArea } from "./ui/scroll-area";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   performanceMetrics: {
     [key: string]: {
-      colorScale: d3.ScaleQuantile<string, never>;
+      colorScale: false | d3.ScaleQuantile<string, never>;
     };
   };
 }
@@ -37,13 +40,53 @@ export default function DataTable<TData, TValue>({
   data,
   performanceMetrics,
 }: DataTableProps<TData, TValue>) {
+  const { baseline, comparison, saveBaseline, saveComparison } = useContext(
+    BaselineComparisonContext
+  );
+
   const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const modifiedColumns = columns.map((column) => {
+    if (column.id === "baseline") {
+      return {
+        ...column,
+        cell: ({ row }: CellContext<TData, unknown>) => (
+          <div className="w-full ml-3">
+            <Checkbox
+              className="ml-2"
+              checked={baseline === row.id}
+              onCheckedChange={() => {
+                saveBaseline(baseline === row.id ? "" : row.id);
+              }}
+            />
+          </div>
+        ),
+      };
+    }
+    if (column.id === "comparison") {
+      return {
+        ...column,
+        cell: ({ row }: CellContext<TData, unknown>) => (
+          <div className="w-full ml-3">
+            <Checkbox
+              className="ml-4"
+              checked={comparison === row.id}
+              onCheckedChange={() => {
+                saveComparison(comparison === row.id ? "" : row.id);
+              }}
+            />
+          </div>
+        ),
+      };
+    }
+    return column;
+  });
+
   const table = useReactTable({
     data,
-    columns,
+    columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -106,7 +149,7 @@ export default function DataTable<TData, TValue>({
                       if (isPerformanceMetric) {
                         const value = cell.getValue() as number;
                         const { colorScale } = performanceMetrics[columnId];
-                        color = colorScale(value);
+                        if (colorScale) color = colorScale(value);
                         rgbaColor = hexToRgba(color);
 
                         cellStyle = {

@@ -7,8 +7,7 @@ import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
-import { BaselineContext } from "../store/baseline-context";
-import { SelectedIDContext } from "../store/selected-id-context";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { OverviewContext } from "../store/overview-context";
 
 const UPPER_HEIGHT = 290;
@@ -17,17 +16,16 @@ const LOWER_HEIGHT = 720;
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
-  const { baseline, saveBaseline, retrieveBaseline } =
-    useContext(BaselineContext);
-  const { saveSelectedID } = useContext(SelectedIDContext);
+  const { baseline, saveBaseline, retrieveContext } = useContext(
+    BaselineComparisonContext
+  );
   const { overview, retrieveOverview } = useContext(OverviewContext);
 
   useEffect(() => {
-    retrieveBaseline();
+    retrieveContext();
     retrieveOverview();
 
     saveBaseline(baseline ?? 0);
-    saveSelectedID(overview.length === 0 ? 0 : overview.length - 1);
 
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
