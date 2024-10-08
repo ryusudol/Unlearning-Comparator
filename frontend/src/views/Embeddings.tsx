@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import ScatterPlot from "../components/ScatterPlot";
+import ScatterPlot from "../components/Embedding";
 import { basicData } from "../constants/basicData";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
