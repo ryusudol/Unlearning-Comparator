@@ -50,18 +50,13 @@ export interface DefenseStatus {
 
 // Configuration Data
 export interface TrainingConfigurationData {
-  model: string;
-  dataset: string;
   epochs: number;
   learning_rate: number;
   batch_size: number;
-  seed: number;
 }
 
 export interface UnlearningConfigurationData {
   method: string;
-  model: string;
-  dataset: string;
   trained_model: string;
   forget_class: string;
   epochs: number;

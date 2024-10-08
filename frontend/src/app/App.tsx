@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 
 import Header from "../components/Header";
 import Settings from "../views/Settings";
@@ -7,8 +7,8 @@ import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { OverviewContext } from "../store/overview-context";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 const UPPER_HEIGHT = 290;
 const LOWER_HEIGHT = 720;
@@ -16,20 +16,19 @@ const LOWER_HEIGHT = 720;
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
-  const { baseline, saveBaseline, retrieveContext } = useContext(
-    BaselineComparisonContext
-  );
-  const { overview, retrieveOverview } = useContext(OverviewContext);
+  const { retrieveContext } = useContext(BaselineComparisonContext);
+  const { retrieveOverview } = useContext(OverviewContext);
 
-  useEffect(() => {
+  const handleRefresh = useCallback(() => {
     retrieveContext();
     retrieveOverview();
-
-    saveBaseline(baseline ?? 0);
-
-    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overview.length]);
+  }, []);
+
+  useEffect(() => {
+    handleRefresh();
+    setIsLoading(false);
+  }, [handleRefresh]);
 
   if (isLoading) {
     return <div>Loading . . .</div>;

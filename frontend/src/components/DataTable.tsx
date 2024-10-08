@@ -12,6 +12,13 @@ import {
 } from "@tanstack/react-table";
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,13 +26,15 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Input } from "./ui/input";
 import { hexToRgba } from "../util";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
+import { forgetClasses } from "../constants/forgetClasses";
+import { MultiplicationSignIcon } from "./ui/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ForgetClassContext } from "../store/forget-class-context";
 
-interface DataTableProps<TData, TValue> {
+interface Props<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   performanceMetrics: {
@@ -39,7 +48,8 @@ export default function DataTable<TData, TValue>({
   columns,
   data,
   performanceMetrics,
-}: DataTableProps<TData, TValue>) {
+}: Props<TData, TValue>) {
+  const { forgetClass, saveForgetClass } = useContext(ForgetClassContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
   );
@@ -53,7 +63,7 @@ export default function DataTable<TData, TValue>({
       return {
         ...column,
         cell: ({ row }: CellContext<TData, unknown>) => (
-          <div className="w-full ml-3">
+          <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-2"
               checked={baseline === row.id}
@@ -69,7 +79,7 @@ export default function DataTable<TData, TValue>({
       return {
         ...column,
         cell: ({ row }: CellContext<TData, unknown>) => (
-          <div className="w-full ml-3">
+          <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-4"
               checked={comparison === row.id}
@@ -98,14 +108,24 @@ export default function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center my-1">
-        <Input
-          placeholder="Filter forget class..."
-          value={(table.getColumn("forget")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("forgetClass")?.setFilterValue(event.target.value)
-          }
-          className="w-[140px] h-6"
-        />
+        <Select
+          onValueChange={(forgetClass) => saveForgetClass(forgetClass)}
+          value={forgetClass}
+        >
+          <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal pr-1">
+            <div className="flex items-center">
+              <MultiplicationSignIcon className="mr-1" />
+              <SelectValue placeholder="Forget Class" />
+            </div>
+          </SelectTrigger>
+          <SelectContent className="bg-white text-black">
+            {forgetClasses.map((el, idx) => (
+              <SelectItem key={idx} value={el}>
+                {el}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>

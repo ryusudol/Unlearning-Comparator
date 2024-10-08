@@ -37,14 +37,6 @@ export const columns: ColumnDef<Overview>[] = [
     header: "ID",
   },
   {
-    accessorKey: "forget",
-    header: "FC",
-    cell: ({ row }) => {
-      const value = row.getValue("forget") as string;
-      return <div className="text-center mr-3">{value}</div>;
-    },
-  },
-  {
     accessorKey: "phase",
     header: "Phase",
     cell: ({ row }) => {
@@ -65,7 +57,8 @@ export const columns: ColumnDef<Overview>[] = [
     header: "Epochs",
     cell: ({ row }) => {
       const value = row.getValue("epochs") as string;
-      return <div>{value}</div>;
+
+      return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
@@ -73,7 +66,7 @@ export const columns: ColumnDef<Overview>[] = [
     header: "LR",
     cell: ({ row }) => {
       const value = row.getValue("lr") as string;
-      return <div>{value}</div>;
+      return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
@@ -81,15 +74,7 @@ export const columns: ColumnDef<Overview>[] = [
     header: "BS",
     cell: ({ row }) => {
       const value = row.getValue("batchSize") as string;
-      return <div>{value}</div>;
-    },
-  },
-  {
-    accessorKey: "seed",
-    header: "Seed",
-    cell: ({ row }) => {
-      const value = row.getValue("seed") as string;
-      return <div>{value}</div>;
+      return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
@@ -183,8 +168,8 @@ export const columns: ColumnDef<Overview>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("rte"));
-      return <div className="ml-4">{value}</div>;
+      const value = row.getValue("rte") as string;
+      return <div className="ml-4">{value !== "N/A" ? value : "-"}</div>;
     },
   },
   // {

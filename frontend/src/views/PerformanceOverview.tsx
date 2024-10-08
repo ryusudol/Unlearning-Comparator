@@ -3,7 +3,6 @@ import * as d3 from "d3";
 import { overviewData } from "../constants/basicData";
 import DataTable from "../components/DataTable";
 // import { OverviewContext } from "../store/overview-context";
-// import { BaselineContext } from "../store/baseline-context";
 import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import { colors, columns } from "../components/Columns";
 
@@ -36,7 +35,6 @@ const performanceMetrics = {
 
 export default function PerformanceOverview({ height }: { height: number }) {
   // const { overview, retrieveOverview } = useContext(OverviewContext);
-  // const { baseline } = useContext(BaselineContext);
   // const { selectedID, saveSelectedID } = useContext(SelectedIDContext);
 
   // useEffect(() => {
@@ -70,7 +68,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
           <h5 className="font-semibold ml-[3px]">Overview</h5>
         </div>
         {/* Legend */}
-        <div className="flex flex-col items-start absolute right-[6px] top-3">
+        <div className="flex flex-col items-start absolute right-[6px] top-2">
           <div className="text-[11px]">Performance</div>
           <div className="w-[250px] h-5 relative">
             <div

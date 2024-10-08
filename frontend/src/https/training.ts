@@ -4,7 +4,6 @@ const API_URL = "http://localhost:8000";
 
 export async function executeTraining(configState: TrainingConfigurationData) {
   const data = {
-    seed: (configState as TrainingConfigurationData).seed,
     epochs: configState.epochs,
     batch_size: configState.batch_size,
     learning_rate: configState.learning_rate,

@@ -5,6 +5,7 @@ import ScatterPlot from "../components/Embedding";
 import { basicData } from "../constants/basicData";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
+import { forgetClasses } from "../constants/forgetClasses";
 import {
   HelpCircleIcon,
   CircleIcon,
@@ -13,19 +14,6 @@ import {
   MultiplicationSignIcon,
   ScrollVerticalIcon,
 } from "../components/ui/icons";
-
-export const classNames = [
-  "airplane",
-  "automobile",
-  "bird",
-  "cat",
-  "deer",
-  "dog",
-  "frog",
-  "horse",
-  "ship",
-  "truck",
-];
 
 export default function Embeddings() {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -105,15 +93,13 @@ export default function Embeddings() {
         <div className="w-full h-[358px] flex flex-col justify-start items-start pl-2 pr-[2px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
           <span className="text-[15px]">Predictions</span>
           <div>
-            {classNames.map((className, idx) => (
+            {forgetClasses.map((className, idx) => (
               <div key={idx} className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[idx]}` }}
-                  className="w-[14px] h-[30px] mr-1"
+                  className="w-[14px] h-[30px] mr-[6px]"
                 />
-                <span className="text-[15px] font-light">
-                  {idx} ({className})
-                </span>
+                <span className="text-[15px] font-light">{className}</span>
               </div>
             ))}
           </div>

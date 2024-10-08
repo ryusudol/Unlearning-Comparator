@@ -1,7 +1,5 @@
 export interface OverviewItem {
   forget_class: string;
-  model: string;
-  dataset: string;
   training: string;
   unlearning: string;
   defense: string;
