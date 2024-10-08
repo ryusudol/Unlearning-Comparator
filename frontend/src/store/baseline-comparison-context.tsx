@@ -9,7 +9,7 @@ import {
 const CONTEXT = "context";
 
 export const BaselineComparisonContext = createContext<ContextType>({
-  baseline: "",
+  baseline: "0",
   comparison: "",
 
   saveBaseline: (baseline: string) => {},
@@ -43,7 +43,7 @@ function BaselineReducer(state: Context, action: Action): Context {
 
     case "CLEAR_CONTEXT":
       sessionStorage.removeItem(CONTEXT);
-      return { baseline: "0", comparison: "0" };
+      return { baseline: "0", comparison: "" };
 
     default:
       return state;
@@ -57,7 +57,7 @@ export default function BaselineContextProvider({
 }) {
   const [context, dispatch] = useReducer(BaselineReducer, {
     baseline: "0",
-    comparison: "1",
+    comparison: "",
   });
 
   function handleSaveBaseline(baseline: string) {

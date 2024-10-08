@@ -5,6 +5,8 @@ import { TABLEAU10 } from "../constants/tableau10";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { basicData } from "../constants/basicData";
 import { Chart01Icon } from "../components/ui/icons";
+import { ForgetClassContext } from "../store/forget-class-context";
+import { forgetClasses } from "../constants/forgetClasses";
 
 interface ClassAccuracies {
   "0": string;
@@ -19,8 +21,9 @@ interface ClassAccuracies {
   "9": string;
 }
 
-export default function PerformanceMetrics({ height }: { height: number }) {
+export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { forgetClass } = useContext(ForgetClassContext);
 
   const baselineTrainAccuracies: ClassAccuracies =
     basicData[+baseline].train_class_accuracies;
@@ -74,21 +77,31 @@ export default function PerformanceMetrics({ height }: { height: number }) {
   return (
     <section
       style={{ height: height }}
-      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
       <div className="flex items-center">
         <Chart01Icon />
         <h5 className="font-semibold ml-[3px]">Accuracies</h5>
       </div>
       <div className="w-full flex flex-col justify-start items-center">
-        <div className="flex justify-center items-center mt-[6px] -ml-6">
-          <p className="w-10 -rotate-90 origin-left translate-x-7 translate-y-[26px] text-[13px] text-[#808080]">
+        <div className="flex justify-center items-center">
+          {/* <p className="w-10 -rotate-90 origin-left translate-x-7 translate-y-[26px] text-[13px] text-[#808080]">
             Classes
-          </p>
+          </p> */}
           <BarChart mode="Training" gapData={trainAccuracyGap} />
           <BarChart mode="Test" gapData={testAccuracyGap} />
         </div>
       </div>
+      {forgetClass && (
+        <p className="text-xs font-medium absolute top-2 right-4">
+          * X is{" "}
+          <span
+            style={{ color: TABLEAU10[forgetClasses.indexOf(forgetClass)] }}
+          >
+            {forgetClass}
+          </span>
+        </p>
+      )}
     </section>
   );
 }

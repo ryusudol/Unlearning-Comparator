@@ -109,7 +109,6 @@ export default function Training({ setTrainedModels }: TrainingProps) {
       initRunningStatus();
     } else {
       const isValid =
-        configState.seed > 0 &&
         configState.epochs > 0 &&
         configState.batch_size > 0 &&
         configState.learning_rate > 0;
@@ -144,7 +143,6 @@ export default function Training({ setTrainedModels }: TrainingProps) {
             <Input labelName="Epochs" defaultValue={30} />
             <Input labelName="Learning Rate" defaultValue={0.01} />
             <Input labelName="Batch Size" defaultValue={128} />
-            <Input labelName="Seed" defaultValue={1} />
           </div>
         </div>
       )}

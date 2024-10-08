@@ -216,8 +216,6 @@ export default function Unlearning({
 
     const newOverviewItem: OverviewItem = {
       forget_class: configState.forget_class,
-      model: "ResNet18",
-      dataset: configState.dataset === "CIFAR-10" ? "CIFAR-10" : "VggFace",
       training: !isRetrain && mode === 0 ? configState.trained_model : "None",
       unlearning: isRetrain
         ? "Retrain"

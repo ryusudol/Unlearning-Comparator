@@ -3,7 +3,6 @@ import * as d3 from "d3";
 import { overviewData } from "../constants/basicData";
 import DataTable from "../components/DataTable";
 // import { OverviewContext } from "../store/overview-context";
-// import { BaselineContext } from "../store/baseline-context";
 import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import { colors, columns } from "../components/Columns";
 
@@ -36,7 +35,6 @@ const performanceMetrics = {
 
 export default function PerformanceOverview({ height }: { height: number }) {
   // const { overview, retrieveOverview } = useContext(OverviewContext);
-  // const { baseline } = useContext(BaselineContext);
   // const { selectedID, saveSelectedID } = useContext(SelectedIDContext);
 
   // useEffect(() => {

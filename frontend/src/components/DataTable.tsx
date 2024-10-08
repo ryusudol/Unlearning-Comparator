@@ -30,9 +30,11 @@ import { hexToRgba } from "../util";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
 import { forgetClasses } from "../constants/forgetClasses";
+import { MultiplicationSignIcon } from "./ui/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ForgetClassContext } from "../store/forget-class-context";
 
-interface DataTableProps<TData, TValue> {
+interface Props<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   performanceMetrics: {
@@ -46,12 +48,12 @@ export default function DataTable<TData, TValue>({
   columns,
   data,
   performanceMetrics,
-}: DataTableProps<TData, TValue>) {
+}: Props<TData, TValue>) {
+  const { forgetClass, saveForgetClass } = useContext(ForgetClassContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
   );
 
-  const [forgetClass, setForgetClass] = useState<string | undefined>(undefined);
   const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -106,9 +108,15 @@ export default function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center my-1">
-        <Select onValueChange={setForgetClass} value={forgetClass}>
+        <Select
+          onValueChange={(forgetClass) => saveForgetClass(forgetClass)}
+          value={forgetClass}
+        >
           <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal pr-1">
-            <SelectValue placeholder="Forget Class" />
+            <div className="flex items-center">
+              <MultiplicationSignIcon className="mr-1" />
+              <SelectValue placeholder="Forget Class" />
+            </div>
           </SelectTrigger>
           <SelectContent className="bg-white text-black">
             {forgetClasses.map((el, idx) => (
