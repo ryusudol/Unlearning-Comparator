@@ -76,19 +76,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     const data = payload[0].payload as GapDataItem;
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-xs shadow-xl">
-        <div className="flex items-center">
-          <div
-            style={{
-              width: "10px",
-              height: "10px",
-              backgroundColor: data.fill,
-              borderColor: data.fill,
-              borderRadius: "2px",
-              marginRight: "4px",
-            }}
-          />
-          <p className="font-medium">{data.classLabel}</p>
-        </div>
+        <p className="font-medium text-[13px]">Class: {data.classLabel}</p>
         <p>Gap: {data.value.toFixed(2)}</p>
         <p>Baseline: {data.baselineAccuracy.toFixed(2)}</p>
         <p>Comparison: {data.comparisonAccuracy.toFixed(2)}</p>

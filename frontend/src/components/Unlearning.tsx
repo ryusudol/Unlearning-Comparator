@@ -11,14 +11,14 @@ import Input from "./Input";
 import CustomInput from "./CustomInput";
 import PredefinedInput from "./PredefinedInput";
 import OperationStatus from "./OperationStatus";
-import { MODELS, DATASET } from "../constants/training";
 import { OverviewContext } from "../store/overview-context";
 import { RunningStatusContext } from "../store/running-status-context";
 import { getDefaultUnlearningConfig } from "../util";
 import { OverviewItem } from "../types/overview-context";
 import { cancelRunning, fetchRunningStatus } from "../https/utils";
-import { EraserIcon } from "./ui/icons";
-import { UNLEARNING_METHODS, UNLEARN_CLASSES } from "../constants/unlearning";
+import { MultiplicationSignIcon } from "./ui/icons";
+import { UNLEARNING_METHODS } from "../constants/unlearning";
+import { forgetClasses } from "../constants/forgetClasses";
 import {
   UnlearningConfigurationData,
   // ResultType,
@@ -299,17 +299,17 @@ export default function Unlearning({
         <div>
           <div id="forget-class" className="flex justify-between items-center">
             <div className="flex items-center">
-              <EraserIcon className="-ml-[2px] mr-[2px]" />
+              <MultiplicationSignIcon className="scale-125 -ml-[2px] mr-[2px]" />
               <label className="text-[15px]" htmlFor="forget_class">
                 Forget Class
               </label>
             </div>
-            <Select defaultValue={UNLEARN_CLASSES[0]} name="forget_class">
+            <Select defaultValue={forgetClasses[0]} name="forget_class">
               <SelectTrigger className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]">
-                <SelectValue placeholder={"0"} />
+                <SelectValue placeholder={forgetClasses[0]} />
               </SelectTrigger>
               <SelectContent className="bg-white text-black overflow-ellipsis whitespace-nowrap">
-                {UNLEARN_CLASSES.map((forgetClass, idx) => (
+                {forgetClasses.map((forgetClass, idx) => (
                   <SelectItem
                     key={idx}
                     value={forgetClass}
@@ -328,16 +328,6 @@ export default function Unlearning({
               optionData={UNLEARNING_METHODS}
             />
             <div>
-              <Input
-                labelName="Model"
-                defaultValue={"ResNet18"}
-                optionData={MODELS}
-              />
-              <Input
-                labelName="Dataset"
-                defaultValue={"CIFAR-10"}
-                optionData={DATASET}
-              />
               <Input
                 labelName="Trained Model"
                 defaultValue={trainedModels[0]}

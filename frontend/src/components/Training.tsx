@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import Input from "./Input";
 import PredefinedInput from "./PredefinedInput";
 import OperationStatus from "./OperationStatus";
-import { MODELS, DATASET } from "../constants/training";
 import { RunningStatusContext } from "../store/running-status-context";
 import {
   fetchRunningStatus,
@@ -142,16 +141,6 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         <div>
           <PredefinedInput mode={0} />
           <div>
-            <Input
-              labelName="Model"
-              defaultValue={"ResNet18"}
-              optionData={MODELS}
-            />
-            <Input
-              labelName="Dataset"
-              defaultValue={"CIFAR-10"}
-              optionData={DATASET}
-            />
             <Input labelName="Epochs" defaultValue={30} />
             <Input labelName="Learning Rate" defaultValue={0.01} />
             <Input labelName="Batch Size" defaultValue={128} />

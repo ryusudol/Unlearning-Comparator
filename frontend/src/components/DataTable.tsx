@@ -12,6 +12,13 @@ import {
 } from "@tanstack/react-table";
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,10 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Input } from "./ui/input";
 import { hexToRgba } from "../util";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
+import { forgetClasses } from "../constants/forgetClasses";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 interface DataTableProps<TData, TValue> {
@@ -44,6 +51,7 @@ export default function DataTable<TData, TValue>({
     BaselineComparisonContext
   );
 
+  const [forgetClass, setForgetClass] = useState<string | undefined>(undefined);
   const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -53,7 +61,7 @@ export default function DataTable<TData, TValue>({
       return {
         ...column,
         cell: ({ row }: CellContext<TData, unknown>) => (
-          <div className="w-full ml-3">
+          <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-2"
               checked={baseline === row.id}
@@ -69,7 +77,7 @@ export default function DataTable<TData, TValue>({
       return {
         ...column,
         cell: ({ row }: CellContext<TData, unknown>) => (
-          <div className="w-full ml-3">
+          <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-4"
               checked={comparison === row.id}
@@ -98,14 +106,18 @@ export default function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center my-1">
-        <Input
-          placeholder="Filter forget class..."
-          value={(table.getColumn("forget")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("forgetClass")?.setFilterValue(event.target.value)
-          }
-          className="w-[140px] h-6"
-        />
+        <Select onValueChange={setForgetClass} value={forgetClass}>
+          <SelectTrigger className="w-[128px] h-6 bg-white text-black font-normal pr-1">
+            <SelectValue placeholder="Forget Class" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-black">
+            {forgetClasses.map((el, idx) => (
+              <SelectItem key={idx} value={el}>
+                {el}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>

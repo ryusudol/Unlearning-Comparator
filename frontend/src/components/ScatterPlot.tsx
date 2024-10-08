@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import * as d3 from "d3";
 
-import { classNames } from "../views/Embeddings";
+import { forgetClasses } from "../constants/forgetClasses";
 
 const API_URL = "http://localhost:8000";
 const dotSize = 3;
@@ -165,12 +165,14 @@ const ScatterPlot = React.memo(
                     <div style="display: flex; justify-content: center;">
                       <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
                     </div>
-                    <div style="font-size: 12px; margin-top: 4px">Ground Truth: ${
-                      d[2]
-                    } (${classNames[d[2]]})</div>
-                    <div style="font-size: 12px;">Prediction: ${d[3]} (${
-                    classNames[d[3]]
-                  })</div>
+                    <div style="font-size: 12px; margin-top: 4px">
+                      <span style="font-weight: 500;">Ground Truth</span>: ${
+                        forgetClasses[d[2]]
+                      }</div>
+                    <div style="font-size: 12px;">
+                      <span style="font-weight: 500;">Prediction</span>: ${
+                        forgetClasses[d[3]]
+                      }</div>
                   `;
                 }
               });

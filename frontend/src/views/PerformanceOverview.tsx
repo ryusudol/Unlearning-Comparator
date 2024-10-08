@@ -70,7 +70,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
           <h5 className="font-semibold ml-[3px]">Overview</h5>
         </div>
         {/* Legend */}
-        <div className="flex flex-col items-start absolute right-[6px] top-3">
+        <div className="flex flex-col items-start absolute right-[6px] top-2">
           <div className="text-[11px]">Performance</div>
           <div className="w-[250px] h-5 relative">
             <div
