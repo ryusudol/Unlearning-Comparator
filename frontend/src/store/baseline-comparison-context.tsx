@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { useEffect, createContext, useReducer } from "react";
 
 import {
   Action,
@@ -9,7 +9,7 @@ import {
 const CONTEXT = "context";
 
 export const BaselineComparisonContext = createContext<ContextType>({
-  baseline: "0",
+  baseline: "",
   comparison: "",
 
   saveBaseline: (baseline: string) => {},
@@ -43,7 +43,7 @@ function BaselineReducer(state: Context, action: Action): Context {
 
     case "CLEAR_CONTEXT":
       sessionStorage.removeItem(CONTEXT);
-      return { baseline: "0", comparison: "" };
+      return { baseline: "", comparison: "" };
 
     default:
       return state;
@@ -56,7 +56,7 @@ export default function BaselineContextProvider({
   children: React.ReactNode;
 }) {
   const [context, dispatch] = useReducer(BaselineReducer, {
-    baseline: "0",
+    baseline: "",
     comparison: "",
   });
 
@@ -75,6 +75,10 @@ export default function BaselineContextProvider({
   function handleClearContext() {
     dispatch({ type: "CLEAR_CONTEXT" });
   }
+
+  useEffect(() => {
+    handleRetrieveContext();
+  }, []);
 
   const ctxValue: ContextType = {
     baseline: context.baseline,

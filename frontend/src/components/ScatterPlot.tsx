@@ -7,7 +7,8 @@ import React, {
 } from "react";
 import * as d3 from "d3";
 
-import { forgetClasses } from "../constants/forgetClasses";
+import { forgetClassNames } from "../constants/forgetClassNames";
+import { basicData } from "../constants/basicData";
 
 const API_URL = "http://localhost:8000";
 const dotSize = 3;
@@ -22,12 +23,13 @@ const defaultOpacity = 0.7;
 const loweredOpacity = 0.1;
 
 interface Props {
-  data: number[][];
+  mode: "Baseline" | "Comparison";
+  data: number[][] | undefined;
   toggleOptions: boolean[];
 }
 
 const ScatterPlot = React.memo(
-  forwardRef(({ data, toggleOptions }: Props, ref) => {
+  forwardRef(({ mode, data, toggleOptions }: Props, ref) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -47,25 +49,36 @@ const ScatterPlot = React.memo(
       unknown
     > | null>(null);
 
-    const x = useMemo(
-      () =>
-        d3
-          .scaleLinear()
-          .domain(d3.extent(data, (d) => d[0]) as [number, number])
-          .nice()
-          .range([0, width]),
-      [data]
+    const unlearnedFCIndices = new Set(
+      basicData.map((item) => item.forget_class)
+    );
+    const unlearnedFCList = forgetClassNames.filter((_, idx) =>
+      unlearnedFCIndices.has(idx)
     );
 
-    const y = useMemo(
-      () =>
-        d3
-          .scaleLinear()
-          .domain(d3.extent(data, (d) => d[1]) as [number, number])
-          .nice()
-          .range([height, 0]),
-      [data]
-    );
+    const processedData = useMemo(() => data || [], [data]);
+
+    const x = useMemo(() => {
+      if (processedData.length === 0) {
+        return d3.scaleLinear().domain([0, 1]).range([0, width]);
+      }
+      return d3
+        .scaleLinear()
+        .domain(d3.extent(processedData, (d) => d[0]) as [number, number])
+        .nice()
+        .range([0, width]);
+    }, [processedData]);
+
+    const y = useMemo(() => {
+      if (processedData.length === 0) {
+        return d3.scaleLinear().domain([0, 1]).range([height, 0]);
+      }
+      return d3
+        .scaleLinear()
+        .domain(d3.extent(processedData, (d) => d[1]) as [number, number])
+        .nice()
+        .range([height, 0]);
+    }, [processedData]);
 
     const z = useMemo(
       () =>
@@ -101,7 +114,7 @@ const ScatterPlot = React.memo(
 
         const circles = gDot
           .selectAll<SVGCircleElement, number[]>("circle")
-          .data(data.filter((d) => d[2] !== d[5]))
+          .data(processedData.filter((d) => d[2] !== d[5]))
           .join("circle")
           .attr("cx", (d) => x(d[0]))
           .attr("cy", (d) => y(d[1]))
@@ -111,7 +124,7 @@ const ScatterPlot = React.memo(
 
         const crosses = gDot
           .selectAll<SVGGElement, number[]>("g")
-          .data(data.filter((d) => d[2] === d[5]))
+          .data(processedData.filter((d) => d[2] === d[5]))
           .join("g")
           .attr("transform", (d) => `translate(${x(d[0])},${y(d[1])})`)
           .each(function (d) {
@@ -167,11 +180,11 @@ const ScatterPlot = React.memo(
                     </div>
                     <div style="font-size: 12px; margin-top: 4px">
                       <span style="font-weight: 500;">Ground Truth</span>: ${
-                        forgetClasses[d[2]]
+                        forgetClassNames[d[2]]
                       }</div>
                     <div style="font-size: 12px;">
                       <span style="font-weight: 500;">Prediction</span>: ${
-                        forgetClasses[d[3]]
+                        forgetClassNames[d[3]]
                       }</div>
                   `;
                 }
@@ -198,14 +211,18 @@ const ScatterPlot = React.memo(
           const transform = event.transform;
           gMain.attr("transform", transform.toString());
 
-          circles.attr("r", dotSize / transform.k);
+          if (circlesRef.current) {
+            circlesRef.current.attr("r", dotSize / transform.k);
+          }
 
-          crosses.attr("transform", (d) => {
-            const xPos = x(d[0]);
-            const yPos = y(d[1]);
-            const scale = 1 / transform.k;
-            return `translate(${xPos},${yPos}) scale(${scale})`;
-          });
+          if (crossesRef.current) {
+            crossesRef.current.attr("transform", (d) => {
+              const xPos = x(d[0]);
+              const yPos = y(d[1]);
+              const scale = 1 / transform.k;
+              return `translate(${xPos},${yPos}) scale(${scale})`;
+            });
+          }
         }
 
         const zoom = d3
@@ -222,10 +239,30 @@ const ScatterPlot = React.memo(
         return svg.node() as SVGSVGElement;
       };
 
-      const svg = chart();
-
       if (svgRef.current) {
-        svgRef.current.appendChild(svg);
+        svgRef.current.innerHTML = "";
+      }
+
+      if (processedData.length > 0) {
+        const svg = chart();
+        if (svgRef.current) {
+          svgRef.current.appendChild(svg);
+        }
+      } else {
+        if (svgRef.current) {
+          d3.select(svgRef.current)
+            .append("text")
+            .attr("x", width / 2)
+            .attr("y", height / 2)
+            .attr("text-anchor", "middle")
+            .attr("fill", "gray")
+            .style("font-size", "15px")
+            .text(
+              `${
+                unlearnedFCList.length > 0 ? "S" : "Run Unlearning and s"
+              }elect the ${mode} from above.`
+            );
+        }
       }
 
       const currentSvgRef = svgRef.current;
@@ -235,7 +272,7 @@ const ScatterPlot = React.memo(
           currentSvgRef.innerHTML = "";
         }
       };
-    }, [data, x, y, z]);
+    }, [mode, processedData, unlearnedFCList.length, x, y, z]);
 
     useEffect(() => {
       const updateOpacity = () => {

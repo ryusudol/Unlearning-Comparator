@@ -8,7 +8,7 @@ import { Label } from "./ui/label";
 
 type Props = {
   mode: "Baseline" | "Comparison";
-  data: number[][];
+  data: number[][] | undefined;
 };
 type ChartRef = {
   reset: () => void;
@@ -96,6 +96,7 @@ export default function Embedding({ mode, data }: Props) {
       </div>
       <div className="w-[630px] h-[620px] flex flex-col justify-center items-center relative bottom-6">
         <ScatterPlot
+          mode={mode}
           data={data}
           toggleOptions={[fDataShow, rDataShow, fClassShow, rClassShow]}
           ref={chartRef}

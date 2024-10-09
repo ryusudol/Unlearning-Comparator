@@ -1,7 +1,6 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import {
   ColumnDef,
-  ColumnFiltersState,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -26,17 +25,19 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { Overview } from "../types/overview";
 import { hexToRgba } from "../util";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
-import { forgetClasses } from "../constants/forgetClasses";
+import { forgetClassNames } from "../constants/forgetClassNames";
 import { MultiplicationSignIcon } from "./ui/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { basicData } from "../constants/basicData";
 
-interface Props<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface Props {
+  columns: ColumnDef<Overview>[];
+  data: Overview[];
   performanceMetrics: {
     [key: string]: {
       colorScale: false | d3.ScaleQuantile<string, never>;
@@ -44,11 +45,11 @@ interface Props<TData, TValue> {
   };
 }
 
-export default function DataTable<TData, TValue>({
+export default function DataTable({
   columns,
   data,
   performanceMetrics,
-}: Props<TData, TValue>) {
+}: Props) {
   const { forgetClass, saveForgetClass } = useContext(ForgetClassContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
@@ -56,13 +57,21 @@ export default function DataTable<TData, TValue>({
 
   const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  // TODO: 기본으로 제공하는 파일에서 unlearning 한 클래스 뽑지 않고
+  //       시용지가 unlearning 수행할 때 하나씩 추가하도록 로직 변경
+  const unlearnedFCIndices = new Set(
+    basicData.map((item) => item.forget_class)
+  );
+  const unlearnedFCList = forgetClassNames.filter((_, idx) =>
+    unlearnedFCIndices.has(idx)
+  );
 
   const modifiedColumns = columns.map((column) => {
     if (column.id === "baseline") {
       return {
         ...column,
-        cell: ({ row }: CellContext<TData, unknown>) => (
+        cell: ({ row }: CellContext<Overview, unknown>) => (
           <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-2"
@@ -78,7 +87,7 @@ export default function DataTable<TData, TValue>({
     if (column.id === "comparison") {
       return {
         ...column,
-        cell: ({ row }: CellContext<TData, unknown>) => (
+        cell: ({ row }: CellContext<Overview, unknown>) => (
           <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-4"
@@ -94,16 +103,33 @@ export default function DataTable<TData, TValue>({
     return column;
   });
 
+  const tableData = useMemo(
+    () =>
+      data.filter((datum) => forgetClassNames[datum.forget] === forgetClass),
+    [data, forgetClass]
+  );
+
   const table = useReactTable({
-    data,
+    getRowId: (row: Overview) => row.id,
+    data: tableData,
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    state: { sorting, columnFilters },
+    state: { sorting },
   });
+
+  useEffect(() => {
+    if (tableData.length > 0) {
+      saveBaseline(tableData[0].id);
+      saveComparison(tableData[1].id);
+    } else {
+      saveBaseline("");
+      saveComparison("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableData]);
 
   return (
     <div>
@@ -119,7 +145,8 @@ export default function DataTable<TData, TValue>({
             </div>
           </SelectTrigger>
           <SelectContent className="bg-white text-black">
-            {forgetClasses.map((el, idx) => (
+            {/* TODO: 나중에 basicData가 아닌 이때까지 돌린 class로 변경 */}
+            {unlearnedFCList.map((el, idx) => (
               <SelectItem key={idx} value={el}>
                 {el}
               </SelectItem>
@@ -201,9 +228,9 @@ export default function DataTable<TData, TValue>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center"
+                    className="h-[178px] text-center text-gray-500 text-[15px]"
                   >
-                    No results.
+                    Run Training or Unlearning from the left first.
                   </TableCell>
                 </TableRow>
               )}

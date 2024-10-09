@@ -10,7 +10,7 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { forgetClasses } from "../constants/forgetClasses";
+import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "../components/ui/chart";
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -64,7 +64,7 @@ const chartConfig = {
 interface GapDataItem {
   category: string;
   classLabel: string;
-  value: number;
+  gap: number;
   fill: string;
   baselineAccuracy: number;
   comparisonAccuracy: number;
@@ -79,7 +79,7 @@ interface CustomAxisTickProps {
 }
 interface Props {
   mode: "Training" | "Test";
-  gapData: GapDataItem[];
+  gapData: GapDataItem[] | [];
 }
 
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
@@ -88,9 +88,9 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-xs shadow-xl">
         <p className="font-medium text-[13px]">
-          Class: {forgetClasses[+data.classLabel]}
+          Class: {forgetClassNames[+data.classLabel]}
         </p>
-        <p>Gap: {data.value.toFixed(2)}</p>
+        <p>Gap: {data.gap.toFixed(2)}</p>
         <p>Baseline: {data.baselineAccuracy.toFixed(2)}</p>
         <p>Comparison: {data.comparisonAccuracy.toFixed(2)}</p>
       </div>
@@ -103,7 +103,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
 
   const maxValue =
-    Math.ceil(Math.max(...gapData.map((item) => Math.abs(item.value))) * 100) /
+    Math.ceil(Math.max(...gapData.map((item) => Math.abs(item.gap))) * 100) /
     100;
 
   function renderCustomAxisTick(props: CustomAxisTickProps) {
@@ -132,7 +132,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
   return (
     <div className="flex flex-col justify-center items-center">
       <h5 className="text-[14px] mb-2">{mode} Dataset</h5>
-      <ChartContainer config={chartConfig} className="w-[235px] h-[220px]">
+      <ChartContainer config={chartConfig} className="w-[232px] h-[220px]">
         <BarChart
           accessibilityLayer
           data={gapData}
@@ -168,7 +168,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="value" layout="vertical" radius={5} />
+          <Bar dataKey="gap" layout="vertical" radius={5} />
         </BarChart>
       </ChartContainer>
     </div>

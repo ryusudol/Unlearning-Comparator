@@ -18,7 +18,7 @@ import { OverviewItem } from "../types/overview-context";
 import { cancelRunning, fetchRunningStatus } from "../https/utils";
 import { MultiplicationSignIcon } from "./ui/icons";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
-import { forgetClasses } from "../constants/forgetClasses";
+import { forgetClassNames } from "../constants/forgetClassNames";
 import {
   UnlearningConfigurationData,
   // ResultType,
@@ -302,12 +302,12 @@ export default function Unlearning({
                 Forget Class
               </label>
             </div>
-            <Select defaultValue={forgetClasses[0]} name="forget_class">
+            <Select defaultValue={forgetClassNames[0]} name="forget_class">
               <SelectTrigger className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]">
-                <SelectValue placeholder={forgetClasses[0]} />
+                <SelectValue placeholder={forgetClassNames[0]} />
               </SelectTrigger>
               <SelectContent className="bg-white text-black overflow-ellipsis whitespace-nowrap">
-                {forgetClasses.map((forgetClass, idx) => (
+                {forgetClassNames.map((forgetClass, idx) => (
                   <SelectItem
                     key={idx}
                     value={forgetClass}
