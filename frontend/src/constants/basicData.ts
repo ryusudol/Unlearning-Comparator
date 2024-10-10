@@ -1,4 +1,5 @@
-import { Overview } from "../components/Columns";
+import { Overview } from "../types/overview";
+
 import data1 from "./478e.json";
 import data2 from "./59d4.json";
 import data3 from "./b824.json";

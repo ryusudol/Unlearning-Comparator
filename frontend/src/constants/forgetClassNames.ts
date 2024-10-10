@@ -1,4 +1,4 @@
-export const forgetClasses = [
+export const forgetClassNames = [
   "airplane",
   "automobile",
   "bird",

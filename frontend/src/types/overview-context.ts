@@ -15,19 +15,19 @@ export interface OverviewItem {
   test_class_accuracies: { [key: string]: string };
 }
 
-export interface Overview {
+export interface OverviewList {
   overview: OverviewItem[];
 }
 
-export interface OverviewContextType extends Overview {
-  saveOverview: (overview: Overview) => void;
+export interface OverviewContextType extends OverviewList {
+  saveOverview: (overview: OverviewList) => void;
   retrieveOverview: () => void;
   deleteLastOverviewItem: () => void;
   clearOverview: () => void;
 }
 
 export type Action =
-  | { type: "SAVE_OVERVIEW"; payload: Overview }
+  | { type: "SAVE_OVERVIEW"; payload: OverviewList }
   | { type: "RETRIEVE_OVERVIEW" }
   | { type: "DELETE_LAST_OVERVIEW_ITEM" }
   | { type: "CLEAR_OVERVIEW" };

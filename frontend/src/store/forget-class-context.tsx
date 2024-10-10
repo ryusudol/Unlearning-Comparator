@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { useEffect, createContext, useReducer } from "react";
 
 import {
   Action,
@@ -27,7 +27,7 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
       const savedForgetClass = sessionStorage.getItem(FORGET_CLASS);
       if (savedForgetClass) {
         const parsedForgetClass = JSON.parse(savedForgetClass);
-        return { forgetClass: parsedForgetClass };
+        return { forgetClass: parsedForgetClass.forgetClass };
       }
       return state;
 
@@ -60,6 +60,10 @@ export default function ForgetClassContextProvider({
   function handleClearForgetClass() {
     dispatch({ type: "CLEAR_FORGET_CLASS" });
   }
+
+  useEffect(() => {
+    handleRetrieveForgetClass();
+  }, []);
 
   const ctxValue: ForgetClassContextType = {
     forgetClass: forgetClass.forgetClass,

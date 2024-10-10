@@ -7,27 +7,30 @@ import React, {
 } from "react";
 import * as d3 from "d3";
 
-import { forgetClasses } from "../constants/forgetClasses";
+import { forgetClassNames } from "../constants/forgetClassNames";
+import { basicData } from "../constants/basicData";
 
 const API_URL = "http://localhost:8000";
-const dotSize = 3;
+const dotSize = 4;
 const minZoom = 0.6;
 const maxZoom = 32;
 const width = 630;
 const height = 630;
-const XSizeDivider = 0.75;
-const XStrokeWidth = 3.5;
-const crossSize = 3.5;
-const defaultOpacity = 0.7;
+const XSizeDivider = 0.4;
+const XStrokeWidth = 1;
+const crossSize = 4;
+const defaultCrossOpacity = 0.85;
+const defaultCircleOpacity = 0.6;
 const loweredOpacity = 0.1;
 
 interface Props {
-  data: number[][];
+  mode: "Baseline" | "Comparison";
+  data: number[][] | undefined;
   toggleOptions: boolean[];
 }
 
 const ScatterPlot = React.memo(
-  forwardRef(({ data, toggleOptions }: Props, ref) => {
+  forwardRef(({ mode, data, toggleOptions }: Props, ref) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -41,31 +44,42 @@ const ScatterPlot = React.memo(
       unknown
     > | null>(null);
     const crossesRef = useRef<d3.Selection<
-      SVGGElement,
+      d3.BaseType | SVGPathElement,
       number[],
       SVGGElement,
-      unknown
+      undefined
     > | null>(null);
 
-    const x = useMemo(
-      () =>
-        d3
-          .scaleLinear()
-          .domain(d3.extent(data, (d) => d[0]) as [number, number])
-          .nice()
-          .range([0, width]),
-      [data]
+    const unlearnedFCIndices = new Set(
+      basicData.map((item) => item.forget_class)
+    );
+    const unlearnedFCList = forgetClassNames.filter((_, idx) =>
+      unlearnedFCIndices.has(idx)
     );
 
-    const y = useMemo(
-      () =>
-        d3
-          .scaleLinear()
-          .domain(d3.extent(data, (d) => d[1]) as [number, number])
-          .nice()
-          .range([height, 0]),
-      [data]
-    );
+    const processedData = useMemo(() => data || [], [data]);
+
+    const x = useMemo(() => {
+      if (processedData.length === 0) {
+        return d3.scaleLinear().domain([0, 1]).range([0, width]);
+      }
+      return d3
+        .scaleLinear()
+        .domain(d3.extent(processedData, (d) => d[0]) as [number, number])
+        .nice()
+        .range([0, width]);
+    }, [processedData]);
+
+    const y = useMemo(() => {
+      if (processedData.length === 0) {
+        return d3.scaleLinear().domain([0, 1]).range([height, 0]);
+      }
+      return d3
+        .scaleLinear()
+        .domain(d3.extent(processedData, (d) => d[1]) as [number, number])
+        .nice()
+        .range([height, 0]);
+    }, [processedData]);
 
     const z = useMemo(
       () =>
@@ -101,7 +115,7 @@ const ScatterPlot = React.memo(
 
         const circles = gDot
           .selectAll<SVGCircleElement, number[]>("circle")
-          .data(data.filter((d) => d[2] !== d[5]))
+          .data(processedData.filter((d) => d[2] !== d[5]))
           .join("circle")
           .attr("cx", (d) => x(d[0]))
           .attr("cy", (d) => y(d[1]))
@@ -110,31 +124,26 @@ const ScatterPlot = React.memo(
           .style("cursor", "pointer");
 
         const crosses = gDot
-          .selectAll<SVGGElement, number[]>("g")
-          .data(data.filter((d) => d[2] === d[5]))
-          .join("g")
-          .attr("transform", (d) => `translate(${x(d[0])},${y(d[1])})`)
-          .each(function (d) {
-            const pos = crossSize / XSizeDivider;
-
-            d3.select(this)
-              .append("line")
-              .attr("x1", -pos)
-              .attr("y1", -pos)
-              .attr("x2", pos)
-              .attr("y2", pos)
-              .attr("stroke", z(d[3]))
-              .attr("stroke-width", XStrokeWidth);
-
-            d3.select(this)
-              .append("line")
-              .attr("x1", -pos)
-              .attr("y1", pos)
-              .attr("x2", pos)
-              .attr("y2", -pos)
-              .attr("stroke", z(d[3]))
-              .attr("stroke-width", XStrokeWidth);
+          .selectAll("path")
+          .data(processedData.filter((d) => d[2] === d[5]))
+          .join("path")
+          .attr(
+            "transform",
+            (d) => `translate(${x(d[0])},${y(d[1])}) rotate(45)`
+          )
+          .attr(
+            "d",
+            d3
+              .symbol()
+              .type(d3.symbolCross)
+              .size(Math.pow(crossSize / XSizeDivider, 2))
+          )
+          .attr("fill", (d) => z(d[3]))
+          .attr("stroke", (d) => {
+            const color = d3.color(z(d[3]));
+            return color ? color.darker().toString() : "black";
           })
+          .attr("stroke-width", XStrokeWidth)
           .style("cursor", "pointer");
 
         circlesRef.current = circles;
@@ -167,11 +176,11 @@ const ScatterPlot = React.memo(
                     </div>
                     <div style="font-size: 12px; margin-top: 4px">
                       <span style="font-weight: 500;">Ground Truth</span>: ${
-                        forgetClasses[d[2]]
+                        forgetClassNames[d[2]]
                       }</div>
                     <div style="font-size: 12px;">
                       <span style="font-weight: 500;">Prediction</span>: ${
-                        forgetClasses[d[3]]
+                        forgetClassNames[d[3]]
                       }</div>
                   `;
                 }
@@ -179,11 +188,11 @@ const ScatterPlot = React.memo(
           }
         }
 
-        function handleMouseLeave(this: SVGElement) {
-          d3.select(this).style("cursor", "grab");
-          if (tooltipRef.current) {
-            tooltipRef.current.style.display = "none";
-          }
+        function handleMouseLeave(event: Event, d: number[]) {
+          if (event.currentTarget)
+            d3.select(event.currentTarget as Element).style("cursor", "grab");
+
+          if (tooltipRef.current) tooltipRef.current.style.display = "none";
         }
 
         circles
@@ -198,14 +207,18 @@ const ScatterPlot = React.memo(
           const transform = event.transform;
           gMain.attr("transform", transform.toString());
 
-          circles.attr("r", dotSize / transform.k);
+          if (circlesRef.current) {
+            circlesRef.current.attr("r", dotSize / transform.k);
+          }
 
-          crosses.attr("transform", (d) => {
-            const xPos = x(d[0]);
-            const yPos = y(d[1]);
-            const scale = 1 / transform.k;
-            return `translate(${xPos},${yPos}) scale(${scale})`;
-          });
+          if (crossesRef.current) {
+            crossesRef.current.attr("transform", (d) => {
+              const xPos = x(d[0]);
+              const yPos = y(d[1]);
+              const scale = 1 / transform.k;
+              return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
+            });
+          }
         }
 
         const zoom = d3
@@ -222,10 +235,30 @@ const ScatterPlot = React.memo(
         return svg.node() as SVGSVGElement;
       };
 
-      const svg = chart();
-
       if (svgRef.current) {
-        svgRef.current.appendChild(svg);
+        svgRef.current.innerHTML = "";
+      }
+
+      if (processedData.length > 0) {
+        const svg = chart();
+        if (svgRef.current) {
+          svgRef.current.appendChild(svg);
+        }
+      } else {
+        if (svgRef.current) {
+          d3.select(svgRef.current)
+            .append("text")
+            .attr("x", width / 2)
+            .attr("y", height / 2)
+            .attr("text-anchor", "middle")
+            .attr("fill", "gray")
+            .style("font-size", "15px")
+            .text(
+              `${
+                unlearnedFCList.length > 0 ? "S" : "Run Unlearning and s"
+              }elect the ${mode} from above.`
+            );
+        }
       }
 
       const currentSvgRef = svgRef.current;
@@ -235,7 +268,7 @@ const ScatterPlot = React.memo(
           currentSvgRef.innerHTML = "";
         }
       };
-    }, [data, x, y, z]);
+    }, [mode, processedData, unlearnedFCList.length, x, y, z]);
 
     useEffect(() => {
       const updateOpacity = () => {
@@ -249,7 +282,7 @@ const ScatterPlot = React.memo(
               (d[3] !== d[5] && !toggleOptions[3]);
 
             if (dataCondition || classCondition) return loweredOpacity;
-            return defaultOpacity;
+            return defaultCircleOpacity;
           });
         }
 
@@ -263,7 +296,7 @@ const ScatterPlot = React.memo(
               (d[3] !== d[5] && !toggleOptions[3]);
 
             if (dataCondition || classCondition) return loweredOpacity;
-            return defaultOpacity;
+            return defaultCrossOpacity;
           });
         }
       };

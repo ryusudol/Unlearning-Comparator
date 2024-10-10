@@ -2,22 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "./ui/button";
-
-export type Overview = {
-  id: string;
-  forget: number;
-  phase: string;
-  method: string;
-  epochs: number | string;
-  lr: number | string;
-  batchSize: number | string;
-  seed: number;
-  ua: number;
-  ra: number;
-  tua: number;
-  tra: number;
-  rte: number | string;
-};
+import { Overview } from "../types/overview";
 
 export const colors = [
   "#A6A6F9",

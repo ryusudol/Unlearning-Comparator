@@ -1,7 +1,7 @@
-import { createContext, useReducer } from "react";
+import { createContext, useEffect, useReducer } from "react";
 
 import {
-  Overview,
+  OverviewList,
   Action,
   OverviewContextType,
 } from "../types/overview-context";
@@ -11,13 +11,13 @@ const OVERVIEW = "overview";
 export const OverviewContext = createContext<OverviewContextType>({
   overview: [],
 
-  saveOverview: (overview: Overview) => {},
+  saveOverview: (overview: OverviewList) => {},
   retrieveOverview: () => {},
   deleteLastOverviewItem: () => {},
   clearOverview: () => {},
 });
 
-function overviewReducer(state: Overview, action: Action): Overview {
+function overviewReducer(state: OverviewList, action: Action): OverviewList {
   switch (action.type) {
     case "SAVE_OVERVIEW":
       const overview = action.payload;
@@ -27,7 +27,7 @@ function overviewReducer(state: Overview, action: Action): Overview {
     case "RETRIEVE_OVERVIEW":
       const savedOverview = sessionStorage.getItem(OVERVIEW);
       if (savedOverview) {
-        const parsedOverview: Overview = JSON.parse(savedOverview);
+        const parsedOverview: OverviewList = JSON.parse(savedOverview);
         return { overview: parsedOverview.overview };
       }
       return state;
@@ -35,7 +35,7 @@ function overviewReducer(state: Overview, action: Action): Overview {
     case "DELETE_LAST_OVERVIEW_ITEM":
       const savedData = sessionStorage.getItem(OVERVIEW);
       if (savedData) {
-        const parsedData: Overview = JSON.parse(savedData);
+        const parsedData: OverviewList = JSON.parse(savedData);
         const updatedOverview = parsedData.overview.slice(0, -1);
         sessionStorage.setItem(
           OVERVIEW,
@@ -63,7 +63,7 @@ export default function OverviewContextProvider({
     overview: [],
   });
 
-  function handleSaveOverview(overview: Overview) {
+  function handleSaveOverview(overview: OverviewList) {
     dispatch({ type: "SAVE_OVERVIEW", payload: overview });
   }
 
@@ -78,6 +78,10 @@ export default function OverviewContextProvider({
   function handleClearOverview() {
     dispatch({ type: "CLEAR_OVERVIEW" });
   }
+
+  useEffect(() => {
+    handleRetrieveOverview();
+  }, []);
 
   const ctxValue = {
     overview: overview.overview,

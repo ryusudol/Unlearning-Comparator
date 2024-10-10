@@ -1,11 +1,11 @@
 import { useContext } from "react";
 
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import ScatterPlot from "../components/Embedding";
+import Embedding from "../components/Embedding";
 import { basicData } from "../constants/basicData";
 import { Separator } from "../components/ui/separator";
 import { TABLEAU10 } from "../constants/tableau10";
-import { forgetClasses } from "../constants/forgetClasses";
+import { forgetClassNames } from "../constants/forgetClassNames";
 import {
   HelpCircleIcon,
   CircleIcon,
@@ -18,29 +18,43 @@ import {
 export default function Embeddings() {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
 
-  // [0: x, 1: y, 2: original_class, 3: predicted class, 4:img_idx], 5: forget_class
-  const BaselineData = basicData[+baseline].detailed_results.map((result) => {
-    return [
-      result.umap_embedding[0],
-      result.umap_embedding[1],
-      result.ground_truth,
-      result.predicted_class,
-      result.original_index,
-      basicData[+baseline].forget_class,
-    ];
-  });
-  const ComparisonData = basicData[+comparison].detailed_results.map(
-    (result) => {
-      return [
-        result.umap_embedding[0],
-        result.umap_embedding[1],
-        result.ground_truth,
-        result.predicted_class,
-        result.original_index,
-        basicData[+comparison].forget_class,
-      ];
-    }
-  );
+  const baselineData = basicData.filter((datum) => datum.id === baseline)[0];
+  const comparisonData = basicData.filter(
+    (datum) => datum.id === comparison
+  )[0];
+
+  // [
+  //   0: x,
+  //   1: y,
+  //   2: original class,
+  //   3: predicted class,
+  //   4:img_idx,
+  //   5: forget_class
+  // ]
+  const BaselineData = baselineData
+    ? baselineData.detailed_results.map((result) => {
+        return [
+          result.umap_embedding[0],
+          result.umap_embedding[1],
+          result.ground_truth,
+          result.predicted_class,
+          result.original_index,
+          baselineData.forget_class,
+        ];
+      })
+    : undefined;
+  const ComparisonData = comparisonData
+    ? comparisonData.detailed_results.map((result) => {
+        return [
+          result.umap_embedding[0],
+          result.umap_embedding[1],
+          result.ground_truth,
+          result.predicted_class,
+          result.original_index,
+          comparisonData.forget_class,
+        ];
+      })
+    : undefined;
 
   return (
     <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
@@ -93,7 +107,7 @@ export default function Embeddings() {
         <div className="w-full h-[358px] flex flex-col justify-start items-start pl-2 pr-[2px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
           <span className="text-[15px]">Predictions</span>
           <div>
-            {forgetClasses.map((className, idx) => (
+            {forgetClassNames.map((className, idx) => (
               <div key={idx} className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[idx]}` }}
@@ -109,12 +123,12 @@ export default function Embeddings() {
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <ScatterPlot mode="Baseline" data={BaselineData} />
+      <Embedding mode="Baseline" data={BaselineData} />
       <Separator
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <ScatterPlot mode="Comparison" data={ComparisonData} />
+      <Embedding mode="Comparison" data={ComparisonData} />
     </div>
   );
 }

@@ -1,36 +1,24 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 import Header from "../components/Header";
 import Settings from "../views/Settings";
-import PerformanceOverview from "../views/PerformanceOverview";
+import Overview from "../views/Overview";
 import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
-import { OverviewContext } from "../store/overview-context";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 const UPPER_HEIGHT = 290;
 const LOWER_HEIGHT = 720;
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { retrieveContext } = useContext(BaselineComparisonContext);
-  const { retrieveOverview } = useContext(OverviewContext);
-
-  const handleRefresh = useCallback(() => {
-    retrieveContext();
-    retrieveOverview();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   useEffect(() => {
-    handleRefresh();
-    setIsLoading(false);
-  }, [handleRefresh]);
+    setIsPageLoading(false);
+  }, []);
 
-  if (isLoading) {
+  if (isPageLoading) {
     return <div>Loading . . .</div>;
   }
 
@@ -39,7 +27,7 @@ export default function App() {
       <Header />
       <div className="flex">
         <Settings height={UPPER_HEIGHT} />
-        <PerformanceOverview height={UPPER_HEIGHT} />
+        <Overview height={UPPER_HEIGHT} />
         <Accuracies height={UPPER_HEIGHT} />
       </div>
       <div className="flex">
