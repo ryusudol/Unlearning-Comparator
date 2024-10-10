@@ -11,15 +11,16 @@ import { forgetClassNames } from "../constants/forgetClassNames";
 import { basicData } from "../constants/basicData";
 
 const API_URL = "http://localhost:8000";
-const dotSize = 3;
+const dotSize = 4;
 const minZoom = 0.6;
 const maxZoom = 32;
 const width = 630;
 const height = 630;
-const XSizeDivider = 0.75;
-const XStrokeWidth = 3.5;
-const crossSize = 3.5;
-const defaultOpacity = 0.7;
+const XSizeDivider = 0.4;
+const XStrokeWidth = 1;
+const crossSize = 4;
+const defaultCrossOpacity = 0.85;
+const defaultCircleOpacity = 0.6;
 const loweredOpacity = 0.1;
 
 interface Props {
@@ -43,10 +44,10 @@ const ScatterPlot = React.memo(
       unknown
     > | null>(null);
     const crossesRef = useRef<d3.Selection<
-      SVGGElement,
+      d3.BaseType | SVGPathElement,
       number[],
       SVGGElement,
-      unknown
+      undefined
     > | null>(null);
 
     const unlearnedFCIndices = new Set(
@@ -123,31 +124,26 @@ const ScatterPlot = React.memo(
           .style("cursor", "pointer");
 
         const crosses = gDot
-          .selectAll<SVGGElement, number[]>("g")
+          .selectAll("path")
           .data(processedData.filter((d) => d[2] === d[5]))
-          .join("g")
-          .attr("transform", (d) => `translate(${x(d[0])},${y(d[1])})`)
-          .each(function (d) {
-            const pos = crossSize / XSizeDivider;
-
-            d3.select(this)
-              .append("line")
-              .attr("x1", -pos)
-              .attr("y1", -pos)
-              .attr("x2", pos)
-              .attr("y2", pos)
-              .attr("stroke", z(d[3]))
-              .attr("stroke-width", XStrokeWidth);
-
-            d3.select(this)
-              .append("line")
-              .attr("x1", -pos)
-              .attr("y1", pos)
-              .attr("x2", pos)
-              .attr("y2", -pos)
-              .attr("stroke", z(d[3]))
-              .attr("stroke-width", XStrokeWidth);
+          .join("path")
+          .attr(
+            "transform",
+            (d) => `translate(${x(d[0])},${y(d[1])}) rotate(45)`
+          )
+          .attr(
+            "d",
+            d3
+              .symbol()
+              .type(d3.symbolCross)
+              .size(Math.pow(crossSize / XSizeDivider, 2))
+          )
+          .attr("fill", (d) => z(d[3]))
+          .attr("stroke", (d) => {
+            const color = d3.color(z(d[3]));
+            return color ? color.darker().toString() : "black";
           })
+          .attr("stroke-width", XStrokeWidth)
           .style("cursor", "pointer");
 
         circlesRef.current = circles;
@@ -192,11 +188,11 @@ const ScatterPlot = React.memo(
           }
         }
 
-        function handleMouseLeave(this: SVGElement) {
-          d3.select(this).style("cursor", "grab");
-          if (tooltipRef.current) {
-            tooltipRef.current.style.display = "none";
-          }
+        function handleMouseLeave(event: Event, d: number[]) {
+          if (event.currentTarget)
+            d3.select(event.currentTarget as Element).style("cursor", "grab");
+
+          if (tooltipRef.current) tooltipRef.current.style.display = "none";
         }
 
         circles
@@ -220,7 +216,7 @@ const ScatterPlot = React.memo(
               const xPos = x(d[0]);
               const yPos = y(d[1]);
               const scale = 1 / transform.k;
-              return `translate(${xPos},${yPos}) scale(${scale})`;
+              return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
             });
           }
         }
@@ -286,7 +282,7 @@ const ScatterPlot = React.memo(
               (d[3] !== d[5] && !toggleOptions[3]);
 
             if (dataCondition || classCondition) return loweredOpacity;
-            return defaultOpacity;
+            return defaultCircleOpacity;
           });
         }
 
@@ -300,7 +296,7 @@ const ScatterPlot = React.memo(
               (d[3] !== d[5] && !toggleOptions[3]);
 
             if (dataCondition || classCondition) return loweredOpacity;
-            return defaultOpacity;
+            return defaultCrossOpacity;
           });
         }
       };
