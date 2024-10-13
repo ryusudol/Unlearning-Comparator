@@ -1,9 +1,6 @@
 import torch
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from datetime import datetime
-from scipy.stats import gaussian_kde
+import torch.nn.functional as F
 from app.config.settings import UMAP_DATA_SIZE
 
 async def get_layer_activations_and_predictions(
@@ -57,19 +54,6 @@ async def get_layer_activations_and_predictions(
     # Calculate max logits
     max_logits = logits.max(axis=1)
     
-    # Generate timestamp for the filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # Compute KDE
-    kde = gaussian_kde(max_logits)
-    x_range = np.linspace(max_logits.min(), max_logits.max(), 1000)
-    density = kde(x_range)
-
-    # Find max density and corresponding logit value
-    max_density_index = np.argmax(density)
-    max_density = density[max_density_index]
-    logit_at_max_density = x_range[max_density_index]
-
     # Get the maximum logit value
     max_logit = max_logits.max()
     
@@ -77,8 +61,6 @@ async def get_layer_activations_and_predictions(
     print(f"Median max logit: {np.median(max_logits):.4f}")
     print(f"Min max logit: {max_logits.min():.4f}")
     print(f"Max max logit: {max_logit:.4f}")
-    print(f"Max density: {max_density:.4f}")
-    print(f"Logit value at max density: {logit_at_max_density:.4f}")
     
     return activations, predictions, logits, max_logits.mean()
 
@@ -114,3 +96,44 @@ async def evaluate_model(model, data_loader, criterion, device):
     for i in range(10):
         print(f"Class {i} correct: {class_correct[i]}, total: {class_total[i]}, accuracy: {class_accuracies[i]:.4f}")
     return avg_loss, accuracy, class_accuracies
+
+async def evaluate_model_with_distributions(model, data_loader, criterion, device):
+    model.eval()
+    total_loss = 0
+    correct = 0
+    total = 0
+    class_correct = [0] * 10
+    class_total = [0] * 10
+    label_distribution = np.zeros((10, 10))  # 실제 클래스 vs 예측 클래스
+    confidence_sum = np.zeros((10, 10))  # 실제 클래스 vs 모든 클래스의 confidence 합
+    
+    with torch.no_grad():
+        for data in data_loader:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            total_loss += loss.item()
+            
+            probabilities = F.softmax(outputs, dim=1)
+            _, predicted = torch.max(probabilities, 1)
+            
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            for i in range(labels.size(0)):
+                label = labels[i].item()
+                pred = predicted[i].item()
+                
+                class_total[label] += 1
+                if label == pred:
+                    class_correct[label] += 1
+                
+                label_distribution[label][pred] += 1
+                confidence_sum[label] += probabilities[i].cpu().numpy()
+
+    accuracy = correct / total
+    class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
+    avg_loss = total_loss / len(data_loader)
+    # Normalize distributions
+    label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
+    confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
+    return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution

@@ -42,7 +42,7 @@ async def unlearning_GA(request, status, weights_path):
         test_set=test_set,
         status=status,
         model_name="resnet18",
-        dataset_name=f"CIFAR10_GA_forget_class_{request.forget_class}"
+        dataset_name=f"GA_forget_class_{request.forget_class}"
     )
     
     unlearning_thread.start()

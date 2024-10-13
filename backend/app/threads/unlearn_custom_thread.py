@@ -8,7 +8,7 @@ import os
 import uuid
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
-from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
+from app.utils.evaluation import evaluate_model, evaluate_model_with_distributions, get_layer_activations_and_predictions
 from app.utils.visualization import compute_umap_embedding
 from app.config.settings import UNLEARN_SEED, UMAP_DATA_SIZE, UMAP_DATASET
 
@@ -40,6 +40,20 @@ class UnlearningInference(threading.Thread):
             if self.loop:
                 self.loop.close()
         
+    def print_distribution(self, distribution):
+        for i in range(10):
+            print(f"  Class {i}:")
+            for j in range(10):
+                print(f"    Predicted as {j}: {distribution[i][j]:.3f}")
+
+    def format_distribution(self, distribution):
+        return {
+            f"gt_{i}": {
+                f"pred_{j}": round(float(distribution[i][j]), 3) for j in range(10)
+            }
+            for i in range(10)
+        }
+    
     async def async_run(self):
         if self.stopped():
             return
@@ -56,7 +70,7 @@ class UnlearningInference(threading.Thread):
             return
 
         # Evaluate on train set
-        train_loss, train_accuracy, train_class_accuracies = await evaluate_model(self.model, train_loader, criterion, device)
+        train_loss, train_accuracy, train_class_accuracies, train_label_dist, train_conf_dist = await evaluate_model_with_distributions(self.model, train_loader, criterion, device)
         self.status.current_loss = train_loss
         self.status.current_accuracy = train_accuracy
         self.status.train_class_accuracies = train_class_accuracies
@@ -65,11 +79,16 @@ class UnlearningInference(threading.Thread):
         self.status.remain_accuracy = sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes)
         self.status.progress = 40
 
+        print("Train Label Distribution:")
+        self.print_distribution(train_label_dist)
+        print("Train Confidence Distribution:")
+        self.print_distribution(train_conf_dist)
+
         if self.stopped():
             return
 
         # Evaluate on test set
-        test_loss, test_accuracy, test_class_accuracies = await evaluate_model(self.model, test_loader, criterion, device)
+        test_loss, test_accuracy, test_class_accuracies, test_label_dist, test_conf_dist = await evaluate_model_with_distributions(self.model, test_loader, criterion, device)
         self.status.test_loss = test_loss
         self.status.test_accuracy = (test_accuracy * 10.0 - test_class_accuracies[self.request.forget_class]) / 9.0
         self.status.test_class_accuracies = test_class_accuracies
@@ -81,6 +100,11 @@ class UnlearningInference(threading.Thread):
         print("Test Class Accuracies:")
         for i, acc in self.status.test_class_accuracies.items():
             print(f"  Class {i}: {acc:.3f}")
+
+        print("Test Label Distribution:")
+        self.print_distribution(test_label_dist)
+        print("Test Confidence Distribution:")
+        self.print_distribution(test_conf_dist)
 
         if self.stopped():
             return
@@ -132,6 +156,8 @@ class UnlearningInference(threading.Thread):
             test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
             test_remain_accuracy = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)
             
+            
+    
             # Prepare results dictionary
             results = {
                 "id": uuid.uuid4().hex[:4],
@@ -149,6 +175,10 @@ class UnlearningInference(threading.Thread):
                 "RTE": "N/A",
                 "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
                 "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
+                "train_label_distribution": self.format_distribution(train_label_dist),
+                "train_confidence_distribution": self.format_distribution(train_conf_dist),
+                "test_label_distribution": self.format_distribution(test_label_dist),
+                "test_confidence_distribution": self.format_distribution(test_conf_dist),
                 "detailed_results": detailed_results
             }
 
