@@ -1,3 +1,6 @@
+import { useContext } from "react";
+
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { Label } from "../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import {
@@ -7,15 +10,13 @@ import {
   GitCompareIcon,
 } from "../components/ui/icons";
 
-interface Props {
-  height: number;
-}
+export default function Correlations({ height }: { height: number }) {
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
 
-export default function Correlations({ height }: Props) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[480px] p-[5px] flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[480px] px-[5px] mt-[257px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center">
@@ -66,7 +67,7 @@ export default function Correlations({ height }: Props) {
         <div className="flex flex-col items-center -mt-1.5 mr-1">
           <div className="flex items-center">
             <NeuralNetworkIcon className="mr-[3px]" />
-            <span className="text-[15px]">Baseline Model (id01)</span>
+            <span className="text-[15px]">Baseline Model ({baseline})</span>
           </div>
           <img src="/heatmap1.png" alt="heatmap img 1" />
           <img src="/heatmap3.png" alt="heatmap img 3" />
@@ -78,7 +79,7 @@ export default function Correlations({ height }: Props) {
         <div className="flex flex-col items-center -mt-1.5">
           <div className="flex items-center">
             <GitCompareIcon className="mr-[3px]" />
-            <span className="text-[15px]">Comparison Model (id02)</span>
+            <span className="text-[15px]">Comparison Model ({comparison})</span>
           </div>
           <img src="/heatmap2.png" alt="heatmap img 2" />
           <img src="/heatmap4.png" alt="heatmap img 4" />

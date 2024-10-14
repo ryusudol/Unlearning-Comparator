@@ -1,26 +1,24 @@
 import { useState, useRef } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
-import { NeuralNetworkIcon, GitCompareIcon } from "./ui/icons";
 import ScatterPlot from "./ScatterPlot";
+import { NeuralNetworkIcon, GitCompareIcon } from "./ui/icons";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 
 type Props = {
   mode: "Baseline" | "Comparison";
   data: number[][] | undefined;
-};
-type ChartRef = {
-  reset: () => void;
+  id: string;
 };
 
-export default function Embedding({ mode, data }: Props) {
+export default function Embedding({ mode, data, id }: Props) {
   const [fDataShow, setFDataShow] = useState(true);
   const [rDataShow, setRDataShow] = useState(true);
   const [fClassShow, setFClassShow] = useState(true);
   const [rClassShow, setRClassShow] = useState(true);
 
-  const chartRef = useRef<ChartRef | null>(null);
+  const chartRef = useRef<{ reset: () => void } | null>(null);
 
   const handleResetClick = () => {
     if (chartRef && typeof chartRef !== "function" && chartRef.current) {
@@ -40,7 +38,9 @@ export default function Embedding({ mode, data }: Props) {
         ) : (
           <GitCompareIcon className="mr-[2px]" />
         )}
-        <h5 className="text-[15px] ml-[2px]">{mode} Model (id)</h5>
+        <h5 className="text-[15px] ml-[2px]">
+          {mode} Model ({id})
+        </h5>
       </div>
       <div className="z-10">
         <div className="flex items-center space-x-2 relative left-[210px]">

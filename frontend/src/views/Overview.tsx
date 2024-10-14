@@ -60,7 +60,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[1110px] p-[5px] relative border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1110px] px-[5px] py-0.5 relative border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="w-full flex justify-between items-center">
         <div className="flex items-center">

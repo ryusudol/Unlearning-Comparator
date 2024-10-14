@@ -13,17 +13,20 @@ const LOWER_HEIGHT = 720;
 
 export default function App() {
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isPredictionsExpanded, setIsPredictionsExpanded] = useState(false);
 
   useEffect(() => {
     setIsPageLoading(false);
   }, []);
 
-  if (isPageLoading) {
-    return <div>Loading . . .</div>;
-  }
+  if (isPageLoading) return <div>Loading . . .</div>;
+
+  const handleExpansionClick = () => {
+    setIsPredictionsExpanded((isPredictionsExpanded) => !isPredictionsExpanded);
+  };
 
   return (
-    <section>
+    <section className="relative">
       <Header />
       <div className="flex">
         <Settings height={UPPER_HEIGHT} />
@@ -33,7 +36,11 @@ export default function App() {
       <div className="flex">
         <Core height={LOWER_HEIGHT} />
         <div className="flex flex-col">
-          <Predictions height={257} />
+          <Predictions
+            height={257}
+            isExpanded={isPredictionsExpanded}
+            onExpansionClick={handleExpansionClick}
+          />
           <Correlations height={LOWER_HEIGHT - 257} />
         </div>
       </div>

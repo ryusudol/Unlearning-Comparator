@@ -115,24 +115,24 @@ export default function MyBarChart({ mode, gapData }: Props) {
       <g transform={`translate(${x},${y})`}>
         <text
           x={0}
-          y={isForgetClass ? -11 : -14}
+          y={isForgetClass ? -5 : -15}
           dy={16}
           textAnchor="end"
           transform={isForgetClass ? "" : "rotate(-30)"}
-          fill={isForgetClass ? "#000000" : "#64758B"}
+          style={{ fill: isForgetClass ? "#000000" : "#64758B" }}
           fontWeight={isForgetClass ? 700 : 400}
-          fontSize={isForgetClass ? "14px" : "12px"}
+          fontSize={isForgetClass ? "28px" : "12px"}
         >
-          {isForgetClass ? "X" : label}
+          {isForgetClass ? "×" : label}
         </text>
       </g>
     );
   }
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <h5 className="text-[14px] mb-2">{mode} Dataset</h5>
-      <ChartContainer config={chartConfig} className="w-[232px] h-[220px]">
+    <div className="flex flex-col justify-center items-center mt-1">
+      <h5 className="text-[14px] mb-1 ml-[52px]">{mode} Dataset</h5>
+      <ChartContainer config={chartConfig} className="w-[232px] h-[223px]">
         <BarChart
           accessibilityLayer
           data={gapData}
@@ -161,7 +161,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
           >
             <Label
               className="text-black -translate-y-[6px] text-[13px]"
-              value="Accuracy Gap"
+              value="Accuracy Gap (Comp.- Base.)"
               offset={0}
               position="bottom"
             />

@@ -30,7 +30,7 @@ export default function Core({ height }: Props) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1440px] px-[5px] py-[4px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1440px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex justify-between items-center mb-[2px]">
         <div className="flex items-center">

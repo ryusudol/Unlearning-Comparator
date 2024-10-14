@@ -123,12 +123,12 @@ export default function Embeddings() {
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <Embedding mode="Baseline" data={BaselineData} />
+      <Embedding mode="Baseline" data={BaselineData} id={baseline} />
       <Separator
         orientation="vertical"
         className="h-[660px] w-[1px] mx-[2px]"
       />
-      <Embedding mode="Comparison" data={ComparisonData} />
+      <Embedding mode="Comparison" data={ComparisonData} id={comparison} />
     </div>
   );
 }
