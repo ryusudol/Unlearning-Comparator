@@ -121,7 +121,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
           transform={isForgetClass ? "" : "rotate(-30)"}
           style={{ fill: isForgetClass ? "#000000" : "#64758B" }}
           fontWeight={isForgetClass ? 700 : 400}
-          fontSize={isForgetClass ? "28px" : "12px"}
+          fontSize={isForgetClass ? "26px" : "11px"}
         >
           {isForgetClass ? "×" : label}
         </text>
@@ -141,7 +141,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             left: -5,
             right: 0,
             top: 0,
-            bottom: 5,
+            bottom: 6,
           }}
         >
           <YAxis
@@ -158,6 +158,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             type="number"
             domain={[-maxValue, maxValue]}
             tickFormatter={(value) => value.toString()}
+            fontSize={11}
           >
             <Label
               className="text-black -translate-y-[6px] text-[13px]"

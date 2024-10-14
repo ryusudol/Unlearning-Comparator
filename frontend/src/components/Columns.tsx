@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "./ui/button";
-import { Overview } from "../types/overview";
+import { Data } from "../types/data";
 
 export const colors = [
   "#A6A6F9",
@@ -16,7 +16,7 @@ export const colors = [
   "#F2AAA8",
 ];
 
-export const columns: ColumnDef<Overview>[] = [
+export const columns: ColumnDef<Data>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -47,23 +47,23 @@ export const columns: ColumnDef<Overview>[] = [
     },
   },
   {
-    accessorKey: "lr",
+    accessorKey: "learning_rate",
     header: "LR",
     cell: ({ row }) => {
-      const value = row.getValue("lr") as string;
+      const value = row.getValue("learning_rate") as string;
       return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
-    accessorKey: "batchSize",
+    accessorKey: "batch_size",
     header: "BS",
     cell: ({ row }) => {
-      const value = row.getValue("batchSize") as string;
+      const value = row.getValue("batch_size") as string;
       return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
-    accessorKey: "ua",
+    accessorKey: "unlearn_accuracy",
     header: ({ column }) => {
       return (
         <Button
@@ -77,12 +77,12 @@ export const columns: ColumnDef<Overview>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("ua"));
+      const value = parseFloat(row.getValue("unlearn_accuracy"));
       return <div className="ml-4">{value}</div>;
     },
   },
   {
-    accessorKey: "ra",
+    accessorKey: "remain_accuracy",
     header: ({ column }) => {
       return (
         <Button
@@ -96,12 +96,12 @@ export const columns: ColumnDef<Overview>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("ra"));
+      const value = parseFloat(row.getValue("remain_accuracy"));
       return <div className="ml-4">{value}</div>;
     },
   },
   {
-    accessorKey: "tua",
+    accessorKey: "test_unlearn_accuracy",
     header: ({ column }) => {
       return (
         <Button
@@ -115,12 +115,12 @@ export const columns: ColumnDef<Overview>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("tua"));
+      const value = parseFloat(row.getValue("test_unlearn_accuracy"));
       return <div className="ml-4">{value}</div>;
     },
   },
   {
-    accessorKey: "tra",
+    accessorKey: "test_remain_accuracy",
     header: ({ column }) => {
       return (
         <Button
@@ -134,12 +134,12 @@ export const columns: ColumnDef<Overview>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("tra"));
+      const value = parseFloat(row.getValue("test_remain_accuracy"));
       return <div className="ml-4">{value}</div>;
     },
   },
   {
-    accessorKey: "rte",
+    accessorKey: "RTE",
     header: ({ column }) => {
       return (
         <Button
@@ -153,7 +153,7 @@ export const columns: ColumnDef<Overview>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = row.getValue("rte") as string;
+      const value = row.getValue("RTE") as string;
       return <div className="ml-4">{value !== "N/A" ? value : "-"}</div>;
     },
   },

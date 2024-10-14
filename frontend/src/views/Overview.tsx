@@ -7,11 +7,11 @@ import { AnalysisTextLinkIcon } from "../components/ui/icons";
 import { colors, columns } from "../components/Columns";
 
 const values = {
-  ua: overviewData.map((d) => d.ua),
-  ra: overviewData.map((d) => d.ra),
-  tua: overviewData.map((d) => d.tua),
-  tra: overviewData.map((d) => d.tra),
-  rte: overviewData.map((d) => d.rte),
+  ua: overviewData.map((d) => d.unlearn_accuracy),
+  ra: overviewData.map((d) => d.remain_accuracy),
+  tua: overviewData.map((d) => d.test_unlearn_accuracy),
+  tra: overviewData.map((d) => d.test_remain_accuracy),
+  rte: overviewData.map((d) => d.RTE),
 };
 const performanceMetrics = {
   ua: {
