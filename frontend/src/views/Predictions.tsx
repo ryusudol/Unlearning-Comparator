@@ -75,7 +75,7 @@ export default function Predictions({ height }: Props) {
         </span>
         {/* Bubble Chart 1 */}
         <div className="flex flex-col items-center -mt-1.5 mr-1">
-          <div className="flex items-center">
+          <div className="flex items-center ml-4">
             <NeuralNetworkIcon className="mr-[3px]" />
             <span className="text-[15px]">Baseline Model (id01)</span>
           </div>
@@ -86,7 +86,7 @@ export default function Predictions({ height }: Props) {
         </div>
         {/* Bubble Chart 2 */}
         <div className="flex flex-col items-center -mt-1.5">
-          <div className="flex items-center">
+          <div className="flex items-center ml-4">
             <GitCompareIcon className="mr-[3px]" />
             <span className="text-[15px]">Comparison Model (id02)</span>
           </div>

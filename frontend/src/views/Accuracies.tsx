@@ -96,14 +96,8 @@ export default function Accuracies({ height }: { height: number }) {
         </p>
       ) : (
         <div className="w-full flex justify-center items-center">
-          {/* justify-start */}
-          {/* <div className="flex justify-center items-center"> */}
-          {/* <p className="w-10 -rotate-90 origin-left translate-x-7 translate-y-[26px] text-[13px] text-[#808080]">
-            Classes
-          </p> */}
           <BarChart mode="Training" gapData={trainAccuracyGap} />
           <BarChart mode="Test" gapData={testAccuracyGap} />
-          {/* </div> */}
         </div>
       )}
       {forgetClass && (
