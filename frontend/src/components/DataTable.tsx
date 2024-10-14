@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Overview } from "../types/overview";
+import { Data } from "../types/data";
 import { hexToRgba } from "../util";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
@@ -36,8 +36,8 @@ import { ForgetClassContext } from "../store/forget-class-context";
 import { basicData } from "../constants/basicData";
 
 interface Props {
-  columns: ColumnDef<Overview>[];
-  data: Overview[];
+  columns: ColumnDef<Data>[];
+  data: Data[];
   performanceMetrics: {
     [key: string]: {
       colorScale: false | d3.ScaleQuantile<string, never>;
@@ -71,7 +71,7 @@ export default function DataTable({
     if (column.id === "baseline") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Overview, unknown>) => (
+        cell: ({ row }: CellContext<Data, unknown>) => (
           <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-2"
@@ -87,7 +87,7 @@ export default function DataTable({
     if (column.id === "comparison") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Overview, unknown>) => (
+        cell: ({ row }: CellContext<Data, unknown>) => (
           <div className="w-full ml-3 flex items-center">
             <Checkbox
               className="ml-4"
@@ -105,12 +105,14 @@ export default function DataTable({
 
   const tableData = useMemo(
     () =>
-      data.filter((datum) => forgetClassNames[datum.forget] === forgetClass),
+      data.filter(
+        (datum) => forgetClassNames[datum.forget_class] === forgetClass
+      ),
     [data, forgetClass]
   );
 
   const table = useReactTable({
-    getRowId: (row: Overview) => row.id,
+    getRowId: (row: Data) => row.id,
     data: tableData,
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
