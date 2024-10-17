@@ -111,7 +111,7 @@ export default function Predictions({
         <div className="flex items-center">
           <div className="flex items-center mr-2">
             <Target02Icon />
-            <h5 className="font-semibold ml-[3px]">Predictions</h5>
+            <h5 className="font-semibold ml-[3px] text-lg">Predictions</h5>
           </div>
           <div className="flex items-center">
             <ChartBubble02Icon
@@ -168,9 +168,9 @@ export default function Predictions({
         }`}
       >
         <span
-          className={`font-extralight -rotate-90 -mr-5 -ml-4 mb-0 text-nowrap ${
-            isExpanded ? "text-base" : "text-[11px]"
-          } ${chartMode !== BUBBLE ? "-mt-[5px]" : ""}`}
+          className={`font-extralight -rotate-90 -mx-6 text-nowrap ${
+            isExpanded ? "text-base" : "text-[13px]"
+          }`}
         >
           Ground Truth
         </span>

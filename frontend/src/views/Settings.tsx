@@ -32,7 +32,7 @@ export default function Settings({ height }: Props) {
       <div className="w-full flex justify-between">
         <div className="flex items-center">
           <SettingsIcon />
-          <h5 className="font-semibold ml-[3px]">Settings</h5>
+          <h5 className="font-semibold ml-[3px] text-lg">Settings</h5>
         </div>
         <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
       </div>

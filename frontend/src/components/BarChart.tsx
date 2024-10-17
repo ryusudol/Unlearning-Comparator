@@ -69,14 +69,6 @@ interface GapDataItem {
   baselineAccuracy: number;
   comparisonAccuracy: number;
 }
-interface CustomAxisTickProps {
-  x: number;
-  y: number;
-  payload: {
-    value: string;
-    index: number;
-  };
-}
 interface Props {
   mode: "Training" | "Test";
   gapData: GapDataItem[] | [];
@@ -106,42 +98,19 @@ export default function MyBarChart({ mode, gapData }: Props) {
     Math.ceil(Math.max(...gapData.map((item) => Math.abs(item.gap))) * 100) /
     100;
 
-  function renderCustomAxisTick(props: CustomAxisTickProps) {
-    const { x, y, payload } = props;
-    const label = chartConfig[payload.value as keyof typeof chartConfig]?.label;
-    const isForgetClass = label === forgetClass;
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text
-          x={0}
-          y={isForgetClass ? -5 : -15}
-          dy={16}
-          textAnchor="end"
-          transform={isForgetClass ? "" : "rotate(-30)"}
-          style={{ fill: isForgetClass ? "#000000" : "#64758B" }}
-          fontWeight={isForgetClass ? 700 : 400}
-          fontSize={isForgetClass ? "26px" : "11px"}
-        >
-          {isForgetClass ? "×" : label}
-        </text>
-      </g>
-    );
-  }
-
   return (
-    <div className="flex flex-col justify-center items-center mt-1">
+    <div className="flex flex-col justify-center items-center">
       <h5 className="text-[14px] mb-1 ml-[52px]">{mode} Dataset</h5>
-      <ChartContainer config={chartConfig} className="w-[232px] h-[223px]">
+      <ChartContainer config={chartConfig} className="w-[232px] h-[190px]">
         <BarChart
           accessibilityLayer
           data={gapData}
           layout="vertical"
           margin={{
-            left: -5,
-            right: 0,
+            left: 2,
+            right: 10,
             top: 0,
-            bottom: 6,
+            bottom: 20,
           }}
         >
           <YAxis
@@ -151,7 +120,12 @@ export default function MyBarChart({ mode, gapData }: Props) {
             tickLine={false}
             axisLine={true}
             interval={0}
-            tick={renderCustomAxisTick}
+            tickFormatter={(value) => {
+              const label =
+                chartConfig[value as keyof typeof chartConfig]?.label;
+              const isForgetClass = label === forgetClass;
+              return isForgetClass ? label + " (X)" : label;
+            }}
           />
           <XAxis
             dataKey="value"
@@ -161,15 +135,16 @@ export default function MyBarChart({ mode, gapData }: Props) {
             fontSize={11}
           >
             <Label
-              className="text-black -translate-y-[6px] text-[13px]"
-              value="Accuracy Gap (Comp.- Base.)"
-              offset={0}
+              className="text-black -translate-y-[6px] text-[11px]"
+              value={`← Baseline High | Comparison High →`}
+              offset={-2}
+              dx={7.5}
               position="bottom"
             />
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" radius={5} />
+          <Bar dataKey="gap" layout="vertical" radius={4} />
         </BarChart>
       </ChartContainer>
     </div>
