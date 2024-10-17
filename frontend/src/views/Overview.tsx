@@ -51,40 +51,14 @@ export default function PerformanceOverview({ height }: { height: number }) {
   // const retrainedRA = currRetrainedData.remain_accuracy;
   // const retrainedTA = currRetrainedData.test_accuracy;
 
-  const colorScale = d3
-    .scaleSequential<string>(
-      d3.interpolateRgbBasis(["#F2AAA8", "#FFFFFF", "#A6A6F9"])
-    )
-    .domain([1, 0]);
-
   return (
     <section
       style={{ height: `${height}px` }}
       className="w-[1110px] px-[5px] py-0.5 relative border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
-      <div className="w-full flex justify-between items-center">
-        <div className="flex items-center">
-          <AnalysisTextLinkIcon />
-          <h5 className="font-semibold ml-[3px]">Overview</h5>
-        </div>
-        {/* Legend */}
-        <div className="flex flex-col items-start absolute right-[6px] top-2">
-          <div className="text-[11px]">Performance</div>
-          <div className="w-[250px] h-5 relative">
-            <div
-              className="w-full h-[10px]"
-              style={{
-                background: `linear-gradient(to right, ${colorScale(
-                  0
-                )}, ${colorScale(0.5)}, ${colorScale(1)})`,
-              }}
-            ></div>
-            <div className="flex justify-between w-full text-[11px] mt-[2px]">
-              <span>Low</span>
-              <span>High</span>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center">
+        <AnalysisTextLinkIcon />
+        <h5 className="font-semibold ml-[3px] text-lg">Overview</h5>
       </div>
       <DataTable
         columns={columns}

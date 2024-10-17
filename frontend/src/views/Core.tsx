@@ -44,7 +44,7 @@ export default function Core({ height }: Props) {
             <ChartScatterIcon
               className={displayMode === ATTACK ? "opacity-40" : ""}
             />
-            <h5 className="font-semibold ml-[3px]">Embeddings</h5>
+            <h5 className="font-semibold ml-[3px] text-lg">Embeddings</h5>
           </div>
           <div
             className={`z-10 flex items-center cursor-pointer border-b-[2px] border-black px-[6px] ${
@@ -59,7 +59,7 @@ export default function Core({ height }: Props) {
             <h5
               id={ATTACK}
               onClick={handleDisplayModeChange}
-              className="font-semibold ml-[3px]"
+              className="font-semibold ml-[3px] text-lg"
             >
               Privacy Attack
             </h5>

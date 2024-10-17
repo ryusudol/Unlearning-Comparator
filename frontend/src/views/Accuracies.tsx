@@ -83,19 +83,16 @@ export default function Accuracies({ height }: { height: number }) {
       style={{ height: height }}
       className="w-[480px] px-[5px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <Chart01Icon />
-          <h5 className="font-semibold ml-[3px]">Accuracies</h5>
-        </div>
-        <div className="text-xs mr-2">← Baseline High | Comparison High →</div>
+      <div className="flex items-center">
+        <Chart01Icon />
+        <h5 className="font-semibold ml-[3px] text-lg">Accuracies</h5>
       </div>
       {baseline === "" || comparison === "" ? (
         <p className="h-full flex justify-center items-center text-[15px] text-gray-500">
           Select both Baseline and Comparison from the left.
         </p>
       ) : (
-        <div className="w-full flex justify-center items-center">
+        <div className="w-full flex justify-center items-center -mt-1">
           <BarChart mode="Training" gapData={trainAccuracyGap} />
           <BarChart mode="Test" gapData={testAccuracyGap} />
         </div>

@@ -8,8 +8,8 @@ import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
 
-const UPPER_HEIGHT = 290;
-const LOWER_HEIGHT = 720;
+const UPPER_HEIGHT = 232;
+const LOWER_HEIGHT = 778;
 
 export default function App() {
   const [isPageLoading, setIsPageLoading] = useState(true);

@@ -4,7 +4,9 @@ import * as d3 from "d3";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { ForgetClassContext } from "../store/forget-class-context";
 
-const MARGIN = { top: 10, right: 10, bottom: 46, left: 46 };
+const MARGIN = { top: 10, right: 10, bottom: 52, left: 52 };
+const fontColor = "#64758B";
+const fontSize = 11;
 
 type Props = {
   length: number;
@@ -56,26 +58,17 @@ export default function Heatmap({ length, data }: Props) {
     return (
       <text
         key={i}
-        x={
-          isForgetClass
-            ? xPos + xScale.bandwidth() - 3
-            : xPos + xScale.bandwidth()
-        }
-        y={boundsHeight + 10}
-        textAnchor="end"
+        x={xPos + xScale.bandwidth() - 12}
+        y={boundsHeight + 8}
+        textAnchor="start"
         dominantBaseline="middle"
-        fontSize={isForgetClass ? "24px" : "10px"}
-        transform={
-          isForgetClass
-            ? ""
-            : `rotate(-90, ${xPos + xScale.bandwidth() / 2}, ${
-                boundsHeight + 10
-              })`
-        }
-        style={{ fill: isForgetClass ? "#000000" : "#64758B" }}
-        fontWeight={isForgetClass ? 700 : 400}
+        fontSize={fontSize}
+        fill={fontColor}
+        transform={`rotate(45, ${xPos + xScale.bandwidth() / 2}, ${
+          boundsHeight + 10
+        })`}
       >
-        {isForgetClass ? "×" : name}
+        {isForgetClass ? name + " (X)" : name}
       </text>
     );
   });
@@ -86,15 +79,14 @@ export default function Heatmap({ length, data }: Props) {
     return (
       <text
         key={i}
-        x={-1.5}
+        x={-4}
         y={yPos + yScale.bandwidth() / 2}
         textAnchor="end"
         dominantBaseline="middle"
-        fontSize={isForgetClass ? "24px" : "10px"}
-        style={{ fill: isForgetClass ? "#000000" : "#64758B" }}
-        fontWeight={isForgetClass ? 700 : 400}
+        fontSize={fontSize}
+        fill={fontColor}
       >
-        {isForgetClass ? "×" : name}
+        {isForgetClass ? name + " (X)" : name}
       </text>
     );
   });

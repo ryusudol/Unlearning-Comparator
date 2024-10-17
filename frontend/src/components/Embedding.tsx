@@ -38,7 +38,7 @@ export default function Embedding({ mode, data, id }: Props) {
         ) : (
           <GitCompareIcon className="mr-[2px]" />
         )}
-        <h5 className="text-[15px] ml-[2px]">
+        <h5 className="ml-[2px] text-[17px]">
           {mode} Model ({id})
         </h5>
       </div>

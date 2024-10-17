@@ -20,14 +20,14 @@ export default function PredictionChart({
   isExpanded,
 }: Props) {
   return (
-    <div className="flex flex-col items-center -mt-[3px]">
+    <div className="flex flex-col items-center -mt-1.5">
       <div className="flex items-center ml-4">
         {mode === "Baseline" ? (
           <NeuralNetworkIcon className="mr-[3px]" />
         ) : (
           <GitCompareIcon className="mr-[3px]" />
         )}
-        <span className="text-[15px]">
+        <span className="text-[17px]">
           {mode} Model ({id})
         </span>
       </div>
@@ -42,7 +42,7 @@ export default function PredictionChart({
             }}
           />
           <span
-            style={{ fontSize: isExpanded ? "16px" : "11px" }}
+            style={{ fontSize: isExpanded ? "16px" : "13px" }}
             className="text-[11px] font-extralight -mt-[5px]"
           >
             Prediction
@@ -50,10 +50,10 @@ export default function PredictionChart({
         </div>
       ) : (
         <div className="flex flex-col items-center">
-          <Heatmap length={215} data={data} />
+          <Heatmap length={220} data={data} />
           <span
-            style={{ fontSize: isExpanded ? "16px" : "11px" }}
-            className="absolute text-[11px] font-extralight bottom-1 ml-8"
+            style={{ fontSize: isExpanded ? "16px" : "13px" }}
+            className="absolute text-[11px] font-extralight bottom-0.5 ml-14"
           >
             Prediction
           </span>

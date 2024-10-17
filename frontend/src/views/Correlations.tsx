@@ -22,7 +22,9 @@ export default function Correlations({ height }: { height: number }) {
         <div className="flex items-center">
           <div className="flex items-center mr-2">
             <Layers02Icon />
-            <h5 className="font-semibold ml-[3px]">Layer-Wise Correlations</h5>
+            <h5 className="font-semibold ml-[3px] text-lg">
+              Layer-Wise Correlations
+            </h5>
           </div>
           <ZoomInAreaIcon className="cursor-pointer" />
         </div>
@@ -67,7 +69,7 @@ export default function Correlations({ height }: { height: number }) {
         <div className="flex flex-col items-center -mt-1.5 mr-1">
           <div className="flex items-center">
             <NeuralNetworkIcon className="mr-[3px]" />
-            <span className="text-[15px]">Baseline Model ({baseline})</span>
+            <span className="text-[17px]">Baseline Model ({baseline})</span>
           </div>
           <img src="/heatmap1.png" alt="heatmap img 1" />
           <img src="/heatmap3.png" alt="heatmap img 3" />
@@ -79,7 +81,7 @@ export default function Correlations({ height }: { height: number }) {
         <div className="flex flex-col items-center -mt-1.5">
           <div className="flex items-center">
             <GitCompareIcon className="mr-[3px]" />
-            <span className="text-[15px]">Comparison Model ({comparison})</span>
+            <span className="text-[17px]">Comparison Model ({comparison})</span>
           </div>
           <img src="/heatmap2.png" alt="heatmap img 2" />
           <img src="/heatmap4.png" alt="heatmap img 4" />
