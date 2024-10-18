@@ -36,7 +36,7 @@ export default function Experiments({ height }: Props) {
         </div>
         <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
       </div>
-      <div className="w-full h-[220px] py-2 px-2.5 rounded-b-[6px] rounded-tl-[6px] border-[1px] border-[rgba(0, 0, 0, 0.2)]">
+      <div className="w-full h-[220px] py-1.5 px-2 rounded-b-[6px] rounded-tl-[6px] border-[1px] border-[rgba(0, 0, 0, 0.2)]">
         {configMode === 0 ? (
           <Training setTrainedModels={setTrainedModels} />
         ) : configMode === 1 ? (

@@ -17,7 +17,7 @@ export default function Header() {
           <Tabs
             onValueChange={saveForgetClass}
             defaultValue={forgetClass}
-            className="relative -bottom-5"
+            className="relative -bottom-5 ml-3"
           >
             <TabsList className="bg-transparent">
               {forgetClassNames.map((name, idx) => (

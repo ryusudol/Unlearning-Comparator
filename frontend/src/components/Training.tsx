@@ -6,8 +6,9 @@ import React, {
   useState,
 } from "react";
 
+import { Input } from "./ui/input";
+import { Slider } from "./ui/slider";
 import { Button } from "./ui/button";
-import { Slider } from "../components/ui/slider";
 import { AddIcon, HyperparametersIcon } from "./ui/icons";
 import OperationStatus from "./OperationStatus";
 import { RunningStatusContext } from "../store/running-status-context";
@@ -35,7 +36,9 @@ export default function Training({ setTrainedModels }: TrainingProps) {
   } = useContext(RunningStatusContext);
 
   const [epochs, setEpochs] = useState([30]);
-  const [learningRate, setLearningRate] = useState([0.01]);
+  const [learningRateLog, setLearningRateLog] = useState([-2]);
+  const [learningRate, setLearningRate] = useState(0.01);
+  const [batchSizeLog, setBatchSizeLog] = useState([5]);
   const [batchSize, setBatchSize] = useState([128]);
 
   const isRunningRef = useRef<boolean>(isRunning);
@@ -138,6 +141,18 @@ export default function Training({ setTrainedModels }: TrainingProps) {
     }
   };
 
+  const handleLearningRateChange = useCallback((value: number[]) => {
+    const logValue = Math.pow(10, value[0]);
+    setLearningRateLog(value);
+    setLearningRate(parseFloat(logValue.toFixed(5)));
+  }, []);
+
+  const handleBatchSizeChange = useCallback((value: number[]) => {
+    const logValue = Math.pow(2, value[0]);
+    setBatchSizeLog(value);
+    setBatchSize([logValue]);
+  }, []);
+
   return (
     <form
       className="w-full h-full flex flex-col items-start justify-between"
@@ -151,63 +166,60 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         />
       ) : (
         <div>
-          <div className="flex items-center mb-2.5">
+          <div className="flex items-center mb-1">
             <HyperparametersIcon className="w-3.5" />
             <p className="ml-1">Hyperparameters</p>
           </div>
-          <div>
-            {/* Epochs */}
-            <div className="flex items-center mb-2 ml-9">
-              <span>Epochs</span>
-              <div className="flex items-center ml-10">
-                <Slider
-                  onValueChange={(value: number[]) => setEpochs(value)}
-                  value={epochs}
-                  defaultValue={[5]}
-                  className="w-[135px] mx-2 cursor-pointer"
-                  min={1}
-                  max={50}
-                  step={1}
-                />
-                <span className="w-2 text-[14px]">{epochs}</span>
-              </div>
+          <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-4 gap-y-0.5">
+            <span className="text-sm">Epochs</span>
+            <div className="flex items-center">
+              <Slider
+                onValueChange={(value: number[]) => setEpochs(value)}
+                value={epochs}
+                defaultValue={[5]}
+                className="w-[135px] mx-2 cursor-pointer"
+                min={1}
+                max={50}
+                step={1}
+              />
+              <span className="w-2 text-sm">{epochs}</span>
             </div>
-            {/* Learning Rate */}
-            <div className="flex items-center mb-2 ml-9">
-              <span>Learning Rate</span>
-              <div className="flex items-center">
-                <Slider
-                  onValueChange={(value: number[]) => setLearningRate(value)}
-                  value={learningRate}
-                  defaultValue={[0.01]}
-                  className="w-[135px] mx-2 cursor-pointer"
-                  min={0.0001}
-                  max={0.1}
-                  step={0.0001}
-                />
-                <span className="w-2 text-[14px]">{learningRate}</span>
-              </div>
+            <span className="text-sm">Learning Rate</span>
+            <div className="flex items-center">
+              <Slider
+                onValueChange={handleLearningRateChange}
+                value={learningRateLog}
+                defaultValue={learningRateLog}
+                className="w-[135px] mx-2 cursor-pointer"
+                min={-4}
+                max={-1}
+                step={1}
+              />
+              <span className="w-2 text-sm">{learningRate}</span>
             </div>
-            {/* Batch Size */}
-            <div className="flex items-center ml-9">
-              <span>Batch Size</span>
-              <div className="flex items-center ml-5">
-                <Slider
-                  onValueChange={(value: number[]) => setBatchSize(value)}
-                  value={batchSize}
-                  defaultValue={[128]}
-                  className="w-[135px] mx-2 cursor-pointer"
-                  min={1}
-                  max={1024}
-                  step={2}
-                />
-                <span className="w-2 text-xs">{batchSize}</span>
-              </div>
+            <span className="text-sm">Batch Size</span>
+            <div className="flex items-center">
+              <Slider
+                onValueChange={handleBatchSizeChange}
+                value={batchSizeLog}
+                defaultValue={batchSizeLog}
+                className="w-[135px] mx-2 cursor-pointer"
+                min={0}
+                max={10}
+                step={1}
+              />
+              <span className="w-2 text-sm">{batchSize}</span>
             </div>
+            <span className="text-sm">Seed</span>
+            <Input
+              type="number"
+              defaultValue={42}
+              className="h-[25px] ml-2 px-2"
+            />
           </div>
         </div>
       )}
-      <Button className="w-full h-6 font-medium text-white bg-[#585858] flex items-center">
+      <Button className="w-full h-7 font-medium text-white bg-[#585858] flex items-center">
         <AddIcon className="text-white" />
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>
