@@ -7,28 +7,19 @@ import React, {
 } from "react";
 import { Button } from "./ui/button";
 
-import Input from "./Input";
-import CustomInput from "./CustomInput";
-import PredefinedInput from "./PredefinedInput";
 import OperationStatus from "./OperationStatus";
-import { OverviewContext } from "../store/overview-context";
+import { Slider } from "./ui/slider";
 import { RunningStatusContext } from "../store/running-status-context";
-import { getDefaultUnlearningConfig } from "../util";
-import { OverviewItem } from "../types/overview-context";
+// import { getDefaultUnlearningConfig } from "../util";
 import { cancelRunning, fetchRunningStatus } from "../https/utils";
-import { HyperparametersIcon } from "./ui/icons";
+import { AddIcon, HyperparametersIcon } from "./ui/icons";
+import { Label } from "./ui/label";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
-import { forgetClassNames } from "../constants/forgetClassNames";
 import {
   UnlearningConfigurationData,
-  // ResultType,
   UnlearningStatus,
 } from "../types/settings";
-import {
-  executeCustomUnlearning,
-  executePredefinedUnlearning,
-  // fetchUnlearningResult,
-} from "../https/unlearning";
+import { executePredefinedUnlearning } from "../https/unlearning";
 import {
   Select,
   SelectContent,
@@ -54,8 +45,6 @@ export default function Unlearning({
   trainedModels,
   setUnlearnedModels,
 }: UnlearningProps) {
-  const { overview, saveOverview, deleteLastOverviewItem } =
-    useContext(OverviewContext);
   const {
     isRunning,
     indicator,
@@ -67,9 +56,12 @@ export default function Unlearning({
     saveRunningStatus,
   } = useContext(RunningStatusContext);
 
-  const [mode, setMode] = useState<0 | 1>(0); // 0: Predefined, 1: Custom
+  const [epochs, setEpochs] = useState([30]);
+  const [learningRateLog, setLearningRateLog] = useState([-2]);
+  const [learningRate, setLearningRate] = useState(0.01);
+  const [batchSizeLog, setBatchSizeLog] = useState([5]);
+  const [batchSize, setBatchSize] = useState([128]);
   const [method, setMethod] = useState("Fine-Tuning");
-  const [customFile, setCustomFile] = useState<File>();
   const [initialState, setInitialState] = useState(initialValue);
 
   const isResultFetched = useRef<boolean>(false);
@@ -173,31 +165,25 @@ export default function Unlearning({
     };
   }, [checkStatus, isRunning]);
 
-  const handleUnlearningMethodSelection = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const selectedMethod = e.currentTarget.value;
-    const { epochs, learning_rate } =
-      getDefaultUnlearningConfig(selectedMethod);
+  // const handleUnlearningMethodSelection = (
+  //   e: React.ChangeEvent<HTMLSelectElement>
+  // ) => {
+  //   const selectedMethod = e.currentTarget.value;
+  //   const { epochs, learning_rate } =
+  //     getDefaultUnlearningConfig(selectedMethod);
 
-    setInitialState({
-      ...initialState,
-      method: selectedMethod,
-      epochs,
-      learning_rate,
-    });
-  };
+  //   setInitialState({
+  //     ...initialState,
+  //     method: selectedMethod,
+  //     epochs,
+  //     learning_rate,
+  //   });
+  // };
 
-  const handleSectionClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const id = e.currentTarget.id;
-    if (id === "predefined") setMode(0);
-    else if (id === "custom") setMode(1);
-  };
-
-  const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.currentTarget.files && e.currentTarget.files.length > 0)
-      setCustomFile(e.currentTarget.files[0]);
-  };
+  // const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.currentTarget.files && e.currentTarget.files.length > 0)
+  //     setCustomFile(e.currentTarget.files[0]);
+  // };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -214,30 +200,30 @@ export default function Unlearning({
       fd.entries()
     ) as unknown as ConfigurationData;
 
-    const newOverviewItem: OverviewItem = {
-      forget_class: configState.forget_class,
-      training: !isRetrain && mode === 0 ? configState.trained_model : "None",
-      unlearning: isRetrain
-        ? "Retrain"
-        : mode === 0
-        ? configState.method
-        : `Custom - ${customFile!.name}`,
-      defense: "None",
-      epochs: configState.epochs,
-      learning_rate: configState.learning_rate,
-      batch_size: configState.batch_size,
-      ua: 0,
-      ra: 0,
-      tua: 0,
-      tra: 0,
-      rte: 0,
-      train_class_accuracies: {},
-      test_class_accuracies: {},
-    };
+    // const newOverviewItem: OverviewItem = {
+    //   forget_class: configState.forget_class,
+    //   training: !isRetrain ? configState.trained_model : "None",
+    //   unlearning: isRetrain
+    //     ? "Retrain"
+    //     : mode === 0
+    //     ? configState.method
+    //     : `Custom - ${customFile!.name}`,
+    //   defense: "None",
+    //   epochs: configState.epochs,
+    //   learning_rate: configState.learning_rate,
+    //   batch_size: configState.batch_size,
+    //   ua: 0,
+    //   ra: 0,
+    //   tua: 0,
+    //   tra: 0,
+    //   rte: 0,
+    //   train_class_accuracies: {},
+    //   test_class_accuracies: {},
+    // };
 
-    const newOverview = [...overview, newOverviewItem];
+    // const newOverview = [...overview, newOverviewItem];
 
-    saveOverview({ overview: newOverview });
+    // saveOverview({ overview: newOverview });
 
     isResultFetched.current = false;
 
@@ -250,43 +236,38 @@ export default function Unlearning({
 
       await cancelRunning("unlearn");
 
-      deleteLastOverviewItem();
       initRunningStatus();
     } else {
-      const isValid =
-        mode === 0
-          ? configState.epochs > 0 &&
-            configState.batch_size > 0 &&
-            configState.learning_rate > 0
-          : !!customFile;
-
-      if (!isValid) {
-        alert(
-          mode === 0
-            ? "Please enter valid numbers."
-            : "Please upload a custom file."
-        );
-        return;
-      }
-
       saveRunningStatus({
         isRunning: true,
         indicator: `Unlearning Class ${configState.forget_class} . . .`,
         status: undefined,
       });
 
-      await (mode === 0
-        ? executePredefinedUnlearning(configState)
-        : executeCustomUnlearning(customFile!, configState.forget_class));
+      await executePredefinedUnlearning(configState);
     }
 
     setInitialState(initialState);
     setMethod("Fine-Tuning");
-    setCustomFile(undefined);
   };
 
+  const handleLearningRateChange = useCallback((value: number[]) => {
+    const logValue = Math.pow(10, value[0]);
+    setLearningRateLog(value);
+    setLearningRate(parseFloat(logValue.toFixed(5)));
+  }, []);
+
+  const handleBatchSizeChange = useCallback((value: number[]) => {
+    const logValue = Math.pow(2, value[0]);
+    setBatchSizeLog(value);
+    setBatchSize([logValue]);
+  }, []);
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      className="w-full h-full flex flex-col items-start justify-between"
+      onSubmit={handleSubmit}
+    >
       {isRunning ? (
         <OperationStatus
           identifier="unlearning"
@@ -295,70 +276,116 @@ export default function Unlearning({
         />
       ) : (
         <div>
-          <div id="forget-class" className="flex justify-between items-center">
+          <div className="grid grid-cols-2 gap-y-1">
+            {/* Initial Checkpoint */}
             <div className="flex items-center">
-              <HyperparametersIcon className="w-4 mr-0.5" />
-              <label className="text-[15px]" htmlFor="forget_class">
-                Forget Class
-              </label>
+              <HyperparametersIcon className="w-4 mr-1" />
+              <Label
+                className="inline text-base text-nowrap"
+                htmlFor="initial-checkpoint"
+              >
+                Initial Checkpoint
+              </Label>
             </div>
-            <Select defaultValue={forgetClassNames[0]} name="forget_class">
-              <SelectTrigger className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]">
-                <SelectValue placeholder={forgetClassNames[0]} />
+            <Select name="initial-checkpoint">
+              <SelectTrigger
+                className="w-[155px] h-[25px] text-base overflow-ellipsis whitespace-nowrap"
+                id="initial-checkpoint"
+              >
+                <SelectValue
+                  placeholder={
+                    trainedModels.length > 0
+                      ? trainedModels[0].length > 15
+                        ? trainedModels[0].slice(0, 15) + "..."
+                        : trainedModels[0]
+                      : ""
+                  }
+                />
               </SelectTrigger>
-              <SelectContent className="bg-white text-black overflow-ellipsis whitespace-nowrap">
-                {forgetClassNames.map((forgetClass, idx) => (
-                  <SelectItem
-                    key={idx}
-                    value={forgetClass}
-                    className="text-[13px]"
-                  >
-                    {forgetClass}
+              <SelectContent defaultValue={trainedModels[0]}>
+                {trainedModels.map((item, idx) => (
+                  <SelectItem key={idx} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* Method */}
+            <div className="flex items-center mb-1">
+              <HyperparametersIcon className="w-4 mr-1" />
+              <Label className="text-base text-nowrap" htmlFor="method">
+                Method
+              </Label>
+            </div>
+            <Select defaultValue={UNLEARNING_METHODS[0]}>
+              <SelectTrigger
+                className="w-[155px] h-[25px] text-base"
+                id="method"
+              >
+                <SelectValue placeholder={UNLEARNING_METHODS[0]} />
+              </SelectTrigger>
+              <SelectContent>
+                {UNLEARNING_METHODS.map((method, idx) => (
+                  <SelectItem key={idx} value={method}>
+                    {method}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div id="predefined" onClick={handleSectionClick}>
-            <PredefinedInput
-              mode={mode}
-              handleMethodSelection={handleUnlearningMethodSelection}
-              optionData={UNLEARNING_METHODS}
-            />
-            <div>
-              <Input
-                labelName="Trained Model"
-                defaultValue={trainedModels[0]}
-                optionData={trainedModels}
-                disabled={isRetrain}
-              />
-              <Input
-                key={initialState.epochs}
-                labelName="Epochs"
-                defaultValue={initialState.epochs}
-              />
-              <Input
-                key={initialState.learning_rate}
-                labelName="Learning Rate"
-                defaultValue={initialState.learning_rate}
-              />
-              <Input
-                key={initialState.batch_size}
-                labelName="Batch Size"
-                defaultValue={initialState.batch_size}
-              />
+          {/* Hyperparameters */}
+          <div>
+            <div className="flex items-center mb-1">
+              <HyperparametersIcon className="w-3.5" />
+              <p className="ml-1">Hyperparameters</p>
             </div>
-          </div>
-          <div id="custom" onClick={handleSectionClick}>
-            <CustomInput
-              mode={mode}
-              handleCustomFileUpload={handleCustomFileUpload}
-            />
+            <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
+              <span className="text-sm">Epochs</span>
+              <div className="flex items-center">
+                <Slider
+                  onValueChange={(value: number[]) => setEpochs(value)}
+                  value={epochs}
+                  defaultValue={[5]}
+                  className="w-[135px] mx-2 cursor-pointer"
+                  min={1}
+                  max={50}
+                  step={1}
+                />
+                <span className="w-2 text-sm">{epochs}</span>
+              </div>
+              <span className="text-sm">Learning Rate</span>
+              <div className="flex items-center">
+                <Slider
+                  onValueChange={handleLearningRateChange}
+                  value={learningRateLog}
+                  defaultValue={learningRateLog}
+                  className="w-[135px] mx-2 cursor-pointer"
+                  min={-4}
+                  max={-1}
+                  step={1}
+                />
+                <span className="w-2 text-sm">{learningRate}</span>
+              </div>
+              <span className="text-sm">Batch Size</span>
+              <div className="flex items-center">
+                <Slider
+                  onValueChange={handleBatchSizeChange}
+                  value={batchSizeLog}
+                  defaultValue={batchSizeLog}
+                  className="w-[135px] mx-2 cursor-pointer"
+                  min={0}
+                  max={10}
+                  step={1}
+                />
+                <span className="w-2 text-sm">{batchSize}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
-      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[14px] left-[262px]">
-        {isRunning ? "Cancel" : "Run"}
+      <Button className="w-full h-7 font-medium text-white bg-[#585858] flex items-center">
+        <AddIcon className="text-white" />
+        <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>
     </form>
   );

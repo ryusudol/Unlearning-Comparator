@@ -3,4 +3,5 @@ export const UNLEARNING_METHODS = [
   "Random-Label",
   "Gradient-Ascent",
   "Retrain",
+  "Custom",
 ];
