@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 
 import Header from "../components/Header";
-import Settings from "../views/Settings";
+import Settings from "../views/Experiments";
 import Overview from "../views/Overview";
 import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
 
-const UPPER_HEIGHT = 232;
-const LOWER_HEIGHT = 778;
+const UPPER_HEIGHT = 260;
+const LOWER_HEIGHT = 757;
 
 export default function App() {
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -37,11 +37,11 @@ export default function App() {
         <Core height={LOWER_HEIGHT} />
         <div className="flex flex-col">
           <Predictions
-            height={257}
+            height={289}
             isExpanded={isPredictionsExpanded}
             onExpansionClick={handleExpansionClick}
           />
-          <Correlations height={LOWER_HEIGHT - 257} />
+          <Correlations height={LOWER_HEIGHT - 289} />
         </div>
       </div>
     </section>

@@ -29,10 +29,8 @@ export default function MyInput({
   const name = labelName.toLowerCase().replaceAll(" ", "_");
 
   return (
-    <div className="flex justify-between items-center ml-[50px]">
-      <label className="text-[15px]" htmlFor={label}>
-        {label}
-      </label>
+    <div className="flex justify-between items-center ml-10">
+      <label htmlFor={label}>{label}</label>
       {optionData ? (
         <Select
           defaultValue={defaultValue as string | undefined}
@@ -42,7 +40,7 @@ export default function MyInput({
         >
           <SelectTrigger
             id={label}
-            className="w-[130px] h-[19px] bg-white text-black pl-2 pr-1 text-[13px]"
+            className="w-[130px] h-[25px] bg-white text-black pl-2 pr-1"
           >
             <SelectValue
               placeholder={
@@ -58,7 +56,7 @@ export default function MyInput({
             {optionData.map((datum, idx) => {
               const data = datum.slice(0, 13) + "...";
               return (
-                <SelectItem key={idx} value={datum} className="text-[13px]">
+                <SelectItem key={idx} value={datum}>
                   {open ? datum : data}
                 </SelectItem>
               );
@@ -69,7 +67,7 @@ export default function MyInput({
         <Input
           type="number"
           id={label}
-          className="w-[130px] h-[19px] px-2 text-[13px] overflow-ellipsis whitespace-nowrap"
+          className="w-[130px] h-[25px] px-2 overflow-ellipsis whitespace-nowrap"
           name={name}
           defaultValue={defaultValue}
           placeholder="Please enter a value"

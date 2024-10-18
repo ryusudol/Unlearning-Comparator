@@ -10,6 +10,7 @@ export type Data = {
   id: string;
   forget_class: number;
   phase: string;
+  // initial_checkpoint: string;
   method: string;
   epochs: number | string;
   batch_size: number | string;
