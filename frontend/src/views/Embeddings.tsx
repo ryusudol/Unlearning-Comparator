@@ -1,6 +1,7 @@
 import { useContext } from "react";
 
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ForgetClassContext } from "../store/forget-class-context";
 import Embedding from "../components/Embedding";
 import { basicData } from "../constants/basicData";
 import { Separator } from "../components/ui/separator";
@@ -15,8 +16,11 @@ import {
   ScrollVerticalIcon,
 } from "../components/ui/icons";
 
+const COMPONENT_HEIGHT = 712;
+
 export default function Embeddings() {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { forgetClass } = useContext(ForgetClassContext);
 
   const baselineData = basicData.filter((datum) => datum.id === baseline)[0];
   const comparisonData = basicData.filter(
@@ -57,23 +61,27 @@ export default function Embeddings() {
     : undefined;
 
   return (
-    <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-      <div className="w-[116px] h-[660px] flex flex-col justify-center items-center">
+    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+      <div
+        style={{ height: `${COMPONENT_HEIGHT}px` }}
+        className="w-[120px] flex flex-col justify-center items-center"
+      >
         {/* Legend - Metadata */}
-        <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+        <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
           <div className="flex items-center">
-            <span className="text-[15px] mr-1">Metadata</span>
+            <span className="mr-1">Metadata</span>
             <HelpCircleIcon className="cursor-pointer" />
           </div>
           <div className="flex flex-col justify-start items-start">
+            <span className="text-[15px] font-light">Methods: UMAP</span>
             <span className="text-[15px] font-light">Points: 2000</span>
             <span className="text-[15px] font-light">Dimension: 8192</span>
             <span className="text-[15px] font-light">Dataset: Training</span>
           </div>
         </div>
         {/* Legend - Controls */}
-        <div className="w-full h-[105px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-          <span className="text-[15px]">Controls</span>
+        <div className="w-full h-[104px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <span>Controls</span>
           <div>
             <div className="flex items-center">
               <CursorPointer01Icon className="scale-110 mr-[6px]" />
@@ -90,45 +98,56 @@ export default function Embeddings() {
           </div>
         </div>
         {/* Legend - Data Type */}
-        <div className="w-full h-[85px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-          <span className="text-[15px]">Data Type</span>
+        <div className="w-full h-[86px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <span>Data Type</span>
           <div>
-            <div className="flex items-center text-[15px] font-light">
-              <MultiplicationSignIcon className="scale-125 mr-[6px]" />
-              <span>Forget</span>
-            </div>
             <div className="flex items-center text-[15px] font-light">
               <CircleIcon className="scale-75 mr-[6px]" />
               <span>Remain</span>
             </div>
+            <div className="flex items-center text-[15px] font-light">
+              <MultiplicationSignIcon className="scale-125 mr-[6px]" />
+              <span>Forget</span>
+            </div>
           </div>
         </div>
         {/* Legend - Predictions */}
-        <div className="w-full h-[358px] flex flex-col justify-start items-start pl-2 pr-[2px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
-          <span className="text-[15px]">Predictions</span>
+        <div className="w-full h-[370px] flex flex-col justify-start items-start pl-2 pr-[2px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+          <span className="mb-1.5">Predictions</span>
           <div>
-            {forgetClassNames.map((className, idx) => (
+            {forgetClassNames.map((name, idx) => (
               <div key={idx} className="flex items-center mb-[2px]">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[idx]}` }}
-                  className="w-[14px] h-[30px] mr-[6px]"
+                  className="w-3 h-[30px] mr-[6px]"
                 />
-                <span className="text-[15px] font-light">{className}</span>
+                <div className="flex items-center">
+                  <span className="text-[15px] font-light">{name}</span>
+                  {name === forgetClass ? (
+                    <div className="flex items-center ml-0.5">
+                      (<MultiplicationSignIcon className="-mx-0.5" />)
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
-      <Separator
-        orientation="vertical"
-        className="h-[660px] w-[1px] mx-[2px]"
+      <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
+      <Embedding
+        mode="Baseline"
+        height={COMPONENT_HEIGHT}
+        data={BaselineData}
+        id={baseline}
       />
-      <Embedding mode="Baseline" data={BaselineData} id={baseline} />
-      <Separator
-        orientation="vertical"
-        className="h-[660px] w-[1px] mx-[2px]"
+      <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
+      <Embedding
+        mode="Comparison"
+        height={COMPONENT_HEIGHT}
+        data={ComparisonData}
+        id={comparison}
       />
-      <Embedding mode="Comparison" data={ComparisonData} id={comparison} />
     </div>
   );
 }

@@ -16,7 +16,7 @@ import { RunningStatusContext } from "../store/running-status-context";
 import { getDefaultUnlearningConfig } from "../util";
 import { OverviewItem } from "../types/overview-context";
 import { cancelRunning, fetchRunningStatus } from "../https/utils";
-import { MultiplicationSignIcon } from "./ui/icons";
+import { HyperparametersIcon } from "./ui/icons";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import {
@@ -297,7 +297,7 @@ export default function Unlearning({
         <div>
           <div id="forget-class" className="flex justify-between items-center">
             <div className="flex items-center">
-              <MultiplicationSignIcon className="scale-125 -ml-[2px] mr-[2px]" />
+              <HyperparametersIcon className="w-4 mr-0.5" />
               <label className="text-[15px]" htmlFor="forget_class">
                 Forget Class
               </label>

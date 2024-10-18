@@ -1,17 +1,23 @@
-import React, { useCallback, useRef, useContext, useEffect } from "react";
-import { Button } from "./ui/button";
+import React, {
+  useCallback,
+  useRef,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-import Input from "./Input";
-import PredefinedInput from "./PredefinedInput";
+import { Button } from "./ui/button";
+import { Slider } from "../components/ui/slider";
+import { AddIcon, HyperparametersIcon } from "./ui/icons";
 import OperationStatus from "./OperationStatus";
 import { RunningStatusContext } from "../store/running-status-context";
+import { TrainingConfigurationData } from "../types/settings";
+import { executeTraining } from "../https/training";
 import {
   fetchRunningStatus,
   cancelRunning,
   fetchModelFiles,
 } from "../https/utils";
-import { TrainingConfigurationData } from "../types/settings";
-import { executeTraining } from "../https/training";
 
 export interface TrainingProps {
   setTrainedModels: (models: string[]) => void;
@@ -27,6 +33,10 @@ export default function Training({ setTrainedModels }: TrainingProps) {
     updateIsRunning,
     updateStatus,
   } = useContext(RunningStatusContext);
+
+  const [epochs, setEpochs] = useState([30]);
+  const [learningRate, setLearningRate] = useState([0.01]);
+  const [batchSize, setBatchSize] = useState([128]);
 
   const isRunningRef = useRef<boolean>(isRunning);
   const indicatorRef = useRef<string>(indicator);
@@ -129,7 +139,10 @@ export default function Training({ setTrainedModels }: TrainingProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      className="w-full h-full flex flex-col items-start justify-between"
+      onSubmit={handleSubmit}
+    >
       {isRunning ? (
         <OperationStatus
           identifier="training"
@@ -138,16 +151,65 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         />
       ) : (
         <div>
-          <PredefinedInput mode={0} />
+          <div className="flex items-center mb-2.5">
+            <HyperparametersIcon className="w-3.5" />
+            <p className="ml-1">Hyperparameters</p>
+          </div>
           <div>
-            <Input labelName="Epochs" defaultValue={30} />
-            <Input labelName="Learning Rate" defaultValue={0.01} />
-            <Input labelName="Batch Size" defaultValue={128} />
+            {/* Epochs */}
+            <div className="flex items-center mb-2 ml-9">
+              <span>Epochs</span>
+              <div className="flex items-center ml-10">
+                <Slider
+                  onValueChange={(value: number[]) => setEpochs(value)}
+                  value={epochs}
+                  defaultValue={[5]}
+                  className="w-[135px] mx-2 cursor-pointer"
+                  min={1}
+                  max={50}
+                  step={1}
+                />
+                <span className="w-2 text-[14px]">{epochs}</span>
+              </div>
+            </div>
+            {/* Learning Rate */}
+            <div className="flex items-center mb-2 ml-9">
+              <span>Learning Rate</span>
+              <div className="flex items-center">
+                <Slider
+                  onValueChange={(value: number[]) => setLearningRate(value)}
+                  value={learningRate}
+                  defaultValue={[0.01]}
+                  className="w-[135px] mx-2 cursor-pointer"
+                  min={0.0001}
+                  max={0.1}
+                  step={0.0001}
+                />
+                <span className="w-2 text-[14px]">{learningRate}</span>
+              </div>
+            </div>
+            {/* Batch Size */}
+            <div className="flex items-center ml-9">
+              <span>Batch Size</span>
+              <div className="flex items-center ml-5">
+                <Slider
+                  onValueChange={(value: number[]) => setBatchSize(value)}
+                  value={batchSize}
+                  defaultValue={[128]}
+                  className="w-[135px] mx-2 cursor-pointer"
+                  min={1}
+                  max={1024}
+                  step={2}
+                />
+                <span className="w-2 text-xs">{batchSize}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
-      <Button className="w-12 h-6 text-[14px] text-[#fefefe] absolute bottom-[14px] left-[262px]">
-        {isRunning ? "Cancel" : "Run"}
+      <Button className="w-full h-6 font-medium text-white bg-[#585858] flex items-center">
+        <AddIcon className="text-white" />
+        <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>
     </form>
   );

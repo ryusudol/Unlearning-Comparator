@@ -104,7 +104,7 @@ export default function Predictions({
     <section
       style={isExpanded ? expandedStyle : unexpandedStyle}
       className={`px-[5px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] transition-all z-10 bg-white absolute ${
-        isExpanded ? `w-[960px] right-0` : `w-[480px]`
+        isExpanded ? `w-[980px] right-0` : `w-[490px]`
       }`}
     >
       <div className="flex justify-between">

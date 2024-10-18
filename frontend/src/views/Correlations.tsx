@@ -16,7 +16,7 @@ export default function Correlations({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[480px] px-[5px] mt-[257px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
+      className="w-[490px] px-[5px] mt-[289px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center">

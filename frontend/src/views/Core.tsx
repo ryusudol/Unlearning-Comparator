@@ -8,11 +8,7 @@ import { ChartScatterIcon, RepeatIcon } from "../components/ui/icons";
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 
-interface Props {
-  height: number;
-}
-
-export default function Core({ height }: Props) {
+export default function Core({ height }: { height: number }) {
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
   const [neighbors, setNeighbors] = useState([5]);
   const [dist, setDist] = useState([0.1]);
@@ -30,21 +26,23 @@ export default function Core({ height }: Props) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1440px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1551px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex justify-between items-center mb-[2px]">
         <div className="flex items-center">
           <div
             id={EMBEDDINGS}
             onClick={handleDisplayModeChange}
-            className={`z-10 flex items-center mr-3 cursor-pointer border-b-[2px] border-black px-[6px] ${
+            className={`z-10 flex items-center mr-3 cursor-pointer border-b-[2px] border-black px-1 ${
               displayMode === ATTACK && "text-gray-400 border-none"
             }`}
           >
             <ChartScatterIcon
               className={displayMode === ATTACK ? "opacity-40" : ""}
             />
-            <h5 className="font-semibold ml-[3px] text-lg">Embeddings</h5>
+            <h5 className="font-semibold ml-[3px] text-lg -mb-0.5">
+              Embeddings
+            </h5>
           </div>
           <div
             className={`z-10 flex items-center cursor-pointer border-b-[2px] border-black px-[6px] ${
@@ -59,7 +57,7 @@ export default function Core({ height }: Props) {
             <h5
               id={ATTACK}
               onClick={handleDisplayModeChange}
-              className="font-semibold ml-[3px] text-lg"
+              className="font-semibold ml-[3px] text-lg -mb-0.5"
             >
               Privacy Attack
             </h5>

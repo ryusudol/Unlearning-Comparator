@@ -29,6 +29,14 @@ export const columns: ColumnDef<Data>[] = [
       return <div>{value}</div>;
     },
   },
+  // {
+  //   accessorKey: "",
+  //   header: "Method",
+  //   cell: ({ row }) => {
+  //     const value = row.getValue("method") as string;
+  //     return <div>{value}</div>;
+  //   },
+  // },
   {
     accessorKey: "method",
     header: "Method",
