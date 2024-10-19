@@ -1,5 +1,6 @@
 import { useEffect, createContext, useReducer } from "react";
 
+import { forgetClassNames } from "../constants/forgetClassNames";
 import {
   Action,
   ForgetClass,
@@ -9,7 +10,7 @@ import {
 const FORGET_CLASS = "forgetClass";
 
 export const ForgetClassContext = createContext<ForgetClassContextType>({
-  forgetClass: undefined,
+  forgetClass: forgetClassNames[0],
 
   saveForgetClass: (forgetClass: string) => {},
   retrieveForgetClass: () => {},
@@ -33,7 +34,7 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
 
     case "CLEAR_FORGET_CLASS":
       sessionStorage.removeItem(FORGET_CLASS);
-      return { forgetClass: undefined };
+      return { forgetClass: forgetClassNames[0] };
 
     default:
       return state;
@@ -46,7 +47,7 @@ export default function ForgetClassContextProvider({
   children: React.ReactNode;
 }) {
   const [forgetClass, dispatch] = useReducer(BaselineReducer, {
-    forgetClass: undefined,
+    forgetClass: forgetClassNames[0],
   });
 
   function handleSaveForgetClass(baseline: string) {

@@ -191,7 +191,7 @@ export default function Training({ setTrainedModels }: TrainingProps) {
                 value={learningRateLog}
                 defaultValue={learningRateLog}
                 className="w-[135px] mx-2 cursor-pointer"
-                min={-4}
+                min={-5}
                 max={-1}
                 step={1}
               />

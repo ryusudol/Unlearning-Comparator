@@ -58,7 +58,7 @@ export interface TrainingConfigurationData {
 export interface UnlearningConfigurationData {
   method: string;
   trained_model: string;
-  forget_class: string;
+  forget_class: number;
   epochs: number;
   learning_rate: number;
   batch_size: number;
@@ -75,14 +75,4 @@ export interface DefenseConfigurationData {
 export interface Action {
   type: string;
   payload: string | number;
-}
-
-export interface ResultType {
-  unlearn_accuracy: number;
-  remain_accuracy: number;
-  test_unlearning_accuracy: number;
-  test_remaining_accuracy: number;
-  train_class_accuracies: ClassAccuracies;
-  test_class_accuracies: ClassAccuracies;
-  svg_files: string[];
 }
