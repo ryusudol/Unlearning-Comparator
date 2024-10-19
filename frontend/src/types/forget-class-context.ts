@@ -1,5 +1,5 @@
 export interface ForgetClass {
-  forgetClass: string | undefined;
+  forgetClass: string;
 }
 
 export interface ForgetClassContextType extends ForgetClass {

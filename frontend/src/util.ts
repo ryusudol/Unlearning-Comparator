@@ -62,18 +62,18 @@ export function getAccuracies(
 export function getDefaultUnlearningConfig(method: string) {
   let epochs, learning_rate;
 
-  if (method === "Fine-Tuning") {
+  if (method === "ft") {
     epochs = 10;
-    learning_rate = 0.02;
-  } else if (method === "Random-Label") {
+    learning_rate = -2;
+  } else if (method === "rl") {
     epochs = 3;
-    learning_rate = 0.01;
-  } else if (method === "Gradient-Ascent") {
+    learning_rate = -2;
+  } else if (method === "ga") {
     epochs = 3;
-    learning_rate = 0.0001;
+    learning_rate = -4;
   } else {
     epochs = 30;
-    learning_rate = 0.01;
+    learning_rate = -2;
   }
 
   return { epochs, learning_rate };

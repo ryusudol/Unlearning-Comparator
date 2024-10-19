@@ -5,21 +5,26 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { Button } from "./ui/button";
 
 import OperationStatus from "./OperationStatus";
-import { Slider } from "./ui/slider";
+import { Button } from "./ui/button";
 import { RunningStatusContext } from "../store/running-status-context";
-// import { getDefaultUnlearningConfig } from "../util";
-import { cancelRunning, fetchRunningStatus } from "../https/utils";
+import { ForgetClassContext } from "../store/forget-class-context";
 import { AddIcon, HyperparametersIcon } from "./ui/icons";
+import { Slider } from "./ui/slider";
+import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
+import { getDefaultUnlearningConfig } from "../util";
+import { cancelRunning, fetchRunningStatus } from "../https/utils";
+import {
+  executeMethodUnlearning,
+  executeCustomUnlearning,
+} from "../https/unlearning";
 import {
   UnlearningConfigurationData,
   UnlearningStatus,
 } from "../types/settings";
-import { executePredefinedUnlearning } from "../https/unlearning";
 import {
   Select,
   SelectContent,
@@ -27,14 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-
-const initialValue = {
-  method: "Fine-Tuning",
-  forget_class: "0",
-  epochs: 10,
-  learning_rate: 0.02,
-  batch_size: 128,
-};
+import { forgetClassNames } from "../constants/forgetClassNames";
 
 export interface UnlearningProps {
   trainedModels: string[];
@@ -55,14 +53,12 @@ export default function Unlearning({
     updateStatus,
     saveRunningStatus,
   } = useContext(RunningStatusContext);
+  const { forgetClass } = useContext(ForgetClassContext);
 
   const [epochs, setEpochs] = useState([30]);
   const [learningRateLog, setLearningRateLog] = useState([-2]);
-  const [learningRate, setLearningRate] = useState(0.01);
   const [batchSizeLog, setBatchSizeLog] = useState([5]);
-  const [batchSize, setBatchSize] = useState([128]);
-  const [method, setMethod] = useState("Fine-Tuning");
-  const [initialState, setInitialState] = useState(initialValue);
+  const [method, setMethod] = useState("ft");
 
   const isResultFetched = useRef<boolean>(false);
   const isRunningRef = useRef<boolean>(isRunning);
@@ -165,25 +161,12 @@ export default function Unlearning({
     };
   }, [checkStatus, isRunning]);
 
-  // const handleUnlearningMethodSelection = (
-  //   e: React.ChangeEvent<HTMLSelectElement>
-  // ) => {
-  //   const selectedMethod = e.currentTarget.value;
-  //   const { epochs, learning_rate } =
-  //     getDefaultUnlearningConfig(selectedMethod);
-
-  //   setInitialState({
-  //     ...initialState,
-  //     method: selectedMethod,
-  //     epochs,
-  //     learning_rate,
-  //   });
-  // };
-
-  // const handleCustomFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.currentTarget.files && e.currentTarget.files.length > 0)
-  //     setCustomFile(e.currentTarget.files[0]);
-  // };
+  const handleMethodSelection = (value: string) => {
+    const { epochs, learning_rate } = getDefaultUnlearningConfig(value);
+    setMethod(value);
+    setEpochs([epochs]);
+    setLearningRateLog([learning_rate]);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -192,13 +175,16 @@ export default function Unlearning({
 
     if (isRetrain) fd.delete("method");
 
-    type ConfigurationData = typeof isRetrain extends true
-      ? Omit<UnlearningConfigurationData, "method">
-      : UnlearningConfigurationData;
+    const config = Object.fromEntries(fd.entries());
 
-    const configState = Object.fromEntries(
-      fd.entries()
-    ) as unknown as ConfigurationData;
+    const runningConfig = {
+      method: config.method,
+      trained_model: config.trained_model,
+      forget_class: forgetClassNames.indexOf(forgetClass),
+      epochs: epochs[0],
+      learning_rate: parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5)),
+      batch_size: Math.pow(2, batchSizeLog[0]),
+    };
 
     // const newOverviewItem: OverviewItem = {
     //   forget_class: configState.forget_class,
@@ -240,28 +226,20 @@ export default function Unlearning({
     } else {
       saveRunningStatus({
         isRunning: true,
-        indicator: `Unlearning Class ${configState.forget_class} . . .`,
+        indicator: `Unlearning Class ${forgetClass} . . .`,
         status: undefined,
       });
 
-      await executePredefinedUnlearning(configState);
+      method === "custom"
+        ? await executeCustomUnlearning(
+            config.custom_file as File,
+            runningConfig.forget_class
+          )
+        : await executeMethodUnlearning(
+            runningConfig as UnlearningConfigurationData
+          );
     }
-
-    setInitialState(initialState);
-    setMethod("Fine-Tuning");
   };
-
-  const handleLearningRateChange = useCallback((value: number[]) => {
-    const logValue = Math.pow(10, value[0]);
-    setLearningRateLog(value);
-    setLearningRate(parseFloat(logValue.toFixed(5)));
-  }, []);
-
-  const handleBatchSizeChange = useCallback((value: number[]) => {
-    const logValue = Math.pow(2, value[0]);
-    setBatchSizeLog(value);
-    setBatchSize([logValue]);
-  }, []);
 
   return (
     <form
@@ -277,7 +255,6 @@ export default function Unlearning({
       ) : (
         <div>
           <div className="grid grid-cols-2 gap-y-1">
-            {/* Initial Checkpoint */}
             <div className="flex items-center">
               <HyperparametersIcon className="w-4 mr-1" />
               <Label
@@ -287,22 +264,18 @@ export default function Unlearning({
                 Initial Checkpoint
               </Label>
             </div>
-            <Select name="initial-checkpoint">
+            <Select defaultValue={trainedModels[0]} name="trained_model">
               <SelectTrigger
                 className="w-[155px] h-[25px] text-base overflow-ellipsis whitespace-nowrap"
                 id="initial-checkpoint"
               >
-                <SelectValue
-                  placeholder={
-                    trainedModels.length > 0
-                      ? trainedModels[0].length > 15
-                        ? trainedModels[0].slice(0, 15) + "..."
-                        : trainedModels[0]
-                      : ""
-                  }
-                />
+                {trainedModels.length > 0
+                  ? trainedModels[0].length > 15
+                    ? trainedModels[0].slice(0, 15) + "..."
+                    : trainedModels[0]
+                  : ""}
               </SelectTrigger>
-              <SelectContent defaultValue={trainedModels[0]}>
+              <SelectContent>
                 {trainedModels.map((item, idx) => (
                   <SelectItem key={idx} value={item}>
                     {item}
@@ -310,14 +283,17 @@ export default function Unlearning({
                 ))}
               </SelectContent>
             </Select>
-            {/* Method */}
             <div className="flex items-center mb-1">
               <HyperparametersIcon className="w-4 mr-1" />
               <Label className="text-base text-nowrap" htmlFor="method">
                 Method
               </Label>
             </div>
-            <Select defaultValue={UNLEARNING_METHODS[0]}>
+            <Select
+              defaultValue="ft"
+              onValueChange={handleMethodSelection}
+              name="method"
+            >
               <SelectTrigger
                 className="w-[155px] h-[25px] text-base"
                 id="method"
@@ -325,62 +301,86 @@ export default function Unlearning({
                 <SelectValue placeholder={UNLEARNING_METHODS[0]} />
               </SelectTrigger>
               <SelectContent>
-                {UNLEARNING_METHODS.map((method, idx) => (
-                  <SelectItem key={idx} value={method}>
-                    {method}
-                  </SelectItem>
-                ))}
+                {UNLEARNING_METHODS.map((method, idx) => {
+                  const chunks = method.split("-");
+                  const value =
+                    chunks.length === 1
+                      ? chunks[0].toLowerCase()
+                      : (chunks[0][0] + chunks[1][0]).toLowerCase();
+                  return (
+                    <SelectItem key={idx} value={value}>
+                      {method}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
-          {/* Hyperparameters */}
-          <div>
-            <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-3.5" />
-              <p className="ml-1">Hyperparameters</p>
+          {method === "custom" ? (
+            <div className="flex justify-between items-center">
+              <div className="flex items-center mb-1">
+                <HyperparametersIcon className="w-3.5" />
+                <p className="ml-1 text-nowrap">Custom File</p>
+              </div>
+              <Input
+                type="file"
+                name="custom_file"
+                className="w-[155px] h-[25px] pt-[1px] px-1.5 cursor-pointer"
+              />
             </div>
-            <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
-              <span className="text-sm">Epochs</span>
-              <div className="flex items-center">
-                <Slider
-                  onValueChange={(value: number[]) => setEpochs(value)}
-                  value={epochs}
-                  defaultValue={[5]}
-                  className="w-[135px] mx-2 cursor-pointer"
-                  min={1}
-                  max={50}
-                  step={1}
-                />
-                <span className="w-2 text-sm">{epochs}</span>
+          ) : (
+            <div>
+              <div className="flex items-center mb-1">
+                <HyperparametersIcon className="w-3.5" />
+                <p className="ml-1">Hyperparameters</p>
               </div>
-              <span className="text-sm">Learning Rate</span>
-              <div className="flex items-center">
-                <Slider
-                  onValueChange={handleLearningRateChange}
-                  value={learningRateLog}
-                  defaultValue={learningRateLog}
-                  className="w-[135px] mx-2 cursor-pointer"
-                  min={-4}
-                  max={-1}
-                  step={1}
-                />
-                <span className="w-2 text-sm">{learningRate}</span>
-              </div>
-              <span className="text-sm">Batch Size</span>
-              <div className="flex items-center">
-                <Slider
-                  onValueChange={handleBatchSizeChange}
-                  value={batchSizeLog}
-                  defaultValue={batchSizeLog}
-                  className="w-[135px] mx-2 cursor-pointer"
-                  min={0}
-                  max={10}
-                  step={1}
-                />
-                <span className="w-2 text-sm">{batchSize}</span>
+              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
+                <span className="text-sm">Epochs</span>
+                <div className="flex items-center">
+                  <Slider
+                    onValueChange={(value: number[]) => setEpochs(value)}
+                    value={epochs}
+                    defaultValue={[5]}
+                    className="w-[135px] mx-2 cursor-pointer"
+                    min={1}
+                    max={50}
+                    step={1}
+                  />
+                  <span className="w-2 text-sm">{epochs}</span>
+                </div>
+                <span className="text-sm">Learning Rate</span>
+                <div className="flex items-center">
+                  <Slider
+                    onValueChange={setLearningRateLog}
+                    value={learningRateLog}
+                    defaultValue={learningRateLog}
+                    className="w-[135px] mx-2 cursor-pointer"
+                    min={-5}
+                    max={-1}
+                    step={1}
+                  />
+                  <span className="w-2 text-sm">
+                    {parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5))}
+                  </span>
+                </div>
+                <span className="text-sm">Batch Size</span>
+                <div className="flex items-center">
+                  <Slider
+                    onValueChange={setBatchSizeLog}
+                    value={batchSizeLog}
+                    defaultValue={batchSizeLog}
+                    className="w-[135px] mx-2 cursor-pointer"
+                    min={0}
+                    max={10}
+                    step={1}
+                  />
+                  <span className="w-2 text-sm">
+                    {Math.pow(2, batchSizeLog[0])}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       <Button className="w-full h-7 font-medium text-white bg-[#585858] flex items-center">
