@@ -36,6 +36,7 @@ dependencies = [
   "matplotlib",
   "python-multipart",
   "seaborn",
+  "torch_cka",
 ]
 
 

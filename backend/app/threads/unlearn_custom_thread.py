@@ -8,16 +8,22 @@ import os
 import uuid
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
-from app.utils.evaluation import evaluate_model, evaluate_model_with_distributions, get_layer_activations_and_predictions
+from app.utils.evaluation import (
+	evaluate_model, 
+	evaluate_model_with_distributions, 
+	get_layer_activations_and_predictions, 
+	calculate_cka_similarity
+)
 from app.utils.visualization import compute_umap_embedding
 from app.config.settings import UNLEARN_SEED, UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningInference(threading.Thread):
-    def __init__(self, request, status, weights_path):
+    def __init__(self, request, status, weights_path_before, weights_path_after):
         threading.Thread.__init__(self)
         self.request = request
         self.status = status
-        self.weights_path = weights_path
+        self.weights_path_before = weights_path_before
+        self.weights_path_after = weights_path_after
         self.exception = None
         self.loop = None
         self.model = None
@@ -61,16 +67,30 @@ class UnlearningInference(threading.Thread):
         print(f"Starting custom unlearning inference for class {self.request.forget_class}...")
         set_seed(UNLEARN_SEED)
         device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-        train_loader, test_loader, train_set, test_set = get_data_loaders(128)
-        self.model = get_resnet18().to(device)
-        self.model.load_state_dict(torch.load(self.weights_path, map_location=device))
+        train_loader, test_loader, train_set, test_set = get_data_loaders(256)
+        self.model_before = get_resnet18().to(device)
+        self.model_before.load_state_dict(torch.load(self.weights_path_before, map_location=device))
+        self.model_after = get_resnet18().to(device)
+        self.model_after.load_state_dict(torch.load(self.weights_path_after, map_location=device))
         criterion = nn.CrossEntropyLoss()
 
         if self.stopped():
             return
 
         # Evaluate on train set
-        train_loss, train_accuracy, train_class_accuracies, train_label_dist, train_conf_dist = await evaluate_model_with_distributions(self.model, train_loader, criterion, device)
+        (
+            train_loss, 
+            train_accuracy, 
+            train_class_accuracies, 
+            train_label_dist, 
+            train_conf_dist
+        ) = await evaluate_model_with_distributions (
+            self.model_after, 
+            train_loader, 
+            criterion, 
+            device
+        )
+        
         self.status.current_loss = train_loss
         self.status.current_accuracy = train_accuracy
         self.status.train_class_accuracies = train_class_accuracies
@@ -88,7 +108,18 @@ class UnlearningInference(threading.Thread):
             return
 
         # Evaluate on test set
-        test_loss, test_accuracy, test_class_accuracies, test_label_dist, test_conf_dist = await evaluate_model_with_distributions(self.model, test_loader, criterion, device)
+        (
+            test_loss, 
+            test_accuracy, 
+            test_class_accuracies, 
+            test_label_dist, 
+            test_conf_dist
+        ) = await evaluate_model_with_distributions(
+            self.model_after, 
+            test_loader, 
+            criterion, 
+            device
+        )
         self.status.test_loss = test_loss
         self.status.test_accuracy = (test_accuracy * 10.0 - test_class_accuracies[self.request.forget_class]) / 9.0
         self.status.test_class_accuracies = test_class_accuracies
@@ -110,7 +141,7 @@ class UnlearningInference(threading.Thread):
             return
 
         # UMAP and activation calculation logic
-        if not self.status.cancel_requested and self.model is not None:
+        if not self.status.cancel_requested and self.model_after is not None:
             print("Getting data loaders for UMAP")
             dataset = train_set if UMAP_DATASET == 'train' else test_set
             subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
@@ -119,7 +150,7 @@ class UnlearningInference(threading.Thread):
             
             print("Computing layer activations")
             activations, predicted_labels, logits, mean_logits = await get_layer_activations_and_predictions(
-                model=self.model,
+                model=self.model_after,
                 data_loader=subset_loader,
                 device=device,
                 forget_class=self.request.forget_class
@@ -156,18 +187,28 @@ class UnlearningInference(threading.Thread):
             test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
             test_remain_accuracy = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)
             
-            
-    
+
+            print("Calculating CKA similarity")
+            cka_results = await calculate_cka_similarity(
+                model_before=self.model_before,
+                model_after=self.model_after,
+                train_loader=train_loader,
+                test_loader=test_loader,
+                forget_class=self.request.forget_class,
+                device=device
+            )
+            self.status.progress = 95
+
             # Prepare results dictionary
             results = {
                 "id": uuid.uuid4().hex[:4],
                 "forget_class": self.request.forget_class,
                 "phase": "Unlearning",
+                "init_id": self.weights_path_before,
                 "method": "Custom",
                 "epochs": "N/A",
                 "batch_size": "N/A",
                 "learning_rate": "N/A",
-                "seed": UNLEARN_SEED,
                 "unlearn_accuracy": self.status.unlearn_accuracy,
                 "remain_accuracy": self.status.remain_accuracy,
                 "test_unlearn_accuracy": test_unlearn_accuracy,
@@ -179,7 +220,9 @@ class UnlearningInference(threading.Thread):
                 "train_confidence_distribution": self.format_distribution(train_conf_dist),
                 "test_label_distribution": self.format_distribution(test_label_dist),
                 "test_confidence_distribution": self.format_distribution(test_conf_dist),
-                "detailed_results": detailed_results
+                "similarity": cka_results["similarity"],
+                "detailed_results": detailed_results,
+                
             }
 
             # Save results to JSON file

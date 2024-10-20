@@ -21,7 +21,7 @@ def load_model(model_path, num_classes=10, device='cuda'):
 
 def get_data_loaders(batch_size):
     train_transform = transforms.Compose([
-        transforms.RandomHorizontalFlip(), 
+        # transforms.RandomHorizontalFlip(), 
         transforms.ToTensor(), 
         transforms.Normalize((0.491, 0.482, 0.446), (0.247, 0.243, 0.261))
     ])
@@ -34,8 +34,8 @@ def get_data_loaders(batch_size):
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
     
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=8)
-    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=32)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=32)
     
     return train_loader, test_loader, train_set, test_set
 

@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import torch.nn.functional as F
+from torch_cka import CKA
 from app.config.settings import UMAP_DATA_SIZE
 
 async def get_layer_activations_and_predictions(
@@ -137,3 +138,60 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
     confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
+
+async def calculate_cka_similarity(model_before, model_after, train_loader, test_loader, forget_class, device):
+    detailed_layers = [
+        'conv1',
+        'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
+        'layer2.0.conv1', 'layer2.0.conv2', 'layer2.1.conv1', 'layer2.1.conv2',
+        'layer3.0.conv1', 'layer3.0.conv2', 'layer3.1.conv1', 'layer3.1.conv2',
+        'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
+        'fc'
+    ]
+
+    cka = CKA(model_before, 
+              model_after, 
+              model1_name="Before Unlearning", 
+              model2_name="After Unlearning",
+              model1_layers=detailed_layers, 
+              model2_layers=detailed_layers, 
+              device=device)
+
+    def filter_loader(loader, condition):
+        return torch.utils.data.DataLoader(
+            torch.utils.data.Subset(
+                loader.dataset,
+                [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
+            ),
+            batch_size=loader.batch_size,
+            shuffle=False
+        )
+
+    forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class)
+    other_classes_train_loader = filter_loader(train_loader, lambda label: label != forget_class)
+    forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class)
+    other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class)
+
+    # 수정된 부분: compare 후 export 사용
+    cka.compare(forget_class_train_loader)
+    results_forget_train = cka.export()
+    cka.compare(other_classes_train_loader)
+    results_other_train = cka.export()
+    cka.compare(forget_class_test_loader)
+    results_forget_test = cka.export()
+    cka.compare(other_classes_test_loader)
+    results_other_test = cka.export()
+
+    return {
+        "similarity": {
+            "layers": detailed_layers,
+            "train": {
+                "forget_class": results_forget_train['CKA'].tolist(),
+                "other_classes": results_other_train['CKA'].tolist()
+            },
+            "test": {
+                "forget_class": results_forget_test['CKA'].tolist(),
+                "other_classes": results_other_test['CKA'].tolist()
+            }
+        }
+    }

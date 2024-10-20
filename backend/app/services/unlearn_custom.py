@@ -8,7 +8,7 @@ async def unlearning_custom(request, status, weights_path):
     status.progress = 0
     status.forget_class = request.forget_class
 
-    unlearning_thread = UnlearningInference(request, status, weights_path)
+    unlearning_thread = UnlearningInference(request, status, weights_path_before="trained_models/0000.pth",weights_path_after=weights_path)
     unlearning_thread.start()
 
     # thread start
