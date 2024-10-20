@@ -24,10 +24,10 @@ export default function HeatmapLegend() {
         .attr("x2", "0%")
         .attr("y2", "0%");
 
-      const stops = [
-        { offset: "0%", color: d3.interpolateViridis(0) },
-        { offset: "100%", color: d3.interpolateViridis(1) },
-      ];
+      const stops = d3.range(0, 1.01, 0.01).map((t) => ({
+        offset: `${t * 100}%`,
+        color: d3.interpolateViridis(t),
+      }));
 
       linearGradient
         .selectAll("stop")
