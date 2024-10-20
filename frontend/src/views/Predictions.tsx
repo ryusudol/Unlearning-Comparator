@@ -12,7 +12,6 @@ import { forgetClassNames } from "../constants/forgetClassNames";
 import { Data } from "../types/data";
 import {
   Target02Icon,
-  ZoomInAreaIcon,
   ChartBubble02Icon,
   RectangularIcon,
   ArrowExpandIcon,
