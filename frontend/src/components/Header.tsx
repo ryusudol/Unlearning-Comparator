@@ -8,32 +8,33 @@ export default function Header() {
   const { forgetClass, saveForgetClass } = useContext(ForgetClassContext);
 
   return (
-    <div className="w-full text-white bg-black h-16 flex justify-between items-center px-4">
+    <div className="w-full text-white bg-black h-16 flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
           <span className="ml-2 text-4xl font-semibold mr-[106px]">
             Unforgettable
           </span>
-          <Tabs
-            onValueChange={saveForgetClass}
-            defaultValue={forgetClass}
-            className="relative -bottom-5 ml-3"
-          >
-            <TabsList className="bg-transparent">
-              {forgetClassNames.map((name, idx) => (
-                <TabsTrigger
-                  key={idx}
-                  value={name}
-                  className="rounded-b-none data-[state=active]:shadow-none pb-0.5 pt-0.5"
-                >
-                  <span className="px-1 border-b-2 border-black">{name}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <div className="relative -bottom-3 -ml-[71px] flex items-center">
+            <span>Forget Class: </span>
+            <Tabs onValueChange={saveForgetClass} defaultValue={forgetClass}>
+              <TabsList className="bg-transparent">
+                {forgetClassNames.map((name, idx) => (
+                  <TabsTrigger
+                    key={idx}
+                    value={name}
+                    className="h-10 rounded-b-none data-[state=active]:shadow-none"
+                  >
+                    <span className="px-1 border-b-2 border-black text-base">
+                      {name}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
       </div>
-      <div className="ml-5 h-9 flex items-end">
+      <div className="ml-5 relative bottom-0.5">
         <span className="mr-3 text-[11px]">
           <strong>Model</strong>: Resnet18
         </span>

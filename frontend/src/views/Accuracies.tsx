@@ -85,14 +85,14 @@ export default function Accuracies({ height }: { height: number }) {
     >
       <div className="flex items-center">
         <Chart01Icon />
-        <h5 className="font-semibold ml-[3px] text-lg">Accuracies</h5>
+        <h5 className="font-semibold ml-1 text-lg">Accuracies</h5>
       </div>
       {baseline === "" || comparison === "" ? (
         <p className="h-full flex justify-center items-center text-[15px] text-gray-500">
           Select both Baseline and Comparison from the left.
         </p>
       ) : (
-        <div className="w-full flex justify-center items-center -mt-1">
+        <div className="w-full flex justify-center items-center">
           <BarChart mode="Training" gapData={trainAccuracyGap} />
           <BarChart mode="Test" gapData={testAccuracyGap} />
         </div>

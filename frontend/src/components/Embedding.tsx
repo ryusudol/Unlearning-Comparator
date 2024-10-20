@@ -2,14 +2,15 @@ import { useState, useRef } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
 import ScatterPlot from "./ScatterPlot";
-import { NeuralNetworkIcon, GitCompareIcon } from "./ui/icons";
 
-type Props = {
-  mode: "Baseline" | "Comparison";
+export type ModeType = "Baseline" | "Comparison";
+
+interface Props {
+  mode: ModeType;
   height: number;
   data: number[][] | undefined;
   id: string;
-};
+}
 
 export default function Embedding({ mode, height, data, id }: Props) {
   const [fDataShow, setFDataShow] = useState(true);
