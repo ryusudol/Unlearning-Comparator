@@ -37,7 +37,11 @@ export default function PredictionChart({
               {mode} Model ({id})
             </span>
           </div>
-          <div className="flex flex-col items-center">
+          <div
+            className={`flex flex-col items-center ${
+              mode === "Baseline" ? "z-10" : ""
+            }`}
+          >
             <Heatmap
               mode={mode}
               length={250}

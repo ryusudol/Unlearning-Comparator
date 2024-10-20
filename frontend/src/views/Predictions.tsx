@@ -125,8 +125,8 @@ export default function Predictions({
               className="relative cursor-pointer"
             >
               <RectangularIcon className="rotate-90 scale-90" />
-              <span className="absolute text-[9px] top-[1px] right-[6px]">
-                L
+              <span className="absolute text-[9px] top-[1px] right-[5.7px]">
+                R
               </span>
             </div>
             <div
