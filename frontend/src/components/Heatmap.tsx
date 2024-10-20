@@ -40,8 +40,7 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
   const boundsWidth = length - MARGIN.right - MARGIN.left;
   const boundsHeight = length - MARGIN.top - MARGIN.bottom;
   const allValues = data.map((d) => d.value);
-  const valueName =
-    chartMode === "label-heatmap" ? "Label Logit" : "Confidence Logit";
+  const valueName = chartMode === "label-heatmap" ? "Ratio" : "Confidence";
 
   const xScale = useMemo(() => {
     return d3.scaleBand().range([0, boundsWidth]).domain(forgetClassNames);
