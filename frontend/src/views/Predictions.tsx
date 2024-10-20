@@ -131,14 +131,13 @@ export default function Predictions({
             </div>
             <div
               onClick={() => setChartMode(CONFIDENCE_HEATMAP)}
-              className="relative cursor-pointer"
+              className="relative cursor-pointer mr-3"
             >
               <RectangularIcon className="rotate-90 scale-90" />
               <span className="absolute text-[9px] top-[1px] right-[5.5px]">
                 C
               </span>
             </div>
-            <ZoomInAreaIcon className="cursor-pointer scale-90 mr-3" />
             {isExpanded ? (
               <SquareArrowShrink01Icon
                 className="cursor-pointer scale-125 transition hover:bg-gray-200 rounded-sm"
