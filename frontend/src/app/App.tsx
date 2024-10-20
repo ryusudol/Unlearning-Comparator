@@ -22,7 +22,7 @@ export default function App() {
   if (isPageLoading) return <div>Loading . . .</div>;
 
   const handleExpansionClick = () => {
-    setIsPredictionsExpanded((isPredictionsExpanded) => !isPredictionsExpanded);
+    setIsPredictionsExpanded((prev) => !prev);
   };
 
   return (

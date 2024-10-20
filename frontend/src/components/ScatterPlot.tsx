@@ -9,6 +9,7 @@ import * as d3 from "d3";
 
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { basicData } from "../constants/basicData";
+import { ModeType } from "./Embedding";
 
 const API_URL = "http://localhost:8000";
 const dotSize = 4;
@@ -24,7 +25,7 @@ const defaultCircleOpacity = 0.6;
 const loweredOpacity = 0.1;
 
 interface Props {
-  mode: "Baseline" | "Comparison";
+  mode: ModeType;
   data: number[][] | undefined;
   toggleOptions: boolean[];
 }
@@ -338,8 +339,8 @@ const ScatterPlot = React.memo(
             padding: "5px",
             border: "1px solid rgba(0, 0, 0, 0.25)",
             borderRadius: "4px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.25)",
           }}
+          className="shadow-xl"
         ></div>
       </div>
     );

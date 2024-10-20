@@ -1,11 +1,16 @@
-import React, { useState, useContext, useCallback } from "react";
+import React, { useState, useContext } from "react";
 import { Button } from "./ui/button";
 
 import OperationStatus from "./OperationStatus";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
 import { DEFENSE_METHODS } from "../constants/defense";
-import { AddIcon, HyperparametersIcon } from "./ui/icons";
+import {
+  AddIcon,
+  HyperparametersIcon,
+  StartPointIcon,
+  EraserIcon,
+} from "./ui/icons";
 import { DefenseConfigurationData } from "../types/settings";
 import { RunningStatusContext } from "../store/running-status-context";
 import {
@@ -25,9 +30,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
 
   const [epochs, setEpochs] = useState([30]);
   const [learningRateLog, setLearningRateLog] = useState([-2]);
-  const [learningRate, setLearningRate] = useState(0.01);
   const [batchSizeLog, setBatchSizeLog] = useState([5]);
-  const [batchSize, setBatchSize] = useState([128]);
 
   const handleRunBtnClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,18 +42,6 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
 
     console.log(configState);
   };
-
-  const handleLearningRateChange = useCallback((value: number[]) => {
-    const logValue = Math.pow(10, value[0]);
-    setLearningRateLog(value);
-    setLearningRate(parseFloat(logValue.toFixed(5)));
-  }, []);
-
-  const handleBatchSizeChange = useCallback((value: number[]) => {
-    const logValue = Math.pow(2, value[0]);
-    setBatchSizeLog(value);
-    setBatchSize([logValue]);
-  }, []);
 
   return (
     <form
@@ -68,7 +59,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           <div className="grid grid-cols-2 gap-y-1">
             {/* Initial Checkpoint */}
             <div className="flex items-center">
-              <HyperparametersIcon className="w-4 mr-1" />
+              <StartPointIcon className="w-4 h-4 mr-1" />
               <Label
                 className="inline text-base text-nowrap"
                 htmlFor="initial-checkpoint"
@@ -101,7 +92,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
             </Select>
             {/* Method */}
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-4 mr-1" />
+              <EraserIcon className="w-4 h-4 mr-1" />
               <Label className="text-base text-nowrap" htmlFor="method">
                 Method
               </Label>
@@ -128,7 +119,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
               <HyperparametersIcon className="w-3.5" />
               <p className="ml-1">Hyperparameters</p>
             </div>
-            <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
+            <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">
               <span className="text-sm">Epochs</span>
               <div className="flex items-center">
                 <Slider
@@ -145,7 +136,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
               <span className="text-sm">Learning Rate</span>
               <div className="flex items-center">
                 <Slider
-                  onValueChange={handleLearningRateChange}
+                  onValueChange={setLearningRateLog}
                   value={learningRateLog}
                   defaultValue={learningRateLog}
                   className="w-[135px] mx-2 cursor-pointer"
@@ -153,12 +144,14 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
                   max={-1}
                   step={1}
                 />
-                <span className="w-2 text-sm">{learningRate}</span>
+                <span className="w-2 text-sm">
+                  {parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5))}
+                </span>
               </div>
               <span className="text-sm">Batch Size</span>
               <div className="flex items-center">
                 <Slider
-                  onValueChange={handleBatchSizeChange}
+                  onValueChange={setBatchSizeLog}
                   value={batchSizeLog}
                   defaultValue={batchSizeLog}
                   className="w-[135px] mx-2 cursor-pointer"
@@ -166,13 +159,15 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
                   max={10}
                   step={1}
                 />
-                <span className="w-2 text-sm">{batchSize}</span>
+                <span className="w-2 text-sm">
+                  {Math.pow(2, batchSizeLog[0])}
+                </span>
               </div>
             </div>
           </div>
         </div>
       )}
-      <Button className="w-full h-7 font-medium text-white bg-[#585858] flex items-center">
+      <Button className="w-full h-[30px] font-medium text-white bg-[#585858] flex items-center">
         <AddIcon className="text-white" />
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>

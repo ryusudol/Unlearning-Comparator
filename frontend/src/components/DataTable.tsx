@@ -116,9 +116,9 @@ export default function DataTable({
   }, [tableData]);
 
   return (
-    <div className="rounded-md border">
+    <div className="w-full h-[251px] rounded-md border">
       <Table>
-        <ScrollArea className="w-[1096px] h-[196px]">
+        <ScrollArea className="w-full h-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

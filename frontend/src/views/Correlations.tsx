@@ -3,12 +3,7 @@ import { useContext } from "react";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { Label } from "../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import {
-  Layers02Icon,
-  ZoomInAreaIcon,
-  NeuralNetworkIcon,
-  GitCompareIcon,
-} from "../components/ui/icons";
+import { Layers02Icon, ZoomInAreaIcon } from "../components/ui/icons";
 
 export default function Correlations({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -67,10 +62,7 @@ export default function Correlations({ height }: { height: number }) {
         </div>
         {/* Heatmap 1 */}
         <div className="flex flex-col items-center -mt-1.5 mr-1">
-          <div className="flex items-center">
-            <NeuralNetworkIcon className="mr-[3px]" />
-            <span className="text-[17px]">Baseline Model ({baseline})</span>
-          </div>
+          <span className="text-[17px]">Baseline Model ({baseline})</span>
           <img src="/heatmap1.png" alt="heatmap img 1" />
           <img src="/heatmap3.png" alt="heatmap img 3" />
           <span className="text-[11px] font-extralight -mt-[5px]">
@@ -79,10 +71,7 @@ export default function Correlations({ height }: { height: number }) {
         </div>
         {/* Heatmap 2 */}
         <div className="flex flex-col items-center -mt-1.5">
-          <div className="flex items-center">
-            <GitCompareIcon className="mr-[3px]" />
-            <span className="text-[17px]">Comparison Model ({comparison})</span>
-          </div>
+          <span className="text-[17px]">Comparison Model ({comparison})</span>
           <img src="/heatmap2.png" alt="heatmap img 2" />
           <img src="/heatmap4.png" alt="heatmap img 4" />
           <span className="text-[11px] font-extralight -mt-[5px]">

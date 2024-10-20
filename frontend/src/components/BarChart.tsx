@@ -15,6 +15,7 @@ import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "../components/ui/chart";
 import { ForgetClassContext } from "../store/forget-class-context";
 
+const labelFontSize = 11;
 const chartConfig = {
   value: {
     label: "Gap",
@@ -100,17 +101,17 @@ export default function MyBarChart({ mode, gapData }: Props) {
 
   return (
     <div className="flex flex-col justify-center items-center">
-      <h5 className="text-[14px] mb-1 ml-[52px]">{mode} Dataset</h5>
-      <ChartContainer config={chartConfig} className="w-[232px] h-[190px]">
+      <h5 className="text-[15px] mb-1 ml-5">{mode} Dataset</h5>
+      <ChartContainer config={chartConfig} className="w-[240px] h-[200px]">
         <BarChart
           accessibilityLayer
           data={gapData}
           layout="vertical"
           margin={{
-            left: 2,
-            right: 10,
+            left: 1,
+            right: 40,
             top: 0,
-            bottom: 20,
+            bottom: 8,
           }}
         >
           <YAxis
@@ -120,6 +121,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             tickLine={false}
             axisLine={true}
             interval={0}
+            fontSize={labelFontSize}
             tickFormatter={(value) => {
               const label =
                 chartConfig[value as keyof typeof chartConfig]?.label;
@@ -132,13 +134,14 @@ export default function MyBarChart({ mode, gapData }: Props) {
             type="number"
             domain={[-maxValue, maxValue]}
             tickFormatter={(value) => value.toString()}
-            fontSize={11}
+            fontSize={labelFontSize}
           >
             <Label
-              className="text-black -translate-y-[6px] text-[11px]"
+              fill="black"
+              className="-translate-y-1 text-[13px] font-light"
               value={`← Baseline High | Comparison High →`}
               offset={-2}
-              dx={7.5}
+              dx={9}
               position="bottom"
             />
           </XAxis>

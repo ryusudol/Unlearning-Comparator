@@ -10,7 +10,12 @@ import OperationStatus from "./OperationStatus";
 import { Button } from "./ui/button";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { AddIcon, HyperparametersIcon } from "./ui/icons";
+import {
+  AddIcon,
+  HyperparametersIcon,
+  StartPointIcon,
+  EraserIcon,
+} from "./ui/icons";
 import { Slider } from "./ui/slider";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -55,9 +60,9 @@ export default function Unlearning({
   } = useContext(RunningStatusContext);
   const { forgetClass } = useContext(ForgetClassContext);
 
-  const [epochs, setEpochs] = useState([30]);
+  const [epochs, setEpochs] = useState([10]);
   const [learningRateLog, setLearningRateLog] = useState([-2]);
-  const [batchSizeLog, setBatchSizeLog] = useState([5]);
+  const [batchSizeLog, setBatchSizeLog] = useState([6]);
   const [method, setMethod] = useState("ft");
 
   const isResultFetched = useRef<boolean>(false);
@@ -256,7 +261,7 @@ export default function Unlearning({
         <div>
           <div className="grid grid-cols-2 gap-y-1">
             <div className="flex items-center">
-              <HyperparametersIcon className="w-4 mr-1" />
+              <StartPointIcon className="w-4 h-4 mr-1" />
               <Label
                 className="inline text-base text-nowrap"
                 htmlFor="initial-checkpoint"
@@ -266,7 +271,7 @@ export default function Unlearning({
             </div>
             <Select defaultValue={trainedModels[0]} name="trained_model">
               <SelectTrigger
-                className="w-[155px] h-[25px] text-base overflow-ellipsis whitespace-nowrap"
+                className="w-40 h-[25px] text-base overflow-ellipsis whitespace-nowrap"
                 id="initial-checkpoint"
               >
                 {trainedModels.length > 0
@@ -284,7 +289,7 @@ export default function Unlearning({
               </SelectContent>
             </Select>
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-4 mr-1" />
+              <EraserIcon className="w-4 h-4 mr-1" />
               <Label className="text-base text-nowrap" htmlFor="method">
                 Method
               </Label>
@@ -294,10 +299,7 @@ export default function Unlearning({
               onValueChange={handleMethodSelection}
               name="method"
             >
-              <SelectTrigger
-                className="w-[155px] h-[25px] text-base"
-                id="method"
-              >
+              <SelectTrigger className="w-40 h-[25px] text-base" id="method">
                 <SelectValue placeholder={UNLEARNING_METHODS[0]} />
               </SelectTrigger>
               <SelectContent>
@@ -325,7 +327,7 @@ export default function Unlearning({
               <Input
                 type="file"
                 name="custom_file"
-                className="w-[155px] h-[25px] pt-[1px] px-1.5 cursor-pointer"
+                className="w-40 h-[25px] -mr-[3px] pt-[1px] px-1.5 cursor-pointer"
               />
             </div>
           ) : (
@@ -334,19 +336,19 @@ export default function Unlearning({
                 <HyperparametersIcon className="w-3.5" />
                 <p className="ml-1">Hyperparameters</p>
               </div>
-              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
+              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">
                 <span className="text-sm">Epochs</span>
                 <div className="flex items-center">
                   <Slider
                     onValueChange={(value: number[]) => setEpochs(value)}
                     value={epochs}
-                    defaultValue={[5]}
-                    className="w-[135px] mx-2 cursor-pointer"
+                    defaultValue={epochs}
+                    className="w-[158px] mx-2 cursor-pointer"
                     min={1}
-                    max={50}
+                    max={30}
                     step={1}
                   />
-                  <span className="w-2 text-sm">{epochs}</span>
+                  <span className="text-sm text-nowrap">{epochs}</span>
                 </div>
                 <span className="text-sm">Learning Rate</span>
                 <div className="flex items-center">
@@ -354,13 +356,13 @@ export default function Unlearning({
                     onValueChange={setLearningRateLog}
                     value={learningRateLog}
                     defaultValue={learningRateLog}
-                    className="w-[135px] mx-2 cursor-pointer"
+                    className="w-[158px] mx-2 cursor-pointer"
                     min={-5}
                     max={-1}
                     step={1}
                   />
-                  <span className="w-2 text-sm">
-                    {parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5))}
+                  <span className="text-sm text-nowrap">
+                    1e{learningRateLog[0]}
                   </span>
                 </div>
                 <span className="text-sm">Batch Size</span>
@@ -369,12 +371,12 @@ export default function Unlearning({
                     onValueChange={setBatchSizeLog}
                     value={batchSizeLog}
                     defaultValue={batchSizeLog}
-                    className="w-[135px] mx-2 cursor-pointer"
+                    className="w-[158px] mx-2 cursor-pointer"
                     min={0}
-                    max={10}
+                    max={9}
                     step={1}
                   />
-                  <span className="w-2 text-sm">
+                  <span className="text-sm text-nowrap">
                     {Math.pow(2, batchSizeLog[0])}
                   </span>
                 </div>
@@ -383,7 +385,7 @@ export default function Unlearning({
           )}
         </div>
       )}
-      <Button className="w-full h-7 font-medium text-white bg-[#585858] flex items-center">
+      <Button className="w-full h-[30px] font-medium text-white bg-[#585858] flex items-center">
         <AddIcon className="text-white" />
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>

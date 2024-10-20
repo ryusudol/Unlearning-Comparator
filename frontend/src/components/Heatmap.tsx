@@ -1,31 +1,54 @@
-import { useMemo, useContext } from "react";
+import { useMemo, useContext, useState, useRef } from "react";
 import * as d3 from "d3";
 
+import { ChartModeType } from "../views/Predictions";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { ModeType } from "./PredictionChart";
 
 const MARGIN = { top: 10, right: 10, bottom: 52, left: 52 };
 const fontColor = "#64758B";
 const fontSize = 11;
 
+const WINDOW_OFFSET = 20;
+const TOOLTIP_WIDTH = 100;
+const TOOLTIP_OFFSET = 10;
+
 type Props = {
+  mode: ModeType;
   length: number;
+  chartMode: Exclude<ChartModeType, "bubble">;
   data: { x: string; y: string; value: number }[];
 };
 
-export default function Heatmap({ length, data }: Props) {
+export default function Heatmap({ mode, length, chartMode, data }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
+
+  const [tooltip, setTooltip] = useState({
+    display: false,
+    x: 0,
+    y: 0,
+    content: {
+      groundTruth: "",
+      prediction: "",
+      value: 0,
+    },
+  });
+
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   const boundsWidth = length - MARGIN.right - MARGIN.left;
   const boundsHeight = length - MARGIN.top - MARGIN.bottom;
   const allValues = data.map((d) => d.value);
+  const valueName =
+    chartMode === "label-heatmap" ? "Label Logit" : "Confidence Logit";
 
   const xScale = useMemo(() => {
     return d3.scaleBand().range([0, boundsWidth]).domain(forgetClassNames);
   }, [boundsWidth]);
 
   const yScale = useMemo(() => {
-    return d3.scaleBand().range([boundsHeight, 0]).domain(forgetClassNames);
+    return d3.scaleBand().range([0, boundsHeight]).domain(forgetClassNames);
   }, [boundsHeight]);
 
   const [min, max] = d3.extent(allValues);
@@ -39,6 +62,38 @@ export default function Heatmap({ length, data }: Props) {
     .interpolator(d3.interpolateViridis)
     .domain([min, max]);
 
+  const handleMouseEnter = (
+    event: React.MouseEvent<SVGRectElement, MouseEvent>,
+    d: { x: string; y: string; value: number }
+  ) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    const tooltipWidth = tooltipRef.current?.offsetWidth || TOOLTIP_WIDTH;
+    let xPos = rect.right + TOOLTIP_OFFSET;
+    let yPos = rect.top + rect.height / 2;
+
+    if (xPos + tooltipWidth > window.innerWidth - WINDOW_OFFSET)
+      xPos = rect.left - tooltipWidth;
+
+    setTooltip({
+      display: true,
+      x: xPos,
+      y: yPos,
+      content: {
+        groundTruth: d.y,
+        prediction: d.x,
+        value: d.value,
+      },
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTooltip((prev) => ({
+      ...prev,
+      display: false,
+    }));
+  };
+
   const allRects = data.map((d, i) => {
     return (
       <rect
@@ -48,6 +103,8 @@ export default function Heatmap({ length, data }: Props) {
         width={xScale.bandwidth()}
         height={yScale.bandwidth()}
         fill={colorScale(d.value)}
+        onMouseEnter={(event) => handleMouseEnter(event, d)}
+        onMouseLeave={handleMouseLeave}
       />
     );
   });
@@ -58,14 +115,14 @@ export default function Heatmap({ length, data }: Props) {
     return (
       <text
         key={i}
-        x={xPos + xScale.bandwidth() - 12}
-        y={boundsHeight + 8}
-        textAnchor="start"
+        x={xPos + xScale.bandwidth() - 8}
+        y={boundsHeight + 6}
+        textAnchor="end"
         dominantBaseline="middle"
         fontSize={fontSize}
         fill={fontColor}
-        transform={`rotate(45, ${xPos + xScale.bandwidth() / 2}, ${
-          boundsHeight + 10
+        transform={`rotate(-45, ${xPos + xScale.bandwidth() / 2}, ${
+          boundsHeight + 6
         })`}
       >
         {isForgetClass ? name + " (X)" : name}
@@ -92,7 +149,7 @@ export default function Heatmap({ length, data }: Props) {
   });
 
   return (
-    <div className="-mt-[10px]">
+    <div className="-mt-[10px]" style={{ position: "relative" }}>
       <svg width={length} height={length}>
         <g
           width={boundsWidth}
@@ -101,9 +158,37 @@ export default function Heatmap({ length, data }: Props) {
         >
           {allRects}
           {xLabels}
-          {yLabels}
+          {mode === "Baseline" && yLabels}
         </g>
       </svg>
+      {tooltip.display && (
+        <div
+          ref={tooltipRef}
+          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-xs z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+            tooltip.display ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          style={{
+            position: "fixed",
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translateY(-50%)",
+            pointerEvents: "none",
+          }}
+        >
+          <div>
+            <span className="font-semibold">Ground Truth</span>:{" "}
+            {tooltip.content.groundTruth}
+          </div>
+          <div>
+            <span className="font-semibold">Prediction</span>:{" "}
+            {tooltip.content.prediction}
+          </div>
+          <div>
+            <span className="font-semibold">{valueName}</span>:{" "}
+            {tooltip.content.value}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

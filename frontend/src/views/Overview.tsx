@@ -35,7 +35,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[1210px] px-[5px] py-0.5 relative border-l-[1px] border-r-[1px] border-b-[1px] border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1210px] p-1 relative border-l-[1px] border-r-[1px] border-b-[1px] border-[rgba(0, 0, 0, 0.2)]"
     >
       <DataTable
         columns={columns}
