@@ -110,7 +110,7 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
 
   const xLabels = forgetClassNames.map((name, i) => {
     const xPos = xScale(name) ?? 0;
-    const isForgetClass = forgetClass === name;
+    const isForgetClass = forgetClassNames[forgetClass] === name;
     return (
       <text
         key={i}
@@ -131,7 +131,7 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
 
   const yLabels = forgetClassNames.map((name, i) => {
     const yPos = yScale(name) ?? 0;
-    const isForgetClass = forgetClass === name;
+    const isForgetClass = forgetClassNames[forgetClass] === name;
     return (
       <text
         key={i}

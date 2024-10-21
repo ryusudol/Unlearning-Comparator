@@ -10,7 +10,7 @@ import {
 const FORGET_CLASS = "forgetClass";
 
 export const ForgetClassContext = createContext<ForgetClassContextType>({
-  forgetClass: forgetClassNames[0],
+  forgetClass: 0,
 
   saveForgetClass: (forgetClass: string) => {},
   retrieveForgetClass: () => {},
@@ -34,7 +34,7 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
 
     case "CLEAR_FORGET_CLASS":
       sessionStorage.removeItem(FORGET_CLASS);
-      return { forgetClass: forgetClassNames[0] };
+      return { forgetClass: 0 };
 
     default:
       return state;
@@ -47,11 +47,14 @@ export default function ForgetClassContextProvider({
   children: React.ReactNode;
 }) {
   const [forgetClass, dispatch] = useReducer(BaselineReducer, {
-    forgetClass: forgetClassNames[0],
+    forgetClass: 0,
   });
 
-  function handleSaveForgetClass(baseline: string) {
-    dispatch({ type: "SAVE_FORGET_CLASS", payload: baseline });
+  function handleSaveForgetClass(forgetClass: string) {
+    dispatch({
+      type: "SAVE_FORGET_CLASS",
+      payload: forgetClassNames.indexOf(forgetClass),
+    });
   }
 
   function handleRetrieveForgetClass() {

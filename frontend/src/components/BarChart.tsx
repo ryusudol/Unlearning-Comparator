@@ -125,7 +125,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             tickFormatter={(value) => {
               const label =
                 chartConfig[value as keyof typeof chartConfig]?.label;
-              const isForgetClass = label === forgetClass;
+              const isForgetClass = label === forgetClassNames[forgetClass];
               return isForgetClass ? label + " (X)" : label;
             }}
           />

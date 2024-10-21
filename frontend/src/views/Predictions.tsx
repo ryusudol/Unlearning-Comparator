@@ -15,7 +15,7 @@ import {
   ChartBubble02Icon,
   RectangularIcon,
   ArrowExpandIcon,
-  SquareArrowShrink01Icon,
+  ArrowShrinkIcon,
 } from "../components/ui/icons";
 
 const TRAINING = "training";
@@ -105,7 +105,7 @@ export default function Predictions({
     <section
       style={isExpanded ? expandedStyle : unexpandedStyle}
       className={`px-[5px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] transition-all z-10 bg-white absolute ${
-        isExpanded ? `w-[980px] right-0 top-[35px]` : `w-[490px]`
+        isExpanded ? `w-[980px] right-0 top-[35px]` : `w-[490px] top-[324px]`
       }`}
     >
       <div className="flex justify-between">
@@ -138,13 +138,20 @@ export default function Predictions({
               </span>
             </div>
             {isExpanded ? (
-              <SquareArrowShrink01Icon
-                className="cursor-pointer scale-125 transition hover:bg-gray-200 rounded-sm"
+              <div
                 onClick={onExpansionClick}
-              />
+                className="flex items-center cursor-pointer border-[1px] border-[#585858] rounded-sm pl-1 pr-[5px] py-[1px] transition hover:bg-gray-200"
+              >
+                <ArrowShrinkIcon className="cursor-pointer scale-90 hover:bg-gray-200 rounded-sm" />
+                <span className="text-xs">Collapse View</span>
+              </div>
             ) : (
-              <div className="cursor-pointer border-[1px] border-[#585858] rounded-sm p-[1px] transition hover:bg-gray-200">
-                <ArrowExpandIcon onClick={onExpansionClick} />
+              <div
+                onClick={onExpansionClick}
+                className="flex items-center cursor-pointer border-[1px] border-[#585858] rounded-sm pl-1 pr-[5px] py-[1px] transition hover:bg-gray-200"
+              >
+                <ArrowExpandIcon className="scale-[80%] mr-0.5" />
+                <span className="text-xs">Expand View</span>
               </div>
             )}
           </div>

@@ -37,7 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { forgetClassNames } from "../constants/forgetClassNames";
 
 export interface UnlearningProps {
   trainedModels: string[];
@@ -185,7 +184,7 @@ export default function Unlearning({
     const runningConfig = {
       method: config.method,
       trained_model: config.trained_model,
-      forget_class: forgetClassNames.indexOf(forgetClass),
+      forget_class: forgetClass,
       epochs: epochs[0],
       learning_rate: parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5)),
       batch_size: Math.pow(2, batchSizeLog[0]),
@@ -333,8 +332,8 @@ export default function Unlearning({
           ) : (
             <div>
               <div className="flex items-center mb-1">
-                <HyperparametersIcon className="w-3.5" />
-                <p className="ml-1">Hyperparameters</p>
+                <HyperparametersIcon className="w-3.5 mr-[7px]" />
+                <p>Hyperparameters</p>
               </div>
               <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">
                 <span className="text-sm">Epochs</span>

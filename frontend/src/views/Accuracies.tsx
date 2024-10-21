@@ -2,22 +2,10 @@ import { useContext } from "react";
 
 import BarChart from "../components/BarChart";
 import { TABLEAU10 } from "../constants/tableau10";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { basicData } from "../constants/basicData";
 import { Chart01Icon } from "../components/ui/icons";
-
-interface ClassAccuracies {
-  "0": string;
-  "1": string;
-  "2": string;
-  "3": string;
-  "4": string;
-  "5": string;
-  "6": string;
-  "7": string;
-  "8": string;
-  "9": string;
-}
+import { ClassAccuracies } from "../types/data";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -39,12 +27,10 @@ export default function Accuracies({ height }: { height: number }) {
   const trainAccuracyGap =
     baselineTrainAccuracies && comparisonTrainAccuracies
       ? Object.keys(baselineTrainAccuracies).map((key, idx) => {
-          const baselineValue = parseFloat(
-            baselineTrainAccuracies[key as keyof ClassAccuracies]
-          );
-          const comparisonValue = parseFloat(
-            comparisonTrainAccuracies[key as keyof ClassAccuracies]
-          );
+          const baselineValue =
+            baselineTrainAccuracies[key as unknown as keyof ClassAccuracies];
+          const comparisonValue =
+            comparisonTrainAccuracies[key as unknown as keyof ClassAccuracies];
           const categoryLetter = String.fromCharCode(65 + idx);
           return {
             category: categoryLetter,
@@ -60,12 +46,10 @@ export default function Accuracies({ height }: { height: number }) {
   const testAccuracyGap =
     baselineTestAccuracies && comparisonTestAccuracies
       ? Object.keys(baselineTestAccuracies).map((key, idx) => {
-          const baselineValue = parseFloat(
-            baselineTestAccuracies[key as keyof ClassAccuracies]
-          );
-          const comparisonValue = parseFloat(
-            comparisonTestAccuracies[key as keyof ClassAccuracies]
-          );
+          const baselineValue =
+            baselineTestAccuracies[key as unknown as keyof ClassAccuracies];
+          const comparisonValue =
+            comparisonTestAccuracies[key as unknown as keyof ClassAccuracies];
           const categoryLetter = String.fromCharCode(65 + idx);
           return {
             category: categoryLetter,
