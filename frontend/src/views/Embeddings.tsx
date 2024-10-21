@@ -123,7 +123,7 @@ export default function Embeddings() {
                 />
                 <div className="flex items-center">
                   <span className="text-[15px] font-light">{name}</span>
-                  {name === forgetClass ? (
+                  {name === forgetClassNames[forgetClass] ? (
                     <div className="flex items-center ml-0.5">
                       (<MultiplicationSignIcon className="-mx-0.5" />)
                     </div>

@@ -29,14 +29,6 @@ export const columns: ColumnDef<Data>[] = [
       return <div>{value}</div>;
     },
   },
-  // {
-  //   accessorKey: "",
-  //   header: "Method",
-  //   cell: ({ row }) => {
-  //     const value = row.getValue("method") as string;
-  //     return <div>{value}</div>;
-  //   },
-  // },
   {
     accessorKey: "method",
     header: "Method",
@@ -64,7 +56,7 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "batch_size",
-    header: "BS",
+    header: "# Batch",
     cell: ({ row }) => {
       const value = row.getValue("batch_size") as string;
       return <div>{value !== "N/A" ? value : "-"}</div>;

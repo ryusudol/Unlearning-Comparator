@@ -14,9 +14,12 @@ export default function Header() {
           <span className="ml-2 text-4xl font-semibold mr-[106px]">
             Unforgettable
           </span>
-          <div className="relative -bottom-3 -ml-[71px] flex items-center">
-            <span>Forget Class: </span>
-            <Tabs onValueChange={saveForgetClass} defaultValue={forgetClass}>
+          <div className="relative -bottom-3 -ml-[37.5px] flex items-center">
+            <span className="text-lg">Forget:</span>
+            <Tabs
+              onValueChange={saveForgetClass}
+              defaultValue={forgetClassNames[forgetClass]}
+            >
               <TabsList className="bg-transparent">
                 {forgetClassNames.map((name, idx) => (
                   <TabsTrigger
@@ -24,7 +27,7 @@ export default function Header() {
                     value={name}
                     className="h-10 rounded-b-none data-[state=active]:shadow-none"
                   >
-                    <span className="px-1 border-b-2 border-black text-base">
+                    <span className="px-1 border-b-2 border-black text-lg">
                       {name}
                     </span>
                   </TabsTrigger>

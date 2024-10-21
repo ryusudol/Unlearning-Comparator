@@ -22,7 +22,6 @@ import { Data } from "../types/data";
 import { hexToRgba } from "../util";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
-import { forgetClassNames } from "../constants/forgetClassNames";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 
@@ -86,10 +85,7 @@ export default function DataTable({
   });
 
   const tableData = useMemo(
-    () =>
-      data.filter(
-        (datum) => forgetClassNames[datum.forget_class] === forgetClass
-      ),
+    () => data.filter((datum) => datum.forget_class === forgetClass),
     [data, forgetClass]
   );
 
@@ -107,7 +103,7 @@ export default function DataTable({
   useEffect(() => {
     if (tableData.length > 0) {
       saveBaseline(tableData[0].id);
-      saveComparison(tableData[1].id);
+      saveComparison(tableData[1]?.id);
     } else {
       saveBaseline("");
       saveComparison("");

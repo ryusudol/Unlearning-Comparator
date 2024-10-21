@@ -161,8 +161,8 @@ export default function Training({ setTrainedModels }: TrainingProps) {
           </div>
           <div>
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-3.5" />
-              <p className="ml-1">Hyperparameters</p>
+              <HyperparametersIcon className="w-3.5 mr-[7px]" />
+              <p>Hyperparameters</p>
             </div>
             <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1 w-full">
               <span className="text-sm">Epochs</span>

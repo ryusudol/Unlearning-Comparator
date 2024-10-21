@@ -116,8 +116,8 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           {/* Hyperparameters */}
           <div>
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-3.5" />
-              <p className="ml-1">Hyperparameters</p>
+              <HyperparametersIcon className="w-3.5 mr-[7px]" />
+              <p>Hyperparameters</p>
             </div>
             <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">
               <span className="text-sm">Epochs</span>
