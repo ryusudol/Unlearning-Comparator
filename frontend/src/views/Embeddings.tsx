@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -22,10 +22,12 @@ export default function Embeddings() {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
 
-  const baselineData = basicData.filter((datum) => datum.id === baseline)[0];
-  const comparisonData = basicData.filter(
-    (datum) => datum.id === comparison
-  )[0];
+  const baselineData = useMemo(() => {
+    return basicData.find((datum) => datum.id === baseline);
+  }, [baseline]);
+  const comparisonData = useMemo(() => {
+    return basicData.find((datum) => datum.id === comparison);
+  }, [comparison]);
 
   // [
   //   0: x,
@@ -35,30 +37,30 @@ export default function Embeddings() {
   //   4:img_idx,
   //   5: forget_class
   // ]
-  const BaselineData = baselineData
-    ? baselineData.detailed_results.map((result) => {
-        return [
+  const BaselineData = useMemo(() => {
+    return baselineData
+      ? baselineData.detailed_results.map((result) => [
           result.umap_embedding[0],
           result.umap_embedding[1],
           result.ground_truth,
           result.predicted_class,
           result.original_index,
           baselineData.forget_class,
-        ];
-      })
-    : undefined;
-  const ComparisonData = comparisonData
-    ? comparisonData.detailed_results.map((result) => {
-        return [
+        ])
+      : undefined;
+  }, [baselineData]);
+  const ComparisonData = useMemo(() => {
+    return comparisonData
+      ? comparisonData.detailed_results.map((result) => [
           result.umap_embedding[0],
           result.umap_embedding[1],
           result.ground_truth,
           result.predicted_class,
           result.original_index,
           comparisonData.forget_class,
-        ];
-      })
-    : undefined;
+        ])
+      : undefined;
+  }, [comparisonData]);
 
   return (
     <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">

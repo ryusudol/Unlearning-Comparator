@@ -27,11 +27,11 @@ const loweredOpacity = 0.1;
 interface Props {
   mode: ModeType;
   data: number[][] | undefined;
-  toggleOptions: boolean[];
+  viewMode: "ALL" | "Unlearning Target" | "Unlearning Failed";
 }
 
 const ScatterPlot = React.memo(
-  forwardRef(({ mode, data, toggleOptions }: Props, ref) => {
+  forwardRef(({ mode, data, viewMode }: Props, ref) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -175,11 +175,11 @@ const ScatterPlot = React.memo(
                     <div style="display: flex; justify-content: center;">
                       <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
                     </div>
-                    <div style="font-size: 12px; margin-top: 4px">
+                    <div style="font-size: 14px; margin-top: 4px">
                       <span style="font-weight: 500;">Ground Truth</span>: ${
                         forgetClassNames[d[2]]
                       }</div>
-                    <div style="font-size: 12px;">
+                    <div style="font-size: 14px;">
                       <span style="font-weight: 500;">Prediction</span>: ${
                         forgetClassNames[d[3]]
                       }</div>
@@ -275,12 +275,15 @@ const ScatterPlot = React.memo(
       const updateOpacity = () => {
         if (circlesRef.current) {
           circlesRef.current.style("opacity", (d: any) => {
+            // 2: original
+            // 3: predicted
+            // 5: forget
             const dataCondition =
-              (d[2] === d[5] && !toggleOptions[0]) ||
-              (d[2] !== d[5] && !toggleOptions[1]);
+              // (d[2] === d[5] && !toggleOptions[0]) ||
+              d[2] !== d[5] && viewMode === "Unlearning Target";
             const classCondition =
-              (d[3] === d[5] && !toggleOptions[2]) ||
-              (d[3] !== d[5] && !toggleOptions[3]);
+              // (d[3] === d[5] && !toggleOptions[2]) ||
+              d[3] !== d[5] && viewMode === "Unlearning Failed";
 
             if (dataCondition || classCondition) return loweredOpacity;
             return defaultCircleOpacity;
@@ -290,11 +293,11 @@ const ScatterPlot = React.memo(
         if (crossesRef.current) {
           crossesRef.current.style("opacity", (d: any) => {
             const dataCondition =
-              (d[2] === d[5] && !toggleOptions[0]) ||
-              (d[2] !== d[5] && !toggleOptions[1]);
+              // (d[2] === d[5] && !toggleOptions[0]) ||
+              d[2] !== d[5] && viewMode === "Unlearning Target";
             const classCondition =
-              (d[3] === d[5] && !toggleOptions[2]) ||
-              (d[3] !== d[5] && !toggleOptions[3]);
+              // (d[3] === d[5] && !toggleOptions[2]) ||
+              d[3] !== d[5] && viewMode === "Unlearning Failed";
 
             if (dataCondition || classCondition) return loweredOpacity;
             return defaultCrossOpacity;
@@ -303,7 +306,7 @@ const ScatterPlot = React.memo(
       };
 
       updateOpacity();
-    }, [toggleOptions]);
+    }, [viewMode]);
 
     useImperativeHandle(ref, () => ({
       reset: () => {

@@ -84,10 +84,19 @@ export default function DataTable({
     return column;
   });
 
-  const tableData = useMemo(
-    () => data.filter((datum) => datum.forget_class === forgetClass),
-    [data, forgetClass]
-  );
+  const tableData = useMemo(() => {
+    const forgetData = data.filter(
+      (datum) => datum.forget_class === forgetClass
+    );
+    const retrainData = forgetData.filter(
+      (forgetDatum) => forgetDatum.method === "Retrain"
+    );
+    const otherData = forgetData.filter(
+      (forgetDatum) => forgetDatum.method !== "Retrain"
+    );
+
+    return [...retrainData, ...otherData];
+  }, [data, forgetClass]);
 
   const table = useReactTable({
     getRowId: (row: Data) => row.id,
@@ -114,7 +123,7 @@ export default function DataTable({
   return (
     <div className="w-full h-[251px] rounded-md border">
       <Table>
-        <ScrollArea className="w-full h-full">
+        <ScrollArea className="w-full h-[249px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
