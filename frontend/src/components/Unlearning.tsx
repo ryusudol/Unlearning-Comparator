@@ -332,7 +332,7 @@ export default function Unlearning({
           ) : (
             <div>
               <div className="flex items-center mb-1">
-                <HyperparametersIcon className="w-3.5 mr-[7px]" />
+                <HyperparametersIcon className="w-3.5 ml-[1px] mr-1.5" />
                 <p>Hyperparameters</p>
               </div>
               <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">

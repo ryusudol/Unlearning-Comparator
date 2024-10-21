@@ -9,7 +9,7 @@ import {
   AddIcon,
   HyperparametersIcon,
   StartPointIcon,
-  EraserIcon,
+  ShieldIcon,
 } from "./ui/icons";
 import { DefenseConfigurationData } from "../types/settings";
 import { RunningStatusContext } from "../store/running-status-context";
@@ -92,7 +92,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
             </Select>
             {/* Method */}
             <div className="flex items-center mb-1">
-              <EraserIcon className="w-4 h-4 mr-1" />
+              <ShieldIcon className="w-4 h-4 mr-1" />
               <Label className="text-base text-nowrap" htmlFor="method">
                 Method
               </Label>
@@ -116,7 +116,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           {/* Hyperparameters */}
           <div>
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-3.5 mr-[7px]" />
+              <HyperparametersIcon className="w-3.5 ml-[1px] mr-1.5" />
               <p>Hyperparameters</p>
             </div>
             <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">

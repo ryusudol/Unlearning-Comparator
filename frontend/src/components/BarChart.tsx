@@ -79,8 +79,8 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as GapDataItem;
     return (
-      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-xs shadow-xl">
-        <p className="font-medium text-[13px]">
+      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
+        <p className="font-medium">
           Class: {forgetClassNames[+data.classLabel]}
         </p>
         <p>Gap: {data.gap.toFixed(2)}</p>
@@ -135,6 +135,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             domain={[-maxValue, maxValue]}
             tickFormatter={(value) => value.toString()}
             fontSize={labelFontSize}
+            ticks={[-maxValue, 0, maxValue]}
           >
             <Label
               fill="black"

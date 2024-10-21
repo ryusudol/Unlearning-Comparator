@@ -81,8 +81,8 @@ export default function BaselineContextProvider({
   }, []);
 
   const ctxValue: ContextType = {
-    baseline: context.baseline,
-    comparison: context.comparison,
+    baseline: context.baseline ?? "",
+    comparison: context.comparison ?? "",
 
     saveBaseline: handleSaveBaseline,
     saveComparison: handleSaveComparison,

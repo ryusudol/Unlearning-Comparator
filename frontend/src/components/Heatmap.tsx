@@ -163,7 +163,7 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
       {tooltip.display && (
         <div
           ref={tooltipRef}
-          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-xs z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
             tooltip.display ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           style={{
