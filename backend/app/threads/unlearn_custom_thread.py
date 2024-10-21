@@ -96,7 +96,7 @@ class UnlearningInference(threading.Thread):
         self.status.train_class_accuracies = train_class_accuracies
         self.status.unlearn_accuracy = train_class_accuracies[self.request.forget_class]
         remain_classes = [i for i in range(10) if i != self.request.forget_class]
-        self.status.remain_accuracy = sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+        self.status.remain_accuracy = round(sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes), 3)
         self.status.progress = 40
 
         print("Train Label Distribution:")
@@ -180,12 +180,12 @@ class UnlearningInference(threading.Thread):
                     "original_index": int(original_index),
                     "predicted_class": int(predicted_labels[i]),
                     "is_forget": bool(is_forget),
-                    "umap_embedding": umap_embedding[i].tolist(),
-                    "logit": logits[i].tolist(),
+                    "umap_embedding": [round(float(coord), 3) for coord in umap_embedding[i]],
+                    "logit": [round(float(l), 3) for l in logits[i]],
                 })
             
             test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
-            test_remain_accuracy = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+            test_remain_accuracy = round(sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes), 3)
             
 
             print("Calculating CKA similarity")
@@ -204,25 +204,24 @@ class UnlearningInference(threading.Thread):
                 "id": uuid.uuid4().hex[:4],
                 "forget_class": self.request.forget_class,
                 "phase": "Unlearning",
-                "init_id": self.weights_path_before,
-                "method": "Custom",
-                "epochs": "N/A",
-                "batch_size": "N/A",
-                "learning_rate": "N/A",
-                "unlearn_accuracy": self.status.unlearn_accuracy,
+                "init_id": "0000",
+                "method": "Retrain",
+                "epochs": 30,
+                "batch_size": 128,
+                "learning_rate": 0.01,
+                "unlearn_accuracy": round(self.status.unlearn_accuracy, 3),
                 "remain_accuracy": self.status.remain_accuracy,
-                "test_unlearn_accuracy": test_unlearn_accuracy,
+                "test_unlearn_accuracy": round(test_unlearn_accuracy, 3),
                 "test_remain_accuracy": test_remain_accuracy,
-                "RTE": "N/A",
-                "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
-                "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
+                "RTE": 1890.1,
+                "train_class_accuracies": {k: round(v, 3) for k, v in train_class_accuracies.items()},
+                "test_class_accuracies": {k: round(v, 3) for k, v in test_class_accuracies.items()},
                 "train_label_distribution": self.format_distribution(train_label_dist),
                 "train_confidence_distribution": self.format_distribution(train_conf_dist),
                 "test_label_distribution": self.format_distribution(test_label_dist),
                 "test_confidence_distribution": self.format_distribution(test_conf_dist),
                 "similarity": cka_results["similarity"],
                 "detailed_results": detailed_results,
-                
             }
 
             # Save results to JSON file

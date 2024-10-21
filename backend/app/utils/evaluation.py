@@ -172,7 +172,6 @@ async def calculate_cka_similarity(model_before, model_after, train_loader, test
     forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class)
     other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class)
 
-    # 수정된 부분: compare 후 export 사용
     cka.compare(forget_class_train_loader)
     results_forget_train = cka.export()
     cka.compare(other_classes_train_loader)
@@ -182,16 +181,19 @@ async def calculate_cka_similarity(model_before, model_after, train_loader, test
     cka.compare(other_classes_test_loader)
     results_other_test = cka.export()
 
+    def format_cka_results(results):
+        return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
+
     return {
         "similarity": {
             "layers": detailed_layers,
             "train": {
-                "forget_class": results_forget_train['CKA'].tolist(),
-                "other_classes": results_other_train['CKA'].tolist()
+                "forget_class": format_cka_results(results_forget_train),
+                "other_classes": format_cka_results(results_other_train)
             },
             "test": {
-                "forget_class": results_forget_test['CKA'].tolist(),
-                "other_classes": results_other_test['CKA'].tolist()
+                "forget_class": format_cka_results(results_forget_test),
+                "other_classes": format_cka_results(results_other_test)
             }
         }
     }
