@@ -1,5 +1,6 @@
 import { useContext } from "react";
 
+import { LogoIcon } from "./ui/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -11,9 +12,12 @@ export default function Header() {
     <div className="w-full text-white bg-black h-16 flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
-          <span className="ml-2 text-4xl font-semibold mr-[106px]">
-            Unforgettable
-          </span>
+          <div className="flex items-center">
+            <LogoIcon className="w-10 h-10" />
+            <span className="ml-2 text-4xl font-semibold mr-[106px]">
+              Unforgettable
+            </span>
+          </div>
           <div className="relative -bottom-3 -ml-[37.5px] flex items-center">
             <span className="text-lg">Forget:</span>
             <Tabs
