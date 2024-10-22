@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { LogoIcon } from "./ui/icons";
+import { LogoIcon, MultiplicationSignIcon } from "./ui/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -18,8 +18,9 @@ export default function Header() {
               Unforgettable
             </span>
           </div>
-          <div className="relative -bottom-3 -ml-[37.5px] flex items-center">
-            <span className="text-lg">Forget:</span>
+          <div className="relative -bottom-3 -ml-[56.5px] flex items-center">
+            <MultiplicationSignIcon className="text-white scale-150" />
+            <span className="text-white font-bold ml-1 mr-1">:</span>
             <Tabs
               onValueChange={saveForgetClass}
               defaultValue={forgetClassNames[forgetClass]}
@@ -41,7 +42,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className="ml-5 relative bottom-0.5">
+      <div className="ml-5 relative bottom-0.5 right-[310px]">
         <span className="mr-3 text-[11px]">
           <strong>Model</strong>: Resnet18
         </span>

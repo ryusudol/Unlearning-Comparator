@@ -258,7 +258,7 @@ export default function Unlearning({
         />
       ) : (
         <div>
-          <div className="grid grid-cols-2 gap-y-1">
+          <div className="grid grid-cols-2 gap-y-2">
             <div className="flex items-center">
               <StartPointIcon className="w-4 h-4 mr-1" />
               <Label
@@ -288,7 +288,7 @@ export default function Unlearning({
               </SelectContent>
             </Select>
             <div className="flex items-center mb-1">
-              <EraserIcon className="w-4 h-4 mr-1" />
+              <EraserIcon className="w-4 h-4 mr-1 scale-110" />
               <Label className="text-base text-nowrap" htmlFor="method">
                 Method
               </Label>
@@ -330,12 +330,12 @@ export default function Unlearning({
               />
             </div>
           ) : (
-            <div>
+            <div className="mt-1">
               <div className="flex items-center mb-1">
                 <HyperparametersIcon className="w-3.5 ml-[1px] mr-1.5" />
                 <p>Hyperparameters</p>
               </div>
-              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1">
+              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1.5">
                 <span className="text-sm">Epochs</span>
                 <div className="flex items-center">
                   <Slider
@@ -385,7 +385,7 @@ export default function Unlearning({
         </div>
       )}
       <Button className="w-full h-[30px] font-medium text-white bg-[#585858] flex items-center">
-        <AddIcon className="text-white" />
+        <AddIcon className="text-white mr-1" />
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>
     </form>

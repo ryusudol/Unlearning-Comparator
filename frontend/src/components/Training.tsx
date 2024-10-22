@@ -151,9 +151,9 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         />
       ) : (
         <div>
-          <div className="flex justify-start items-start mb-1.5 relative">
-            <AlertCircleIcon className="mr-0.5 flex-shrink-0 scale-75 relative top-[1px]" />
-            <p className="text-sm">
+          <div className="flex justify-start items-start mb-[5px] relative">
+            <AlertCircleIcon className="mr-0.5 flex-shrink-0 relative top-0.5" />
+            <p className=" ml-1 text-sm">
               A pretrained model (as an initial checkpoint) and a retrained
               model (as the ground truth) are provided. Training is also
               available for customization.
@@ -161,10 +161,10 @@ export default function Training({ setTrainedModels }: TrainingProps) {
           </div>
           <div>
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-3.5 mr-[7px]" />
+              <HyperparametersIcon className="w-3.5 mr-1.5 ml-[1px]" />
               <p>Hyperparameters</p>
             </div>
-            <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1 w-full">
+            <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1.5 w-full">
               <span className="text-sm">Epochs</span>
               <div className="flex items-center">
                 <Slider
@@ -213,7 +213,7 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         </div>
       )}
       <Button className="w-full h-[30px] font-medium text-white bg-[#585858] flex items-center">
-        <AddIcon className="text-white" />
+        <AddIcon className="text-white mr-1" />
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>
     </form>

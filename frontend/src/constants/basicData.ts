@@ -50,10 +50,7 @@ export const overviewData: Data[] = basicData.map((datum) => {
     remain_accuracy: Number(datum.remain_accuracy.toFixed(3)),
     test_unlearn_accuracy: Number(datum.test_unlearn_accuracy.toFixed(3)),
     test_remain_accuracy: Number(datum.test_remain_accuracy.toFixed(3)),
-    RTE:
-      typeof datum.RTE === "number"
-        ? Number((datum.RTE as number).toFixed(1))
-        : datum.RTE,
+    RTE: datum.RTE,
     train_class_accuracies: datum.train_class_accuracies,
     test_class_accuracies: datum.test_class_accuracies,
     train_label_distribution: datum.train_label_distribution,

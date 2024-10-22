@@ -30,7 +30,8 @@ interface Props {
   data: Data[];
   performanceMetrics: {
     [key: string]: {
-      colorScale: false | d3.ScaleQuantile<string, never>;
+      colorScale: d3.ScaleLinear<number, number, never>;
+      baseColor: string;
     };
   };
 }
@@ -45,7 +46,6 @@ export default function DataTable({
     BaselineComparisonContext
   );
 
-  const [hoveredRowIndex, setHoveredRowIndex] = useState<number | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const modifiedColumns = columns.map((column) => {
@@ -148,8 +148,6 @@ export default function DataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onMouseEnter={() => setHoveredRowIndex(rowIdx)}
-                  onMouseLeave={() => setHoveredRowIndex(null)}
                 >
                   {row.getVisibleCells().map((cell, idx) => {
                     const columnId = cell.column.id;
@@ -157,27 +155,28 @@ export default function DataTable({
                     const isPerformanceMetric =
                       performanceMetrics[columnId] !== undefined;
 
-                    let cellStyle = {},
-                      color = "",
-                      rgbaColor = "";
+                    let cellStyle = {};
                     if (isPerformanceMetric) {
                       const value = cell.getValue() as number;
-                      const { colorScale } = performanceMetrics[columnId];
-                      if (colorScale) color = colorScale(value);
-                      rgbaColor = hexToRgba(color);
+                      const { colorScale, baseColor } =
+                        performanceMetrics[columnId];
 
-                      cellStyle = {
-                        borderLeft:
-                          columnId === "ua"
-                            ? "1px solid rgb(229 231 235)"
-                            : "none",
-                        borderRight:
-                          idx === row.getVisibleCells().length - 1
-                            ? "none"
-                            : "1px solid rgb(229 231 235)",
-                        backgroundColor:
-                          hoveredRowIndex === rowIdx ? rgbaColor : color,
-                      };
+                      if (colorScale && baseColor) {
+                        const opacity = colorScale(value);
+                        const color = hexToRgba(baseColor, opacity);
+
+                        cellStyle = {
+                          borderLeft:
+                            columnId === "ua"
+                              ? "1px solid rgb(229 231 235)"
+                              : "none",
+                          borderRight:
+                            idx === row.getVisibleCells().length - 1
+                              ? "none"
+                              : "1px solid rgb(229 231 235)",
+                          backgroundColor: color,
+                        };
+                      }
                     }
 
                     return (

@@ -11,12 +11,15 @@ import {
 } from "./ui/select";
 
 const VIEW_MODES: ViewModeType[] = [
-  "ALL",
+  "All Instances",
   "Unlearning Target",
   "Unlearning Failed",
 ];
 
-export type ViewModeType = "ALL" | "Unlearning Target" | "Unlearning Failed";
+export type ViewModeType =
+  | "All Instances"
+  | "Unlearning Target"
+  | "Unlearning Failed";
 export type ModeType = "Baseline" | "Comparison";
 
 interface Props {
@@ -50,22 +53,25 @@ const Embedding = ({ mode, height, data, id }: Props) => {
         className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
         onClick={handleResetClick}
       />
-      <Select
-        value={viewMode}
-        defaultValue={VIEW_MODES[0]}
-        onValueChange={(value: ViewModeType) => setViewMode(value)}
-      >
-        <SelectTrigger className="w-36 h-7 px-2 text-sm absolute z-10 right-0 top-1">
-          <SelectValue placeholder={0} />
-        </SelectTrigger>
-        <SelectContent>
-          {VIEW_MODES.map((mode, idx) => (
-            <SelectItem key={idx} value={mode}>
-              {mode}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex items-center text-base absolute z-10 right-0 top-6">
+        <span className="mr-1.5">Focus on:</span>
+        <Select
+          value={viewMode}
+          defaultValue={VIEW_MODES[0]}
+          onValueChange={(value: ViewModeType) => setViewMode(value)}
+        >
+          <SelectTrigger className="w-36 h-7 px-2">
+            <SelectValue placeholder={0} />
+          </SelectTrigger>
+          <SelectContent>
+            {VIEW_MODES.map((mode, idx) => (
+              <SelectItem key={idx} value={mode}>
+                {mode}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       {id !== "" && (
         <h5 className="text-[17px] mt-1">
           {mode} Model ({id})
