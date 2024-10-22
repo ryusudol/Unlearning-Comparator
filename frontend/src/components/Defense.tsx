@@ -5,12 +5,7 @@ import OperationStatus from "./OperationStatus";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
 import { DEFENSE_METHODS } from "../constants/defense";
-import {
-  AddIcon,
-  HyperparametersIcon,
-  StartPointIcon,
-  ShieldIcon,
-} from "./ui/icons";
+import { HyperparametersIcon, StartPointIcon, ShieldIcon } from "./ui/icons";
 import { DefenseConfigurationData } from "../types/settings";
 import { RunningStatusContext } from "../store/running-status-context";
 import {
@@ -116,7 +111,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           {/* Hyperparameters */}
           <div className="mt-1">
             <div className="flex items-center mb-1">
-              <HyperparametersIcon className="w-3.5 ml-[1px] mr-1.5" />
+              <HyperparametersIcon className="w-3.5 ml-[1px] mr-[5px]" />
               <p>Hyperparameters</p>
             </div>
             <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1.5">
@@ -167,8 +162,10 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           </div>
         </div>
       )}
-      <Button className="w-full h-[30px] font-medium text-white bg-[#585858] flex items-center">
-        <AddIcon className="mr-1 text-white" />
+      <Button className="relative w-full h-[32px] font-medium text-white bg-[#585858] flex items-center">
+        <span className="text-white mr-1 font-bold font-[roboto] text-[28px] relative top-0.5">
+          +
+        </span>
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
       </Button>
     </form>

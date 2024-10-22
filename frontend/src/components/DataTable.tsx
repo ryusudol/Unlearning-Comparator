@@ -53,9 +53,9 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <div className="w-full ml-3 flex items-center">
+          <div className="flex items-center ml-4">
             <Checkbox
-              className="ml-2"
+              className="w-[18px] h-[18px]"
               checked={baseline === row.id}
               onCheckedChange={() => {
                 saveBaseline(baseline === row.id ? "" : row.id);
@@ -69,9 +69,9 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <div className="w-full ml-3 flex items-center">
+          <div className="flex items-center ml-4">
             <Checkbox
-              className="ml-4"
+              className="w-[18px] h-[18px]"
               checked={comparison === row.id}
               onCheckedChange={() => {
                 saveComparison(comparison === row.id ? "" : row.id);
@@ -122,7 +122,7 @@ export default function DataTable({
 
   return (
     <div className="w-full h-[251px] rounded-md border">
-      <Table>
+      <Table className="table-fixed w-full">
         <ScrollArea className="w-full h-[249px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

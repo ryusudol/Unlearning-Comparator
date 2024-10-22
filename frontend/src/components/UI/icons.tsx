@@ -805,23 +805,6 @@ export const HyperparametersIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const AddIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    width={16}
-    height={16}
-    color={"#000000"}
-    fill={"none"}
-    {...props}
-  >
-    <path
-      d="M10.75 13.25V20H13.25V13.25H20V10.75H13.25V4H10.75V10.75H4V13.25H10.75Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
 export const EraserIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     fill="none"

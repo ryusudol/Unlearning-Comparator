@@ -19,7 +19,7 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "init_id",
-    header: "Initial Checkpoint",
+    header: "Init",
     cell: ({ row }) => {
       const value = row.getValue("init_id") as string;
       return <div>{value !== "N/A" ? value : "-"}</div>;
@@ -155,10 +155,14 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     id: "baseline",
-    header: "Baseline",
+    header: () => {
+      return <div className="-mr-2 w-[35px] px-0">Baseline</div>;
+    },
   },
   {
     id: "comparison",
-    header: "Comparison",
+    header: () => {
+      return <div className="-mr-3 w-[55px] px-0">Comparison</div>;
+    },
   },
 ];
