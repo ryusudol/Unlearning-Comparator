@@ -79,9 +79,11 @@ export function getDefaultUnlearningConfig(method: string) {
   return { epochs, learning_rate };
 }
 
-export const hexToRgba = (hex: string) => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, 0.7)`;
+export const hexToRgba = (hex: string, opacity: number) => {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };

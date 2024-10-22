@@ -30,8 +30,8 @@ export default function Experiments({ height }: Props) {
       className="w-[342px] relative px-1 py-0.5 flex flex-col justify-start items-start border-[1px] border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="w-full flex justify-between">
-        <div className="flex items-center">
-          <SettingsIcon />
+        <div className="flex items-center ml-0.5">
+          <SettingsIcon className="scale-110" />
           <h5 className="font-semibold ml-1 text-lg">Experiments</h5>
         </div>
         <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />

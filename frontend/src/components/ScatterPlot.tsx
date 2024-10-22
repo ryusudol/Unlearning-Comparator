@@ -27,7 +27,7 @@ const loweredOpacity = 0.1;
 interface Props {
   mode: ModeType;
   data: number[][] | undefined;
-  viewMode: "ALL" | "Unlearning Target" | "Unlearning Failed";
+  viewMode: "All Instances" | "Unlearning Target" | "Unlearning Failed";
 }
 
 const ScatterPlot = React.memo(
@@ -122,7 +122,8 @@ const ScatterPlot = React.memo(
           .attr("cy", (d) => y(d[1]))
           .attr("r", dotSize)
           .attr("fill", (d) => z(d[3]))
-          .style("cursor", "pointer");
+          .style("cursor", "pointer")
+          .style("opacity", defaultCircleOpacity);
 
         const crosses = gDot
           .selectAll("path")
@@ -145,7 +146,8 @@ const ScatterPlot = React.memo(
             return color ? color.darker().toString() : "black";
           })
           .attr("stroke-width", XStrokeWidth)
-          .style("cursor", "pointer");
+          .style("cursor", "pointer")
+          .style("opacity", defaultCrossOpacity);
 
         circlesRef.current = circles;
         crossesRef.current = crosses;
@@ -275,14 +277,9 @@ const ScatterPlot = React.memo(
       const updateOpacity = () => {
         if (circlesRef.current) {
           circlesRef.current.style("opacity", (d: any) => {
-            // 2: original
-            // 3: predicted
-            // 5: forget
             const dataCondition =
-              // (d[2] === d[5] && !toggleOptions[0]) ||
               d[2] !== d[5] && viewMode === "Unlearning Target";
             const classCondition =
-              // (d[3] === d[5] && !toggleOptions[2]) ||
               d[3] !== d[5] && viewMode === "Unlearning Failed";
 
             if (dataCondition || classCondition) return loweredOpacity;
@@ -293,10 +290,8 @@ const ScatterPlot = React.memo(
         if (crossesRef.current) {
           crossesRef.current.style("opacity", (d: any) => {
             const dataCondition =
-              // (d[2] === d[5] && !toggleOptions[0]) ||
               d[2] !== d[5] && viewMode === "Unlearning Target";
             const classCondition =
-              // (d[3] === d[5] && !toggleOptions[2]) ||
               d[3] !== d[5] && viewMode === "Unlearning Failed";
 
             if (dataCondition || classCondition) return loweredOpacity;

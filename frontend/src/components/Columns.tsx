@@ -4,18 +4,6 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "./ui/button";
 import { Data } from "../types/data";
 
-export const colors = [
-  "#A6A6F9",
-  "#B4BBF4",
-  "#C1C7F6",
-  "#CDD2F7",
-  "#FFFFFF",
-  "#F7CFCD",
-  "#F6C3C1",
-  "#F4B6B4",
-  "#F2AAA8",
-];
-
 export const columns: ColumnDef<Data>[] = [
   {
     accessorKey: "id",
@@ -27,6 +15,14 @@ export const columns: ColumnDef<Data>[] = [
     cell: ({ row }) => {
       const value = row.getValue("phase") as string;
       return <div>{value}</div>;
+    },
+  },
+  {
+    accessorKey: "init_id",
+    header: "Init",
+    cell: ({ row }) => {
+      const value = row.getValue("init_id") as string;
+      return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
@@ -67,7 +63,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="px-3"
+          className="w-full px-0"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -78,7 +74,7 @@ export const columns: ColumnDef<Data>[] = [
     },
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("unlearn_accuracy"));
-      return <div className="ml-4">{value}</div>;
+      return <div className="text-center">{value}</div>;
     },
   },
   {
@@ -86,7 +82,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="px-3"
+          className="w-full px-0"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -97,7 +93,7 @@ export const columns: ColumnDef<Data>[] = [
     },
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("remain_accuracy"));
-      return <div className="ml-4">{value}</div>;
+      return <div className="text-center">{value}</div>;
     },
   },
   {
@@ -105,7 +101,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="px-3"
+          className="w-full px-0"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -116,7 +112,7 @@ export const columns: ColumnDef<Data>[] = [
     },
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("test_unlearn_accuracy"));
-      return <div className="ml-4">{value}</div>;
+      return <div className="text-center">{value}</div>;
     },
   },
   {
@@ -124,7 +120,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="px-3"
+          className="w-full px-0"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -135,7 +131,7 @@ export const columns: ColumnDef<Data>[] = [
     },
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("test_remain_accuracy"));
-      return <div className="ml-4">{value}</div>;
+      return <div className="text-center">{value}</div>;
     },
   },
   {
@@ -143,7 +139,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="px-3"
+          className="w-full px-0"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -154,23 +150,19 @@ export const columns: ColumnDef<Data>[] = [
     },
     cell: ({ row }) => {
       const value = row.getValue("RTE") as string;
-      return <div className="ml-4">{value !== "N/A" ? value : "-"}</div>;
+      return <div className="text-center">{value !== "N/A" ? value : "-"}</div>;
     },
   },
-  // {
-  //   accessorKey: "rank",
-  //   header: "Rank",
-  //   cell: ({ row }) => {
-  //     const value = parseFloat(row.getValue("rank"));
-  //     return <div className="text-center">{value}</div>;
-  //   },
-  // },
   {
     id: "baseline",
-    header: "Baseline",
+    header: () => {
+      return <div className="-mr-2 w-[35px] px-0">Baseline</div>;
+    },
   },
   {
     id: "comparison",
-    header: "Comparison",
+    header: () => {
+      return <div className="-mr-3 w-[55px] px-0">Comparison</div>;
+    },
   },
 ];

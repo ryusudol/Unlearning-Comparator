@@ -53,7 +53,7 @@ export type Data = {
   remain_accuracy: number;
   test_unlearn_accuracy: number;
   test_remain_accuracy: number;
-  RTE: number | string;
+  RTE: number;
   train_class_accuracies: ClassAccuracies;
   test_class_accuracies: ClassAccuracies;
   train_label_distribution: GroundTruthDistribution;
