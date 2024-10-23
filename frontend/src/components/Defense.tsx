@@ -64,7 +64,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
             </div>
             <Select name="initial-checkpoint">
               <SelectTrigger
-                className="w-[155px] h-[25px] text-base overflow-ellipsis whitespace-nowrap"
+                className="w-[160px] h-[25px] text-base overflow-ellipsis whitespace-nowrap"
                 id="initial-checkpoint"
               >
                 <SelectValue
@@ -94,7 +94,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
             </div>
             <Select defaultValue={DEFENSE_METHODS[0]}>
               <SelectTrigger
-                className="w-[155px] h-[25px] text-base"
+                className="w-[160px] h-[25px] text-base"
                 id="method"
               >
                 <SelectValue placeholder={DEFENSE_METHODS[0]} />

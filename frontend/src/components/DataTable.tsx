@@ -167,7 +167,7 @@ export default function DataTable({
 
                         cellStyle = {
                           borderLeft:
-                            columnId === "ua"
+                            columnId === "unlearn_accuracy"
                               ? "1px solid rgb(229 231 235)"
                               : "none",
                           borderRight:

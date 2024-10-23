@@ -23,47 +23,54 @@ export default function Core({ height }: { height: number }) {
     console.log("Replay Button Clicked !");
   };
 
+  const isEmbeddingMode = displayMode === EMBEDDINGS;
+  const isAttackMode = displayMode === ATTACK;
+
   return (
     <section
       style={{ height: `${height}` }}
       className="w-[1551px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
-      <div className="flex justify-between items-center mb-[2px]">
-        <div className="flex items-center">
+      <div className="flex justify-between items-center mb-0.5">
+        <div className="flex items-center border-[1px] relative top-[3px] px-3 rounded-t-[6px]">
           <div
             id={EMBEDDINGS}
             onClick={handleDisplayModeChange}
-            className={`z-10 flex items-center mr-3 cursor-pointer border-b-[2px] border-black px-1 ${
-              displayMode === ATTACK && "text-gray-400 border-none"
+            className={`relative z-10 flex items-center mr-3 cursor-pointer pb-0.5 px-1 ${
+              isAttackMode && "text-gray-400 border-none"
             }`}
           >
-            <ChartScatterIcon
-              className={displayMode === ATTACK ? "opacity-40" : ""}
-            />
-            <h5 className="font-semibold ml-[3px] text-lg -mb-0.5">
+            <ChartScatterIcon className={isAttackMode ? "opacity-40" : ""} />
+            <button className="font-semibold ml-[3px] text-lg -mb-0">
               Embeddings
-            </h5>
+            </button>
+            {isEmbeddingMode && (
+              <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
+            )}
           </div>
           <div
-            className={`z-10 flex items-center cursor-pointer border-b-[2px] border-black px-[6px] ${
-              displayMode === EMBEDDINGS && "text-gray-400 border-none"
+            onClick={handleDisplayModeChange}
+            className={`relative z-10 flex items-center cursor-pointer pb-0.5 px-1 ${
+              isEmbeddingMode && "text-gray-400 border-none"
             }`}
           >
             <img
               src="/hacker.png"
               alt="Attack logo img"
-              className={`w-4 ${displayMode === EMBEDDINGS && "opacity-40"}`}
+              className={`w-4 ${isEmbeddingMode && "opacity-40"}`}
             />
-            <h5
+            <button
               id={ATTACK}
-              onClick={handleDisplayModeChange}
-              className="font-semibold ml-[3px] text-lg -mb-0.5"
+              className="font-semibold ml-[3px] text-lg -mb-0"
             >
               Privacy Attack
-            </h5>
+            </button>
+            {isAttackMode && (
+              <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
+            )}
           </div>
         </div>
-        {displayMode === EMBEDDINGS && (
+        {isEmbeddingMode && (
           <div className="w-[680px] flex justify-end items-center z-10">
             <div className="flex items-center">
               <span>neighbors</span>
@@ -102,7 +109,7 @@ export default function Core({ height }: { height: number }) {
           </div>
         )}
       </div>
-      {displayMode === EMBEDDINGS ? <Embeddings /> : <PrivacyAttack />}
+      {isEmbeddingMode ? <Embeddings /> : <PrivacyAttack />}
     </section>
   );
 }

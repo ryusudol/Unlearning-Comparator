@@ -153,7 +153,7 @@ export default function Training({ setTrainedModels }: TrainingProps) {
         <div>
           <div className="flex justify-start items-start mb-[5px] relative">
             <AlertCircleIcon className="mr-0.5 flex-shrink-0 relative top-0.5" />
-            <p className=" ml-1 text-sm">
+            <p className="ml-0.5 text-sm">
               A pretrained model (as an initial checkpoint) and a retrained
               model (as the ground truth) are provided. Training is also
               available for customization.

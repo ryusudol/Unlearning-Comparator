@@ -63,7 +63,7 @@ export default function Embeddings() {
   }, [comparisonData]);
 
   return (
-    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-b-[6px] rounded-tr-[6px]">
       <div
         style={{ height: `${COMPONENT_HEIGHT}px` }}
         className="w-[120px] flex flex-col justify-center items-center"
