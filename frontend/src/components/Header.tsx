@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { LogoIcon, MultiplicationSignIcon } from "./ui/icons";
+import { LogoIcon } from "./ui/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -18,9 +18,7 @@ export default function Header() {
               Unforgettable
             </span>
           </div>
-          <div className="relative -bottom-3 -ml-[56.5px] flex items-center">
-            <MultiplicationSignIcon className="text-white scale-150" />
-            <span className="text-white font-bold ml-1 mr-1">:</span>
+          <div className="relative -bottom-3 -ml-7 flex items-center">
             <Tabs
               onValueChange={saveForgetClass}
               defaultValue={forgetClassNames[forgetClass]}
@@ -37,6 +35,14 @@ export default function Header() {
                     </span>
                   </TabsTrigger>
                 ))}
+                <TabsTrigger
+                  value=""
+                  className="h-10 rounded-b-none data-[state=active]:shadow-none"
+                >
+                  <span className="px-1 border-b-2 border-black text-lg">
+                    +
+                  </span>
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

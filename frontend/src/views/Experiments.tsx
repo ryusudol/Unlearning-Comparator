@@ -1,27 +1,21 @@
 import { useState } from "react";
 
-import ConfigSelector from "../components/ConfigSelector";
-import Training from "../components/Training";
 import Unlearning from "../components/Unlearning";
 import Defense from "../components/Defense";
 import { useFetchModels } from "../hooks/useFetchModels";
 import { SettingsIcon } from "../components/ui/icons";
 
-type Mode = 0 | 1 | 2;
+type Mode = 0 | 1;
 
-interface Props {
-  height: number;
-}
-
-export default function Experiments({ height }: Props) {
-  const [configMode, setConfigMode] = useState<Mode>(0); // 0: Training, 1: Unlearning, 2:Defense
+export default function Experiments({ height }: { height: number }) {
+  const [mode, setMode] = useState<Mode>(0);
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
   useFetchModels(setTrainedModels, "trained_models");
 
   const handleConfigModeChange = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setConfigMode(+e.currentTarget.id as Mode);
+    setMode(+e.currentTarget.id as Mode);
   };
 
   return (
@@ -29,17 +23,40 @@ export default function Experiments({ height }: Props) {
       style={{ height: `${height}px` }}
       className="w-[342px] relative px-1 py-0.5 flex flex-col justify-start items-start border-[1px] border-[rgba(0, 0, 0, 0.2)]"
     >
-      <div className="w-full flex justify-between">
-        <div className="flex items-center ml-0.5">
+      <div className="w-full flex justify-between -mt-[1px]">
+        <div className="flex items-center ml-0.5 mb-[1px]">
           <SettingsIcon className="scale-110" />
           <h5 className="font-semibold ml-1 text-lg">Experiments</h5>
         </div>
-        <ConfigSelector mode={configMode} onClick={handleConfigModeChange} />
+        <div className="flex items-center border-[1px] px-2 relative top-[1px] rounded-t-[6px]">
+          <button
+            id="0"
+            onClick={handleConfigModeChange}
+            className={`relative text-base font-semibold py-0 mr-3 px-1 ${
+              mode === 1 ? "text-gray-400" : ""
+            }`}
+          >
+            Unlearning
+            {mode === 0 && (
+              <div className="absolute w-full h-0.5 bg-black right-0 bottom-0" />
+            )}
+          </button>
+          <button
+            id="1"
+            onClick={handleConfigModeChange}
+            className={`relative text-base font-semibold py-0 px-1 ${
+              mode === 0 ? "text-gray-400" : ""
+            }`}
+          >
+            Defense
+            {mode === 1 && (
+              <div className="absolute w-full h-0.5 bg-black right-0 bottom-0" />
+            )}
+          </button>
+        </div>
       </div>
       <div className="w-full h-56 py-1.5 px-2 rounded-b-[6px] rounded-tl-[6px] border-[1px] border-[rgba(0, 0, 0, 0.2)]">
-        {configMode === 0 ? (
-          <Training setTrainedModels={setTrainedModels} />
-        ) : configMode === 1 ? (
+        {mode === 0 ? (
           <Unlearning
             trainedModels={trainedModels}
             setUnlearnedModels={setUnlearnedModels}
