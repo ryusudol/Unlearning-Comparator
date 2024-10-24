@@ -63,7 +63,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="w-full px-0"
+          className="w-full px-0 h-[34px]"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -82,7 +82,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="w-full px-0"
+          className="w-full px-0 h-[34px]"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -101,7 +101,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="w-full px-0"
+          className="w-full px-0 h-[34px]"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -120,7 +120,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="w-full px-0"
+          className="w-full px-0 h-[34px]"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -139,7 +139,7 @@ export const columns: ColumnDef<Data>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="w-full px-0"
+          className="w-full px-0 h-[34px]"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >

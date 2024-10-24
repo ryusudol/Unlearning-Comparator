@@ -50,10 +50,10 @@ export default function Header() {
       </div>
       <div className="ml-5 relative top-3 right-[310px]">
         <span className="mr-3 text-[11px]">
-          <strong>Model</strong>: Resnet18
+          <strong>Dataset</strong>: CIFAR-10
         </span>
         <span className="text-[11px]">
-          <strong>Dataset</strong>: CIFAR-10
+          <strong>Model</strong>: Resnet18
         </span>
       </div>
     </div>

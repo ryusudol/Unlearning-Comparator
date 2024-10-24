@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 
+import { SettingsIcon } from "../components/ui/icons";
 import { overviewData } from "../constants/basicData";
 import DataTable from "../components/DataTable";
 import { columns } from "../components/Columns";
@@ -75,8 +76,12 @@ export default function PerformanceOverview({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[1210px] p-1 relative border-l-[1px] border-r-[1px] border-b-[1px] border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1210px] p-1 relative border-x-[1px] border-b-[1px]"
     >
+      <div className="flex items-center ml-0.5 mb-[1px]">
+        <SettingsIcon className="scale-110" />
+        <h5 className="font-semibold ml-1 text-lg">Experiments</h5>
+      </div>
       <DataTable
         columns={columns}
         data={overviewData}

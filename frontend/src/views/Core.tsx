@@ -29,7 +29,7 @@ export default function Core({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1551px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1552px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex justify-between items-center mb-0.5">
         <div className="flex items-center border-[1px] relative top-[3px] px-3 rounded-t-[6px]">

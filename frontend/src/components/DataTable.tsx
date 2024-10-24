@@ -121,9 +121,9 @@ export default function DataTable({
   }, [tableData]);
 
   return (
-    <div className="w-full h-[251px] rounded-md border">
+    <div className="w-full h-[222px] rounded-md border">
       <Table className="table-fixed w-full">
-        <ScrollArea className="w-full h-[249px]">
+        <ScrollArea className="w-full h-[220px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -142,7 +142,7 @@ export default function DataTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="text-[13px]">
+          <TableBody className="text-sm">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row, rowIdx) => (
                 <TableRow
