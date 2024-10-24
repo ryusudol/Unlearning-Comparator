@@ -21,12 +21,12 @@ export default function Experiments({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[342px] relative px-1 py-0.5 flex flex-col justify-start items-start border-[1px] border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[342px] relative px-1 py-0.5 flex flex-col justify-start items-start border-[1px]"
     >
       <div className="w-full flex justify-between -mt-[1px]">
         <div className="flex items-center ml-0.5 mb-[1px]">
           <SettingsIcon className="scale-110" />
-          <h5 className="font-semibold ml-1 text-lg">Experiments</h5>
+          <h5 className="font-semibold ml-1 text-lg">Model Builder</h5>
         </div>
         <div className="flex items-center border-[1px] px-2 relative top-[1px] rounded-t-[6px]">
           <button
