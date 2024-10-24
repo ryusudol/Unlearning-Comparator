@@ -98,6 +98,41 @@ export default function DataTable({
     return [...retrainData, ...otherData];
   }, [data, forgetClass]);
 
+  const opacityMapping = useMemo(() => {
+    const mapping: { [key: string]: { [value: number]: number } } = {};
+
+    Object.keys(performanceMetrics).forEach((columnId) => {
+      const values = tableData
+        .map((datum) => datum[columnId as keyof Data] as number)
+        .filter((value) => typeof value === "number");
+
+      const uniqueValues = Array.from(new Set(values));
+
+      uniqueValues.sort((a, b) => a - b);
+
+      const numUniqueValues = uniqueValues.length;
+
+      const valueOpacityMap: { [value: number]: number } = {};
+
+      if (numUniqueValues === 0) {
+        uniqueValues.forEach((value) => {
+          valueOpacityMap[value] = 0;
+        });
+      } else if (numUniqueValues === 1) {
+        valueOpacityMap[uniqueValues[0]] = 1;
+      } else {
+        uniqueValues.forEach((value, index) => {
+          const opacity = index / (numUniqueValues - 1);
+          valueOpacityMap[value] = opacity;
+        });
+      }
+
+      mapping[columnId] = valueOpacityMap;
+    });
+
+    return mapping;
+  }, [tableData, performanceMetrics]);
+
   const table = useReactTable({
     getRowId: (row: Data) => row.id,
     data: tableData,
@@ -157,12 +192,11 @@ export default function DataTable({
 
                     let cellStyle = {};
                     if (isPerformanceMetric) {
+                      const { baseColor } = performanceMetrics[columnId];
                       const value = cell.getValue() as number;
-                      const { colorScale, baseColor } =
-                        performanceMetrics[columnId];
+                      const opacity = opacityMapping[columnId]?.[value] ?? 0;
 
-                      if (colorScale && baseColor) {
-                        const opacity = colorScale(value);
+                      if (baseColor) {
                         const color = hexToRgba(baseColor, opacity);
 
                         cellStyle = {

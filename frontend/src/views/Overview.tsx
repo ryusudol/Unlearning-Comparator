@@ -5,6 +5,11 @@ import { overviewData } from "../constants/basicData";
 import DataTable from "../components/DataTable";
 import { columns } from "../components/Columns";
 
+const RED = "#D98585";
+const GREEN = "#429D4D";
+const BRIGHTEST = 0;
+const DARKEST = 1;
+
 const values = {
   unlearn_accuracy: overviewData.map((d) => d.unlearn_accuracy),
   remain_accuracy: overviewData.map((d) => d.remain_accuracy),
@@ -14,11 +19,11 @@ const values = {
 };
 
 const baseColors = {
-  unlearn_accuracy: "#D98585",
-  test_unlearn_accuracy: "#D98585",
-  RTE: "#D98585",
-  remain_accuracy: "#429D4D",
-  test_remain_accuracy: "#429D4D",
+  unlearn_accuracy: RED,
+  remain_accuracy: GREEN,
+  test_unlearn_accuracy: RED,
+  test_remain_accuracy: GREEN,
+  RTE: RED,
 };
 
 const mins = {
@@ -42,32 +47,35 @@ const performanceMetrics = {
     colorScale: d3
       .scaleLinear()
       .domain([mins.unlearn_accuracy, maxs.unlearn_accuracy])
-      .range([0.2, 1]),
+      .range([BRIGHTEST, DARKEST]),
     baseColor: baseColors.unlearn_accuracy,
   },
   remain_accuracy: {
     colorScale: d3
       .scaleLinear()
       .domain([mins.remain_accuracy, maxs.remain_accuracy])
-      .range([0.2, 1]),
+      .range([BRIGHTEST, DARKEST]),
     baseColor: baseColors.remain_accuracy,
   },
   test_unlearn_accuracy: {
     colorScale: d3
       .scaleLinear()
       .domain([mins.test_unlearn_accuracy, maxs.test_unlearn_accuracy])
-      .range([0.2, 1]),
+      .range([BRIGHTEST, DARKEST]),
     baseColor: baseColors.test_unlearn_accuracy,
   },
   test_remain_accuracy: {
     colorScale: d3
       .scaleLinear()
       .domain([mins.test_remain_accuracy, maxs.test_remain_accuracy])
-      .range([0.2, 1]),
+      .range([BRIGHTEST, DARKEST]),
     baseColor: baseColors.test_remain_accuracy,
   },
   RTE: {
-    colorScale: d3.scaleLinear().domain([mins.RTE, maxs.RTE]).range([0.2, 1]),
+    colorScale: d3
+      .scaleLinear()
+      .domain([mins.RTE, maxs.RTE])
+      .range([BRIGHTEST, DARKEST]),
     baseColor: baseColors.RTE,
   },
 };
