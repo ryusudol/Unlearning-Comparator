@@ -199,6 +199,9 @@ export default function DataTable({
                       if (baseColor) {
                         const color = hexToRgba(baseColor, opacity);
 
+                        const textColor =
+                          opacity >= 0.8 ? "#FFFFFF" : "#000000";
+
                         cellStyle = {
                           borderLeft:
                             columnId === "unlearn_accuracy"
@@ -209,6 +212,7 @@ export default function DataTable({
                               ? "none"
                               : "1px solid rgb(229 231 235)",
                           backgroundColor: color,
+                          color: textColor,
                         };
                       }
                     }
