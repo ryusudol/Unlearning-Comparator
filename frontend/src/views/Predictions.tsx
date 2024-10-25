@@ -189,6 +189,10 @@ export default function Predictions({
       {/* Charts */}
       {selectedFCExist ? (
         baseline === "" || comparison === "" ? (
+          <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
+            Select both Baseline and Comparison.
+          </div>
+        ) : (
           <div
             className={`flex justify-start items-center ${
               isExpanded ? "mt-2" : "mt-0"
@@ -228,10 +232,6 @@ export default function Predictions({
             ) : (
               <HeatmapLegend />
             )}
-          </div>
-        ) : (
-          <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
-            Select both Baseline and Comparison.
           </div>
         )
       ) : (
