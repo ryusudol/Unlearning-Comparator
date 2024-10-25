@@ -34,7 +34,7 @@ export default function PredictionChart({
         <div className="flex flex-col items-center">
           <div className="flex items-center ml-[42px]">
             <span className="text-[17px] text-nowrap">
-              {mode} Model ({id})
+              {mode} Model {id !== "" ? `(${id})` : ""}
             </span>
           </div>
           <div

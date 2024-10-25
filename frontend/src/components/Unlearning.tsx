@@ -179,7 +179,7 @@ export default function Unlearning({
     const runningConfig = {
       method: config.method,
       trained_model: config.trained_model,
-      forget_class: forgetClass,
+      forget_class: forgetClass!,
       epochs: epochs[0],
       learning_rate: parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5)),
       batch_size: Math.pow(2, batchSizeLog[0]),

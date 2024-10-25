@@ -21,12 +21,15 @@ import {
   SelectValue,
 } from "../components/ui/select";
 
-export default function PrivacyAttack() {
+export default function PrivacyAttack({ height }: { height: number }) {
   const [selected, setSelected] = useState([0.5]);
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+    <div
+      style={{ height: `${height}px` }}
+      className="w-[1428px] h-[683px] flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]"
+    >
       <div className="w-[155px] h-[660px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
         <div className="w-[155px] h-[104px] flex flex-col justify-start items-start mb-[5px] px-2 py-2 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">

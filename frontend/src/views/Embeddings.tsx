@@ -16,9 +16,7 @@ import {
   ScrollVerticalIcon,
 } from "../components/ui/icons";
 
-const COMPONENT_HEIGHT = 712;
-
-export default function Embeddings() {
+export default function Embeddings({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
 
@@ -64,10 +62,7 @@ export default function Embeddings() {
 
   return (
     <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-b-[6px] rounded-tr-[6px]">
-      <div
-        style={{ height: `${COMPONENT_HEIGHT}px` }}
-        className="w-[120px] flex flex-col justify-center items-center"
-      >
+      <div className="w-[120px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
         <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
           <div className="flex items-center">
@@ -125,7 +120,7 @@ export default function Embeddings() {
                 />
                 <div className="flex items-center">
                   <span className="text-[15px] font-light">{name}</span>
-                  {name === forgetClassNames[forgetClass] ? (
+                  {forgetClass && name === forgetClassNames[forgetClass] ? (
                     <div className="flex items-center ml-0.5">
                       (<MultiplicationSignIcon className="-mx-0.5" />)
                     </div>
@@ -139,14 +134,14 @@ export default function Embeddings() {
       <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
       <Embedding
         mode="Baseline"
-        height={COMPONENT_HEIGHT}
+        height={height}
         data={BaselineData}
         id={baseline}
       />
       <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
       <Embedding
         mode="Comparison"
-        height={COMPONENT_HEIGHT}
+        height={height}
         data={ComparisonData}
         id={comparison}
       />

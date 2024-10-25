@@ -2,16 +2,18 @@ import React, { useState } from "react";
 
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import { Slider } from "../components/ui/slider";
-import { ChartScatterIcon, RepeatIcon } from "../components/ui/icons";
+import { ChartScatterIcon } from "../components/ui/icons";
+// import { Slider } from "../components/ui/slider";
+// import { RepeatIcon } from "../components/ui/icons";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
+const HEIGHT = 715;
 
 export default function Core({ height }: { height: number }) {
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
-  const [neighbors, setNeighbors] = useState([5]);
-  const [dist, setDist] = useState([0.1]);
+  // const [neighbors, setNeighbors] = useState([5]);
+  // const [dist, setDist] = useState([0.1]);
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -19,9 +21,9 @@ export default function Core({ height }: { height: number }) {
     else setDisplayMode(ATTACK);
   };
 
-  const handleReplayClick = () => {
-    console.log("Replay Button Clicked !");
-  };
+  // const handleReplayClick = () => {
+  //   console.log("Replay Button Clicked !");
+  // };
 
   const isEmbeddingMode = displayMode === EMBEDDINGS;
   const isAttackMode = displayMode === ATTACK;
@@ -70,7 +72,7 @@ export default function Core({ height }: { height: number }) {
             )}
           </div>
         </div>
-        {isEmbeddingMode && (
+        {/* {isEmbeddingMode && (
           <div className="w-[680px] flex justify-end items-center z-10">
             <div className="flex items-center">
               <span>neighbors</span>
@@ -107,9 +109,13 @@ export default function Core({ height }: { height: number }) {
               className="scale-125 cursor-pointer mr-2"
             />
           </div>
-        )}
+        )} */}
       </div>
-      {isEmbeddingMode ? <Embeddings /> : <PrivacyAttack />}
+      {isEmbeddingMode ? (
+        <Embeddings height={HEIGHT} />
+      ) : (
+        <PrivacyAttack height={HEIGHT} />
+      )}
     </section>
   );
 }
