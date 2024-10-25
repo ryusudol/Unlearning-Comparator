@@ -5,6 +5,7 @@ import PredictionChart from "../components/PredictionChart";
 import HeatmapLegend from "../components/HeatmapLegend";
 import BubbleLegend from "../components/BubbleLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ForgetClassContext } from "../store/forget-class-context";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Label } from "../components/ui/label";
 import { basicData } from "../constants/basicData";
@@ -77,6 +78,7 @@ export default function Predictions({
   onExpansionClick,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { selectedForgetClasses } = useContext(ForgetClassContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
   const [chartMode, setChartMode] = useState<ChartModeType>(BUBBLE);
@@ -101,6 +103,8 @@ export default function Predictions({
   const expandedStyle = { height: `${height * 2}px` };
   const unexpandedStyle = { height: `${height}px` };
 
+  const selectedFCExist = selectedForgetClasses.length !== 0;
+
   return (
     <section
       style={isExpanded ? expandedStyle : unexpandedStyle}
@@ -114,111 +118,127 @@ export default function Predictions({
             <Target02Icon />
             <h5 className="font-semibold ml-1 text-lg">Predictions</h5>
           </div>
+          {selectedFCExist && (
+            <div className="flex items-center">
+              <ChartBubble02Icon
+                onClick={() => setChartMode(BUBBLE)}
+                className="cursor-pointer scale-90"
+              />
+              <div
+                onClick={() => setChartMode(LABEL_HEATMAP)}
+                className="relative cursor-pointer"
+              >
+                <RectangularIcon className="rotate-90 scale-90" />
+                <span className="absolute text-[9px] top-[1px] right-[5.7px]">
+                  R
+                </span>
+              </div>
+              <div
+                onClick={() => setChartMode(CONFIDENCE_HEATMAP)}
+                className="relative cursor-pointer mr-3"
+              >
+                <RectangularIcon className="rotate-90 scale-90" />
+                <span className="absolute text-[9px] top-[1px] right-[5.5px]">
+                  C
+                </span>
+              </div>
+              {isExpanded ? (
+                <div
+                  onClick={onExpansionClick}
+                  className="flex items-center cursor-pointer border-[1px] border-[#585858] rounded-sm pl-1 pr-[5px] py-[1px] transition hover:bg-gray-200"
+                >
+                  <ArrowShrinkIcon className="cursor-pointer scale-90 hover:bg-gray-200 rounded-sm" />
+                  <span className="text-xs">Collapse View</span>
+                </div>
+              ) : (
+                <div
+                  onClick={onExpansionClick}
+                  className="flex items-center cursor-pointer border-[1px] border-[#585858] rounded-sm pl-1 pr-[5px] py-[1px] transition hover:bg-gray-200"
+                >
+                  <ArrowExpandIcon className="scale-[80%] mr-0.5" />
+                  <span className="text-xs">Expand View</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        {selectedFCExist && (
           <div className="flex items-center">
-            <ChartBubble02Icon
-              onClick={() => setChartMode(BUBBLE)}
-              className="cursor-pointer scale-90"
-            />
-            <div
-              onClick={() => setChartMode(LABEL_HEATMAP)}
-              className="relative cursor-pointer"
+            <span className="text-xs font-light mr-2">Dataset:</span>
+            <RadioGroup
+              onValueChange={setDatasetMode}
+              className="flex"
+              defaultValue={TRAINING}
             >
-              <RectangularIcon className="rotate-90 scale-90" />
-              <span className="absolute text-[9px] top-[1px] right-[5.7px]">
-                R
-              </span>
-            </div>
-            <div
-              onClick={() => setChartMode(CONFIDENCE_HEATMAP)}
-              className="relative cursor-pointer mr-3"
-            >
-              <RectangularIcon className="rotate-90 scale-90" />
-              <span className="absolute text-[9px] top-[1px] right-[5.5px]">
-                C
-              </span>
-            </div>
-            {isExpanded ? (
-              <div
-                onClick={onExpansionClick}
-                className="flex items-center cursor-pointer border-[1px] border-[#585858] rounded-sm pl-1 pr-[5px] py-[1px] transition hover:bg-gray-200"
-              >
-                <ArrowShrinkIcon className="cursor-pointer scale-90 hover:bg-gray-200 rounded-sm" />
-                <span className="text-xs">Collapse View</span>
+              <div className="flex items-center space-x-[2px]">
+                <RadioGroupItem value={TRAINING} id={TRAINING} />
+                <Label className="text-xs font-light" htmlFor={TRAINING}>
+                  Training
+                </Label>
               </div>
-            ) : (
-              <div
-                onClick={onExpansionClick}
-                className="flex items-center cursor-pointer border-[1px] border-[#585858] rounded-sm pl-1 pr-[5px] py-[1px] transition hover:bg-gray-200"
-              >
-                <ArrowExpandIcon className="scale-[80%] mr-0.5" />
-                <span className="text-xs">Expand View</span>
+              <div className="flex items-center space-x-[2px]">
+                <RadioGroupItem value={TEST} id={TEST} />
+                <Label className="text-xs font-light" htmlFor={TEST}>
+                  Test
+                </Label>
               </div>
-            )}
+            </RadioGroup>
           </div>
-        </div>
-        <div className="flex items-center">
-          <span className="text-xs font-light mr-2">Dataset:</span>
-          <RadioGroup
-            onValueChange={setDatasetMode}
-            className="flex"
-            defaultValue={TRAINING}
-          >
-            <div className="flex items-center space-x-[2px]">
-              <RadioGroupItem value={TRAINING} id={TRAINING} />
-              <Label className="text-xs font-light" htmlFor={TRAINING}>
-                Training
-              </Label>
-            </div>
-            <div className="flex items-center space-x-[2px]">
-              <RadioGroupItem value={TEST} id={TEST} />
-              <Label className="text-xs font-light" htmlFor={TEST}>
-                Test
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
-      </div>
-      {/* Charts */}
-      <div
-        className={`flex justify-start items-center ${
-          isExpanded ? "mt-2" : "mt-0"
-        }`}
-      >
-        <span
-          className={`font-extralight -rotate-90 text-nowrap ${
-            isExpanded ? "text-base" : "text-[13px]"
-          } ${chartMode !== BUBBLE ? "-ml-6 -mr-9" : "-mx-6"}`}
-        >
-          Ground Truth
-        </span>
-        <PredictionChart
-          mode="Baseline"
-          id={baseline}
-          data={baselineDistributionData}
-          chartMode={chartMode}
-          isExpanded={isExpanded}
-        />
-        <PredictionChart
-          mode="Comparison"
-          id={comparison}
-          data={comparisonDistributionData}
-          chartMode={chartMode}
-          isExpanded={isExpanded}
-        />
-        {/* Legend */}
-        {chartMode === BUBBLE ? (
-          <div
-            className={`flex flex-col items-center ${
-              isExpanded ? "ml-3" : "ml-1"
-            }`}
-          >
-            <BubbleLegend scale={sizeScale} />
-            <img src="/bubble-legend.png" alt="bubble legend img" />
-          </div>
-        ) : (
-          <HeatmapLegend />
         )}
       </div>
+      {/* Charts */}
+      {selectedFCExist ? (
+        baseline === "" || comparison === "" ? (
+          <div
+            className={`flex justify-start items-center ${
+              isExpanded ? "mt-2" : "mt-0"
+            }`}
+          >
+            <span
+              className={`font-extralight -rotate-90 text-nowrap ${
+                isExpanded ? "text-base" : "text-[13px]"
+              } ${chartMode !== BUBBLE ? "-ml-6 -mr-9" : "-mx-6"}`}
+            >
+              Ground Truth
+            </span>
+            <PredictionChart
+              mode="Baseline"
+              id={baseline}
+              data={baselineDistributionData}
+              chartMode={chartMode}
+              isExpanded={isExpanded}
+            />
+            <PredictionChart
+              mode="Comparison"
+              id={comparison}
+              data={comparisonDistributionData}
+              chartMode={chartMode}
+              isExpanded={isExpanded}
+            />
+            {/* Legend */}
+            {chartMode === BUBBLE ? (
+              <div
+                className={`flex flex-col items-center ${
+                  isExpanded ? "ml-3" : "ml-1"
+                }`}
+              >
+                <BubbleLegend scale={sizeScale} />
+                <img src="/bubble-legend.png" alt="bubble legend img" />
+              </div>
+            ) : (
+              <HeatmapLegend />
+            )}
+          </div>
+        ) : (
+          <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
+            Select both Baseline and Comparison.
+          </div>
+        )
+      ) : (
+        <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
+          Select the target forget class first.
+        </div>
+      )}
     </section>
   );
 }

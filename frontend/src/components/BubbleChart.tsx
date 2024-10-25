@@ -13,7 +13,7 @@ export default function BubbleChart({ mode, id, isExpanded }: Props) {
     <div className="flex flex-col items-center">
       <div className="flex items-center ml-4">
         <span className="text-[17px] text-nowrap">
-          {mode} Model ({id})
+          {mode} Model {id !== "" ? `(${id})` : ""}
         </span>
       </div>
       <div className="flex flex-col items-center">
