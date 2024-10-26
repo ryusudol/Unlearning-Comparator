@@ -7,6 +7,8 @@ import { Chart01Icon } from "../components/UI/icons";
 import { ClassAccuracies } from "../types/data";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
+const GAP_FIX_LENGTH = 3;
+
 export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
 
@@ -35,7 +37,9 @@ export default function Accuracies({ height }: { height: number }) {
           return {
             category: categoryLetter,
             classLabel: key,
-            gap: parseFloat((comparisonValue - baselineValue).toFixed(2)),
+            gap: parseFloat(
+              (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
+            ),
             fill: TABLEAU10[idx],
             baselineAccuracy: baselineValue,
             comparisonAccuracy: comparisonValue,
@@ -54,7 +58,9 @@ export default function Accuracies({ height }: { height: number }) {
           return {
             category: categoryLetter,
             classLabel: key,
-            gap: parseFloat((comparisonValue - baselineValue).toFixed(2)),
+            gap: parseFloat(
+              (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
+            ),
             fill: TABLEAU10[idx],
             baselineAccuracy: baselineValue,
             comparisonAccuracy: comparisonValue,

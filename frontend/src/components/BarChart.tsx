@@ -15,7 +15,8 @@ import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "./UI/chart";
 import { ForgetClassContext } from "../store/forget-class-context";
 
-const labelFontSize = 11;
+const TOOLTIP_FIX_LENGTH = 3;
+const LABEL_FONT_SIZE = 11;
 const chartConfig = {
   value: {
     label: "Gap",
@@ -83,9 +84,9 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <p className="font-medium">
           Class: {forgetClassNames[+data.classLabel]}
         </p>
-        <p>Gap: {data.gap.toFixed(2)}</p>
-        <p>Baseline: {data.baselineAccuracy.toFixed(2)}</p>
-        <p>Comparison: {data.comparisonAccuracy.toFixed(2)}</p>
+        <p>Gap: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+        <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+        <p>Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
       </div>
     );
   }
@@ -121,7 +122,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             tickLine={false}
             axisLine={true}
             interval={0}
-            fontSize={labelFontSize}
+            fontSize={LABEL_FONT_SIZE}
             tickFormatter={(value) => {
               const label =
                 chartConfig[value as keyof typeof chartConfig]?.label;
@@ -135,7 +136,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
             type="number"
             domain={[-maxValue, maxValue]}
             tickFormatter={(value) => value.toString()}
-            fontSize={labelFontSize}
+            fontSize={LABEL_FONT_SIZE}
             ticks={[-maxValue, 0, maxValue]}
           >
             <Label
@@ -149,7 +150,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" radius={0} />
+          <Bar dataKey="gap" layout="vertical" />
         </BarChart>
       </ChartContainer>
     </div>
