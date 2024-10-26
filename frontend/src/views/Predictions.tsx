@@ -125,22 +125,36 @@ export default function Predictions({
             <div className="flex items-center">
               <ChartBubble02Icon
                 onClick={() => setChartMode(BUBBLE)}
-                className="cursor-pointer scale-90"
+                className={`cursor-pointer scale-90 ${
+                  chartMode === BUBBLE ? "text-[#429D4D]" : ""
+                }`}
               />
               <div
                 onClick={() => setChartMode(LABEL_HEATMAP)}
-                className="relative cursor-pointer"
+                className={`relative cursor-pointer ${
+                  chartMode === LABEL_HEATMAP ? "text-[#429D4D]" : ""
+                }`}
               >
-                <RectangularIcon className="rotate-90 scale-90" />
+                <RectangularIcon
+                  className={`rotate-90 scale-90 ${
+                    chartMode === LABEL_HEATMAP ? "text-[#429D4D]" : ""
+                  }`}
+                />
                 <span className="absolute text-[9px] top-[1px] right-[5.7px]">
                   R
                 </span>
               </div>
               <div
                 onClick={() => setChartMode(CONFIDENCE_HEATMAP)}
-                className="relative cursor-pointer mr-3"
+                className={`relative cursor-pointer mr-3 ${
+                  chartMode === CONFIDENCE_HEATMAP ? "text-[#429D4D]" : ""
+                }`}
               >
-                <RectangularIcon className="rotate-90 scale-90" />
+                <RectangularIcon
+                  className={`rotate-90 scale-90 ${
+                    chartMode === CONFIDENCE_HEATMAP ? "text-[#429D4D]" : ""
+                  }`}
+                />
                 <span className="absolute text-[9px] top-[1px] right-[5.5px]">
                   C
                 </span>
