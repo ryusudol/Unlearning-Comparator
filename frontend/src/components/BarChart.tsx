@@ -149,7 +149,7 @@ export default function MyBarChart({ mode, gapData }: Props) {
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" radius={4} />
+          <Bar dataKey="gap" layout="vertical" radius={0} />
         </BarChart>
       </ChartContainer>
     </div>
