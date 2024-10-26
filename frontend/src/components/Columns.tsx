@@ -1,13 +1,17 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-import { Button } from "./ui/button";
+import { Button } from "./UI/button";
 import { Data } from "../types/data";
 
 export const columns: ColumnDef<Data>[] = [
   {
     accessorKey: "id",
     header: "ID",
+    cell: ({ row }) => {
+      const value = row.getValue("id") as string;
+      return <div className="w-7">{value}</div>;
+    },
   },
   {
     accessorKey: "phase",
@@ -18,19 +22,11 @@ export const columns: ColumnDef<Data>[] = [
     },
   },
   {
-    accessorKey: "init_id",
-    header: "Init",
-    cell: ({ row }) => {
-      const value = row.getValue("init_id") as string;
-      return <div>{value !== "N/A" ? value : "-"}</div>;
-    },
-  },
-  {
     accessorKey: "method",
     header: "Method",
     cell: ({ row }) => {
       const value = row.getValue("method") as string;
-      return <div>{value}</div>;
+      return <div className="w-[138px]">{value}</div>;
     },
   },
   {
@@ -47,7 +43,7 @@ export const columns: ColumnDef<Data>[] = [
     header: "LR",
     cell: ({ row }) => {
       const value = row.getValue("learning_rate") as string;
-      return <div>{value !== "N/A" ? value : "-"}</div>;
+      return <div className="w-[38px]">{value !== "N/A" ? value : "-"}</div>;
     },
   },
   {
@@ -156,13 +152,13 @@ export const columns: ColumnDef<Data>[] = [
   {
     id: "baseline",
     header: () => {
-      return <div className="-mr-2 w-[35px] px-0">Baseline</div>;
+      return <div className="ml-5 -mr-5 w-[50px] px-0">Baseline</div>;
     },
   },
   {
     id: "comparison",
     header: () => {
-      return <div className="-mr-3 w-[55px] px-0">Comparison</div>;
+      return <div className="-mr-5 w-[70px] px-0">Comparison</div>;
     },
   },
 ];

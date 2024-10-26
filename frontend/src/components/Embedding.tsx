@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./UI/select";
 
 const VIEW_MODES: ViewModeType[] = [
   "All Instances",

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import { ChartScatterIcon } from "../components/ui/icons";
+import { ChartScatterIcon } from "../components/UI/icons";
 // import { Slider } from "../components/ui/slider";
 // import { RepeatIcon } from "../components/ui/icons";
 

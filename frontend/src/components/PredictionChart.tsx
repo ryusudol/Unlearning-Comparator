@@ -44,12 +44,12 @@ export default function PredictionChart({
           >
             <Heatmap
               mode={mode}
-              length={250}
+              isExpanded={isExpanded}
               chartMode={chartMode as Exclude<ChartModeType, "bubble">}
               data={data}
             />
             <span
-              style={{ fontSize }}
+              style={{ fontSize, bottom: isExpanded ? 6 : 0 }}
               className="absolute font-extralight bottom-0 ml-14"
             >
               Prediction

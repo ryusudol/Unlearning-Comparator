@@ -1,25 +1,25 @@
 import { useState } from "react";
 
-import { Slider } from "../components/ui/slider";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
-import { Separator } from "../components/ui/separator";
-import { HelpCircleIcon } from "../components/ui/icons";
+import { Slider } from "../components/UI/slider";
+import { Button } from "../components/UI/button";
+import { Label } from "../components/UI/label";
+import { Input } from "../components/UI/input";
+import { Separator } from "../components/UI/separator";
+import { HelpCircleIcon } from "../components/UI/icons";
 import {
   Image01Icon,
   UserQuestion01Icon,
   ImageDelete01Icon,
   NeuralNetworkIcon,
   GitCompareIcon,
-} from "../components/ui/icons";
+} from "../components/UI/icons";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "../components/UI/select";
 
 export default function PrivacyAttack({ height }: { height: number }) {
   const [selected, setSelected] = useState([0.5]);

@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
 
-import { LogoIcon } from "./ui/icons";
+import { LogoIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
+import { Label } from "./UI/label";
+import { Button } from "./UI/button";
 import {
   Dialog,
   DialogContent,
@@ -14,14 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "./ui/dialog";
+} from "./UI/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./UI/select";
 
 export default function Header() {
   const {
@@ -44,17 +44,17 @@ export default function Header() {
   };
 
   return (
-    <div className="w-full text-white bg-black h-16 flex justify-between items-center px-4 relative">
+    <div className="w-full text-white bg-black h-12 flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
           <div className="flex items-center">
-            <LogoIcon className="w-10 h-10" />
-            <span className="ml-2 text-4xl font-semibold mr-[106px]">
+            <LogoIcon className="w-7 h-7" />
+            <span className="ml-2 text-2xl font-semibold mr-[106px]">
               Unforgettable
             </span>
           </div>
           <Tabs
-            className="relative -bottom-3 -ml-7 flex items-center"
+            className="relative -bottom-2.5 ml-[50px] flex items-center"
             onValueChange={saveForgetClass}
             value={
               forgetClass !== undefined ? forgetClassNames[forgetClass] : ""
@@ -65,10 +65,10 @@ export default function Header() {
                 <TabsTrigger
                   key={idx}
                   value={forgetClassNames[selectedForgetClass]}
-                  className="h-10 rounded-b-none data-[state=active]:shadow-none"
+                  className="h-[30px] rounded-b-none data-[state=active]:shadow-none"
                 >
-                  <span className="px-1 border-b-2 border-black text-lg">
-                    {forgetClassNames[selectedForgetClass]}
+                  <span className="px-1 border-b-2 border-black text-base">
+                    Forget Class: {forgetClassNames[selectedForgetClass]}
                   </span>
                 </TabsTrigger>
               ))}
@@ -83,7 +83,7 @@ export default function Header() {
                       }
                 }
               >
-                <DialogTrigger className="w-8 h-10 ml-1 transition hover:bg-gray-800 rounded-t font-[roboto] text-3xl font-bold">
+                <DialogTrigger className="w-8 h-[30px] ml-1 -mt-0.5 transition hover:bg-gray-800 rounded-t font-[roboto] text-2xl font-bold">
                   +
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
@@ -120,11 +120,11 @@ export default function Header() {
           </Tabs>
         </div>
       </div>
-      <div className="ml-5 relative top-3 right-[310px]">
-        <span className="mr-3 text-[11px]">
+      <div className="ml-5 relative top-2 right-[284px] text-[13px]">
+        <span className="mr-3">
           <strong>Dataset</strong>: CIFAR-10
         </span>
-        <span className="text-[11px]">
+        <span>
           <strong>Model</strong>: Resnet18
         </span>
       </div>
