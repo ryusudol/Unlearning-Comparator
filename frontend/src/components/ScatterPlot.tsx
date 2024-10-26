@@ -276,27 +276,47 @@ const ScatterPlot = React.memo(
     useEffect(() => {
       const updateOpacity = () => {
         if (circlesRef.current) {
-          circlesRef.current.style("opacity", (d: any) => {
-            const dataCondition =
-              d[2] !== d[5] && viewMode === "Unlearning Target";
-            const classCondition =
-              d[3] !== d[5] && viewMode === "Unlearning Failed";
+          circlesRef.current
+            .style("opacity", (d: any) => {
+              const dataCondition =
+                d[2] !== d[5] && viewMode === "Unlearning Target";
+              const classCondition =
+                d[3] !== d[5] && viewMode === "Unlearning Failed";
 
-            if (dataCondition || classCondition) return loweredOpacity;
-            return defaultCircleOpacity;
-          });
+              if (dataCondition || classCondition) return loweredOpacity;
+              return defaultCircleOpacity;
+            })
+            .style("pointer-events", (d: any) => {
+              const dataCondition =
+                d[2] !== d[5] && viewMode === "Unlearning Target";
+              const classCondition =
+                d[3] !== d[5] && viewMode === "Unlearning Failed";
+
+              if (dataCondition || classCondition) return "none";
+              return "auto";
+            });
         }
 
         if (crossesRef.current) {
-          crossesRef.current.style("opacity", (d: any) => {
-            const dataCondition =
-              d[2] !== d[5] && viewMode === "Unlearning Target";
-            const classCondition =
-              d[3] !== d[5] && viewMode === "Unlearning Failed";
+          crossesRef.current
+            .style("opacity", (d: any) => {
+              const dataCondition =
+                d[2] !== d[5] && viewMode === "Unlearning Target";
+              const classCondition =
+                d[3] !== d[5] && viewMode === "Unlearning Failed";
 
-            if (dataCondition || classCondition) return loweredOpacity;
-            return defaultCrossOpacity;
-          });
+              if (dataCondition || classCondition) return loweredOpacity;
+              return defaultCrossOpacity;
+            })
+            .style("pointer-events", (d: any) => {
+              const dataCondition =
+                d[2] !== d[5] && viewMode === "Unlearning Target";
+              const classCondition =
+                d[3] !== d[5] && viewMode === "Unlearning Failed";
+
+              if (dataCondition || classCondition) return "none";
+              return "auto";
+            });
         }
       };
 
