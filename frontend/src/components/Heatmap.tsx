@@ -6,22 +6,19 @@ import { forgetClassNames } from "../constants/forgetClassNames";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ModeType } from "./PredictionChart";
 
-const MARGIN = { top: 10, right: 10, bottom: 52, left: 52 };
 const fontColor = "#64758B";
-const fontSize = 11;
-
 const WINDOW_OFFSET = 20;
 const TOOLTIP_WIDTH = 100;
 const TOOLTIP_OFFSET = 10;
 
 type Props = {
   mode: ModeType;
-  length: number;
+  isExpanded: boolean;
   chartMode: Exclude<ChartModeType, "bubble">;
   data: { x: string; y: string; value: number }[];
 };
 
-export default function Heatmap({ mode, length, chartMode, data }: Props) {
+export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
 
   const [tooltip, setTooltip] = useState({
@@ -37,6 +34,15 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
 
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  const MARGIN = {
+    top: 10,
+    right: 10,
+    bottom: isExpanded ? 56 : 52,
+    left: isExpanded ? 70 : 52,
+  };
+  const fontSize = isExpanded ? 15 : 11;
+  const XLabelTransform = isExpanded ? 24 : 8;
+  const length = isExpanded ? 500 : 250;
   const boundsWidth = length - MARGIN.right - MARGIN.left;
   const boundsHeight = length - MARGIN.top - MARGIN.bottom;
   const allValues = data.map((d) => d.value);
@@ -62,7 +68,7 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
     .domain([min, max]);
 
   const handleMouseEnter = (
-    event: React.MouseEvent<SVGRectElement, MouseEvent>,
+    event: React.MouseEvent<SVGGElement, MouseEvent>,
     d: { x: string; y: string; value: number }
   ) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -94,17 +100,34 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
   };
 
   const allRects = data.map((d, i) => {
+    const textColor = d.value >= 0.75 ? "#000000" : "#FFFFFF";
+
     return (
-      <rect
+      <g
         key={i}
-        x={xScale(d.x)}
-        y={yScale(d.y)}
-        width={xScale.bandwidth()}
-        height={yScale.bandwidth()}
-        fill={colorScale(d.value)}
         onMouseEnter={(event) => handleMouseEnter(event, d)}
         onMouseLeave={handleMouseLeave}
-      />
+      >
+        <rect
+          x={xScale(d.x)}
+          y={yScale(d.y)}
+          width={xScale.bandwidth()}
+          height={yScale.bandwidth()}
+          fill={colorScale(d.value)}
+        />
+        {isExpanded && (
+          <text
+            x={(xScale(d.x) ?? 0) + xScale.bandwidth() / 2}
+            y={(yScale(d.y) ?? 0) + yScale.bandwidth() / 2}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={14}
+            fill={textColor}
+          >
+            {d.value.toFixed(3)}
+          </text>
+        )}
+      </g>
     );
   });
 
@@ -114,7 +137,7 @@ export default function Heatmap({ mode, length, chartMode, data }: Props) {
     return (
       <text
         key={i}
-        x={xPos + xScale.bandwidth() - 8}
+        x={xPos + xScale.bandwidth() - XLabelTransform}
         y={boundsHeight + 6}
         textAnchor="end"
         dominantBaseline="middle"

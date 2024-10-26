@@ -100,7 +100,10 @@ export default function Predictions({
     comparisonData
   );
 
-  const expandedStyle = { height: `${height * 2}px` };
+  const expandedStyle = {
+    height: `${height * 2}px`,
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+  };
   const unexpandedStyle = { height: `${height}px` };
 
   const selectedFCExist = selectedForgetClasses.length !== 0;
@@ -109,7 +112,7 @@ export default function Predictions({
     <section
       style={isExpanded ? expandedStyle : unexpandedStyle}
       className={`px-[5px] py-0.5 flex flex-col border-[1px] border-solid transition-all z-10 bg-white absolute ${
-        isExpanded ? `w-[980px] right-0 top-[35px]` : `w-[490px] top-[324px]`
+        isExpanded ? `w-[980px] right-0 top-[19px]` : `w-[490px] top-[308px]`
       }`}
     >
       <div className="flex justify-between">
@@ -229,7 +232,7 @@ export default function Predictions({
                 <BubbleLegend scale={sizeScale} />
                 <img src="/bubble-legend.png" alt="bubble legend img" />
               </div>
-            ) : (
+            ) : isExpanded ? null : (
               <HeatmapLegend />
             )}
           </div>
