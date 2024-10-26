@@ -53,9 +53,9 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <div className="flex items-center ml-4">
+          <div className="flex items-center ml-[34px]">
             <Checkbox
-              className="w-[18px] h-[18px]"
+              className="w-[18px] h-[18px] rounded-full"
               checked={baseline === row.id}
               onCheckedChange={() => {
                 saveBaseline(baseline === row.id ? "" : row.id);
@@ -69,9 +69,9 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <div className="flex items-center ml-4">
+          <div className="flex items-center ml-[26px]">
             <Checkbox
-              className="w-[18px] h-[18px]"
+              className="w-[18px] h-[18px] rounded-full"
               checked={comparison === row.id}
               onCheckedChange={() => {
                 saveComparison(comparison === row.id ? "" : row.id);
@@ -156,8 +156,8 @@ export default function DataTable({
   }, [tableData]);
 
   return (
-    <div className="w-full h-[222px] rounded-md border">
-      <Table className="table-fixed w-full">
+    <div className="w-full h-[222px]">
+      <Table className="table-fixed w-full border-none">
         <ScrollArea className="w-full h-[220px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -197,10 +197,15 @@ export default function DataTable({
                       const opacity = opacityMapping[columnId]?.[value] ?? 0;
 
                       if (baseColor) {
-                        const color = hexToRgba(baseColor, opacity);
+                        let color, textColor;
 
-                        const textColor =
-                          opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                        if (tableData.length === 1 && value === 0) {
+                          color = "#FFFFFF";
+                          textColor = "#000000";
+                        } else {
+                          color = hexToRgba(baseColor, opacity);
+                          textColor = opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                        }
 
                         cellStyle = {
                           borderLeft:
