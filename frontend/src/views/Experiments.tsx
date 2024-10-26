@@ -3,7 +3,7 @@ import { useState, useContext } from "react";
 import Unlearning from "../components/Unlearning";
 import Defense from "../components/Defense";
 import { useFetchModels } from "../hooks/useFetchModels";
-import { SettingsIcon } from "../components/ui/icons";
+import { SettingsIcon } from "../components/UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 
 type Mode = 0 | 1;

@@ -4,7 +4,7 @@ import { BaselineComparisonContext } from "../store/baseline-comparison-context"
 import { ForgetClassContext } from "../store/forget-class-context";
 import Embedding from "../components/Embedding";
 import { basicData } from "../constants/basicData";
-import { Separator } from "../components/ui/separator";
+import { Separator } from "../components/UI/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import {
@@ -14,7 +14,7 @@ import {
   Drag01Icon,
   MultiplicationSignIcon,
   ScrollVerticalIcon,
-} from "../components/ui/icons";
+} from "../components/UI/icons";
 
 export default function Embeddings({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);

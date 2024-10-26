@@ -2,7 +2,7 @@ import { useContext } from "react";
 
 import DataTable from "../components/DataTable";
 import { columns } from "../components/Columns";
-import { SettingsIcon } from "../components/ui/icons";
+import { SettingsIcon } from "../components/UI/icons";
 import { overviewData } from "../constants/basicData";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { performanceMetrics } from "../constants/overview";

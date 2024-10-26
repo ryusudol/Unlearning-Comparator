@@ -7,13 +7,13 @@ import React, {
 } from "react";
 
 import OperationStatus from "./OperationStatus";
-import { Button } from "./ui/button";
+import { Button } from "./UI/button";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { HyperparametersIcon, StartPointIcon, EraserIcon } from "./ui/icons";
-import { Slider } from "./ui/slider";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { HyperparametersIcon, StartPointIcon, EraserIcon } from "./UI/icons";
+import { Slider } from "./UI/slider";
+import { Input } from "./UI/input";
+import { Label } from "./UI/label";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
 import { getDefaultUnlearningConfig } from "../util";
 import { cancelRunning, fetchRunningStatus } from "../https/utils";
@@ -31,7 +31,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./UI/select";
 
 export interface UnlearningProps {
   trainedModels: string[];

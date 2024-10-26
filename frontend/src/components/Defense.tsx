@@ -1,11 +1,11 @@
 import React, { useState, useContext } from "react";
-import { Button } from "./ui/button";
+import { Button } from "./UI/button";
 
 import OperationStatus from "./OperationStatus";
-import { Slider } from "./ui/slider";
-import { Label } from "./ui/label";
+import { Slider } from "./UI/slider";
+import { Label } from "./UI/label";
 import { DEFENSE_METHODS } from "../constants/defense";
-import { HyperparametersIcon, StartPointIcon, ShieldIcon } from "./ui/icons";
+import { HyperparametersIcon, StartPointIcon, ShieldIcon } from "./UI/icons";
 import { DefenseConfigurationData } from "../types/settings";
 import { RunningStatusContext } from "../store/running-status-context";
 import {
@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./UI/select";
 
 export interface DefenseProps {
   unlearnedModels: string[];

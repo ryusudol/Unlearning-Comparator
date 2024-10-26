@@ -17,11 +17,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table";
+} from "./UI/table";
 import { Data } from "../types/data";
 import { hexToRgba } from "../util";
-import { Checkbox } from "./ui/checkbox";
-import { ScrollArea } from "./ui/scroll-area";
+import { Checkbox } from "./UI/checkbox";
+import { ScrollArea } from "./UI/scroll-area";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 

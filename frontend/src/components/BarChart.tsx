@@ -12,7 +12,7 @@ import {
 
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
-import { ChartContainer, type ChartConfig } from "../components/ui/chart";
+import { ChartContainer, type ChartConfig } from "./UI/chart";
 import { ForgetClassContext } from "../store/forget-class-context";
 
 const labelFontSize = 11;

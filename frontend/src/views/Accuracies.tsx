@@ -3,7 +3,7 @@ import { useContext } from "react";
 import BarChart from "../components/BarChart";
 import { TABLEAU10 } from "../constants/tableau10";
 import { basicData } from "../constants/basicData";
-import { Chart01Icon } from "../components/ui/icons";
+import { Chart01Icon } from "../components/UI/icons";
 import { ClassAccuracies } from "../types/data";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 

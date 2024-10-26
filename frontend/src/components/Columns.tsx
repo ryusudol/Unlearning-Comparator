@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-import { Button } from "./ui/button";
+import { Button } from "./UI/button";
 import { Data } from "../types/data";
 
 export const columns: ColumnDef<Data>[] = [

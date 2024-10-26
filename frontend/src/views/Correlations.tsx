@@ -1,8 +1,8 @@
 import { useContext } from "react";
 
-import { Label } from "../components/ui/label";
-import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import { Layers02Icon } from "../components/ui/icons";
+import { Label } from "../components/UI/label";
+import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
+import { Layers02Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { getAccuracies } from "../util";
-import { Progress } from "./ui/progress";
+import { Progress } from "./UI/progress";
 import {
   TrainingStatus,
   UnlearningStatus,

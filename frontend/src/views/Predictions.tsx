@@ -6,8 +6,8 @@ import HeatmapLegend from "../components/HeatmapLegend";
 import BubbleLegend from "../components/BubbleLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import { Label } from "../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
+import { Label } from "../components/UI/label";
 import { basicData } from "../constants/basicData";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Data } from "../types/data";
@@ -17,7 +17,7 @@ import {
   RectangularIcon,
   ArrowExpandIcon,
   ArrowShrinkIcon,
-} from "../components/ui/icons";
+} from "../components/UI/icons";
 
 const TRAINING = "training";
 const TEST = "test";

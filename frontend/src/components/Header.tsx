@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
 
-import { LogoIcon } from "./ui/icons";
+import { LogoIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
+import { Label } from "./UI/label";
+import { Button } from "./UI/button";
 import {
   Dialog,
   DialogContent,
@@ -14,14 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "./ui/dialog";
+} from "./UI/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./UI/select";
 
 export default function Header() {
   const {
