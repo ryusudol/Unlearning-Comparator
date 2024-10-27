@@ -86,7 +86,7 @@ export default function Header() {
                 <DialogTrigger className="w-8 h-[30px] flex justify-center items-center ml-1 mb-0.5 transition hover:bg-gray-800 rounded-t">
                   <PlusIcon className="w-3.5 h-3.5" color="#64758B" />
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] p-4">
                   <DialogHeader>
                     <DialogTitle>
                       Which class do you want to unlearn?
