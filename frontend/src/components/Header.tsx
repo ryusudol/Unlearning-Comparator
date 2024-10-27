@@ -50,8 +50,7 @@ export default function Header() {
           <div className="flex items-center">
             <LogoIcon className="w-7 h-7" />
             <span className="text-2xl font-semibold ml-2 mr-10">
-              {/* Unforgettable */}
-              Unlearning Comparator
+              UnlearningComparator
             </span>
           </div>
           <Tabs
