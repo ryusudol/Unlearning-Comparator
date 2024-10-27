@@ -10,7 +10,7 @@ import OperationStatus from "./OperationStatus";
 import { Button } from "./UI/button";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { HyperparametersIcon, StartPointIcon, EraserIcon } from "./UI/icons";
+import { HyperparametersIcon, EraserIcon } from "./UI/icons";
 import { Slider } from "./UI/slider";
 import { Input } from "./UI/input";
 import { Label } from "./UI/label";
@@ -242,7 +242,7 @@ export default function Unlearning({
 
   return (
     <form
-      className="w-full h-full flex flex-col items-start justify-between"
+      className="h-full flex flex-col items-start justify-between"
       onSubmit={handleSubmit}
     >
       {isRunning ? (
@@ -252,36 +252,8 @@ export default function Unlearning({
           status={status}
         />
       ) : (
-        <div>
+        <div className="w-full">
           <div className="grid grid-cols-2 gap-y-2">
-            <div className="flex items-center">
-              <StartPointIcon className="w-4 h-4 mr-1" />
-              <Label
-                className="inline text-base text-nowrap"
-                htmlFor="initial-checkpoint"
-              >
-                Initial Checkpoint
-              </Label>
-            </div>
-            <Select defaultValue={trainedModels[0]} name="trained_model">
-              <SelectTrigger
-                className="w-40 h-[25px] text-base overflow-ellipsis whitespace-nowrap"
-                id="initial-checkpoint"
-              >
-                {trainedModels.length > 0
-                  ? trainedModels[0].length > 15
-                    ? trainedModels[0].slice(0, 15) + "..."
-                    : trainedModels[0]
-                  : ""}
-              </SelectTrigger>
-              <SelectContent>
-                {trainedModels.map((item, idx) => (
-                  <SelectItem key={idx} value={item}>
-                    {item}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <div className="flex items-center mb-1">
               <EraserIcon className="w-4 h-4 mr-1 scale-110" />
               <Label className="text-base text-nowrap" htmlFor="method">
@@ -293,7 +265,7 @@ export default function Unlearning({
               onValueChange={handleMethodSelection}
               name="method"
             >
-              <SelectTrigger className="w-40 h-[25px] text-base" id="method">
+              <SelectTrigger className="h-[25px] text-base" id="method">
                 <SelectValue placeholder={UNLEARNING_METHODS[0]} />
               </SelectTrigger>
               <SelectContent>
@@ -337,7 +309,7 @@ export default function Unlearning({
                     onValueChange={(value: number[]) => setEpochs(value)}
                     value={epochs}
                     defaultValue={epochs}
-                    className="w-[158px] mx-2 cursor-pointer"
+                    className="w-[218px] mx-2 cursor-pointer"
                     min={1}
                     max={30}
                     step={1}
@@ -350,7 +322,7 @@ export default function Unlearning({
                     onValueChange={setLearningRateLog}
                     value={learningRateLog}
                     defaultValue={learningRateLog}
-                    className="w-[158px] mx-2 cursor-pointer"
+                    className="w-[218px] mx-2 cursor-pointer"
                     min={-5}
                     max={-1}
                     step={1}
@@ -365,7 +337,7 @@ export default function Unlearning({
                     onValueChange={setBatchSizeLog}
                     value={batchSizeLog}
                     defaultValue={batchSizeLog}
-                    className="w-[158px] mx-2 cursor-pointer"
+                    className="w-[218px] mx-2 cursor-pointer"
                     min={0}
                     max={9}
                     step={1}

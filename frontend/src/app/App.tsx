@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 import Header from "../components/Header";
-import Settings from "../views/Experiments";
 import Overview from "../views/Overview";
 import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
@@ -28,8 +27,7 @@ export default function App() {
   return (
     <section className="relative">
       <Header />
-      <div className="flex">
-        <Settings height={UPPER_HEIGHT} />
+      <div className="flex justify-between">
         <Overview height={UPPER_HEIGHT} />
         <Accuracies height={UPPER_HEIGHT} />
       </div>

@@ -40,7 +40,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
 
   return (
     <form
-      className="w-full h-full flex flex-col items-start justify-between"
+      className="h-full flex flex-col items-start justify-between"
       onSubmit={handleRunBtnClick}
     >
       {isRunning ? (
@@ -50,7 +50,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           status={status}
         />
       ) : (
-        <div>
+        <div className="w-full">
           <div className="grid grid-cols-2 gap-y-2">
             {/* Initial Checkpoint */}
             <div className="flex items-center">
@@ -64,7 +64,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
             </div>
             <Select name="initial-checkpoint">
               <SelectTrigger
-                className="w-[160px] h-[25px] text-base overflow-ellipsis whitespace-nowrap"
+                className="h-[25px] text-base overflow-ellipsis whitespace-nowrap"
                 id="initial-checkpoint"
               >
                 <SelectValue
@@ -93,10 +93,7 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
               </Label>
             </div>
             <Select defaultValue={DEFENSE_METHODS[0]}>
-              <SelectTrigger
-                className="w-[160px] h-[25px] text-base"
-                id="method"
-              >
+              <SelectTrigger className="h-[25px] text-base" id="method">
                 <SelectValue placeholder={DEFENSE_METHODS[0]} />
               </SelectTrigger>
               <SelectContent>
@@ -121,12 +118,12 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
                   onValueChange={(value: number[]) => setEpochs(value)}
                   value={epochs}
                   defaultValue={[5]}
-                  className="w-[135px] mx-2 cursor-pointer"
+                  className="w-[218px] mx-2 cursor-pointer"
                   min={1}
                   max={50}
                   step={1}
                 />
-                <span className="w-2 text-sm">{epochs}</span>
+                <span className="text-sm">{epochs}</span>
               </div>
               <span className="text-sm">Learning Rate</span>
               <div className="flex items-center">
@@ -134,12 +131,12 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
                   onValueChange={setLearningRateLog}
                   value={learningRateLog}
                   defaultValue={learningRateLog}
-                  className="w-[135px] mx-2 cursor-pointer"
+                  className="w-[218px] mx-2 cursor-pointer"
                   min={-4}
                   max={-1}
                   step={1}
                 />
-                <span className="w-2 text-sm">
+                <span className="text-sm">
                   {parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5))}
                 </span>
               </div>
@@ -149,14 +146,12 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
                   onValueChange={setBatchSizeLog}
                   value={batchSizeLog}
                   defaultValue={batchSizeLog}
-                  className="w-[135px] mx-2 cursor-pointer"
+                  className="w-[218px] mx-2 cursor-pointer"
                   min={0}
                   max={10}
                   step={1}
                 />
-                <span className="w-2 text-sm">
-                  {Math.pow(2, batchSizeLog[0])}
-                </span>
+                <span className="text-sm">{Math.pow(2, batchSizeLog[0])}</span>
               </div>
             </div>
           </div>
