@@ -168,7 +168,7 @@ export default function DataTable({
     <div className="w-full h-[222px]">
       <Table className="table-fixed w-full border-none">
         <ScrollArea className="w-full h-[220px]">
-          <TableHeader>
+          <TableHeader className="bg-[#F5F6F9]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

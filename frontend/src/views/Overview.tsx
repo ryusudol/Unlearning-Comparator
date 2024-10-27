@@ -59,12 +59,12 @@ export default function PerformanceOverview({ height }: { height: number }) {
           }}
         >
           <DialogTrigger onClick={handleAddExpClick}>
-            <Button className="h-7 px-2.5 mr-0.5">
+            <Button className="h-7 px-2.5 mr-0.5 bg-[#585858] hover:bg-[#696969]">
               <PlusIcon color="white" className="w-2.5 h-2.5 mr-1.5" />
               <span>Add Experiment</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] p-3">
             <div className="w-full flex items-center mt-2">
               <div
                 id={UNLEARNING}
@@ -104,7 +104,12 @@ export default function PerformanceOverview({ height }: { height: number }) {
               <Defense unlearnedModels={unlearnedModels} />
             )}
             <DialogFooter>
-              <Button onClick={handleRunClick}>Run</Button>
+              <Button
+                className="bg-[#585858] hover:bg-[#696969]"
+                onClick={handleRunClick}
+              >
+                Run
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
