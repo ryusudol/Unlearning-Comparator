@@ -79,7 +79,7 @@ export default function Accuracies({ height }: { height: number }) {
       </div>
       {baseline === "" || comparison === "" ? (
         <p className="h-full flex justify-center items-center text-[15px] text-gray-500">
-          Select both Baseline and Comparison from the left.
+          Select both Baseline and Comparison.
         </p>
       ) : (
         <div className="w-full flex justify-center items-center">
