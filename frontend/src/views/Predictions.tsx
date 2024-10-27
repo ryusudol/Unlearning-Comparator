@@ -106,6 +106,7 @@ export default function Predictions({
   };
   const unexpandedStyle = { height: `${height}px` };
 
+  const allSelected = baseline !== "" && comparison !== "";
   const selectedFCExist = selectedForgetClasses.length !== 0;
 
   return (
@@ -121,7 +122,7 @@ export default function Predictions({
             <Target02Icon />
             <h5 className="font-semibold ml-1 text-lg">Predictions</h5>
           </div>
-          {selectedFCExist && (
+          {allSelected && (
             <div className="flex items-center">
               <ChartBubble02Icon
                 onClick={() => setChartMode(BUBBLE)}
@@ -183,7 +184,7 @@ export default function Predictions({
             </div>
           )}
         </div>
-        {selectedFCExist && (
+        {allSelected && (
           <div className="flex items-center">
             <span className="text-xs font-light mr-2">Dataset:</span>
             <RadioGroup
