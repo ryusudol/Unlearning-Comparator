@@ -126,18 +126,18 @@ export default function Predictions({
               <ChartBubble02Icon
                 onClick={() => setChartMode(BUBBLE)}
                 className={`cursor-pointer scale-90 ${
-                  chartMode === BUBBLE ? "text-[#429D4D]" : ""
+                  chartMode === BUBBLE ? "text-black" : "text-gray-400"
                 }`}
               />
               <div
                 onClick={() => setChartMode(LABEL_HEATMAP)}
                 className={`relative cursor-pointer ${
-                  chartMode === LABEL_HEATMAP ? "text-[#429D4D]" : ""
+                  chartMode === LABEL_HEATMAP ? "text-black" : "text-gray-400"
                 }`}
               >
                 <RectangularIcon
                   className={`rotate-90 scale-90 ${
-                    chartMode === LABEL_HEATMAP ? "text-[#429D4D]" : ""
+                    chartMode === LABEL_HEATMAP ? "text-black" : "text-gray-400"
                   }`}
                 />
                 <span className="absolute text-[9px] top-[1px] right-[5.7px]">
@@ -147,12 +147,16 @@ export default function Predictions({
               <div
                 onClick={() => setChartMode(CONFIDENCE_HEATMAP)}
                 className={`relative cursor-pointer mr-3 ${
-                  chartMode === CONFIDENCE_HEATMAP ? "text-[#429D4D]" : ""
+                  chartMode === CONFIDENCE_HEATMAP
+                    ? "text-black"
+                    : "text-gray-400"
                 }`}
               >
                 <RectangularIcon
                   className={`rotate-90 scale-90 ${
-                    chartMode === CONFIDENCE_HEATMAP ? "text-[#429D4D]" : ""
+                    chartMode === CONFIDENCE_HEATMAP
+                      ? "text-black"
+                      : "text-gray-400"
                   }`}
                 />
                 <span className="absolute text-[9px] top-[1px] right-[5.5px]">
@@ -246,8 +250,8 @@ export default function Predictions({
                 <BubbleLegend scale={sizeScale} />
                 <img src="/bubble-legend.png" alt="bubble legend img" />
               </div>
-            ) : isExpanded ? null : (
-              <HeatmapLegend />
+            ) : (
+              <HeatmapLegend isExpanded={isExpanded} />
             )}
           </div>
         )

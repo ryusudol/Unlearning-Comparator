@@ -37,12 +37,12 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
   const MARGIN = {
     top: 10,
     right: 10,
-    bottom: isExpanded ? 56 : 52,
-    left: isExpanded ? 70 : 52,
+    bottom: isExpanded ? 50 : 52,
+    left: isExpanded ? 62 : 52,
   };
-  const fontSize = isExpanded ? 15 : 11;
+  const fontSize = isExpanded ? 13 : 11;
   const XLabelTransform = isExpanded ? 24 : 8;
-  const length = isExpanded ? 500 : 250;
+  const length = isExpanded ? 490 : 250;
   const boundsWidth = length - MARGIN.right - MARGIN.left;
   const boundsHeight = length - MARGIN.top - MARGIN.bottom;
   const allValues = data.map((d) => d.value);
