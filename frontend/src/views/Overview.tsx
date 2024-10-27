@@ -5,11 +5,16 @@ import Unlearning from "../components/Unlearning";
 import Defense from "../components/Defense";
 import { columns } from "../components/Columns";
 import { Button } from "../components/UI/button";
-import { SettingsIcon } from "../components/UI/icons";
+import { PlusIcon, SettingsIcon } from "../components/UI/icons";
 import { overviewData } from "../constants/basicData";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { performanceMetrics } from "../constants/overview";
-import { Dialog, DialogContent, DialogTrigger } from "../components/UI/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogFooter,
+} from "../components/UI/dialog";
 
 const UNLEARNING = "unlearning";
 const DEFENSE = "defense";
@@ -35,6 +40,8 @@ export default function PerformanceOverview({ height }: { height: number }) {
     setMode(e.currentTarget.id as ModeType);
   };
 
+  const handleRunClick = () => {};
+
   return (
     <section
       style={{ height: `${height}px` }}
@@ -52,7 +59,10 @@ export default function PerformanceOverview({ height }: { height: number }) {
           }}
         >
           <DialogTrigger onClick={handleAddExpClick}>
-            <Button className="h-[30px] px-3 mr-0.5">Add Experiment</Button>
+            <Button className="h-7 px-2.5 mr-0.5">
+              <PlusIcon color="white" className="w-2.5 h-2.5 mr-1.5" />
+              <span>Add Experiment</span>
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px]">
             <div className="w-full flex items-center mt-2">
@@ -85,16 +95,17 @@ export default function PerformanceOverview({ height }: { height: number }) {
                 />
               </div>
             </div>
-            <div className="h-[220px]">
-              {isUnlearning ? (
-                <Unlearning
-                  trainedModels={trainedModels}
-                  setUnlearnedModels={setUnlearnedModels}
-                />
-              ) : (
-                <Defense unlearnedModels={unlearnedModels} />
-              )}
-            </div>
+            {isUnlearning ? (
+              <Unlearning
+                trainedModels={trainedModels}
+                setUnlearnedModels={setUnlearnedModels}
+              />
+            ) : (
+              <Defense unlearnedModels={unlearnedModels} />
+            )}
+            <DialogFooter>
+              <Button onClick={handleRunClick}>Run</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
