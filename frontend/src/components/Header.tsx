@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 
-import { LogoIcon } from "./UI/icons";
+import { LogoIcon, PlusIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -49,12 +49,12 @@ export default function Header() {
         <div className="flex items-center relative">
           <div className="flex items-center">
             <LogoIcon className="w-7 h-7" />
-            <span className="ml-2 text-2xl font-semibold mr-[106px]">
+            <span className="text-2xl font-semibold ml-2 mr-20">
               Unforgettable
             </span>
           </div>
           <Tabs
-            className="relative -bottom-2.5 ml-[50px] flex items-center"
+            className="relative -bottom-2.5 flex items-center"
             onValueChange={saveForgetClass}
             value={
               forgetClass !== undefined ? forgetClassNames[forgetClass] : ""
@@ -83,8 +83,8 @@ export default function Header() {
                       }
                 }
               >
-                <DialogTrigger className="w-8 h-[30px] ml-1 -mt-0.5 transition hover:bg-gray-800 rounded-t font-[roboto] text-2xl font-bold">
-                  +
+                <DialogTrigger className="w-8 h-[30px] flex justify-center items-center ml-1 mb-0.5 transition hover:bg-gray-800 rounded-t">
+                  <PlusIcon className="w-4 h-4" />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
