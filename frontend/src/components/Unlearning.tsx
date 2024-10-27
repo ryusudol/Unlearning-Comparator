@@ -10,7 +10,7 @@ import OperationStatus from "./OperationStatus";
 import { Button } from "./UI/button";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { HyperparametersIcon, EraserIcon } from "./UI/icons";
+import { HyperparametersIcon, EraserIcon, PlusIcon } from "./UI/icons";
 import { Slider } from "./UI/slider";
 import { Input } from "./UI/input";
 import { Label } from "./UI/label";
@@ -297,19 +297,19 @@ export default function Unlearning({
               />
             </div>
           ) : (
-            <div className="mt-1">
-              <div className="flex items-center mb-1">
+            <div>
+              <div className="flex items-center mb-2">
                 <HyperparametersIcon className="w-3.5 ml-[1px] mr-[5px]" />
                 <p>Hyperparameters</p>
               </div>
-              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-1.5">
+              <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
                 <span className="text-sm">Epochs</span>
                 <div className="flex items-center">
                   <Slider
                     onValueChange={(value: number[]) => setEpochs(value)}
                     value={epochs}
                     defaultValue={epochs}
-                    className="w-[218px] mx-2 cursor-pointer"
+                    className="w-[194px] mx-2 cursor-pointer"
                     min={1}
                     max={30}
                     step={1}
@@ -322,7 +322,7 @@ export default function Unlearning({
                     onValueChange={setLearningRateLog}
                     value={learningRateLog}
                     defaultValue={learningRateLog}
-                    className="w-[218px] mx-2 cursor-pointer"
+                    className="w-[194px] mx-2 cursor-pointer"
                     min={-5}
                     max={-1}
                     step={1}
@@ -337,7 +337,7 @@ export default function Unlearning({
                     onValueChange={setBatchSizeLog}
                     value={batchSizeLog}
                     defaultValue={batchSizeLog}
-                    className="w-[218px] mx-2 cursor-pointer"
+                    className="w-[194px] mx-2 cursor-pointer"
                     min={0}
                     max={9}
                     step={1}
@@ -351,12 +351,10 @@ export default function Unlearning({
           )}
         </div>
       )}
-      <Button className="relative w-full h-[32px] font-medium text-white bg-[#585858] flex items-center">
-        <span className="text-white mr-1 font-bold font-[roboto] text-[28px] relative top-0.5">
-          +
-        </span>
+      {/* <Button className="relative w-full h-[32px] font-medium text-white bg-[#585858] flex items-center">
+        <PlusIcon color="#ffffff" className="w-3 h-3 mr-1" />
         <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
-      </Button>
+      </Button> */}
     </form>
   );
 }

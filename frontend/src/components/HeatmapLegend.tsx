@@ -1,15 +1,18 @@
 import { useRef, useEffect } from "react";
 import * as d3 from "d3";
 
-const width = 8;
-const height = 188;
 const margin = { top: 10, right: 30, bottom: 10, left: 0 };
 
-export default function HeatmapLegend() {
+export default function HeatmapLegend({ isExpanded }: { isExpanded: boolean }) {
   const legendRef = useRef<SVGSVGElement>(null);
+
+  const width = isExpanded ? 12 : 8;
+  const height = isExpanded ? 430 : 188;
 
   useEffect(() => {
     if (legendRef.current) {
+      d3.select(legendRef.current).selectAll("*").remove();
+
       const svg = d3
         .select(legendRef.current)
         .attr("width", width + margin.left + margin.right)
@@ -70,11 +73,11 @@ export default function HeatmapLegend() {
         .style("font-size", "8px")
         .style("overflow", "visible");
     }
-  }, []);
+  }, [height, width]);
 
   return (
     <svg
-      className="mb-[32.5px] -ml-1"
+      className={`${isExpanded ? "mb-[31px]" : "mb-[32.5px]"} -ml-1`}
       ref={legendRef}
       width={width + margin.left + margin.right}
       height={height + margin.top + margin.bottom}

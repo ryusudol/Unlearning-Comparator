@@ -31,10 +31,10 @@ export default function Core({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}` }}
-      className="w-[1552px] px-[5px] py-0.5 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1552px] p-1 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex justify-between items-center mb-0.5">
-        <div className="flex items-center border-[1px] relative top-[3px] px-3 rounded-t-[6px]">
+        <div className="flex items-center">
           <div
             id={EMBEDDINGS}
             onClick={handleDisplayModeChange}
@@ -43,7 +43,7 @@ export default function Core({ height }: { height: number }) {
             }`}
           >
             <ChartScatterIcon className={isAttackMode ? "opacity-40" : ""} />
-            <button className="font-semibold ml-[3px] text-lg -mb-0">
+            <button className="font-semibold ml-[3px] text-lg">
               Embeddings
             </button>
             {isEmbeddingMode && (
@@ -61,10 +61,7 @@ export default function Core({ height }: { height: number }) {
               alt="Attack logo img"
               className={`w-4 ${isEmbeddingMode && "opacity-40"}`}
             />
-            <button
-              id={ATTACK}
-              className="font-semibold ml-[3px] text-lg -mb-0"
-            >
+            <button id={ATTACK} className="font-semibold ml-[3px] text-lg">
               Privacy Attack
             </button>
             {isAttackMode && (

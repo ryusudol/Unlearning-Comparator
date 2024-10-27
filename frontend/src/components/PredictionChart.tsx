@@ -25,7 +25,11 @@ export default function PredictionChart({
   return (
     <div
       className={`-mt-1.5 ${
-        chartMode !== BUBBLE && mode === "Comparison" ? "-ml-14" : ""
+        chartMode !== BUBBLE && mode === "Comparison"
+          ? isExpanded
+            ? "-ml-16"
+            : "-ml-14"
+          : ""
       }`}
     >
       {chartMode === BUBBLE ? (
@@ -49,7 +53,7 @@ export default function PredictionChart({
               data={data}
             />
             <span
-              style={{ fontSize, bottom: isExpanded ? 6 : 0 }}
+              style={{ fontSize, bottom: isExpanded ? 8 : 0 }}
               className="absolute font-extralight bottom-0 ml-14"
             >
               Prediction
