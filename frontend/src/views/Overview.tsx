@@ -1,37 +1,38 @@
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 
 import DataTable from "../components/DataTable";
 import Unlearning from "../components/Unlearning";
 import Defense from "../components/Defense";
 import { columns } from "../components/Columns";
 import { Button } from "../components/UI/button";
-import { SettingsIcon, RoboticIcon } from "../components/UI/icons";
+import { SettingsIcon } from "../components/UI/icons";
 import { overviewData } from "../constants/basicData";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { performanceMetrics } from "../constants/overview";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/UI/tabs";
-import {
-  Dialog,
-  DialogHeader,
-  DialogTitle,
-  DialogContent,
-  DialogTrigger,
-} from "../components/UI/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "../components/UI/dialog";
+
+const UNLEARNING = "unlearning";
+const DEFENSE = "defense";
+
+type ModeType = "unlearning" | "defense";
 
 export default function PerformanceOverview({ height }: { height: number }) {
   const { selectedForgetClasses } = useContext(ForgetClassContext);
 
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<ModeType>(UNLEARNING);
   const [trainedModels, setTrainedModels] = useState<string[]>([]);
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
 
+  const isUnlearning = mode === UNLEARNING;
+  const isDefense = mode === DEFENSE;
+
   const handleAddExpClick = () => {
     setOpen(true);
+  };
+
+  const handleExperimentModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
+    setMode(e.currentTarget.id as ModeType);
   };
 
   return (
@@ -53,35 +54,47 @@ export default function PerformanceOverview({ height }: { height: number }) {
           <DialogTrigger onClick={handleAddExpClick}>
             <Button className="h-[30px] px-3 mr-0.5">Add Experiment</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <div className="flex relative">
-                <RoboticIcon className="scale-125 mr-1.5 relative bottom-[1px]" />
-                <DialogTitle>Model Builder</DialogTitle>
+          <DialogContent className="sm:max-w-[400px]">
+            <div className="w-full flex items-center mt-2">
+              <div
+                id={UNLEARNING}
+                onClick={handleExperimentModeChange}
+                className={`w-full h-8 relative flex items-center cursor-pointer ${
+                  isDefense && "text-gray-400"
+                }`}
+              >
+                <button className="font-semibold w-full">Unlearning</button>
+                <div
+                  className={`absolute w-full h-0.5 bg-black bottom-0 ${
+                    isDefense && "bg-gray-400 h-[1px]"
+                  }`}
+                />
               </div>
-            </DialogHeader>
-            <Tabs defaultValue="unlearning">
-              <TabsList className="w-full bg-black mb-1.5">
-                <TabsTrigger
-                  className="w-full text-base py-1"
-                  value="unlearning"
-                >
-                  Unlearning
-                </TabsTrigger>
-                <TabsTrigger className="w-full text-base py-1" value="defense">
-                  Defense
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent className="h-[210px]" value="unlearning">
+              <div
+                id={DEFENSE}
+                onClick={handleExperimentModeChange}
+                className={`w-full h-8 relative flex items-center cursor-pointer ${
+                  isUnlearning && "text-gray-400"
+                }`}
+              >
+                <button className="font-semibold w-full">Defense</button>
+                <div
+                  className={`absolute w-full h-0.5 bg-black bottom-0 ${
+                    isUnlearning && "bg-gray-400 h-[1px]"
+                  }`}
+                />
+              </div>
+            </div>
+            <div className="h-[220px]">
+              {isUnlearning ? (
                 <Unlearning
                   trainedModels={trainedModels}
                   setUnlearnedModels={setUnlearnedModels}
                 />
-              </TabsContent>
-              <TabsContent className="h-[210px]" value="defense">
+              ) : (
                 <Defense unlearnedModels={unlearnedModels} />
-              </TabsContent>
-            </Tabs>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
