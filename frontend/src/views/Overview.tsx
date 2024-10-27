@@ -64,7 +64,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
               <span>Add Experiment</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[400px] p-3">
+          <DialogContent className="sm:max-w-[400px] p-4">
             <div className="w-full flex items-center mt-2">
               <div
                 id={UNLEARNING}
@@ -105,7 +105,7 @@ export default function PerformanceOverview({ height }: { height: number }) {
             )}
             <DialogFooter>
               <Button
-                className="bg-[#585858] hover:bg-[#696969]"
+                className="bg-[#585858] hover:bg-[#696969] h-7"
                 onClick={handleRunClick}
               >
                 Run
