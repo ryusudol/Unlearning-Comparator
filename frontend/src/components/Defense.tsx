@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import { Button } from "./UI/button";
 
 import OperationStatus from "./OperationStatus";
 import { Slider } from "./UI/slider";
@@ -7,12 +6,7 @@ import { Label } from "./UI/label";
 import { DEFENSE_METHODS } from "../constants/defense";
 import { DefenseConfigurationData } from "../types/settings";
 import { RunningStatusContext } from "../store/running-status-context";
-import {
-  HyperparametersIcon,
-  StartPointIcon,
-  ShieldIcon,
-  PlusIcon,
-} from "./UI/icons";
+import { HyperparametersIcon, StartPointIcon, ShieldIcon } from "./UI/icons";
 import {
   Select,
   SelectContent,
@@ -160,10 +154,6 @@ export default function Defense({ unlearnedModels }: DefenseProps) {
           </div>
         </div>
       )}
-      {/* <Button className="relative w-full h-[32px] font-medium text-white bg-[#585858] flex items-center">
-        <PlusIcon color="#ffffff" className="w-3 h-3 mr-1" />
-        <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
-      </Button> */}
     </form>
   );
 }
