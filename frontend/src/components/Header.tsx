@@ -49,8 +49,9 @@ export default function Header() {
         <div className="flex items-center relative">
           <div className="flex items-center">
             <LogoIcon className="w-7 h-7" />
-            <span className="text-2xl font-semibold ml-2 mr-20">
-              Unforgettable
+            <span className="text-2xl font-semibold ml-2 mr-10">
+              {/* Unforgettable */}
+              Unlearning Comparator
             </span>
           </div>
           <Tabs
@@ -84,7 +85,7 @@ export default function Header() {
                 }
               >
                 <DialogTrigger className="w-8 h-[30px] flex justify-center items-center ml-1 mb-0.5 transition hover:bg-gray-800 rounded-t">
-                  <PlusIcon className="w-4 h-4" />
+                  <PlusIcon className="w-3.5 h-3.5" color="#64758B" />
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
