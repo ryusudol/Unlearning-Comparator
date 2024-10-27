@@ -7,10 +7,9 @@ import React, {
 } from "react";
 
 import OperationStatus from "./OperationStatus";
-import { Button } from "./UI/button";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { HyperparametersIcon, EraserIcon, PlusIcon } from "./UI/icons";
+import { HyperparametersIcon, EraserIcon } from "./UI/icons";
 import { Slider } from "./UI/slider";
 import { Input } from "./UI/input";
 import { Label } from "./UI/label";
@@ -351,10 +350,6 @@ export default function Unlearning({
           )}
         </div>
       )}
-      {/* <Button className="relative w-full h-[32px] font-medium text-white bg-[#585858] flex items-center">
-        <PlusIcon color="#ffffff" className="w-3 h-3 mr-1" />
-        <span>{isRunning ? "Cancel" : "Run and Add Experiment"}</span>
-      </Button> */}
     </form>
   );
 }

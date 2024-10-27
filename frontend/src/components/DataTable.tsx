@@ -10,6 +10,13 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
+import { Data } from "../types/data";
+import { hexToRgba } from "../util";
+import { ScrollArea } from "./UI/scroll-area";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ForgetClassContext } from "../store/forget-class-context";
+import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
+import { cn } from "../lib/utils";
 import {
   Table,
   TableBody,
@@ -18,12 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "./UI/table";
-import { Data } from "../types/data";
-import { hexToRgba } from "../util";
-import { Checkbox } from "./UI/checkbox";
-import { ScrollArea } from "./UI/scroll-area";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
 
 interface Props {
   columns: ColumnDef<Data>[];
@@ -53,15 +54,19 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <div className="flex items-center ml-[34px]">
-            <Checkbox
-              className="w-[18px] h-[18px] rounded-full"
+          <RadioGroup className="flex items-center ml-[34px]">
+            <RadioGroupItem
+              value={row.id}
+              className={cn(
+                "w-[18px] h-[18px] rounded-full",
+                baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+              )}
               checked={baseline === row.id}
-              onCheckedChange={() => {
+              onClick={() => {
                 saveBaseline(baseline === row.id ? "" : row.id);
               }}
             />
-          </div>
+          </RadioGroup>
         ),
       };
     }
@@ -69,15 +74,19 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <div className="flex items-center ml-[26px]">
-            <Checkbox
-              className="w-[18px] h-[18px] rounded-full"
+          <RadioGroup className="flex items-center ml-[26px]">
+            <RadioGroupItem
+              value={row.id}
+              className={cn(
+                "w-[18px] h-[18px] rounded-full",
+                comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+              )}
               checked={comparison === row.id}
-              onCheckedChange={() => {
+              onClick={() => {
                 saveComparison(comparison === row.id ? "" : row.id);
               }}
             />
-          </div>
+          </RadioGroup>
         ),
       };
     }
