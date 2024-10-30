@@ -3,6 +3,7 @@ import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "./UI/button";
 import { Data } from "../types/data";
+import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 
 export const columns: ColumnDef<Data>[] = [
@@ -19,7 +20,11 @@ export const columns: ColumnDef<Data>[] = [
     header: "Phase",
     cell: ({ row }) => {
       const value = row.getValue("phase") as string;
-      return <div>{value}</div>;
+      const backgroundColor =
+        value === "Unlearning"
+          ? "rgba(256, 0, 0, 0.8)"
+          : "rgba(0, 256, 0, 0.8)";
+      return <Badge style={{ backgroundColor }}>{value}</Badge>;
     },
   },
   {
