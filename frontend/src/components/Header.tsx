@@ -92,8 +92,14 @@ export default function Header() {
                       Which class do you want to unlearn?
                     </DialogTitle>
                     <DialogDescription>
-                      Select a class that you want to unlearn. Click add when
-                      you're done.
+                      <p>
+                        Select a class that you want to unlearn. Click add when
+                        you're done.
+                      </p>
+                      <p className="text-black mt-3">
+                        <strong>Dataset</strong>: CIFAR-10,
+                        <strong> Model</strong>: ResNet18
+                      </p>
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-2 items-center gap-y-4">
