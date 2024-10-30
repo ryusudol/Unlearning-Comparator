@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import BarChart from "../components/BarChart";
+import VerticalBarChart from "../components/VerticalBarChart";
 import { TABLEAU10 } from "../constants/tableau10";
 import { basicData } from "../constants/basicData";
 import { Chart01Icon } from "../components/UI/icons";
@@ -8,6 +8,21 @@ import { ClassAccuracies } from "../types/data";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 const GAP_FIX_LENGTH = 3;
+
+export interface GapDataItem {
+  category: string;
+  classLabel: string;
+  gap: number;
+  fill: string;
+  baselineAccuracy: number;
+  comparisonAccuracy: number;
+}
+
+function getMaxGap(gapData: GapDataItem[]) {
+  return Number(
+    Math.max(...gapData.map((item) => Math.abs(item.gap))).toFixed(3)
+  );
+}
 
 export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -68,6 +83,10 @@ export default function Accuracies({ height }: { height: number }) {
         })
       : [];
 
+  const trainMaxGap = getMaxGap(trainAccuracyGap);
+  const testMaxGap = getMaxGap(testAccuracyGap);
+  const maxGap = Math.max(trainMaxGap, testMaxGap);
+
   return (
     <section
       style={{ height: height }}
@@ -83,8 +102,16 @@ export default function Accuracies({ height }: { height: number }) {
         </p>
       ) : (
         <div className="w-full flex justify-center items-center">
-          <BarChart mode="Training" gapData={trainAccuracyGap} />
-          <BarChart mode="Test" gapData={testAccuracyGap} />
+          <VerticalBarChart
+            mode="Training"
+            gapData={trainAccuracyGap}
+            maxGap={maxGap}
+          />
+          <VerticalBarChart
+            mode="Test"
+            gapData={testAccuracyGap}
+            maxGap={maxGap}
+          />
         </div>
       )}
     </section>
