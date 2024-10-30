@@ -73,6 +73,7 @@ export default function DataTable({
               onClick={() => {
                 saveBaseline(baseline === row.id ? "" : row.id);
               }}
+              disabled={comparison === row.id}
             />
           </RadioGroup>
         ),
@@ -93,6 +94,7 @@ export default function DataTable({
               onClick={() => {
                 saveComparison(comparison === row.id ? "" : row.id);
               }}
+              disabled={baseline === row.id}
             />
           </RadioGroup>
         ),
