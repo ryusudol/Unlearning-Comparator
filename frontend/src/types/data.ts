@@ -44,7 +44,7 @@ export type Data = {
   id: string;
   forget_class: number;
   phase: string;
-  init_id: string; // TODO: 지워야 할 수도
+  init_id: string;
   method: string;
   epochs: number | string;
   batch_size: number | string;

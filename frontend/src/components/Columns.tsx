@@ -23,6 +23,14 @@ export const columns: ColumnDef<Data>[] = [
     },
   },
   {
+    accessorKey: "init_id",
+    header: "Init",
+    cell: ({ row }) => {
+      const value = row.getValue("init_id") as string;
+      return <div>{value !== "N/A" ? value : "-"}</div>;
+    },
+  },
+  {
     accessorKey: "method",
     header: "Method",
     cell: ({ row }) => {
