@@ -14,6 +14,7 @@ import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "./UI/chart";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { GapDataItem } from "../views/Accuracies";
 
 const TOOLTIP_FIX_LENGTH = 3;
 const LABEL_FONT_SIZE = 11;
@@ -63,19 +64,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-interface GapDataItem {
-  category: string;
-  classLabel: string;
-  gap: number;
-  fill: string;
-  baselineAccuracy: number;
-  comparisonAccuracy: number;
-}
-interface Props {
-  mode: "Training" | "Test";
-  gapData: GapDataItem[] | [];
-}
-
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as GapDataItem;
@@ -93,12 +81,14 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   return null;
 }
 
-export default function MyBarChart({ mode, gapData }: Props) {
-  const { forgetClass } = useContext(ForgetClassContext);
+interface Props {
+  mode: "Training" | "Test";
+  gapData: GapDataItem[] | [];
+  maxGap: number;
+}
 
-  const maxValue =
-    Math.ceil(Math.max(...gapData.map((item) => Math.abs(item.gap))) * 100) /
-    100;
+export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
+  const { forgetClass } = useContext(ForgetClassContext);
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -134,10 +124,10 @@ export default function MyBarChart({ mode, gapData }: Props) {
           <XAxis
             dataKey="value"
             type="number"
-            domain={[-maxValue, maxValue]}
+            domain={[-maxGap, maxGap]}
             tickFormatter={(value) => value.toString()}
             fontSize={LABEL_FONT_SIZE}
-            ticks={[-maxValue, 0, maxValue]}
+            ticks={[-maxGap, 0, maxGap]}
           >
             <Label
               fill="black"
