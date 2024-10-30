@@ -3,6 +3,7 @@ import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "./UI/button";
 import { Data } from "../types/data";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 
 export const columns: ColumnDef<Data>[] = [
   {
@@ -58,14 +59,23 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "unlearn_accuracy",
     header: ({ column }) => {
       return (
-        <Button
-          className="w-full px-0 h-[34px]"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          UA
-          <ArrowUpDown className="w-4" />
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button
+              className="w-full px-0 h-[34px]"
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              UA
+              <ArrowUpDown className="w-4" />
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-3 py-2" side="top">
+            Unlearning Accuracy
+          </HoverCardContent>
+        </HoverCard>
       );
     },
     cell: ({ row }) => {
@@ -77,14 +87,23 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "remain_accuracy",
     header: ({ column }) => {
       return (
-        <Button
-          className="w-full px-0 h-[34px]"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          RA
-          <ArrowUpDown className="w-4" />
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button
+              className="w-full px-0 h-[34px]"
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              RA
+              <ArrowUpDown className="w-4" />
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-3 py-2" side="top">
+            Remaining Accuracy
+          </HoverCardContent>
+        </HoverCard>
       );
     },
     cell: ({ row }) => {
@@ -96,14 +115,23 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "test_unlearn_accuracy",
     header: ({ column }) => {
       return (
-        <Button
-          className="w-full px-0 h-[34px]"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          TUA
-          <ArrowUpDown className="w-4" />
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button
+              className="w-full px-0 h-[34px]"
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              TUA
+              <ArrowUpDown className="w-4" />
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-3 py-2" side="top">
+            Test Unlearning Accuracy
+          </HoverCardContent>
+        </HoverCard>
       );
     },
     cell: ({ row }) => {
@@ -115,14 +143,23 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "test_remain_accuracy",
     header: ({ column }) => {
       return (
-        <Button
-          className="w-full px-0 h-[34px]"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          TRA
-          <ArrowUpDown className="w-4" />
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button
+              className="w-full px-0 h-[34px]"
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              TRA
+              <ArrowUpDown className="w-4" />
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-3 py-2" side="top">
+            Test Remaining Accuracy
+          </HoverCardContent>
+        </HoverCard>
       );
     },
     cell: ({ row }) => {
@@ -134,14 +171,23 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "RTE",
     header: ({ column }) => {
       return (
-        <Button
-          className="w-full px-0 h-[34px]"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          RTE(s)
-          <ArrowUpDown className="w-4" />
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button
+              className="w-full px-0 h-[34px]"
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              RTE(s)
+              <ArrowUpDown className="w-4" />
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-auto px-3 py-2" side="top">
+            Run-Time Efficiency
+          </HoverCardContent>
+        </HoverCard>
       );
     },
     cell: ({ row }) => {

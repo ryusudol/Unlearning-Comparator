@@ -26,6 +26,14 @@ import {
   TableRow,
 } from "./UI/table";
 
+const sortables = [
+  "unlearn_accuracy",
+  "remain_accuracy",
+  "test_unlearn_accuracy",
+  "test_remain_accuracy",
+  "RTE",
+];
+
 interface Props {
   columns: ColumnDef<Data>[];
   data: Data[];
@@ -172,8 +180,11 @@ export default function DataTable({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const style = sortables.includes(header.column.id)
+                    ? { width: "80px" }
+                    : {};
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} style={style}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
