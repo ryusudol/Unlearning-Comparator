@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useMemo, useContext } from "react";
 import {
   Bar,
   BarChart,
@@ -72,7 +72,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <p className="font-medium">
           Class: {forgetClassNames[+data.classLabel]}
         </p>
-        <p>Gap: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+        <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         <p>Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
       </div>
@@ -83,25 +83,34 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 
 interface Props {
   mode: "Training" | "Test";
-  gapData: GapDataItem[] | [];
+  gapData: GapDataItem[];
   maxGap: number;
 }
 
 export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
 
+  const remainGapAvgValue = useMemo(
+    () =>
+      gapData.length
+        ? gapData.reduce((sum, datum) => sum + datum.gap, 0) / gapData.length
+        : 0,
+    [gapData]
+  );
+  const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
+
   return (
     <div className="flex flex-col justify-center items-center">
-      <h5 className="text-[15px] mb-1 ml-5">{mode} Dataset</h5>
+      <h5 className="text-[15px] mb-0.5 ml-5">{mode} Dataset</h5>
       <ChartContainer config={chartConfig} className="w-[240px] h-[200px]">
         <BarChart
           accessibilityLayer
           data={gapData}
           layout="vertical"
           margin={{
-            left: 1,
+            left: 0,
             right: 40,
-            top: 0,
+            top: 13,
             bottom: 8,
           }}
         >
@@ -141,6 +150,18 @@ export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
           <Bar dataKey="gap" layout="vertical" />
+          <ReferenceLine
+            x={remainGapAvg}
+            stroke="#777"
+            strokeDasharray="3 3"
+            label={{
+              value: `avg: ${remainGapAvg}`,
+              position: "top",
+              fontSize: LABEL_FONT_SIZE,
+              fill: "#777",
+              offset: 3.5,
+            }}
+          />
         </BarChart>
       </ChartContainer>
     </div>
