@@ -61,10 +61,10 @@ export default function Embeddings({ height }: { height: number }) {
   }, [comparisonData]);
 
   return (
-    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-b-[6px] rounded-tr-[6px]">
+    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
       <div className="w-[120px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
-        <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+        <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
           <div className="flex items-center">
             <span className="mr-1">Metadata</span>
             <HelpCircleIcon className="cursor-pointer" />
@@ -77,7 +77,7 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
         {/* Legend - Controls */}
-        <div className="w-full h-[104px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+        <div className="w-full h-[104px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
           <span>Controls</span>
           <div>
             <div className="flex items-center">
@@ -95,7 +95,7 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
         {/* Legend - Data Type */}
-        <div className="w-full h-[86px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+        <div className="w-full h-[86px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
           <span>Data Type</span>
           <div>
             <div className="flex items-center text-[15px] font-light">
@@ -109,22 +109,20 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
         {/* Legend - Predictions */}
-        <div className="w-full h-[370px] flex flex-col justify-start items-start pl-2 pr-[2px] py-[5px] border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]">
+        <div className="w-full h-[370px] flex flex-col justify-start items-start pl-2 pr-0.5 py-[5px] border-[1px] border-solid rounded-[6px]">
           <span className="mb-1.5">Predictions</span>
           <div>
             {forgetClassNames.map((name, idx) => (
-              <div key={idx} className="flex items-center mb-[2px]">
+              <div key={idx} className="flex items-center mb-0.5">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[idx]}` }}
-                  className="w-3 h-[30px] mr-[6px]"
+                  className="w-3 h-[30px] mr-1.5"
                 />
-                <div className="flex items-center">
-                  <span className="text-[15px] font-light">{name}</span>
-                  {forgetClass && name === forgetClassNames[forgetClass] ? (
-                    <div className="flex items-center ml-0.5">
-                      (<MultiplicationSignIcon className="-mx-0.5" />)
-                    </div>
-                  ) : null}
+                <div className="flex items-center text-[15px] font-light">
+                  <span>{name}</span>
+                  {forgetClass && name === forgetClassNames[forgetClass] && (
+                    <span className="ml-0.5">(X)</span>
+                  )}
                 </div>
               </div>
             ))}
