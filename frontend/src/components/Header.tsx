@@ -68,7 +68,7 @@ export default function Header() {
                   className="h-[30px] rounded-b-none data-[state=active]:shadow-none"
                 >
                   <span className="px-1 border-b-2 border-black text-base">
-                    Forget Class: {forgetClassNames[selectedForgetClass]}
+                    Forget: {forgetClassNames[selectedForgetClass]}
                   </span>
                 </TabsTrigger>
               ))}
@@ -96,9 +96,13 @@ export default function Header() {
                         Select a class that you want to unlearn. Click add when
                         you're done.
                       </p>
-                      <p className="text-black mt-3">
-                        <strong>Dataset</strong>: CIFAR-10,
-                        <strong> Model</strong>: ResNet18
+                      <p className="text-black mt-2">
+                        <span className="mr-3">
+                          Dataset: <strong>CIFAR-10</strong>
+                        </span>
+                        <span>
+                          Model: <strong>ResNet18</strong>
+                        </span>
                       </p>
                     </DialogDescription>
                   </DialogHeader>
@@ -126,14 +130,14 @@ export default function Header() {
           </Tabs>
         </div>
       </div>
-      <div className="ml-5 relative top-2 right-[284px] text-[13px]">
+      <p className="ml-5 relative top-2 right-[278px] text-[13px]">
         <span className="mr-3">
-          <strong>Dataset</strong>: CIFAR-10
+          Dataset: <strong>CIFAR-10</strong>
         </span>
         <span>
-          <strong>Model</strong>: Resnet18
+          Model: <strong>ResNet18</strong>
         </span>
-      </div>
+      </p>
     </div>
   );
 }
