@@ -199,9 +199,14 @@ export default function DataTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="text-sm">
+          <TableBody
+            className={`text-sm ${
+              table.getRowModel().rows?.length <= 5 &&
+              "[&_tr:last-child]:border-b"
+            }`}
+          >
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, rowIdx) => (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}

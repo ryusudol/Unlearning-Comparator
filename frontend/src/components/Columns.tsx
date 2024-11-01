@@ -22,8 +22,12 @@ export const columns: ColumnDef<Data>[] = [
       const value = row.getValue("phase") as string;
       const backgroundColor =
         value === "Unlearning"
-          ? "rgba(256, 0, 0, 0.8)"
-          : "rgba(0, 256, 0, 0.8)";
+          ? "#FFA500"
+          : value === "Defended"
+          ? "#008000"
+          : value === "Origin"
+          ? "#808080"
+          : "#FFD700";
       return <Badge style={{ backgroundColor }}>{value}</Badge>;
     },
   },
