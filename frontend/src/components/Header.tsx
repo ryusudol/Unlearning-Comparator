@@ -96,14 +96,24 @@ export default function Header() {
                         Select a class that you want to unlearn. Click add when
                         you're done.
                       </p>
-                      <p className="text-black mt-2">
-                        <span className="mr-3">
-                          Dataset: <strong>CIFAR-10</strong>
-                        </span>
-                        <span>
-                          Model: <strong>ResNet18</strong>
-                        </span>
-                      </p>
+                      <div className="flex items-center gap-y-4 text-black mt-4 ml-[62px]">
+                        <div className="flex flex-col mr-[82px]">
+                          <span className="text-xs text-muted-foreground">
+                            Dataset
+                          </span>
+                          <span className="text-sm font-semibold -mt-[3px]">
+                            CIFAR-10
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-muted-foreground">
+                            Model
+                          </span>
+                          <span className="text-sm font-semibold -mt-[3px]">
+                            ResNet18
+                          </span>
+                        </div>
+                      </div>
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-2 items-center gap-y-4">
@@ -130,14 +140,16 @@ export default function Header() {
           </Tabs>
         </div>
       </div>
-      <p className="ml-5 relative top-2 right-[278px] text-[13px]">
-        <span className="mr-3">
-          Dataset: <strong>CIFAR-10</strong>
-        </span>
-        <span>
-          Model: <strong>ResNet18</strong>
-        </span>
-      </p>
+      <div className="flex ml-5 relative top-1.5 right-[342px] text-[13px]">
+        <div className="flex flex-col mr-10">
+          <span className="text-[10px] text-gray-300">Dataset</span>
+          <span className="text-xs font-semibold -mt-[3px]">CIFAR-10</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-gray-300">Model</span>
+          <span className="text-xs font-semibold -mt-[3px]">ResNet18</span>
+        </div>
+      </div>
     </div>
   );
 }
