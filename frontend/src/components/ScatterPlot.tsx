@@ -102,15 +102,12 @@ const ScatterPlot = React.memo(
 
         const gMain = svg.append("g");
 
-        const rect = gMain
+        gMain
           .append("rect")
           .attr("width", width)
           .attr("height", height)
           .style("fill", "none")
-          .style("pointer-events", "all")
-          .style("cursor", "grab")
-          .on("mousedown", () => rect.style("cursor", "grabbing"))
-          .on("mousemove", () => rect.style("cursor", "grab"));
+          .style("pointer-events", "all");
 
         const gDot = gMain.append("g");
 
@@ -191,10 +188,7 @@ const ScatterPlot = React.memo(
           }
         }
 
-        function handleMouseLeave(event: Event, d: number[]) {
-          if (event.currentTarget)
-            d3.select(event.currentTarget as Element).style("cursor", "grab");
-
+        function handleMouseLeave() {
           if (tooltipRef.current) tooltipRef.current.style.display = "none";
         }
 
