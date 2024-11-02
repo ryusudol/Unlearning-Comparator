@@ -33,10 +33,10 @@ def get_data_loaders(batch_size):
     
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
-    
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=32)
-    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=32)
-    
+    print("loaded data")
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    print("loaded loaders")
     return train_loader, test_loader, train_set, test_set
 
 def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate, is_best=False):

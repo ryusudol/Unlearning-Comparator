@@ -18,7 +18,7 @@ class UnlearningRequest(BaseModel):
     batch_size: int = Field(default=128, description="Batch size for unlearning")
     learning_rate: float = Field(default=0.01, description="Learning rate for unlearning")
     epochs: int = Field(default=5, ge=1, description="Number of unlearning epochs")
-    forget_class: int = Field(default=4, ge=0, lt=10, description="Class to forget (0-9)")
+    forget_class: int = Field(default=4, ge=-1, lt=10, description="Class to forget (0-9), -1 for original")
     weights_filename: str = Field(default=".", description="Filename of the weights in trained_models folder")
     
 class CustomUnlearningRequest(BaseModel):
@@ -102,7 +102,7 @@ async def get_unlearning_status():
 @router.post("/unlearn/custom")
 async def start_unlearning_custom(
     background_tasks: BackgroundTasks,
-    forget_class: int = Form(..., ge=0, lt=10),
+    forget_class: int = Form(..., ge=-1, lt=10),
     weights_file: UploadFile = File(...)
 ):
     if status.is_unlearning:
@@ -117,11 +117,9 @@ async def start_unlearning_custom(
     with open(weights_path, "wb") as buffer:
         content = await weights_file.read()
         buffer.write(content)
-
-    request = CustomUnlearningRequest(forget_class=forget_class)
     
     # Use the new main function in the background task
-    background_tasks.add_task(run_unlearning_custom, request, status, weights_path)
+    background_tasks.add_task(run_unlearning_custom, forget_class, status, weights_path)
     
     return {"message": "Custom Unlearning started"}
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from umap import UMAP
 import os
 from datetime import datetime
-from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_RANDOM_STATE, UMAP_N_JOBS
+from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_N_JOBS
 
 async def compute_umap_embedding(activation, 
                                   labels, 
@@ -25,9 +25,8 @@ async def compute_umap_embedding(activation,
                 n_neighbors=UMAP_N_NEIGHBORS,
                 min_dist=UMAP_MIN_DIST,
                 init=UMAP_INIT,
-                # random_state=UMAP_RANDOM_STATE,
                 n_jobs=UMAP_N_JOBS)
-    # embedding = umap.fit_transform(activation.reshape(activation.shape[0], -1))
+    
     embedding = umap.fit_transform(activation)
     umap_embedding = embedding
     plt.figure(figsize=(12, 11))

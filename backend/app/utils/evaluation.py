@@ -3,67 +3,49 @@ import numpy as np
 import torch.nn.functional as F
 from torch_cka import CKA
 from app.config.settings import UMAP_DATA_SIZE
+# from scipy.special import softmax
+import time
 
-async def get_layer_activations_and_predictions(
-        model, 
-        data_loader, 
-        device, 
-        forget_class=-1,
-        num_samples=UMAP_DATA_SIZE
-    ):
+async def get_layer_activations_and_predictions(model, data_loader, device, num_samples=UMAP_DATA_SIZE):
     model.eval()
     activations = []
     predictions = []
     logits = []
     sample_count = 0
-    
+
+    # Hook function to capture the activations of the last layer
+    def hook_fn(module, input, output):
+        activations.append(output.detach().cpu().numpy())
+
+    # Register the hook for the last layer
+    hook = model.layer4.register_forward_hook(hook_fn)
+
     with torch.no_grad():
         for inputs, labels in data_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
-            
+
             # Get predictions
             outputs = model(inputs)
             _, predicted = outputs.max(1)
             predictions.extend(predicted.cpu().numpy())
-            
+
             # Add logits for all classes
             logits.extend(outputs.cpu().numpy())
-            
-            # Get activations
-            x = model.conv1(inputs)
-            x = model.bn1(x)
-            x = model.relu(x)
-            x = model.maxpool(x)
-
-            x = model.layer1(x)
-            x = model.layer2(x)
-            x = model.layer3(x)
-            x = model.layer4(x)
-            activations.append(x.cpu().numpy())
 
             sample_count += inputs.size(0)
             if sample_count >= num_samples:
                 break
 
-    activations = np.concatenate(activations, axis=0)[:num_samples]
-    activations = activations.reshape(activations.shape[0], -1)
+    # Remove the hook after collecting activations
+    hook.remove()
 
-    predictions = np.array(predictions)[:num_samples]
-    logits = np.array(logits)[:num_samples]
-    
-    # Calculate max logits
-    max_logits = logits.max(axis=1)
-    
-    # Get the maximum logit value
-    max_logit = max_logits.max()
-    
-    print(f"Mean max logit: {max_logits.mean():.4f}")
-    print(f"Median max logit: {np.median(max_logits):.4f}")
-    print(f"Min max logit: {max_logits.min():.4f}")
-    print(f"Max max logit: {max_logit:.4f}")
-    
-    return activations, predictions, logits, max_logits.mean()
+    # Concatenate and reshape activations to the desired shape
+    activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
+    predictions = np.array(predictions)
+    logits = np.array(logits)
+
+    return activations, predictions, logits
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
@@ -108,8 +90,11 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     label_distribution = np.zeros((10, 10))  # 실제 클래스 vs 예측 클래스
     confidence_sum = np.zeros((10, 10))  # 실제 클래스 vs 모든 클래스의 confidence 합
     
+    start_time = time.time()  # 시작 시간 기록
+    print(f"Start evaluation:{time.time() - start_time}")
     with torch.no_grad():
-        for data in data_loader:
+        for batch_idx, data in enumerate(data_loader):
+            print(f"Start Loop:{time.time() - start_time}")
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -130,6 +115,10 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 
                 label_distribution[label][pred] += 1
                 confidence_sum[label] += probabilities[i].cpu().numpy()
+            
+            # 경과 시간 출력
+            elapsed_time = time.time() - start_time
+            print(f"Batch {batch_idx + 1}/{len(data_loader)} processed, elapsed time: {elapsed_time:.2f} seconds")
 
     accuracy = correct / total
     class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
@@ -137,7 +126,9 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     # Normalize distributions
     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
     confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
+    
     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
+
 
 async def calculate_cka_similarity(model_before, model_after, train_loader, test_loader, forget_class, device):
     detailed_layers = [
@@ -172,13 +163,13 @@ async def calculate_cka_similarity(model_before, model_after, train_loader, test
     forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class)
     other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class)
 
-    cka.compare(forget_class_train_loader)
+    cka.compare(forget_class_train_loader, forget_class_train_loader)
     results_forget_train = cka.export()
-    cka.compare(other_classes_train_loader)
+    cka.compare(other_classes_train_loader, other_classes_train_loader)
     results_other_train = cka.export()
-    cka.compare(forget_class_test_loader)
+    cka.compare(forget_class_test_loader, forget_class_test_loader)
     results_forget_test = cka.export()
-    cka.compare(other_classes_test_loader)
+    cka.compare(other_classes_test_loader, other_classes_test_loader)
     results_other_test = cka.export()
 
     def format_cka_results(results):
