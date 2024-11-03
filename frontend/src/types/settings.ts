@@ -50,20 +50,15 @@ export interface DefenseStatus {
 
 // Configuration Data
 export interface TrainingConfigurationData {
-  model: string;
-  dataset: string;
   epochs: number;
   learning_rate: number;
   batch_size: number;
-  seed: number;
 }
 
 export interface UnlearningConfigurationData {
   method: string;
-  model: string;
-  dataset: string;
   trained_model: string;
-  forget_class: string;
+  forget_class: number;
   epochs: number;
   learning_rate: number;
   batch_size: number;
@@ -80,13 +75,4 @@ export interface DefenseConfigurationData {
 export interface Action {
   type: string;
   payload: string | number;
-}
-
-export interface ResultType {
-  unlearn_accuracy: number;
-  remain_accuracy: number;
-  test_accuracy: number;
-  train_class_accuracies: ClassAccuracies;
-  test_class_accuracies: ClassAccuracies;
-  svg_files: string[];
 }

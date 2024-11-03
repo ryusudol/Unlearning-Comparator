@@ -4,18 +4,6 @@ import {
   DefenseStatus,
 } from "./types/settings";
 
-export function modifySvg(svg: string) {
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svg, "image/svg+xml");
-  const legend = svgDoc.getElementById("legend_1");
-
-  if (!legend || !legend.parentNode) return;
-
-  legend.parentNode.removeChild(legend);
-
-  return new XMLSerializer().serializeToString(svgDoc);
-}
-
 export function getAccuracies(
   selectedMode: "Test" | "Train",
   identifier: "training" | "unlearning" | "defense",
@@ -74,28 +62,28 @@ export function getAccuracies(
 export function getDefaultUnlearningConfig(method: string) {
   let epochs, learning_rate;
 
-  if (method === "Fine-Tuning") {
+  if (method === "ft") {
     epochs = 10;
-    learning_rate = 0.02;
-  } else if (method === "Random-Label") {
+    learning_rate = -2;
+  } else if (method === "rl") {
     epochs = 3;
-    learning_rate = 0.01;
-  } else if (method === "Gradient-Ascent") {
+    learning_rate = -2;
+  } else if (method === "ga") {
     epochs = 3;
-    learning_rate = 0.0001;
+    learning_rate = -4;
   } else {
     epochs = 30;
-    learning_rate = 0.01;
+    learning_rate = -2;
   }
 
   return { epochs, learning_rate };
 }
 
-export const getColorForValue = (value: number) => {
-  if (value >= 0.95) return "#a1d76a";
-  if (value >= 0.9) return "#d9ef8b";
-  if (value >= 0.85) return "#f7f7f7";
-  if (value >= 0.8) return "#fde0ef";
-  if (value >= 0.75) return "#f1b6da";
-  return "#e9a3c9";
+export const hexToRgba = (hex: string, opacity: number) => {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };

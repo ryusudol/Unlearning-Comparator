@@ -1,7 +1,5 @@
 export interface OverviewItem {
   forget_class: string;
-  model: string;
-  dataset: string;
   training: string;
   unlearning: string;
   defense: string;
@@ -10,29 +8,26 @@ export interface OverviewItem {
   batch_size: number;
   ua: number;
   ra: number;
-  ta: number;
-  mia: number;
-  avg_gap: number;
+  tua: number;
+  tra: number;
   rte: number;
   train_class_accuracies: { [key: string]: string };
   test_class_accuracies: { [key: string]: string };
-  unlearn_svgs: string[];
-  retrain_svgs: string[];
 }
 
-export interface Overview {
+export interface OverviewList {
   overview: OverviewItem[];
 }
 
-export interface OverviewContextType extends Overview {
-  saveOverview: (overview: Overview) => void;
+export interface OverviewContextType extends OverviewList {
+  saveOverview: (overview: OverviewList) => void;
   retrieveOverview: () => void;
   deleteLastOverviewItem: () => void;
   clearOverview: () => void;
 }
 
 export type Action =
-  | { type: "SAVE_OVERVIEW"; payload: Overview }
+  | { type: "SAVE_OVERVIEW"; payload: OverviewList }
   | { type: "RETRIEVE_OVERVIEW" }
   | { type: "DELETE_LAST_OVERVIEW_ITEM" }
   | { type: "CLEAR_OVERVIEW" };

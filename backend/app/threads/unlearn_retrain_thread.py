@@ -116,25 +116,10 @@ class UnlearningRetrainThread(threading.Thread):
             for i, acc in test_class_accuracies.items():
                 print(f"  Class {i}: {acc:.2f}%")
             print(f"Progress: {self.status.progress:.5f}%, ETA: {self.status.estimated_time_remaining:.2f}s")
-            
             sys.stdout.flush()
         
-        print()  # Print a newline at the end of unlearning
+        print() 
 
         if not self.status.cancel_requested:
             save_dir = 'unlearned_models'
             save_model(self.model, save_dir, self.model_name, self.dataset_name, self.epochs, self.learning_rate)
-
-            # plt.figure(figsize=(10, 6))
-            # plt.plot(range(1, self.epochs + 1), train_accuracies, label='Train Accuracy')
-            # plt.plot(range(1, self.epochs + 1), test_accuracies, label='Test Accuracy')
-            # plt.xlabel('Epochs')
-            # plt.ylabel('Accuracy (%)')
-            # plt.title(f'Training and Test Accuracy for {self.model_name} on {self.dataset_name}')
-            # plt.legend()
-            # plt.grid(True)
-            # plot_filename = f"accuracy_plot_{self.model_name}_{self.dataset_name}_{self.epochs}epochs_{self.learning_rate}lr.png"
-            # plot_path = os.path.join(save_dir, plot_filename)
-            # plt.savefig(plot_path)
-            # plt.close()
-            # print(f"Accuracy plot saved to {plot_path}")

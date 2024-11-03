@@ -26,39 +26,31 @@ export async function fetchUnlearningResult() {
   }
 }
 
-export async function executePredefinedUnlearning(
-  configState: UnlearningConfigurationData
+export async function executeMethodUnlearning(
+  runningConfig: UnlearningConfigurationData
 ) {
-  const method = configState.method;
-  const end =
-    method === "Fine-Tuning"
-      ? "ft"
-      : method === "Random-Label"
-      ? "rl"
-      : method === "Gradient-Ascent"
-      ? "ga"
-      : "retrain";
+  const method = runningConfig.method;
   let data: {
     epochs: number;
     batch_size: number;
     learning_rate: number;
-    forget_class: string;
+    forget_class: number;
     weights_filename?: string;
   } = {
-    epochs: configState.epochs,
-    batch_size: configState.batch_size,
-    learning_rate: configState.learning_rate,
-    forget_class: configState.forget_class,
+    epochs: runningConfig.epochs,
+    batch_size: runningConfig.batch_size,
+    learning_rate: runningConfig.learning_rate,
+    forget_class: runningConfig.forget_class,
   };
-  if (end !== "retrain") {
+  if (method !== "retrain") {
     data = {
       ...data,
-      weights_filename: configState.trained_model,
+      weights_filename: runningConfig.trained_model,
     };
   }
 
   try {
-    const response = await fetch(`${API_URL}/unlearn/${end}`, {
+    const response = await fetch(`${API_URL}/unlearn/${method}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -84,12 +76,12 @@ export async function executePredefinedUnlearning(
 
 export async function executeCustomUnlearning(
   customFile: File,
-  forgetClass: string
+  forgetClass: number
 ) {
   try {
     const formData = new FormData();
     formData.append("weights_file", customFile);
-    formData.append("forget_class", forgetClass);
+    formData.append("forget_class", forgetClass.toString());
 
     const response = await fetch(`${API_URL}/unlearn/custom`, {
       method: "POST",

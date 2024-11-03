@@ -1,51 +1,46 @@
-import { useState, useEffect, useContext } from "react";
-import styles from "./App.module.css";
+import { useState, useEffect } from "react";
 
-import Settings from "../views/Settings";
-import PerformanceOverview from "../views/PerformanceOverview";
-import PerformanceMetrics from "../views/PerformanceMetrics";
-import Embeddings from "../views/Embeddings";
-import Privacies from "../views/Privacies";
-import { BaselineContext } from "../store/baseline-context";
-import { SelectedIDContext } from "../store/selected-id-context";
-import { OverviewContext } from "../store/overview-context";
+import Header from "../components/Header";
+import Overview from "../views/Overview";
+import Accuracies from "../views/Accuracies";
+import Core from "../views/Core";
+import Predictions from "../views/Predictions";
+import Correlations from "../views/Correlations";
 
-const UPPER_HEIGHT = 265;
-const LOWER_HEIGHT = 615;
+const UPPER_HEIGHT = 260;
+const LOWER_HEIGHT = 757;
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { baseline, saveBaseline, retrieveBaseline } =
-    useContext(BaselineContext);
-  const { saveSelectedID } = useContext(SelectedIDContext);
-  const { overview, retrieveOverview } = useContext(OverviewContext);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isPredictionsExpanded, setIsPredictionsExpanded] = useState(false);
 
   useEffect(() => {
-    retrieveBaseline();
-    retrieveOverview();
+    setIsPageLoading(false);
+  }, []);
 
-    saveBaseline(baseline ?? 0);
-    saveSelectedID(overview.length === 0 ? 0 : overview.length - 1);
+  if (isPageLoading) return <div>Loading . . .</div>;
 
-    setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overview.length]);
-
-  if (isLoading) {
-    return <div>Loading . . .</div>;
-  }
+  const handleExpansionClick = () => {
+    setIsPredictionsExpanded((prev) => !prev);
+  };
 
   return (
-    <section className={styles["body-wrapper"]}>
-      <div className={styles.row}>
-        <Settings height={UPPER_HEIGHT} />
-        <PerformanceOverview height={UPPER_HEIGHT} />
-        <PerformanceMetrics height={UPPER_HEIGHT} />
+    <section className="relative">
+      <Header />
+      <div className="flex justify-between">
+        <Overview height={UPPER_HEIGHT} />
+        <Accuracies height={UPPER_HEIGHT} />
       </div>
-      <div className={styles.row}>
-        <Embeddings height={LOWER_HEIGHT} />
-        <Privacies height={LOWER_HEIGHT} />
+      <div className="flex">
+        <Core height={LOWER_HEIGHT} />
+        <div className="flex flex-col">
+          <Predictions
+            height={289}
+            isExpanded={isPredictionsExpanded}
+            onExpansionClick={handleExpansionClick}
+          />
+          <Correlations height={LOWER_HEIGHT - 289} />
+        </div>
       </div>
     </section>
   );

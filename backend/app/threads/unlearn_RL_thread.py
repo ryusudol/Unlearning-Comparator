@@ -2,31 +2,40 @@ import threading
 import asyncio
 import torch
 import time
-import sys
 import os
-import matplotlib.pyplot as plt
-from app.utils.helpers import save_model
-from app.utils.evaluation import evaluate_model
+import uuid
+import json
+import numpy as np
+from app.utils.helpers import save_model, set_seed
+from app.utils.evaluation import evaluate_model, get_layer_activations_and_predictions
+from app.utils.visualization import compute_umap_embedding
+from app.config.settings import UNLEARN_SEED, UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningRLThread(threading.Thread):
-    def __init__(self, model, train_loader, test_loader, criterion, optimizer, scheduler,
-                 device, epochs, status, model_name, dataset_name, learning_rate, forget_class):
+    def __init__(self, model, device, criterion, optimizer, scheduler, request, train_loader, test_loader, train_set, test_set, status, model_name, dataset_name):
         threading.Thread.__init__(self)
         self.model = model
-        self.train_loader = train_loader
-        self.test_loader = test_loader
+        self.device = device
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.device = device
-        self.epochs = epochs
+        self.request = request
+        self.train_loader = train_loader
+        self.test_loader = test_loader
+        self.train_set = train_set
+        self.test_set = test_set
         self.status = status
         self.model_name = model_name
         self.dataset_name = dataset_name
-        self.learning_rate = learning_rate
-        self.forget_class = forget_class
         self.exception = None
         self.loop = None
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
 
     def run(self):
         try:
@@ -38,44 +47,48 @@ class UnlearningRLThread(threading.Thread):
         finally:
             if self.loop:
                 self.loop.close()
-
+        
     async def unlearn_RL_model(self):
+        if self.stopped():
+            return
+
+        print(f"Starting RL unlearning for class {self.request.forget_class}...")
+        set_seed(UNLEARN_SEED)
         self.model.train()
         self.status.start_time = time.time()
-        self.status.total_epochs = self.epochs
-        
+
         train_accuracies = []
         test_accuracies = []
 
-        for epoch in range(self.epochs):
-            running_loss = 0.0
-            
-            for i, (inputs, labels) in enumerate(self.train_loader):
-                if self.status.cancel_requested:
-                    self.status.is_unlearning = False
-                    print("\nTraining cancelled mid-batch.")
-                    return
-                
-                inputs, labels = inputs.to(self.device), labels.to(self.device)
-                
-                # Assign random labels to the forget class
-                forget_mask = (labels == self.forget_class)
-                random_labels = torch.randint(0, 10, (forget_mask.sum(),), device=self.device)
-                labels[forget_mask] = random_labels
+        start_time = time.time() 
 
+        for epoch in range(self.request.epochs):
+            running_loss = 0.0
+
+            for i, (inputs, labels) in enumerate(self.train_loader):
+                if self.stopped():
+                    return
+
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
                 self.optimizer.zero_grad()
                 outputs = self.model(inputs)
+
+                forget_mask = (labels == self.request.forget_class)
+                num_forget = forget_mask.sum().item()
+                if num_forget > 0:
+                    random_labels = torch.randint(0, 9, (num_forget,), device=self.device)
+                    random_labels += (random_labels >= self.request.forget_class).long()
+                    labels[forget_mask] = random_labels 
+
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
-
                 running_loss += loss.item()
 
-            if self.status.cancel_requested:
-                self.status.is_unlearning = False
-                print("\nUnlearning cancelled.")
+
+            if self.stopped():
                 return
-            
+
             self.scheduler.step()
 
             # Evaluate on train set
@@ -88,14 +101,14 @@ class UnlearningRLThread(threading.Thread):
             test_accuracies.append(test_accuracy)
 
             # Save current model (last epoch)
-            if epoch == self.epochs - 1:
+            if epoch == self.request.epochs - 1:
                 save_dir = 'unlearned_models'
-                save_model(self.model, save_dir, self.model_name, self.dataset_name, epoch + 1, self.learning_rate)
+                save_model(self.model, save_dir, self.model_name, self.dataset_name, epoch + 1, self.request.learning_rate)
                 print(f"Model saved after epoch {epoch + 1}")
 
             # Update status
             self.status.current_epoch = epoch + 1
-            self.status.progress = (epoch + 1) / self.epochs * 80
+            self.status.progress = (epoch + 1) / self.request.epochs * 80
             self.status.current_loss = train_loss
             self.status.current_accuracy = train_accuracy
             self.status.test_loss = test_loss
@@ -103,39 +116,106 @@ class UnlearningRLThread(threading.Thread):
             self.status.train_class_accuracies = train_class_accuracies
             self.status.test_class_accuracies = test_class_accuracies
             
+            self.status.unlearn_accuracy = train_class_accuracies[self.request.forget_class]
+            remain_classes = [i for i in range(10) if i != self.request.forget_class]
+            self.status.remain_accuracy = sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+
             elapsed_time = time.time() - self.status.start_time
-            estimated_total_time = elapsed_time / (epoch + 1) * self.epochs
+            estimated_total_time = elapsed_time / (epoch + 1) * self.request.epochs
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
             
             current_lr = self.optimizer.param_groups[0]['lr']
 
-            print(f"\nEpoch [{epoch+1}/{self.epochs}]")
-            print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
-            print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
-            print(f"Current LR: {current_lr:.5f}")
+            print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
+            print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.3f}")
+            print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.3f}")
+            print(f"Current LR: {current_lr}")
             print("Train Class Accuracies:")
             for i, acc in train_class_accuracies.items():
-                print(f"  Class {i}: {acc:.2f}%")
+                print(f"  Class {i}: {acc:.3f}")
             print("Test Class Accuracies:")
             for i, acc in test_class_accuracies.items():
-                print(f"  Class {i}: {acc:.2f}%")
-            print(f"Progress: {self.status.progress:.5f}%, ETA: {self.status.estimated_time_remaining:.2f}s")
+                print(f"  Class {i}: {acc:.3f}")
+            print(f"Progress: {self.status.progress:.2f}%, ETA: {self.status.estimated_time_remaining:.2f}s")
             
-            sys.stdout.flush()
-        
-        print()  # Print a newline at the end of unlearning
+        print()
+        end_time = time.time()
+        rte = end_time - start_time
 
-        # if not self.status.cancel_requested:
-        #     plt.figure(figsize=(10, 6))
-        #     plt.plot(range(1, self.epochs + 1), train_accuracies, label='Train Accuracy')
-        #     plt.plot(range(1, self.epochs + 1), test_accuracies, label='Test Accuracy')
-        #     plt.xlabel('Epochs')
-        #     plt.ylabel('Accuracy (%)')
-        #     plt.title(f'Training and Test Accuracy for {self.model_name} on {self.dataset_name}')
-        #     plt.legend()
-        #     plt.grid(True)
-        #     plot_filename = f"accuracy_plot_{self.model_name}_{self.dataset_name}_{self.epochs}epochs_{self.learning_rate}lr.png"
-        #     plot_path = os.path.join('unlearned_models', plot_filename)
-        #     plt.savefig(plot_path)
-        #     plt.close()
-        #     print(f"Accuracy plot saved to {plot_path}")
+        # UMAP and activation calculation logic
+        if not self.stopped() and self.model is not None:
+            print("Getting data loaders for UMAP")
+            dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+            subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+            subset = torch.utils.data.Subset(dataset, subset_indices)
+            subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
+            
+            print("Computing layer activations")
+            activations, predicted_labels, logits, mean_logits = await get_layer_activations_and_predictions(
+                model=self.model,
+                data_loader=subset_loader,
+                device=self.device,
+                forget_class=self.request.forget_class
+            )
+            self.status.progress = 90
+
+            print("Computing UMAP embedding")
+            forget_labels = torch.tensor([label == self.request.forget_class for _, label in subset])
+            umap_embedding, _ = await compute_umap_embedding(
+                activations, 
+                predicted_labels, 
+                forget_class=self.request.forget_class,
+                forget_labels=forget_labels
+            )
+            self.status.progress = 100
+
+            print("RL Unlearning inference and visualization completed!")
+
+            detailed_results = []
+            for i in range(len(subset)):
+                original_index = subset_indices[i].item()
+                ground_truth = subset.dataset.targets[subset_indices[i]]
+                is_forget = ground_truth == self.request.forget_class
+                detailed_results.append({
+                    "index": i,
+                    "ground_truth": int(ground_truth),
+                    "original_index": int(original_index),
+                    "predicted_class": int(predicted_labels[i]),
+                    "is_forget": bool(is_forget),
+                    "umap_embedding": umap_embedding[i].tolist(),
+                    "logit": logits[i].tolist(),
+                })
+            
+            test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
+            test_remain_accuracy = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)
+            
+            # Prepare results dictionary
+            results = {
+                "id": uuid.uuid4().hex[:4],
+                "forget_class": self.request.forget_class,
+                "phase": "Unlearning",
+                "method": "RandomLabeling",
+                "epochs": self.request.epochs,
+                "batch_size": self.request.batch_size,
+                "learning_rate": self.request.learning_rate,
+                "seed": UNLEARN_SEED,
+                "unlearn_accuracy": self.status.unlearn_accuracy,
+                "remain_accuracy": self.status.remain_accuracy,
+                "test_unlearn_accuracy": test_unlearn_accuracy,
+                "test_remain_accuracy": test_remain_accuracy,
+                "RTE": rte,
+                "train_class_accuracies": {str(k): f"{v:.3f}" for k, v in train_class_accuracies.items()},
+                "test_class_accuracies": {str(k): f"{v:.3f}" for k, v in test_class_accuracies.items()},
+                "detailed_results": detailed_results
+            }
+
+            # Save results to JSON file
+            os.makedirs('data', exist_ok=True)
+            with open(f'data/{results["id"]}.json', 'w') as f:
+                json.dump(results, f, indent=2)
+
+            print(f"Results saved to data/{results['id']}.json")
+        else:
+            print("RL Unlearning cancelled or model not available.")
+
+        print("RL Unlearning inference completed!")

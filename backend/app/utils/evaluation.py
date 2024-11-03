@@ -1,106 +1,53 @@
 import torch
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from datetime import datetime
-from scipy.stats import gaussian_kde
+import torch.nn.functional as F
+from torch_cka import CKA
+from torch.utils.data import DataLoader, Subset
 from app.config.settings import UMAP_DATA_SIZE
+# from scipy.special import softmax
+# import time
 
-async def get_layer_activations_and_predictions(
-        model, 
-        data_loader, 
-        device, 
-        forget_class=-1,
-        num_samples=UMAP_DATA_SIZE
-    ):
+async def get_layer_activations_and_predictions(model, data_loader, device, num_samples=UMAP_DATA_SIZE):
     model.eval()
-    activations = [[], [], [], []]
+    activations = []
     predictions = []
-    logits = []
+    probabilities = []
     sample_count = 0
-    
+
+    # Hook function to capture the activations of the last layer
+    def hook_fn(module, input, output):
+        activations.append(output.detach().cpu().numpy())
+
+    # Register the hook for the last layer
+    hook = model.avgpool.register_forward_hook(hook_fn)
+
     with torch.no_grad():
         for inputs, labels in data_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
-            
+
             # Get predictions
             outputs = model(inputs)
             _, predicted = outputs.max(1)
             predictions.extend(predicted.cpu().numpy())
-            
-            # Only add logits for non-forget classes
-            non_forget_mask = labels != forget_class
-            logits.extend(outputs[non_forget_mask].cpu().numpy())
-            
-            # Get activations
-            x = model.conv1(inputs)
-            x = model.bn1(x)
-            x = model.relu(x)
-            x = model.maxpool(x)
 
-            x = model.layer1(x)
-            activations[0].append(x.cpu().numpy())
-
-            x = model.layer2(x)
-            activations[1].append(x.cpu().numpy())
-
-            x = model.layer3(x)
-            activations[2].append(x.cpu().numpy())
-
-            x = model.layer4(x)
-            activations[3].append(x.cpu().numpy())
+            # Add logits for all classes
+            probs = F.softmax(outputs, dim=1)
+            probabilities.extend(probs.cpu().numpy())
 
             sample_count += inputs.size(0)
             if sample_count >= num_samples:
                 break
 
-    activations = [np.concatenate(act)[:num_samples] for act in activations]
-    predictions = np.array(predictions)[:num_samples]
-    logits = np.array(logits)
-    
-    # Calculate max logits
-    max_logits = logits.max(axis=1)
-    
-    # Generate timestamp for the filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # Compute KDE
-    kde = gaussian_kde(max_logits)
-    x_range = np.linspace(max_logits.min(), max_logits.max(), 1000)
-    density = kde(x_range)
+    # Remove the hook after collecting activations
+    hook.remove()
 
-    # Find max density and corresponding logit value
-    max_density_index = np.argmax(density)
-    max_density = density[max_density_index]
-    logit_at_max_density = x_range[max_density_index]
+    # Concatenate and reshape activations to the desired shape
+    activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
+    predictions = np.array(predictions)
+    probabilities = np.array(probabilities)
 
-    # Get the maximum logit value
-    max_logit = max_logits.max()
-    
-    # Plot KDE of max logits
-    plt.figure(figsize=(10, 6))
-    sns.kdeplot(max_logits, fill=True)
-    plt.xlim(0, 50)
-    plt.ylim(0, 0.1)  # Set y-axis limit to slightly above max density
-    plt.title("Distribution of Max Logit Values (Excluding Forget Class)")
-    plt.xlabel("Max Logit Value")
-    plt.ylabel("Density")
-    
-    # Save the plot with timestamp in the filename
-    plot_filename = f"max_logit_distribution_{timestamp}.png"
-    plt.savefig(plot_filename)
-    plt.close()
-    
-    print(f"Max logit distribution plot saved as {plot_filename}")
-    print(f"Mean max logit: {max_logits.mean():.4f}")
-    print(f"Median max logit: {np.median(max_logits):.4f}")
-    print(f"Min max logit: {max_logits.min():.4f}")
-    print(f"Max max logit: {max_logit:.4f}")
-    print(f"Max density: {max_density:.4f}")
-    print(f"Logit value at max density: {logit_at_max_density:.4f}")
-    
-    return activations, predictions, max_logits, max_logits.mean()
+    return activations, predictions, probabilities
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
@@ -134,3 +81,137 @@ async def evaluate_model(model, data_loader, criterion, device):
     for i in range(10):
         print(f"Class {i} correct: {class_correct[i]}, total: {class_total[i]}, accuracy: {class_accuracies[i]:.4f}")
     return avg_loss, accuracy, class_accuracies
+
+async def evaluate_model_with_distributions(model, data_loader, criterion, device):
+    model.eval()
+    total_loss = 0
+    correct = 0
+    total = 0
+    class_correct = [0] * 10
+    class_total = [0] * 10
+    label_distribution = np.zeros((10, 10))  # 실제 클래스 vs 예측 클래스
+    confidence_sum = np.zeros((10, 10))  # 실제 클래스 vs 모든 클래스의 confidence 합
+    with torch.no_grad():
+        for data in data_loader:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            total_loss += loss.item()
+            
+            probabilities = F.softmax(outputs, dim=1)
+            _, predicted = torch.max(probabilities, 1)
+            
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            for i in range(labels.size(0)):
+                label = labels[i].item()
+                pred = predicted[i].item()
+                
+                class_total[label] += 1
+                if label == pred:
+                    class_correct[label] += 1
+                
+                label_distribution[label][pred] += 1
+                confidence_sum[label] += probabilities[i].cpu().numpy()
+
+    accuracy = correct / total
+    class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
+    avg_loss = total_loss / len(data_loader)
+
+    label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
+    confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
+    
+    return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
+
+
+async def calculate_cka_similarity(model_before, model_after, train_loader, test_loader, forget_class, device):
+    detailed_layers = [
+        'conv1',
+        'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
+        'layer2.0.conv1', 'layer2.0.conv2', 'layer2.1.conv1', 'layer2.1.conv2',
+        'layer3.0.conv1', 'layer3.0.conv2', 'layer3.1.conv1', 'layer3.1.conv2',
+        'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
+        'fc'
+    ]
+    
+    detailed_layers = [
+        'conv1',
+        'layer1.0.conv1',  # 블록1 시작
+        'layer1.1.conv2',  # 블록1 끝
+        'layer2.0.conv1',  # 블록2 시작
+        'layer2.1.conv2',  # 블록2 끝
+        'layer3.0.conv1',  # 블록3 시작
+        'layer3.1.conv2',  # 블록3 끝
+        'layer4.0.conv1',  # 블록4 시작
+        'layer4.1.conv2',  # 블록4 끝
+        'fc'
+    ]
+    
+    # detailed_layers = [conv1, bn1, relu, maxpool,
+    #     layer1, layer1.0, layer1.0.conv1, layer1.0.bn1,
+    #     layer1.0.relu, layer1.0.conv2, layer1.0.bn2, layer1.1, 
+    #     layer1.1.conv1, layer1.1.bn1, layer1.1.relu, layer1.1.conv2, layer1.1.bn2, 
+    #     layer2, layer2.0, layer2.0.conv1, layer2.0.bn1, layer2.0.relu,
+    #     layer2.0.conv2, layer2.0.bn2, layer2.0.downsample, layer2.0.downsample.0, 
+    #     layer2.0.downsample.1, layer2.1, layer2.1.conv1, layer2.1.bn1,
+    #     layer2.1.relu, layer2.1.conv2, layer2.1.bn2,
+    #     layer3, layer3.0, layer3.0.conv1, layer3.0.bn1,
+    #     layer3.0.relu, layer3.0.conv2, layer3.0.bn2, layer3.0.downsample,
+    #     layer3.0.downsample.0, layer3.0.downsample.1, layer3.1, layer3.1.conv1,
+    #     layer3.1.bn1, layer3.1.relu, layer3.1.conv2, layer3.1.bn2,
+    #     layer4, layer4.0, layer4.0.conv1, layer4.0.bn1, layer4.0.relu, 
+    #     layer4.0.conv2, layer4.0.bn2, layer4.0.downsample, 
+    #     layer4.0.downsample.0, layer4.0.downsample.1, layer4.1, layer4.1.conv1,
+    #     layer4.1.bn1, layer4.1.relu, layer4.1.conv2, layer4.1.bn2,
+    #     avgpool, fc
+    # ]
+
+    cka = CKA(model_before, 
+              model_after, 
+              model1_name="Before Unlearning", 
+              model2_name="After Unlearning",
+              model1_layers=detailed_layers, 
+              model2_layers=detailed_layers, 
+              device=device)
+
+    def filter_loader(loader, condition):
+        return DataLoader(
+            Subset(
+                loader.dataset,
+                [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
+            ),
+            batch_size=loader.batch_size,
+            shuffle=False,
+            num_workers=0
+        )
+
+    forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class)
+    other_classes_train_loader = filter_loader(train_loader, lambda label: label != forget_class)
+    forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class)
+    other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class)
+
+    cka.compare(forget_class_train_loader, forget_class_train_loader)
+    results_forget_train = cka.export()
+    cka.compare(other_classes_train_loader, other_classes_train_loader)
+    results_other_train = cka.export()
+    cka.compare(forget_class_test_loader, forget_class_test_loader)
+    results_forget_test = cka.export()
+    cka.compare(other_classes_test_loader, other_classes_test_loader)
+    results_other_test = cka.export()
+
+    def format_cka_results(results):
+        return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
+
+    return {
+        "similarity": {
+            "layers": detailed_layers,
+            "train": {
+                "forget_class": format_cka_results(results_forget_train),
+                "other_classes": format_cka_results(results_other_train)
+            },
+            "test": {
+                "forget_class": format_cka_results(results_forget_test),
+                "other_classes": format_cka_results(results_other_test)
+            }
+        }
+    }

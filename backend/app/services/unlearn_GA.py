@@ -5,14 +5,13 @@ import torch.optim as optim
 
 from app.threads.unlearn_GA_thread import UnlearningGAThread
 from app.models.neural_network import get_resnet18
-from app.utils.helpers import  get_data_loaders
+from app.utils.helpers import set_seed, get_data_loaders
 from app.config.settings import MOMENTUM, WEIGHT_DECAY, DECREASING_LR
 
 async def unlearning_GA(request, status, weights_path):
     print(f"Starting GA unlearning for class {request.forget_class} with {request.epochs} epochs...")
-
+    set_seed(request.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    
     train_loader, test_loader, train_set, test_set = get_data_loaders(request.batch_size)
     # Create Unlearning Settings
     forget_indices = [i for i, (_, label) in enumerate(train_set) if label == request.forget_class]
@@ -43,7 +42,7 @@ async def unlearning_GA(request, status, weights_path):
         test_set=test_set,
         status=status,
         model_name="resnet18",
-        dataset_name=f"CIFAR10_GA_forget_class_{request.forget_class}"
+        dataset_name=f"GA_forget_class_{request.forget_class}"
     )
     
     unlearning_thread.start()

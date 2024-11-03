@@ -6,7 +6,7 @@ import torch.optim as optim
 from app.threads.train_thread import TrainingThread
 from app.models.neural_network import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
-from app.utils.visualization import compute_umap_embeddings
+from app.utils.visualization import compute_umap_embedding
 from app.utils.evaluation import get_layer_activations_and_predictions
 from app.config.settings import UMAP_DATA_SIZE, MOMENTUM, UMAP_DATASET, WEIGHT_DECAY, DECREASING_LR
 
@@ -57,7 +57,7 @@ async def training(request, status):
             device
         )
         labels = torch.tensor([dataset.targets[i] for i in subset_indices])
-        umap_embeddings, svg_files = await compute_umap_embeddings(activations, labels)
+        umap_embeddings, svg_files = await compute_umap_embedding(activations, labels)
         status.umap_embeddings = umap_embeddings
         status.svg_files = list(svg_files.values())
         print("Training and visualization completed!")
