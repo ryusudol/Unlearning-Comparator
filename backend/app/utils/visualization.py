@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from umap import UMAP
 import os
 from datetime import datetime
+import time
 from app.config.settings import UMAP_N_NEIGHBORS, UMAP_MIN_DIST, UMAP_INIT, UMAP_N_JOBS
 
 async def compute_umap_embedding(activation, 
@@ -26,8 +27,11 @@ async def compute_umap_embedding(activation,
                 min_dist=UMAP_MIN_DIST,
                 init=UMAP_INIT,
                 n_jobs=UMAP_N_JOBS)
-    
+    print(f"UMAP start!")
+    start_time = time.time()
     embedding = umap.fit_transform(activation)
+    print(f"UMAP done! Time taken: {time.time() - start_time:.2f}s")
+
     umap_embedding = embedding
     plt.figure(figsize=(12, 11))
     

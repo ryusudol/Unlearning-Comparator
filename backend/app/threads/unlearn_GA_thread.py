@@ -68,8 +68,7 @@ class UnlearningGAThread(threading.Thread):
     async def unlearn_GA_model(self):
         self.model.train()
         self.status.start_time = time.time()
-        set_seed(UNLEARN_SEED)
-
+        
         train_accuracies = []
         test_accuracies = []
 

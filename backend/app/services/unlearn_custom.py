@@ -24,7 +24,6 @@ async def unlearning_custom(forget_class, status, weights_path):
         await asyncio.sleep(0.2)  # Check status every 200ms
 
     status.is_unlearning = False
-    print("unlearning canceled")
    
     if unlearning_thread.is_alive():
         print("Warning: Unlearning thread did not stop within the timeout period.")

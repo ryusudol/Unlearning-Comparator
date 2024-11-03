@@ -2,15 +2,16 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 from torch_cka import CKA
+from torch.utils.data import DataLoader, Subset
 from app.config.settings import UMAP_DATA_SIZE
 # from scipy.special import softmax
-import time
+# import time
 
 async def get_layer_activations_and_predictions(model, data_loader, device, num_samples=UMAP_DATA_SIZE):
     model.eval()
     activations = []
     predictions = []
-    logits = []
+    probabilities = []
     sample_count = 0
 
     # Hook function to capture the activations of the last layer
@@ -18,7 +19,7 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
         activations.append(output.detach().cpu().numpy())
 
     # Register the hook for the last layer
-    hook = model.layer4.register_forward_hook(hook_fn)
+    hook = model.avgpool.register_forward_hook(hook_fn)
 
     with torch.no_grad():
         for inputs, labels in data_loader:
@@ -31,7 +32,8 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
             predictions.extend(predicted.cpu().numpy())
 
             # Add logits for all classes
-            logits.extend(outputs.cpu().numpy())
+            probs = F.softmax(outputs, dim=1)
+            probabilities.extend(probs.cpu().numpy())
 
             sample_count += inputs.size(0)
             if sample_count >= num_samples:
@@ -43,9 +45,9 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
     # Concatenate and reshape activations to the desired shape
     activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
     predictions = np.array(predictions)
-    logits = np.array(logits)
+    probabilities = np.array(probabilities)
 
-    return activations, predictions, logits
+    return activations, predictions, probabilities
 
 async def evaluate_model(model, data_loader, criterion, device):
     model.eval()
@@ -89,12 +91,8 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     class_total = [0] * 10
     label_distribution = np.zeros((10, 10))  # 실제 클래스 vs 예측 클래스
     confidence_sum = np.zeros((10, 10))  # 실제 클래스 vs 모든 클래스의 confidence 합
-    
-    start_time = time.time()  # 시작 시간 기록
-    print(f"Start evaluation:{time.time() - start_time}")
     with torch.no_grad():
-        for batch_idx, data in enumerate(data_loader):
-            print(f"Start Loop:{time.time() - start_time}")
+        for data in data_loader:
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -115,15 +113,11 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 
                 label_distribution[label][pred] += 1
                 confidence_sum[label] += probabilities[i].cpu().numpy()
-            
-            # 경과 시간 출력
-            elapsed_time = time.time() - start_time
-            print(f"Batch {batch_idx + 1}/{len(data_loader)} processed, elapsed time: {elapsed_time:.2f} seconds")
 
     accuracy = correct / total
     class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
     avg_loss = total_loss / len(data_loader)
-    # Normalize distributions
+
     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
     confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
     
@@ -139,6 +133,38 @@ async def calculate_cka_similarity(model_before, model_after, train_loader, test
         'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
         'fc'
     ]
+    
+    detailed_layers = [
+        'conv1',
+        'layer1.0.conv1',  # 블록1 시작
+        'layer1.1.conv2',  # 블록1 끝
+        'layer2.0.conv1',  # 블록2 시작
+        'layer2.1.conv2',  # 블록2 끝
+        'layer3.0.conv1',  # 블록3 시작
+        'layer3.1.conv2',  # 블록3 끝
+        'layer4.0.conv1',  # 블록4 시작
+        'layer4.1.conv2',  # 블록4 끝
+        'fc'
+    ]
+    
+    # detailed_layers = [conv1, bn1, relu, maxpool,
+    #     layer1, layer1.0, layer1.0.conv1, layer1.0.bn1,
+    #     layer1.0.relu, layer1.0.conv2, layer1.0.bn2, layer1.1, 
+    #     layer1.1.conv1, layer1.1.bn1, layer1.1.relu, layer1.1.conv2, layer1.1.bn2, 
+    #     layer2, layer2.0, layer2.0.conv1, layer2.0.bn1, layer2.0.relu,
+    #     layer2.0.conv2, layer2.0.bn2, layer2.0.downsample, layer2.0.downsample.0, 
+    #     layer2.0.downsample.1, layer2.1, layer2.1.conv1, layer2.1.bn1,
+    #     layer2.1.relu, layer2.1.conv2, layer2.1.bn2,
+    #     layer3, layer3.0, layer3.0.conv1, layer3.0.bn1,
+    #     layer3.0.relu, layer3.0.conv2, layer3.0.bn2, layer3.0.downsample,
+    #     layer3.0.downsample.0, layer3.0.downsample.1, layer3.1, layer3.1.conv1,
+    #     layer3.1.bn1, layer3.1.relu, layer3.1.conv2, layer3.1.bn2,
+    #     layer4, layer4.0, layer4.0.conv1, layer4.0.bn1, layer4.0.relu, 
+    #     layer4.0.conv2, layer4.0.bn2, layer4.0.downsample, 
+    #     layer4.0.downsample.0, layer4.0.downsample.1, layer4.1, layer4.1.conv1,
+    #     layer4.1.bn1, layer4.1.relu, layer4.1.conv2, layer4.1.bn2,
+    #     avgpool, fc
+    # ]
 
     cka = CKA(model_before, 
               model_after, 
@@ -149,13 +175,14 @@ async def calculate_cka_similarity(model_before, model_after, train_loader, test
               device=device)
 
     def filter_loader(loader, condition):
-        return torch.utils.data.DataLoader(
-            torch.utils.data.Subset(
+        return DataLoader(
+            Subset(
                 loader.dataset,
                 [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
             ),
             batch_size=loader.batch_size,
-            shuffle=False
+            shuffle=False,
+            num_workers=0
         )
 
     forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class)
