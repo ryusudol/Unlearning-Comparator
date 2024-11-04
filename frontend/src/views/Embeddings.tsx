@@ -76,34 +76,6 @@ export default function Embeddings({ height }: { height: number }) {
       setToPosition(null);
     }
   }, [hoveredInstance]);
-  // useEffect(() => {
-  //   if (hoveredInstance) {
-  //     const { imgIdx, source } = hoveredInstance;
-  //     const targetRef = source === "Baseline" ? comparisonRef : baselineRef;
-  //     const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
-  //     if (targetRef.current && currentRef.current && containerRef.current) {
-  //       const containerRect = containerRef.current.getBoundingClientRect();
-  //       const targetPosition = targetRef.current.getInstancePosition(
-  //         imgIdx,
-  //         containerRect
-  //       );
-  //       const currentPosition = currentRef.current.getInstancePosition(
-  //         imgIdx,
-  //         containerRect
-  //       );
-  //       if (targetPosition && currentPosition) {
-  //         setFromPosition(currentPosition);
-  //         setToPosition(targetPosition);
-  //       } else {
-  //         setFromPosition(null);
-  //         setToPosition(null);
-  //       }
-  //     }
-  //   } else {
-  //     setFromPosition(null);
-  //     setToPosition(null);
-  //   }
-  // }, [hoveredInstance]);
 
   const baselineData = useMemo(() => {
     return basicData.find((datum) => datum.id === baseline);
@@ -146,10 +118,7 @@ export default function Embeddings({ height }: { height: number }) {
   }, [comparisonData]);
 
   return (
-    <div
-      // ref={containerRef}
-      className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]"
-    >
+    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
       <ConnectionLine from={fromPosition} to={toPosition} />
       <div className="w-[120px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}

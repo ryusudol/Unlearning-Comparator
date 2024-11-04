@@ -58,7 +58,7 @@ const Embedding = forwardRef(
     const idExist = id !== "";
 
     useImperativeHandle(ref, () => ({
-      getInstancePosition: (imgIdx: number, containerRect: DOMRect) => {
+      getInstancePosition: (imgIdx: number) => {
         if (chartRef.current) {
           return chartRef.current.getInstancePosition(imgIdx);
         }
