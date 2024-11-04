@@ -25,7 +25,7 @@ export const columns: ColumnDef<Data>[] = [
         method === "Retrain" ? "Retrained" : (row.getValue("phase") as string);
       const { color, backgroundColor } = getPhaseColors(phase, 1, 0.15);
       return (
-        <Badge className="w-auto py-[2.5px]" style={{ backgroundColor, color }}>
+        <Badge className="w-auto" style={{ backgroundColor, color }}>
           {phase}
         </Badge>
       );

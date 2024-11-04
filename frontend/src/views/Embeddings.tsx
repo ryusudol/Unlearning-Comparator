@@ -25,16 +25,14 @@ import {
 } from "../components/UI/icons";
 
 export type ModeType = "Baseline" | "Comparison";
+export type InstanceType = { imgIdx: number; source: ModeType } | null;
 type Position = { x: number; y: number } | null;
 
 export default function Embeddings({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
 
-  const [hoveredInstance, setHoveredInstance] = useState<{
-    imgIdx: number;
-    source: ModeType;
-  } | null>(null);
+  const [hoveredInstance, setHoveredInstance] = useState<InstanceType>(null);
   const [fromPosition, setFromPosition] = useState<Position>(null);
   const [toPosition, setToPosition] = useState<Position>(null);
 
