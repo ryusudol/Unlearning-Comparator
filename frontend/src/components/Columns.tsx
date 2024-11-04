@@ -5,6 +5,7 @@ import { Button } from "./UI/button";
 import { Data } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
+import { getPhaseColors } from "../util";
 
 export const columns: ColumnDef<Data>[] = [
   {
@@ -19,16 +20,15 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "phase",
     header: "Phase",
     cell: ({ row }) => {
-      const value = row.getValue("phase") as string;
-      const backgroundColor =
-        value === "Unlearning"
-          ? "#FFA500"
-          : value === "Defended"
-          ? "#008000"
-          : value === "Origin"
-          ? "#808080"
-          : "#FFD700";
-      return <Badge style={{ backgroundColor }}>{value}</Badge>;
+      const method = row.getValue("method") as string;
+      const phase =
+        method === "Retrain" ? "Retrained" : (row.getValue("phase") as string);
+      const { color, backgroundColor } = getPhaseColors(phase, 1, 0.15);
+      return (
+        <Badge className="w-auto py-[2.5px]" style={{ backgroundColor, color }}>
+          {phase}
+        </Badge>
+      );
     },
   },
   {
@@ -44,7 +44,9 @@ export const columns: ColumnDef<Data>[] = [
     header: "Method",
     cell: ({ row }) => {
       const value = row.getValue("method") as string;
-      return <div className="w-[138px]">{value}</div>;
+      return (
+        <div className="w-[138px]">{value === "Retrain" ? "-" : value}</div>
+      );
     },
   },
   {
@@ -52,7 +54,6 @@ export const columns: ColumnDef<Data>[] = [
     header: "Epochs",
     cell: ({ row }) => {
       const value = row.getValue("epochs") as string;
-
       return <div>{value !== "N/A" ? value : "-"}</div>;
     },
   },
@@ -74,27 +75,23 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "unlearn_accuracy",
-    header: ({ column }) => {
-      return (
-        <HoverCard>
-          <HoverCardTrigger>
-            <Button
-              className="w-full px-0 h-[34px]"
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              UA
-              <ArrowUpDown className="w-4" />
-            </Button>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Unlearning Accuracy
-          </HoverCardContent>
-        </HoverCard>
-      );
-    },
+    header: ({ column }) => (
+      <HoverCard>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            UA
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Unlearning Accuracy
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("unlearn_accuracy"));
       return <div className="text-center">{value}</div>;
@@ -102,27 +99,23 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "remain_accuracy",
-    header: ({ column }) => {
-      return (
-        <HoverCard>
-          <HoverCardTrigger>
-            <Button
-              className="w-full px-0 h-[34px]"
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              RA
-              <ArrowUpDown className="w-4" />
-            </Button>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Remaining Accuracy
-          </HoverCardContent>
-        </HoverCard>
-      );
-    },
+    header: ({ column }) => (
+      <HoverCard>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            RA
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Remaining Accuracy
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("remain_accuracy"));
       return <div className="text-center">{value}</div>;
@@ -130,27 +123,23 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "test_unlearn_accuracy",
-    header: ({ column }) => {
-      return (
-        <HoverCard>
-          <HoverCardTrigger>
-            <Button
-              className="w-full px-0 h-[34px]"
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              TUA
-              <ArrowUpDown className="w-4" />
-            </Button>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Test Unlearning Accuracy
-          </HoverCardContent>
-        </HoverCard>
-      );
-    },
+    header: ({ column }) => (
+      <HoverCard>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            TUA
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Test Unlearning Accuracy
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("test_unlearn_accuracy"));
       return <div className="text-center">{value}</div>;
@@ -158,27 +147,23 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "test_remain_accuracy",
-    header: ({ column }) => {
-      return (
-        <HoverCard>
-          <HoverCardTrigger>
-            <Button
-              className="w-full px-0 h-[34px]"
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              TRA
-              <ArrowUpDown className="w-4" />
-            </Button>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Test Remaining Accuracy
-          </HoverCardContent>
-        </HoverCard>
-      );
-    },
+    header: ({ column }) => (
+      <HoverCard>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            TRA
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Test Remaining Accuracy
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("test_remain_accuracy"));
       return <div className="text-center">{value}</div>;
@@ -186,27 +171,23 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "RTE",
-    header: ({ column }) => {
-      return (
-        <HoverCard>
-          <HoverCardTrigger>
-            <Button
-              className="w-full px-0 h-[34px]"
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              RTE(s)
-              <ArrowUpDown className="w-4" />
-            </Button>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Run-Time Efficiency
-          </HoverCardContent>
-        </HoverCard>
-      );
-    },
+    header: ({ column }) => (
+      <HoverCard>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            RTE(s)
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Run-Time Efficiency
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const value = row.getValue("RTE") as string;
       return <div className="text-center">{value !== "N/A" ? value : "-"}</div>;
@@ -214,14 +195,10 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     id: "baseline",
-    header: () => {
-      return <div className="ml-5 -mr-5 w-[50px] px-0">Baseline</div>;
-    },
+    header: () => <div className="w-full text-center">Baseline</div>,
   },
   {
     id: "comparison",
-    header: () => {
-      return <div className="-mr-5 w-[70px] px-0">Comparison</div>;
-    },
+    header: () => <div className="w-full text-center">Comparison</div>,
   },
 ];

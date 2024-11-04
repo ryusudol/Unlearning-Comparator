@@ -62,7 +62,6 @@ export default function Embeddings({ height }: { height: number }) {
       if (targetRef.current && currentRef.current) {
         const targetPosition = targetRef.current.getInstancePosition(imgIdx);
         const currentPosition = currentRef.current.getInstancePosition(imgIdx);
-        console.log(currentPosition);
         if (targetPosition && currentPosition) {
           setFromPosition(currentPosition);
           setToPosition(targetPosition);
