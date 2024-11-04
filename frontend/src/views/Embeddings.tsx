@@ -1,8 +1,16 @@
-import { useContext, useMemo } from "react";
+import {
+  useState,
+  useContext,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import Embedding from "../components/Embedding";
+import ConnectionLine from "../components/ConnectionLine";
 import { basicData } from "../constants/basicData";
 import { Separator } from "../components/UI/separator";
 import { TABLEAU10 } from "../constants/tableau10";
@@ -16,9 +24,86 @@ import {
   ScrollVerticalIcon,
 } from "../components/UI/icons";
 
+export type ModeType = "Baseline" | "Comparison";
+type Position = { x: number; y: number } | null;
+
 export default function Embeddings({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
+
+  const [hoveredInstance, setHoveredInstance] = useState<{
+    imgIdx: number;
+    source: ModeType;
+  } | null>(null);
+  const [fromPosition, setFromPosition] = useState<Position>(null);
+  const [toPosition, setToPosition] = useState<Position>(null);
+
+  const baselineRef = useRef<any>(null);
+  const comparisonRef = useRef<any>(null);
+
+  const handleHover = useCallback(
+    (imgIdxOrNull: number | null, source?: ModeType) => {
+      if (imgIdxOrNull === null) {
+        setHoveredInstance(null);
+        setFromPosition(null);
+        setToPosition(null);
+      } else if (typeof imgIdxOrNull === "number" && source) {
+        setHoveredInstance({ imgIdx: imgIdxOrNull, source });
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (hoveredInstance) {
+      const { imgIdx, source } = hoveredInstance;
+      const targetRef = source === "Baseline" ? comparisonRef : baselineRef;
+      const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
+      if (targetRef.current && currentRef.current) {
+        const targetPosition = targetRef.current.getInstancePosition(imgIdx);
+        const currentPosition = currentRef.current.getInstancePosition(imgIdx);
+        console.log(currentPosition);
+        if (targetPosition && currentPosition) {
+          setFromPosition(currentPosition);
+          setToPosition(targetPosition);
+        } else {
+          setFromPosition(null);
+          setToPosition(null);
+        }
+      }
+    } else {
+      setFromPosition(null);
+      setToPosition(null);
+    }
+  }, [hoveredInstance]);
+  // useEffect(() => {
+  //   if (hoveredInstance) {
+  //     const { imgIdx, source } = hoveredInstance;
+  //     const targetRef = source === "Baseline" ? comparisonRef : baselineRef;
+  //     const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
+  //     if (targetRef.current && currentRef.current && containerRef.current) {
+  //       const containerRect = containerRef.current.getBoundingClientRect();
+  //       const targetPosition = targetRef.current.getInstancePosition(
+  //         imgIdx,
+  //         containerRect
+  //       );
+  //       const currentPosition = currentRef.current.getInstancePosition(
+  //         imgIdx,
+  //         containerRect
+  //       );
+  //       if (targetPosition && currentPosition) {
+  //         setFromPosition(currentPosition);
+  //         setToPosition(targetPosition);
+  //       } else {
+  //         setFromPosition(null);
+  //         setToPosition(null);
+  //       }
+  //     }
+  //   } else {
+  //     setFromPosition(null);
+  //     setToPosition(null);
+  //   }
+  // }, [hoveredInstance]);
 
   const baselineData = useMemo(() => {
     return basicData.find((datum) => datum.id === baseline);
@@ -61,7 +146,11 @@ export default function Embeddings({ height }: { height: number }) {
   }, [comparisonData]);
 
   return (
-    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
+    <div
+      // ref={containerRef}
+      className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]"
+    >
+      <ConnectionLine from={fromPosition} to={toPosition} />
       <div className="w-[120px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
         <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
@@ -135,6 +224,8 @@ export default function Embeddings({ height }: { height: number }) {
         height={height}
         data={BaselineData}
         id={baseline}
+        onHover={handleHover}
+        ref={baselineRef}
       />
       <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
       <Embedding
@@ -142,6 +233,8 @@ export default function Embeddings({ height }: { height: number }) {
         height={height}
         data={ComparisonData}
         id={comparison}
+        onHover={handleHover}
+        ref={comparisonRef}
       />
     </div>
   );
