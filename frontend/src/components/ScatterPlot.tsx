@@ -11,8 +11,8 @@ import * as d3 from "d3";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { basicData } from "../constants/basicData";
 import { ModeType } from "../views/Embeddings";
+import { API_URL } from "../constants/common";
 
-const API_URL = "http://localhost:8000";
 const dotSize = 4;
 const minZoom = 0.6;
 const maxZoom = 32;
@@ -35,6 +35,7 @@ interface Props {
 
 const ScatterPlot = React.memo(
   forwardRef(({ mode, data, viewMode, onHover }: Props, ref) => {
+    const lastHoverTimeRef = useRef<number>(0);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -51,6 +52,18 @@ const ScatterPlot = React.memo(
       d3.BaseType | SVGPathElement,
       number[],
       SVGGElement,
+      undefined
+    > | null>(null);
+    const gDotRef = useRef<d3.Selection<
+      SVGGElement,
+      undefined,
+      null,
+      undefined
+    > | null>(null);
+    const gHoveredRef = useRef<d3.Selection<
+      SVGGElement,
+      undefined,
+      null,
       undefined
     > | null>(null);
 
@@ -134,7 +147,12 @@ const ScatterPlot = React.memo(
 
     const handleMouseEnter = useCallback(
       (event: any, d: number[]) => {
-        console.log(event);
+        const now = Date.now();
+        if (now - lastHoverTimeRef.current < 100) {
+          return;
+        }
+        lastHoverTimeRef.current = now;
+
         const element = event.currentTarget;
 
         onHover(d[4], mode);
@@ -161,23 +179,25 @@ const ScatterPlot = React.memo(
                 tooltipRef.current.style.left = `${xPosTooltip}px`;
                 tooltipRef.current.style.top = `${yPosTooltip}px`;
                 tooltipRef.current.innerHTML = `
-                <div style="display: flex; justify-content: center;">
-                  <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
-                </div>
-                <div style="font-size: 14px; margin-top: 4px">
-                  <span style="font-weight: 500;">Ground Truth</span>: ${
-                    forgetClassNames[d[2]]
-                  }
-                </div>
-                <div style="font-size: 14px;">
-                  <span style="font-weight: 500;">Prediction</span>: ${
-                    forgetClassNames[d[3]]
-                  }
-                </div>
-              `;
+                  <div style="display: flex; justify-content: center;">
+                    <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
+                  </div>
+                  <div style="font-size: 14px; margin-top: 4px">
+                    <span style="font-weight: 500;">Ground Truth</span>: ${
+                      forgetClassNames[d[2]]
+                    }
+                  </div>
+                  <div style="font-size: 14px;">
+                    <span style="font-weight: 500;">Prediction</span>: ${
+                      forgetClassNames[d[3]]
+                    }
+                  </div>
+                `;
               }
             });
         }
+
+        gHoveredRef.current?.node()?.appendChild(element);
 
         d3.select(element)
           .attr("stroke", "black")
@@ -192,11 +212,14 @@ const ScatterPlot = React.memo(
 
         onHover(null);
 
-        const selection = d3.select(event.currentTarget);
+        const element = event.currentTarget;
+        const selection = d3.select(element);
 
-        if (event.currentTarget.tagName === "circle") {
+        gHoveredRef.current?.node()?.appendChild(element);
+
+        if (element.tagName === "circle") {
           selection.attr("stroke", null).attr("stroke-width", null);
-        } else if (event.currentTarget.tagName === "path") {
+        } else if (element.tagName === "path") {
           const color = d3.color(z(d[3]));
           selection
             .attr("stroke", color ? color.darker().toString() : "black")
@@ -225,6 +248,10 @@ const ScatterPlot = React.memo(
           .style("pointer-events", "all");
 
         const gDot = gMain.append("g");
+        gDotRef.current = gDot;
+
+        const gHovered = gMain.append("g");
+        gHoveredRef.current = gHovered;
 
         const circles = gDot
           .selectAll<SVGCircleElement, number[]>("circle")
