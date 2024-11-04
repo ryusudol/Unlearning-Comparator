@@ -54,18 +54,6 @@ const ScatterPlot = React.memo(
       SVGGElement,
       undefined
     > | null>(null);
-    const gDotRef = useRef<d3.Selection<
-      SVGGElement,
-      undefined,
-      null,
-      undefined
-    > | null>(null);
-    const gHoveredRef = useRef<d3.Selection<
-      SVGGElement,
-      undefined,
-      null,
-      undefined
-    > | null>(null);
 
     const unlearnedFCIndices = useMemo(
       () => new Set(basicData.map((item) => item.forget_class)),
@@ -197,11 +185,10 @@ const ScatterPlot = React.memo(
             });
         }
 
-        gHoveredRef.current?.node()?.appendChild(element);
-
         d3.select(element)
           .attr("stroke", "black")
-          .attr("stroke-width", hoveredStrokeWidth);
+          .attr("stroke-width", hoveredStrokeWidth)
+          .raise();
       },
       [mode, onHover]
     );
@@ -214,8 +201,6 @@ const ScatterPlot = React.memo(
 
         const element = event.currentTarget;
         const selection = d3.select(element);
-
-        gHoveredRef.current?.node()?.appendChild(element);
 
         if (element.tagName === "circle") {
           selection.attr("stroke", null).attr("stroke-width", null);
@@ -248,10 +233,6 @@ const ScatterPlot = React.memo(
           .style("pointer-events", "all");
 
         const gDot = gMain.append("g");
-        gDotRef.current = gDot;
-
-        const gHovered = gMain.append("g");
-        gHoveredRef.current = gHovered;
 
         const circles = gDot
           .selectAll<SVGCircleElement, number[]>("circle")
