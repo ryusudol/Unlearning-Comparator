@@ -1,6 +1,5 @@
 import { TrainingConfigurationData } from "../types/settings";
-
-const API_URL = "http://localhost:8000";
+import { API_URL } from "../constants/common";
 
 export async function executeTraining(configState: TrainingConfigurationData) {
   const data = {

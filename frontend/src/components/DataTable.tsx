@@ -62,7 +62,7 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <RadioGroup className="flex items-center ml-[34px]">
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
               className={cn(
@@ -83,7 +83,7 @@ export default function DataTable({
       return {
         ...column,
         cell: ({ row }: CellContext<Data, unknown>) => (
-          <RadioGroup className="flex items-center ml-[26px]">
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
               className={cn(
@@ -184,6 +184,8 @@ export default function DataTable({
                 {headerGroup.headers.map((header) => {
                   const style = sortables.includes(header.column.id)
                     ? { width: "80px" }
+                    : header.column.id === "phase"
+                    ? { width: "100px" }
                     : {};
                   return (
                     <TableHead key={header.id} style={style}>
