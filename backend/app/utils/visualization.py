@@ -75,4 +75,4 @@ async def compute_umap_embedding(activation,
         svg_files = f.read()
         
     print("\nUMAP embeddings computation and saving completed!")
-    return umap_embedding, svg_files
+    return umap_embedding

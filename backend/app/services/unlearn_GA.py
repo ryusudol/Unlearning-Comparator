@@ -11,19 +11,51 @@ from app.config.settings import MOMENTUM, WEIGHT_DECAY, DECREASING_LR
 async def unlearning_GA(request, status, weights_path):
     print(f"Starting GA unlearning for class {request.forget_class} with {request.epochs} epochs...")
     set_seed(request.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-    train_loader, test_loader, train_set, test_set = get_data_loaders(request.batch_size)
+    
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() 
+        else "mps" if torch.backends.mps.is_available() 
+        else "cpu"
+    )
+    
+    (
+        train_loader, 
+        test_loader, 
+        train_set, 
+        test_set
+    ) = get_data_loaders(
+        request.batch_size
+    )
+    
     # Create Unlearning Settings
-    forget_indices = [i for i, (_, label) in enumerate(train_set) if label == request.forget_class]
+    forget_indices = [
+        i for i, (_, label) in enumerate(train_set)
+        if label == request.forget_class
+    ]
     forget_subset = torch.utils.data.Subset(train_set, forget_indices)
-    forget_loader = torch.utils.data.DataLoader(forget_subset, batch_size=request.batch_size, shuffle=True)
+    forget_loader = torch.utils.data.DataLoader(
+        forget_subset, 
+        batch_size=request.batch_size, 
+        shuffle=True
+    )
 
     model = get_resnet18().to(device)
-    model.load_state_dict(torch.load(weights_path, map_location=device))
+    model.load_state_dict(
+        torch.load(weights_path, map_location=device)
+    )
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=request.learning_rate, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=DECREASING_LR, gamma=0.2)
+    optimizer = optim.SGD(
+        model.parameters(),
+        lr=request.learning_rate, 
+        momentum=MOMENTUM,
+        weight_decay=WEIGHT_DECAY
+    )
+    scheduler = optim.lr_scheduler.MultiStepLR(
+        optimizer,
+        milestones=DECREASING_LR,
+        gamma=0.2
+    )
 
     status.progress = 0
     status.forget_class = request.forget_class

@@ -1,18 +1,45 @@
 import asyncio
 import os
+import torch
+import torch.nn as nn
+
 from app.threads.unlearn_custom_thread import UnlearningInference
+from app.utils.helpers import set_seed, get_data_loaders
+from app.models.neural_network import get_resnet18
+from app.config.settings import UNLEARN_SEED
+
 
 async def unlearning_custom(forget_class, status, weights_path):
     print(f"Starting custom unlearning inference for class {forget_class}...")
+    set_seed(UNLEARN_SEED)
+    (
+        train_loader, 
+        test_loader, 
+        train_set, 
+        test_set
+    ) = get_data_loaders(batch_size=1024)
     
-    status.progress = 0
-    status.forget_class = forget_class
+    criterion = nn.CrossEntropyLoss()
+    device = torch.device("cuda" if torch.cuda.is_available() 
+                         else "mps" if torch.backends.mps.is_available() 
+                         else "cpu")
+    model_before = get_resnet18().to(device)
+    model_after = get_resnet18().to(device)
+    
+    model_before.load_state_dict(torch.load("trained_models/0000.pth", map_location=device))
+    model_after.load_state_dict(torch.load(weights_path, map_location=device))
 
     unlearning_thread = UnlearningInference(
-        forget_class=forget_class, 
-        status=status, 
-        weights_path_before="trained_models/0000.pth",
-        weights_path_after=weights_path
+        forget_class=forget_class,
+        status=status,
+        model_before=model_before,
+        model_after=model_after,
+        train_loader=train_loader,
+        test_loader=test_loader,
+        train_set=train_set,
+        test_set=test_set,
+        criterion=criterion,
+        device=device
     )
     unlearning_thread.start()
     print("unlearning started")
