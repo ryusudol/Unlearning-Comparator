@@ -41,7 +41,7 @@ type DetailedResult = {
   prob?: number[];
 };
 
-export type Data = {
+export type UnlearningDataType = {
   id: string;
   forget_class: number | string;
   phase: string;
@@ -65,7 +65,7 @@ export type Data = {
   detailed_results: DetailedResult[];
 };
 
-export type TrainingData = {
+export type TrainingDataType = {
   id: string;
   forget_class: string;
   phase: string;

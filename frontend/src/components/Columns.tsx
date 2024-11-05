@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "./UI/button";
-import { Data } from "../types/data";
+import { UnlearningDataType } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 import { getPhaseColors } from "../util";
@@ -16,7 +16,7 @@ function getValueToDisplay(value: unknown) {
     : Number(value);
 }
 
-export const columns: ColumnDef<Data>[] = [
+export const columns: ColumnDef<UnlearningDataType>[] = [
   {
     accessorKey: "id",
     header: "ID",

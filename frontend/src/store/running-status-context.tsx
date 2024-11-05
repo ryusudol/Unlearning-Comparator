@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useCallback } from "react";
 
 import {
   RunningStatus,
@@ -90,25 +90,28 @@ export default function RunningStatusContextProvider({
     status: undefined,
   });
 
-  function handleInitRunningStatus() {
+  const handleInitRunningStatus = useCallback(() => {
     dispatch({ type: "INIT_RUNNING_STATUS" });
-  }
+  }, []);
 
-  function handleSaveRunningStatus(runningStatus: RunningStatus) {
-    dispatch({ type: "SAVE_RUNNING_STATUS", payload: runningStatus });
-  }
+  const handleSaveRunningStatus = useCallback(
+    (runningStatus: RunningStatus) => {
+      dispatch({ type: "SAVE_RUNNING_STATUS", payload: runningStatus });
+    },
+    []
+  );
 
-  function handleUpdateIsRunning(isRunning: boolean) {
+  const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
     dispatch({ type: "UPDATE_IS_RUNNING", payload: isRunning });
-  }
+  }, []);
 
-  function handleUpdateIndicator(indicator: string) {
+  const handleUpdateIndicator = useCallback((indicator: string) => {
     dispatch({ type: "UPDATE_INDICATOR", payload: indicator });
-  }
+  }, []);
 
-  function handleUpdateStatus(status: Status) {
+  const handleUpdateStatus = useCallback((status: Status) => {
     dispatch({ type: "UPDATE_STATUS", payload: status });
-  }
+  }, []);
 
   const ctxValue: RunningStatusContextType = {
     isRunning: runningStatus.isRunning,

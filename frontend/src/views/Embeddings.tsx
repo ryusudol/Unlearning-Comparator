@@ -99,7 +99,7 @@ export default function Embeddings({ height }: { height: number }) {
           result.predicted_class,
           result.original_index,
           baselineData.forget_class,
-          result.logit,
+          (result as any).logit || (result as any).prob,
         ])
       : undefined;
   }, [baselineData]);
@@ -113,7 +113,7 @@ export default function Embeddings({ height }: { height: number }) {
           result.predicted_class,
           result.original_index,
           comparisonData.forget_class,
-          result.logit,
+          (result as any).logit || (result as any).prob,
         ])
       : undefined;
   }, [comparisonData]);
@@ -179,9 +179,10 @@ export default function Embeddings({ height }: { height: number }) {
                 />
                 <div className="flex items-center text-[15px] font-light">
                   <span>{name}</span>
-                  {forgetClass && name === forgetClassNames[forgetClass] && (
-                    <span className="ml-0.5">(X)</span>
-                  )}
+                  {forgetClass !== undefined &&
+                    name === forgetClassNames[forgetClass] && (
+                      <span className="ml-0.5">(X)</span>
+                    )}
                 </div>
               </div>
             ))}

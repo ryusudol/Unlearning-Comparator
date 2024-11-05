@@ -1,4 +1,4 @@
-import { useEffect, createContext, useReducer } from "react";
+import { useEffect, createContext, useReducer, useCallback } from "react";
 
 import { forgetClassNames } from "../constants/forgetClassNames";
 import {
@@ -89,38 +89,38 @@ export default function ForgetClassContextProvider({
     selectedForgetClasses: [],
   });
 
-  function handleSaveForgetClass(forgetClass: string) {
+  const handleSaveForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: "SAVE_FORGET_CLASS",
       payload: forgetClassNames.indexOf(forgetClass),
     });
-  }
+  }, []);
 
-  function handleAddSelectedForgetClass(forgetClass: string) {
+  const handleAddSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: "ADD_SELECTED_FORGET_CLASS",
       payload: forgetClassNames.indexOf(forgetClass),
     });
-  }
+  }, []);
 
-  function handleRetrieveForgetClassContextData() {
+  const handleRetrieveForgetClassContextData = useCallback(() => {
     dispatch({ type: "RETRIEVE_FORGET_CLASS_CONTEXT_DATA" });
-  }
+  }, []);
 
-  function handleClearForgetClass() {
+  const handleClearForgetClass = useCallback(() => {
     dispatch({ type: "CLEAR_FORGET_CLASS" });
-  }
+  }, []);
 
-  function handleDeleteSelectedForgetClass(forgetClass: string) {
+  const handleDeleteSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: "DELETE_SELECTED_FORGET_CLASS",
       payload: forgetClassNames.indexOf(forgetClass),
     });
-  }
+  }, []);
 
   useEffect(() => {
     handleRetrieveForgetClassContextData();
-  }, []);
+  }, [handleRetrieveForgetClassContextData]);
 
   const ctxValue: ForgetClassContextType = {
     forgetClass: state.forgetClass,

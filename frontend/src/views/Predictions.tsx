@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
 import { Label } from "../components/UI/label";
 import { basicData } from "../constants/basicData";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { Data } from "../types/data";
+import { UnlearningDataType } from "../types/data";
 import {
   Target02Icon,
   ChartBubble02Icon,
@@ -38,7 +38,7 @@ type GroundTruthDistribution = {
 function extractHeatmapData(
   datasetMode: string,
   chartMode: string,
-  data: Data | undefined
+  data: UnlearningDataType | undefined
 ) {
   let distributionData: GroundTruthDistribution | undefined;
   if (datasetMode === TRAINING && chartMode === LABEL_HEATMAP)

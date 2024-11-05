@@ -10,7 +10,7 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { Data, TrainingData } from "../types/data";
+import { UnlearningDataType, TrainingDataType } from "../types/data";
 import { hexToRgba } from "../util";
 import { ScrollArea } from "./UI/scroll-area";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -35,9 +35,9 @@ const sortables = [
 ];
 
 interface Props {
-  columns: ColumnDef<Data | TrainingData>[];
-  data: Data[];
-  trainingData: TrainingData;
+  columns: ColumnDef<UnlearningDataType | TrainingDataType>[];
+  data: UnlearningDataType[];
+  trainingData: TrainingDataType;
   performanceMetrics: {
     [key: string]: {
       colorScale: d3.ScaleLinear<number, number, never>;
@@ -63,49 +63,47 @@ export default function DataTable({
     if (column.id === "baseline") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => {
-          const isTraining = row.original.phase === "Training";
-          return (
-            <RadioGroup className="flex justify-center items-center ml-[0px]">
-              <RadioGroupItem
-                value={row.id}
-                className={cn(
-                  "w-[18px] h-[18px] rounded-full",
-                  baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-                )}
-                checked={baseline === row.id}
-                onClick={() => {
-                  saveBaseline(baseline === row.id ? "" : row.id);
-                }}
-                disabled={comparison === row.id || isTraining}
-              />
-            </RadioGroup>
-          );
-        },
+        cell: ({
+          row,
+        }: CellContext<UnlearningDataType | TrainingDataType, unknown>) => (
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
+            <RadioGroupItem
+              value={row.id}
+              className={cn(
+                "w-[18px] h-[18px] rounded-full",
+                baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+              )}
+              checked={baseline === row.id}
+              onClick={() => {
+                saveBaseline(baseline === row.id ? "" : row.id);
+              }}
+              disabled={comparison === row.id}
+            />
+          </RadioGroup>
+        ),
       };
     }
     if (column.id === "comparison") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => {
-          const isTraining = row.original.phase === "Training";
-          return (
-            <RadioGroup className="flex justify-center items-center ml-[0px]">
-              <RadioGroupItem
-                value={row.id}
-                className={cn(
-                  "w-[18px] h-[18px] rounded-full",
-                  comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-                )}
-                checked={comparison === row.id}
-                onClick={() => {
-                  saveComparison(comparison === row.id ? "" : row.id);
-                }}
-                disabled={baseline === row.id || isTraining}
-              />
-            </RadioGroup>
-          );
-        },
+        cell: ({
+          row,
+        }: CellContext<UnlearningDataType | TrainingDataType, unknown>) => (
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
+            <RadioGroupItem
+              value={row.id}
+              className={cn(
+                "w-[18px] h-[18px] rounded-full",
+                comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+              )}
+              checked={comparison === row.id}
+              onClick={() => {
+                saveComparison(comparison === row.id ? "" : row.id);
+              }}
+              disabled={baseline === row.id}
+            />
+          </RadioGroup>
+        ),
       };
     }
     return column;
@@ -130,7 +128,7 @@ export default function DataTable({
 
     Object.keys(performanceMetrics).forEach((columnId) => {
       const values = tableData
-        .map((datum) => datum[columnId as keyof Data] as number)
+        .map((datum) => datum[columnId as keyof UnlearningDataType] as number)
         .filter((value) => typeof value === "number");
 
       const uniqueValues = Array.from(new Set(values));
@@ -161,8 +159,8 @@ export default function DataTable({
   }, [tableData, performanceMetrics]);
 
   const table = useReactTable({
-    getRowId: (row: Data | TrainingData) => row.id,
-    data: tableData as (Data | TrainingData)[],
+    getRowId: (row: UnlearningDataType | TrainingDataType) => row.id,
+    data: tableData as (UnlearningDataType | TrainingDataType)[],
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -172,15 +170,14 @@ export default function DataTable({
   });
 
   useEffect(() => {
-    if (tableData.length > 1) {
-      saveBaseline(tableData[1].id);
-      saveComparison(tableData[2]?.id);
+    if (tableData.length > 0) {
+      saveBaseline(tableData[0].id);
+      saveComparison(tableData[1]?.id);
     } else {
       saveBaseline("");
       saveComparison("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableData]);
+  }, [saveBaseline, saveComparison, tableData]);
 
   return (
     <div className="w-full h-[222px]">
@@ -188,7 +185,7 @@ export default function DataTable({
         <ScrollArea className="w-full h-[220px]">
           <TableHeader className="bg-gray-200">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-gray-200">
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const style = sortables.includes(header.column.id)
                     ? { width: "80px" }
@@ -220,11 +217,6 @@ export default function DataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={
-                    row.original.phase === "Training"
-                      ? "bg-gray-100 hover:bg-gray-100"
-                      : ""
-                  }
                 >
                   {row.getVisibleCells().map((cell, idx) => {
                     const columnId = cell.column.id;

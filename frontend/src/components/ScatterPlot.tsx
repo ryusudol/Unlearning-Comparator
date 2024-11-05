@@ -9,10 +9,10 @@ import React, {
 import * as d3 from "d3";
 
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { TABLEAU10 } from "../constants/tableau10";
 import { basicData } from "../constants/basicData";
 import { ModeType } from "../views/Embeddings";
 import { API_URL } from "../constants/common";
+import { renderTooltip } from "../util";
 
 const dotSize = 4;
 const minZoom = 0.6;
@@ -154,8 +154,8 @@ const ScatterPlot = React.memo(
         if (containerRef.current) {
           const containerRect = containerRef.current.getBoundingClientRect();
 
-          const tooltipXSize = 362;
-          const tooltipYSize = 336;
+          const tooltipXSize = 365;
+          const tooltipYSize = 250;
           let xPosTooltip = event.clientX - containerRect.left + 10;
           let yPosTooltip = event.clientY - containerRect.top + 10;
 
@@ -174,63 +174,12 @@ const ScatterPlot = React.memo(
                 tooltipRef.current.style.display = "block";
                 tooltipRef.current.style.left = `${xPosTooltip}px`;
                 tooltipRef.current.style.top = `${yPosTooltip}px`;
-                tooltipRef.current.innerHTML = `
-                <div style="width: 362px; height: 336px; display: flex; justify-content: center; align-items: center;">
-                  <div style="margin-right: 15px;">
-                    <div style="display: flex; justify-content: center;">
-                      <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
-                    </div>
-                    <div style="font-size: 14px; margin-top: 4px">
-                      <span style="font-weight: 500;">Ground Truth</span>: ${
-                        forgetClassNames[d[2] as number]
-                      }
-                    </div>
-                    <div style="font-size: 14px;">
-                      <span style="font-weight: 500;">Prediction</span>: ${
-                        forgetClassNames[d[3] as number]
-                      }
-                    </div>
-                  </div>
-                  <div style="width: 200px;">
-                    <p style="font-size: 16px; font-weight: 600;">Confidence:</p>
-                    <div>
-                      ${(d[6] as number[])
-                        .map(
-                          (value, idx) => `
-                          <div style="width: 100%;">
-                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: -15px;">
-                              <span style="font-size: 14px">${
-                                forgetClassNames[idx]
-                              }</span>
-                              <span style="font-size: 14px">${value.toFixed(
-                                4
-                              )}</span>
-                            </div>
-                            <progress
-                              style="width: 100%; height: 2px; margin: 0; appearance: none;"
-                              value=${Number(value.toFixed(3))}
-                              min=${0}
-                              max=${1}
-                              id="progress-${idx}"
-                            ></progress>
-                            <style>
-                              #progress-${idx}::-webkit-progress-bar {
-                                background-color: #f0f0f0; /* 진행되지 않은 막대의 기본 색 */
-                              }
-                              #progress-${idx}::-webkit-progress-value {
-                                background-color: ${
-                                  TABLEAU10[idx]
-                                }; /* 진행된 부분의 색상 */
-                              }
-                            </style>
-                          </div>
-                        `
-                        )
-                        .join("")}
-                    </div>
-                  </div>
-                </div>
-                `;
+                tooltipRef.current.innerHTML = renderTooltip(
+                  tooltipXSize,
+                  tooltipYSize,
+                  imageUrl,
+                  d
+                );
               }
             });
         }
@@ -489,8 +438,63 @@ const ScatterPlot = React.memo(
             .attr("stroke-width", hoveredStrokeWidth)
             .raise();
         }
+
+        // **Add the following code to display the tooltip**
+        let selectedElement: SVGCircleElement | SVGPathElement | null = null;
+        if (circlesRef.current) {
+          selectedElement = circlesRef.current
+            .filter((d) => d[4] === hoveredImgIdx)
+            .node() as SVGCircleElement;
+        }
+        if (!selectedElement && crossesRef.current) {
+          selectedElement = crossesRef.current
+            .filter((d) => d[4] === hoveredImgIdx)
+            .node() as SVGPathElement;
+        }
+
+        if (selectedElement && containerRef.current) {
+          const elementRect = selectedElement.getBoundingClientRect();
+          const containerRect = containerRef.current.getBoundingClientRect();
+
+          const tooltipXSize = 365;
+          const tooltipYSize = 265;
+          let xPosTooltip = elementRect.left - containerRect.left + 10;
+          let yPosTooltip = elementRect.top - containerRect.top + 10;
+
+          if (xPosTooltip + tooltipXSize > containerRect.width)
+            xPosTooltip =
+              elementRect.left - containerRect.left - tooltipXSize - 10;
+          if (yPosTooltip + tooltipYSize > containerRect.height)
+            yPosTooltip =
+              elementRect.top - containerRect.top - tooltipYSize - 10;
+
+          const datum = processedData.find((d) => d[4] === hoveredImgIdx);
+          if (datum) {
+            const index = datum[4];
+            fetch(`${API_URL}/image/cifar10/${index}`)
+              .then((response) => response.blob())
+              .then((blob) => {
+                const imageUrl = URL.createObjectURL(blob);
+                if (tooltipRef.current) {
+                  tooltipRef.current.style.display = "block";
+                  tooltipRef.current.style.left = `${xPosTooltip}px`;
+                  tooltipRef.current.style.top = `${yPosTooltip}px`;
+                  tooltipRef.current.innerHTML = renderTooltip(
+                    tooltipXSize,
+                    tooltipYSize,
+                    imageUrl,
+                    datum
+                  );
+                }
+              });
+          }
+        }
+      } else {
+        if (tooltipRef.current) {
+          tooltipRef.current.style.display = "none";
+        }
       }
-    }, [hoveredImgIdx, z]);
+    }, [hoveredImgIdx, processedData, z]);
 
     return (
       <div
@@ -515,7 +519,7 @@ const ScatterPlot = React.memo(
             padding: "5px",
             border: "1px solid rgba(0, 0, 0, 0.25)",
             borderRadius: "4px",
-            zIndex: 20,
+            zIndex: 30,
           }}
           className="shadow-xl"
         ></div>
