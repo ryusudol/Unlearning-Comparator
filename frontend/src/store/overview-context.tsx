@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useEffect, useReducer, useCallback } from "react";
 
 import {
   OverviewList,
@@ -63,25 +63,25 @@ export default function OverviewContextProvider({
     overview: [],
   });
 
-  function handleSaveOverview(overview: OverviewList) {
+  const handleSaveOverview = useCallback((overview: OverviewList) => {
     dispatch({ type: "SAVE_OVERVIEW", payload: overview });
-  }
+  }, []);
 
-  function handleRetrieveOverview() {
+  const handleRetrieveOverview = useCallback(() => {
     dispatch({ type: "RETRIEVE_OVERVIEW" });
-  }
+  }, []);
 
-  function handleDeleteOverviewItem() {
+  const handleDeleteOverviewItem = useCallback(() => {
     dispatch({ type: "DELETE_LAST_OVERVIEW_ITEM" });
-  }
+  }, []);
 
-  function handleClearOverview() {
+  const handleClearOverview = useCallback(() => {
     dispatch({ type: "CLEAR_OVERVIEW" });
-  }
+  }, []);
 
   useEffect(() => {
     handleRetrieveOverview();
-  }, []);
+  }, [handleRetrieveOverview]);
 
   const ctxValue = {
     overview: overview.overview,
