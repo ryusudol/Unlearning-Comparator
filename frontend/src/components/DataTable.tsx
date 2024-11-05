@@ -63,49 +63,43 @@ export default function DataTable({
     if (column.id === "baseline") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => {
-          const isTraining = row.original.phase === "Training";
-          return (
-            <RadioGroup className="flex justify-center items-center ml-[0px]">
-              <RadioGroupItem
-                value={row.id}
-                className={cn(
-                  "w-[18px] h-[18px] rounded-full",
-                  baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-                )}
-                checked={baseline === row.id}
-                onClick={() => {
-                  saveBaseline(baseline === row.id ? "" : row.id);
-                }}
-                disabled={comparison === row.id || isTraining}
-              />
-            </RadioGroup>
-          );
-        },
+        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => (
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
+            <RadioGroupItem
+              value={row.id}
+              className={cn(
+                "w-[18px] h-[18px] rounded-full",
+                baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+              )}
+              checked={baseline === row.id}
+              onClick={() => {
+                saveBaseline(baseline === row.id ? "" : row.id);
+              }}
+              disabled={comparison === row.id}
+            />
+          </RadioGroup>
+        ),
       };
     }
     if (column.id === "comparison") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => {
-          const isTraining = row.original.phase === "Training";
-          return (
-            <RadioGroup className="flex justify-center items-center ml-[0px]">
-              <RadioGroupItem
-                value={row.id}
-                className={cn(
-                  "w-[18px] h-[18px] rounded-full",
-                  comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-                )}
-                checked={comparison === row.id}
-                onClick={() => {
-                  saveComparison(comparison === row.id ? "" : row.id);
-                }}
-                disabled={baseline === row.id || isTraining}
-              />
-            </RadioGroup>
-          );
-        },
+        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => (
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
+            <RadioGroupItem
+              value={row.id}
+              className={cn(
+                "w-[18px] h-[18px] rounded-full",
+                comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+              )}
+              checked={comparison === row.id}
+              onClick={() => {
+                saveComparison(comparison === row.id ? "" : row.id);
+              }}
+              disabled={baseline === row.id}
+            />
+          </RadioGroup>
+        ),
       };
     }
     return column;
