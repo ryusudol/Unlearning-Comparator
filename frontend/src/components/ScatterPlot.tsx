@@ -515,7 +515,7 @@ const ScatterPlot = React.memo(
             padding: "5px",
             border: "1px solid rgba(0, 0, 0, 0.25)",
             borderRadius: "4px",
-            zIndex: 20,
+            zIndex: 30,
           }}
           className="shadow-xl"
         ></div>
