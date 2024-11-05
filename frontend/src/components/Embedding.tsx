@@ -31,13 +31,14 @@ export type ViewModeType =
 interface Props {
   mode: ModeType;
   height: number;
-  data: number[][] | undefined;
+  data: (number | number[])[][] | undefined;
   id: string;
   onHover: (imgIdxOrNull: number | null, source?: ModeType) => void;
+  hoveredImgIdx: number | null;
 }
 
 const Embedding = forwardRef(
-  ({ mode, height, data, id, onHover }: Props, ref) => {
+  ({ mode, height, data, id, onHover, hoveredImgIdx }: Props, ref) => {
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
     const chartRef = useRef<{
@@ -107,6 +108,7 @@ const Embedding = forwardRef(
             data={data}
             viewMode={viewMode}
             onHover={onHover}
+            hoveredImgIdx={hoveredImgIdx}
             ref={chartRef}
           />
         </div>
