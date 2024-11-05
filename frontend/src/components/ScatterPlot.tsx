@@ -9,6 +9,7 @@ import React, {
 import * as d3 from "d3";
 
 import { forgetClassNames } from "../constants/forgetClassNames";
+import { TABLEAU10 } from "../constants/tableau10";
 import { basicData } from "../constants/basicData";
 import { ModeType } from "../views/Embeddings";
 import { API_URL } from "../constants/common";
@@ -28,7 +29,7 @@ const hoveredStrokeWidth = 2;
 
 interface Props {
   mode: ModeType;
-  data: number[][] | undefined;
+  data: (number | number[])[][] | undefined;
   viewMode: "All Instances" | "Unlearning Target" | "Unlearning Failed";
   onHover: (imgIdxOrNull: number | null, source?: ModeType) => void;
   hoveredImgIdx: number | null;
@@ -45,13 +46,13 @@ const ScatterPlot = React.memo(
       useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
     const circlesRef = useRef<d3.Selection<
       SVGCircleElement,
-      number[],
+      (number | number[])[],
       SVGGElement,
-      unknown
+      undefined
     > | null>(null);
     const crossesRef = useRef<d3.Selection<
       d3.BaseType | SVGPathElement,
-      number[],
+      (number | number[])[],
       SVGGElement,
       undefined
     > | null>(null);
@@ -74,7 +75,9 @@ const ScatterPlot = React.memo(
 
       return d3
         .scaleLinear()
-        .domain(d3.extent(processedData, (d) => d[0]) as [number, number])
+        .domain(
+          d3.extent(processedData, (d) => d[0] as number) as [number, number]
+        )
         .nice()
         .range([0, width]);
     }, [processedData]);
@@ -85,7 +88,9 @@ const ScatterPlot = React.memo(
 
       return d3
         .scaleLinear()
-        .domain(d3.extent(processedData, (d) => d[1]) as [number, number])
+        .domain(
+          d3.extent(processedData, (d) => d[1] as number) as [number, number]
+        )
         .nice()
         .range([height, 0]);
     }, [processedData]);
@@ -114,8 +119,8 @@ const ScatterPlot = React.memo(
           const svgElement = svgRef.current;
           const point = svgElement.createSVGPoint();
 
-          const svgX = x(datum[0]);
-          const svgY = y(datum[1]);
+          const svgX = x(datum[0] as number);
+          const svgY = y(datum[1] as number);
 
           point.x = svgX;
           point.y = svgY;
@@ -135,7 +140,7 @@ const ScatterPlot = React.memo(
     }));
 
     const handleMouseEnter = useCallback(
-      (event: any, d: number[]) => {
+      (event: any, d: (number | number[])[]) => {
         const now = Date.now();
         if (now - lastHoverTimeRef.current < 100) {
           return;
@@ -144,19 +149,21 @@ const ScatterPlot = React.memo(
 
         const element = event.currentTarget;
 
-        onHover(d[4], mode);
+        onHover(d[4] as number, mode);
 
         if (containerRef.current) {
           const containerRect = containerRef.current.getBoundingClientRect();
 
-          const tooltipSize = 140;
+          const tooltipXSize = 362;
+          const tooltipYSize = 336;
           let xPosTooltip = event.clientX - containerRect.left + 10;
           let yPosTooltip = event.clientY - containerRect.top + 10;
 
-          if (xPosTooltip + tooltipSize > containerRect.width)
-            xPosTooltip = event.clientX - containerRect.left - tooltipSize - 10;
-          if (yPosTooltip + tooltipSize > containerRect.height)
-            yPosTooltip = event.clientY - containerRect.top - tooltipSize - 10;
+          if (xPosTooltip + tooltipXSize > containerRect.width)
+            xPosTooltip =
+              event.clientX - containerRect.left - tooltipXSize - 10;
+          if (yPosTooltip + tooltipYSize > containerRect.height)
+            yPosTooltip = event.clientY - containerRect.top - tooltipYSize - 10;
 
           const index = d[4];
           fetch(`${API_URL}/image/cifar10/${index}`)
@@ -168,19 +175,61 @@ const ScatterPlot = React.memo(
                 tooltipRef.current.style.left = `${xPosTooltip}px`;
                 tooltipRef.current.style.top = `${yPosTooltip}px`;
                 tooltipRef.current.innerHTML = `
-                  <div style="display: flex; justify-content: center;">
-                    <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
+                <div style="width: 362px; height: 336px; display: flex; justify-content: center; align-items: center;">
+                  <div style="margin-right: 15px;">
+                    <div style="display: flex; justify-content: center;">
+                      <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
+                    </div>
+                    <div style="font-size: 14px; margin-top: 4px">
+                      <span style="font-weight: 500;">Ground Truth</span>: ${
+                        forgetClassNames[d[2] as number]
+                      }
+                    </div>
+                    <div style="font-size: 14px;">
+                      <span style="font-weight: 500;">Prediction</span>: ${
+                        forgetClassNames[d[3] as number]
+                      }
+                    </div>
                   </div>
-                  <div style="font-size: 14px; margin-top: 4px">
-                    <span style="font-weight: 500;">Ground Truth</span>: ${
-                      forgetClassNames[d[2]]
-                    }
+                  <div style="width: 200px;">
+                    <p style="font-size: 16px; font-weight: 600;">Confidence:</p>
+                    <div>
+                      ${(d[6] as number[])
+                        .map(
+                          (value, idx) => `
+                          <div style="width: 100%;">
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: -15px;">
+                              <span style="font-size: 14px">${
+                                forgetClassNames[idx]
+                              }</span>
+                              <span style="font-size: 14px">${value.toFixed(
+                                4
+                              )}</span>
+                            </div>
+                            <progress
+                              style="width: 100%; height: 2px; margin: 0; appearance: none;"
+                              value=${Number(value.toFixed(3))}
+                              min=${0}
+                              max=${1}
+                              id="progress-${idx}"
+                            ></progress>
+                            <style>
+                              #progress-${idx}::-webkit-progress-bar {
+                                background-color: #f0f0f0; /* 진행되지 않은 막대의 기본 색 */
+                              }
+                              #progress-${idx}::-webkit-progress-value {
+                                background-color: ${
+                                  TABLEAU10[idx]
+                                }; /* 진행된 부분의 색상 */
+                              }
+                            </style>
+                          </div>
+                        `
+                        )
+                        .join("")}
+                    </div>
                   </div>
-                  <div style="font-size: 14px;">
-                    <span style="font-weight: 500;">Prediction</span>: ${
-                      forgetClassNames[d[3]]
-                    }
-                  </div>
+                </div>
                 `;
               }
             });
@@ -195,7 +244,7 @@ const ScatterPlot = React.memo(
     );
 
     const handleMouseLeave = useCallback(
-      (event: any, d: number[]) => {
+      (event: any, d: (number | number[])[]) => {
         if (tooltipRef.current) tooltipRef.current.style.display = "none";
 
         onHover(null);
@@ -206,7 +255,7 @@ const ScatterPlot = React.memo(
         if (element.tagName === "circle") {
           selection.attr("stroke", null).attr("stroke-width", null);
         } else if (element.tagName === "path") {
-          const color = d3.color(z(d[3]));
+          const color = d3.color(z(d[3] as number));
           selection
             .attr("stroke", color ? color.darker().toString() : "black")
             .attr("stroke-width", XStrokeWidth);
@@ -239,10 +288,10 @@ const ScatterPlot = React.memo(
           .selectAll<SVGCircleElement, number[]>("circle")
           .data(processedData.filter((d) => d[2] !== d[5]))
           .join("circle")
-          .attr("cx", (d) => x(d[0]))
-          .attr("cy", (d) => y(d[1]))
+          .attr("cx", (d) => x(d[0] as number))
+          .attr("cy", (d) => y(d[1] as number))
           .attr("r", dotSize)
-          .attr("fill", (d) => z(d[3]))
+          .attr("fill", (d) => z(d[3] as number))
           .style("cursor", "pointer")
           .style("opacity", defaultCircleOpacity)
           .style("vector-effect", "non-scaling-stroke");
@@ -253,7 +302,8 @@ const ScatterPlot = React.memo(
           .join("path")
           .attr(
             "transform",
-            (d) => `translate(${x(d[0])},${y(d[1])}) rotate(45)`
+            (d) =>
+              `translate(${x(d[0] as number)},${y(d[1] as number)}) rotate(45)`
           )
           .attr(
             "d",
@@ -262,9 +312,9 @@ const ScatterPlot = React.memo(
               .type(d3.symbolCross)
               .size(Math.pow(crossSize / XSizeDivider, 2))
           )
-          .attr("fill", (d) => z(d[3]))
+          .attr("fill", (d) => z(d[3] as number))
           .attr("stroke", (d) => {
-            const color = d3.color(z(d[3]));
+            const color = d3.color(z(d[3] as number));
             return color ? color.darker().toString() : "black";
           })
           .attr("stroke-width", XStrokeWidth)
@@ -292,8 +342,8 @@ const ScatterPlot = React.memo(
 
           if (crossesRef.current) {
             crossesRef.current.attr("transform", (d) => {
-              const xPos = x(d[0]);
-              const yPos = y(d[1]);
+              const xPos = x(d[0] as number);
+              const yPos = y(d[1] as number);
               const scale = 1 / transform.k;
               return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
             });
@@ -418,7 +468,7 @@ const ScatterPlot = React.memo(
       if (crossesRef.current) {
         crossesRef.current
           .attr("stroke", (d) => {
-            const color = d3.color(z(d[3]));
+            const color = d3.color(z(d[3] as number));
             return color ? color.darker().toString() : "black";
           })
           .attr("stroke-width", XStrokeWidth);
@@ -465,6 +515,7 @@ const ScatterPlot = React.memo(
             padding: "5px",
             border: "1px solid rgba(0, 0, 0, 0.25)",
             borderRadius: "4px",
+            zIndex: 20,
           }}
           className="shadow-xl"
         ></div>

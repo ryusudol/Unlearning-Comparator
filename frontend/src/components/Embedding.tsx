@@ -31,7 +31,7 @@ export type ViewModeType =
 interface Props {
   mode: ModeType;
   height: number;
-  data: number[][] | undefined;
+  data: (number | number[])[][] | undefined;
   id: string;
   onHover: (imgIdxOrNull: number | null, source?: ModeType) => void;
   hoveredImgIdx: number | null;

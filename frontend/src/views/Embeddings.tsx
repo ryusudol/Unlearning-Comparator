@@ -86,8 +86,9 @@ export default function Embeddings({ height }: { height: number }) {
   //   1: y,
   //   2: original class,
   //   3: predicted class,
-  //   4:img_idx,
+  //   4: img_idx,
   //   5: forget_class
+  //   6: logit (TODO: 추후 prob으로 변경)
   // ]
   const BaselineData = useMemo(() => {
     return baselineData
@@ -98,9 +99,11 @@ export default function Embeddings({ height }: { height: number }) {
           result.predicted_class,
           result.original_index,
           baselineData.forget_class,
+          result.logit,
         ])
       : undefined;
   }, [baselineData]);
+
   const ComparisonData = useMemo(() => {
     return comparisonData
       ? comparisonData.detailed_results.map((result) => [
@@ -110,6 +113,7 @@ export default function Embeddings({ height }: { height: number }) {
           result.predicted_class,
           result.original_index,
           comparisonData.forget_class,
+          result.logit,
         ])
       : undefined;
   }, [comparisonData]);
