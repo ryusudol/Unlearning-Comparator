@@ -6,7 +6,10 @@ import Defense from "../components/Defense";
 import { columns } from "../components/Columns";
 import { Button } from "../components/UI/button";
 import { PlusIcon, SettingsIcon } from "../components/UI/icons";
-import { overviewData } from "../constants/basicData";
+import {
+  defaultUnlearningData,
+  defaultTrainingData,
+} from "../constants/basicData";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { performanceMetrics } from "../constants/overview";
 import {
@@ -45,7 +48,7 @@ export default function Experiments({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[1080px] p-1 relative border-x-[1px] border-b-[1px]"
+      className="w-[1150px] p-1 relative border-x-[1px] border-b-[1px]"
     >
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center ml-0.5">
@@ -121,7 +124,8 @@ export default function Experiments({ height }: { height: number }) {
       ) : (
         <DataTable
           columns={columns}
-          data={overviewData}
+          data={defaultUnlearningData}
+          trainingData={defaultTrainingData}
           performanceMetrics={performanceMetrics}
         />
       )}

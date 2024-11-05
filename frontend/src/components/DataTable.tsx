@@ -10,7 +10,7 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { Data } from "../types/data";
+import { Data, TrainingData } from "../types/data";
 import { hexToRgba } from "../util";
 import { ScrollArea } from "./UI/scroll-area";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -35,8 +35,9 @@ const sortables = [
 ];
 
 interface Props {
-  columns: ColumnDef<Data>[];
+  columns: ColumnDef<Data | TrainingData>[];
   data: Data[];
+  trainingData: TrainingData;
   performanceMetrics: {
     [key: string]: {
       colorScale: d3.ScaleLinear<number, number, never>;
@@ -48,6 +49,7 @@ interface Props {
 export default function DataTable({
   columns,
   data,
+  trainingData,
   performanceMetrics,
 }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
@@ -61,43 +63,49 @@ export default function DataTable({
     if (column.id === "baseline") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data, unknown>) => (
-          <RadioGroup className="flex justify-center items-center ml-[0px]">
-            <RadioGroupItem
-              value={row.id}
-              className={cn(
-                "w-[18px] h-[18px] rounded-full",
-                baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-              )}
-              checked={baseline === row.id}
-              onClick={() => {
-                saveBaseline(baseline === row.id ? "" : row.id);
-              }}
-              disabled={comparison === row.id}
-            />
-          </RadioGroup>
-        ),
+        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => {
+          const isTraining = row.original.phase === "Training";
+          return (
+            <RadioGroup className="flex justify-center items-center ml-[0px]">
+              <RadioGroupItem
+                value={row.id}
+                className={cn(
+                  "w-[18px] h-[18px] rounded-full",
+                  baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+                )}
+                checked={baseline === row.id}
+                onClick={() => {
+                  saveBaseline(baseline === row.id ? "" : row.id);
+                }}
+                disabled={comparison === row.id || isTraining}
+              />
+            </RadioGroup>
+          );
+        },
       };
     }
     if (column.id === "comparison") {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data, unknown>) => (
-          <RadioGroup className="flex justify-center items-center ml-[0px]">
-            <RadioGroupItem
-              value={row.id}
-              className={cn(
-                "w-[18px] h-[18px] rounded-full",
-                comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-              )}
-              checked={comparison === row.id}
-              onClick={() => {
-                saveComparison(comparison === row.id ? "" : row.id);
-              }}
-              disabled={baseline === row.id}
-            />
-          </RadioGroup>
-        ),
+        cell: ({ row }: CellContext<Data | TrainingData, unknown>) => {
+          const isTraining = row.original.phase === "Training";
+          return (
+            <RadioGroup className="flex justify-center items-center ml-[0px]">
+              <RadioGroupItem
+                value={row.id}
+                className={cn(
+                  "w-[18px] h-[18px] rounded-full",
+                  comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+                )}
+                checked={comparison === row.id}
+                onClick={() => {
+                  saveComparison(comparison === row.id ? "" : row.id);
+                }}
+                disabled={baseline === row.id || isTraining}
+              />
+            </RadioGroup>
+          );
+        },
       };
     }
     return column;
@@ -114,8 +122,8 @@ export default function DataTable({
       (forgetDatum) => forgetDatum.method !== "Retrain"
     );
 
-    return [...retrainData, ...otherData];
-  }, [data, forgetClass]);
+    return [trainingData, ...retrainData, ...otherData];
+  }, [data, forgetClass, trainingData]);
 
   const opacityMapping = useMemo(() => {
     const mapping: { [key: string]: { [value: number]: number } } = {};
@@ -153,8 +161,8 @@ export default function DataTable({
   }, [tableData, performanceMetrics]);
 
   const table = useReactTable({
-    getRowId: (row: Data) => row.id,
-    data: tableData,
+    getRowId: (row: Data | TrainingData) => row.id,
+    data: tableData as (Data | TrainingData)[],
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -164,9 +172,9 @@ export default function DataTable({
   });
 
   useEffect(() => {
-    if (tableData.length > 0) {
-      saveBaseline(tableData[0].id);
-      saveComparison(tableData[1]?.id);
+    if (tableData.length > 1) {
+      saveBaseline(tableData[1].id);
+      saveComparison(tableData[2]?.id);
     } else {
       saveBaseline("");
       saveComparison("");
@@ -178,9 +186,9 @@ export default function DataTable({
     <div className="w-full h-[222px]">
       <Table className="table-fixed w-full border-none">
         <ScrollArea className="w-full h-[220px]">
-          <TableHeader className="bg-[#F5F6F9]">
+          <TableHeader className="bg-gray-200">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-gray-200">
                 {headerGroup.headers.map((header) => {
                   const style = sortables.includes(header.column.id)
                     ? { width: "80px" }
@@ -212,6 +220,11 @@ export default function DataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className={
+                    row.original.phase === "Training"
+                      ? "bg-gray-100 hover:bg-gray-100"
+                      : ""
+                  }
                 >
                   {row.getVisibleCells().map((cell, idx) => {
                     const columnId = cell.column.id;

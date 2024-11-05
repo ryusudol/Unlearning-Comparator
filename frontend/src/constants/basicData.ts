@@ -1,5 +1,6 @@
-import { Data } from "../types/data";
+import { Data, TrainingData } from "../types/data";
 
+import training from "./JSON/training.json";
 import data0 from "./JSON/0/9f4d.json";
 import data1 from "./JSON/1/b5c3.json";
 import data2 from "./JSON/2/ea48.json";
@@ -36,7 +37,7 @@ export const basicData = [
   data15,
 ];
 
-export const overviewData: Data[] = basicData.map((datum) => {
+export const defaultUnlearningData: Data[] = basicData.map((datum) => {
   return {
     id: datum.id,
     forget_class: datum.forget_class,
@@ -61,3 +62,5 @@ export const overviewData: Data[] = basicData.map((datum) => {
     detailed_results: datum.detailed_results,
   };
 });
+
+export const defaultTrainingData: TrainingData = training;
