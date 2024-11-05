@@ -179,9 +179,10 @@ export default function Embeddings({ height }: { height: number }) {
                 />
                 <div className="flex items-center text-[15px] font-light">
                   <span>{name}</span>
-                  {forgetClass && name === forgetClassNames[forgetClass] && (
-                    <span className="ml-0.5">(X)</span>
-                  )}
+                  {forgetClass !== undefined &&
+                    name === forgetClassNames[forgetClass] && (
+                      <span className="ml-0.5">(X)</span>
+                    )}
                 </div>
               </div>
             ))}
