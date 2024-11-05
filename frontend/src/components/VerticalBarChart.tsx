@@ -155,7 +155,7 @@ export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
             stroke="#777"
             strokeDasharray="3 3"
             label={{
-              value: `avg: ${remainGapAvg}`,
+              value: `avg (remain): ${remainGapAvg}`,
               position: "top",
               fontSize: LABEL_FONT_SIZE,
               fill: "#777",
