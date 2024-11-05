@@ -31,10 +31,11 @@ interface Props {
   data: number[][] | undefined;
   viewMode: "All Instances" | "Unlearning Target" | "Unlearning Failed";
   onHover: (imgIdxOrNull: number | null, source?: ModeType) => void;
+  hoveredImgIdx: number | null;
 }
 
 const ScatterPlot = React.memo(
-  forwardRef(({ mode, data, viewMode, onHover }: Props, ref) => {
+  forwardRef(({ mode, data, viewMode, onHover, hoveredImgIdx }: Props, ref) => {
     const lastHoverTimeRef = useRef<number>(0);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
@@ -407,6 +408,39 @@ const ScatterPlot = React.memo(
 
       updateOpacity();
     }, [viewMode]);
+
+    useEffect(() => {
+      if (!circlesRef.current && !crossesRef.current) return;
+
+      if (circlesRef.current) {
+        circlesRef.current.attr("stroke", null).attr("stroke-width", null);
+      }
+      if (crossesRef.current) {
+        crossesRef.current
+          .attr("stroke", (d) => {
+            const color = d3.color(z(d[3]));
+            return color ? color.darker().toString() : "black";
+          })
+          .attr("stroke-width", XStrokeWidth);
+      }
+
+      if (hoveredImgIdx !== null) {
+        if (circlesRef.current) {
+          circlesRef.current
+            .filter((d) => d[4] === hoveredImgIdx)
+            .attr("stroke", "black")
+            .attr("stroke-width", hoveredStrokeWidth)
+            .raise();
+        }
+        if (crossesRef.current) {
+          crossesRef.current
+            .filter((d) => d[4] === hoveredImgIdx)
+            .attr("stroke", "black")
+            .attr("stroke-width", hoveredStrokeWidth)
+            .raise();
+        }
+      }
+    }, [hoveredImgIdx, z]);
 
     return (
       <div

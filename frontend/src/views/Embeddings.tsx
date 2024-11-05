@@ -191,6 +191,7 @@ export default function Embeddings({ height }: { height: number }) {
         data={BaselineData}
         id={baseline}
         onHover={handleHover}
+        hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
         ref={baselineRef}
       />
       <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
@@ -200,6 +201,7 @@ export default function Embeddings({ height }: { height: number }) {
         data={ComparisonData}
         id={comparison}
         onHover={handleHover}
+        hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
         ref={comparisonRef}
       />
     </div>
