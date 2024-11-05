@@ -182,7 +182,7 @@ export default function DataTable({
         <ScrollArea className="w-full h-[220px]">
           <TableHeader className="bg-gray-200">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-gray-200">
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const style = sortables.includes(header.column.id)
                     ? { width: "80px" }
@@ -214,11 +214,6 @@ export default function DataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={
-                    row.original.phase === "Training"
-                      ? "bg-gray-100 hover:bg-gray-100"
-                      : ""
-                  }
                 >
                   {row.getVisibleCells().map((cell, idx) => {
                     const columnId = cell.column.id;
