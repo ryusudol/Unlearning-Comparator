@@ -99,7 +99,7 @@ export default function Embeddings({ height }: { height: number }) {
           result.predicted_class,
           result.original_index,
           baselineData.forget_class,
-          result.logit,
+          (result as any).logit || (result as any).prob,
         ])
       : undefined;
   }, [baselineData]);
@@ -113,7 +113,7 @@ export default function Embeddings({ height }: { height: number }) {
           result.predicted_class,
           result.original_index,
           comparisonData.forget_class,
-          result.logit,
+          (result as any).logit || (result as any).prob,
         ])
       : undefined;
   }, [comparisonData]);

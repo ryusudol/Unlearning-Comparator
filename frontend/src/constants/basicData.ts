@@ -1,4 +1,4 @@
-import { Data, TrainingData } from "../types/data";
+import { UnlearningDataType, TrainingDataType } from "../types/data";
 
 import training from "./JSON/training.json";
 import data0 from "./JSON/0/9f4d.json";
@@ -19,6 +19,7 @@ import data14 from "./JSON/8/4b3e.json";
 import data15 from "./JSON/9/9bbe.json";
 
 export const basicData = [
+  training,
   data0,
   data1,
   data2,
@@ -37,7 +38,9 @@ export const basicData = [
   data15,
 ];
 
-export const defaultUnlearningData: Data[] = basicData.map((datum) => {
+export const defaultUnlearningData: UnlearningDataType[] = (
+  basicData.slice(1) as UnlearningDataType[]
+).map((datum) => {
   return {
     id: datum.id,
     forget_class: datum.forget_class,
@@ -47,9 +50,11 @@ export const defaultUnlearningData: Data[] = basicData.map((datum) => {
     epochs: datum.epochs,
     batch_size: datum.batch_size,
     learning_rate: datum.learning_rate,
-    unlearn_accuracy: Number(datum.unlearn_accuracy.toFixed(3)),
+    unlearn_accuracy: Number((datum.unlearn_accuracy as number).toFixed(3)),
     remain_accuracy: Number(datum.remain_accuracy.toFixed(3)),
-    test_unlearn_accuracy: Number(datum.test_unlearn_accuracy.toFixed(3)),
+    test_unlearn_accuracy: Number(
+      (datum.test_unlearn_accuracy as number).toFixed(3)
+    ),
     test_remain_accuracy: Number(datum.test_remain_accuracy.toFixed(3)),
     RTE: datum.RTE,
     train_class_accuracies: datum.train_class_accuracies,
@@ -63,4 +68,4 @@ export const defaultUnlearningData: Data[] = basicData.map((datum) => {
   };
 });
 
-export const defaultTrainingData: TrainingData = training;
+export const defaultTrainingData: TrainingDataType = training;
