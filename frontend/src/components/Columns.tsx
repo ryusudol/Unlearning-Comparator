@@ -6,6 +6,15 @@ import { Data } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 import { getPhaseColors } from "../util";
+import { NotAvailable } from "../constants/overview";
+
+function getValueToDisplay(value: unknown) {
+  return value === NotAvailable
+    ? "-"
+    : typeof value === "string"
+    ? value
+    : Number(value);
+}
 
 export const columns: ColumnDef<Data>[] = [
   {
@@ -21,56 +30,60 @@ export const columns: ColumnDef<Data>[] = [
     header: "Phase",
     cell: ({ row }) => {
       const method = row.getValue("method") as string;
-      const phase =
-        method === "Retrain" ? "Retrained" : (row.getValue("phase") as string);
-      const { color, backgroundColor } = getPhaseColors(phase, 1, 0.15);
-      return (
-        <Badge className="w-auto" style={{ backgroundColor, color }}>
-          {phase}
-        </Badge>
-      );
+      const phase = row.getValue("phase") as string;
+      const value =
+        method === "Retrain"
+          ? "Retrained"
+          : phase === "Training"
+          ? "Origin"
+          : phase;
+      const { color, backgroundColor } = getPhaseColors(value, 1, 0.15);
+      return <Badge style={{ backgroundColor, color }}>{value}</Badge>;
     },
   },
   {
     accessorKey: "init_id",
     header: "Init",
     cell: ({ row }) => {
-      const value = row.getValue("init_id") as string;
-      return <div>{value !== "N/A" ? value : "-"}</div>;
+      const init = row.getValue("init_id");
+      const value = getValueToDisplay(init);
+      return <div>{value}</div>;
     },
   },
   {
     accessorKey: "method",
     header: "Method",
     cell: ({ row }) => {
-      const value = row.getValue("method") as string;
-      return (
-        <div className="w-[138px]">{value === "Retrain" ? "-" : value}</div>
-      );
+      const method = row.getValue("method");
+      const value = getValueToDisplay(method);
+      return <div className="w-[138px]">{value}</div>;
     },
   },
   {
     accessorKey: "epochs",
     header: "Epochs",
     cell: ({ row }) => {
-      const value = row.getValue("epochs") as string;
-      return <div>{value !== "N/A" ? value : "-"}</div>;
+      const epochs = row.getValue("epochs");
+      const value = getValueToDisplay(epochs);
+      return <div>{value}</div>;
     },
   },
   {
     accessorKey: "learning_rate",
     header: "LR",
     cell: ({ row }) => {
-      const value = row.getValue("learning_rate") as string;
-      return <div className="w-[38px]">{value !== "N/A" ? value : "-"}</div>;
+      const learningRate = row.getValue("learning_rate");
+      const value = getValueToDisplay(learningRate);
+      return <div className="w-[38px]">{value}</div>;
     },
   },
   {
     accessorKey: "batch_size",
     header: "# Batch",
     cell: ({ row }) => {
-      const value = row.getValue("batch_size") as string;
-      return <div>{value !== "N/A" ? value : "-"}</div>;
+      const batchSize = row.getValue("batch_size");
+      const value = getValueToDisplay(batchSize);
+      return <div>{value}</div>;
     },
   },
   {
@@ -93,7 +106,8 @@ export const columns: ColumnDef<Data>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("unlearn_accuracy"));
+      const ua = row.getValue("unlearn_accuracy");
+      const value = getValueToDisplay(ua);
       return <div className="text-center">{value}</div>;
     },
   },
@@ -117,7 +131,8 @@ export const columns: ColumnDef<Data>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("remain_accuracy"));
+      const ra = row.getValue("remain_accuracy");
+      const value = getValueToDisplay(ra);
       return <div className="text-center">{value}</div>;
     },
   },
@@ -141,7 +156,8 @@ export const columns: ColumnDef<Data>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("test_unlearn_accuracy"));
+      const tua = row.getValue("test_unlearn_accuracy");
+      const value = getValueToDisplay(tua);
       return <div className="text-center">{value}</div>;
     },
   },
@@ -165,7 +181,8 @@ export const columns: ColumnDef<Data>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const value = parseFloat(row.getValue("test_remain_accuracy"));
+      const tra = row.getValue("test_remain_accuracy");
+      const value = getValueToDisplay(tra);
       return <div className="text-center">{value}</div>;
     },
   },
@@ -189,8 +206,9 @@ export const columns: ColumnDef<Data>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const value = row.getValue("RTE") as string;
-      return <div className="text-center">{value !== "N/A" ? value : "-"}</div>;
+      const rte = row.getValue("RTE");
+      const value = getValueToDisplay(rte);
+      return <div className="text-center">{value}</div>;
     },
   },
   {
