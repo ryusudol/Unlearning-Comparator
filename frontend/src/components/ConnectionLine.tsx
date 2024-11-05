@@ -32,7 +32,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
     transform: `translate(${x1}px, ${y1}px) rotate(${angle}deg)`,
     width: `${length}px`,
     height: "2px",
-    backgroundColor: "red",
+    backgroundColor: "black",
     zIndex: 100,
   };
 
