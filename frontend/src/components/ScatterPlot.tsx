@@ -27,6 +27,9 @@ const defaultCircleOpacity = 0.6;
 const loweredOpacity = 0.1;
 const hoveredStrokeWidth = 2;
 
+const UNLEARNING_TARGET = "Unlearning Target";
+const UNLEARNING_FAILED = "Unlearning Failed";
+
 interface Props {
   mode: ModeType;
   data: (number | number[])[][] | undefined;
@@ -37,6 +40,7 @@ interface Props {
 
 const ScatterPlot = React.memo(
   forwardRef(({ mode, data, viewMode, onHover, hoveredImgIdx }: Props, ref) => {
+    const fetchControllerRef = useRef<AbortController | null>(null);
     const lastHoverTimeRef = useRef<number>(0);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
@@ -165,10 +169,17 @@ const ScatterPlot = React.memo(
           if (yPosTooltip + tooltipYSize > containerRect.height)
             yPosTooltip = event.clientY - containerRect.top - tooltipYSize - 10;
 
+          const controller = new AbortController();
+          if (fetchControllerRef.current) {
+            fetchControllerRef.current.abort();
+          }
+          fetchControllerRef.current = controller;
+
           const index = d[4];
           fetch(`${API_URL}/image/cifar10/${index}`)
             .then((response) => response.blob())
             .then((blob) => {
+              if (controller.signal.aborted) return;
               const imageUrl = URL.createObjectURL(blob);
               if (tooltipRef.current) {
                 tooltipRef.current.style.display = "block";
@@ -181,6 +192,9 @@ const ScatterPlot = React.memo(
                   d
                 );
               }
+            })
+            .catch((err) => {
+              if (err.name === "AbortError") return;
             });
         }
 
@@ -197,6 +211,11 @@ const ScatterPlot = React.memo(
         if (tooltipRef.current) tooltipRef.current.style.display = "none";
 
         onHover(null);
+
+        if (fetchControllerRef.current) {
+          fetchControllerRef.current.abort();
+          fetchControllerRef.current = null;
+        }
 
         const element = event.currentTarget;
         const selection = d3.select(element);
@@ -364,18 +383,18 @@ const ScatterPlot = React.memo(
           circlesRef.current
             .style("opacity", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
+                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
+                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return loweredOpacity;
               return defaultCircleOpacity;
             })
             .style("pointer-events", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
+                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
+                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return "none";
               return "auto";
@@ -386,18 +405,18 @@ const ScatterPlot = React.memo(
           crossesRef.current
             .style("opacity", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
+                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
+                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return loweredOpacity;
               return defaultCrossOpacity;
             })
             .style("pointer-events", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
+                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
+                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return "none";
               return "auto";
@@ -439,7 +458,6 @@ const ScatterPlot = React.memo(
             .raise();
         }
 
-        // **Add the following code to display the tooltip**
         let selectedElement: SVGCircleElement | SVGPathElement | null = null;
         if (circlesRef.current) {
           selectedElement = circlesRef.current
@@ -470,10 +488,12 @@ const ScatterPlot = React.memo(
 
           const datum = processedData.find((d) => d[4] === hoveredImgIdx);
           if (datum) {
+            const controller = new AbortController();
             const index = datum[4];
             fetch(`${API_URL}/image/cifar10/${index}`)
               .then((response) => response.blob())
               .then((blob) => {
+                if (controller.signal.aborted) return;
                 const imageUrl = URL.createObjectURL(blob);
                 if (tooltipRef.current) {
                   tooltipRef.current.style.display = "block";
@@ -486,7 +506,13 @@ const ScatterPlot = React.memo(
                     datum
                   );
                 }
+              })
+              .catch((error) => {
+                if (error.name === "AbortError") return;
               });
+            return () => {
+              controller.abort();
+            };
           }
         }
       } else {
