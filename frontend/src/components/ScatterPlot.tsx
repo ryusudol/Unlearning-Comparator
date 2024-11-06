@@ -41,7 +41,6 @@ interface Props {
 const ScatterPlot = React.memo(
   forwardRef(({ mode, data, viewMode, onHover, hoveredImgIdx }: Props, ref) => {
     const fetchControllerRef = useRef<AbortController | null>(null);
-    const lastHoverTimeRef = useRef<number>(0);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -145,12 +144,6 @@ const ScatterPlot = React.memo(
 
     const handleMouseEnter = useCallback(
       (event: any, d: (number | number[])[]) => {
-        const now = Date.now();
-        if (now - lastHoverTimeRef.current < 100) {
-          return;
-        }
-        lastHoverTimeRef.current = now;
-
         const element = event.currentTarget;
 
         onHover(d[4] as number, mode);
