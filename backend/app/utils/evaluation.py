@@ -31,8 +31,10 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
             _, predicted = outputs.max(1)
             predictions.extend(predicted.cpu().numpy())
 
-            # Add logits for all classes
-            probs = F.softmax(outputs, dim=1)
+            # Add softmax probabilities with temperature scaling
+            temperature = 3.0 
+            scaled_outputs = outputs / temperature
+            probs = F.softmax(scaled_outputs, dim=1)
             probabilities.extend(probs.cpu().numpy())
 
             sample_count += inputs.size(0)
@@ -124,26 +126,20 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
 
 
-async def calculate_cka_similarity(model_before, model_after, train_loader, test_loader, forget_class, device):
+async def calculate_cka_similarity(
+        model_before, 
+        model_after, 
+        train_loader, 
+        test_loader, 
+        forget_class, 
+        device
+    ):
     detailed_layers = [
         'conv1',
         'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
         'layer2.0.conv1', 'layer2.0.conv2', 'layer2.1.conv1', 'layer2.1.conv2',
         'layer3.0.conv1', 'layer3.0.conv2', 'layer3.1.conv1', 'layer3.1.conv2',
         'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
-        'fc'
-    ]
-    
-    detailed_layers = [
-        'conv1',
-        'layer1.0.conv1',  # 블록1 시작
-        'layer1.1.conv2',  # 블록1 끝
-        'layer2.0.conv1',  # 블록2 시작
-        'layer2.1.conv2',  # 블록2 끝
-        'layer3.0.conv1',  # 블록3 시작
-        'layer3.1.conv2',  # 블록3 끝
-        'layer4.0.conv1',  # 블록4 시작
-        'layer4.1.conv2',  # 블록4 끝
         'fc'
     ]
     
@@ -174,21 +170,29 @@ async def calculate_cka_similarity(model_before, model_after, train_loader, test
               model2_layers=detailed_layers, 
               device=device)
 
-    def filter_loader(loader, condition):
+    def filter_loader(loader, condition, is_train=False):
+        # Get indices that satisfy the condition
+        indices = [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
+        
+        # If it's train loader, randomly sample 1/5 of indices
+        if is_train:
+            num_samples = len(indices) // 10
+            indices = torch.randperm(len(indices))[:num_samples].tolist()
+        else:
+            num_samples = len(indices) // 2
+            indices = torch.randperm(len(indices))[:num_samples].tolist()
+
         return DataLoader(
-            Subset(
-                loader.dataset,
-                [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
-            ),
+            Subset(loader.dataset, indices),
             batch_size=loader.batch_size,
             shuffle=False,
             num_workers=0
         )
 
-    forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class)
-    other_classes_train_loader = filter_loader(train_loader, lambda label: label != forget_class)
-    forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class)
-    other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class)
+    forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class, is_train=True)
+    other_classes_train_loader = filter_loader(train_loader, lambda label: label != forget_class, is_train=True)
+    forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class, is_train=False)
+    other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class, is_train=False)
 
     cka.compare(forget_class_train_loader, forget_class_train_loader)
     results_forget_train = cka.export()

@@ -27,24 +27,14 @@ class TrainingStatus:
 class UnlearningStatus:
     def __init__(self):
         self.is_unlearning = False
-        self.progress = 0
+        self.cancel_requested = False
+        self.progress = "Idle"
+        self.forget_class = 0
         self.current_epoch = 0
         self.total_epochs = 0
-        self.current_loss = 0
-        self.current_accuracy = 0
-        self.test_loss = 0
-        self.start_time = None
+        self.current_unlearn_loss = 0
+        self.current_unlearn_accuracy = 0
         self.estimated_time_remaining = 0
-        self.umap_embedding = None
-        self.cancel_requested = False
-        self.forget_class = None
-
-        self.unlearn_accuracy = 0 # UA 
-        self.remain_accuracy = 0 # RA
-        self.test_accuracy = 0 # TA
-        self.train_class_accuracies: Dict[int, float] = {0} # Train Metrics
-        self.test_class_accuracies: Dict[int, float] = {0} # Test Metrics
-        self.svg_file: List[str] = None
 
     def reset(self):
         self.__init__()

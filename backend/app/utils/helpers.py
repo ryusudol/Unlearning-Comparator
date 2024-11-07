@@ -27,8 +27,8 @@ def get_data_loaders(batch_size):
     ])
     
     test_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.491, 0.482, 0.446), (0.247, 0.243, 0.261))
+        transforms.ToTensor(),
+        transforms.Normalize((0.491, 0.482, 0.446), (0.247, 0.243, 0.261))
     ])
     
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
@@ -39,13 +39,24 @@ def get_data_loaders(batch_size):
     print("loaded loaders")
     return train_loader, test_loader, train_set, test_set
 
-def save_model(model, save_dir, model_name, dataset_name, epochs, learning_rate, is_best=False):
+def save_model(model, 
+               epochs, 
+               learning_rate, 
+               is_best=False):
+    save_dir = 'unlearned_models'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
-    prefix = ""
-    model_filename = f"{prefix}{model_name}_{dataset_name}_{epochs}epochs_{learning_rate}lr.pth"
+    model_filename = f"ResNet18_CIFAR10_{epochs}epochs_{learning_rate}lr.pth"
     model_path = os.path.join(save_dir, model_filename)
     
     torch.save(model.state_dict(), model_path)
     print(f"{'Best ' if is_best else ''}Model saved to {model_path}")
+
+def format_distribution(distribution):
+    return {
+        f"gt_{i}": {
+            f"pred_{j}": round(float(distribution[i][j]), 3) for j in range(10)
+        }
+        for i in range(10)
+    }

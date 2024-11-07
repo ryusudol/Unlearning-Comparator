@@ -14,7 +14,7 @@ router = APIRouter()
 status = UnlearningStatus()
 
 class UnlearningRequest(BaseModel):
-    seed: int = UNLEARN_SEED
+    # seed: int = UNLEARN_SEED
     batch_size: int = Field(
         default=128, 
         description="Batch size for unlearning"
@@ -34,11 +34,32 @@ class UnlearningRequest(BaseModel):
         lt=10, 
         description="Class to forget (0-9), -1 for original"
     )
-    weights_filename: str = Field(
-        default=".", 
-        description="Filename of the weights in trained_models folder"
-    )
-    
+    # weights_filename: str = Field(
+    #     default="0000.pth", 
+    #     description="Filename of the weights in trained_models folder"
+    # )
+
+@router.post("/unlearn/ga")
+async def start_unlearning_ga(
+    background_tasks: BackgroundTasks,
+    request: UnlearningRequest
+):
+    if status.is_unlearning:
+        raise HTTPException(
+            status_code=400, 
+            detail="Unlearning is already in progress"
+        )
+    status.reset()
+    weights_path = 'trained_models/0000.pth'
+    if not os.path.exists(weights_path):
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Weights '{weights_path}' not found in trained_models/ folder"
+        )
+
+    background_tasks.add_task(run_unlearning_GA, request, status, weights_path)
+    return {"message": "GA Unlearning started"}
+
 @router.post("/unlearn/rl")
 async def start_unlearning_rl(
     background_tasks: BackgroundTasks,
@@ -55,33 +76,11 @@ async def start_unlearning_rl(
     if not os.path.exists(weights_path):
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights file '{request.weights_filename}' not found in trained_models folder"
+            detail=f"Weights '{request.weights_filename}' not found in trained_models folder"
         )
 
     background_tasks.add_task(run_unlearning_RL, request, status, weights_path)
     return {"message": "RL Unlearning started"}
-
-@router.post("/unlearn/ga")
-async def start_unlearning_ga(
-    background_tasks: BackgroundTasks,
-    request: UnlearningRequest
-):
-    if status.is_unlearning:
-        raise HTTPException(
-            status_code=400, 
-            detail="Unlearning is already in progress"
-        )
-    status.reset()
-
-    weights_path = os.path.join('trained_models', request.weights_filename)
-    if not os.path.exists(weights_path):
-        raise HTTPException(
-            status_code=404, 
-            detail=f"Weights file '{request.weights_filename}' not found in trained_models folder"
-        )
-
-    background_tasks.add_task(run_unlearning_GA, request, status, weights_path)
-    return {"message": "GA Unlearning started"}
 
 @router.post("/unlearn/ft")
 async def start_unlearning_ft(
@@ -99,7 +98,7 @@ async def start_unlearning_ft(
     if not os.path.exists(weights_path):
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights file '{request.weights_filename}' not found in trained_models folder"
+            detail=f"Weights '{request.weights_filename}' not found in trained_models folder"
         )
 
     background_tasks.add_task(run_unlearning_FT, request, status, weights_path)
@@ -124,16 +123,12 @@ async def get_unlearning_status():
     return {
         "is_unlearning": status.is_unlearning,
         "progress": status.progress,
+        "forget_class": status.forget_class,
         "current_epoch": status.current_epoch,
         "total_epochs": status.total_epochs,
-        "current_loss": status.current_loss,
-        "current_accuracy": status.current_accuracy,
-        "test_loss": status.test_loss,
-        "test_accuracy": status.test_accuracy,
-        "train_class_accuracies": status.train_class_accuracies,
-        "test_class_accuracies": status.test_class_accuracies,
-        "estimated_time_remaining": status.estimated_time_remaining + 30.0,
-        "forget_class": status.forget_class
+        "current_unlearn_loss": round(status.current_unlearn_loss, 2),
+        "current_unlearn_accuracy": round(status.current_unlearn_accuracy, 2),
+        "estimated_time_remaining": round(status.estimated_time_remaining + 30.0, 2),
     }
 
 @router.post("/unlearn/custom")
@@ -162,7 +157,7 @@ async def start_unlearning_custom(
     background_tasks.add_task(
         run_unlearning_custom, 
         forget_class, 
-        status, 
+        status,
         weights_path
     )
     
@@ -177,5 +172,5 @@ async def cancel_unlearning():
         )
     status.cancel_requested = True
     return {
-        "message": "Cancellation requested. Unlearning will stop after the current epoch."
+        "message": "Cancellation requested. Unlearning will stop soon."
     }

@@ -25,7 +25,6 @@ async def unlearning_custom(forget_class, status, weights_path):
                          else "cpu")
     model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    
     model_before.load_state_dict(torch.load("trained_models/0000.pth", map_location=device))
     model_after.load_state_dict(torch.load(weights_path, map_location=device))
 
@@ -73,5 +72,4 @@ async def run_unlearning_custom(forget_class, status, weights_path):
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
-        status.progress = 100
         os.remove(weights_path)

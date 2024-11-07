@@ -13,6 +13,7 @@ from app.utils.evaluation import (
 	calculate_cka_similarity
 )
 from app.utils.visualization import compute_umap_embedding
+from app.utils.helpers import format_distribution
 from app.config.settings import UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningInference(threading.Thread):
@@ -40,6 +41,7 @@ class UnlearningInference(threading.Thread):
         self.criterion = criterion
         self.device = device
         self.num_classes = 10
+        self.remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
 
         self.exception = None
         self.loop = None
@@ -67,14 +69,6 @@ class UnlearningInference(threading.Thread):
             print(f"  Class {i}:")
             for j in range(10):
                 print(f"    Predicted as {j}: {distribution[i][j]:.3f}")
-
-    def format_distribution(self, distribution):
-        return {
-            f"gt_{i}": {
-                f"pred_{j}": round(float(distribution[i][j]), 3) for j in range(10)
-            }
-            for i in range(10)
-        }
     
     async def async_run(self):
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
@@ -104,10 +98,9 @@ class UnlearningInference(threading.Thread):
             unlearn_accuracy = "N/A"
             remain_accuracy = round(train_accuracy, 3)
         else:
-            remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
             unlearn_accuracy = train_class_accuracies[self.forget_class]
             remain_accuracy = round(
-                sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes), 3
+                sum(train_class_accuracies[i] for i in self.remain_classes) / len(self. remain_classes), 3
             )
 
         print("Train Class Accuracies:")
@@ -138,9 +131,9 @@ class UnlearningInference(threading.Thread):
         )
 
         if not self.is_training_eval:
-            test_accuracy = (test_accuracy * 10.0 - test_class_accuracies[self.forget_class]) / 9.0 
-
-        test_class_accuracies = test_class_accuracies
+            test_accuracy = round(
+                sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
+            )
         
         print("Test Class Accuracies:")
         for i, acc in test_class_accuracies.items():
@@ -207,9 +200,10 @@ class UnlearningInference(threading.Thread):
             test_unlearn_accuracy = "N/A"
             test_remain_accuracy = round(test_accuracy, 3) 
         else:
-            remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
             test_unlearn_accuracy = test_class_accuracies[self.forget_class]
-            test_remain_accuracy = round(sum(test_class_accuracies[i] for i in remain_classes), 3)
+            test_remain_accuracy = round(
+                sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
+            )
                                          
         # CKA similarity calculation
         print("Calculating CKA similarity")
@@ -247,10 +241,10 @@ class UnlearningInference(threading.Thread):
             "test_class_accuracies": {
                 k: round(v, 3) for k, v in test_class_accuracies.items()
             },
-            "train_label_distribution": self.format_distribution(train_label_dist),
-            "train_confidence_distribution": self.format_distribution(train_conf_dist),
-            "test_label_distribution": self.format_distribution(test_label_dist),
-            "test_confidence_distribution": self.format_distribution(test_conf_dist),
+            "train_label_distribution": format_distribution(train_label_dist),
+            "train_confidence_distribution": format_distribution(train_conf_dist),
+            "test_label_distribution": format_distribution(test_label_dist),
+            "test_confidence_distribution": format_distribution(test_conf_dist),
             "similarity": "N/A" if self.is_training_eval else cka_results["similarity"],
             "detailed_results": detailed_results,
         }
