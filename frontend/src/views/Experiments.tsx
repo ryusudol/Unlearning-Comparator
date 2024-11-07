@@ -4,14 +4,14 @@ import DataTable from "../components/DataTable";
 import Unlearning from "../components/Unlearning";
 import Defense from "../components/Defense";
 import { columns } from "../components/Columns";
-import { Button } from "../components/UI/button";
+import Button from "../components/Button";
 import { PlusIcon, SettingsIcon } from "../components/UI/icons";
+import { ForgetClassContext } from "../store/forget-class-context";
+import { performanceMetrics } from "../constants/overview";
 import {
   defaultUnlearningData,
   defaultTrainingData,
 } from "../constants/basicData";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { performanceMetrics } from "../constants/overview";
 import {
   Dialog,
   DialogContent,
@@ -61,11 +61,17 @@ export default function Experiments({ height }: { height: number }) {
             setOpen(value);
           }}
         >
-          <DialogTrigger onClick={handleAddExpClick}>
-            <Button className="h-7 px-2.5 mr-0.5 bg-[#585858] hover:bg-[#696969]">
-              <PlusIcon color="white" className="w-2.5 h-2.5 mr-1.5" />
-              <span>Add Experiment</span>
-            </Button>
+          <DialogTrigger>
+            <Button
+              onClick={handleAddExpClick}
+              content={
+                <>
+                  <PlusIcon color="white" className="w-2.5 h-2.5 mr-1.5" />
+                  <span>Add Experiment</span>
+                </>
+              }
+              className="h-7 px-2.5 mr-0.5 bg-[#585858] hover:bg-[#696969]"
+            />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px] p-4">
             <div className="w-full flex items-center mt-2">
@@ -107,12 +113,7 @@ export default function Experiments({ height }: { height: number }) {
               <Defense unlearnedModels={unlearnedModels} />
             )}
             <DialogFooter>
-              <Button
-                className="bg-[#585858] hover:bg-[#696969] h-7"
-                onClick={handleRunClick}
-              >
-                Run
-              </Button>
+              <Button onClick={handleRunClick} content="Run" />
             </DialogFooter>
           </DialogContent>
         </Dialog>
