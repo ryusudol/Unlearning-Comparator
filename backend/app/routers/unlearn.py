@@ -71,12 +71,11 @@ async def start_unlearning_rl(
             detail="Unlearning is already in progress"
         )
     status.reset()
-
-    weights_path = os.path.join('trained_models', request.weights_filename)
+    weights_path = 'trained_models/0000.pth'
     if not os.path.exists(weights_path):
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights '{request.weights_filename}' not found in trained_models folder"
+            detail=f"Weights '{weights_path}' not found in trained_models/ folder"
         )
 
     background_tasks.add_task(run_unlearning_RL, request, status, weights_path)
@@ -93,12 +92,11 @@ async def start_unlearning_ft(
             detail="Unlearning is already in progress"
         )
     status.reset()
-
-    weights_path = os.path.join('trained_models', request.weights_filename)
+    weights_path = 'trained_models/0000.pth'
     if not os.path.exists(weights_path):
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights '{request.weights_filename}' not found in trained_models folder"
+            detail=f"Weights '{weights_path}' not found in trained_models/ folder"
         )
 
     background_tasks.add_task(run_unlearning_FT, request, status, weights_path)

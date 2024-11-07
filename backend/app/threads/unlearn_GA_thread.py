@@ -118,10 +118,10 @@ class UnlearningGAThread(threading.Thread):
             self.status.current_unlearn_accuracy = epoch_acc
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
-            print(f"UnlearningLoss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
+            print(f"Unlearning Loss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
             print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
 
-        rte = time.time() - start_time  # RTE 계산
+        rte = time.time() - start_time
         save_model(model=self.model, epochs=epoch + 1, learning_rate=self.request.learning_rate)
         
         if self.stopped():
@@ -254,9 +254,9 @@ class UnlearningGAThread(threading.Thread):
             "forget_class": self.request.forget_class,
             "phase": "Unlearned",
             "init_id": "0000",
-            "method": "GA",
+            "method": "Gradient-Ascent",
             "epochs": self.request.epochs,
-            "batch_size": 128,
+            "batch_size": self.request.batch_size,
             "learning_rate": self.request.learning_rate,
             "unlearn_accuracy": round(unlearn_accuracy, 3),
             "remain_accuracy": remain_accuracy,
