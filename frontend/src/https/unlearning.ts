@@ -29,24 +29,12 @@ export async function executeMethodUnlearning(
   runningConfig: UnlearningConfigurationData
 ) {
   const method = runningConfig.method;
-  let data: {
-    epochs: number;
-    batch_size: number;
-    learning_rate: number;
-    forget_class: number;
-    weights_filename?: string;
-  } = {
-    epochs: runningConfig.epochs,
-    batch_size: runningConfig.batch_size,
-    learning_rate: runningConfig.learning_rate,
+  const data: Omit<UnlearningConfigurationData, "method"> = {
     forget_class: runningConfig.forget_class,
+    epochs: runningConfig.epochs,
+    learning_rate: runningConfig.learning_rate,
+    batch_size: runningConfig.batch_size,
   };
-  if (method !== "retrain") {
-    data = {
-      ...data,
-      weights_filename: runningConfig.trained_model,
-    };
-  }
 
   try {
     const response = await fetch(`${API_URL}/unlearn/${method}`, {

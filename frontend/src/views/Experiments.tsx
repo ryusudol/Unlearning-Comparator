@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 
 import DataTable from "../components/DataTable";
 import Unlearning from "../components/Unlearning";
@@ -6,8 +6,9 @@ import Defense from "../components/Defense";
 import { columns } from "../components/Columns";
 import Button from "../components/Button";
 import { PlusIcon, SettingsIcon } from "../components/UI/icons";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { performanceMetrics } from "../constants/overview";
+import { RunningStatusContext } from "../store/running-status-context";
+import { ForgetClassContext } from "../store/forget-class-context";
 import {
   defaultUnlearningData,
   defaultTrainingData,
@@ -15,8 +16,10 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
   DialogTrigger,
-  DialogFooter,
 } from "../components/UI/dialog";
 
 const UNLEARNING = "unlearning";
@@ -26,11 +29,14 @@ type ModeType = "unlearning" | "defense";
 
 export default function Experiments({ height }: { height: number }) {
   const { selectedForgetClasses } = useContext(ForgetClassContext);
+  const { isRunning } = useContext(RunningStatusContext);
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<ModeType>(UNLEARNING);
-  const [trainedModels, setTrainedModels] = useState<string[]>([]);
-  const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isRunning) setOpen(false);
+  }, [isRunning]);
 
   const isUnlearning = mode === UNLEARNING;
   const isDefense = mode === DEFENSE;
@@ -42,8 +48,6 @@ export default function Experiments({ height }: { height: number }) {
   const handleExperimentModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     setMode(e.currentTarget.id as ModeType);
   };
-
-  const handleRunClick = () => {};
 
   return (
     <section
@@ -61,7 +65,7 @@ export default function Experiments({ height }: { height: number }) {
             setOpen(value);
           }}
         >
-          <DialogTrigger>
+          <DialogTrigger disabled={isRunning}>
             <Button
               onClick={handleAddExpClick}
               content={
@@ -74,6 +78,10 @@ export default function Experiments({ height }: { height: number }) {
             />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px] p-4">
+            <DialogHeader className="hidden">
+              <DialogTitle>Run</DialogTitle>
+              <DialogDescription>Running Configuration</DialogDescription>
+            </DialogHeader>
             <div className="w-full flex items-center mt-2">
               <div
                 id={UNLEARNING}
@@ -104,17 +112,7 @@ export default function Experiments({ height }: { height: number }) {
                 />
               </div>
             </div>
-            {isUnlearning ? (
-              <Unlearning
-                trainedModels={trainedModels}
-                setUnlearnedModels={setUnlearnedModels}
-              />
-            ) : (
-              <Defense unlearnedModels={unlearnedModels} />
-            )}
-            <DialogFooter>
-              <Button onClick={handleRunClick} content="Run" />
-            </DialogFooter>
+            {isUnlearning ? <Unlearning /> : <Defense />}
           </DialogContent>
         </Dialog>
       </div>

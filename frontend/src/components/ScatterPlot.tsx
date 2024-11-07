@@ -214,12 +214,16 @@ const ScatterPlot = React.memo(
         const selection = d3.select(element);
 
         if (element.tagName === "circle") {
-          selection.attr("stroke", null).attr("stroke-width", null);
+          selection
+            .attr("stroke", null)
+            .attr("stroke-width", null)
+            .style("opacity", defaultCircleOpacity);
         } else if (element.tagName === "path") {
           const color = d3.color(z(d[3] as number));
           selection
             .attr("stroke", color ? color.darker().toString() : "black")
-            .attr("stroke-width", XStrokeWidth);
+            .attr("stroke-width", XStrokeWidth)
+            .style("opacity", defaultCrossOpacity);
         }
       },
       [onHover, z]
@@ -424,7 +428,10 @@ const ScatterPlot = React.memo(
       if (!circlesRef.current && !crossesRef.current) return;
 
       if (circlesRef.current) {
-        circlesRef.current.attr("stroke", null).attr("stroke-width", null);
+        circlesRef.current
+          .attr("stroke", null)
+          .attr("stroke-width", null)
+          .style("opacity", defaultCircleOpacity);
       }
       if (crossesRef.current) {
         crossesRef.current
@@ -432,7 +439,8 @@ const ScatterPlot = React.memo(
             const color = d3.color(z(d[3] as number));
             return color ? color.darker().toString() : "black";
           })
-          .attr("stroke-width", XStrokeWidth);
+          .attr("stroke-width", XStrokeWidth)
+          .style("opacity", defaultCrossOpacity);
       }
 
       if (hoveredImgIdx !== null) {
