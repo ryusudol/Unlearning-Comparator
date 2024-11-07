@@ -3,22 +3,6 @@ export interface ClassAccuracies {
   [key: string]: number;
 }
 
-export interface TrainingStatus {
-  is_training: boolean;
-  progress: number;
-  current_epoch: number;
-  total_epochs: number;
-  current_loss: number;
-  current_accuracy: number;
-  best_loss: number;
-  best_accuracy: number;
-  test_loss: number;
-  test_accuracy: number;
-  train_class_accuracies: ClassAccuracies;
-  test_class_accuracies: ClassAccuracies;
-  estimated_time_remaining: number | undefined;
-}
-
 export interface UnlearningStatus {
   is_unlearning: boolean;
   progress: number;
@@ -49,15 +33,8 @@ export interface DefenseStatus {
 }
 
 // Configuration Data
-export interface TrainingConfigurationData {
-  epochs: number;
-  learning_rate: number;
-  batch_size: number;
-}
-
 export interface UnlearningConfigurationData {
   method: string;
-  trained_model: string;
   forget_class: number;
   epochs: number;
   learning_rate: number;

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 import Header from "../components/Header";
 import Experiments from "../views/Experiments";
+import RunningStatus from "../views/RunningStatus";
 import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
@@ -27,8 +28,9 @@ export default function App() {
   return (
     <section className="relative">
       <Header />
-      <div className="flex justify-between">
+      <div className="flex items-center">
         <Experiments height={UPPER_HEIGHT} />
+        <RunningStatus height={UPPER_HEIGHT} />
         <Accuracies height={UPPER_HEIGHT} />
       </div>
       <div className="flex">
