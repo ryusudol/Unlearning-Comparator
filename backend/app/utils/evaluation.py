@@ -7,7 +7,12 @@ from app.config.settings import UMAP_DATA_SIZE
 # from scipy.special import softmax
 # import time
 
-async def get_layer_activations_and_predictions(model, data_loader, device, num_samples=UMAP_DATA_SIZE):
+async def get_layer_activations_and_predictions(
+    model, 
+    data_loader, 
+    device, 
+    num_samples=UMAP_DATA_SIZE
+):
     model.eval()
     activations = []
     predictions = []
@@ -32,7 +37,7 @@ async def get_layer_activations_and_predictions(model, data_loader, device, num_
             predictions.extend(predicted.cpu().numpy())
 
             # Add softmax probabilities with temperature scaling
-            temperature = 3.0 
+            temperature = 2.0 
             scaled_outputs = outputs / temperature
             probs = F.softmax(scaled_outputs, dim=1)
             probabilities.extend(probs.cpu().numpy())
@@ -76,12 +81,19 @@ async def evaluate_model(model, data_loader, criterion, device):
                 class_total[label] += 1
     
     accuracy = correct / total
-    class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
+    class_accuracies = {
+        i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) 
+        for i in range(10)
+    }
     avg_loss = total_loss / len(data_loader)
     print(f"Total correct: {correct}, Total samples: {total}")
     print(f"Overall accuracy: {accuracy:.3f}")
     for i in range(10):
-        print(f"Class {i} correct: {class_correct[i]}, total: {class_total[i]}, accuracy: {class_accuracies[i]:.4f}")
+        print(
+            f"Class {i} correct: {class_correct[i]}, "
+            f"total: {class_total[i]}, "
+            f"accuracy: {class_accuracies[i]:.4f}"
+        )
     return avg_loss, accuracy, class_accuracies
 
 async def evaluate_model_with_distributions(model, data_loader, criterion, device):
@@ -170,20 +182,18 @@ async def calculate_cka_similarity(
               model2_layers=detailed_layers, 
               device=device)
 
-    def filter_loader(loader, condition, is_train=False):
-        # Get indices that satisfy the condition
+    def filter_loader(loader, condition, is_train=False):              
         indices = [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
-        
-        # If it's train loader, randomly sample 1/5 of indices
         if is_train:
             num_samples = len(indices) // 10
-            indices = torch.randperm(len(indices))[:num_samples].tolist()
         else:
             num_samples = len(indices) // 2
-            indices = torch.randperm(len(indices))[:num_samples].tolist()
+        
+        sampled_indices = torch.randperm(len(indices))[:num_samples].tolist()
+        final_indices = [indices[i] for i in sampled_indices]
 
         return DataLoader(
-            Subset(loader.dataset, indices),
+            Subset(loader.dataset, final_indices),
             batch_size=loader.batch_size,
             shuffle=False,
             num_workers=0

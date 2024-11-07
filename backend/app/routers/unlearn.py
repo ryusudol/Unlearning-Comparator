@@ -20,11 +20,11 @@ class UnlearningRequest(BaseModel):
         description="Batch size for unlearning"
     )
     learning_rate: float = Field(
-        default=0.01, 
+        default=0.001, 
         description="Learning rate for unlearning"
     )
     epochs: int = Field(
-        default=5, 
+        default=3, 
         ge=1, 
         description="Number of unlearning epochs"
     )

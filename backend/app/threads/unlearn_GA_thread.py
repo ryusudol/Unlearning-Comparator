@@ -118,7 +118,7 @@ class UnlearningGAThread(threading.Thread):
             self.status.current_unlearn_accuracy = epoch_acc
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
-            print(f"Loss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
+            print(f"UnlearningLoss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
             print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
 
         rte = time.time() - start_time  # RTE 계산
