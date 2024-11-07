@@ -33,7 +33,6 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
     width: `${length}px`,
     height: "2px",
     backgroundColor: "black",
-    zIndex: 20,
   };
 
   return (
