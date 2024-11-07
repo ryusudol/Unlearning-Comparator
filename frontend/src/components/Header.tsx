@@ -5,7 +5,7 @@ import { forgetClassNames } from "../constants/forgetClassNames";
 import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Label } from "./UI/label";
-import { Button } from "./UI/button";
+import Button from "./Button";
 import {
   Dialog,
   DialogContent,
@@ -86,7 +86,7 @@ export default function Header() {
                 <DialogTrigger className="w-8 h-[30px] flex justify-center items-center ml-1 mb-0.5 transition hover:bg-gray-800 rounded-t">
                   <PlusIcon className="w-3.5 h-3.5" color="#64758B" />
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] p-4">
+                <DialogContent className="sm:max-w-[320px] p-4">
                   <DialogHeader>
                     <DialogTitle>
                       Which class do you want to unlearn?
@@ -96,8 +96,8 @@ export default function Header() {
                         Select a class that you want to unlearn. Click add when
                         you're done.
                       </p>
-                      <div className="flex items-center gap-y-4 text-black mt-4 ml-[62px]">
-                        <div className="flex flex-col mr-[82px]">
+                      <div className="grid grid-cols-2 gap-y-4 text-black mt-4">
+                        <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground">
                             Dataset
                           </span>
@@ -116,8 +116,10 @@ export default function Header() {
                       </div>
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid grid-cols-2 items-center gap-y-4">
-                    <Label className="text-center">Forget Class</Label>
+                  <div className="flex flex-col items-start">
+                    <Label className="text-xs text-muted-foreground text-center text-nowrap mb-0.5">
+                      Forget Class
+                    </Label>
                     <Select defaultValue={targetFC} onValueChange={setTargetFC}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder={targetFC} />
@@ -132,7 +134,7 @@ export default function Header() {
                     </Select>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddClick}>Add</Button>
+                    <Button onClick={handleAddClick} content="Add" />
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
