@@ -259,11 +259,16 @@ class UnlearningInference(threading.Thread):
             "similarity": "N/A" if self.is_training_eval else cka_results["similarity"],
             "detailed_results": detailed_results,
         }
+
         # Save results to JSON file
         os.makedirs('data', exist_ok=True)
-        with open(f'data/{results["id"]}.json', 'w') as f:
+        forget_class_dir = os.path.join('data', str(self.forget_class))
+        os.makedirs(forget_class_dir, exist_ok=True)
+
+        result_path = os.path.join(forget_class_dir, f'{results["id"]}.json')
+        with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
-            
-        print(f"Results saved to data/{results['id']}.json")
+
+        print(f"Results saved to {result_path}")
         print(f"Custom unlearning inference completed at {time.time() - start_time:.3f} seconds")
         self.status.progress = "Completed"
