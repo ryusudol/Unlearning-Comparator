@@ -82,6 +82,13 @@ class UnlearningGAThread(threading.Thread):
         self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
         
+        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        umap_subset_loader = torch.utils.data.DataLoader(
+            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
+        )
+        
         start_time = time.time()
         for epoch in range(self.request.epochs):
             self.status.current_epoch = epoch + 1
@@ -187,12 +194,7 @@ class UnlearningGAThread(threading.Thread):
         
         # UMAP and activation calculation
         self.status.progress = "Computing UMAP"
-        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
-        umap_subset_loader = torch.utils.data.DataLoader(
-            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
-        )
+        
         
         print("Computing layer activations")
         (

@@ -27,15 +27,16 @@ class TrainingStatus:
 class UnlearningStatus:
     def __init__(self):
         self.is_unlearning = False
-        self.cancel_requested = False
         self.recent_id = None
         self.progress = "Idle"
-        self.forget_class = -1
         self.current_epoch = 0
         self.total_epochs = 0
         self.current_unlearn_loss = 0
         self.current_unlearn_accuracy = 0
         self.estimated_time_remaining = 0
+        
+        self.cancel_requested = False
+        self.forget_class = -1
 
     def reset(self):
         self.__init__()

@@ -74,7 +74,16 @@ class UnlearningInference(threading.Thread):
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
         self.status.progress = "Starting Inference"
         self.status.recent_id = uuid.uuid4().hex[:4]
+        
+        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        umap_subset_loader = torch.utils.data.DataLoader(
+            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
+        )
+        
         start_time = time.time()
+        
         print(f"Models loaded successfully at{time.time() - start_time:.3f} seconds")
         
         # Evaluate on train set
@@ -156,12 +165,6 @@ class UnlearningInference(threading.Thread):
 
         # UMAP and activation calculation
         self.status.progress = "Computing UMAP"
-        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
-        umap_subset_loader = torch.utils.data.DataLoader(
-            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
-        )
         
         print("Computing layer activations")
         (

@@ -21,39 +21,42 @@ from app.config.settings import (
 class UnlearningRLThread(threading.Thread):
     def __init__(
         self,
+        request,
+        status,
         model_before,
         model_after,
-        device,
-        criterion,
-        optimizer,
-        scheduler,
-        request,
-        retain_loader,
         forget_loader,
         train_loader,
         test_loader,
         train_set,
         test_set,
-        status
+        criterion,
+        optimizer,
+        scheduler,
+        device,
+        retain_loader
     ):
         threading.Thread.__init__(self)
+        self.request = request
+        self.status = status
         self.model_before = model_before
         self.model = model_after
-        self.device = device
-        self.criterion = criterion
-        self.optimizer = optimizer
-        self.scheduler = scheduler
-        self.request = request
-        self.retain_loader = retain_loader
+
         self.forget_loader = forget_loader
         self.train_loader = train_loader
         self.test_loader = test_loader
+        self.retain_loader = retain_loader
+
         self.train_set = train_set
         self.test_set = test_set
-        self.status = status
+        
+        self.criterion = criterion
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+        self.device = device
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
-
+        
         self.exception = None
         self.loop = None
         self._stop_event = threading.Event()
@@ -80,7 +83,6 @@ class UnlearningRLThread(threading.Thread):
         self.status.progress = "Unlearning"
         self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
-        start_time = time.time()
 
         # Combine retain_loader and forget_loader
         combined_dataset = torch.utils.data.ConcatDataset([
@@ -92,6 +94,17 @@ class UnlearningRLThread(threading.Thread):
             batch_size=self.request.batch_size,
             shuffle=True
         )
+
+        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        umap_subset_loader = torch.utils.data.DataLoader(
+            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
+        )
+        
+        start_time = time.time()
+
+        
 
         for epoch in range(self.request.epochs):
             self.status.current_epoch = epoch + 1
@@ -224,12 +237,7 @@ class UnlearningRLThread(threading.Thread):
         
         # UMAP and activation calculation
         self.status.progress = "Computing UMAP"
-        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
-        umap_subset_loader = torch.utils.data.DataLoader(
-            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
-        )
+        
         
         print("Computing layer activations")
         (
@@ -291,7 +299,8 @@ class UnlearningRLThread(threading.Thread):
             "id": self.status.recent_id,
             "forget_class": self.request.forget_class,
             "phase": "Unlearned",
-            "method": "RandomLabeling",
+            "init_id": "0000",
+            "method": "Random-Labeling",
             "epochs": self.request.epochs,
             "batch_size": self.request.batch_size,
             "learning_rate": self.request.learning_rate,

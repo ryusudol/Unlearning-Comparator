@@ -127,6 +127,7 @@ async def get_unlearning_status():
     return {
         "is_unlearning": status.is_unlearning,
         "progress": status.progress,
+        "recent_id": status.recent_id,
         "current_epoch": status.current_epoch,
         "total_epochs": status.total_epochs,
         "current_unlearn_loss": round(status.current_unlearn_loss, 2),
