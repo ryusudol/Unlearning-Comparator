@@ -21,14 +21,16 @@ def load_model(model_path, num_classes=10, device='cuda'):
 
 def get_data_loaders(batch_size):
     train_transform = transforms.Compose([
-        # transforms.RandomHorizontalFlip(), 
-        transforms.ToTensor(), 
-        transforms.Normalize((0.491, 0.482, 0.446), (0.247, 0.243, 0.261))
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        # cka 계산시에는 주석처리
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
     
     test_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.491, 0.482, 0.446), (0.247, 0.243, 0.261))
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     ])
     
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)

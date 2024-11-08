@@ -2,18 +2,28 @@ import threading
 import asyncio
 import time
 import sys
-import os
+import traceback
 
-import matplotlib.pyplot as plt
 from app.utils.helpers import save_model
 from app.utils.evaluation import evaluate_model
 
 class TrainingThread(threading.Thread):
-    def __init__(self, model, train_loader, test_loader, criterion, optimizer, scheduler,
-                 device, epochs, status, model_name, dataset_name, learning_rate):
+    def __init__(self, 
+                 model, 
+                 train_loader, 
+                 test_loader, 
+                 criterion, 
+                 optimizer, 
+                 scheduler,
+                 device, 
+                 epochs, 
+                 status, 
+                 model_name, 
+                 dataset_name, 
+                 learning_rate):
         threading.Thread.__init__(self)
         self.model = model
-        self.train_loader = train_loader
+        self.train_loader = train_loader 
         self.test_loader = test_loader
         self.criterion = criterion
         self.optimizer = optimizer
@@ -26,6 +36,13 @@ class TrainingThread(threading.Thread):
         self.learning_rate = learning_rate
         self.exception = None
         self.loop = None
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
 
     def run(self):
         try:
@@ -34,6 +51,8 @@ class TrainingThread(threading.Thread):
             self.loop.run_until_complete(self.train_model())
         except Exception as e:
             self.exception = e
+            print(f"Training error occurred: {str(e)}")
+            traceback.print_exc()
         finally:
             if self.loop:
                 self.loop.close()
@@ -50,14 +69,18 @@ class TrainingThread(threading.Thread):
         test_accuracies = []
 
         for epoch in range(self.epochs):
+            if self.stopped():
+                self.status.is_training = False
+                print("\nTraining stopped.")
+                return
+
             running_loss = 0.0
             correct = 0
             total = 0
             class_correct = [0] * 10
             class_total = [0] * 10
-            
             for i, (inputs, labels) in enumerate(self.train_loader):
-                if self.status.cancel_requested:
+                if self.stopped():
                     self.status.is_training = False
                     print("\nTraining cancelled mid-batch.")
                     return
@@ -81,28 +104,35 @@ class TrainingThread(threading.Thread):
                     class_correct[label] += c[i].item()
                     class_total[label] += 1
             
-            if self.status.cancel_requested:
+            if self.stopped():
                 self.status.is_training = False
                 print("\nTraining cancelled.")
                 return
             
             self.scheduler.step()
             train_loss = running_loss / len(self.train_loader)
-            train_accuracy = 100. * correct / total
-            train_class_accuracies = {i: (100 * class_correct[i] / class_total[i] if class_total[i] > 0 else 0) for i in range(10)}
+            train_accuracy = correct / total
+            train_class_accuracies = {
+                i: (class_correct[i] / class_total[i] 
+                    if class_total[i] > 0 else 0) 
+                for i in range(10)
+            }
             
             # Evaluate on test set
-            test_loss, test_accuracy, test_class_accuracies = await evaluate_model(self.model, self.test_loader, self.criterion, self.device)
+            test_loss, test_accuracy, test_class_accuracies = await evaluate_model(
+                self.model, 
+                self.test_loader, 
+                self.criterion, 
+                self.device
+            )
             
-            train_accuracies.append(train_accuracy)
-            test_accuracies.append(test_accuracy)
-
+            # Update best test accuracy and epoch if current result is better
             if test_accuracy > best_test_acc:
                 best_test_acc = test_accuracy
                 best_epoch = epoch + 1
-                save_model(self.model, 'trained_models', self.model_name, self.dataset_name, self.epochs, self.learning_rate, is_best=True)
-                print(f"New best model saved at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
-
+            
+            train_accuracies.append(train_accuracy)
+            test_accuracies.append(test_accuracy)
             # Update status
             self.status.current_epoch = epoch + 1
             self.status.progress = (epoch + 1) / self.epochs * 100
@@ -122,29 +152,32 @@ class TrainingThread(threading.Thread):
             
             elapsed_time = time.time() - self.status.start_time
             estimated_total_time = elapsed_time / (epoch + 1) * self.epochs
-            self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
+            self.status.estimated_time_remaining = max(
+                0, 
+                estimated_total_time - elapsed_time
+            )
             
             current_lr = self.optimizer.param_groups[0]['lr']
 
+            # Simplified print statements for better readability
             print(f"\nEpoch [{epoch+1}/{self.epochs}]")
-            print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}%")
-            print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_accuracy:.2f}%")
-            print(f"Best Train Acc: {self.status.best_accuracy:.2f}%")
-            print(f"Best Test Acc: {self.status.best_test_accuracy:.2f}%")
-            print(f"Current LR: {current_lr:.5f}")
-            print(f"Best model so far was at epoch {best_epoch} with test accuracy {best_test_acc:.2f}%")
-            print("Train Class Accuracies:")
-            for i, acc in train_class_accuracies.items():
-                print(f"  Class {i}: {acc:.2f}%")
-            print("Test Class Accuracies:")
-            for i, acc in test_class_accuracies.items():
-                print(f"  Class {i}: {acc:.2f}%")
-            print(f"Progress: {self.status.progress:.5f}%, ETA: {self.status.estimated_time_remaining:.2f}s")
+            print(f"Training   - Loss: {train_loss:.4f}, Accuracy: {train_accuracy:.4f}")
+            print(f"Test - Loss: {test_loss:.4f}, Accuracy: {test_accuracy:.4f}")
+            print(f"Best - Train: {self.status.best_accuracy:.4f}, Test: {self.status.best_test_accuracy:.4f}")
+            print(f"Learning Rate: {current_lr:.5f}")
+            print(f"Best Model: Epoch {best_epoch} (Test Acc: {best_test_acc:.4f})")
+            
+            print("\nPer-Class Accuracies:")
+            print("Class |  Train  |  Test")
+            print("-" * 30)
+            for i in range(10):
+                print(f"  {i}   | {train_class_accuracies[i]:6.4f} | {test_class_accuracies[i]:6.4f}")
+            
+            print(f"ETA: {self.status.estimated_time_remaining:.1f}s")
             
             sys.stdout.flush()
         
-        print()  # Print a newline at the end of training
-
-        if not self.status.cancel_requested:
-            save_dir = 'trained_models'
-            save_model(self.model, save_dir, self.model_name, self.dataset_name, self.epochs, self.learning_rate)
+        total_training_time = time.time() - self.status.start_time
+        print(f"\nTotal training time: {total_training_time:.1f} seconds ({total_training_time/60:.1f} minutes)")
+        print()
+        save_model(self.model, self.epochs, self.learning_rate)

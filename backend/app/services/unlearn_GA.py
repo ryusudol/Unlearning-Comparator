@@ -84,10 +84,11 @@ async def unlearning_GA(request, status, weights_path):
 
     # thread start
     while unlearning_GA_thread.is_alive():
+        await asyncio.sleep(0.1)
         if status.cancel_requested:
             unlearning_GA_thread.stop()
             print("Cancellation requested, stopping the unlearning process...")
-        await asyncio.sleep(0.2)  # Check status every 100ms
+        
     status.is_unlearning = False
 
     # thread end

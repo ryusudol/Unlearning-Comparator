@@ -103,10 +103,11 @@ async def unlearning_RL(request, status, weights_path):
 
     # thread start
     while unlearning_RL_thread.is_alive():
+        await asyncio.sleep(0.1)
         if status.cancel_requested:
             unlearning_RL_thread.stop()
             print("Cancellation requested, stopping the unlearning process...")
-        await asyncio.sleep(0.2)  # Check status every 200ms
+        
     status.is_unlearning = False
 
     # thread end

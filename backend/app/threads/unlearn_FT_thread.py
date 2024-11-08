@@ -96,7 +96,6 @@ class UnlearningFTThread(threading.Thread):
             correct = 0
             
             for i, (inputs, labels) in enumerate(self.retain_loader):
-                
                 if self.stopped():
                     self.status.is_unlearning = False
                     print("\nTraining cancelled mid-batch.")

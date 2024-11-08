@@ -44,11 +44,11 @@ async def unlearning_custom(forget_class, status, weights_path):
     print("unlearning started")
     # thread start
     while unlearning_thread.is_alive():
+        await asyncio.sleep(0.1)
         if status.cancel_requested:
             unlearning_thread.stop()
             print("Cancellation requested, stopping the unlearning process...")
-        await asyncio.sleep(0.2)  # Check status every 200ms
-
+        
     status.is_unlearning = False
    
     if unlearning_thread.is_alive():
