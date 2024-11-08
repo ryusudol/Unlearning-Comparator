@@ -74,7 +74,7 @@ export default function Experiments({ height }: { height: number }) {
                   <span>Add Experiment</span>
                 </>
               }
-              className="h-7 px-2.5 mr-0.5 bg-[#585858] hover:bg-[#696969]"
+              className="px-2.5 mr-0.5"
             />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px] p-4">

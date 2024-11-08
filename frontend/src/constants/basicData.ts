@@ -5,18 +5,15 @@ import data0 from "./JSON/0/9f4d.json";
 import data1 from "./JSON/1/b5c3.json";
 import data2 from "./JSON/2/ea48.json";
 import data3 from "./JSON/3/f0f5.json";
-import data4 from "./JSON/4/4455.json";
+import data4 from "./JSON/4/8882.json";
 import data5 from "./JSON/5/49c0.json";
-import data6 from "./JSON/6/04c5.json";
-import data7 from "./JSON/6/272f.json";
-import data8 from "./JSON/6/37d2.json";
-import data9 from "./JSON/6/8896.json";
-import data10 from "./JSON/6/95ce.json";
-import data11 from "./JSON/6/b0d0.json";
-import data12 from "./JSON/6/ff06.json";
-import data13 from "./JSON/7/0b65.json";
-import data14 from "./JSON/8/4b3e.json";
-import data15 from "./JSON/9/9bbe.json";
+import data6 from "./JSON/6/b0d0.json";
+import data11 from "./JSON/6/b163.json";
+import data12 from "./JSON/6/1369.json";
+import data7 from "./JSON/6/724c.json";
+import data8 from "./JSON/7/0b65.json";
+import data9 from "./JSON/8/4b3e.json";
+import data10 from "./JSON/9/9bbe.json";
 
 export const basicData = [
   training,
@@ -33,9 +30,6 @@ export const basicData = [
   data10,
   data11,
   data12,
-  data13,
-  data14,
-  data15,
 ];
 
 export const defaultUnlearningData: UnlearningDataType[] = (
