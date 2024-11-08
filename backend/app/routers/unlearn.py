@@ -121,12 +121,11 @@ async def get_unlearning_status():
     return {
         "is_unlearning": status.is_unlearning,
         "progress": status.progress,
-        "forget_class": status.forget_class,
         "current_epoch": status.current_epoch,
         "total_epochs": status.total_epochs,
         "current_unlearn_loss": round(status.current_unlearn_loss, 2),
         "current_unlearn_accuracy": round(status.current_unlearn_accuracy, 2),
-        "estimated_time_remaining": round(status.estimated_time_remaining + 30.0, 2),
+        "estimated_time_remaining": round(status.estimated_time_remaining + 60.0, 2),
     }
 
 @router.post("/unlearn/custom")
@@ -151,7 +150,6 @@ async def start_unlearning_custom(
         content = await weights_file.read()
         buffer.write(content)
     
-    # Use the new main function in the background task
     background_tasks.add_task(
         run_unlearning_custom, 
         forget_class, 

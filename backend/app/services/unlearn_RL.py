@@ -22,7 +22,6 @@ async def unlearning_RL(request, status, weights_path):
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=DECREASING_LR, gamma=0.2)
 
     status.progress = 0
-    status.forget_class = request.forget_class
 
     unlearning_thread = UnlearningRLThread(
         model=model, 

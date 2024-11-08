@@ -77,15 +77,17 @@ class UnlearningFTThread(threading.Thread):
     async def unlearn_FT_model(self):
         print(f"Starting FT unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
-        
+        self.status.total_epochs = self.request.epochs
         start_time = time.time()
 
         for epoch in range(self.request.epochs):
+            self.status.current_epoch = epoch + 1
             running_loss = 0.0
             total = 0
             correct = 0
             
             for i, (inputs, labels) in enumerate(self.retain_loader):
+                
                 if self.stopped():
                     self.status.is_unlearning = False
                     print("\nTraining cancelled mid-batch.")
@@ -128,11 +130,11 @@ class UnlearningFTThread(threading.Thread):
             # Status update with forget set metrics
             elapsed_time = time.time() - start_time
             estimated_total_time = elapsed_time / (epoch + 1) * self.request.epochs
-            self.status.current_epoch = epoch + 1
-            self.status.total_epochs = self.request.epochs
+            
             self.status.current_unlearn_loss = forget_epoch_loss
             self.status.current_unlearn_accuracy = forget_epoch_acc
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
+
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
             print(f"Forget Loss: {forget_epoch_loss:.4f}, Forget Accuracy: {forget_epoch_acc:.2f}%")
             print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
@@ -248,7 +250,7 @@ class UnlearningFTThread(threading.Thread):
         for i in range(len(umap_subset)):
             original_index = umap_subset_indices[i].item()
             ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
-            is_forget = ground_truth == self.request.forget_class
+            is_forget = (ground_truth == self.request.forget_class)
             detailed_results.append({
                 "index": i,
                 "ground_truth": int(ground_truth),

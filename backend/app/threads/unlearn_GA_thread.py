@@ -79,9 +79,11 @@ class UnlearningGAThread(threading.Thread):
     async def unlearn_GA_model(self):
         print(f"Starting GA unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
-
+        self.status.total_epochs = self.request.epochs
+        
         start_time = time.time()
         for epoch in range(self.request.epochs):
+            self.status.current_epoch = epoch + 1
             running_loss = 0.0
             correct = 0
             total = 0
@@ -112,11 +114,11 @@ class UnlearningGAThread(threading.Thread):
             # Status update
             elapsed_time = time.time() - start_time
             estimated_total_time = elapsed_time / (epoch + 1) * self.request.epochs
-            self.status.current_epoch = epoch + 1
-            self.status.total_epochs = self.request.epochs
+            
             self.status.current_unlearn_loss = epoch_loss
             self.status.current_unlearn_accuracy = epoch_acc
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
+
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
             print(f"Unlearning Loss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
             print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
@@ -220,7 +222,7 @@ class UnlearningGAThread(threading.Thread):
         for i in range(len(umap_subset)):
             original_index = umap_subset_indices[i].item()
             ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
-            is_forget = ground_truth == self.request.forget_class
+            is_forget = (ground_truth == self.request.forget_class)
             detailed_results.append({
                 "index": i,
                 "ground_truth": int(ground_truth),

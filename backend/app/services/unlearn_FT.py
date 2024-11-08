@@ -81,9 +81,6 @@ async def unlearning_FT(request, status, weights_path):
         gamma=0.2
     )
 
-    status.progress = 0
-    status.forget_class = request.forget_class
-
     unlearning_FT_thread = UnlearningFTThread(
         request=request,
         status=status,
