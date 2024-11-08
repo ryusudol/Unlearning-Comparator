@@ -38,7 +38,7 @@ async def training(request, status):
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
         T_max=request.epochs,
-        eta_min=0
+        eta_min=1e-5
     )
 
     training_thread = TrainingThread(

@@ -15,8 +15,8 @@ class TrainingStatus:
         self.best_test_accuracy = 0
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
-        self.start_time = None
-        self.estimated_time_remaining = None
+        self.start_time = 0
+        self.estimated_time_remaining = 0
         self.umap_embeddings = None
         self.cancel_requested = False
 
@@ -48,7 +48,6 @@ class UnlearningStatus:
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None
-        self.estimated_time_remaining = None
 
         
 

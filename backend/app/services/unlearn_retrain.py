@@ -56,7 +56,7 @@ async def unlearning_retrain(request, status):
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
         T_max=request.epochs,
-        eta_min=0
+        eta_min=0.0001
     )
 
     status.progress = 0

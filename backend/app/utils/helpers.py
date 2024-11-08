@@ -21,7 +21,7 @@ def load_model(model_path, num_classes=10, device='cuda'):
 
 def get_data_loaders(batch_size):
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
+        transforms.RandomCrop(32, padding=2),
         transforms.RandomHorizontalFlip(),
         # cka 계산시에는 주석처리
         transforms.ToTensor(),
