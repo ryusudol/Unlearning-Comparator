@@ -29,7 +29,7 @@ class UnlearningStatus:
         self.is_unlearning = False
         self.cancel_requested = False
         self.progress = "Idle"
-        self.forget_class = 0
+        self.forget_class = -1
         self.current_epoch = 0
         self.total_epochs = 0
         self.current_unlearn_loss = 0
