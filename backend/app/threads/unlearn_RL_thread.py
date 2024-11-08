@@ -78,6 +78,7 @@ class UnlearningRLThread(threading.Thread):
     async def unlearn_RL_model(self):
         print(f"Starting RL unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
+        self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
         start_time = time.time()
 
@@ -109,7 +110,6 @@ class UnlearningRLThread(threading.Thread):
                 self.optimizer.zero_grad()
                 outputs = self.model(inputs)
 
-                # Random labeling only for forget class samples
                 forget_mask = (labels == self.request.forget_class)
                 num_forget = forget_mask.sum().item()
                 if num_forget > 0:
@@ -139,15 +139,12 @@ class UnlearningRLThread(threading.Thread):
                 for inputs, labels in self.forget_loader:
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     outputs = self.model(inputs)
-                    
-                    # 원래 라벨로 loss 계산
                     loss = self.criterion(outputs, labels)
                     forget_running_loss += loss.item()
 
-                    # 원래 클래스로 예측하는지 확인 
                     _, predicted = torch.max(outputs.data, 1)
                     forget_total += labels.size(0)
-                    forget_correct += (predicted == self.request.forget_class).sum().item()
+                    forget_correct += (predicted == labels).sum().item()
 
             forget_epoch_loss = forget_running_loss / len(self.forget_loader)
             forget_epoch_acc = 100 * forget_correct / forget_total
@@ -291,7 +288,7 @@ class UnlearningRLThread(threading.Thread):
 
         # Save results
         results = {
-            "id": uuid.uuid4().hex[:4],
+            "id": self.status.recent_id,
             "forget_class": self.request.forget_class,
             "phase": "Unlearned",
             "method": "RandomLabeling",

@@ -28,6 +28,7 @@ class UnlearningStatus:
     def __init__(self):
         self.is_unlearning = False
         self.cancel_requested = False
+        self.recent_id = None
         self.progress = "Idle"
         self.forget_class = -1
         self.current_epoch = 0

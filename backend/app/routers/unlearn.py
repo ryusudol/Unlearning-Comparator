@@ -1,4 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Form
+from fastapi import (
+    APIRouter, 
+    BackgroundTasks, 
+    HTTPException, 
+    UploadFile, 
+    File, 
+    Form
+)
 from pydantic import BaseModel, Field
 from app.services.unlearn_retrain import run_unlearning
 from app.services.unlearn_RL import run_unlearning_RL
@@ -7,7 +14,6 @@ from app.services.unlearn_FT import run_unlearning_FT
 from app.services.unlearn_custom import run_unlearning_custom
 
 from app.models.neural_network import UnlearningStatus
-from app.config.settings import UNLEARN_SEED
 import os
 
 router = APIRouter()
@@ -141,7 +147,6 @@ async def start_unlearning_custom(
         )
     status.reset()
 
-    # Save the uploaded weights file
     weights_filename = f"custom_weights_{weights_file.filename}"
     weights_path = os.path.join('uploaded_models', weights_filename)
     os.makedirs('uploaded_models', exist_ok=True)

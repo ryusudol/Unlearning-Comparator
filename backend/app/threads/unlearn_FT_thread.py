@@ -78,6 +78,7 @@ class UnlearningFTThread(threading.Thread):
         print(f"Starting FT unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
         self.status.total_epochs = self.request.epochs
+        self.status.recent_id = uuid.uuid4().hex[:4]
         start_time = time.time()
 
         for epoch in range(self.request.epochs):
@@ -268,7 +269,7 @@ class UnlearningFTThread(threading.Thread):
 
         # Prepare results dictionary
         results = {
-            "id": uuid.uuid4().hex[:4],
+            "id": self.status.recent_id,
             "forget_class": self.request.forget_class,
             "phase": "Unlearned",
             "init_id": "0000",

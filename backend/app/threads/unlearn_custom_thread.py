@@ -72,12 +72,17 @@ class UnlearningInference(threading.Thread):
     
     async def async_run(self):
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
-        
+        self.status.progress = "Starting Inference"
+        self.status.recent_id = uuid.uuid4().hex[:4]
         start_time = time.time()
         print(f"Models loaded successfully at{time.time() - start_time:.3f} seconds")
+        
+        # Evaluate on train set
+        self.status.progress = "Evaluating Train Set"
         print("Start Train set evaluation")
 
         if self.stopped():
+            self.status.is_unlearning = False
             return
         
         # Evaluate on train set
@@ -116,6 +121,7 @@ class UnlearningInference(threading.Thread):
         # self.print_distribution(train_conf_dist)
         
         # Evaluate on test set
+        self.status.progress = "Evaluating Test Set"
         print("Start Test set evaluation")
         (
             test_loss, 
@@ -149,6 +155,7 @@ class UnlearningInference(threading.Thread):
         # self.print_distribution(test_conf_dist)
 
         # UMAP and activation calculation
+        self.status.progress = "Computing UMAP"
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
         umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
         umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
@@ -206,8 +213,9 @@ class UnlearningInference(threading.Thread):
             )
                                          
         # CKA similarity calculation
-        print("Calculating CKA similarity")
         if not self.is_training_eval:
+            self.status.progress = "Calculating CKA Similarity"
+            print("Calculating CKA similarity")
             cka_results = await calculate_cka_similarity(
                 model_before=self.model_before,
                 model_after=self.model_after,
@@ -220,7 +228,7 @@ class UnlearningInference(threading.Thread):
 
         # Prepare results dictionary
         results = {
-            "id": uuid.uuid4().hex[:4],
+            "id": self.status.recent_id,
             "forget_class": "N/A" if self.is_training_eval else self.forget_class,
             "phase": "Training" if self.is_training_eval else "Unlearning",
             "init_id": "N/A",
@@ -255,3 +263,4 @@ class UnlearningInference(threading.Thread):
             
         print(f"Results saved to data/{results['id']}.json")
         print(f"Custom unlearning inference completed at {time.time() - start_time:.3f} seconds")
+        self.status.progress = "Completed"

@@ -79,6 +79,7 @@ class UnlearningGAThread(threading.Thread):
     async def unlearn_GA_model(self):
         print(f"Starting GA unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
+        self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
         
         start_time = time.time()
@@ -250,9 +251,10 @@ class UnlearningGAThread(threading.Thread):
             device=self.device
         )
         print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
+
         # Prepare results dictionary
         results = {
-            "id": uuid.uuid4().hex[:4],
+            "id": self.status.recent_id,
             "forget_class": self.request.forget_class,
             "phase": "Unlearned",
             "init_id": "0000",
