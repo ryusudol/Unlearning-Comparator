@@ -1,30 +1,6 @@
 import { UnlearningConfigurationData } from "../types/settings";
 import { API_URL } from "../constants/common";
 
-export async function fetchUnlearningResult() {
-  try {
-    const response = await fetch(`${API_URL}/unlearn/result`);
-
-    if (!response.ok) {
-      throw new Error(
-        `Status Code: ${response.status}, Message: ${response.statusText}`
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch the result:", error);
-
-    if (error instanceof Error) {
-      alert(`Failed to fetch the result: ${error.message}`);
-    } else {
-      alert("An unknown error occurred while fetching the result . . .");
-    }
-
-    throw error;
-  }
-}
-
 export async function executeMethodUnlearning(
   runningConfig: UnlearningConfigurationData
 ) {
@@ -88,6 +64,26 @@ export async function executeCustomUnlearning(
     } else {
       alert(
         "An unknown error occurred while executing custom unlearning . . ."
+      );
+    }
+
+    throw error;
+  }
+}
+
+export async function fetchDataFile(forgetClass: number, id: string) {
+  try {
+    const response = await fetch(`${API_URL}/data/${forgetClass}/${id}`);
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch an unlearned data file:", error);
+
+    if (error instanceof Error) {
+      alert(`Failed to fetch an unlearned data file: ${error.message}`);
+    } else {
+      alert(
+        "An unknown error occurred while fetching an unlearned data file . . ."
       );
     }
 

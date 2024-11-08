@@ -131,7 +131,7 @@ export default function Embeddings({ height }: { height: number }) {
           <div className="flex flex-col justify-start items-start">
             <span className="text-[15px] font-light">Method: UMAP</span>
             <span className="text-[15px] font-light">Points: 2000</span>
-            <span className="text-[15px] font-light">Dimension: 8192</span>
+            <span className="text-[15px] font-light">Dimension: 512</span>
             <span className="text-[15px] font-light">Dataset: Training</span>
           </div>
         </div>

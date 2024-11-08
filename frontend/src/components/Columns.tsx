@@ -35,7 +35,7 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
         method === "Retrain"
           ? "Retrained"
           : phase === "Training"
-          ? "Origin"
+          ? "Pretrained"
           : phase;
       const { color, backgroundColor } = getPhaseColors(value, 1, 0.15);
       return <Badge style={{ backgroundColor, color }}>{value}</Badge>;
