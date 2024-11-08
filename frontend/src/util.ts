@@ -1,39 +1,5 @@
 import { forgetClassNames } from "./constants/forgetClassNames";
 import { TABLEAU10 } from "./constants/tableau10";
-import { UnlearningStatus, DefenseStatus } from "./types/settings";
-
-export function getAccuracies(
-  selectedMode: "Test" | "Train",
-  status: UnlearningStatus | DefenseStatus | undefined
-) {
-  let accuracies: number[] = [];
-
-  if (selectedMode === "Test") {
-    if (
-      status &&
-      (status as UnlearningStatus).test_class_accuracies &&
-      !Array.isArray((status as UnlearningStatus).test_class_accuracies)
-    ) {
-      for (let key in (status as UnlearningStatus).test_class_accuracies)
-        accuracies.push(
-          (status as UnlearningStatus).test_class_accuracies![key]
-        );
-    }
-  } else {
-    if (
-      status &&
-      (status as UnlearningStatus).train_class_accuracies &&
-      !Array.isArray((status as UnlearningStatus).train_class_accuracies)
-    ) {
-      for (let key in (status as UnlearningStatus).train_class_accuracies)
-        accuracies.push(
-          (status as UnlearningStatus).train_class_accuracies[key]
-        );
-    }
-  }
-
-  return { accuracies };
-}
 
 export function getDefaultUnlearningConfig(method: string) {
   let epochs, learning_rate;
@@ -70,13 +36,13 @@ export const getPhaseColors = (
   backgroundColorOpacity: number
 ) => {
   let color, backgroundColor;
-  if (phase === "Unlearning") {
+  if (phase === "Unlearned") {
     color = `rgba(255, 140, 0, ${colorOpacity})`;
     backgroundColor = `rgba(255, 140, 0, ${backgroundColorOpacity})`;
   } else if (phase === "Defended") {
     color = `rgba(34, 139, 34, ${colorOpacity})`;
     backgroundColor = `rgba(34, 139, 34, ${backgroundColorOpacity})`;
-  } else if (phase === "Origin") {
+  } else if (phase === "Pretrained") {
     color = `rgba(80, 80, 80, ${colorOpacity})`;
     backgroundColor = `rgba(80, 80, 80, ${backgroundColorOpacity})`;
   } else {
@@ -95,7 +61,7 @@ export function renderTooltip(
   return `<div style="width: ${xSize}px; height: ${ySize}px; display: flex; justify-content: center; align-items: center;">
             <div style="margin: 8px 8px 0 0;">
               <div style="display: flex; justify-content: center;">
-                <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
+                <img src="${imageUrl}" alt="cifar-10 image" width="160" height="160" />
               </div>
               <div style="font-size: 14px; margin-top: 4px">
                 <span style="font-weight: 500;">Ground Truth</span>: ${

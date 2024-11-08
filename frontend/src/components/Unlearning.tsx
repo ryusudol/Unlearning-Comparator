@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useContext,
-  useState,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useContext, useState } from "react";
 
 import Button from "./Button";
 import Slider from "./Slider";
@@ -15,7 +9,6 @@ import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
 import { getDefaultUnlearningConfig } from "../util";
-import { cancelRunning, fetchRunningStatus } from "../https/utils";
 import { UnlearningConfigurationData } from "../types/settings";
 import {
   executeMethodUnlearning,
@@ -30,49 +23,13 @@ import {
 } from "./UI/select";
 
 export default function Unlearning() {
-  const { isRunning, updateIsRunning } = useContext(RunningStatusContext);
+  const { updateIsRunning } = useContext(RunningStatusContext);
   const { forgetClass } = useContext(ForgetClassContext);
 
   const [epochs, setEpochs] = useState([10]);
   const [learningRateLog, setLearningRateLog] = useState([-2]);
   const [batchSizeLog, setBatchSizeLog] = useState([6]);
   const [method, setMethod] = useState("ft");
-
-  const isResultFetched = useRef<boolean>(false);
-
-  const checkStatus = useCallback(async () => {
-    if (isResultFetched.current) return;
-
-    try {
-      const unlearningStatus = await fetchRunningStatus("unlearn");
-
-      if (
-        !isResultFetched.current &&
-        unlearningStatus.progress === 100 &&
-        "is_unlearning" in unlearningStatus &&
-        !unlearningStatus.is_unlearning
-      ) {
-        isResultFetched.current = true;
-      }
-    } catch (error) {
-      console.error("Failed to fetch unlearning status or result:", error);
-      throw error;
-    }
-  }, []);
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
-
-    if (isRunning) {
-      intervalId = setInterval(checkStatus, 1000);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [checkStatus, isRunning]);
 
   const handleMethodSelection = (value: string) => {
     const { epochs, learning_rate } = getDefaultUnlearningConfig(value);
@@ -96,20 +53,14 @@ export default function Unlearning() {
       batch_size: Math.pow(2, batchSizeLog[0]),
     };
 
-    isResultFetched.current = false;
-
     updateIsRunning(true);
 
-    if (isRunning) {
-      await cancelRunning("unlearn");
-    } else {
-      method === "custom"
-        ? await executeCustomUnlearning(
-            config.custom_file as File,
-            forgetClass as number
-          )
-        : await executeMethodUnlearning(runningConfig);
-    }
+    method === "custom"
+      ? await executeCustomUnlearning(
+          config.custom_file as File,
+          forgetClass as number
+        )
+      : await executeMethodUnlearning(runningConfig);
   };
 
   return (

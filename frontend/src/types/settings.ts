@@ -1,37 +1,3 @@
-// Status
-export interface ClassAccuracies {
-  [key: string]: number;
-}
-
-export interface UnlearningStatus {
-  is_unlearning: boolean;
-  progress: number;
-  current_epoch: number;
-  total_epochs: number;
-  current_loss: number;
-  current_accuracy: number;
-  test_loss: number;
-  test_accuracy: number;
-  train_class_accuracies: ClassAccuracies;
-  test_class_accuracies: ClassAccuracies | null;
-  estimated_time_remaining: number | undefined;
-  forget_class: number;
-}
-
-// Temporarily created
-export interface DefenseStatus {
-  is_defensing: boolean;
-  progress: number;
-  current_epoch: number;
-  total_epochs: number;
-  current_loss: number;
-  best_loss: number;
-  current_accuracy: number;
-  best_accuracy: number;
-  estimated_time_remaining: number | undefined;
-  forget_class: number;
-}
-
 // Configuration Data
 export interface UnlearningConfigurationData {
   method: string;
@@ -46,6 +12,36 @@ export interface DefenseConfigurationData {
   param1: string;
   param2: number;
   param3: number;
+}
+
+// Status
+export interface ClassAccuracies {
+  [key: string]: number;
+}
+
+export interface UnlearningStatus {
+  is_unlearning: boolean;
+  progress: string;
+  recent_id: string | null;
+  current_epoch: number;
+  total_epochs: number;
+  current_unlearn_loss: number;
+  current_unlearn_accuracy: number;
+  estimated_time_remaining: number;
+}
+
+// Temporarily created
+export interface DefenseStatus {
+  is_defensing: boolean;
+  progress: number;
+  current_epoch: number;
+  total_epochs: number;
+  current_loss: number;
+  best_loss: number;
+  current_accuracy: number;
+  best_accuracy: number;
+  estimated_time_remaining: number | undefined;
+  forget_class: number;
 }
 
 // etc
