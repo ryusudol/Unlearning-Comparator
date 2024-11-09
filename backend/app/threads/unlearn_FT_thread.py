@@ -251,21 +251,20 @@ class UnlearningFTThread(threading.Thread):
         print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
         # Prepare detailed results
-        self.status.progress = "Preparing Results"
         detailed_results = []
         for i in range(len(umap_subset)):
             original_index = umap_subset_indices[i].item()
             ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
             is_forget = (ground_truth == self.request.forget_class)
-            detailed_results.append({
-                "idx": i,
-                "gt": int(ground_truth),
-                "pred": int(predicted_labels[i]),
-                "img": int(original_index),
-                "forget": bool(is_forget),
-                "xy": [round(float(coord), 3) for coord in umap_embedding[i]],
-                "prob": [round(float(l), 3) for l in probs[i]],
-            })
+            detailed_results.append([
+                int(ground_truth),                             # gt
+                int(predicted_labels[i]),                      # pred
+                int(original_index),                           # img
+                1 if is_forget else 0,                         # forget as binary
+                round(float(umap_embedding[i][0]), 2),         # x coordinate
+                round(float(umap_embedding[i][1]), 2),         # y coordinate
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
+            ])
 
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
         test_remain_accuracy = round(
@@ -287,14 +286,10 @@ class UnlearningFTThread(threading.Thread):
             "TUA": round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
             "RTE": round(rte, 1),
-            "accs": {
-                k: round(v, 3) for k, v in train_class_accuracies.items()
-            },
-            "t_accs": {
-                k: round(v, 3) for k, v in test_class_accuracies.items()
-            },
+            "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
+            "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": cka_results["similarity"],

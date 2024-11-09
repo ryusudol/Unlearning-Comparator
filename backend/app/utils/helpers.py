@@ -57,9 +57,7 @@ def save_model(model,
 
 def format_distribution(distribution):
     return {
-        f"gt_{i}": {
-            f"pred_{j}": round(float(distribution[i][j]), 3) for j in range(10)
-        }
+        f"gt_{i}": [round(float(distribution[i][j]), 3) for j in range(10)]
         for i in range(10)
     }
 

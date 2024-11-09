@@ -195,15 +195,27 @@ class UnlearningInference(threading.Thread):
             original_index = umap_subset_indices[i].item()
             ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
             is_forget = ground_truth == self.forget_class
-            detailed_results.append({
-                "idx": i,
-                "gt": int(ground_truth),
-                "pred": int(predicted_labels[i]),
-                "img": int(original_index),
-                "forget": bool(is_forget),
-                "xy": [round(float(coord), 2) for coord in umap_embedding[i]],
-                "prob": compress_prob_array(probs[i].tolist()),
-            })
+            detailed_results.append([
+                int(ground_truth),                             # gt
+                int(predicted_labels[i]),                      # pred
+                int(original_index),                           # img
+                1 if is_forget else 0,                         # forget as binary
+                round(float(umap_embedding[i][0]), 2),         # x coordinate
+                round(float(umap_embedding[i][1]), 2),         # y coordinate
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
+            ])
+
+        # Decode comment can be updated to:
+        # function decodeDetailedResults(compressedArray) {
+        #   return {
+        #     gt: compressedArray[0],
+        #     pred: compressedArray[1],
+        #     img: compressedArray[2],
+        #     forget: Boolean(compressedArray[3]),
+        #     xy: [compressedArray[4], compressedArray[5]],
+        #     prob: compressedArray[6]
+        #   };
+        # }
 
         # Test accuracy calculation
         if self.is_training_eval:
@@ -239,21 +251,15 @@ class UnlearningInference(threading.Thread):
             "epochs": 50,
             "BS": 128,
             "LR": 0.01,
-            "UA": "N/A" if self.is_training_eval 
-                else round(unlearn_accuracy, 3),
+            "UA": "N/A" if self.is_training_eval else round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
-            "TUA": "N/A" if self.is_training_eval 
-                else round(test_unlearn_accuracy, 3),
+            "TUA": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
             "RTE": "N/A",
-            "accs": {
-                k: round(v, 3) for k, v in train_class_accuracies.items()
-            },
+            "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
-            "t_accs": {
-                k: round(v, 3) for k, v in test_class_accuracies.items()
-            },
+            "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
