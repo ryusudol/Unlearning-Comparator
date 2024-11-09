@@ -21,7 +21,7 @@ def load_model(model_path, num_classes=10, device='cuda'):
 
 def get_data_loaders(batch_size):
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=2),
+        transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         # cka 계산시에는 주석처리
         transforms.ToTensor(),
@@ -37,7 +37,7 @@ def get_data_loaders(batch_size):
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
     print("loaded data")
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0)
-    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=0)
     print("loaded loaders")
     return train_loader, test_loader, train_set, test_set
 

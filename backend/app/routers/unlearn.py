@@ -7,7 +7,7 @@ from fastapi import (
     Form
 )
 from pydantic import BaseModel, Field
-from app.services.unlearn_retrain import run_unlearning
+from app.services.unlearn_retrain import run_unlearning_retrain
 from app.services.unlearn_RL import run_unlearning_RL
 from app.services.unlearn_GA import run_unlearning_GA 
 from app.services.unlearn_FT import run_unlearning_FT
@@ -119,7 +119,7 @@ async def start_unlearning_retrain(
             detail="Unlearning is already in progress"
         )
     status.reset()
-    background_tasks.add_task(run_unlearning, request, status)
+    background_tasks.add_task(run_unlearning_retrain, request, status)
     return {"message": "Unlearning (retrain) started"}
 
 @router.get("/unlearn/status")

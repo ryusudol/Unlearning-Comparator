@@ -31,7 +31,7 @@ async def download_trained_model(filename: str):
     
     return FileResponse(file_path, media_type='application/octet-stream', filename=filename)
 
-@router.get("/data/{forget_class}/files", response_model=List[str])
+@router.get("/data/{forget_class}/file_lists", response_model=List[str])
 async def list_json_files(forget_class: str):
     data_dir = os.path.join('data', forget_class)
     if not os.path.exists(data_dir):
@@ -41,6 +41,29 @@ async def list_json_files(forget_class: str):
     if not json_files:
         raise HTTPException(status_code=404, detail=f"No JSON files found in {forget_class}")
     return json_files
+
+@router.get("/data/{forget_class}/all")
+async def get_all_json_files(forget_class: str):
+    data_dir = os.path.join('data', forget_class)
+    if not os.path.exists(data_dir):
+        raise HTTPException(status_code=404, detail=f"Directory for {forget_class} not found")
+    
+    json_files = [f for f in os.listdir(data_dir) if f.endswith('.json')]
+    if not json_files:
+        raise HTTPException(status_code=404, detail=f"No JSON files found in {forget_class}")
+    
+    all_data = {}
+    for filename in json_files:
+        file_path = os.path.join(data_dir, filename)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                # 파일명에서 .json 확장자를 제거하고 키로 사용
+                key = filename[:-5]
+                all_data[key] = json.load(f)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error reading file {filename}: {str(e)}")
+    
+    return all_data
 
 @router.delete("/data/{forget_class}/{filename}")
 async def delete_json_file(forget_class: str, filename: str):
@@ -76,3 +99,4 @@ async def get_json_file(forget_class: str, filename: str):
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+
