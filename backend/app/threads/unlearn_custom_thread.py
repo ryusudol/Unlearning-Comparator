@@ -13,7 +13,7 @@ from app.utils.evaluation import (
 	calculate_cka_similarity
 )
 from app.utils.visualization import compute_umap_embedding
-from app.utils.helpers import format_distribution
+from app.utils.helpers import format_distribution, compress_prob_array
 from app.config.settings import UMAP_DATA_SIZE, UMAP_DATASET
 
 class UnlearningInference(threading.Thread):
@@ -196,13 +196,13 @@ class UnlearningInference(threading.Thread):
             ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
             is_forget = ground_truth == self.forget_class
             detailed_results.append({
-                "index": i,
-                "ground_truth": int(ground_truth),
-                "original_index": int(original_index),
-                "predicted_class": int(predicted_labels[i]),
-                "is_forget": bool(is_forget),
-                "umap_embedding": [round(float(coord), 3) for coord in umap_embedding[i]],
-                "prob": [round(float(l), 3) for l in probs[i]],
+                "idx": i,
+                "gt": int(ground_truth),
+                "pred": int(predicted_labels[i]),
+                "img": int(original_index),
+                "forget": bool(is_forget),
+                "xy": [round(float(coord), 2) for coord in umap_embedding[i]],
+                "prob": compress_prob_array(probs[i].tolist()),
             })
 
         # Test accuracy calculation
@@ -232,32 +232,32 @@ class UnlearningInference(threading.Thread):
         # Prepare results dictionary
         results = {
             "id": self.status.recent_id,
-            "forget_class": "N/A" if self.is_training_eval else self.forget_class,
-            "phase": "Training" if self.is_training_eval else "Unlearning",
-            "init_id": "N/A",
+            "fc": "N/A" if self.is_training_eval else self.forget_class,
+            "phase": "Training" if self.is_training_eval else "Unlearning", 
+            "init": "N/A",
             "method": "N/A",
             "epochs": 30,
-            "batch_size": 128,
-            "learning_rate": 0.01,
-            "unlearn_accuracy": "N/A" if self.is_training_eval 
+            "BS": 128,
+            "LR": 0.01,
+            "UA": "N/A" if self.is_training_eval 
                 else round(unlearn_accuracy, 3),
-            "remain_accuracy": remain_accuracy,
-            "test_unlearn_accuracy": "N/A" if self.is_training_eval 
+            "RA": remain_accuracy,
+            "TUA": "N/A" if self.is_training_eval 
                 else round(test_unlearn_accuracy, 3),
-            "test_remain_accuracy": test_remain_accuracy,
+            "TRA": test_remain_accuracy,
             "RTE": "N/A",
-            "train_class_accuracies": {
+            "accs": {
                 k: round(v, 3) for k, v in train_class_accuracies.items()
             },
-            "test_class_accuracies": {
+            "label_dist": format_distribution(train_label_dist),
+            "conf_dist": format_distribution(train_conf_dist),
+            "t_accs": {
                 k: round(v, 3) for k, v in test_class_accuracies.items()
             },
-            "train_label_distribution": format_distribution(train_label_dist),
-            "train_confidence_distribution": format_distribution(train_conf_dist),
-            "test_label_distribution": format_distribution(test_label_dist),
-            "test_confidence_distribution": format_distribution(test_conf_dist),
-            "similarity": "N/A" if self.is_training_eval else cka_results["similarity"],
-            "detailed_results": detailed_results,
+            "t_label_dist": format_distribution(test_label_dist),
+            "t_conf_dist": format_distribution(test_conf_dist),
+            "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
+            "points": detailed_results,
         }
 
         # Save results to JSON file

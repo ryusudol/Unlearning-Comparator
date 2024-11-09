@@ -62,3 +62,6 @@ def format_distribution(distribution):
         }
         for i in range(10)
     }
+
+def compress_prob_array(prob_array, threshold=0.001):
+    return {str(i): round(p, 3) for i, p in enumerate(prob_array) if p > threshold}

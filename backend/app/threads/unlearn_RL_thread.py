@@ -5,7 +5,7 @@ import time
 import os
 import uuid
 import json
-from app.utils.helpers import save_model,format_distribution
+from app.utils.helpers import save_model,format_distribution, compress_prob_array
 from app.utils.evaluation import (
     calculate_cka_similarity,
     evaluate_model_with_distributions,
@@ -280,13 +280,13 @@ class UnlearningRLThread(threading.Thread):
             ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
             is_forget = (ground_truth == self.request.forget_class)
             detailed_results.append({
-                "index": i,
-                "ground_truth": int(ground_truth),
-                "original_index": int(original_index),
-                "predicted_class": int(predicted_labels[i]),
-                "is_forget": bool(is_forget),
-                "umap_embedding": [round(float(coord), 3) for coord in umap_embedding[i]],
-                "prob": [round(float(l), 3) for l in probs[i]],
+                "idx": i,
+                "gt": int(ground_truth),
+                "pred": int(predicted_labels[i]),
+                "img": int(original_index),
+                "forget": bool(is_forget),
+                "xy": [round(float(coord), 3) for coord in umap_embedding[i]],
+                "prob": compress_prob_array(probs[i]),   
             })
 
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
@@ -297,26 +297,26 @@ class UnlearningRLThread(threading.Thread):
         # Save results
         results = {
             "id": self.status.recent_id,
-            "forget_class": self.request.forget_class,
+            "fc": self.request.forget_class,
             "phase": "Unlearned",
-            "init_id": "0000",
+            "init": "0000",
             "method": "Random-Labeling",
             "epochs": self.request.epochs,
-            "batch_size": self.request.batch_size,
-            "learning_rate": self.request.learning_rate,
-            "unlearn_accuracy": round(unlearn_accuracy, 3),
-            "remain_accuracy": remain_accuracy,
-            "test_unlearn_accuracy": round(test_unlearn_accuracy, 3),
-            "test_remain_accuracy": test_remain_accuracy,
+            "BS": self.request.batch_size,
+            "LR": self.request.learning_rate,
+            "UA": round(unlearn_accuracy, 3),
+            "RA": remain_accuracy,
+            "TUA": round(test_unlearn_accuracy, 3),
+            "TRA": test_remain_accuracy,
             "RTE": round(rte, 1),
-            "train_class_accuracies": {k: round(v, 3) for k, v in train_class_accuracies.items()},
-            "test_class_accuracies": {k: round(v, 3) for k, v in test_class_accuracies.items()},
-            "train_label_distribution": format_distribution(train_label_dist),
-            "train_confidence_distribution": format_distribution(train_conf_dist),
-            "test_label_distribution": format_distribution(test_label_dist),
-            "test_confidence_distribution": format_distribution(test_conf_dist),
-            "similarity": cka_results["similarity"],
-            "detailed_results": detailed_results,
+            "accs": {k: round(v, 3) for k, v in train_class_accuracies.items()},
+            "label_dist": format_distribution(train_label_dist),
+            "conf_dist": format_distribution(train_conf_dist),
+            "t_accs": {k: round(v, 3) for k, v in test_class_accuracies.items()},
+            "t_label_dist": format_distribution(test_label_dist),
+            "t_conf_dist": format_distribution(test_conf_dist),
+            "cka": cka_results["similarity"],
+            "points": detailed_results,
         }
         # Create base data directory if it doesn't exist
         os.makedirs('data', exist_ok=True)
