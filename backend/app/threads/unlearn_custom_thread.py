@@ -233,10 +233,10 @@ class UnlearningInference(threading.Thread):
         results = {
             "id": self.status.recent_id,
             "fc": "N/A" if self.is_training_eval else self.forget_class,
-            "phase": "Training" if self.is_training_eval else "Unlearning", 
+            "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
             "init": "N/A",
             "method": "N/A",
-            "epochs": 30,
+            "epochs": 50,
             "BS": 128,
             "LR": 0.01,
             "UA": "N/A" if self.is_training_eval 

@@ -6,7 +6,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # TODO: 배포 후 URL 수정
+    allow_origins=["*"],
+    # allow_origins=["http://localhost:3000"], # TODO: 배포 후 URL 수정
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
