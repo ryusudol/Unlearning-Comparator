@@ -196,7 +196,8 @@ async def calculate_cka_similarity(
             Subset(loader.dataset, final_indices),
             batch_size=loader.batch_size,
             shuffle=False,
-            num_workers=0
+            num_workers=0,
+            pin_memory=True
         )
 
     forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class, is_train=True)

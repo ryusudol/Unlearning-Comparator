@@ -93,7 +93,7 @@ async def unlearning_GA(request, status, weights_path):
 
     # thread end
     if unlearning_GA_thread.exception:
-        print(f"An error occurred during custom unlearning: {str(unlearning_GA_thread.exception)}")
+        print(f"An error occurred during GA unlearning: {str(unlearning_GA_thread.exception)}")
     elif status.cancel_requested:
         print("Unlearning process was cancelled.")
     else:

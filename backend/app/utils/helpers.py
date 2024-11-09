@@ -36,8 +36,8 @@ def get_data_loaders(batch_size):
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
     print("loaded data")
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0)
-    test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
+    test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=0, pin_memory=True)
     print("loaded loaders")
     return train_loader, test_loader, train_set, test_set
 
