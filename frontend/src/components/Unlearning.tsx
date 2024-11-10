@@ -129,7 +129,7 @@ export default function Unlearning() {
               value={epochs}
               setValue={setEpochs}
               min={1}
-              max={30}
+              max={20}
               step={1}
             />
             <span className="text-sm">Learning Rate</span>
