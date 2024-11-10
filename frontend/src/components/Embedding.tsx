@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
-import { ModeType } from "../views/Embeddings";
+import { Mode, SelectedData } from "../views/Embeddings";
 import ScatterPlot from "./ScatterPlot";
 import {
   Select,
@@ -29,11 +29,11 @@ export type ViewModeType =
   | "Unlearning Failed";
 
 interface Props {
-  mode: ModeType;
+  mode: Mode;
   height: number;
-  data: (number | number[])[][] | undefined;
+  data: SelectedData;
   id: string;
-  onHover: (imgIdxOrNull: number | null, source?: ModeType) => void;
+  onHover: (imgIdxOrNull: number | null, source?: Mode) => void;
   hoveredImgIdx: number | null;
 }
 

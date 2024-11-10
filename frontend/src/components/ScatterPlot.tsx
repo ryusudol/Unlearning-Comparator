@@ -5,12 +5,14 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  useContext,
 } from "react";
 import * as d3 from "d3";
 
+import { ForgetClassContext } from "../store/forget-class-context";
+import { ExperimentsContext } from "../store/experiments-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { basicData } from "../constants/basicData";
-import { ModeType } from "../views/Embeddings";
+import { Mode, Prob, SelectedData } from "../views/Embeddings";
 import { API_URL } from "../constants/common";
 import { renderTooltip } from "../util";
 
@@ -31,15 +33,19 @@ const UNLEARNING_TARGET = "Unlearning Target";
 const UNLEARNING_FAILED = "Unlearning Failed";
 
 interface Props {
-  mode: ModeType;
-  data: (number | number[])[][] | undefined;
+  mode: Mode;
+  data: SelectedData;
   viewMode: "All Instances" | "Unlearning Target" | "Unlearning Failed";
-  onHover: (imgIdxOrNull: number | null, source?: ModeType) => void;
+  onHover: (imgIdxOrNull: number | null, source?: Mode) => void;
   hoveredImgIdx: number | null;
 }
 
 const ScatterPlot = React.memo(
   forwardRef(({ mode, data, viewMode, onHover, hoveredImgIdx }: Props, ref) => {
+    const { experiments } = useContext(ExperimentsContext);
+    const { forgetClass } = useContext(ForgetClassContext);
+    console.log(data);
+
     const fetchControllerRef = useRef<AbortController | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
@@ -49,20 +55,21 @@ const ScatterPlot = React.memo(
       useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
     const circlesRef = useRef<d3.Selection<
       SVGCircleElement,
-      (number | number[])[],
+      (number | Prob)[],
       SVGGElement,
       undefined
     > | null>(null);
     const crossesRef = useRef<d3.Selection<
-      d3.BaseType | SVGPathElement,
-      (number | number[])[],
+      SVGPathElement,
+      (number | Prob)[],
       SVGGElement,
       undefined
     > | null>(null);
 
     const unlearnedFCIndices = useMemo(
-      () => new Set(basicData.map((item) => item.forget_class)),
-      []
+      () =>
+        new Set(Object.values(experiments).map((experiment) => experiment.fc)),
+      [experiments]
     );
 
     const unlearnedFCList = useMemo(
@@ -70,33 +77,27 @@ const ScatterPlot = React.memo(
       [unlearnedFCIndices]
     );
 
-    const processedData = useMemo(() => data || [], [data]);
-
     const x = useMemo(() => {
-      if (processedData.length === 0)
+      if (data.length === 0)
         return d3.scaleLinear().domain([0, 1]).range([0, width]);
 
       return d3
         .scaleLinear()
-        .domain(
-          d3.extent(processedData, (d) => d[0] as number) as [number, number]
-        )
+        .domain(d3.extent(data, (d) => d[0] as number) as [number, number])
         .nice()
         .range([0, width]);
-    }, [processedData]);
+    }, [data]);
 
     const y = useMemo(() => {
-      if (processedData.length === 0)
+      if (data.length === 0)
         return d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
       return d3
         .scaleLinear()
-        .domain(
-          d3.extent(processedData, (d) => d[1] as number) as [number, number]
-        )
+        .domain(d3.extent(data, (d) => d[1] as number) as [number, number])
         .nice()
         .range([height, 0]);
-    }, [processedData]);
+    }, [data]);
 
     const z = useMemo(
       () =>
@@ -117,7 +118,7 @@ const ScatterPlot = React.memo(
         }
       },
       getInstancePosition: (imgIdx: number) => {
-        const datum = processedData.find((d) => d[4] === imgIdx);
+        const datum = data.find((d) => d[4] === imgIdx);
         if (datum && svgRef.current) {
           const svgElement = svgRef.current;
           const point = svgElement.createSVGPoint();
@@ -143,8 +144,8 @@ const ScatterPlot = React.memo(
     }));
 
     const handleMouseEnter = useCallback(
-      (event: any, d: (number | number[])[]) => {
-        const element = event.currentTarget;
+      (event: MouseEvent, d: (number | Prob)[]): void => {
+        const element = event.currentTarget as Element;
 
         onHover(d[4] as number, mode);
 
@@ -178,12 +179,14 @@ const ScatterPlot = React.memo(
                 tooltipRef.current.style.display = "block";
                 tooltipRef.current.style.left = `${xPosTooltip}px`;
                 tooltipRef.current.style.top = `${yPosTooltip}px`;
-                tooltipRef.current.innerHTML = renderTooltip(
+                const tooltipHtml = renderTooltip(
                   tooltipXSize,
                   tooltipYSize,
                   imageUrl,
                   d
                 );
+                console.log(tooltipHtml);
+                tooltipRef.current.innerHTML = tooltipHtml;
               }
             })
             .catch((err) => {
@@ -191,7 +194,7 @@ const ScatterPlot = React.memo(
             });
         }
 
-        d3.select(element)
+        d3.select(element as Element)
           .attr("stroke", "black")
           .attr("stroke-width", hoveredStrokeWidth)
           .raise();
@@ -200,7 +203,7 @@ const ScatterPlot = React.memo(
     );
 
     const handleMouseLeave = useCallback(
-      (event: any, d: (number | number[])[]) => {
+      (event: MouseEvent, d: (number | Prob)[]): void => {
         if (tooltipRef.current) tooltipRef.current.style.display = "none";
 
         onHover(null);
@@ -210,7 +213,9 @@ const ScatterPlot = React.memo(
           fetchControllerRef.current = null;
         }
 
-        const element = event.currentTarget;
+        const element = event.currentTarget as Element;
+        if (!element) return;
+
         const selection = d3.select(element);
 
         if (element.tagName === "circle") {
@@ -251,7 +256,7 @@ const ScatterPlot = React.memo(
 
         const circles = gDot
           .selectAll<SVGCircleElement, number[]>("circle")
-          .data(processedData.filter((d) => d[2] !== d[5]))
+          .data(data.filter((d) => d[2] !== forgetClass))
           .join("circle")
           .attr("cx", (d) => x(d[0] as number))
           .attr("cy", (d) => y(d[1] as number))
@@ -262,8 +267,8 @@ const ScatterPlot = React.memo(
           .style("vector-effect", "non-scaling-stroke");
 
         const crosses = gDot
-          .selectAll("path")
-          .data(processedData.filter((d) => d[2] === d[5]))
+          .selectAll<SVGPathElement, number[]>("path")
+          .data(data.filter((d) => d[2] === forgetClass))
           .join("path")
           .attr(
             "transform",
@@ -333,7 +338,7 @@ const ScatterPlot = React.memo(
         svgRef.current.innerHTML = "";
       }
 
-      if (processedData.length > 0) {
+      if (data.length > 0) {
         const svg = chart();
         if (svgRef.current) {
           svgRef.current.appendChild(svg);
@@ -363,11 +368,12 @@ const ScatterPlot = React.memo(
         }
       };
     }, [
+      forgetClass,
       handleMouseEnter,
       handleMouseLeave,
       mode,
       onHover,
-      processedData,
+      data,
       unlearnedFCList.length,
       x,
       y,
@@ -380,18 +386,18 @@ const ScatterPlot = React.memo(
           circlesRef.current
             .style("opacity", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
+                d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
+                d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return loweredOpacity;
               return defaultCircleOpacity;
             })
             .style("pointer-events", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
+                d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
+                d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return "none";
               return "auto";
@@ -402,18 +408,18 @@ const ScatterPlot = React.memo(
           crossesRef.current
             .style("opacity", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
+                d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
+                d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return loweredOpacity;
               return defaultCrossOpacity;
             })
             .style("pointer-events", (d: any) => {
               const dataCondition =
-                d[2] !== d[5] && viewMode === UNLEARNING_TARGET;
+                d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
               const classCondition =
-                d[3] !== d[5] && viewMode === UNLEARNING_FAILED;
+                d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
 
               if (dataCondition || classCondition) return "none";
               return "auto";
@@ -422,7 +428,7 @@ const ScatterPlot = React.memo(
       };
 
       updateOpacity();
-    }, [viewMode]);
+    }, [forgetClass, viewMode]);
 
     useEffect(() => {
       if (!circlesRef.current && !crossesRef.current) return;
@@ -487,7 +493,7 @@ const ScatterPlot = React.memo(
             yPosTooltip =
               elementRect.top - containerRect.top - tooltipYSize - 10;
 
-          const datum = processedData.find((d) => d[4] === hoveredImgIdx);
+          const datum = data.find((d) => d[4] === hoveredImgIdx);
           if (datum) {
             const controller = new AbortController();
             const index = datum[4];
@@ -521,7 +527,7 @@ const ScatterPlot = React.memo(
           tooltipRef.current.style.display = "none";
         }
       }
-    }, [hoveredImgIdx, processedData, z]);
+    }, [hoveredImgIdx, data, z]);
 
     return (
       <div

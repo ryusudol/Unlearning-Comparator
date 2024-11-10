@@ -23,7 +23,7 @@ import {
 } from "./UI/select";
 
 export default function Unlearning() {
-  const { updateIsRunning } = useContext(RunningStatusContext);
+  const { updateIsRunning, initStatus } = useContext(RunningStatusContext);
   const { forgetClass } = useContext(ForgetClassContext);
 
   const [epochs, setEpochs] = useState([10]);
@@ -54,6 +54,7 @@ export default function Unlearning() {
     };
 
     updateIsRunning(true);
+    initStatus();
 
     method === "custom"
       ? await executeCustomUnlearning(

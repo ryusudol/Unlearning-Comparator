@@ -7,14 +7,15 @@ import {
   useCallback,
 } from "react";
 
+import { ExperimentsContext } from "../store/experiments-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import Embedding from "../components/Embedding";
 import ConnectionLine from "../components/ConnectionLine";
-import { basicData } from "../constants/basicData";
 import { Separator } from "../components/UI/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import { forgetClassNames } from "../constants/forgetClassNames";
+import { extractSelectedData } from "../util";
 import {
   HelpCircleIcon,
   CircleIcon,
@@ -24,15 +25,19 @@ import {
   ScrollVerticalIcon,
 } from "../components/UI/icons";
 
-export type ModeType = "Baseline" | "Comparison";
-export type InstanceType = { imgIdx: number; source: ModeType } | null;
 type Position = { x: number; y: number } | null;
+export type Mode = "Baseline" | "Comparison";
+export type Instance = { imgIdx: number; source: Mode } | null;
+export type Prob = { [key: string]: number };
+export type SelectedData = (number | Prob)[][];
 
 export default function Embeddings({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
-  const [hoveredInstance, setHoveredInstance] = useState<InstanceType>(null);
+  const [hoveredInstance, setHoveredInstance] = useState<Instance>(null);
   const [fromPosition, setFromPosition] = useState<Position>(null);
   const [toPosition, setToPosition] = useState<Position>(null);
 
@@ -40,7 +45,7 @@ export default function Embeddings({ height }: { height: number }) {
   const comparisonRef = useRef<any>(null);
 
   const handleHover = useCallback(
-    (imgIdxOrNull: number | null, source?: ModeType) => {
+    (imgIdxOrNull: number | null, source?: Mode) => {
       if (imgIdxOrNull === null) {
         setHoveredInstance(null);
         setFromPosition(null);
@@ -74,49 +79,14 @@ export default function Embeddings({ height }: { height: number }) {
     }
   }, [hoveredInstance]);
 
-  const baselineData = useMemo(() => {
-    return basicData.find((datum) => datum.id === baseline);
-  }, [baseline]);
-  const comparisonData = useMemo(() => {
-    return basicData.find((datum) => datum.id === comparison);
-  }, [comparison]);
-
-  // [
-  //   0: x,
-  //   1: y,
-  //   2: original class,
-  //   3: predicted class,
-  //   4: img_idx,
-  //   5: forget_class
-  //   6: logit (TODO: 추후 prob으로 변경)
-  // ]
-  const BaselineData = useMemo(() => {
-    return baselineData
-      ? baselineData.detailed_results.map((result) => [
-          result.umap_embedding[0],
-          result.umap_embedding[1],
-          result.ground_truth,
-          result.predicted_class,
-          result.original_index,
-          baselineData.forget_class,
-          (result as any).logit || (result as any).prob,
-        ])
-      : undefined;
-  }, [baselineData]);
-
-  const ComparisonData = useMemo(() => {
-    return comparisonData
-      ? comparisonData.detailed_results.map((result) => [
-          result.umap_embedding[0],
-          result.umap_embedding[1],
-          result.ground_truth,
-          result.predicted_class,
-          result.original_index,
-          comparisonData.forget_class,
-          (result as any).logit || (result as any).prob,
-        ])
-      : undefined;
-  }, [comparisonData]);
+  const extractedBaselineData = useMemo(
+    () => extractSelectedData(baselineExperiment),
+    [baselineExperiment]
+  );
+  const extractedComparisonData = useMemo(
+    () => extractSelectedData(comparisonExperiment),
+    [comparisonExperiment]
+  );
 
   return (
     <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
@@ -193,7 +163,7 @@ export default function Embeddings({ height }: { height: number }) {
       <Embedding
         mode="Baseline"
         height={height}
-        data={BaselineData}
+        data={extractedBaselineData}
         id={baseline}
         onHover={handleHover}
         hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
@@ -203,7 +173,7 @@ export default function Embeddings({ height }: { height: number }) {
       <Embedding
         mode="Comparison"
         height={height}
-        data={ComparisonData}
+        data={extractedComparisonData}
         id={comparison}
         onHover={handleHover}
         hoveredImgIdx={hoveredInstance?.imgIdx ?? null}

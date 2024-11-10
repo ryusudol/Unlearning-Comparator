@@ -5,12 +5,11 @@ import PredictionChart from "../components/PredictionChart";
 import HeatmapLegend from "../components/HeatmapLegend";
 import BubbleLegend from "../components/BubbleLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
 import { Label } from "../components/UI/label";
-import { basicData } from "../constants/basicData";
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { UnlearningDataType } from "../types/data";
+import { extractHeatmapData } from "../util";
 import {
   Target02Icon,
   ChartBubble02Icon,
@@ -19,52 +18,15 @@ import {
   ArrowShrinkIcon,
 } from "../components/UI/icons";
 
-const TRAINING = "training";
-const TEST = "test";
+export const TRAINING = "training";
+export const TEST = "test";
 export const BUBBLE = "bubble";
-const LABEL_HEATMAP = "label-heatmap";
-const CONFIDENCE_HEATMAP = "confidence-heatmap";
+export const LABEL_HEATMAP = "label-heatmap";
+export const CONFIDENCE_HEATMAP = "confidence-heatmap";
 const sizeScale = d3.scaleSqrt().domain([0, 100]).range([0, 12.5]).nice();
 
 export type ChartModeType = "bubble" | "label-heatmap" | "confidence-heatmap";
-type HeatmapData = { x: string; y: string; value: number }[];
-type Prediction = {
-  [key: string]: number;
-};
-type GroundTruthDistribution = {
-  [key: string]: Prediction;
-};
-
-function extractHeatmapData(
-  datasetMode: string,
-  chartMode: string,
-  data: UnlearningDataType | undefined
-) {
-  let distributionData: GroundTruthDistribution | undefined;
-  if (datasetMode === TRAINING && chartMode === LABEL_HEATMAP)
-    distributionData = data?.train_label_distribution;
-  else if (datasetMode === TRAINING && chartMode === CONFIDENCE_HEATMAP)
-    distributionData = data?.train_confidence_distribution;
-  else if (datasetMode === TEST && chartMode === LABEL_HEATMAP)
-    distributionData = data?.test_label_distribution;
-  else if (datasetMode === TEST && chartMode === CONFIDENCE_HEATMAP)
-    distributionData = data?.test_confidence_distribution;
-
-  let processedData: HeatmapData = [];
-  if (distributionData) {
-    Object.entries(distributionData).forEach(([_, preds], gtIdx) => {
-      Object.entries(preds).forEach(([_, value], predIdx) => {
-        processedData.push({
-          x: forgetClassNames[predIdx],
-          y: forgetClassNames[gtIdx],
-          value,
-        });
-      });
-    });
-  }
-
-  return processedData;
-}
+export type HeatmapData = { x: string; y: string; value: number }[];
 
 interface Props {
   height: number;
@@ -79,25 +41,24 @@ export default function Predictions({
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
   const [chartMode, setChartMode] = useState<ChartModeType>(BUBBLE);
-
-  const baselineData = basicData.find((datum) => datum.id === baseline);
-  const comparisonData = basicData.find((datum) => datum.id === comparison);
 
   let baselineDistributionData: HeatmapData;
   baselineDistributionData = extractHeatmapData(
     datasetMode,
     chartMode,
-    baselineData
+    baselineExperiment
   );
 
   let comparisonDistributionData: HeatmapData;
   comparisonDistributionData = extractHeatmapData(
     datasetMode,
     chartMode,
-    comparisonData
+    comparisonExperiment
   );
 
   const expandedStyle = {

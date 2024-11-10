@@ -90,3 +90,23 @@ export async function fetchDataFile(forgetClass: number, id: string) {
     throw error;
   }
 }
+
+export async function fetchAllExperimentsData(forgetClass: number) {
+  try {
+    const response = await fetch(`${API_URL}/data/${forgetClass}/all`);
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch all unlearned data file:", error);
+
+    if (error instanceof Error) {
+      alert(`Failed to fetch all unlearned data file: ${error.message}`);
+    } else {
+      alert(
+        "An unknown error occurred while fetching all unlearned data file . . ."
+      );
+    }
+
+    throw error;
+  }
+}
