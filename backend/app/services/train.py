@@ -38,16 +38,8 @@ async def training(request, status):
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
         T_max=request.epochs,
+        eta_min=1e-5
     )
-
-    # scheduler = optim.lr_scheduler.OneCycleLR(
-    #     optimizer,
-    #     max_lr=request.learning_rate,
-    #     epochs=request.epochs,
-    #     steps_per_epoch=len(train_loader)
-    # )
-
-    # scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100, 150], gamma=0.1)
 
     training_thread = TrainingThread(
         model,

@@ -5,6 +5,38 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.models.neural_network import get_resnet18
 
+class Cutout:
+    def __init__(self, n_holes=1, length=16, p=0.5):
+        self.n_holes = n_holes
+        self.length = length
+        self.p = p
+
+    def __call__(self, img):
+        if np.random.random() > self.p:
+            return img
+            
+        h = img.size(1)
+        w = img.size(2)
+
+        mask = np.ones((h, w), np.float32)
+
+        for n in range(self.n_holes):
+            y = np.random.randint(h)
+            x = np.random.randint(w)
+
+            y1 = np.clip(y - self.length // 2, 0, h)
+            y2 = np.clip(y + self.length // 2, 0, h)
+            x1 = np.clip(x - self.length // 2, 0, w)
+            x2 = np.clip(x + self.length // 2, 0, w)
+
+            mask[y1: y2, x1: x2] = 0.
+
+        mask = torch.from_numpy(mask)
+        mask = mask.expand_as(img)
+        img = img * mask
+
+        return img
+
 def set_seed(seed):
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -21,11 +53,13 @@ def load_model(model_path, num_classes=10, device='cuda'):
 
 def get_data_loaders(batch_size):
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        # cka 계산시에는 주석처리
+        transforms.RandomCrop(32, padding=4), #
+        transforms.RandomHorizontalFlip(), #
+        
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+
+        Cutout(n_holes=1, length=16, p=0.5) #
     ])
     
     test_transform = transforms.Compose([
