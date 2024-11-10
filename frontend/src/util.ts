@@ -70,7 +70,6 @@ export function renderTooltip(
   imageUrl: string,
   d: SelectedData[number]
 ) {
-  console.log("tooltip hi");
   const groundTruthIdx = Number(d[2]);
   const predictionIdx = Number(d[3]);
 

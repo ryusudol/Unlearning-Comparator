@@ -48,6 +48,7 @@ export default function DataTable({ columns }: Props) {
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  const tableData = useMemo(() => Object.values(experiments), [experiments]);
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
   ) as PerformanceMetrics;
@@ -97,22 +98,6 @@ export default function DataTable({ columns }: Props) {
     }
     return column;
   });
-
-  const tableData = useMemo(() => {
-    const dataArray = Object.values(experiments);
-    if (dataArray.length === 0) return [];
-
-    const pretrainedData = dataArray[0];
-    const remainingData = dataArray.slice(1);
-    const retrainData = remainingData.filter(
-      (datum) => datum.phase === "Retrained"
-    );
-    const otherData = remainingData.filter(
-      (datum) => datum.phase !== "Retrained"
-    );
-
-    return [pretrainedData, ...retrainData, ...otherData];
-  }, [experiments]);
 
   const opacityMapping = useMemo(() => {
     const mapping: { [key: string]: { [value: number]: number } } = {};

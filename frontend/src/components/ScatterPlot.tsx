@@ -44,7 +44,6 @@ const ScatterPlot = React.memo(
   forwardRef(({ mode, data, viewMode, onHover, hoveredImgIdx }: Props, ref) => {
     const { experiments } = useContext(ExperimentsContext);
     const { forgetClass } = useContext(ForgetClassContext);
-    console.log(data);
 
     const fetchControllerRef = useRef<AbortController | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
@@ -185,7 +184,6 @@ const ScatterPlot = React.memo(
                   imageUrl,
                   d
                 );
-                console.log(tooltipHtml);
                 tooltipRef.current.innerHTML = tooltipHtml;
               }
             })
