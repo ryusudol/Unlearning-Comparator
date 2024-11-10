@@ -29,7 +29,7 @@ export default function App() {
   };
 
   return (
-    <section className="w-full relative">
+    <section className="w-[2042px] relative">
       <Header />
       {!experimentLoading && (
         <>

@@ -42,7 +42,6 @@ export default function Header() {
   const [targetFC, setTargetFC] = useState(unselectForgetClasses[0]);
   const [open, setOpen] = useState(selectedForgetClasses.length === 0);
 
-  // TODO: 새로고침 시 experimentsLoading이 true가 되는 현상 수정
   const fetchAndSaveExperiments = async (forgetClass: string) => {
     const classIndex = forgetClassNames.indexOf(forgetClass);
     setExperimentsLoading(true);
