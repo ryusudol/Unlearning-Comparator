@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from typing import List
 import os
+from collections import OrderedDict
 
 router = APIRouter()
 
@@ -52,12 +53,21 @@ async def get_all_json_files(forget_class: str):
     if not json_files:
         raise HTTPException(status_code=404, detail=f"No JSON files found in {forget_class}")
     
-    all_data = {}
+    def sort_key(filename):
+        if filename.startswith(f'000{forget_class}'):
+            return (0, filename)
+        elif filename.startswith(f'a00{forget_class}'):
+            return (1, filename)
+        else:
+            return (2, filename)
+    
+    json_files.sort(key=sort_key)
+    
+    all_data = OrderedDict()
     for filename in json_files:
         file_path = os.path.join(data_dir, filename)
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                # 파일명에서 .json 확장자를 제거하고 키로 사용
                 key = filename[:-5]
                 all_data[key] = json.load(f)
         except Exception as e:
