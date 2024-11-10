@@ -33,10 +33,17 @@ function BaselineReducer(state: Context, action: Action): Context {
     case "RETRIEVE_CONTEXT":
       const savedContext = sessionStorage.getItem(CONTEXT);
       if (savedContext) {
-        const parsedBaseline = JSON.parse(savedContext);
+        const parsedContext = JSON.parse(savedContext);
+        sessionStorage.setItem(
+          CONTEXT,
+          JSON.stringify({
+            baseline: parsedContext.baseline,
+            comparison: parsedContext.comparison,
+          })
+        );
         return {
-          baseline: parsedBaseline.baseline,
-          comparison: parsedBaseline.comparison,
+          baseline: parsedContext.baseline,
+          comparison: parsedContext.comparison,
         };
       }
       return state;

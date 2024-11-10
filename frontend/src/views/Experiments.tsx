@@ -6,13 +6,8 @@ import Defense from "../components/Defense";
 import { columns } from "../components/Columns";
 import Button from "../components/Button";
 import { PlusIcon, SettingsIcon } from "../components/UI/icons";
-import { performanceMetrics } from "../constants/overview";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import {
-  defaultUnlearningData,
-  defaultTrainingData,
-} from "../constants/basicData";
 import {
   Dialog,
   DialogContent,
@@ -121,12 +116,7 @@ export default function Experiments({ height }: { height: number }) {
           Select the target forget class first from above.
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={defaultUnlearningData}
-          trainingData={defaultTrainingData}
-          performanceMetrics={performanceMetrics}
-        />
+        <DataTable columns={columns} />
       )}
     </section>
   );

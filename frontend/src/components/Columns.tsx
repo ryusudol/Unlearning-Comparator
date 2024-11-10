@@ -2,21 +2,20 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "./UI/button";
-import { UnlearningDataType } from "../types/data";
+import { ExperimentData } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 import { getPhaseColors } from "../util";
-import { NotAvailable } from "../constants/overview";
 
 function getValueToDisplay(value: unknown) {
-  return value === NotAvailable
+  return value === "N/A"
     ? "-"
     : typeof value === "string"
     ? value
     : Number(value);
 }
 
-export const columns: ColumnDef<UnlearningDataType>[] = [
+export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -42,10 +41,10 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
     },
   },
   {
-    accessorKey: "init_id",
+    accessorKey: "init",
     header: "Init",
     cell: ({ row }) => {
-      const init = row.getValue("init_id");
+      const init = row.getValue("init");
       const value = getValueToDisplay(init);
       return <div>{value}</div>;
     },
@@ -69,25 +68,25 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
     },
   },
   {
-    accessorKey: "learning_rate",
-    header: "LR",
-    cell: ({ row }) => {
-      const learningRate = row.getValue("learning_rate");
-      const value = getValueToDisplay(learningRate);
-      return <div className="w-[38px]">{value}</div>;
-    },
-  },
-  {
-    accessorKey: "batch_size",
+    accessorKey: "BS",
     header: "# Batch",
     cell: ({ row }) => {
-      const batchSize = row.getValue("batch_size");
+      const batchSize = row.getValue("BS");
       const value = getValueToDisplay(batchSize);
       return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "unlearn_accuracy",
+    accessorKey: "LR",
+    header: "LR",
+    cell: ({ row }) => {
+      const learningRate = row.getValue("LR");
+      const value = getValueToDisplay(learningRate);
+      return <div className="w-[38px]">{value}</div>;
+    },
+  },
+  {
+    accessorKey: "UA",
     header: ({ column }) => (
       <HoverCard>
         <HoverCardTrigger>
@@ -106,13 +105,13 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const ua = row.getValue("unlearn_accuracy");
+      const ua = row.getValue("UA");
       const value = getValueToDisplay(ua);
       return <div className="text-center">{value}</div>;
     },
   },
   {
-    accessorKey: "remain_accuracy",
+    accessorKey: "RA",
     header: ({ column }) => (
       <HoverCard>
         <HoverCardTrigger>
@@ -131,13 +130,13 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const ra = row.getValue("remain_accuracy");
+      const ra = row.getValue("RA");
       const value = getValueToDisplay(ra);
       return <div className="text-center">{value}</div>;
     },
   },
   {
-    accessorKey: "test_unlearn_accuracy",
+    accessorKey: "TUA",
     header: ({ column }) => (
       <HoverCard>
         <HoverCardTrigger>
@@ -156,13 +155,13 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const tua = row.getValue("test_unlearn_accuracy");
+      const tua = row.getValue("TUA");
       const value = getValueToDisplay(tua);
       return <div className="text-center">{value}</div>;
     },
   },
   {
-    accessorKey: "test_remain_accuracy",
+    accessorKey: "TRA",
     header: ({ column }) => (
       <HoverCard>
         <HoverCardTrigger>
@@ -181,7 +180,7 @@ export const columns: ColumnDef<UnlearningDataType>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      const tra = row.getValue("test_remain_accuracy");
+      const tra = row.getValue("TRA");
       const value = getValueToDisplay(tra);
       return <div className="text-center">{value}</div>;
     },

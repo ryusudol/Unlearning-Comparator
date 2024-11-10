@@ -10,11 +10,12 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { UnlearningDataType, TrainingDataType } from "../types/data";
+import { calculatePerformanceMetrics } from "../util";
+import { ExperimentData } from "../types/data";
 import { hexToRgba } from "../util";
 import { ScrollArea } from "./UI/scroll-area";
+import { ExperimentsContext } from "../store/experiments-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
 import { cn } from "../lib/utils";
 import {
@@ -26,46 +27,36 @@ import {
   TableRow,
 } from "./UI/table";
 
-const sortables = [
-  "unlearn_accuracy",
-  "remain_accuracy",
-  "test_unlearn_accuracy",
-  "test_remain_accuracy",
-  "RTE",
-];
+const sortables = ["UA", "RA", "TUA", "TRA", "RTE"];
+
+type PerformanceMetrics = {
+  [key: string]: {
+    colorScale: d3.ScaleLinear<number, number, never>;
+    baseColor: string;
+  };
+};
 
 interface Props {
-  columns: ColumnDef<UnlearningDataType | TrainingDataType>[];
-  data: UnlearningDataType[];
-  trainingData: TrainingDataType;
-  performanceMetrics: {
-    [key: string]: {
-      colorScale: d3.ScaleLinear<number, number, never>;
-      baseColor: string;
-    };
-  };
+  columns: ColumnDef<ExperimentData>[];
 }
 
-export default function DataTable({
-  columns,
-  data,
-  trainingData,
-  performanceMetrics,
-}: Props) {
-  const { forgetClass } = useContext(ForgetClassContext);
+export default function DataTable({ columns }: Props) {
+  const { experiments } = useContext(ExperimentsContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  const performanceMetrics = calculatePerformanceMetrics(
+    experiments
+  ) as PerformanceMetrics;
+
   const modifiedColumns = columns.map((column) => {
     if (column.id === "baseline") {
       return {
         ...column,
-        cell: ({
-          row,
-        }: CellContext<UnlearningDataType | TrainingDataType, unknown>) => (
+        cell: ({ row }: CellContext<ExperimentData, unknown>) => (
           <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
@@ -86,9 +77,7 @@ export default function DataTable({
     if (column.id === "comparison") {
       return {
         ...column,
-        cell: ({
-          row,
-        }: CellContext<UnlearningDataType | TrainingDataType, unknown>) => (
+        cell: ({ row }: CellContext<ExperimentData, unknown>) => (
           <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
@@ -110,26 +99,33 @@ export default function DataTable({
   });
 
   const tableData = useMemo(() => {
-    const forgetData = data.filter(
-      (datum) => datum.forget_class === forgetClass
+    const dataArray = Object.values(experiments);
+    if (dataArray.length === 0) return [];
+
+    const pretrainedData = dataArray[0];
+    const remainingData = dataArray.slice(1);
+    const retrainData = remainingData.filter(
+      (datum) => datum.phase === "Retrained"
     );
-    const retrainData = forgetData.filter(
-      (forgetDatum) => forgetDatum.method === "Retrain"
-    );
-    const otherData = forgetData.filter(
-      (forgetDatum) => forgetDatum.method !== "Retrain"
+    const otherData = remainingData.filter(
+      (datum) => datum.phase !== "Retrained"
     );
 
-    return [trainingData, ...retrainData, ...otherData];
-  }, [data, forgetClass, trainingData]);
+    return [pretrainedData, ...retrainData, ...otherData];
+  }, [experiments]);
 
   const opacityMapping = useMemo(() => {
     const mapping: { [key: string]: { [value: number]: number } } = {};
 
     Object.keys(performanceMetrics).forEach((columnId) => {
+      if (!performanceMetrics[columnId]) return;
+
       const values = tableData
-        .map((datum) => datum[columnId as keyof UnlearningDataType] as number)
-        .filter((value) => typeof value === "number");
+        .map((datum) => datum[columnId as keyof ExperimentData] as number)
+        .filter(
+          (value) =>
+            value !== undefined && value !== null && typeof value === "number"
+        );
 
       const uniqueValues = Array.from(new Set(values));
 
@@ -159,8 +155,8 @@ export default function DataTable({
   }, [tableData, performanceMetrics]);
 
   const table = useReactTable({
-    getRowId: (row: UnlearningDataType | TrainingDataType) => row.id,
-    data: tableData as (UnlearningDataType | TrainingDataType)[],
+    getRowId: (row: ExperimentData) => row.id,
+    data: tableData as ExperimentData[],
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -221,8 +217,7 @@ export default function DataTable({
                   {row.getVisibleCells().map((cell, idx) => {
                     const columnId = cell.column.id;
 
-                    const isPerformanceMetric =
-                      performanceMetrics[columnId] !== undefined;
+                    const isPerformanceMetric = columnId in performanceMetrics;
 
                     let cellStyle = {};
                     if (isPerformanceMetric) {
@@ -243,7 +238,7 @@ export default function DataTable({
 
                         cellStyle = {
                           borderLeft:
-                            columnId === "unlearn_accuracy"
+                            columnId === "ua"
                               ? "1px solid rgb(229 231 235)"
                               : "none",
                           borderRight:

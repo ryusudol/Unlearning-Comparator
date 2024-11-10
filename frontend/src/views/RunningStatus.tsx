@@ -1,17 +1,19 @@
 import { useEffect, useContext, useCallback } from "react";
-import { promises as fs } from "fs";
-import path from "path";
 
 import Button from "../components/Button";
 import { fetchDataFile } from "../https/unlearning";
-import { ForgetClassContext } from "../store/forget-class-context";
+import { ExperimentsContext } from "../store/experiments-context";
 import { RunningStatusContext } from "../store/running-status-context";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { fetchUnlearningStatus, cancelUnlearning } from "../https/utils";
 import { Chart01Icon, MultiplicationSignIcon } from "../components/UI/icons";
 import { useLoadingDots } from "../hooks/useLoadingDots";
+import { ForgetClassContext } from "../store/forget-class-context";
 
 export default function RunningStatus({ height }: { height: number }) {
+  const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
+  const { saveComparison } = useContext(BaselineComparisonContext);
   const { isRunning, status, updateIsRunning, initStatus, updateStatus } =
     useContext(RunningStatusContext);
 
@@ -26,27 +28,24 @@ export default function RunningStatus({ height }: { height: number }) {
       }
       if (!unlearningStatus.is_unlearning) {
         updateIsRunning(false);
-        const res = await fetchDataFile(
+        const newData = await fetchDataFile(
           forgetClass as number,
-          status.recent_id as string
+          unlearningStatus.recent_id as string
         );
-        const jsonString = JSON.stringify(res, null, 2);
-        const blob = new Blob([jsonString], { type: "application/json" });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${status.recent_id}.json`;
-
-        document.body.appendChild(link);
-        link.click();
-
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        addExperiment(newData);
+        saveComparison(newData.id);
       }
     } catch (error) {
       console.error("Failed to fetch unlearning status or result:", error);
     }
-  }, [forgetClass, status, updateIsRunning, updateStatus]);
+  }, [
+    addExperiment,
+    forgetClass,
+    saveComparison,
+    status,
+    updateIsRunning,
+    updateStatus,
+  ]);
 
   useEffect(() => {
     initStatus();
@@ -116,10 +115,10 @@ export default function RunningStatus({ height }: { height: number }) {
                 className="w-5 h-5 mr-0.5"
                 color="white"
               />
-              <span className="text-base">Cancel the Experiment</span>
+              <span className="text-base">Cancel</span>
             </>
           }
-          className="w-full flex items-center"
+          className="flex items-center w-16 bg-red-600 hover:bg-red-700"
         />
       )}
     </section>

@@ -4,6 +4,9 @@ import { LogoIcon, PlusIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { Experiments } from "../types/experiments-context";
+import { ExperimentsContext } from "../store/experiments-context";
+import { fetchAllExperimentsData } from "../https/unlearning";
 import { Label } from "./UI/label";
 import Button from "./Button";
 import {
@@ -30,6 +33,8 @@ export default function Header() {
     saveForgetClass,
     addSelectedForgetClass,
   } = useContext(ForgetClassContext);
+  const { saveExperiments, setExperimentsLoading } =
+    useContext(ExperimentsContext);
 
   const unselectForgetClasses = forgetClassNames.filter(
     (item) => !selectedForgetClasses.includes(forgetClassNames.indexOf(item))
@@ -37,7 +42,26 @@ export default function Header() {
   const [targetFC, setTargetFC] = useState(unselectForgetClasses[0]);
   const [open, setOpen] = useState(selectedForgetClasses.length === 0);
 
-  const handleAddClick = () => {
+  // TODO: 새로고침 시 experimentsLoading이 true가 되는 현상 수정
+  const fetchAndSaveExperiments = async (forgetClass: string) => {
+    const classIndex = forgetClassNames.indexOf(forgetClass);
+    setExperimentsLoading(true);
+    try {
+      const allData: Experiments = await fetchAllExperimentsData(classIndex);
+      if ("detail" in allData) saveExperiments({});
+      else saveExperiments(allData);
+    } finally {
+      setExperimentsLoading(false);
+    }
+  };
+
+  const handleForgetClassChange = async (value: string) => {
+    saveForgetClass(value);
+    await fetchAndSaveExperiments(value);
+  };
+
+  const handleAddClick = async () => {
+    await fetchAndSaveExperiments(targetFC);
     addSelectedForgetClass(targetFC);
     saveForgetClass(targetFC);
     setOpen(false);
@@ -55,7 +79,7 @@ export default function Header() {
           </div>
           <Tabs
             className="relative -bottom-2.5 flex items-center"
-            onValueChange={saveForgetClass}
+            onValueChange={handleForgetClassChange}
             value={
               forgetClass !== undefined ? forgetClassNames[forgetClass] : ""
             }

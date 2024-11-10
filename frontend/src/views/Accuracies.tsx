@@ -2,10 +2,9 @@ import { useMemo, useContext } from "react";
 
 import VerticalBarChart from "../components/VerticalBarChart";
 import { TABLEAU10 } from "../constants/tableau10";
-import { basicData } from "../constants/basicData";
 import { Chart01Icon } from "../components/UI/icons";
-import { ClassAccuracies } from "../types/data";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { ExperimentsContext } from "../store/experiments-context";
 
 const GAP_FIX_LENGTH = 3;
 
@@ -26,35 +25,24 @@ function getMaxGap(gapData: GapDataItem[]) {
 
 export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
-  const baselineData = useMemo(
-    () => basicData.filter((datum) => datum.id === baseline)[0],
-    [baseline]
-  );
-  const comparisonData = useMemo(
-    () => basicData.filter((datum) => datum.id === comparison)[0],
-    [comparison]
-  );
-
-  const baselineTrainAccuracies: ClassAccuracies =
-    baselineData?.train_class_accuracies;
-  const comparisonTrainAccuracies: ClassAccuracies =
-    comparisonData?.train_class_accuracies;
-  const baselineTestAccuracies: ClassAccuracies =
-    baselineData?.test_class_accuracies;
-  const comparisonTestAccuracies: ClassAccuracies =
-    comparisonData?.test_class_accuracies;
+  const baselineTrainAccuracies: number[] | undefined =
+    baselineExperiment?.accs;
+  const comparisonTrainAccuracies: number[] | undefined =
+    comparisonExperiment?.accs;
+  const baselineTestAccuracies: number[] | undefined =
+    baselineExperiment?.t_accs;
+  const comparisonTestAccuracies: number[] | undefined =
+    comparisonExperiment?.t_accs;
 
   const trainAccuracyGap = useMemo(
     () =>
       baselineTrainAccuracies && comparisonTrainAccuracies
         ? Object.keys(baselineTrainAccuracies).map((key, idx) => {
-            const baselineValue =
-              baselineTrainAccuracies[key as unknown as keyof ClassAccuracies];
-            const comparisonValue =
-              comparisonTrainAccuracies[
-                key as unknown as keyof ClassAccuracies
-              ];
+            const baselineValue = baselineTrainAccuracies[idx];
+            const comparisonValue = comparisonTrainAccuracies[idx];
             const categoryLetter = String.fromCharCode(65 + idx);
             return {
               category: categoryLetter,
@@ -75,10 +63,8 @@ export default function Accuracies({ height }: { height: number }) {
     () =>
       baselineTestAccuracies && comparisonTestAccuracies
         ? Object.keys(baselineTestAccuracies).map((key, idx) => {
-            const baselineValue =
-              baselineTestAccuracies[key as unknown as keyof ClassAccuracies];
-            const comparisonValue =
-              comparisonTestAccuracies[key as unknown as keyof ClassAccuracies];
+            const baselineValue = baselineTestAccuracies[idx];
+            const comparisonValue = comparisonTestAccuracies[idx];
             const categoryLetter = String.fromCharCode(65 + idx);
             return {
               category: categoryLetter,
@@ -102,7 +88,7 @@ export default function Accuracies({ height }: { height: number }) {
   return (
     <section
       style={{ height: height }}
-      className="w-[490px] px-[5px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
+      className="w-[490px] p-1 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
       <div className="flex items-center">
         <Chart01Icon />
