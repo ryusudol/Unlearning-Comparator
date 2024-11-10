@@ -60,13 +60,14 @@ function ExperimentsReducer(state: Context, action: Action): Context {
           savedExperimentsContext
         );
         return {
-          experiments: parsedExperimentsContext.experiments,
-          baselineExperiment: parsedExperimentsContext.baselineExperiment,
-          comparisonExperiment: parsedExperimentsContext.comparisonExperiment,
-          experimentLoading: parsedExperimentsContext.experimentLoading,
+          ...parsedExperimentsContext,
+          experimentLoading: false,
         };
       }
-      return state;
+      return {
+        ...state,
+        experimentLoading: false,
+      };
 
     case "DELETE_EXPERIMENT":
       const id = action.payload;
