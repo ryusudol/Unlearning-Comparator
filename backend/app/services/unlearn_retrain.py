@@ -97,6 +97,7 @@ async def unlearning_retrain(request, status):
 async def run_unlearning_retrain(request, status):
     try:
         status.is_unlearning = True
+        status.progress = "Unlearning"
         updated_status = await unlearning_retrain(request, status)
         return updated_status
     finally:

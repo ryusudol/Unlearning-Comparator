@@ -21,7 +21,8 @@ from app.utils.visualization import compute_umap_embedding
 from app.config.settings import (
 	MAX_GRAD_NORM, 
 	UMAP_DATA_SIZE, 
-	UMAP_DATASET
+	UMAP_DATASET,
+	UNLEARN_SEED
 )
 
 class UnlearningGAThread(threading.Thread):
@@ -87,7 +88,9 @@ class UnlearningGAThread(threading.Thread):
         self.status.total_epochs = self.request.epochs
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        generator = torch.Generator()
+        generator.manual_seed(UNLEARN_SEED)
+        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
         umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
@@ -133,7 +136,7 @@ class UnlearningGAThread(threading.Thread):
 
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
             print(f"Unlearning Loss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
-            print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
+            print(f"ETA: {self.status.estimated_time_remaining:.1f}s")
 
         rte = time.time() - start_time
         save_model(model=self.model, epochs=epoch + 1, learning_rate=self.request.learning_rate)

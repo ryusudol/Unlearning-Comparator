@@ -104,6 +104,7 @@ async def unlearning_GA(request, status, weights_path):
 async def run_unlearning_GA(request, status, weights_path):
     try:
         status.is_unlearning = True
+        status.progress = "Unlearning"
         updated_status = await unlearning_GA(request, status, weights_path)
         return updated_status
     finally:

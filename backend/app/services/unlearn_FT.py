@@ -123,6 +123,7 @@ async def unlearning_FT(request, status, weights_path):
 async def run_unlearning_FT(request, status, weights_path):
     try:
         status.is_unlearning = True
+        status.progress = "Unlearning"
         updated_status = await unlearning_FT(request, status, weights_path)
         return updated_status
     finally:

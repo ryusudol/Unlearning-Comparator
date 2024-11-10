@@ -18,7 +18,8 @@ from app.utils.evaluation import (
 from app.utils.visualization import compute_umap_embedding
 from app.config.settings import (
 	UMAP_DATA_SIZE, 
-	UMAP_DATASET
+	UMAP_DATASET,
+	UNLEARN_SEED
 )
 
 class UnlearningFTThread(threading.Thread):
@@ -85,7 +86,8 @@ class UnlearningFTThread(threading.Thread):
         self.status.recent_id = uuid.uuid4().hex[:4]
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        generator = torch.Generator().manual_seed(UNLEARN_SEED)
+        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
         umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False

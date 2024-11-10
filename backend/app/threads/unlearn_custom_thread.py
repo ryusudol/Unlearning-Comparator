@@ -1,7 +1,6 @@
 import threading
 import asyncio
 import torch
-import torch.nn as nn
 import time
 import json
 import os
@@ -14,7 +13,11 @@ from app.utils.evaluation import (
 )
 from app.utils.visualization import compute_umap_embedding
 from app.utils.helpers import format_distribution, compress_prob_array
-from app.config.settings import UMAP_DATA_SIZE, UMAP_DATASET
+from app.config.settings import (
+	UMAP_DATA_SIZE, 
+	UMAP_DATASET, 
+	UNLEARN_SEED
+)
 
 class UnlearningInference(threading.Thread):
     def __init__(self, 
@@ -76,7 +79,9 @@ class UnlearningInference(threading.Thread):
         self.status.recent_id = uuid.uuid4().hex[:4]
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        umap_subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
+        generator = torch.Generator()
+        generator.manual_seed(UNLEARN_SEED)
+        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
         umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
