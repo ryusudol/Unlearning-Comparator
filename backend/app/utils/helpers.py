@@ -59,7 +59,7 @@ def get_data_loaders(batch_size):
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 
-        Cutout(n_holes=1, length=16, p=0.5) #
+        Cutout(n_holes=1, length=16, p=1.0) #
     ])
     
     test_transform = transforms.Compose([
