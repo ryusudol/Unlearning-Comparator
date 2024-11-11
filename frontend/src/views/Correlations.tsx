@@ -46,51 +46,23 @@ export default function Correlations({ height }: { height: number }) {
       </div>
       {selectedForgetClasses ? (
         allSelected ? (
-          <div className="flex items-center">
-            <div className="flex -rotate-90 w-8 mr-[2px] relative">
-              <div className="flex flex-col items-center leading-4 relative right-[132px]">
-                <span className="text-[15px] font-light whitespace-nowrap">
-                  Remaining Data
-                </span>
-                <span className="text-[11px] font-extralight whitespace-nowrap">
-                  Layer After Unlearning
-                </span>
-              </div>
-              <div className="flex flex-col items-center leading-4 relative right-[18px]">
-                <span className="text-[15px] font-light whitespace-nowrap">
-                  Forgetting Data
-                </span>
-                <span className="text-[11px] font-extralight whitespace-nowrap">
-                  Layer After Unlearning
-                </span>
-              </div>
-            </div>
-            {/* Heatmap 1 */}
-            <div className="flex flex-col items-center -mt-1.5 mr-1">
-              <span className="text-[17px]">Baseline Model ({baseline})</span>
-              <img src="/heatmap1.png" alt="heatmap img 1" />
-              <img src="/heatmap3.png" alt="heatmap img 3" />
-              <span className="text-[11px] font-extralight -mt-[5px]">
-                Layer Before Unlearning
-              </span>
-            </div>
-            {/* Heatmap 2 */}
-            <div className="flex flex-col items-center -mt-1.5">
-              <span className="text-[17px]">
-                Comparison Model ({comparison})
-              </span>
-              <img src="/heatmap2.png" alt="heatmap img 2" />
-              <img src="/heatmap4.png" alt="heatmap img 4" />
-              <span className="text-[11px] font-extralight -mt-[5px]">
-                Layer Before Unlearning
-              </span>
-            </div>
-            {/* Legend */}
-            <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center">
+            <img src="/sim.png" alt="similarity img" className="h-[180px]" />
+            <div className="flex items-start">
               <img
-                src="/heatmap-legend.png"
+                src="/bheat.png"
+                alt="baseline heatmap img"
+                className="h-1/2"
+              />
+              <img
+                src="/cheat.png"
+                alt="comparison heatmap img"
+                className="h-1/2"
+              />
+              <img
+                src="/leg.png"
                 alt="heatmap legend img"
-                className="ml-1"
+                className="h-[210px] ml-1"
               />
             </div>
           </div>
