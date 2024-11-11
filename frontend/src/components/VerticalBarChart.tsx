@@ -89,7 +89,6 @@ interface Props {
 
 export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
-  console.log(gapData);
 
   const remainGapAvgValue = useMemo(() => {
     if (!forgetClass) return 0;
