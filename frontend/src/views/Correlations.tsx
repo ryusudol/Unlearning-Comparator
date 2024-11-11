@@ -47,7 +47,8 @@ export default function Correlations({ height }: { height: number }) {
       {selectedForgetClasses ? (
         allSelected ? (
           <div className="flex flex-col items-center">
-            <img src="/sim.png" alt="similarity img" className="h-[180px]" />
+            <img src="/cor.png" alt="correlation img" className="h-[435px]" />
+            {/* <img src="/sim.png" alt="similarity img" className="h-[180px]" />
             <div className="flex items-start">
               <img
                 src="/bheat.png"
@@ -64,7 +65,7 @@ export default function Correlations({ height }: { height: number }) {
                 alt="heatmap legend img"
                 className="h-[210px] ml-1"
               />
-            </div>
+            </div> */}
           </div>
         ) : (
           <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
