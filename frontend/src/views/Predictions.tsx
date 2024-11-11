@@ -45,7 +45,7 @@ export default function Predictions({
     useContext(ExperimentsContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
-  const [chartMode, setChartMode] = useState<ChartModeType>(BUBBLE);
+  const [chartMode, setChartMode] = useState<ChartModeType>(LABEL_HEATMAP);
 
   let baselineDistributionData: HeatmapData;
   baselineDistributionData = extractHeatmapData(
