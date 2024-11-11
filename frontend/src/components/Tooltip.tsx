@@ -58,8 +58,8 @@ export default function Tooltip({
       .append("pattern")
       .attr("id", "stripe")
       .attr("patternUnits", "userSpaceOnUse")
-      .attr("width", 4)
-      .attr("height", 4)
+      .attr("width", 3)
+      .attr("height", 3)
       .attr("patternTransform", "rotate(-45)");
 
     pattern
@@ -67,7 +67,7 @@ export default function Tooltip({
       .attr("x1", 0)
       .attr("y1", 0)
       .attr("x2", 0)
-      .attr("y2", 4)
+      .attr("y2", 3)
       .attr("stroke", "black")
       .attr("stroke-width", 2);
 
@@ -125,7 +125,7 @@ export default function Tooltip({
                 forgetClassNames[(d as { class: number; value: number }).class]
               ) ?? 0) +
               barHeight -
-              9
+              6
           )
           .attr("height", barHeight)
           .attr(
@@ -146,7 +146,7 @@ export default function Tooltip({
                 forgetClassNames[(d as { class: number; value: number }).class]
               ) ?? 0) +
               barHeight -
-              9
+              6
           )
           .attr("height", barHeight)
           .attr(
@@ -194,8 +194,12 @@ export default function Tooltip({
         </div>
         <div className="text-sm flex flex-col">
           <span className="font-semibold">Prediction</span>
-          <span>Baseline: {prediction}</span>
-          <span>Comparison: {prediction}</span>
+          <p>
+            <span className="font-semibold">Baseline</span>: {prediction}
+          </p>
+          <p>
+            <span className="font-semibold">Comparison</span>: {prediction}
+          </p>
         </div>
       </div>
       <div className="relative z-50">
@@ -212,6 +216,9 @@ export default function Tooltip({
             {tooltipContent}
           </div>
         )}
+        <p className="text-xs absolute bottom-0 right-[70px]">
+          Confidence Score
+        </p>
       </div>
     </div>
   );
