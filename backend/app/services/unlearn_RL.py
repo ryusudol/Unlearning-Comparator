@@ -35,7 +35,8 @@ async def unlearning_RL(request, status, weights_path):
         train_set,
         test_set
     ) = get_data_loaders(
-        batch_size=request.batch_size
+        batch_size=request.batch_size,
+        augmentation=False
     )
 
     # Create retain loader (excluding forget class)

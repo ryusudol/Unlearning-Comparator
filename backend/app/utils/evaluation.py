@@ -159,18 +159,18 @@ async def calculate_cka_similarity(
     # ]
     
     detailed_layers = [
-        'conv1',              # 초기 특징 추출
-        'layer1.1.conv2',     # 첫 번째 블록의 마지막 컨볼루션
-        'layer2.0.conv1',     # 다운샘플링이 시작되는 부분
-        'layer2.1.conv2',     # 두 번째 블록의 마지막 컨볼루션
-        'layer3.0.conv1',     # 다운샘플링이 시작되는 부분
-        'layer3.1.conv2',     # 세 번째 블록의 마지막 컨볼루션
-        'layer4.0.conv1',     # 다운샘플링이 시작되는 부분
-        'layer4.1.conv2',     # 마지막 블록의 마지막 컨볼루션
-        'avgpool',            # 전역 평균 풀링
-        'fc'                  # 최종 분류기
+        'conv1',              # 
+        'layer1.1.conv2',     # 첫 번째 블록의 마지막
+        'layer2.0.conv1',     # 다운샘플링 시작
+        'layer2.1.conv2',     # 두 번째 블록의 마지막
+        'layer3.0.conv1',     # 다운샘플링 시작
+        'layer3.1.conv2',     # 세 번째 블록의 마지막
+        'layer4.0.conv1',     # 다운샘플링 시작
+        'layer4.1.conv2',     # 마지막 블록의 마지막
+        'avgpool',            # avgpool 8192 -> 512
+        'fc'                  # fc 512 -> 10
     ]
-    
+
     # detailed_layers = [conv1, bn1, relu, maxpool,
     #     layer1, layer1.0, layer1.0.conv1, layer1.0.bn1,
     #     layer1.0.relu, layer1.0.conv2, layer1.0.bn2, layer1.1, 
@@ -189,7 +189,7 @@ async def calculate_cka_similarity(
     #     layer4.1.bn1, layer4.1.relu, layer4.1.conv2, layer4.1.bn2,
     #     avgpool, fc
     # ]
-
+    
     cka = CKA(model_before, 
               model_after, 
               model1_name="Before Unlearning", 
@@ -197,30 +197,47 @@ async def calculate_cka_similarity(
               model1_layers=detailed_layers, 
               model2_layers=detailed_layers, 
               device=device)
-
-    def filter_loader(loader, condition, is_train=False):              
-        indices = [i for i, (_, label) in enumerate(loader.dataset) if condition(label)]
-        if is_train:
-            num_samples = len(indices) // 10
-        else:
-            num_samples = len(indices) // 2
+    
+    def filter_loader(loader, is_train=False):
+        targets = loader.dataset.targets
+        targets = torch.tensor(targets) if not isinstance(targets, torch.Tensor) else targets
         
-        sampled_indices = torch.randperm(len(indices))[:num_samples].tolist()
-        final_indices = [indices[i] for i in sampled_indices]
+        forget_indices = (targets == forget_class).nonzero(as_tuple=True)[0]
+        other_indices = (targets != forget_class).nonzero(as_tuple=True)[0]
 
-        return DataLoader(
-            Subset(loader.dataset, final_indices),
+        if is_train:
+            forget_samples = len(forget_indices) // 10
+            other_samples = len(other_indices) // 10
+        else:
+            forget_samples = len(forget_indices) // 2  
+            other_samples = len(other_indices) // 2
+
+        forget_sampled = forget_indices[torch.randperm(len(forget_indices))[:forget_samples]]
+        other_sampled = other_indices[torch.randperm(len(other_indices))[:other_samples]]
+
+        forget_loader = DataLoader(
+            Subset(loader.dataset, forget_sampled),
+            batch_size=loader.batch_size,
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True
+        )
+        
+        other_loader = DataLoader(
+            Subset(loader.dataset, other_sampled), 
             batch_size=loader.batch_size,
             shuffle=False,
             num_workers=0,
             pin_memory=True
         )
 
-    forget_class_train_loader = filter_loader(train_loader, lambda label: label == forget_class, is_train=True)
-    other_classes_train_loader = filter_loader(train_loader, lambda label: label != forget_class, is_train=True)
-    forget_class_test_loader = filter_loader(test_loader, lambda label: label == forget_class, is_train=False)
-    other_classes_test_loader = filter_loader(test_loader, lambda label: label != forget_class, is_train=False)
+        return forget_loader, other_loader
 
+    print("filtering train loader")
+    forget_class_train_loader, other_classes_train_loader = filter_loader(train_loader, is_train=True)
+    print("filtering test loader") 
+    forget_class_test_loader, other_classes_test_loader = filter_loader(test_loader, is_train=False)
+    print("comparing train loader")
     cka.compare(forget_class_train_loader, forget_class_train_loader)
     results_forget_train = cka.export()
     cka.compare(other_classes_train_loader, other_classes_train_loader)
@@ -229,7 +246,7 @@ async def calculate_cka_similarity(
     results_forget_test = cka.export()
     cka.compare(other_classes_test_loader, other_classes_test_loader)
     results_other_test = cka.export()
-
+    print("cka results calculated")
     def format_cka_results(results):
         return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
 

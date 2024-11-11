@@ -26,7 +26,10 @@ async def training(request, status):
         test_loader,
         train_set,
         test_set
-    ) = get_data_loaders(request.batch_size)
+    ) = get_data_loaders(
+        batch_size=request.batch_size,
+        augmentation=True
+    )
     model = get_resnet18().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
@@ -41,8 +44,8 @@ async def training(request, status):
     # )
     scheduler = optim.lr_scheduler.MultiStepLR(
         optimizer,
-        milestones=[80, 120, 160],
-        gamma=0.2
+        milestones=[100, 150],
+        gamma=0.1
     )
 
     training_thread = TrainingThread(
