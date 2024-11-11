@@ -132,7 +132,11 @@ async def get_unlearning_status():
         "total_epochs": status.total_epochs,
         "current_unlearn_loss": round(status.current_unlearn_loss, 2),
         "current_unlearn_accuracy": round(status.current_unlearn_accuracy, 2),
-        "estimated_time_remaining": round(status.estimated_time_remaining + 60.0, 2) if status.progress != "idle" else 0,
+        "p_training_loss": round(status.p_training_loss, 4),
+        "p_training_accuracy": round(status.p_training_accuracy, 2),
+        "p_test_loss": round(status.p_test_loss, 4),
+        "p_test_accuracy": round(status.p_test_accuracy, 2),
+        "estimated_time_remaining": round(status.estimated_time_remaining + 30.0, 2) if status.progress != "idle" else 0,
     }
 
 @router.post("/unlearn/custom")

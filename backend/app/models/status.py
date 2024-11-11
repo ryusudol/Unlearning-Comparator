@@ -45,6 +45,12 @@ class UnlearningStatus:
         self.test_accuracy = 0
         self.best_test_accuracy = 0
 
+        # for Evaluation progress
+        self.p_training_loss = 0
+        self.p_training_accuracy = 0
+        self.p_test_loss = 0
+        self.p_test_accuracy = 0
+
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None

@@ -113,6 +113,14 @@ class UnlearningInference(threading.Thread):
             device=self.device
         )
 
+        # Update training evaluation status for remain classes only
+        self.status.p_training_loss = train_loss
+        if self.is_training_eval:
+            self.status.p_training_accuracy = train_accuracy
+        else:
+            remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+            self.status.p_training_accuracy = remain_train_accuracy
+
         if self.is_training_eval:
             unlearn_accuracy = "N/A"
             remain_accuracy = round(train_accuracy, 3)
@@ -149,6 +157,14 @@ class UnlearningInference(threading.Thread):
             criterion=self.criterion, 
             device=self.device
         )
+
+        # Update test evaluation status for remain classes only
+        self.status.p_test_loss = test_loss
+        if self.is_training_eval:
+            self.status.p_test_accuracy = test_accuracy
+        else:
+            remain_test_accuracy = sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+            self.status.p_test_accuracy = remain_test_accuracy
 
         if not self.is_training_eval:
             test_accuracy = round(

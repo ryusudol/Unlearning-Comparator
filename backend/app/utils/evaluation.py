@@ -113,7 +113,7 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
             total_loss += loss.item()
             
             # Add temperature scaling
-            temperature = 2.0
+            temperature = 1.0
             scaled_outputs = outputs / temperature
             probabilities = F.softmax(scaled_outputs, dim=1)
             _, predicted = torch.max(probabilities, 1)

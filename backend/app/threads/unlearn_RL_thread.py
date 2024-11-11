@@ -200,6 +200,12 @@ class UnlearningRLThread(threading.Thread):
             criterion=self.criterion, 
             device=self.device
         )
+
+        # Update training evaluation status for remain classes only
+        self.status.p_training_loss = train_loss
+        remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+        self.status.p_training_accuracy = remain_train_accuracy
+
         unlearn_accuracy = train_class_accuracies[self.request.forget_class]
         remain_accuracy = round(
             sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
@@ -228,6 +234,11 @@ class UnlearningRLThread(threading.Thread):
             criterion=self.criterion, 
             device=self.device
         )
+
+        # Update test evaluation status for remain classes only
+        self.status.p_test_loss = test_loss
+        remain_test_accuracy = sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+        self.status.p_test_accuracy = remain_test_accuracy
 
         print("Test Class Accuracies:")
         for i, acc in test_class_accuracies.items():
