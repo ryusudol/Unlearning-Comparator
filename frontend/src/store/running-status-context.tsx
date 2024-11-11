@@ -64,9 +64,15 @@ function runningStatusReducer(
 
     case "UPDATE_STATUS":
       const status = action.payload;
+      const progress =
+        state.isRunning && status.progress === "Idle"
+          ? "Unlearning"
+          : !state.isRunning
+          ? "Idle"
+          : status.progress;
       sessionStorage.setItem(
         RUNNING_STATUS,
-        JSON.stringify({ ...state, status })
+        JSON.stringify({ ...state, status: { ...status, progress } })
       );
       return { ...state, status };
 

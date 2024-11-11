@@ -23,26 +23,29 @@ export default function RunningStatus({ height }: { height: number }) {
     try {
       const unlearningStatus = await fetchUnlearningStatus();
 
-      if (JSON.stringify(status) !== JSON.stringify(unlearningStatus)) {
-        updateStatus(unlearningStatus);
-      }
+      updateStatus(unlearningStatus);
+
       if (!unlearningStatus.is_unlearning) {
         updateIsRunning(false);
-        const newData = await fetchDataFile(
-          forgetClass as number,
-          unlearningStatus.recent_id as string
-        );
-        addExperiment(newData);
-        saveComparison(newData.id);
+
+        try {
+          const newData = await fetchDataFile(
+            forgetClass as number,
+            unlearningStatus.recent_id as string
+          );
+          addExperiment(newData);
+          saveComparison(newData.id);
+        } catch (error) {
+          console.error("Failed to fetch data file:", error);
+        }
       }
     } catch (error) {
-      console.error("Failed to fetch unlearning status or result:", error);
+      console.error("Failed to fetch unlearning status:", error);
     }
   }, [
     addExperiment,
     forgetClass,
     saveComparison,
-    status,
     updateIsRunning,
     updateStatus,
   ]);
@@ -68,6 +71,8 @@ export default function RunningStatus({ height }: { height: number }) {
   const handleCancelClick = async () => {
     if (window.confirm("Are you sure you want to cancel the experiment?")) {
       await cancelUnlearning();
+      updateIsRunning(false);
+      initStatus();
     }
   };
 

@@ -1,3 +1,4 @@
+import { ExperimentData } from "../types/data";
 import { UnlearningConfigurationData } from "../types/settings";
 import { API_URL } from "../constants/common";
 
@@ -71,7 +72,10 @@ export async function executeCustomUnlearning(
   }
 }
 
-export async function fetchDataFile(forgetClass: number, id: string) {
+export async function fetchDataFile(
+  forgetClass: number,
+  id: string
+): Promise<ExperimentData> {
   try {
     const response = await fetch(`${API_URL}/data/${forgetClass}/${id}`);
 
