@@ -162,16 +162,20 @@ export default function DataTable({ columns }: Props) {
 
   return (
     <div className="w-full h-[222px]">
-      <Table className="table-fixed w-full border-none">
+      <Table className="table-fixed w-full border-t">
         <ScrollArea className="w-full h-[220px]">
-          <TableHeader className="bg-gray-200">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const style = sortables.includes(header.column.id)
-                    ? { width: "80px" }
+                    ? { width: "78px" }
                     : header.column.id === "phase"
                     ? { width: "100px" }
+                    : header.column.id === "baseline"
+                    ? { width: "70px" }
+                    : header.column.id === "comparison"
+                    ? { width: "90px" }
                     : {};
                   return (
                     <TableHead key={header.id} style={style}>
