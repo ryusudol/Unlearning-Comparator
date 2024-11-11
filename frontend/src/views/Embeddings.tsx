@@ -27,7 +27,12 @@ import {
 
 type Position = { x: number; y: number } | null;
 export type Mode = "Baseline" | "Comparison";
-export type Instance = { imgIdx: number; source: Mode } | null;
+export type HovereInstance = {
+  imgIdx: number;
+  source: Mode;
+  baselineProb?: Prob;
+  comparisonProb?: Prob;
+} | null;
 export type Prob = { [key: string]: number };
 export type SelectedData = (number | Prob)[][];
 
@@ -37,24 +42,48 @@ export default function Embeddings({ height }: { height: number }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
-  const [hoveredInstance, setHoveredInstance] = useState<Instance>(null);
+  const [hoveredInstance, setHoveredInstance] = useState<HovereInstance>(null);
   const [fromPosition, setFromPosition] = useState<Position>(null);
   const [toPosition, setToPosition] = useState<Position>(null);
-
+  console.log(hoveredInstance);
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
 
+  const extractedBaselineData = useMemo(
+    () => extractSelectedData(baselineExperiment),
+    [baselineExperiment]
+  );
+  const extractedComparisonData = useMemo(
+    () => extractSelectedData(comparisonExperiment),
+    [comparisonExperiment]
+  );
+
   const handleHover = useCallback(
-    (imgIdxOrNull: number | null, source?: Mode) => {
+    (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
       if (imgIdxOrNull === null) {
         setHoveredInstance(null);
         setFromPosition(null);
         setToPosition(null);
       } else if (typeof imgIdxOrNull === "number" && source) {
-        setHoveredInstance({ imgIdx: imgIdxOrNull, source });
+        const oppositeData =
+          source === "Baseline"
+            ? extractedComparisonData
+            : extractedBaselineData;
+
+        const oppositeInstance = oppositeData.find(
+          (d) => d[4] === imgIdxOrNull
+        );
+        const oppositeProb = oppositeInstance?.[5] as Prob;
+
+        setHoveredInstance({
+          imgIdx: imgIdxOrNull,
+          source,
+          baselineProb: source === "Baseline" ? prob : oppositeProb,
+          comparisonProb: source === "Comparison" ? prob : oppositeProb,
+        });
       }
     },
-    []
+    [extractedBaselineData, extractedComparisonData]
   );
 
   useEffect(() => {
@@ -78,15 +107,6 @@ export default function Embeddings({ height }: { height: number }) {
       setToPosition(null);
     }
   }, [hoveredInstance]);
-
-  const extractedBaselineData = useMemo(
-    () => extractSelectedData(baselineExperiment),
-    [baselineExperiment]
-  );
-  const extractedComparisonData = useMemo(
-    () => extractSelectedData(comparisonExperiment),
-    [comparisonExperiment]
-  );
 
   return (
     <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
@@ -167,6 +187,7 @@ export default function Embeddings({ height }: { height: number }) {
         id={baseline}
         onHover={handleHover}
         hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
+        hoveredProb={hoveredInstance}
         ref={baselineRef}
       />
       <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
@@ -177,6 +198,7 @@ export default function Embeddings({ height }: { height: number }) {
         id={comparison}
         onHover={handleHover}
         hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
+        hoveredProb={hoveredInstance}
         ref={comparisonRef}
       />
     </div>

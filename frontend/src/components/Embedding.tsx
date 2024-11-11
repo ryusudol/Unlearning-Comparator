@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
-import { Mode, SelectedData } from "../views/Embeddings";
+import { Mode, SelectedData, HovereInstance } from "../views/Embeddings";
 import ScatterPlot from "./ScatterPlot";
 import {
   Select,
@@ -35,10 +35,14 @@ interface Props {
   id: string;
   onHover: (imgIdxOrNull: number | null, source?: Mode) => void;
   hoveredImgIdx: number | null;
+  hoveredProb: HovereInstance | undefined;
 }
 
 const Embedding = forwardRef(
-  ({ mode, height, data, id, onHover, hoveredImgIdx }: Props, ref) => {
+  (
+    { mode, height, data, id, onHover, hoveredImgIdx, hoveredProb }: Props,
+    ref
+  ) => {
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
     const chartRef = useRef<{
@@ -109,6 +113,7 @@ const Embedding = forwardRef(
             viewMode={viewMode}
             onHover={onHover}
             hoveredImgIdx={hoveredImgIdx}
+            hoveredProb={hoveredProb}
             ref={chartRef}
           />
         </div>
