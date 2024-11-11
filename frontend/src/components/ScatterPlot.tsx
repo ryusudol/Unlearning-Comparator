@@ -28,6 +28,7 @@ const defaultCrossOpacity = 0.85;
 const defaultCircleOpacity = 0.6;
 const loweredOpacity = 0.1;
 const hoveredStrokeWidth = 2;
+const paddingRatio = 0.01;
 
 const UNLEARNING_TARGET = "Unlearning Target";
 const UNLEARNING_FAILED = "Unlearning Failed";
@@ -91,9 +92,15 @@ const ScatterPlot = React.memo(
       if (data.length === 0)
         return d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
+      const [min, max] = d3.extent(data, (d) => d[1] as number) as [
+        number,
+        number
+      ];
+      const padding = (max - min) * paddingRatio;
+
       return d3
         .scaleLinear()
-        .domain(d3.extent(data, (d) => d[1] as number) as [number, number])
+        .domain([min - padding, max + padding])
         .nice()
         .range([height, 0]);
     }, [data]);
@@ -461,64 +468,6 @@ const ScatterPlot = React.memo(
             .attr("stroke", "black")
             .attr("stroke-width", hoveredStrokeWidth)
             .raise();
-        }
-
-        let selectedElement: SVGCircleElement | SVGPathElement | null = null;
-        if (circlesRef.current) {
-          selectedElement = circlesRef.current
-            .filter((d) => d[4] === hoveredImgIdx)
-            .node() as SVGCircleElement;
-        }
-        if (!selectedElement && crossesRef.current) {
-          selectedElement = crossesRef.current
-            .filter((d) => d[4] === hoveredImgIdx)
-            .node() as SVGPathElement;
-        }
-
-        if (selectedElement && containerRef.current) {
-          const elementRect = selectedElement.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
-
-          const tooltipXSize = 365;
-          const tooltipYSize = 265;
-          let xPosTooltip = elementRect.left - containerRect.left + 10;
-          let yPosTooltip = elementRect.top - containerRect.top + 10;
-
-          if (xPosTooltip + tooltipXSize > containerRect.width)
-            xPosTooltip =
-              elementRect.left - containerRect.left - tooltipXSize - 10;
-          if (yPosTooltip + tooltipYSize > containerRect.height)
-            yPosTooltip =
-              elementRect.top - containerRect.top - tooltipYSize - 10;
-
-          const datum = data.find((d) => d[4] === hoveredImgIdx);
-          if (datum) {
-            const controller = new AbortController();
-            const index = datum[4];
-            fetch(`${API_URL}/image/cifar10/${index}`)
-              .then((response) => response.blob())
-              .then((blob) => {
-                if (controller.signal.aborted) return;
-                const imageUrl = URL.createObjectURL(blob);
-                if (tooltipRef.current) {
-                  tooltipRef.current.style.display = "block";
-                  tooltipRef.current.style.left = `${xPosTooltip}px`;
-                  tooltipRef.current.style.top = `${yPosTooltip}px`;
-                  tooltipRef.current.innerHTML = renderTooltip(
-                    tooltipXSize,
-                    tooltipYSize,
-                    imageUrl,
-                    datum
-                  );
-                }
-              })
-              .catch((error) => {
-                if (error.name === "AbortError") return;
-              });
-            return () => {
-              controller.abort();
-            };
-          }
         }
       } else {
         if (tooltipRef.current) {

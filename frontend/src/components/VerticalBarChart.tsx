@@ -90,13 +90,19 @@ interface Props {
 export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
 
-  const remainGapAvgValue = useMemo(
-    () =>
-      gapData.length
-        ? gapData.reduce((sum, datum) => sum + datum.gap, 0) / gapData.length
-        : 0,
-    [gapData]
-  );
+  const remainGapAvgValue = useMemo(() => {
+    if (!forgetClass) return 0;
+
+    const remainingData = gapData.filter(
+      (datum) =>
+        forgetClassNames[+datum.classLabel] !== forgetClassNames[forgetClass]
+    );
+
+    return remainingData.length
+      ? remainingData.reduce((sum, datum) => sum + datum.gap, 0) /
+          remainingData.length
+      : 0;
+  }, [gapData, forgetClass]);
   const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
 
   return (
