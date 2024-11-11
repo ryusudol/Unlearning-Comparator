@@ -28,8 +28,8 @@ const crossSize = 4;
 const loweredOpacity = 0.1;
 const hoveredStrokeWidth = 2;
 const paddingRatio = 0.01;
-const tooltipXSize = 365;
-const tooltipYSize = 250;
+const tooltipXSize = 450;
+const tooltipYSize = 280;
 export const defaultCrossOpacity = 0.85;
 export const defaultCircleOpacity = 0.6;
 
@@ -167,7 +167,7 @@ const ScatterPlot = React.memo(
         },
       }));
 
-      const handleMouseEnter = useCallback(
+      const handleClick = useCallback(
         (event: MouseEvent, d: (number | Prob)[]): void => {
           const element = event.currentTarget as Element;
           onHover(d[4] as number, mode, d[5] as Prob);
@@ -233,12 +233,10 @@ const ScatterPlot = React.memo(
                   yPosTooltip =
                     event.clientY - containerRect.top - tooltipYSize - 10;
 
-                if (containerRect) {
-                  setTooltipPosition({
-                    x: event.clientX - containerRect.left + 10,
-                    y: event.clientY - containerRect.top + 10,
-                  });
-                }
+                setTooltipPosition({
+                  x: xPosTooltip,
+                  y: yPosTooltip,
+                });
               }
             })
             .catch((err) => {
@@ -345,11 +343,27 @@ const ScatterPlot = React.memo(
           crossesRef.current = crosses;
 
           circles
-            .on("mouseenter", handleMouseEnter)
+            .on("click", handleClick)
+            .on("mouseenter", (event, d) => {
+              const element = event.currentTarget as Element;
+              onHover(d[4] as number, mode);
+              d3.select(element)
+                .attr("stroke", "black")
+                .attr("stroke-width", hoveredStrokeWidth)
+                .raise();
+            })
             .on("mouseleave", handleMouseLeave);
 
           crosses
-            .on("mouseenter", handleMouseEnter)
+            .on("click", handleClick)
+            .on("mouseenter", (event, d) => {
+              const element = event.currentTarget as Element;
+              onHover(d[4] as number, mode);
+              d3.select(element)
+                .attr("stroke", "black")
+                .attr("stroke-width", hoveredStrokeWidth)
+                .raise();
+            })
             .on("mouseleave", handleMouseLeave);
 
           function zoomed(event: d3.D3ZoomEvent<SVGSVGElement, undefined>) {
@@ -419,7 +433,7 @@ const ScatterPlot = React.memo(
         };
       }, [
         forgetClass,
-        handleMouseEnter,
+        handleClick,
         handleMouseLeave,
         mode,
         onHover,
@@ -520,6 +534,21 @@ const ScatterPlot = React.memo(
           }
         }
       }, [hoveredImgIdx, data, z]);
+
+      useEffect(() => {
+        const handleDocumentClick = (event: MouseEvent) => {
+          const target = event.target as Element;
+          if (!target.closest("circle") && !target.closest("path")) {
+            setTooltipContent(null);
+            setTooltipPosition(null);
+          }
+        };
+
+        document.addEventListener("click", handleDocumentClick);
+        return () => {
+          document.removeEventListener("click", handleDocumentClick);
+        };
+      }, []);
 
       return (
         <div

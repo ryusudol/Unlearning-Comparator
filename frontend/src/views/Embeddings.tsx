@@ -45,7 +45,7 @@ export default function Embeddings({ height }: { height: number }) {
   const [hoveredInstance, setHoveredInstance] = useState<HovereInstance>(null);
   const [fromPosition, setFromPosition] = useState<Position>(null);
   const [toPosition, setToPosition] = useState<Position>(null);
-  console.log(hoveredInstance);
+
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
 

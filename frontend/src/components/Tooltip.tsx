@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import * as d3 from "d3";
 
-import { defaultCircleOpacity, defaultCrossOpacity } from "./ScatterPlot";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Prob } from "../views/Embeddings";
+
+const BASELINE_OPACITY = 0.7;
+const COMPARISON_OPACITY = 1;
 
 interface Props {
   width: number;
@@ -41,8 +43,8 @@ export default function Tooltip({
 
     const width = 300;
     const height = 280;
-    const margin = { top: 20, right: 20, bottom: 10, left: 80 };
-    const barHeight = 8;
+    const margin = { top: 20, right: 20, bottom: 30, left: 85 };
+    const barHeight = 12;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -56,8 +58,8 @@ export default function Tooltip({
       .append("pattern")
       .attr("id", "stripe")
       .attr("patternUnits", "userSpaceOnUse")
-      .attr("width", 6)
-      .attr("height", 6)
+      .attr("width", 4)
+      .attr("height", 4)
       .attr("patternTransform", "rotate(-45)");
 
     pattern
@@ -65,9 +67,9 @@ export default function Tooltip({
       .attr("x1", 0)
       .attr("y1", 0)
       .attr("x2", 0)
-      .attr("y2", 6)
+      .attr("y2", 4)
       .attr("stroke", "black")
-      .attr("stroke-width", 3);
+      .attr("stroke-width", 2);
 
     const xScale = d3
       .scaleLinear()
@@ -93,9 +95,7 @@ export default function Tooltip({
       .attr("height", barHeight)
       .attr("width", (d) => xScale(d.value) - margin.left)
       .attr("fill", (_, i) => colors[i])
-      .attr("opacity", (d) =>
-        d.class === forgetClass ? defaultCrossOpacity : defaultCircleOpacity
-      )
+      .attr("opacity", BASELINE_OPACITY)
       .on("mouseover", (event, d) => {
         setTooltipContent(
           `Baseline ${forgetClassNames[d.class]}: ${d.value.toFixed(3)}`
@@ -124,8 +124,8 @@ export default function Tooltip({
               (yScale(
                 forgetClassNames[(d as { class: number; value: number }).class]
               ) ?? 0) +
-              barHeight +
-              2
+              barHeight -
+              9
           )
           .attr("height", barHeight)
           .attr(
@@ -135,11 +135,7 @@ export default function Tooltip({
               margin.left
           )
           .attr("fill", colors[i])
-          .attr("opacity", (d) =>
-            (d as { class: number; value: number }).class === forgetClass
-              ? defaultCrossOpacity
-              : defaultCircleOpacity
-          );
+          .attr("opacity", COMPARISON_OPACITY);
 
         g.append("rect")
           .attr("x", margin.left)
@@ -149,8 +145,8 @@ export default function Tooltip({
               (yScale(
                 forgetClassNames[(d as { class: number; value: number }).class]
               ) ?? 0) +
-              barHeight +
-              2
+              barHeight -
+              9
           )
           .attr("height", barHeight)
           .attr(
@@ -196,8 +192,10 @@ export default function Tooltip({
         <div className="text-sm mt-1">
           <span className="font-semibold">Ground Truth</span>: {groundTruth}
         </div>
-        <div className="text-sm">
-          <span className="font-semibold">Prediction</span>: {prediction}
+        <div className="text-sm flex flex-col">
+          <span className="font-semibold">Prediction</span>
+          <span>Baseline: {prediction}</span>
+          <span>Comparison: {prediction}</span>
         </div>
       </div>
       <div className="relative z-50">
