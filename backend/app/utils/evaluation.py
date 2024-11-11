@@ -112,7 +112,10 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
             loss = criterion(outputs, labels)
             total_loss += loss.item()
             
-            probabilities = F.softmax(outputs, dim=1)
+            # Add temperature scaling
+            temperature = 2.0
+            scaled_outputs = outputs / temperature
+            probabilities = F.softmax(scaled_outputs, dim=1)
             _, predicted = torch.max(probabilities, 1)
             
             total += labels.size(0)
@@ -146,13 +149,26 @@ async def calculate_cka_similarity(
         forget_class, 
         device
     ):
+    # detailed_layers = [
+    #     'conv1',
+    #     'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
+    #     'layer2.0.conv1', 'layer2.0.conv2', 'layer2.1.conv1', 'layer2.1.conv2',
+    #     'layer3.0.conv1', 'layer3.0.conv2', 'layer3.1.conv1', 'layer3.1.conv2',
+    #     'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
+    #     'fc'
+    # ]
+    
     detailed_layers = [
-        'conv1',
-        'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
-        'layer2.0.conv1', 'layer2.0.conv2', 'layer2.1.conv1', 'layer2.1.conv2',
-        'layer3.0.conv1', 'layer3.0.conv2', 'layer3.1.conv1', 'layer3.1.conv2',
-        'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
-        'fc'
+        'conv1',              # 초기 특징 추출
+        'layer1.1.conv2',     # 첫 번째 블록의 마지막 컨볼루션
+        'layer2.0.conv1',     # 다운샘플링이 시작되는 부분
+        'layer2.1.conv2',     # 두 번째 블록의 마지막 컨볼루션
+        'layer3.0.conv1',     # 다운샘플링이 시작되는 부분
+        'layer3.1.conv2',     # 세 번째 블록의 마지막 컨볼루션
+        'layer4.0.conv1',     # 다운샘플링이 시작되는 부분
+        'layer4.1.conv2',     # 마지막 블록의 마지막 컨볼루션
+        'avgpool',            # 전역 평균 풀링
+        'fc'                  # 최종 분류기
     ]
     
     # detailed_layers = [conv1, bn1, relu, maxpool,

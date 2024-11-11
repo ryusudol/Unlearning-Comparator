@@ -51,21 +51,20 @@ def load_model(model_path, num_classes=10, device='cuda'):
     model.eval()
     return model
 
-def get_data_loaders(batch_size):
-    train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4), #
-        transforms.RandomHorizontalFlip(), #
-        
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-
-        Cutout(n_holes=1, length=16, p=1.0) #
-    ])
-    
-    test_transform = transforms.Compose([
+def get_data_loaders(batch_size, augmentation=False):
+    base_transforms = [
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    ])
+    ]
+    
+    train_transform = transforms.Compose(
+        ([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+        ] if augmentation else []) + base_transforms
+    )
+    
+    test_transform = transforms.Compose(base_transforms)
     
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)

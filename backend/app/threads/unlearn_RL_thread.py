@@ -302,7 +302,7 @@ class UnlearningRLThread(threading.Thread):
             "id": self.status.recent_id,
             "fc": self.request.forget_class,
             "phase": "Unlearned",
-            "init": "0000",
+            "init": f"000{self.request.forget_class}",
             "method": "Random-Labeling",
             "epochs": self.request.epochs,
             "BS": self.request.batch_size,

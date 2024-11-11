@@ -35,10 +35,14 @@ async def training(request, status):
         momentum=MOMENTUM,
         weight_decay=WEIGHT_DECAY
     )
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer,
+    #     T_max=request.epochs,
+    # )
+    scheduler = optim.lr_scheduler.MultiStepLR(
         optimizer,
-        T_max=request.epochs,
-        eta_min=1e-5
+        milestones=[80, 120, 160],
+        gamma=0.2
     )
 
     training_thread = TrainingThread(

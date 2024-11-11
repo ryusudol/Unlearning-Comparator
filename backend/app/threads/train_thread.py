@@ -3,6 +3,8 @@ import asyncio
 import time
 import sys
 import traceback
+import matplotlib.pyplot as plt
+import os
 
 from app.utils.helpers import save_model
 from app.utils.evaluation import evaluate_model
@@ -164,7 +166,7 @@ class TrainingThread(threading.Thread):
             print(f"Training   - Loss: {train_loss:.4f}, Accuracy: {train_accuracy:.4f}")
             print(f"Test - Loss: {test_loss:.4f}, Accuracy: {test_accuracy:.4f}")
             print(f"Best - Train: {self.status.best_accuracy:.4f}, Test: {self.status.best_test_accuracy:.4f}")
-            print(f"Learning Rate: {current_lr:.5f}")
+            print(f"Learning Rate: {current_lr:.6f}")
             print(f"Best Model: Epoch {best_epoch} (Test Acc: {best_test_acc:.4f})")
             
             print("\nPer-Class Accuracies:")
@@ -180,4 +182,23 @@ class TrainingThread(threading.Thread):
         total_training_time = time.time() - self.status.start_time
         print(f"\nTotal training time: {total_training_time:.1f} seconds ({total_training_time/60:.1f} minutes)")
         print()
+        
+        # Plot and save accuracy curves
+        plt.figure(figsize=(10, 6))
+        plt.plot(range(1, self.epochs + 1), train_accuracies, label='Train Accuracy')
+        plt.plot(range(1, self.epochs + 1), test_accuracies, label='Test Accuracy')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.title(f'Training Progress - {self.model_name} on {self.dataset_name}')
+        plt.legend()
+        plt.grid(True)
+        
+        # Create directory if it doesn't exist
+        os.makedirs('static/plots', exist_ok=True)
+        
+        # Save the plot
+        plot_filename = f'accuracy_plot_{self.model_name}_{self.dataset_name}.png'
+        plt.savefig(f'static/plots/{plot_filename}')
+        plt.close()
+        
         save_model(self.model, self.epochs, self.learning_rate)
