@@ -161,6 +161,10 @@ class UnlearningGAThread(threading.Thread):
             device=self.device
         )
         
+        unlearn_accuracy = train_class_accuracies[self.request.forget_class]
+        remain_accuracy = round(
+            sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
+        )
         # Update training evaluation status for remain classes only
         self.status.p_training_loss = train_loss
         remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
