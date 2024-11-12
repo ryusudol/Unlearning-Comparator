@@ -36,15 +36,18 @@ export default function RunningStatus({ height }: { height: number }) {
   const [ckaProgress, setCkaProgress] = useState(0);
 
   const isFirstRunning = status.total_epochs === 0;
+  const progress = status.progress;
 
   const steps = [
     {
       step: 1,
       title: "Unlearn",
-      description: `Current Epoch: ${
+      description: `Method: ${status.method ? status.method : "-"} | Epochs: ${
         isFirstRunning ? "-" : status.current_epoch + "/" + status.total_epochs
       }\nUnlearning Loss: ${
-        status.current_unlearn_loss === 0 ? "-" : status.current_unlearn_loss
+        status.current_unlearn_loss === 0
+          ? "-"
+          : status.current_unlearn_loss.toFixed(3)
       } | Unlearning Accuracy: ${
         status.current_unlearn_accuracy === 0
           ? "-"
@@ -69,19 +72,21 @@ export default function RunningStatus({ height }: { height: number }) {
       title: "Analyze",
       description: `${
         (activeStep === 3 &&
-          (status.progress.includes("UMAP") ||
-            status.progress.includes("CKA"))) ||
-        (!isFirstRunning && status.progress === "Idle")
-          ? `Computing UMAP Embedding... ${umapProgress}%`
+          (progress.includes("UMAP") || progress.includes("CKA"))) ||
+        (!isFirstRunning && progress === "Idle")
+          ? `Computing UMAP Embedding... ${
+              !progress.includes("UMAP") ? "100" : umapProgress
+            }%`
           : "Computing UMAP Embedding"
       }\n${
-        activeStep === 3 &&
-        (status.progress.includes("CKA") ||
-          (!isFirstRunning && status.progress === "Idle"))
-          ? `Calculating CKA Similarity... ${ckaProgress}%`
+        (activeStep === 3 && progress.includes("CKA")) ||
+        (!isFirstRunning && progress === "Idle")
+          ? `Calculating CKA Similarity... ${
+              progress === "Idle" ? "100" : ckaProgress
+            }%`
           : "Calculating CKA Similarity"
       }\n${
-        !isFirstRunning && status.progress === "Idle"
+        !isFirstRunning && progress === "Idle"
           ? `Done! Experiment ID: ${status.recent_id}`
           : ""
       }`,
@@ -151,31 +156,37 @@ export default function RunningStatus({ height }: { height: number }) {
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
-    if (status.progress.includes("UMAP")) {
+    if (progress.includes("UMAP")) {
       const startTime = Date.now();
       const duration = 10000;
 
       intervalId = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        const progress = Math.min(Math.floor((elapsed / duration) * 100), 100);
+        const progressValue = Math.min(
+          Math.floor((elapsed / duration) * 100),
+          100
+        );
 
-        setUmapProgress(progress);
+        setUmapProgress(progressValue);
 
-        if (progress === 100) {
+        if (progressValue === 100) {
           clearInterval(intervalId!);
         }
       }, 100);
-    } else if (status.progress.includes("CKA")) {
+    } else if (progress.includes("CKA")) {
       const startTime = Date.now();
       const duration = 10000;
 
       intervalId = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        const progress = Math.min(Math.floor((elapsed / duration) * 100), 100);
+        const progressValue = Math.min(
+          Math.floor((elapsed / duration) * 100),
+          100
+        );
 
-        setCkaProgress(progress);
+        setCkaProgress(progressValue);
 
-        if (progress === 100) {
+        if (progressValue === 100) {
           clearInterval(intervalId!);
         }
       }, 100);
@@ -186,7 +197,7 @@ export default function RunningStatus({ height }: { height: number }) {
         clearInterval(intervalId);
       }
     };
-  }, [status.progress]);
+  }, [progress]);
 
   // const handleCancelClick = async () => {
   //   if (window.confirm("Are you sure you want to cancel the experiment?")) {

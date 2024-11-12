@@ -20,6 +20,7 @@ const initialStatus: UnlearningStatus = {
   p_training_accuracy: 0,
   p_test_loss: 0,
   p_test_accuracy: 0,
+  method: "",
   estimated_time_remaining: 0,
 };
 
