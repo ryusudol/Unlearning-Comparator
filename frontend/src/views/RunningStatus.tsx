@@ -22,26 +22,33 @@ export default function RunningStatus({ height }: { height: number }) {
   const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
-  const { isRunning, status, updateIsRunning, initStatus, updateStatus } =
-    useContext(RunningStatusContext);
+  const {
+    isRunning,
+    status,
+    activeStep,
+    updateIsRunning,
+    initStatus,
+    updateStatus,
+    updateActiveStep,
+  } = useContext(RunningStatusContext);
 
-  const [activeStep, setActiveStep] = useState(0);
   const [umapProgress, setUmapProgress] = useState(0);
+  const [ckaProgress, setCkaProgress] = useState(0);
+
+  const isFirstRunning = status.total_epochs === 0;
 
   const steps = [
     {
       step: 1,
       title: "Unlearn",
       description: `Current Epoch: ${
-        status.current_epoch === 0 ? "-" : status.current_epoch
-      }/${
-        status.total_epochs === 0 ? "-" : status.total_epochs
+        isFirstRunning ? "-" : status.current_epoch + "/" + status.total_epochs
       }\nUnlearning Loss: ${
         status.current_unlearn_loss === 0 ? "-" : status.current_unlearn_loss
       } | Unlearning Accuracy: ${
         status.current_unlearn_accuracy === 0
           ? "-"
-          : status.current_unlearn_accuracy + "%"
+          : status.current_unlearn_accuracy
       }`,
     },
     {
@@ -50,26 +57,33 @@ export default function RunningStatus({ height }: { height: number }) {
       description: `Training Loss: ${
         status.p_training_loss === 0 ? "-" : status.p_training_loss
       } | Training Accuracy: ${
-        status.p_training_accuracy === 0
-          ? "-"
-          : status.p_training_accuracy + "%"
+        status.p_training_accuracy === 0 ? "-" : status.p_training_accuracy
       }\nTest Loss: ${
         status.p_test_loss === 0 ? "-" : status.p_test_loss
       } | Test Accuracy: ${
-        status.p_test_accuracy === 0 ? "-" : status.p_test_accuracy + "%"
+        status.p_test_accuracy === 0 ? "-" : status.p_test_accuracy
       }`,
     },
     {
       step: 3,
       title: "Analyze",
-      description: `Computing UMAP Embedding... ${
-        status.progress.includes("UMAP") ? `${umapProgress}%` : ""
-      }\nCalculating CKA Similarity... ${
-        status.progress === "Idle" && status.total_epochs !== 0 ? "100%" : ""
-      }\nDone! Experiment ID: ${
-        status.total_epochs !== 0 && status.progress === "Idle"
-          ? status.recent_id
-          : "-"
+      description: `${
+        (activeStep === 3 &&
+          (status.progress.includes("UMAP") ||
+            status.progress.includes("CKA"))) ||
+        (!isFirstRunning && status.progress === "Idle")
+          ? `Computing UMAP Embedding... ${umapProgress}%`
+          : "Computing UMAP Embedding"
+      }\n${
+        activeStep === 3 &&
+        (status.progress.includes("CKA") ||
+          (!isFirstRunning && status.progress === "Idle"))
+          ? `Calculating CKA Similarity... ${ckaProgress}%`
+          : "Calculating CKA Similarity"
+      }\n${
+        !isFirstRunning && status.progress === "Idle"
+          ? `Done! Experiment ID: ${status.recent_id}`
+          : ""
       }`,
     },
   ];
@@ -81,16 +95,15 @@ export default function RunningStatus({ height }: { height: number }) {
       updateStatus(unlearningStatus);
 
       const progress = unlearningStatus.progress;
-      if (progress === "Idle" || progress === "Unlearning") {
-        setActiveStep(1);
-      } else if (progress.includes("Evaluating")) {
-        setActiveStep(2);
+      if (progress.includes("Evaluating")) {
+        updateActiveStep(2);
       } else if (progress.includes("UMAP") || progress.includes("CKA")) {
-        setActiveStep(3);
+        updateActiveStep(3);
       }
 
       if (!unlearningStatus.is_unlearning) {
         updateIsRunning(false);
+        updateActiveStep(0);
 
         try {
           const newData = await fetchDataFile(
@@ -112,6 +125,7 @@ export default function RunningStatus({ height }: { height: number }) {
     addExperiment,
     forgetClass,
     saveComparison,
+    updateActiveStep,
     updateIsRunning,
     updateStatus,
   ]);
@@ -151,8 +165,20 @@ export default function RunningStatus({ height }: { height: number }) {
           clearInterval(intervalId!);
         }
       }, 100);
-    } else {
-      setUmapProgress(0);
+    } else if (status.progress.includes("CKA")) {
+      const startTime = Date.now();
+      const duration = 10000;
+
+      intervalId = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(Math.floor((elapsed / duration) * 100), 100);
+
+        setCkaProgress(progress);
+
+        if (progress === 100) {
+          clearInterval(intervalId!);
+        }
+      }, 100);
     }
 
     return () => {
@@ -201,11 +227,15 @@ export default function RunningStatus({ height }: { height: number }) {
                 )}
                 <StepperTrigger>
                   <Button className="w-8 h-8 p-0 rounded-full z-10">
-                    {state === "completed" && <Check className="size-4" />}
-                    {state === "active" && (
+                    {state === "completed" ||
+                    (!isFirstRunning && !isRunning) ? (
+                      <Check className="size-4" />
+                    ) : state === "active" ? (
                       <Loader2 className="size-4 animate-spin" />
-                    )}
-                    {state === "inactive" && <Dot className="size-4" />}
+                    ) : (isFirstRunning || isRunning) &&
+                      state === "inactive" ? (
+                      <Dot className="size-4" />
+                    ) : null}
                   </Button>
                 </StepperTrigger>
                 <div className="flex flex-col">
