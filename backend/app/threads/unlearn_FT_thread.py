@@ -82,6 +82,7 @@ class UnlearningFTThread(threading.Thread):
     async def unlearn_FT_model(self):
         print(f"Starting FT unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
+        self.status.method = "Fine-Tuning"
         self.status.total_epochs = self.request.epochs
         self.status.recent_id = uuid.uuid4().hex[:4]
         

@@ -82,6 +82,7 @@ class UnlearningRLThread(threading.Thread):
     async def unlearn_RL_model(self):
         print(f"Starting RL unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
+        self.status.method = "Random-Labeling"
         self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
 

@@ -136,6 +136,7 @@ async def get_unlearning_status():
         "p_training_accuracy": round(status.p_training_accuracy, 3),
         "p_test_loss": round(status.p_test_loss, 3),
         "p_test_accuracy": round(status.p_test_accuracy, 3),
+        "method": status.method,
         "estimated_time_remaining": round(status.estimated_time_remaining + 30.0, 2) if status.progress != "idle" else 0,
     }
 

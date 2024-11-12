@@ -46,6 +46,7 @@ class UnlearningStatus:
         self.best_test_accuracy = 0
 
         # for Evaluation progress
+        self.method = ""
         self.p_training_loss = 0
         self.p_training_accuracy = 0
         self.p_test_loss = 0

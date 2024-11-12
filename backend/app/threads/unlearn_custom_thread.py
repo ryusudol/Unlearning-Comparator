@@ -76,6 +76,7 @@ class UnlearningInference(threading.Thread):
     async def async_run(self):
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
         self.status.progress = "Starting Inference"
+        self.status.method = "Custom"
         self.status.recent_id = uuid.uuid4().hex[:4]
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set

@@ -61,7 +61,7 @@ class UnlearningRetrainThread(threading.Thread):
         self.model.train()
         self.status.start_time = time.time()
         self.status.total_epochs = self.epochs
-        
+        self.status.method = "Retraining"
         best_test_acc = 0.0
         best_epoch = 0
 
