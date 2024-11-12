@@ -16,6 +16,10 @@ const initialStatus: UnlearningStatus = {
   total_epochs: 0,
   current_unlearn_loss: 0,
   current_unlearn_accuracy: 0,
+  p_training_loss: 0,
+  p_training_accuracy: 0,
+  p_test_loss: 0,
+  p_test_accuracy: 0,
   estimated_time_remaining: 0,
 };
 
@@ -88,16 +92,7 @@ export default function RunningStatusContextProvider({
 }) {
   const [runningStatus, dispatch] = useReducer(runningStatusReducer, {
     isRunning: false,
-    status: {
-      is_unlearning: false,
-      progress: "Idle",
-      recent_id: null,
-      current_epoch: 0,
-      total_epochs: 0,
-      current_unlearn_loss: 0,
-      current_unlearn_accuracy: 0,
-      estimated_time_remaining: 0,
-    },
+    status: initialStatus,
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {

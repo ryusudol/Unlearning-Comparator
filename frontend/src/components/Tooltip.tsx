@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 
 import { ForgetClassContext } from "../store/forget-class-context";
@@ -29,8 +29,6 @@ export default function Tooltip({
   const { forgetClass } = useContext(ForgetClassContext);
 
   const svgRef = useRef(null);
-  const [tooltipContent, setTooltipContent] = useState("");
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const groundTruthIdx = Number(data[2]);
   const predictionIdx = Number(data[3]);
@@ -95,19 +93,7 @@ export default function Tooltip({
       .attr("height", barHeight)
       .attr("width", (d) => xScale(d.value) - margin.left)
       .attr("fill", (_, i) => colors[i])
-      .attr("opacity", BASELINE_OPACITY)
-      .on("mouseover", (event, d) => {
-        setTooltipContent(
-          `Baseline ${forgetClassNames[d.class]}: ${d.value.toFixed(3)}`
-        );
-        setTooltipPosition({
-          x: event.pageX,
-          y: event.pageY - 28,
-        });
-      })
-      .on("mouseout", () => {
-        setTooltipContent("");
-      });
+      .attr("opacity", BASELINE_OPACITY);
 
     g.selectAll(".bar-comparison")
       .data(barChartData.comparison)
@@ -204,18 +190,6 @@ export default function Tooltip({
       </div>
       <div className="relative z-50">
         <svg ref={svgRef} className="w-full max-w-4xl" />
-        {tooltipContent && (
-          <div
-            className="absolute bg-black text-white px-2 py-1 rounded text-sm pointer-events-none"
-            style={{
-              left: `${tooltipPosition.x}px`,
-              top: `${tooltipPosition.y}px`,
-              transform: "translate(-50%, -100%)",
-            }}
-          >
-            {tooltipContent}
-          </div>
-        )}
         <p className="text-xs absolute bottom-0 right-[70px]">
           Confidence Score
         </p>

@@ -27,6 +27,10 @@ export interface UnlearningStatus {
   total_epochs: number;
   current_unlearn_loss: number;
   current_unlearn_accuracy: number;
+  p_training_loss: number;
+  p_training_accuracy: number;
+  p_test_loss: number;
+  p_test_accuracy: number;
   estimated_time_remaining: number;
 }
 
