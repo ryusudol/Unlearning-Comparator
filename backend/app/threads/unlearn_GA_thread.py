@@ -123,7 +123,7 @@ class UnlearningGAThread(threading.Thread):
                 correct += (predicted == labels).sum().item()
 
             epoch_loss = running_loss / len(self.forget_loader)
-            epoch_acc = 100 * correct / total
+            epoch_acc = correct / total
             self.scheduler.step()
 
             # Status update
@@ -135,7 +135,7 @@ class UnlearningGAThread(threading.Thread):
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
 
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
-            print(f"Unlearning Loss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.2f}%")
+            print(f"Unlearning Loss: {epoch_loss:.4f}, Unlearning Accuracy: {epoch_acc:.3f}%")
             print(f"ETA: {self.status.estimated_time_remaining:.1f}s")
 
         rte = time.time() - start_time
