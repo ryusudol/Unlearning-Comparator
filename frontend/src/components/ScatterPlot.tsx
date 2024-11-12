@@ -252,16 +252,9 @@ const ScatterPlot = React.memo(
       );
 
       const handleMouseLeave = useCallback(
-        (event: MouseEvent, d: (number | Prob)[]): void => {
-          if (fetchControllerRef.current) {
-            fetchControllerRef.current.abort();
-            fetchControllerRef.current = null;
-          }
-
-          setTooltipContent(null);
-
+        (event: MouseEvent, d: (number | Prob)[]) => {
           const element = event.currentTarget as Element;
-          if (!element) return;
+          onHover(null, mode);
 
           const selection = d3.select(element);
           if (element.tagName === "circle") {
@@ -277,7 +270,7 @@ const ScatterPlot = React.memo(
               .style("opacity", defaultCrossOpacity);
           }
         },
-        [z]
+        [mode, onHover, z]
       );
 
       useEffect(() => {

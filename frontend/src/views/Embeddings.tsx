@@ -60,28 +60,25 @@ export default function Embeddings({ height }: { height: number }) {
 
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
-      if (imgIdxOrNull === null) {
+      if (imgIdxOrNull === null || !source) {
         setHoveredInstance(null);
         setFromPosition(null);
         setToPosition(null);
-      } else if (typeof imgIdxOrNull === "number" && source) {
-        const oppositeData =
-          source === "Baseline"
-            ? extractedComparisonData
-            : extractedBaselineData;
-
-        const oppositeInstance = oppositeData.find(
-          (d) => d[4] === imgIdxOrNull
-        );
-        const oppositeProb = oppositeInstance?.[5] as Prob;
-
-        setHoveredInstance({
-          imgIdx: imgIdxOrNull,
-          source,
-          baselineProb: source === "Baseline" ? prob : oppositeProb,
-          comparisonProb: source === "Comparison" ? prob : oppositeProb,
-        });
+        return;
       }
+
+      const oppositeData =
+        source === "Baseline" ? extractedComparisonData : extractedBaselineData;
+
+      const oppositeInstance = oppositeData.find((d) => d[4] === imgIdxOrNull);
+      const oppositeProb = oppositeInstance?.[5] as Prob;
+
+      setHoveredInstance({
+        imgIdx: imgIdxOrNull,
+        source,
+        baselineProb: source === "Baseline" ? prob : oppositeProb,
+        comparisonProb: source === "Comparison" ? prob : oppositeProb,
+      });
     },
     [extractedBaselineData, extractedComparisonData]
   );
