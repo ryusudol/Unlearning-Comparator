@@ -26,11 +26,13 @@ const initialStatus: UnlearningStatus = {
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
   status: initialStatus,
+  activeStep: 0,
 
   updateIsRunning: () => {},
   initStatus: () => {},
   retrieveStatus: () => {},
   updateStatus: (status: UnlearningStatus) => {},
+  updateActiveStep: (step: number) => {},
 });
 
 function runningStatusReducer(
@@ -80,6 +82,14 @@ function runningStatusReducer(
       );
       return { ...state, status };
 
+    case "UPDATE_ACTIVE_STEP":
+      const step = action.payload;
+      sessionStorage.setItem(
+        RUNNING_STATUS,
+        JSON.stringify({ ...state, activeStep: step })
+      );
+      return { ...state, activeStep: step };
+
     default:
       return state;
   }
@@ -93,6 +103,7 @@ export default function RunningStatusContextProvider({
   const [runningStatus, dispatch] = useReducer(runningStatusReducer, {
     isRunning: false,
     status: initialStatus,
+    activeStep: 0,
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
@@ -111,6 +122,10 @@ export default function RunningStatusContextProvider({
     dispatch({ type: "UPDATE_STATUS", payload: status });
   }, []);
 
+  const handleUpdateActiveStep = useCallback((step: number) => {
+    dispatch({ type: "UPDATE_ACTIVE_STEP", payload: step });
+  }, []);
+
   useEffect(() => {
     handleRetrieveStatus();
   }, [handleRetrieveStatus]);
@@ -118,11 +133,13 @@ export default function RunningStatusContextProvider({
   const ctxValue: RunningStatusContextType = {
     isRunning: runningStatus.isRunning,
     status: runningStatus.status,
+    activeStep: runningStatus.activeStep,
 
     updateIsRunning: handleUpdateIsRunning,
     initStatus: handleInitStatus,
     retrieveStatus: handleRetrieveStatus,
     updateStatus: handleUpdateStatus,
+    updateActiveStep: handleUpdateActiveStep,
   };
 
   return (
