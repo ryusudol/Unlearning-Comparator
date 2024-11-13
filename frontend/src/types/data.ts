@@ -1,4 +1,4 @@
-type Dist = {
+export type Dist = {
   [key: string]: number[];
 };
 

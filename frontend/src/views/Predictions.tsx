@@ -9,7 +9,7 @@ import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
 import { Label } from "../components/UI/label";
-import { extractHeatmapData } from "../util";
+import { extractHeatmapData } from "../utils/data/experiments";
 import {
   Target02Icon,
   ChartBubble02Icon,

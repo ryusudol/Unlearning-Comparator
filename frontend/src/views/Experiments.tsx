@@ -66,10 +66,14 @@ export default function Experiments({ height }: { height: number }) {
               content={
                 <>
                   <PlusIcon color="white" className="w-2.5 h-2.5 mr-1.5" />
-                  <span>Add Experiment</span>
+                  <span className={isRunning ? "text" : ""}>
+                    Add Experiment
+                  </span>
                 </>
               }
-              className="px-2.5 mr-0.5"
+              className={`px-2.5 mr-0.5 ${
+                isRunning && "opacity-20 cursor-not-allowed"
+              }`}
             />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px] p-4">

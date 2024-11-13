@@ -5,7 +5,7 @@ import { Button } from "./UI/button";
 import { ExperimentData } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
-import { getPhaseColors } from "../util";
+import { getPhaseColors } from "../utils/data/colors";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A"
@@ -181,8 +181,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
-      const value = getValueToDisplay(tra);
-      return <div className="text-center">{value}</div>;
+      const value = getValueToDisplay(tra) as number;
+      return <div className="text-center">{value.toFixed(3)}</div>;
     },
   },
   {

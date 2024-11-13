@@ -10,14 +10,14 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { calculatePerformanceMetrics } from "../util";
+import { calculatePerformanceMetrics } from "../utils/data/experiments";
 import { ExperimentData } from "../types/data";
-import { hexToRgba } from "../util";
+import { hexToRgba } from "../utils/data/colors";
 import { ScrollArea } from "./UI/scroll-area";
 import { ExperimentsContext } from "../store/experiments-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
-import { cn } from "../lib/utils";
+import { cn } from "../utils/common/styles";
 import {
   Table,
   TableBody,
