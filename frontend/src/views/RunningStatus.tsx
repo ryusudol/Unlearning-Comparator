@@ -9,7 +9,7 @@ import { BaselineComparisonContext } from "../store/baseline-comparison-context"
 import { fetchUnlearningStatus, cancelUnlearning } from "../utils/api/requests";
 import { VitalIcon } from "../components/UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { getProgressSteps } from "../utils/getProgressSteps";
+import { getProgressSteps } from "../utils/data/getProgressSteps";
 import {
   Stepper,
   StepperDescription,
