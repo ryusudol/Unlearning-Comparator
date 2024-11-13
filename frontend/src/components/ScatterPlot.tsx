@@ -29,7 +29,7 @@ const loweredOpacity = 0.1;
 const hoveredStrokeWidth = 2;
 const paddingRatio = 0.01;
 const tooltipXSize = 450;
-const tooltipYSize = 280;
+const tooltipYSize = 320;
 export const defaultCrossOpacity = 0.85;
 export const defaultCircleOpacity = 0.6;
 
@@ -41,16 +41,12 @@ interface Props {
   data: SelectedData;
   viewMode: "All Instances" | "Unlearning Target" | "Unlearning Failed";
   onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
-  hoveredImgIdx: number | null;
-  hoveredProb: HovereInstance | undefined;
+  hoveredInstance: HovereInstance | null;
 }
 
 const ScatterPlot = React.memo(
   forwardRef(
-    (
-      { mode, data, viewMode, onHover, hoveredImgIdx, hoveredProb }: Props,
-      ref
-    ) => {
+    ({ mode, data, viewMode, onHover, hoveredInstance }: Props, ref) => {
       const { experiments } = useContext(ExperimentsContext);
       const { forgetClass } = useContext(ForgetClassContext);
 
@@ -212,13 +208,17 @@ const ScatterPlot = React.memo(
                       })),
                       comparison: Array.from({ length: 10 }, (_, idx) => ({
                         class: idx,
-                        value: Number(hoveredProb?.comparisonProb?.[idx] || 0),
+                        value: Number(
+                          hoveredInstance?.comparisonProb?.[idx] || 0
+                        ),
                       })),
                     }
                   : {
                       baseline: Array.from({ length: 10 }, (_, idx) => ({
                         class: idx,
-                        value: Number(hoveredProb?.baselineProb?.[idx] || 0),
+                        value: Number(
+                          hoveredInstance?.baselineProb?.[idx] || 0
+                        ),
                       })),
                       comparison: Array.from({ length: 10 }, (_, idx) => ({
                         class: idx,
@@ -240,7 +240,12 @@ const ScatterPlot = React.memo(
               if (err.name === "AbortError") return;
             });
         },
-        [hoveredProb?.baselineProb, hoveredProb?.comparisonProb, mode, onHover]
+        [
+          hoveredInstance?.baselineProb,
+          hoveredInstance?.comparisonProb,
+          mode,
+          onHover,
+        ]
       );
 
       const handleMouseEnter = useCallback(
@@ -501,12 +506,12 @@ const ScatterPlot = React.memo(
 
         resetStyles();
 
-        if (hoveredImgIdx !== null) {
+        if (hoveredInstance?.imgIdx !== null) {
           const applyHoverStyle = (
             selection: d3.Selection<any, any, any, any>
           ) => {
             selection
-              .filter((d) => d[4] === hoveredImgIdx)
+              .filter((d) => d[4] === hoveredInstance?.imgIdx)
               .attr("stroke", "black")
               .attr("stroke-width", hoveredStrokeWidth)
               .raise();
@@ -515,7 +520,7 @@ const ScatterPlot = React.memo(
           if (circlesRef.current) applyHoverStyle(circlesRef.current);
           if (crossesRef.current) applyHoverStyle(crossesRef.current);
         }
-      }, [hoveredImgIdx, data, z]);
+      }, [hoveredInstance, data, z]);
 
       useEffect(() => {
         const handleDocumentClick = (event: MouseEvent) => {
