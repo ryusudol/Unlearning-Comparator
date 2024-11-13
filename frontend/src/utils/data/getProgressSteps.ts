@@ -1,4 +1,4 @@
-import { UnlearningStatus } from "../types/settings";
+import { UnlearningStatus } from "../../types/settings";
 
 export const getProgressSteps = (
   status: UnlearningStatus,
@@ -45,20 +45,20 @@ export const getProgressSteps = (
       (activeStep === 3 &&
         (progress.includes("UMAP") || progress.includes("CKA"))) ||
       (!isFirstRunning && progress === "Idle")
-        ? `Computing UMAP Embedding... ${
+        ? `Computing UMAP Embedding... **${
             !progress.includes("UMAP") ? "100" : umapProgress
-          }%`
+          }%**`
         : "Computing UMAP Embedding"
     }\n${
       (activeStep === 3 && progress.includes("CKA")) ||
       (!isFirstRunning && progress === "Idle")
-        ? `Calculating CKA Similarity... ${
+        ? `Calculating CKA Similarity... **${
             progress === "Idle" ? "100" : ckaProgress
-          }%`
+          }%**`
         : "Calculating CKA Similarity"
     }\n${
       !isFirstRunning && progress === "Idle"
-        ? `Done! Experiment ID: ${status.recent_id}`
+        ? `Done! Experiment ID: **${status.recent_id}**`
         : ""
     }`,
   },
