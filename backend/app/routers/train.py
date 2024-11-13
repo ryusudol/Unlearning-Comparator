@@ -1,8 +1,12 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 from app.services.train import run_training
-from app.models.neural_network import TrainingStatus
-from app.config.settings import BATCH_SIZE, LEARNING_RATE, EPOCHS
+from app.models import TrainingStatus
+from app.config.settings import (
+	BATCH_SIZE, 
+	LEARNING_RATE, 
+	EPOCHS
+)
 
 router = APIRouter()
 status = TrainingStatus()

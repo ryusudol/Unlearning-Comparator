@@ -58,7 +58,6 @@ class UnlearningRetrainThread(threading.Thread):
                 self.loop.close()
 
     async def unlearn_retrain_model(self):
-        self.model.train()
         self.status.start_time = time.time()
         self.status.total_epochs = self.epochs
         self.status.method = "Retraining"
@@ -69,10 +68,7 @@ class UnlearningRetrainThread(threading.Thread):
         test_accuracies = []
 
         for epoch in range(self.epochs):
-            if self.stopped():
-                self.status.is_unlearning = False
-                print("\nTraining stopped.")
-                return
+            self.model.train()
 
             running_loss = 0.0
             correct = 0
@@ -105,11 +101,6 @@ class UnlearningRetrainThread(threading.Thread):
                     label = labels[i]
                     class_correct[label] += c[i].item()
                     class_total[label] += 1
-            
-            if self.stopped():
-                self.status.is_unlearning = False
-                print("\nUnlearning cancelled.")
-                return
             
             self.scheduler.step()
             train_loss = running_loss / len(self.unlearning_loader)

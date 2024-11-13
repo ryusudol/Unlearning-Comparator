@@ -1,11 +1,18 @@
+# Python standard libraries
+import io
 import json
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
-from typing import List
 import os
 from collections import OrderedDict
+from typing import List
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse, Response
+from PIL import Image
+
+from app.utils.data_loader import load_cifar10_data
 
 router = APIRouter()
+x_train, y_train = load_cifar10_data()
 
 def get_trained_model_files() -> List[str]:
     saved_models_dir = 'trained_models'
@@ -109,4 +116,19 @@ async def get_json_file(forget_class: str, filename: str):
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+
+@router.get("/image/cifar10/{index}")
+async def get_image(index: int):
+    if index < 0 or index >= len(x_train):
+        raise HTTPException(status_code=404, detail="Image index out of range")
+
+    img_data = x_train[index]
+    
+    img = Image.fromarray(img_data)
+    
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return Response(content=img_byte_arr, media_type="image/png")
 

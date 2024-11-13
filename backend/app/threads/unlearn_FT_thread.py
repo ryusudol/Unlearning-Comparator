@@ -97,6 +97,7 @@ class UnlearningFTThread(threading.Thread):
         start_time = time.time()
 
         for epoch in range(self.request.epochs):
+            self.model.train()
             self.status.current_epoch = epoch + 1
             running_loss = 0.0
             total = 0
@@ -140,7 +141,6 @@ class UnlearningFTThread(threading.Thread):
 
             forget_epoch_loss = forget_running_loss / len(self.forget_loader)
             forget_epoch_acc = forget_correct / forget_total
-            self.model.train()
 
             # Status update with forget set metrics
             elapsed_time = time.time() - start_time

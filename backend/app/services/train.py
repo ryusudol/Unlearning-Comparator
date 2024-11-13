@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from app.threads.train_thread import TrainingThread
-from app.models.neural_network import get_resnet18
+from app.models import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
 from app.config.settings import (
     MOMENTUM,
@@ -30,7 +30,9 @@ async def training(request, status):
         batch_size=request.batch_size,
         augmentation=True
     )
-    model = get_resnet18().to(device)
+    # model = ResNet18().to(device=device)
+    model = get_resnet18().to(device=device)
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
         model.parameters(),
@@ -42,11 +44,6 @@ async def training(request, status):
         optimizer,
         T_max=request.epochs,
     )
-    # scheduler = optim.lr_scheduler.MultiStepLR(
-    #     optimizer,
-    #     milestones=[100, 150],
-    #     gamma=0.1
-    # )
 
     training_thread = TrainingThread(
         model,

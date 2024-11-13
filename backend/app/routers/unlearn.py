@@ -13,7 +13,7 @@ from app.services.unlearn_GA import run_unlearning_GA
 from app.services.unlearn_FT import run_unlearning_FT
 from app.services.unlearn_custom import run_unlearning_custom
 
-from app.models.neural_network import UnlearningStatus
+from app.models import UnlearningStatus
 import os
 
 router = APIRouter()

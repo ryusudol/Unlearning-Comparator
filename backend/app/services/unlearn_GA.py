@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from app.threads.unlearn_GA_thread import UnlearningGAThread
-from app.models.neural_network import get_resnet18
+from app.models import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
 from app.config.settings import (
 	MOMENTUM, 

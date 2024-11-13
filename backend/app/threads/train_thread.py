@@ -60,7 +60,6 @@ class TrainingThread(threading.Thread):
                 self.loop.close()
 
     async def train_model(self):
-        self.model.train()
         self.status.start_time = time.time()
         self.status.total_epochs = self.epochs
         
@@ -71,11 +70,7 @@ class TrainingThread(threading.Thread):
         test_accuracies = []
 
         for epoch in range(self.epochs):
-            if self.stopped():
-                self.status.is_training = False
-                print("\nTraining stopped.")
-                return
-
+            self.model.train()
             running_loss = 0.0
             correct = 0
             total = 0
@@ -88,7 +83,6 @@ class TrainingThread(threading.Thread):
                     return
                 
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                
                 self.optimizer.zero_grad()
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
@@ -105,11 +99,6 @@ class TrainingThread(threading.Thread):
                     label = labels[i]
                     class_correct[label] += c[i].item()
                     class_total[label] += 1
-            
-            if self.stopped():
-                self.status.is_training = False
-                print("\nTraining cancelled.")
-                return
             
             self.scheduler.step()
             train_loss = running_loss / len(self.train_loader)

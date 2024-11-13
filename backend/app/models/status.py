@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import Dict
 
 class TrainingStatus:
     def __init__(self):
@@ -55,8 +55,6 @@ class UnlearningStatus:
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
         self.start_time = None
-
-        
 
     def reset(self):
         self.__init__()

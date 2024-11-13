@@ -1,11 +1,11 @@
 import torch
 import numpy as np
 import torch.nn.functional as F
+
 from torch_cka import CKA
 from torch.utils.data import DataLoader, Subset
 from app.config.settings import UMAP_DATA_SIZE
-# from scipy.special import softmax
-# import time
+
 
 async def get_layer_activations_and_predictions(
     model, 
@@ -19,11 +19,9 @@ async def get_layer_activations_and_predictions(
     probabilities = []
     sample_count = 0
 
-    # Hook function to capture the activations of the last layer
     def hook_fn(module, input, output):
         activations.append(output.detach().cpu().numpy())
 
-    # Register the hook for the last layer
     hook = model.avgpool.register_forward_hook(hook_fn)
 
     with torch.no_grad():
@@ -31,12 +29,10 @@ async def get_layer_activations_and_predictions(
             inputs = inputs.to(device)
             labels = labels.to(device)
 
-            # Get predictions
             outputs = model(inputs)
             _, predicted = outputs.max(1)
             predictions.extend(predicted.cpu().numpy())
 
-            # Add softmax probabilities with temperature scaling
             temperature = 2.0 
             scaled_outputs = outputs / temperature
             probs = F.softmax(scaled_outputs, dim=1)
@@ -46,10 +42,8 @@ async def get_layer_activations_and_predictions(
             if sample_count >= num_samples:
                 break
 
-    # Remove the hook after collecting activations
     hook.remove()
 
-    # Concatenate and reshape activations to the desired shape
     activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
     predictions = np.array(predictions)
     probabilities = np.array(probabilities)
@@ -142,13 +136,13 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
 
 
 async def calculate_cka_similarity(
-        model_before, 
-        model_after, 
-        train_loader, 
-        test_loader, 
-        forget_class, 
-        device
-    ):
+    model_before, 
+    model_after, 
+    train_loader, 
+    test_loader, 
+    forget_class, 
+    device
+):
     # detailed_layers = [
     #     'conv1',
     #     'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
@@ -233,11 +227,8 @@ async def calculate_cka_similarity(
 
         return forget_loader, other_loader
 
-    print("filtering train loader")
     forget_class_train_loader, other_classes_train_loader = filter_loader(train_loader, is_train=True)
-    print("filtering test loader") 
     forget_class_test_loader, other_classes_test_loader = filter_loader(test_loader, is_train=False)
-    print("comparing train loader")
     cka.compare(forget_class_train_loader, forget_class_train_loader)
     results_forget_train = cka.export()
     cka.compare(other_classes_train_loader, other_classes_train_loader)
@@ -246,7 +237,7 @@ async def calculate_cka_similarity(
     results_forget_test = cka.export()
     cka.compare(other_classes_test_loader, other_classes_test_loader)
     results_other_test = cka.export()
-    print("cka results calculated")
+    
     def format_cka_results(results):
         return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
 

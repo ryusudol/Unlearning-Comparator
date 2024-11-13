@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from app.threads.unlearn_retrain_thread import UnlearningRetrainThread
-from app.models.neural_network import get_resnet18
+from app.models import get_resnet18
 from app.utils.helpers import set_seed, get_data_loaders
 from app.utils.visualization import compute_umap_embedding
 from app.utils.evaluation import get_layer_activations_and_predictions
