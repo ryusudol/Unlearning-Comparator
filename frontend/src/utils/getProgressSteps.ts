@@ -11,30 +11,32 @@ export const getProgressSteps = (
   {
     step: 1,
     title: "Unlearn",
-    description: `Method: ${status.method ? status.method : "-"} | Epochs: ${
+    description: `Method: **${
+      status.method ? status.method : "-"
+    }** | Epochs: **${
       isFirstRunning ? "-" : status.current_epoch + "/" + status.total_epochs
-    }\nUnlearning Loss: ${
+    }**\nUnlearning Loss: **${
       status.current_unlearn_loss === 0
         ? "-"
         : status.current_unlearn_loss.toFixed(3)
-    } | Unlearning Accuracy: ${
+    }** | Unlearning Accuracy: **${
       status.current_unlearn_accuracy === 0
         ? "-"
         : status.current_unlearn_accuracy
-    }`,
+    }**`,
   },
   {
     step: 2,
     title: "Evaluate",
-    description: `Training Loss: ${
+    description: `Training Loss: **${
       status.p_training_loss === 0 ? "-" : status.p_training_loss
-    } | Training Accuracy: ${
+    }** | Training Accuracy: **${
       status.p_training_accuracy === 0 ? "-" : status.p_training_accuracy
-    }\nTest Loss: ${
+    }**\nTest Loss: **${
       status.p_test_loss === 0 ? "-" : status.p_test_loss
-    } | Test Accuracy: ${
+    }** | Test Accuracy: **${
       status.p_test_accuracy === 0 ? "-" : status.p_test_accuracy
-    }`,
+    }**`,
   },
   {
     step: 3,

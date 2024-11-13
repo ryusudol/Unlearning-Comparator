@@ -177,7 +177,17 @@ export default function RunningStatus({ height }: { height: number }) {
                   </StepperTitle>
                   <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm">
                     {step.description.split("\n").map((el, idx) => (
-                      <p key={idx}>{el}</p>
+                      <p key={idx} className="text-black">
+                        {el
+                          .split("**")
+                          .map((part, partIdx) =>
+                            partIdx % 2 === 1 ? (
+                              <strong key={partIdx}>{part}</strong>
+                            ) : (
+                              part
+                            )
+                          )}
+                      </p>
                     ))}
                   </StepperDescription>
                 </div>
