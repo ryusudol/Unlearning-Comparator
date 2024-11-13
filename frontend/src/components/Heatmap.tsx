@@ -46,7 +46,8 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
   const boundsWidth = length - MARGIN.right - MARGIN.left;
   const boundsHeight = length - MARGIN.top - MARGIN.bottom;
   const allValues = data.map((d) => d.value);
-  const valueName = chartMode === "label-heatmap" ? "Ratio" : "Confidence";
+  const valueName =
+    chartMode === "label-heatmap" ? "Proportion" : "Confidence Score";
 
   const xScale = useMemo(() => {
     return d3.scaleBand().range([0, boundsWidth]).domain(forgetClassNames);
@@ -198,16 +199,16 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
           }}
         >
           <div>
-            <span className="font-semibold">Ground Truth</span>:{" "}
-            {tooltip.content.groundTruth}
+            <span>Ground Truth</span>:{" "}
+            <span className="font-semibold">{tooltip.content.groundTruth}</span>
           </div>
           <div>
-            <span className="font-semibold">Prediction</span>:{" "}
-            {tooltip.content.prediction}
+            <span>Prediction</span>:{" "}
+            <span className="font-semibold">{tooltip.content.prediction}</span>
           </div>
           <div>
-            <span className="font-semibold">{valueName}</span>:{" "}
-            {tooltip.content.value}
+            <span>{valueName}</span>:{" "}
+            <span className="font-semibold">{tooltip.content.value}</span>
           </div>
         </div>
       )}

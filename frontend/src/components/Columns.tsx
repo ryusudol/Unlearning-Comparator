@@ -5,7 +5,7 @@ import { Button } from "./UI/button";
 import { ExperimentData } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
-import { getPhaseColors } from "../util";
+import { getPhaseColors } from "../utils/data/colors";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A"
@@ -88,7 +88,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "UA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -113,7 +113,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "RA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -138,7 +138,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "TUA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -163,7 +163,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "TRA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -181,14 +181,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
-      const value = getValueToDisplay(tra);
-      return <div className="text-center">{value}</div>;
+      const value = getValueToDisplay(tra) as number;
+      return <div className="text-center">{value.toFixed(3)}</div>;
     },
   },
   {
     accessorKey: "RTE",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"

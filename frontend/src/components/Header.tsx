@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Experiments } from "../types/experiments-context";
 import { ExperimentsContext } from "../store/experiments-context";
-import { fetchAllExperimentsData } from "../https/unlearning";
+import { fetchAllExperimentsData } from "../utils/api/unlearning";
 import { Label } from "./UI/label";
 import Button from "./Button";
 import {

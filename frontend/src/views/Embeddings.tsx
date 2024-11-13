@@ -1,11 +1,4 @@
-import {
-  useState,
-  useContext,
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import { useContext, useMemo, useRef, useCallback } from "react";
 
 import { ExperimentsContext } from "../store/experiments-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -15,7 +8,7 @@ import ConnectionLine from "../components/ConnectionLine";
 import { Separator } from "../components/UI/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { extractSelectedData } from "../util";
+import { extractSelectedData } from "../utils/data/experiments";
 import {
   HelpCircleIcon,
   CircleIcon,
@@ -42,9 +35,9 @@ export default function Embeddings({ height }: { height: number }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
-  const [hoveredInstance, setHoveredInstance] = useState<HovereInstance>(null);
-  const [fromPosition, setFromPosition] = useState<Position>(null);
-  const [toPosition, setToPosition] = useState<Position>(null);
+  const hoveredInstanceRef = useRef<HovereInstance>(null);
+  const fromPositionRef = useRef<Position>(null);
+  const toPositionRef = useRef<Position>(null);
 
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
@@ -61,9 +54,9 @@ export default function Embeddings({ height }: { height: number }) {
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
       if (imgIdxOrNull === null || !source) {
-        setHoveredInstance(null);
-        setFromPosition(null);
-        setToPosition(null);
+        hoveredInstanceRef.current = null;
+        fromPositionRef.current = null;
+        toPositionRef.current = null;
         return;
       }
 
@@ -71,43 +64,36 @@ export default function Embeddings({ height }: { height: number }) {
         source === "Baseline" ? extractedComparisonData : extractedBaselineData;
 
       const oppositeInstance = oppositeData.find((d) => d[4] === imgIdxOrNull);
-      const oppositeProb = oppositeInstance?.[5] as Prob;
+      if (!oppositeInstance) return;
 
-      setHoveredInstance({
+      const oppositeProb = oppositeInstance[5] as Prob;
+
+      hoveredInstanceRef.current = {
         imgIdx: imgIdxOrNull,
         source,
         baselineProb: source === "Baseline" ? prob : oppositeProb,
         comparisonProb: source === "Comparison" ? prob : oppositeProb,
-      });
+      };
+
+      const targetRef = source === "Baseline" ? comparisonRef : baselineRef;
+      const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
+
+      if (targetRef.current && currentRef.current) {
+        fromPositionRef.current =
+          currentRef.current.getInstancePosition(imgIdxOrNull);
+        toPositionRef.current =
+          targetRef.current.getInstancePosition(imgIdxOrNull);
+      }
     },
     [extractedBaselineData, extractedComparisonData]
   );
 
-  useEffect(() => {
-    if (hoveredInstance) {
-      const { imgIdx, source } = hoveredInstance;
-      const targetRef = source === "Baseline" ? comparisonRef : baselineRef;
-      const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
-      if (targetRef.current && currentRef.current) {
-        const targetPosition = targetRef.current.getInstancePosition(imgIdx);
-        const currentPosition = currentRef.current.getInstancePosition(imgIdx);
-        if (targetPosition && currentPosition) {
-          setFromPosition(currentPosition);
-          setToPosition(targetPosition);
-        } else {
-          setFromPosition(null);
-          setToPosition(null);
-        }
-      }
-    } else {
-      setFromPosition(null);
-      setToPosition(null);
-    }
-  }, [hoveredInstance]);
-
   return (
     <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
-      <ConnectionLine from={fromPosition} to={toPosition} />
+      <ConnectionLine
+        from={fromPositionRef.current}
+        to={toPositionRef.current}
+      />
       <div className="w-[120px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
         <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
@@ -183,8 +169,7 @@ export default function Embeddings({ height }: { height: number }) {
         data={extractedBaselineData}
         id={baseline}
         onHover={handleHover}
-        hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
-        hoveredProb={hoveredInstance}
+        hoveredInstance={hoveredInstanceRef.current}
         ref={baselineRef}
       />
       <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
@@ -194,8 +179,7 @@ export default function Embeddings({ height }: { height: number }) {
         data={extractedComparisonData}
         id={comparison}
         onHover={handleHover}
-        hoveredImgIdx={hoveredInstance?.imgIdx ?? null}
-        hoveredProb={hoveredInstance}
+        hoveredInstance={hoveredInstanceRef.current}
         ref={comparisonRef}
       />
     </div>

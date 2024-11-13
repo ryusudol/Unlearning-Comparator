@@ -31,6 +31,7 @@ export interface UnlearningStatus {
   p_training_accuracy: number;
   p_test_loss: number;
   p_test_accuracy: number;
+  method: string;
   estimated_time_remaining: number;
 }
 

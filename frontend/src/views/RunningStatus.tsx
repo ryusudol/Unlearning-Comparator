@@ -2,13 +2,14 @@ import { useState, useEffect, useContext, useCallback } from "react";
 import { Check, Dot, Loader2 } from "lucide-react";
 
 import { Button } from "../components/UI/button";
-import { fetchDataFile } from "../https/unlearning";
+import { fetchDataFile } from "../utils/api/unlearning";
 import { ExperimentsContext } from "../store/experiments-context";
 import { RunningStatusContext } from "../store/running-status-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { fetchUnlearningStatus, cancelUnlearning } from "../https/utils";
+import { fetchUnlearningStatus, cancelUnlearning } from "../utils/api/requests";
 import { VitalIcon } from "../components/UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { getProgressSteps } from "../utils/data/getProgressSteps";
 import {
   Stepper,
   StepperDescription,
@@ -27,7 +28,6 @@ export default function RunningStatus({ height }: { height: number }) {
     status,
     activeStep,
     updateIsRunning,
-    initStatus,
     updateStatus,
     updateActiveStep,
   } = useContext(RunningStatusContext);
@@ -36,57 +36,15 @@ export default function RunningStatus({ height }: { height: number }) {
   const [ckaProgress, setCkaProgress] = useState(0);
 
   const isFirstRunning = status.total_epochs === 0;
-
-  const steps = [
-    {
-      step: 1,
-      title: "Unlearn",
-      description: `Current Epoch: ${
-        isFirstRunning ? "-" : status.current_epoch + "/" + status.total_epochs
-      }\nUnlearning Loss: ${
-        status.current_unlearn_loss === 0 ? "-" : status.current_unlearn_loss
-      } | Unlearning Accuracy: ${
-        status.current_unlearn_accuracy === 0
-          ? "-"
-          : status.current_unlearn_accuracy
-      }`,
-    },
-    {
-      step: 2,
-      title: "Evaluate",
-      description: `Training Loss: ${
-        status.p_training_loss === 0 ? "-" : status.p_training_loss
-      } | Training Accuracy: ${
-        status.p_training_accuracy === 0 ? "-" : status.p_training_accuracy
-      }\nTest Loss: ${
-        status.p_test_loss === 0 ? "-" : status.p_test_loss
-      } | Test Accuracy: ${
-        status.p_test_accuracy === 0 ? "-" : status.p_test_accuracy
-      }`,
-    },
-    {
-      step: 3,
-      title: "Analyze",
-      description: `${
-        (activeStep === 3 &&
-          (status.progress.includes("UMAP") ||
-            status.progress.includes("CKA"))) ||
-        (!isFirstRunning && status.progress === "Idle")
-          ? `Computing UMAP Embedding... ${umapProgress}%`
-          : "Computing UMAP Embedding"
-      }\n${
-        activeStep === 3 &&
-        (status.progress.includes("CKA") ||
-          (!isFirstRunning && status.progress === "Idle"))
-          ? `Calculating CKA Similarity... ${ckaProgress}%`
-          : "Calculating CKA Similarity"
-      }\n${
-        !isFirstRunning && status.progress === "Idle"
-          ? `Done! Experiment ID: ${status.recent_id}`
-          : ""
-      }`,
-    },
-  ];
+  const progress = status.progress;
+  const steps = getProgressSteps(
+    status,
+    isFirstRunning,
+    activeStep,
+    progress,
+    umapProgress,
+    ckaProgress
+  );
 
   const checkStatus = useCallback(async () => {
     try {
@@ -131,10 +89,6 @@ export default function RunningStatus({ height }: { height: number }) {
   ]);
 
   useEffect(() => {
-    initStatus();
-  }, [initStatus]);
-
-  useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
     if (isRunning) {
@@ -150,36 +104,23 @@ export default function RunningStatus({ height }: { height: number }) {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
+    const startTime = Date.now();
+    const duration = 10000;
 
-    if (status.progress.includes("UMAP")) {
-      const startTime = Date.now();
-      const duration = 10000;
+    intervalId = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progressValue = Math.min(
+        Math.floor((elapsed / duration) * 100),
+        100
+      );
 
-      intervalId = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(Math.floor((elapsed / duration) * 100), 100);
+      if (status.progress.includes("UMAP")) setUmapProgress(progressValue);
+      else setCkaProgress(progressValue);
 
-        setUmapProgress(progress);
-
-        if (progress === 100) {
-          clearInterval(intervalId!);
-        }
-      }, 100);
-    } else if (status.progress.includes("CKA")) {
-      const startTime = Date.now();
-      const duration = 10000;
-
-      intervalId = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(Math.floor((elapsed / duration) * 100), 100);
-
-        setCkaProgress(progress);
-
-        if (progress === 100) {
-          clearInterval(intervalId!);
-        }
-      }, 100);
-    }
+      if (progressValue === 100) {
+        clearInterval(intervalId!);
+      }
+    }, 100);
 
     return () => {
       if (intervalId) {
@@ -187,14 +128,6 @@ export default function RunningStatus({ height }: { height: number }) {
       }
     };
   }, [status.progress]);
-
-  // const handleCancelClick = async () => {
-  //   if (window.confirm("Are you sure you want to cancel the experiment?")) {
-  //     await cancelUnlearning();
-  //     updateIsRunning(false);
-  //     initStatus();
-  //   }
-  // };
 
   return (
     <section
@@ -206,7 +139,7 @@ export default function RunningStatus({ height }: { height: number }) {
         <h5 className="font-semibold ml-1 text-lg">Progress</h5>
       </div>
       <div>
-        <Stepper className="mx-auto flex w-full max-w-md flex-col justify-start gap-1.5">
+        <Stepper className="mx-auto flex w-full flex-col justify-start gap-1.5">
           {steps.map((step, idx) => {
             const isNotLastStep = idx !== steps.length - 1;
 
@@ -239,12 +172,22 @@ export default function RunningStatus({ height }: { height: number }) {
                   </Button>
                 </StepperTrigger>
                 <div className="flex flex-col">
-                  <StepperTitle className="text-sm font-semibold transition lg:text-base">
+                  <StepperTitle className="font-semibold transition text-base">
                     {step.title}
                   </StepperTitle>
-                  <StepperDescription className="text-xs text-muted-foreground whitespace-pre-line transition md:not-sr-only lg:text-sm">
+                  <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm">
                     {step.description.split("\n").map((el, idx) => (
-                      <p key={idx}>{el}</p>
+                      <p key={idx} className="text-black">
+                        {el
+                          .split("**")
+                          .map((part, partIdx) =>
+                            partIdx % 2 === 1 ? (
+                              <strong key={partIdx}>{part}</strong>
+                            ) : (
+                              part
+                            )
+                          )}
+                      </p>
                     ))}
                   </StepperDescription>
                 </div>
@@ -253,21 +196,6 @@ export default function RunningStatus({ height }: { height: number }) {
           })}
         </Stepper>
       </div>
-      {/* {isRunning && (
-        <CustomButton
-          onClick={handleCancelClick}
-          content={
-            <>
-              <MultiplicationSignIcon
-                className="w-5 h-5 mr-0.5"
-                color="white"
-              />
-              <span className="text-base">Cancel</span>
-            </>
-          }
-          className="flex items-center w-16 bg-red-600 hover:bg-red-700"
-        />
-      )} */}
     </section>
   );
 }

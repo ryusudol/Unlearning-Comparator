@@ -8,12 +8,12 @@ import { HyperparametersIcon, EraserIcon, PlusIcon } from "./UI/icons";
 import { RunningStatusContext } from "../store/running-status-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { UNLEARNING_METHODS } from "../constants/unlearning";
-import { getDefaultUnlearningConfig } from "../util";
+import { getDefaultUnlearningConfig } from "../utils/config/unlearning";
 import { UnlearningConfigurationData } from "../types/settings";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
-} from "../https/unlearning";
+} from "../utils/api/unlearning";
 import {
   Select,
   SelectContent,

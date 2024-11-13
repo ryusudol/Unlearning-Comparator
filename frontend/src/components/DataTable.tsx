@@ -10,14 +10,14 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { calculatePerformanceMetrics } from "../util";
+import { calculatePerformanceMetrics } from "../utils/data/experiments";
 import { ExperimentData } from "../types/data";
-import { hexToRgba } from "../util";
+import { hexToRgba } from "../utils/data/colors";
 import { ScrollArea } from "./UI/scroll-area";
 import { ExperimentsContext } from "../store/experiments-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
-import { cn } from "../lib/utils";
+import { cn } from "../utils/common/styles";
 import {
   Table,
   TableBody,
@@ -162,8 +162,8 @@ export default function DataTable({ columns }: Props) {
 
   return (
     <div className="w-full h-[222px]">
-      <Table className="table-fixed w-full border-t">
-        <ScrollArea className="w-full h-[220px]">
+      <div className="relative w-full">
+        <Table className="table-fixed w-full border-t">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -191,79 +191,84 @@ export default function DataTable({ columns }: Props) {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody
-            className={`text-sm ${
-              table.getRowModel().rows?.length <= 5 &&
-              "[&_tr:last-child]:border-b"
-            }`}
-          >
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell, idx) => {
-                    const columnId = cell.column.id;
+        </Table>
+        <ScrollArea className="w-full h-[186px]">
+          <Table className="table-fixed w-full">
+            <TableBody
+              className={`text-sm ${
+                table.getRowModel().rows?.length <= 5 &&
+                "[&_tr:last-child]:border-b"
+              }`}
+            >
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell, idx) => {
+                      const columnId = cell.column.id;
 
-                    const isPerformanceMetric = columnId in performanceMetrics;
+                      const isPerformanceMetric =
+                        columnId in performanceMetrics;
 
-                    let cellStyle = {};
-                    if (isPerformanceMetric) {
-                      const { baseColor } = performanceMetrics[columnId];
-                      const value = cell.getValue() as number;
-                      const opacity = opacityMapping[columnId]?.[value] ?? 0;
+                      let cellStyle = {};
+                      if (isPerformanceMetric) {
+                        const { baseColor } = performanceMetrics[columnId];
+                        const value = cell.getValue() as number;
+                        const opacity = opacityMapping[columnId]?.[value] ?? 0;
 
-                      if (baseColor) {
-                        let color, textColor;
+                        if (baseColor) {
+                          let color, textColor;
 
-                        if (tableData.length === 1 && value === 0) {
-                          color = "#FFFFFF";
-                          textColor = "#000000";
-                        } else {
-                          color = hexToRgba(baseColor, opacity);
-                          textColor = opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                          if (tableData.length === 1 && value === 0) {
+                            color = "#FFFFFF";
+                            textColor = "#000000";
+                          } else {
+                            color = hexToRgba(baseColor, opacity);
+                            textColor = opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                          }
+
+                          cellStyle = {
+                            borderLeft:
+                              columnId === "ua"
+                                ? "1px solid rgb(229 231 235)"
+                                : "none",
+                            borderRight:
+                              idx === row.getVisibleCells().length - 1
+                                ? "none"
+                                : "1px solid rgb(229 231 235)",
+                            backgroundColor: color,
+                            color: textColor,
+                          };
                         }
-
-                        cellStyle = {
-                          borderLeft:
-                            columnId === "ua"
-                              ? "1px solid rgb(229 231 235)"
-                              : "none",
-                          borderRight:
-                            idx === row.getVisibleCells().length - 1
-                              ? "none"
-                              : "1px solid rgb(229 231 235)",
-                          backgroundColor: color,
-                          color: textColor,
-                        };
                       }
-                    }
 
-                    return (
-                      <TableCell key={cell.id} style={cellStyle}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    );
-                  })}
+                      return (
+                        <TableCell key={cell.id} style={cellStyle}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-[178px] text-center text-gray-500 text-[15px]"
+                  >
+                    Run Training or Unlearning from the left first.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-[178px] text-center text-gray-500 text-[15px]"
-                >
-                  Run Training or Unlearning from the left first.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+              )}
+            </TableBody>
+          </Table>
         </ScrollArea>
-      </Table>
+      </div>
     </div>
   );
 }

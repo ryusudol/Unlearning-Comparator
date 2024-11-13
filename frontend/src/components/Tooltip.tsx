@@ -1,12 +1,16 @@
-import { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 
 import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Prob } from "../views/Embeddings";
 
-const BASELINE_OPACITY = 0.7;
+const BASELINE_OPACITY = 0.6;
 const COMPARISON_OPACITY = 1;
+const TICK_PADDING = 8;
+const BAR_HEIGHT = 8;
+const FONT_SIZE = "12px";
+const margin = { top: 30, right: 20, bottom: 20, left: 85 };
 
 interface Props {
   width: number;
@@ -19,7 +23,7 @@ interface Props {
   };
 }
 
-export default function Tooltip({
+export default React.memo(function Tooltip({
   width,
   height,
   imageUrl,
@@ -33,6 +37,8 @@ export default function Tooltip({
   const groundTruthIdx = Number(data[2]);
   const predictionIdx = Number(data[3]);
 
+  const firstTableauColor = d3.schemeTableau10[0];
+
   const groundTruth = forgetClassNames[groundTruthIdx];
   const prediction = forgetClassNames[predictionIdx];
 
@@ -40,9 +46,7 @@ export default function Tooltip({
     if (!svgRef.current) return;
 
     const width = 300;
-    const height = 280;
-    const margin = { top: 20, right: 20, bottom: 30, left: 85 };
-    const barHeight = 12;
+    const height = 300;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -52,6 +56,7 @@ export default function Tooltip({
       .attr("viewBox", [0, 0, width, height]);
 
     const defs = svg.append("defs");
+
     const pattern = defs
       .append("pattern")
       .attr("id", "stripe")
@@ -69,6 +74,74 @@ export default function Tooltip({
       .attr("stroke", "black")
       .attr("stroke-width", 2);
 
+    const legendPattern = defs
+      .append("pattern")
+      .attr("id", "stripe-legend")
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("width", 3)
+      .attr("height", 3)
+      .attr("patternTransform", "rotate(-45)");
+
+    legendPattern
+      .append("rect")
+      .attr("width", 3)
+      .attr("height", 3)
+      .attr("fill", "white");
+
+    legendPattern
+      .append("line")
+      .attr("x1", 0)
+      .attr("y1", 0)
+      .attr("x2", 0)
+      .attr("y2", 3)
+      .attr("stroke", firstTableauColor)
+      .attr("stroke-width", 2);
+
+    const legend = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width - margin.right - 60}, -8)`);
+
+    legend
+      .append("rect")
+      .attr("width", 12)
+      .attr("height", 12)
+      .attr("fill", firstTableauColor);
+
+    legend
+      .append("text")
+      .attr("x", 20)
+      .attr("y", 10)
+      .text("Baseline")
+      .style("font-size", FONT_SIZE)
+      .style("font-family", "Roboto Condensed");
+
+    const comparisonLegend = legend
+      .append("g")
+      .attr("transform", "translate(0, 16)");
+
+    comparisonLegend
+      .append("rect")
+      .attr("width", 12)
+      .attr("height", 12)
+      .attr("fill", firstTableauColor)
+      .attr("opacity", COMPARISON_OPACITY);
+
+    comparisonLegend
+      .append("rect")
+      .attr("width", 12)
+      .attr("height", 12)
+      .attr("fill", "url(#stripe-legend)")
+      .attr("opacity", 1);
+
+    comparisonLegend
+      .append("text")
+      .attr("x", 20)
+      .attr("y", 10)
+      .text("Comparison")
+      .style("font-size", FONT_SIZE)
+      .style("font-family", "Roboto Condensed");
+
     const xScale = d3
       .scaleLinear()
       .domain([0, 1])
@@ -80,6 +153,22 @@ export default function Tooltip({
       .range([margin.top, height - margin.bottom])
       .padding(0.2);
 
+    const gridLines = svg.append("g").attr("class", "grid-lines");
+
+    const xAxisTicks = d3.range(0, 1.2, 0.2);
+
+    gridLines
+      .selectAll("line")
+      .data(xAxisTicks)
+      .enter()
+      .append("line")
+      .attr("x1", (d) => xScale(d))
+      .attr("x2", (d) => xScale(d))
+      .attr("y1", margin.top)
+      .attr("y2", height - margin.bottom)
+      .attr("stroke", "#d8d8d8")
+      .attr("stroke-width", 1);
+
     const colors = d3.schemeTableau10;
 
     const g = svg.append("g");
@@ -90,7 +179,7 @@ export default function Tooltip({
       .attr("class", "bar-baseline")
       .attr("x", margin.left)
       .attr("y", (d) => yScale(forgetClassNames[d.class]) ?? 0)
-      .attr("height", barHeight)
+      .attr("height", BAR_HEIGHT)
       .attr("width", (d) => xScale(d.value) - margin.left)
       .attr("fill", (_, i) => colors[i])
       .attr("opacity", BASELINE_OPACITY);
@@ -99,48 +188,24 @@ export default function Tooltip({
       .data(barChartData.comparison)
       .join("g")
       .attr("class", "bar-comparison")
-      .each(function (_, i: number) {
+      .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
+        const x = xScale(d.value) - margin.left;
+        const y = (yScale(forgetClassNames[d.class]) ?? 0) + BAR_HEIGHT;
 
         g.append("rect")
           .attr("x", margin.left)
-          .attr(
-            "y",
-            (d) =>
-              (yScale(
-                forgetClassNames[(d as { class: number; value: number }).class]
-              ) ?? 0) +
-              barHeight -
-              6
-          )
-          .attr("height", barHeight)
-          .attr(
-            "width",
-            (d) =>
-              xScale((d as { class: number; value: number }).value) -
-              margin.left
-          )
+          .attr("y", y)
+          .attr("height", BAR_HEIGHT)
+          .attr("width", x)
           .attr("fill", colors[i])
           .attr("opacity", COMPARISON_OPACITY);
 
         g.append("rect")
           .attr("x", margin.left)
-          .attr(
-            "y",
-            (d) =>
-              (yScale(
-                forgetClassNames[(d as { class: number; value: number }).class]
-              ) ?? 0) +
-              barHeight -
-              6
-          )
-          .attr("height", barHeight)
-          .attr(
-            "width",
-            (d) =>
-              xScale((d as { class: number; value: number }).value) -
-              margin.left
-          )
+          .attr("y", y)
+          .attr("height", BAR_HEIGHT)
+          .attr("width", x)
           .attr("fill", "url(#stripe)")
           .attr("opacity", 0.5);
       });
@@ -148,6 +213,8 @@ export default function Tooltip({
     const xAxis = d3
       .axisBottom(xScale)
       .ticks(5)
+      .tickSize(0)
+      .tickPadding(TICK_PADDING)
       .tickFormat((d) => d.toString());
 
     svg
@@ -155,18 +222,21 @@ export default function Tooltip({
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(xAxis)
       .selectAll("text")
-      .style("font-size", "13px")
+      .style("font-size", FONT_SIZE)
       .style("font-family", "Roboto Condensed");
 
-    const yAxis = d3.axisLeft(yScale);
+    svg.select(".domain").remove();
+
+    const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(TICK_PADDING);
+
     svg
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
       .call(yAxis)
       .selectAll("text")
-      .style("font-size", "13px")
+      .style("font-size", FONT_SIZE)
       .style("font-family", "Roboto Condensed");
-  }, [barChartData, forgetClass]);
+  }, [barChartData, firstTableauColor, forgetClass]);
 
   return (
     <div
@@ -191,11 +261,14 @@ export default function Tooltip({
         </div>
       </div>
       <div className="relative z-50">
+        <p className="text-xs absolute top-[calc(50%)] -translate-y-1/2 -rotate-90">
+          Classes
+        </p>
         <svg ref={svgRef} className="w-full max-w-4xl" />
-        <p className="text-xs absolute bottom-0 right-[70px]">
+        <p className="text-xs absolute -bottom-2.5 right-[calc(50%-2rem)] translate-x-1/2">
           Confidence Score
         </p>
       </div>
     </div>
   );
-}
+});
