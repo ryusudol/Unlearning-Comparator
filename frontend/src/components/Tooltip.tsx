@@ -9,6 +9,8 @@ const BASELINE_OPACITY = 0.6;
 const COMPARISON_OPACITY = 1;
 const TICK_PADDING = 8;
 const BAR_HEIGHT = 8;
+const FONT_SIZE = "12px";
+const margin = { top: 30, right: 20, bottom: 20, left: 85 };
 
 interface Props {
   width: number;
@@ -35,6 +37,8 @@ export default React.memo(function Tooltip({
   const groundTruthIdx = Number(data[2]);
   const predictionIdx = Number(data[3]);
 
+  const firstTableauColor = d3.schemeTableau10[0];
+
   const groundTruth = forgetClassNames[groundTruthIdx];
   const prediction = forgetClassNames[predictionIdx];
 
@@ -42,8 +46,7 @@ export default React.memo(function Tooltip({
     if (!svgRef.current) return;
 
     const width = 300;
-    const height = 280;
-    const margin = { top: 20, right: 20, bottom: 30, left: 85 };
+    const height = 300;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -53,6 +56,7 @@ export default React.memo(function Tooltip({
       .attr("viewBox", [0, 0, width, height]);
 
     const defs = svg.append("defs");
+
     const pattern = defs
       .append("pattern")
       .attr("id", "stripe")
@@ -69,6 +73,74 @@ export default React.memo(function Tooltip({
       .attr("y2", 3)
       .attr("stroke", "black")
       .attr("stroke-width", 2);
+
+    const legendPattern = defs
+      .append("pattern")
+      .attr("id", "stripe-legend")
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("width", 3)
+      .attr("height", 3)
+      .attr("patternTransform", "rotate(-45)");
+
+    legendPattern
+      .append("rect")
+      .attr("width", 3)
+      .attr("height", 3)
+      .attr("fill", "white");
+
+    legendPattern
+      .append("line")
+      .attr("x1", 0)
+      .attr("y1", 0)
+      .attr("x2", 0)
+      .attr("y2", 3)
+      .attr("stroke", firstTableauColor)
+      .attr("stroke-width", 2);
+
+    const legend = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width - margin.right - 60}, -8)`);
+
+    legend
+      .append("rect")
+      .attr("width", 12)
+      .attr("height", 12)
+      .attr("fill", firstTableauColor);
+
+    legend
+      .append("text")
+      .attr("x", 20)
+      .attr("y", 10)
+      .text("Baseline")
+      .style("font-size", FONT_SIZE)
+      .style("font-family", "Roboto Condensed");
+
+    const comparisonLegend = legend
+      .append("g")
+      .attr("transform", "translate(0, 16)");
+
+    comparisonLegend
+      .append("rect")
+      .attr("width", 12)
+      .attr("height", 12)
+      .attr("fill", firstTableauColor)
+      .attr("opacity", COMPARISON_OPACITY);
+
+    comparisonLegend
+      .append("rect")
+      .attr("width", 12)
+      .attr("height", 12)
+      .attr("fill", "url(#stripe-legend)")
+      .attr("opacity", 1);
+
+    comparisonLegend
+      .append("text")
+      .attr("x", 20)
+      .attr("y", 10)
+      .text("Comparison")
+      .style("font-size", FONT_SIZE)
+      .style("font-family", "Roboto Condensed");
 
     const xScale = d3
       .scaleLinear()
@@ -150,7 +222,7 @@ export default React.memo(function Tooltip({
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(xAxis)
       .selectAll("text")
-      .style("font-size", "13px")
+      .style("font-size", FONT_SIZE)
       .style("font-family", "Roboto Condensed");
 
     svg.select(".domain").remove();
@@ -162,9 +234,9 @@ export default React.memo(function Tooltip({
       .attr("transform", `translate(${margin.left},0)`)
       .call(yAxis)
       .selectAll("text")
-      .style("font-size", "13px")
+      .style("font-size", FONT_SIZE)
       .style("font-family", "Roboto Condensed");
-  }, [barChartData, forgetClass]);
+  }, [barChartData, firstTableauColor, forgetClass]);
 
   return (
     <div
@@ -189,8 +261,11 @@ export default React.memo(function Tooltip({
         </div>
       </div>
       <div className="relative z-50">
+        <p className="text-xs absolute top-[calc(50%)] -translate-y-1/2 -rotate-90">
+          Classes
+        </p>
         <svg ref={svgRef} className="w-full max-w-4xl" />
-        <p className="text-xs absolute bottom-0 right-[70px]">
+        <p className="text-xs absolute -bottom-2.5 right-[calc(50%-2rem)] translate-x-1/2">
           Confidence Score
         </p>
       </div>
