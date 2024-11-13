@@ -88,7 +88,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "UA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -113,7 +113,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "RA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -138,7 +138,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "TUA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -163,7 +163,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "TRA",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
@@ -188,7 +188,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "RTE",
     header: ({ column }) => (
-      <HoverCard>
+      <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
             className="w-full px-0 h-[34px]"
