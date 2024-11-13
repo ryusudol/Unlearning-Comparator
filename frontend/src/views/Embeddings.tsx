@@ -15,7 +15,7 @@ import ConnectionLine from "../components/ConnectionLine";
 import { Separator } from "../components/UI/separator";
 import { TABLEAU10 } from "../constants/tableau10";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { extractSelectedData } from "../util";
+import { extractSelectedData } from "../utils/data/experiments";
 import {
   HelpCircleIcon,
   CircleIcon,
@@ -67,20 +67,28 @@ export default function Embeddings({ height }: { height: number }) {
         return;
       }
 
+      if (hoveredInstance?.source === source) return;
+
       const oppositeData =
         source === "Baseline" ? extractedComparisonData : extractedBaselineData;
 
       const oppositeInstance = oppositeData.find((d) => d[4] === imgIdxOrNull);
-      const oppositeProb = oppositeInstance?.[5] as Prob;
+      if (!oppositeInstance) {
+        return;
+      }
 
-      setHoveredInstance({
-        imgIdx: imgIdxOrNull,
-        source,
-        baselineProb: source === "Baseline" ? prob : oppositeProb,
-        comparisonProb: source === "Comparison" ? prob : oppositeProb,
-      });
+      const oppositeProb = oppositeInstance[5] as Prob;
+
+      setHoveredInstance(
+        Object.freeze({
+          imgIdx: imgIdxOrNull,
+          source,
+          baselineProb: source === "Baseline" ? prob : oppositeProb,
+          comparisonProb: source === "Comparison" ? prob : oppositeProb,
+        })
+      );
     },
-    [extractedBaselineData, extractedComparisonData]
+    [extractedBaselineData, extractedComparisonData, hoveredInstance]
   );
 
   useEffect(() => {

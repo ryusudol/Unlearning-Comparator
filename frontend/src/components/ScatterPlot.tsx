@@ -65,7 +65,6 @@ const ScatterPlot = React.memo(
       const fetchControllerRef = useRef<AbortController | null>(null);
       const svgRef = useRef<SVGSVGElement | null>(null);
       const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
-      const tooltipRef = useRef<HTMLDivElement | null>(null);
       const containerRef = useRef<HTMLDivElement | null>(null);
       const svgSelectionRef =
         useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
@@ -168,24 +167,42 @@ const ScatterPlot = React.memo(
       }));
 
       const handleClick = useCallback(
-        (event: MouseEvent, d: (number | Prob)[]): void => {
-          const element = event.currentTarget as Element;
+        (event: MouseEvent, d: (number | Prob)[]) => {
           onHover(d[4] as number, mode, d[5] as Prob);
 
-          const controller = new AbortController();
           if (fetchControllerRef.current) {
             fetchControllerRef.current.abort();
           }
+
+          const controller = new AbortController();
           fetchControllerRef.current = controller;
 
-          const index = d[4];
-          fetch(`${API_URL}/image/cifar10/${index}`)
+          if (containerRef.current) {
+            const containerRect = containerRef.current.getBoundingClientRect();
+            let xPosTooltip = event.clientX - containerRect.left + 10;
+            let yPosTooltip = event.clientY - containerRect.top + 10;
+
+            if (xPosTooltip + tooltipXSize > containerRect.width) {
+              xPosTooltip =
+                event.clientX - containerRect.left - tooltipXSize - 10;
+            }
+            if (yPosTooltip + tooltipYSize > containerRect.height) {
+              yPosTooltip =
+                event.clientY - containerRect.top - tooltipYSize - 10;
+            }
+
+            setTooltipPosition({ x: xPosTooltip, y: yPosTooltip });
+          }
+
+          fetch(`${API_URL}/image/cifar10/${d[4]}`, {
+            signal: controller.signal,
+          })
             .then((response) => response.blob())
             .then((blob) => {
               if (controller.signal.aborted) return;
+
               const prob = d[5] as Prob;
               const imageUrl = URL.createObjectURL(blob);
-
               const barChartData =
                 mode === "Baseline"
                   ? {
@@ -218,52 +235,39 @@ const ScatterPlot = React.memo(
                   barChartData={barChartData}
                 />
               );
-
-              if (containerRef.current) {
-                const containerRect =
-                  containerRef.current.getBoundingClientRect();
-
-                let xPosTooltip = event.clientX - containerRect.left + 10;
-                let yPosTooltip = event.clientY - containerRect.top + 10;
-
-                if (xPosTooltip + tooltipXSize > containerRect.width)
-                  xPosTooltip =
-                    event.clientX - containerRect.left - tooltipXSize - 10;
-                if (yPosTooltip + tooltipYSize > containerRect.height)
-                  yPosTooltip =
-                    event.clientY - containerRect.top - tooltipYSize - 10;
-
-                setTooltipPosition({
-                  x: xPosTooltip,
-                  y: yPosTooltip,
-                });
-              }
             })
             .catch((err) => {
               if (err.name === "AbortError") return;
             });
+        },
+        [hoveredProb?.baselineProb, hoveredProb?.comparisonProb, mode, onHover]
+      );
 
+      const handleMouseEnter = useCallback(
+        (event: MouseEvent, d: (number | Prob)[]) => {
+          onHover(d[4] as number, mode);
+          const element = event.currentTarget as Element;
           d3.select(element)
             .attr("stroke", "black")
             .attr("stroke-width", hoveredStrokeWidth)
             .raise();
         },
-        [hoveredProb?.baselineProb, hoveredProb?.comparisonProb, mode, onHover]
+        [mode, onHover]
       );
 
       const handleMouseLeave = useCallback(
-        (event: MouseEvent, d: (number | Prob)[]) => {
-          const element = event.currentTarget as Element;
+        (event: MouseEvent) => {
           onHover(null, mode);
-
+          const element = event.currentTarget as Element;
           const selection = d3.select(element);
+
           if (element.tagName === "circle") {
             selection
               .attr("stroke", null)
               .attr("stroke-width", null)
               .style("opacity", defaultCircleOpacity);
-          } else if (element.tagName === "path") {
-            const color = d3.color(z(d[3] as number));
+          } else {
+            const color = d3.color(z((selection.datum() as any)[3]));
             selection
               .attr("stroke", color ? color.darker().toString() : "black")
               .attr("stroke-width", XStrokeWidth)
@@ -337,26 +341,12 @@ const ScatterPlot = React.memo(
 
           circles
             .on("click", handleClick)
-            .on("mouseenter", (event, d) => {
-              const element = event.currentTarget as Element;
-              onHover(d[4] as number, mode);
-              d3.select(element)
-                .attr("stroke", "black")
-                .attr("stroke-width", hoveredStrokeWidth)
-                .raise();
-            })
+            .on("mouseenter", handleMouseEnter)
             .on("mouseleave", handleMouseLeave);
 
           crosses
             .on("click", handleClick)
-            .on("mouseenter", (event, d) => {
-              const element = event.currentTarget as Element;
-              onHover(d[4] as number, mode);
-              d3.select(element)
-                .attr("stroke", "black")
-                .attr("stroke-width", hoveredStrokeWidth)
-                .raise();
-            })
+            .on("mouseenter", handleMouseEnter)
             .on("mouseleave", handleMouseLeave);
 
           function zoomed(event: d3.D3ZoomEvent<SVGSVGElement, undefined>) {
@@ -427,6 +417,7 @@ const ScatterPlot = React.memo(
       }, [
         forgetClass,
         handleClick,
+        handleMouseEnter,
         handleMouseLeave,
         mode,
         onHover,
@@ -490,41 +481,39 @@ const ScatterPlot = React.memo(
       useEffect(() => {
         if (!circlesRef.current && !crossesRef.current) return;
 
-        if (circlesRef.current) {
-          circlesRef.current
-            .attr("stroke", null)
-            .attr("stroke-width", null)
-            .style("opacity", defaultCircleOpacity);
-        }
-        if (crossesRef.current) {
-          crossesRef.current
-            .attr("stroke", (d) => {
-              const color = d3.color(z(d[3] as number));
-              return color ? color.darker().toString() : "black";
-            })
-            .attr("stroke-width", XStrokeWidth)
-            .style("opacity", defaultCrossOpacity);
-        }
-
-        if (hoveredImgIdx !== null) {
+        const resetStyles = () => {
           if (circlesRef.current) {
             circlesRef.current
-              .filter((d) => d[4] === hoveredImgIdx)
-              .attr("stroke", "black")
-              .attr("stroke-width", hoveredStrokeWidth)
-              .raise();
+              .attr("stroke", null)
+              .attr("stroke-width", null)
+              .style("opacity", defaultCircleOpacity);
           }
           if (crossesRef.current) {
             crossesRef.current
+              .attr("stroke", (d) => {
+                const color = d3.color(z(d[3] as number));
+                return color ? color.darker().toString() : "black";
+              })
+              .attr("stroke-width", XStrokeWidth)
+              .style("opacity", defaultCrossOpacity);
+          }
+        };
+
+        resetStyles();
+
+        if (hoveredImgIdx !== null) {
+          const applyHoverStyle = (
+            selection: d3.Selection<any, any, any, any>
+          ) => {
+            selection
               .filter((d) => d[4] === hoveredImgIdx)
               .attr("stroke", "black")
               .attr("stroke-width", hoveredStrokeWidth)
               .raise();
-          }
-        } else {
-          if (tooltipRef.current) {
-            tooltipRef.current.style.display = "none";
-          }
+          };
+
+          if (circlesRef.current) applyHoverStyle(circlesRef.current);
+          if (crossesRef.current) applyHoverStyle(crossesRef.current);
         }
       }, [hoveredImgIdx, data, z]);
 
