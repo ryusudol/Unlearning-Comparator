@@ -65,12 +65,17 @@ export default function Experiments({ height }: { height: number }) {
               onClick={handleAddExpClick}
               content={
                 <>
-                  <PlusIcon color="white" className="w-2.5 h-2.5 mr-1.5" />
-                  <span>Add Experiment</span>
+                  <PlusIcon
+                    color={isRunning ? "#d1d5db" : "white"}
+                    className="w-2.5 h-2.5 mr-1.5"
+                  />
+                  <span className={isRunning ? "text-gray-300" : ""}>
+                    Add Experiment
+                  </span>
                 </>
               }
               className={`px-2.5 mr-0.5 ${
-                isRunning && "opacity-20 cursor-not-allowed"
+                isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
               }`}
             />
           </DialogTrigger>
