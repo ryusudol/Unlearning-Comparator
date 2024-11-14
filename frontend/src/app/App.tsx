@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { ExperimentsContext } from "../store/experiments-context";
 import Header from "../components/Header";
 import Experiments from "../views/Experiments";
-import RunningStatus from "../views/RunningStatus";
+import RunningStatus from "../views/Progress";
 import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";

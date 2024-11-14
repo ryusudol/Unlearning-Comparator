@@ -19,7 +19,7 @@ import {
   StepperTrigger,
 } from "../components/UI/stepper";
 
-export default function RunningStatus({ height }: { height: number }) {
+export default function Progress({ height }: { height: number }) {
   const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
