@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 
+import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Prob } from "../views/Embeddings";
@@ -40,7 +41,13 @@ export default React.memo(function Tooltip({
   const firstTableauColor = d3.schemeTableau10[0];
 
   const groundTruth = forgetClassNames[groundTruthIdx];
-  const prediction = forgetClassNames[predictionIdx];
+  const baselinePrediction = forgetClassNames[predictionIdx];
+  const comparisonPrediction =
+    forgetClassNames[
+      barChartData.comparison.reduce((maxObj, currentObj) =>
+        currentObj.value > maxObj.value ? currentObj : maxObj
+      ).class
+    ];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -248,22 +255,23 @@ export default React.memo(function Tooltip({
           <img src={imageUrl} alt="cifar-10" width="160" height="160" />
         </div>
         <div className="text-sm mt-1">
-          <span className="font-semibold">Ground Truth</span>: {groundTruth}
+          <span>Ground Truth:</span>{" "}
+          <span className="font-semibold">{groundTruth}</span>
         </div>
         <div className="text-sm flex flex-col">
-          <span className="font-semibold">Prediction</span>
-          <p>
-            <span className="font-semibold">Baseline</span>: {prediction}
+          <p className="flex items-center text-nowrap">
+            <CircleIcon className="w-3 h-3 mr-1" />
+            <span className="mr-0.5">Baseline:</span>
+            <span className="font-semibold">{baselinePrediction}</span>
           </p>
-          <p>
-            <span className="font-semibold">Comparison</span>: {prediction}
+          <p className="flex items-center text-nowrap">
+            <TriangleIcon className="w-3 h-3 mr-1" />
+            <span className="mr-0.5">Comparison:</span>
+            <span className="font-semibold">{comparisonPrediction}</span>
           </p>
         </div>
       </div>
       <div className="relative z-50">
-        <p className="text-xs absolute top-[calc(50%)] -translate-y-1/2 -rotate-90">
-          Classes
-        </p>
         <svg ref={svgRef} className="w-full max-w-4xl" />
         <p className="text-xs absolute -bottom-2.5 right-[calc(50%-2rem)] translate-x-1/2">
           Confidence Score
