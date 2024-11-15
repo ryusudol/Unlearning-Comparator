@@ -2,9 +2,8 @@ import { UnlearningStatus } from "../../types/settings";
 
 export const getProgressSteps = (
   status: UnlearningStatus,
-  isFirstRunning: boolean,
+  completedSteps: number[],
   activeStep: number,
-  progress: string,
   umapProgress: number,
   ckaProgress: number
 ) => [
@@ -14,28 +13,56 @@ export const getProgressSteps = (
     description: `Method: **${
       status.method ? status.method : "-"
     }** | Epochs: **${
-      isFirstRunning ? "-" : status.current_epoch + "/" + status.total_epochs
+      !completedSteps.includes(1)
+        ? "-"
+        : status.current_epoch + "/" + status.total_epochs
     }**\nUnlearning Loss: **${
-      status.current_unlearn_loss === 0
-        ? "-"
-        : status.current_unlearn_loss.toFixed(3)
+      completedSteps.includes(1) &&
+      (status.current_epoch > 1 ||
+        (status.total_epochs === 1 && completedSteps.includes(2)))
+        ? status.current_unlearn_loss === 0
+          ? 0
+          : status.current_unlearn_loss.toFixed(3)
+        : "-"
     }** | Unlearning Accuracy: **${
-      status.current_unlearn_accuracy === 0
-        ? "-"
-        : status.current_unlearn_accuracy
+      completedSteps.includes(1) &&
+      (status.current_epoch > 1 ||
+        (status.total_epochs === 1 && completedSteps.includes(2)))
+        ? status.current_unlearn_accuracy === 0
+          ? 0
+          : status.current_unlearn_accuracy.toFixed(3)
+        : "-"
     }**`,
   },
   {
     step: 2,
     title: "Evaluate",
     description: `Training Loss: **${
-      status.p_training_loss === 0 ? "-" : status.p_training_loss
+      completedSteps.includes(3) ||
+      (completedSteps.includes(2) && status.progress.includes("Test"))
+        ? status.p_training_loss === 0
+          ? 0
+          : status.p_training_loss.toFixed(3)
+        : "-"
     }** | Training Accuracy: **${
-      status.p_training_accuracy === 0 ? "-" : status.p_training_accuracy
+      completedSteps.includes(3) ||
+      (completedSteps.includes(2) && status.progress.includes("Test"))
+        ? status.p_training_accuracy === 0
+          ? 0
+          : status.p_training_accuracy.toFixed(3)
+        : "-"
     }**\nTest Loss: **${
-      status.p_test_loss === 0 ? "-" : status.p_test_loss
+      completedSteps.includes(3)
+        ? status.p_test_loss === 0
+          ? 0
+          : status.p_test_loss.toFixed(3)
+        : "-"
     }** | Test Accuracy: **${
-      status.p_test_accuracy === 0 ? "-" : status.p_test_accuracy
+      completedSteps.includes(3)
+        ? status.p_test_accuracy === 0
+          ? 0
+          : status.p_test_accuracy.toFixed(3)
+        : "-"
     }**`,
   },
   {
@@ -43,21 +70,27 @@ export const getProgressSteps = (
     title: "Analyze",
     description: `${
       (activeStep === 3 &&
-        (progress.includes("UMAP") || progress.includes("CKA"))) ||
-      (!isFirstRunning && progress === "Idle")
+        (status.progress.includes("UMAP") ||
+          status.progress.includes("CKA"))) ||
+      (completedSteps.includes(3) &&
+        (status.progress === "Idle" || status.progress === "Unlearning"))
         ? `Computing UMAP Embedding... **${
-            !progress.includes("UMAP") ? "100" : umapProgress
+            !status.progress.includes("UMAP") ? "100" : umapProgress
           }%**`
         : "Computing UMAP Embedding"
     }\n${
-      (activeStep === 3 && progress.includes("CKA")) ||
-      (!isFirstRunning && progress === "Idle")
+      (activeStep === 3 && status.progress.includes("CKA")) ||
+      (completedSteps.includes(3) &&
+        (status.progress === "Idle" || status.progress === "Unlearning"))
         ? `Calculating CKA Similarity... **${
-            progress === "Idle" ? "100" : ckaProgress
+            status.progress === "Idle" || status.progress === "Unlearning"
+              ? "100"
+              : ckaProgress
           }%**`
         : "Calculating CKA Similarity"
     }\n${
-      !isFirstRunning && progress === "Idle"
+      completedSteps.includes(3) &&
+      (status.progress === "Idle" || status.progress === "Unlearning")
         ? `Done! Experiment ID: **${status.recent_id}**`
         : ""
     }`,

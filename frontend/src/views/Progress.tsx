@@ -28,6 +28,7 @@ export default function Progress({ height }: { height: number }) {
     status,
     activeStep,
     updateIsRunning,
+    completedSteps,
     updateStatus,
     updateActiveStep,
   } = useContext(RunningStatusContext);
@@ -35,13 +36,11 @@ export default function Progress({ height }: { height: number }) {
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
 
-  const isFirstRunning = status.total_epochs === 0;
   const progress = status.progress;
   const steps = getProgressSteps(
     status,
-    isFirstRunning,
+    completedSteps,
     activeStep,
-    progress,
     umapProgress,
     ckaProgress
   );
@@ -100,7 +99,7 @@ export default function Progress({ height }: { height: number }) {
         clearInterval(intervalId);
       }
     };
-  }, [checkStatus, isRunning, status.progress]);
+  }, [checkStatus, isRunning]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -114,7 +113,7 @@ export default function Progress({ height }: { height: number }) {
         100
       );
 
-      if (status.progress.includes("UMAP")) setUmapProgress(progressValue);
+      if (progress.includes("UMAP")) setUmapProgress(progressValue);
       else setCkaProgress(progressValue);
 
       if (progressValue === 100) {
@@ -127,7 +126,7 @@ export default function Progress({ height }: { height: number }) {
         clearInterval(intervalId);
       }
     };
-  }, [status.progress]);
+  }, [progress]);
 
   return (
     <section
@@ -161,11 +160,11 @@ export default function Progress({ height }: { height: number }) {
                 <StepperTrigger>
                   <Button className="w-8 h-8 p-0 rounded-full z-10">
                     {state === "completed" ||
-                    (!isFirstRunning && !isRunning) ? (
+                    (completedSteps.length && !isRunning) ? (
                       <Check className="size-4" />
                     ) : state === "active" ? (
                       <Loader2 className="size-4 animate-spin" />
-                    ) : (isFirstRunning || isRunning) &&
+                    ) : (!completedSteps.length || isRunning) &&
                       state === "inactive" ? (
                       <Dot className="size-4" />
                     ) : null}
