@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 
+import { TABLEAU10 } from "../constants/tableau10";
 import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
@@ -42,12 +43,10 @@ export default React.memo(function Tooltip({
 
   const groundTruth = forgetClassNames[groundTruthIdx];
   const baselinePrediction = forgetClassNames[predictionIdx];
-  const comparisonPrediction =
-    forgetClassNames[
-      barChartData.comparison.reduce((maxObj, currentObj) =>
-        currentObj.value > maxObj.value ? currentObj : maxObj
-      ).class
-    ];
+  const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
+    currentObj.value > maxObj.value ? currentObj : maxObj
+  ).class;
+  const comparisonPrediction = forgetClassNames[comparisonIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -262,12 +261,22 @@ export default React.memo(function Tooltip({
           <p className="flex items-center text-nowrap">
             <CircleIcon className="w-3 h-3 mr-1" />
             <span className="mr-0.5">Baseline:</span>
-            <span className="font-semibold">{baselinePrediction}</span>
+            <span
+              style={{ color: TABLEAU10[predictionIdx] }}
+              className="font-semibold"
+            >
+              {baselinePrediction}
+            </span>
           </p>
           <p className="flex items-center text-nowrap">
             <TriangleIcon className="w-3 h-3 mr-1" />
             <span className="mr-0.5">Comparison:</span>
-            <span className="font-semibold">{comparisonPrediction}</span>
+            <span
+              style={{ color: TABLEAU10[comparisonIdx] }}
+              className="font-semibold"
+            >
+              {comparisonPrediction}
+            </span>
           </p>
         </div>
       </div>

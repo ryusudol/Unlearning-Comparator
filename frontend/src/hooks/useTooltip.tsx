@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import * as ReactDOM from "react-dom";
+import { createRoot, Root } from "react-dom/client";
 
 import Tooltip from "../components/Tooltip";
 import { API_URL } from "../constants/common";
@@ -17,6 +17,7 @@ export const useTooltip = (
   config: TooltipConfig
 ) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<Root | null>(null);
   const fetchControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export const useTooltip = (
     if (!config.containerRef.current) return;
 
     if (tooltipRef.current) {
+      rootRef.current?.unmount();
       tooltipRef.current.remove();
     }
 
@@ -62,14 +64,16 @@ export const useTooltip = (
     config.containerRef.current.appendChild(tooltipDiv);
     tooltipRef.current = tooltipDiv;
 
-    ReactDOM.render(content, tooltipDiv);
+    rootRef.current = createRoot(tooltipDiv);
+    rootRef.current.render(content);
   };
 
   const hideTooltip = () => {
     if (tooltipRef.current) {
-      ReactDOM.unmountComponentAtNode(tooltipRef.current);
+      rootRef.current?.unmount();
       tooltipRef.current.remove();
       tooltipRef.current = null;
+      rootRef.current = null;
     }
   };
 

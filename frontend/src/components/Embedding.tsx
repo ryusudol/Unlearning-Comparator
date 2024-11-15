@@ -1,12 +1,14 @@
 import React, {
   useState,
   useEffect,
-  useRef,
+  useContext,
   useImperativeHandle,
   forwardRef,
+  useRef,
 } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
 import ScatterPlot from "./ScatterPlot";
 import {
@@ -32,44 +34,48 @@ interface Props {
   mode: Mode;
   height: number;
   data: SelectedData;
-  id: string;
   onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
   hoveredInstance: HovereInstance | null;
 }
 
 const Embedding = forwardRef(
-  ({ mode, height, data, id, onHover, hoveredInstance }: Props, ref) => {
-    const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
+  ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
+    const { baseline, comparison } = useContext(BaselineComparisonContext);
 
-    const chartRef = useRef<{
-      reset: () => void;
-      getInstancePosition: (imgIdx: number) => { x: number; y: number } | null;
-    } | null>(null);
+    const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
+    const scatterRef = useRef(null);
+
+    const id = mode === "Baseline" ? baseline : comparison;
 
     useEffect(() => {
       setViewMode(VIEW_MODES[0]);
     }, [id]);
 
+    useImperativeHandle(ref, () => ({
+      getInstancePosition: (imgIdx: number) => {
+        if (scatterRef.current) {
+          return (scatterRef.current as any).getInstancePosition(imgIdx);
+        }
+        return null;
+      },
+      reset: () => {
+        if (scatterRef.current) {
+          (scatterRef.current as any).reset();
+        }
+      },
+    }));
+
     const handleResetClick = () => {
-      if (chartRef && typeof chartRef !== "function" && chartRef.current) {
-        chartRef.current.reset();
+      if (scatterRef.current) {
+        (scatterRef.current as any).reset();
       }
     };
 
     const idExist = id !== "";
 
-    useImperativeHandle(ref, () => ({
-      getInstancePosition: (imgIdx: number) => {
-        if (chartRef.current) {
-          return chartRef.current.getInstancePosition(imgIdx);
-        }
-        return null;
-      },
-    }));
-
     return (
       <div
-        style={{ height: `${height}px` }}
+        style={{ height }}
         className="flex flex-col justify-start items-center relative"
       >
         {idExist && (
@@ -109,7 +115,7 @@ const Embedding = forwardRef(
             viewMode={viewMode}
             onHover={onHover}
             hoveredInstance={hoveredInstance}
-            ref={chartRef}
+            ref={scatterRef}
           />
         </div>
       </div>

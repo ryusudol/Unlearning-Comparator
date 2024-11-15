@@ -204,20 +204,6 @@ const ScatterPlot = React.memo(
         }
       }, [forgetClass, viewMode, rendererRefs]);
 
-      useEffect(() => {
-        const handleDocumentClick = (event: MouseEvent) => {
-          const target = event.target as Element;
-          if (!target.closest("circle") && !target.closest("path")) {
-            hideTooltip();
-          }
-        };
-
-        document.addEventListener("click", handleDocumentClick);
-        return () => {
-          document.removeEventListener("click", handleDocumentClick);
-        };
-      }, [hideTooltip]);
-
       return (
         <div
           ref={containerRef}

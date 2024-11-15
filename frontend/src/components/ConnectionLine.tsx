@@ -1,4 +1,3 @@
-// ConnectionLine.tsx
 import React from "react";
 
 interface ConnectionLineProps {
