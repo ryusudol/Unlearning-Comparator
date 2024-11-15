@@ -3,10 +3,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from app.threads.train_thread import TrainingThread
+from app.threads import TrainingThread
 from app.models import get_resnet18
-from app.utils.helpers import set_seed, get_data_loaders
-from app.config.settings import (
+from app.utils import set_seed, get_data_loaders
+from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     UNLEARN_SEED
@@ -30,7 +30,6 @@ async def training(request, status):
         batch_size=request.batch_size,
         augmentation=True
     )
-    # model = ResNet18().to(device=device)
     model = get_resnet18().to(device=device)
 
     criterion = nn.CrossEntropyLoss()
@@ -38,26 +37,27 @@ async def training(request, status):
         model.parameters(),
         lr=request.learning_rate,
         momentum=MOMENTUM,
-        weight_decay=WEIGHT_DECAY
+        weight_decay=WEIGHT_DECAY,
+        nesterov=True
     )
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer,
+        optimizer=optimizer,
         T_max=request.epochs,
     )
 
     training_thread = TrainingThread(
-        model,
-        train_loader,
-        test_loader,
-        criterion,
-        optimizer,
-        scheduler,
-        device,
-        request.epochs,
-        status,
-        "resnet18",
-        "CIFAR10",
-        request.learning_rate
+        model=model,
+        train_loader=train_loader,
+        test_loader=test_loader,
+        criterion=criterion,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        device=device,
+        epochs=request.epochs,
+        status=status,
+        model_name="resnet18",
+        dataset_name="CIFAR10",
+        learning_rate=request.learning_rate
     )
     training_thread.start()
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
-from app.services.train import run_training
+from app.services import run_training
 from app.models import TrainingStatus
-from app.config.settings import (
+from app.config import (
 	BATCH_SIZE, 
 	LEARNING_RATE, 
 	EPOCHS

@@ -4,8 +4,7 @@ import torch.nn.functional as F
 
 from torch_cka import CKA
 from torch.utils.data import DataLoader, Subset
-from app.config.settings import UMAP_DATA_SIZE
-
+from app.config import UMAP_DATA_SIZE
 
 async def get_layer_activations_and_predictions(
     model, 
@@ -126,7 +125,10 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 confidence_sum[label] += probabilities[i].cpu().numpy()
 
     accuracy = correct / total
-    class_accuracies = {i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) for i in range(10)}
+    class_accuracies = {
+        i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) 
+        for i in range(10)
+    }
     avg_loss = total_loss / len(data_loader)
 
     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)

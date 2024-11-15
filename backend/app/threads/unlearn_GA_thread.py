@@ -5,7 +5,6 @@ import uuid
 import torch
 import time
 import os
-
 from app.utils.helpers import (
 	save_model, 
 	format_distribution, 
@@ -16,7 +15,6 @@ from app.utils.evaluation import (
 	evaluate_model_with_distributions, 
 	get_layer_activations_and_predictions
 )
-
 from app.utils.visualization import compute_umap_embedding
 from app.config.settings import (
 	MAX_GRAD_NORM, 
@@ -140,7 +138,12 @@ class UnlearningGAThread(threading.Thread):
             print(f"ETA: {self.status.estimated_time_remaining:.1f}s")
 
         rte = time.time() - start_time
-        save_model(model=self.model, epochs=epoch + 1, learning_rate=self.request.learning_rate)
+        # save_model(
+        #     model=self.model, 
+        #     epochs=epoch + 1, 
+        #     learning_rate=self.request.learning_rate,
+        #     forget_class=self.request.forget_class
+        # )
         
         if self.stopped():
             self.status.is_unlearning = False

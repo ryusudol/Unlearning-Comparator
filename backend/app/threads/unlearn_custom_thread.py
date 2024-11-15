@@ -13,13 +13,13 @@ from app.utils.evaluation import (
 )
 from app.utils.visualization import compute_umap_embedding
 from app.utils.helpers import format_distribution, compress_prob_array
-from app.config.settings import (
+from app.config import (
 	UMAP_DATA_SIZE, 
 	UMAP_DATASET, 
 	UNLEARN_SEED
 )
 
-class UnlearningInference(threading.Thread):
+class UnlearningCustomThread(threading.Thread):
     def __init__(self, 
                  forget_class,
                  status,
@@ -180,11 +180,7 @@ class UnlearningInference(threading.Thread):
 
         if self.stopped():
             return
-        # print("Test Label Distribution:")
-        # self.print_distribution(test_label_dist)
-        # print("Test Confidence Distribution:")
-        # self.print_distribution(test_conf_dist)
-
+        
         # UMAP and activation calculation
         self.status.progress = "Computing UMAP"
         
@@ -270,9 +266,9 @@ class UnlearningInference(threading.Thread):
             "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
             "init": "N/A",
             "method": "N/A",
-            "epochs": 50,
+            "epochs": 200,
             "BS": 128,
-            "LR": 0.01,
+            "LR": 0.1,
             "UA": "N/A" if self.is_training_eval else round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),

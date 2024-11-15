@@ -3,10 +3,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from app.threads.unlearn_FT_thread import UnlearningFTThread
+from app.threads import UnlearningFTThread
 from app.models import get_resnet18
-from app.utils.helpers import set_seed, get_data_loaders
-from app.config.settings import (
+from app.utils.helpers import set_seed
+from app.utils.data_loader import get_data_loaders
+from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     DECREASING_LR,

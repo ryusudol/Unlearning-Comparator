@@ -1,3 +1,4 @@
+import os
 from fastapi import (
     APIRouter, 
     BackgroundTasks, 
@@ -7,14 +8,15 @@ from fastapi import (
     Form
 )
 from pydantic import BaseModel, Field
-from app.services.unlearn_retrain import run_unlearning_retrain
-from app.services.unlearn_RL import run_unlearning_RL
-from app.services.unlearn_GA import run_unlearning_GA 
-from app.services.unlearn_FT import run_unlearning_FT
-from app.services.unlearn_custom import run_unlearning_custom
-
+from app.services import (
+	run_unlearning_retrain,
+	run_unlearning_RL,
+	run_unlearning_GA,
+	run_unlearning_FT,
+	run_unlearning_custom
+)
 from app.models import UnlearningStatus
-import os
+
 
 router = APIRouter()
 status = UnlearningStatus()

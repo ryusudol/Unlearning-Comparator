@@ -3,12 +3,17 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from app.threads.unlearn_retrain_thread import UnlearningRetrainThread
+from app.threads import UnlearningRetrainThread
 from app.models import get_resnet18
-from app.utils.helpers import set_seed, get_data_loaders
-from app.utils.visualization import compute_umap_embedding
-from app.utils.evaluation import get_layer_activations_and_predictions
-from app.config.settings import (
+from app.utils.helpers import set_seed
+from app.utils.data_loader import get_data_loaders
+from app.utils.visualization import (
+	compute_umap_embedding,
+)
+from app.utils.evaluation import (
+	get_layer_activations_and_predictions,
+)
+from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     UNLEARN_SEED
@@ -31,7 +36,10 @@ async def unlearning_retrain(request, status):
         test_loader,
         train_set,
         test_set
-    ) = get_data_loaders(request.batch_size)
+    ) = get_data_loaders(
+        batch_size=request.batch_size,
+        augmentation=True
+    )
     
     # Create dataset excluding the forget class
     indices = [
@@ -40,7 +48,7 @@ async def unlearning_retrain(request, status):
     ]
     subset = torch.utils.data.Subset(train_set, indices)
     unlearning_loader = torch.utils.data.DataLoader(
-        subset,
+        dataset=subset,
         batch_size=request.batch_size,
         shuffle=True
     )
@@ -51,10 +59,11 @@ async def unlearning_retrain(request, status):
         model.parameters(),
         lr=request.learning_rate,
         momentum=MOMENTUM,
-        weight_decay=WEIGHT_DECAY
+        weight_decay=WEIGHT_DECAY,
+        nesterov=True
     )
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer,
+        optimizer=optimizer,
         T_max=request.epochs,
     )
 
@@ -62,24 +71,25 @@ async def unlearning_retrain(request, status):
     status.forget_class = request.forget_class
 
     unlearning_thread = UnlearningRetrainThread(
-        model,
-        unlearning_loader,
-        train_loader,
-        test_loader,
-        criterion,
-        optimizer,
-        scheduler,
-        device,
-        request.epochs,
-        status,
-        "resnet18",
-        f"CIFAR10_without_class_{request.forget_class}",
-        request.learning_rate
+        model=model,
+        unlearning_loader=unlearning_loader,
+        full_train_loader=train_loader,
+        test_loader=test_loader,
+        criterion=criterion,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        device=device,
+        epochs=request.epochs,
+        status=status,
+        model_name="resnet18",
+        dataset_name=f"CIFAR10_without_class_{request.forget_class}",
+        learning_rate=request.learning_rate,
+        forget_class=request.forget_class
     )
     unlearning_thread.start()
     
     while unlearning_thread.is_alive():
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.5)
         if status.cancel_requested:
             unlearning_thread.stop()
             print("Cancel requested. Stopping unlearning thread...")

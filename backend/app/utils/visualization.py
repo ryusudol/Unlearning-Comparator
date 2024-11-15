@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from umap import UMAP
 
-from app.config.settings import (
+from app.config import (
     UMAP_N_NEIGHBORS,
     UMAP_MIN_DIST,
     UMAP_INIT,

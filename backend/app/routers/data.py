@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response
 from PIL import Image
 
-from app.utils.data_loader import load_cifar10_data
+from app.utils import load_cifar10_data
 
 router = APIRouter()
 x_train, y_train = load_cifar10_data()

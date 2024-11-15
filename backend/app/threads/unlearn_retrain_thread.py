@@ -20,7 +20,8 @@ class UnlearningRetrainThread(threading.Thread):
         status,
         model_name,
         dataset_name,
-        learning_rate
+        learning_rate,
+        forget_class
     ):
         threading.Thread.__init__(self)
         self.model = model
@@ -36,6 +37,7 @@ class UnlearningRetrainThread(threading.Thread):
         self.model_name = model_name
         self.dataset_name = dataset_name
         self.learning_rate = learning_rate
+        self.forget_class = forget_class
         self.exception = None
         self.loop = None
         self._stop_event = threading.Event()
@@ -67,9 +69,12 @@ class UnlearningRetrainThread(threading.Thread):
         train_accuracies = []
         test_accuracies = []
 
+        training_time = 0  # Add total training time counter
+        
         for epoch in range(self.epochs):
+            epoch_start_time = time.time()  # Start timing training portion
+            
             self.model.train()
-
             running_loss = 0.0
             correct = 0
             total = 0
@@ -84,7 +89,6 @@ class UnlearningRetrainThread(threading.Thread):
                     return
                 
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                
                 self.optimizer.zero_grad()
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
@@ -111,7 +115,10 @@ class UnlearningRetrainThread(threading.Thread):
                 for i in range(10)
             }
             
-            # Evaluate on test set
+            epoch_training_time = time.time() - epoch_start_time  # Calculate training time
+            training_time += epoch_training_time  # Add to total training time
+            
+            # Evaluate on test set (not counted in training time)
             (
                 test_loss, 
                 test_accuracy, 
@@ -146,10 +153,10 @@ class UnlearningRetrainThread(threading.Thread):
             if test_accuracy > self.status.best_test_accuracy:
                 self.status.best_test_accuracy = test_accuracy
             
-            elapsed_time = time.time() - self.status.start_time
-            estimated_total_time = elapsed_time / (epoch + 1) * self.epochs
+            # Update estimated time using only training time
+            estimated_total_time = training_time / (epoch + 1) * self.epochs
             self.status.estimated_time_remaining = max(
-                0, estimated_total_time - elapsed_time
+                0, estimated_total_time - training_time
             )
             
             current_lr = self.optimizer.param_groups[0]['lr']
@@ -172,7 +179,12 @@ class UnlearningRetrainThread(threading.Thread):
             
             sys.stdout.flush()
         
-        total_training_time = time.time() - self.status.start_time
-        print(f"\nTotal training time: {total_training_time:.1f} seconds ({total_training_time/60:.1f} minutes)")
+        # Use accumulated training_time instead of total elapsed time
+        print(f"\nTotal training time: {training_time:.1f} seconds ({training_time/60:.1f} minutes)")
         print()
-        save_model(self.model, self.epochs, self.learning_rate)
+        save_model(
+            model=self.model, 
+            epochs=self.epochs, 
+            learning_rate=self.learning_rate,
+            forget_class=self.forget_class
+        )

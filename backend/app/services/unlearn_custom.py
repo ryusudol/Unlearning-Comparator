@@ -3,10 +3,11 @@ import os
 import torch
 import torch.nn as nn
 
-from app.threads.unlearn_custom_thread import UnlearningInference
-from app.utils.helpers import set_seed, get_data_loaders
+from app.threads import UnlearningCustomThread
+from app.utils.helpers import set_seed
+from app.utils.data_loader import get_data_loaders
 from app.models import get_resnet18
-from app.config.settings import UNLEARN_SEED
+from app.config import UNLEARN_SEED
 
 
 async def unlearning_custom(forget_class, status, weights_path):
@@ -17,7 +18,10 @@ async def unlearning_custom(forget_class, status, weights_path):
         test_loader, 
         train_set, 
         test_set
-    ) = get_data_loaders(batch_size=1000)
+    ) = get_data_loaders(
+        batch_size=1000,
+        augmentation=False
+    )
     
     criterion = nn.CrossEntropyLoss()
     device = torch.device("cuda" if torch.cuda.is_available() 
@@ -28,7 +32,7 @@ async def unlearning_custom(forget_class, status, weights_path):
     model_before.load_state_dict(torch.load("trained_models/0000.pth", map_location=device))
     model_after.load_state_dict(torch.load(weights_path, map_location=device))
 
-    unlearning_thread = UnlearningInference(
+    unlearning_thread = UnlearningCustomThread(
         forget_class=forget_class,
         status=status,
         model_before=model_before,

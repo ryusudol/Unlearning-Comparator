@@ -110,7 +110,11 @@ class TrainingThread(threading.Thread):
             }
             
             # Evaluate on test set
-            test_loss, test_accuracy, test_class_accuracies = await evaluate_model(
+            (
+                test_loss, 
+                test_accuracy, 
+                test_class_accuracies
+            ) = await evaluate_model(
                 self.model, 
                 self.test_loader, 
                 self.criterion, 
@@ -190,4 +194,9 @@ class TrainingThread(threading.Thread):
         plt.savefig(f'static/plots/{plot_filename}')
         plt.close()
         
-        save_model(self.model, self.epochs, self.learning_rate)
+        save_model(
+            model=self.model, 
+            epochs=self.epochs, 
+            learning_rate=self.learning_rate, 
+            forget_class=-1
+        )

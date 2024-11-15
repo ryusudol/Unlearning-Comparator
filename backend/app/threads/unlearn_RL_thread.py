@@ -5,7 +5,11 @@ import time
 import os
 import uuid
 import json
-from app.utils.helpers import save_model,format_distribution, compress_prob_array
+from app.utils.helpers import (
+	save_model,
+	format_distribution,
+	compress_prob_array
+)
 from app.utils.evaluation import (
     calculate_cka_similarity,
     evaluate_model_with_distributions,
@@ -173,11 +177,16 @@ class UnlearningRLThread(threading.Thread):
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
 
             print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
-            print(f"Forget Loss: {forget_epoch_loss:.4f}, Forget Accuracy: {forget_epoch_acc:.3f}%")
+            print(f"Unlearning Loss: {forget_epoch_loss:.4f}, Unlearning Accuracy: {forget_epoch_acc:.3f}")
             print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
 
         rte = time.time() - start_time
-        save_model(model=self.model, epochs=epoch + 1, learning_rate=self.request.learning_rate)
+        # save_model(
+        #     model=self.model, 
+        #     epochs=epoch + 1, 
+        #     learning_rate=self.request.learning_rate,
+        #     forget_class=self.request.forget_class
+        # )
 
         if self.stopped():
             self.status.is_unlearning = False
