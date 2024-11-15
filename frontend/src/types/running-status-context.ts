@@ -4,6 +4,7 @@ export interface RunningStatus {
   isRunning: boolean;
   status: UnlearningStatus;
   activeStep: number;
+  hasStatusHistory: boolean;
 }
 
 export interface RunningStatusContextType extends RunningStatus {

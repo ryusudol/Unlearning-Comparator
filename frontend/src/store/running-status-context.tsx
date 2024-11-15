@@ -28,6 +28,7 @@ export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
   status: initialStatus,
   activeStep: 0,
+  hasStatusHistory: true,
 
   updateIsRunning: () => {},
   initStatus: () => {},
@@ -52,9 +53,13 @@ function runningStatusReducer(
     case "INIT_STATUS":
       sessionStorage.setItem(
         RUNNING_STATUS,
-        JSON.stringify({ ...state, status: initialStatus })
+        JSON.stringify({
+          ...state,
+          status: initialStatus,
+          hasStatusHistory: true,
+        })
       );
-      return { ...state, status: initialStatus };
+      return { ...state, status: initialStatus, hasStatusHistory: true };
 
     case "RETRIEVE_STATUS":
       const savedStatus = sessionStorage.getItem(RUNNING_STATUS);
@@ -79,9 +84,13 @@ function runningStatusReducer(
           : status.progress;
       sessionStorage.setItem(
         RUNNING_STATUS,
-        JSON.stringify({ ...state, status: { ...status, progress } })
+        JSON.stringify({
+          ...state,
+          status: { ...status, progress },
+          hasStatusHistory: false,
+        })
       );
-      return { ...state, status };
+      return { ...state, status, hasStatusHistory: false };
 
     case "UPDATE_ACTIVE_STEP":
       const step = action.payload;
@@ -105,6 +114,7 @@ export default function RunningStatusContextProvider({
     isRunning: false,
     status: initialStatus,
     activeStep: 0,
+    hasStatusHistory: true,
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
@@ -135,6 +145,7 @@ export default function RunningStatusContextProvider({
     isRunning: runningStatus.isRunning,
     status: runningStatus.status,
     activeStep: runningStatus.activeStep,
+    hasStatusHistory: runningStatus.hasStatusHistory,
 
     updateIsRunning: handleUpdateIsRunning,
     initStatus: handleInitStatus,
