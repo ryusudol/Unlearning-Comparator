@@ -44,10 +44,19 @@ export const useTooltip = (
     let xPos = event.clientX - containerRect.left + 10;
     let yPos = event.clientY - containerRect.top + 10;
 
-    if (xPos + config.tooltipXSize > containerRect.width)
+    if (xPos + config.tooltipXSize > containerRect.width) {
       xPos = event.clientX - containerRect.left - config.tooltipXSize - 10;
-    if (yPos + config.tooltipYSize > containerRect.height)
+      if (xPos < 0) {
+        xPos = 0;
+      }
+    }
+
+    if (yPos + config.tooltipYSize > containerRect.height) {
       yPos = event.clientY - containerRect.top - config.tooltipYSize - 10;
+      if (yPos < 0) {
+        yPos = 0;
+      }
+    }
 
     const tooltipDiv = document.createElement("div");
     tooltipDiv.style.position = "absolute";
