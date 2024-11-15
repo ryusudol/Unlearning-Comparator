@@ -1,7 +1,6 @@
 import { useContext, useMemo, useRef, useCallback } from "react";
 
 import { ExperimentsContext } from "../store/experiments-context";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import Embedding from "../components/Embedding";
 import ConnectionLine from "../components/ConnectionLine";
@@ -18,7 +17,11 @@ import {
   ScrollVerticalIcon,
 } from "../components/UI/icons";
 
-type Position = { x: number; y: number } | null;
+type Coordinate = { x: number; y: number };
+type Position = {
+  from: Coordinate | null;
+  to: Coordinate | null;
+};
 export type Mode = "Baseline" | "Comparison";
 export type HovereInstance = {
   imgIdx: number;
@@ -30,15 +33,12 @@ export type Prob = { [key: string]: number };
 export type SelectedData = (number | Prob)[][];
 
 export default function Embeddings({ height }: { height: number }) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
   const hoveredInstanceRef = useRef<HovereInstance>(null);
-  const fromPositionRef = useRef<Position>(null);
-  const toPositionRef = useRef<Position>(null);
-
+  const positionRef = useRef<Position>({ from: null, to: null });
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
 
@@ -55,8 +55,8 @@ export default function Embeddings({ height }: { height: number }) {
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
       if (imgIdxOrNull === null || !source) {
         hoveredInstanceRef.current = null;
-        fromPositionRef.current = null;
-        toPositionRef.current = null;
+        positionRef.current.from = null;
+        positionRef.current.to = null;
         return;
       }
 
@@ -79,20 +79,26 @@ export default function Embeddings({ height }: { height: number }) {
       const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
 
       if (targetRef.current && currentRef.current) {
-        fromPositionRef.current =
-          currentRef.current.getInstancePosition(imgIdxOrNull);
-        toPositionRef.current =
-          targetRef.current.getInstancePosition(imgIdxOrNull);
+        const fromPos = currentRef.current.getInstancePosition(imgIdxOrNull);
+        const toPos = targetRef.current.getInstancePosition(imgIdxOrNull);
+
+        positionRef.current = {
+          from: { ...fromPos },
+          to: { ...toPos },
+        };
       }
     },
     [extractedBaselineData, extractedComparisonData]
   );
 
   return (
-    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
+    <div
+      style={{ height }}
+      className="w-[1538px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]"
+    >
       <ConnectionLine
-        from={fromPositionRef.current}
-        to={toPositionRef.current}
+        from={positionRef.current.from}
+        to={positionRef.current.to}
       />
       <div className="w-[120px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
@@ -167,7 +173,6 @@ export default function Embeddings({ height }: { height: number }) {
         mode="Baseline"
         height={height}
         data={extractedBaselineData}
-        id={baseline}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={baselineRef}
@@ -177,7 +182,6 @@ export default function Embeddings({ height }: { height: number }) {
         mode="Comparison"
         height={height}
         data={extractedComparisonData}
-        id={comparison}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={comparisonRef}
