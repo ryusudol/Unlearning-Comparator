@@ -115,7 +115,7 @@ async def unlearning_RL(request, status, weights_path):
 
     # thread end
     if unlearning_RL_thread.exception:
-        print(f"An error occurred during FT unlearning: {str(unlearning_RL_thread.exception)}")
+        print(f"An error occurred during RL unlearning: {str(unlearning_RL_thread.exception)}")
     elif status.cancel_requested:
         print("Unlearning process was cancelled.")
     else:

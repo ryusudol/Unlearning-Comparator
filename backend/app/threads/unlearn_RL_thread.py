@@ -133,7 +133,7 @@ class UnlearningRLThread(threading.Thread):
                 forget_mask = (labels == self.request.forget_class)
                 num_forget = forget_mask.sum().item()
                 if num_forget > 0:
-                    # Generate random labels for each forget sample individually
+                    torch.manual_seed(int(time.time_ns()) % (2**32 - 1)) # Set random seed based on current time
                     random_labels = torch.tensor([
                         self.remain_classes[torch.randint(0, len(self.remain_classes), (1,)).item()]
                         for _ in range(num_forget)
