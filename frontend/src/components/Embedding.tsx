@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
+import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
 import ScatterPlot from "./ScatterPlot";
@@ -105,8 +106,11 @@ const Embedding = forwardRef(
             </div>
           </div>
         )}
-        <div className="text-[17px] mt-1">
-          {mode} Model {idExist ? `(${id})` : ""}
+        <div className="text-[17px] mt-1 flex items-center">
+          {mode === "Baseline" ? <CircleIcon /> : <TriangleIcon />}
+          <span className="ml-1">
+            {mode} Model {idExist ? `(${id})` : ""}
+          </span>
         </div>
         <div className="w-[672px] h-[672px] flex flex-col justify-center items-center">
           <ScatterPlot

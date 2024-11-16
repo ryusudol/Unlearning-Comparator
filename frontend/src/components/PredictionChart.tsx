@@ -1,3 +1,4 @@
+import { CircleIcon, TriangleIcon } from "./UI/icons";
 import BubbleChart from "../components/BubbleChart";
 import Heatmap from "../components/Heatmap";
 import { BUBBLE, ChartModeType } from "../views/Predictions";
@@ -37,7 +38,8 @@ export default function PredictionChart({
       ) : (
         <div className="flex flex-col items-center">
           <div className="flex items-center ml-[42px]">
-            <span className="text-[17px] text-nowrap">
+            {mode === "Baseline" ? <CircleIcon /> : <TriangleIcon />}
+            <span className="text-[15px] text-nowrap ml-1">
               {mode} Model {id !== "" ? `(${id})` : ""}
             </span>
           </div>

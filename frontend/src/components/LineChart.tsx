@@ -50,18 +50,30 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
         <p className="mb-1 font-bold">{payload[0].payload.layer}</p>
-        <p>
-          Baseline (Forget Class): <strong>{payload[0].value}</strong>
-        </p>
-        <p>
-          Baseline (Remain Classes): <strong>{payload[1].value}</strong>
-        </p>
-        <p>
-          Comparison (Forget Class): <strong>{payload[2].value}</strong>
-        </p>
-        <p>
-          Comparison (Remain Classes): <strong>{payload[3].value}</strong>
-        </p>
+        <div className="flex items-center">
+          <CircleIcon className="w-3 h-3 mr-1" style={{ color: RED }} />
+          <p>
+            Baseline (Forget Class): <strong>{payload[0].value}</strong>
+          </p>
+        </div>
+        <div className="flex items-center">
+          <CircleIcon className="w-3 h-3 mr-1" style={{ color: GREEN }} />
+          <p>
+            Baseline (Remain Classes): <strong>{payload[1].value}</strong>
+          </p>
+        </div>
+        <div className="flex items-center">
+          <TriangleIcon className="w-3 h-3 mr-1" color={RED} />
+          <p>
+            Comparison (Forget Class): <strong>{payload[2].value}</strong>
+          </p>
+        </div>
+        <div className="flex items-center">
+          <TriangleIcon className="w-3 h-3 mr-1" color={GREEN} />
+          <p>
+            Comparison (Remain Classes): <strong>{payload[3].value}</strong>
+          </p>
+        </div>
       </div>
     );
   }
@@ -79,7 +91,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   return (
     <div>
       <CustomLegend />
-      <p className="text-sm text-center">
+      <p className="text-[15px] text-center">
         Layer-wise CKA Similarity (Before vs. After Unlearning)
       </p>
       <ChartContainer
@@ -185,7 +197,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   );
 }
 
-const CustomLegend = () => {
+function CustomLegend() {
   return (
     <div className="absolute top-[135px] left-14 text-[10px] leading-[10px]">
       <div className="mb-1 flex items-center">
@@ -248,4 +260,4 @@ const CustomLegend = () => {
       </div>
     </div>
   );
-};
+}

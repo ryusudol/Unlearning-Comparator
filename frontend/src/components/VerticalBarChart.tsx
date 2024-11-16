@@ -10,6 +10,7 @@ import {
   TooltipProps,
 } from "recharts";
 
+import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "./UI/chart";
@@ -73,8 +74,18 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           Class: {forgetClassNames[+data.classLabel]}
         </p>
         <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
-        <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
-        <p>Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+        <div className="flex items-center">
+          <CircleIcon className="w-3 h-3" />
+          <p className="ml-1">
+            Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+          </p>
+        </div>
+        <div className="flex items-center">
+          <TriangleIcon className="w-3 h-3" />
+          <p className="ml-1">
+            Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+          </p>
+        </div>
       </div>
     );
   }
