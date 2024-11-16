@@ -79,8 +79,11 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   return (
     <div>
       <CustomLegend />
+      <p className="text-sm text-center">
+        Layer-wise CKA Similarity (Before vs. After Unlearning)
+      </p>
       <ChartContainer
-        className="w-[468px] h-[190px] relative"
+        className="w-[468px] h-[190px] relative -top-0.5"
         config={chartConfig}
       >
         <LineChart
