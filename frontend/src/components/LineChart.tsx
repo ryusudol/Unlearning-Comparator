@@ -187,7 +187,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
 const CustomLegend = () => {
   return (
-    <div className="absolute top-[120px] left-14 text-[10px] leading-[10px]">
+    <div className="absolute top-[135px] left-14 text-[10px] leading-[10px]">
       <div className="mb-1 flex items-center">
         <div className="relative">
           <CircleIcon
