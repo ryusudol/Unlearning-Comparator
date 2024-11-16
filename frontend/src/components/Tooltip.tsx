@@ -11,7 +11,9 @@ const BASELINE_OPACITY = 0.6;
 const COMPARISON_OPACITY = 1;
 const TICK_PADDING = 8;
 const BAR_HEIGHT = 8;
-const FONT_SIZE = "12px";
+const FONT_SIZE = "14px";
+const FONT_WEIGHT = 500;
+const LEGEND_RECT_SIZE = 12;
 const margin = { top: 30, right: 20, bottom: 20, left: 85 };
 
 interface Props {
@@ -106,12 +108,12 @@ export default React.memo(function Tooltip({
     const legend = svg
       .append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${width - margin.right - 60}, -8)`);
+      .attr("transform", `translate(${width - margin.right - 166}, 8)`);
 
     legend
       .append("rect")
-      .attr("width", 12)
-      .attr("height", 12)
+      .attr("width", LEGEND_RECT_SIZE)
+      .attr("height", LEGEND_RECT_SIZE)
       .attr("fill", firstTableauColor);
 
     legend
@@ -124,19 +126,19 @@ export default React.memo(function Tooltip({
 
     const comparisonLegend = legend
       .append("g")
-      .attr("transform", "translate(0, 16)");
+      .attr("transform", "translate(80, 0)");
 
     comparisonLegend
       .append("rect")
-      .attr("width", 12)
-      .attr("height", 12)
+      .attr("width", LEGEND_RECT_SIZE)
+      .attr("height", LEGEND_RECT_SIZE)
       .attr("fill", firstTableauColor)
       .attr("opacity", COMPARISON_OPACITY);
 
     comparisonLegend
       .append("rect")
-      .attr("width", 12)
-      .attr("height", 12)
+      .attr("width", LEGEND_RECT_SIZE)
+      .attr("height", LEGEND_RECT_SIZE)
       .attr("fill", "url(#stripe-legend)")
       .attr("opacity", 1);
 
@@ -229,7 +231,8 @@ export default React.memo(function Tooltip({
       .call(xAxis)
       .selectAll("text")
       .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed");
+      .style("font-family", "Roboto Condensed")
+      .style("font-weight", FONT_WEIGHT);
 
     svg.select(".domain").remove();
 
@@ -241,7 +244,8 @@ export default React.memo(function Tooltip({
       .call(yAxis)
       .selectAll("text")
       .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed");
+      .style("font-family", "Roboto Condensed")
+      .style("font-weight", FONT_WEIGHT);
   }, [barChartData, firstTableauColor, forgetClass]);
 
   return (
@@ -280,9 +284,9 @@ export default React.memo(function Tooltip({
           </p>
         </div>
       </div>
-      <div className="relative z-50">
+      <div className="relative z-50 bottom-2.5">
         <svg ref={svgRef} className="w-full max-w-4xl" />
-        <p className="text-xs absolute -bottom-2.5 right-[calc(50%-2rem)] translate-x-1/2">
+        <p className="text-sm absolute font-medium -bottom-[18px] right-[calc(50%-2rem)] translate-x-1/2">
           Confidence Score
         </p>
       </div>
