@@ -1,5 +1,12 @@
 import { useContext } from "react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  TooltipProps,
+} from "recharts";
 
 import { getCkaData } from "../utils/data/getCkaData";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -8,7 +15,6 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "../components/UI/chart";
 
 const GREEN = "#567C31";
@@ -39,6 +45,29 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
+        <p className="mb-1 font-bold">{payload[0].payload.layer}</p>
+        <p>
+          Baseline (Forget Class): <strong>{payload[0].value}</strong>
+        </p>
+        <p>
+          Baseline (Remain Classes): <strong>{payload[1].value}</strong>
+        </p>
+        <p>
+          Comparison (Forget Class): <strong>{payload[2].value}</strong>
+        </p>
+        <p>
+          Comparison (Remain Classes): <strong>{payload[3].value}</strong>
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function MyLineChart({ dataset }: { dataset: string }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
@@ -49,6 +78,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
   return (
     <div>
+      <CustomLegend />
       <ChartContainer
         className="w-[468px] h-[190px] relative"
         config={chartConfig}
@@ -87,7 +117,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               },
             }}
           />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+          <ChartTooltip cursor={false} content={<CustomTooltip />} />
           <Line
             dataKey="baselineForgetCka"
             type="linear"
@@ -148,7 +178,6 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
           />
         </LineChart>
       </ChartContainer>
-      <CustomLegend />
     </div>
   );
 }
