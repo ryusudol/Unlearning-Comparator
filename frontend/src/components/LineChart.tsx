@@ -101,7 +101,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
         <LineChart
           accessibilityLayer
           data={ckaData}
-          width={468}
+          width={470}
           height={190}
           margin={{
             top: 4,
@@ -126,9 +126,10 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               angle: -90,
               position: "center",
               style: {
-                fontSize: 10,
+                fontSize: 12,
                 textAnchor: "middle",
                 fill: "#000000",
+                marginRight: 2,
               },
             }}
           />
