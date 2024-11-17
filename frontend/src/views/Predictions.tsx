@@ -1,15 +1,14 @@
 import { useState, useContext } from "react";
 import * as d3 from "d3";
 
+import BubbleChart from "../components/BubbleChart";
 import PredictionChart from "../components/PredictionChart";
 import HeatmapLegend from "../components/HeatmapLegend";
 import BubbleLegend from "../components/BubbleLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
 import { Label } from "../components/UI/label";
-import { extractHeatmapData } from "../utils/data/experiments";
 import {
   Target02Icon,
   ChartBubble02Icon,
@@ -41,25 +40,9 @@ export default function Predictions({
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
   const [chartMode, setChartMode] = useState<ChartModeType>(LABEL_HEATMAP);
-
-  let baselineDistributionData: HeatmapData;
-  baselineDistributionData = extractHeatmapData(
-    datasetMode,
-    chartMode,
-    baselineExperiment
-  );
-
-  let comparisonDistributionData: HeatmapData;
-  comparisonDistributionData = extractHeatmapData(
-    datasetMode,
-    chartMode,
-    comparisonExperiment
-  );
 
   const expandedStyle = {
     height: `${height * 2}px`,
@@ -171,7 +154,7 @@ export default function Predictions({
       </div>
       {/* Charts */}
       {selectedFCExist ? (
-        baseline === "" || comparison === "" ? (
+        !allSelected ? (
           <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
             Select both Baseline and Comparison.
           </div>
@@ -181,27 +164,46 @@ export default function Predictions({
               isExpanded ? "mt-2" : "mt-0"
             }`}
           >
-            <span
-              className={`font-extralight -rotate-90 text-nowrap ${
-                isExpanded ? "text-base" : "text-[13px]"
-              } ${chartMode !== BUBBLE ? "-ml-6 -mr-9" : "-mx-6"}`}
-            >
-              Ground Truth
-            </span>
-            <PredictionChart
-              mode="Baseline"
-              id={baseline}
-              data={baselineDistributionData}
-              chartMode={chartMode}
-              isExpanded={isExpanded}
-            />
-            <PredictionChart
-              mode="Comparison"
-              id={comparison}
-              data={comparisonDistributionData}
-              chartMode={chartMode}
-              isExpanded={isExpanded}
-            />
+            {chartMode !== BUBBLE && (
+              <span
+                className={`font-extralight -rotate-90 text-nowrap -ml-6 -mr-9 ${
+                  isExpanded ? "text-base" : "text-[13px]"
+                }`}
+              >
+                Ground Truth
+              </span>
+            )}
+            {chartMode === BUBBLE && (
+              <>
+                <BubbleChart
+                  mode="Baseline"
+                  datasetMode={datasetMode}
+                  isExpanded={isExpanded}
+                />
+                <BubbleChart
+                  mode="Comparison"
+                  datasetMode={datasetMode}
+                  isExpanded={isExpanded}
+                  showYAxis={false}
+                />
+              </>
+            )}
+            {chartMode !== BUBBLE && (
+              <>
+                <PredictionChart
+                  mode="Baseline"
+                  datasetMode={datasetMode}
+                  chartMode={chartMode}
+                  isExpanded={isExpanded}
+                />
+                <PredictionChart
+                  mode="Comparison"
+                  datasetMode={datasetMode}
+                  chartMode={chartMode}
+                  isExpanded={isExpanded}
+                />
+              </>
+            )}
             {/* Legend */}
             {chartMode === BUBBLE ? (
               <div
@@ -209,8 +211,8 @@ export default function Predictions({
                   isExpanded ? "ml-3" : "ml-1"
                 }`}
               >
-                <BubbleLegend scale={sizeScale} />
-                <img src="/bubble-legend.png" alt="bubble legend img" />
+                {/* <BubbleLegend scale={sizeScale} />
+                <img src="/bubble-legend.png" alt="bubble legend img" /> */}
               </div>
             ) : (
               <HeatmapLegend isExpanded={isExpanded} />

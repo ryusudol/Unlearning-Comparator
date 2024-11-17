@@ -10,6 +10,7 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
+import { ForgetClassContext } from "../store/forget-class-context";
 import { calculatePerformanceMetrics } from "../utils/data/experiments";
 import { ExperimentData } from "../types/data";
 import { hexToRgba } from "../utils/data/colors";
@@ -41,6 +42,7 @@ interface Props {
 }
 
 export default function DataTable({ columns }: Props) {
+  const { forgetClass } = useContext(ForgetClassContext);
   const { experiments } = useContext(ExperimentsContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
@@ -48,7 +50,24 @@ export default function DataTable({ columns }: Props) {
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const tableData = useMemo(() => Object.values(experiments), [experiments]);
+  const tableData = useMemo(() => {
+    const experimentsArray = Object.values(experiments);
+    const pretrainedExp = experimentsArray.find(
+      (exp) => exp.id === `000${forgetClass}`
+    );
+    const retrainedExp = experimentsArray.find(
+      (exp) => exp.id === `a00${forgetClass}`
+    );
+
+    if (!pretrainedExp || !retrainedExp) return [];
+
+    const remainingExps = experimentsArray.filter(
+      (exp) => exp.id !== pretrainedExp.id && exp.id !== retrainedExp.id
+    );
+
+    return [pretrainedExp, retrainedExp, ...remainingExps];
+  }, [experiments, forgetClass]);
+
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
   ) as PerformanceMetrics;

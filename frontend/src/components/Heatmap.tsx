@@ -172,7 +172,7 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
   });
 
   return (
-    <div className="-mt-[10px]" style={{ position: "relative" }}>
+    <div className="-mt-2.5" style={{ position: "relative" }}>
       <svg width={length} height={length}>
         <g
           width={boundsWidth}

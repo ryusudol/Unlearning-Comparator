@@ -28,7 +28,7 @@ export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
   status: initialStatus,
   activeStep: 0,
-  hasStatusHistory: true,
+  completedSteps: [],
 
   updateIsRunning: () => {},
   initStatus: () => {},
@@ -51,54 +51,59 @@ function runningStatusReducer(
       return { ...state, isRunning };
 
     case "INIT_STATUS":
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({
-          ...state,
-          status: initialStatus,
-          hasStatusHistory: true,
-        })
-      );
-      return { ...state, status: initialStatus, hasStatusHistory: true };
+      const initializedStatus = {
+        ...state,
+        status: initialStatus,
+        completedSteps: [],
+      };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(initializedStatus));
+      return initializedStatus;
 
     case "RETRIEVE_STATUS":
       const savedStatus = sessionStorage.getItem(RUNNING_STATUS);
       if (savedStatus) {
         const parsedStatus: RunningStatus = JSON.parse(savedStatus);
-        const updatedStatus = parsedStatus.status;
-        sessionStorage.setItem(
-          RUNNING_STATUS,
-          JSON.stringify({ ...state, status: updatedStatus })
-        );
-        return { ...state, status: updatedStatus };
+        sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(parsedStatus));
+        return parsedStatus;
       }
       return state;
 
     case "UPDATE_STATUS":
       const status = action.payload;
       const progress =
-        state.isRunning && status.progress === "Idle"
+        status.is_unlearning && status.progress === "Idle"
           ? "Unlearning"
-          : !state.isRunning
+          : !status.is_unlearning
           ? "Idle"
           : status.progress;
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({
-          ...state,
-          status: { ...status, progress },
-          hasStatusHistory: false,
-        })
-      );
-      return { ...state, status, hasStatusHistory: false };
+      let completedSteps: number[] = [];
+      if (
+        (progress === "Unlearning" &&
+          status.current_epoch !== status.total_epochs) ||
+        (progress === "Unlearning" && status.is_unlearning)
+      ) {
+        completedSteps = [1];
+      } else if (progress.includes("Evaluating")) {
+        completedSteps = [1, 2];
+      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
+        completedSteps = [1, 2, 3];
+      } else {
+        completedSteps = [1, 2, 3];
+      }
+
+      const updatedStatus = {
+        ...state,
+        status: { ...status, progress },
+        completedSteps,
+      };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
+      return updatedStatus;
 
     case "UPDATE_ACTIVE_STEP":
       const step = action.payload;
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({ ...state, activeStep: step })
-      );
-      return { ...state, activeStep: step };
+      const updatedActiveStep = { ...state, activeStep: step };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedActiveStep));
+      return updatedActiveStep;
 
     default:
       return state;
@@ -114,7 +119,7 @@ export default function RunningStatusContextProvider({
     isRunning: false,
     status: initialStatus,
     activeStep: 0,
-    hasStatusHistory: true,
+    completedSteps: [],
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
@@ -145,7 +150,7 @@ export default function RunningStatusContextProvider({
     isRunning: runningStatus.isRunning,
     status: runningStatus.status,
     activeStep: runningStatus.activeStep,
-    hasStatusHistory: runningStatus.hasStatusHistory,
+    completedSteps: runningStatus.completedSteps,
 
     updateIsRunning: handleUpdateIsRunning,
     initStatus: handleInitStatus,

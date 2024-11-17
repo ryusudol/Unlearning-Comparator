@@ -1,14 +1,20 @@
-import { useContext } from "react";
+import { useState, useContext } from "react";
 
+import LineChart from "../components/LineChart";
 import { Label } from "../components/UI/label";
 import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
 import { Layers02Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 
+const TRAINING = "training";
+const TEST = "test";
+
 export default function Correlations({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
+
+  const [dataset, setDataset] = useState(TRAINING);
 
   const allSelected = baseline !== "" && comparison !== "";
 
@@ -27,16 +33,20 @@ export default function Correlations({ height }: { height: number }) {
         {allSelected && (
           <div className="flex items-center">
             <span className="text-xs font-light mr-2">Dataset:</span>
-            <RadioGroup className="flex" defaultValue="training">
+            <RadioGroup
+              className="flex"
+              defaultValue={TRAINING}
+              onValueChange={setDataset}
+            >
               <div className="flex items-center space-x-[2px]">
-                <RadioGroupItem value="training" id="training" />
-                <Label className="text-xs font-light" htmlFor="training">
+                <RadioGroupItem value={TRAINING} id={TRAINING} />
+                <Label className="text-xs font-light" htmlFor={TRAINING}>
                   Training
                 </Label>
               </div>
               <div className="flex items-center space-x-[2px]">
-                <RadioGroupItem value="test" id="test" />
-                <Label className="text-xs font-light" htmlFor="test">
+                <RadioGroupItem value={TEST} id={TEST} />
+                <Label className="text-xs font-light" htmlFor={TEST}>
                   Test
                 </Label>
               </div>
@@ -47,7 +57,12 @@ export default function Correlations({ height }: { height: number }) {
       {selectedForgetClasses ? (
         allSelected ? (
           <div className="flex flex-col items-center">
-            <img src="/cor.png" alt="correlation img" className="h-[435px]" />
+            <LineChart dataset={dataset} />
+            <img
+              src="/cor.png"
+              alt="correlation img"
+              className="h-[435px] mt-4"
+            />
           </div>
         ) : (
           <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">

@@ -20,6 +20,13 @@ type Values = {
   RTE: number[];
 };
 
+type BubbleChartData = {
+  x: number;
+  y: number;
+  label: number;
+  conf: number;
+}[];
+
 const BRIGHTEST = 0;
 const DARKEST = 1;
 const RED = "#D98585";
@@ -126,11 +133,11 @@ export function extractHeatmapData(
   else if (datasetMode === TEST && chartMode === CONFIDENCE_HEATMAP)
     distributionData = data?.t_conf_dist;
 
-  let processedData: HeatmapData = [];
+  let result: HeatmapData = [];
   if (distributionData) {
     Object.entries(distributionData).forEach(([_, preds], gtIdx) => {
       Object.entries(preds).forEach(([_, value], predIdx) => {
-        processedData.push({
+        result.push({
           x: forgetClassNames[predIdx],
           y: forgetClassNames[gtIdx],
           value,
@@ -139,5 +146,44 @@ export function extractHeatmapData(
     });
   }
 
-  return processedData;
+  return result;
+}
+
+export function extractBubbleChartData(
+  datasetMode: string,
+  data: ExperimentData
+) {
+  let bubbleChartData: {
+    label_dist: Dist;
+    conf_dist: Dist;
+  };
+  if (datasetMode === TRAINING)
+    bubbleChartData = {
+      label_dist: data.label_dist,
+      conf_dist: data.conf_dist,
+    };
+  else
+    bubbleChartData = {
+      label_dist: data.t_label_dist,
+      conf_dist: data.t_conf_dist,
+    };
+
+  let result: BubbleChartData = [];
+  if (bubbleChartData) {
+    Object.entries(bubbleChartData.label_dist).forEach(
+      ([gtIndex, dist], gtIdx) => {
+        Object.entries(dist).forEach(([predIndex, labelValue], predIdx) => {
+          const confValue = bubbleChartData.conf_dist[gtIndex][predIdx];
+          result.push({
+            x: predIdx,
+            y: gtIdx,
+            label: labelValue,
+            conf: confValue,
+          });
+        });
+      }
+    );
+  }
+
+  return result;
 }
