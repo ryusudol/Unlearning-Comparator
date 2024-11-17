@@ -9,8 +9,8 @@ import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
 
-const UPPER_HEIGHT = 260;
-const LOWER_HEIGHT = 757;
+const UPPER_SECTION_HEIGHT = 234;
+const LOWER_SECTION_HEIGHT = 677;
 
 export default function App() {
   const { experimentLoading } = useContext(ExperimentsContext);
@@ -34,19 +34,19 @@ export default function App() {
       {!experimentLoading && (
         <>
           <div className="flex items-center">
-            <Experiments height={UPPER_HEIGHT} />
-            <RunningStatus height={UPPER_HEIGHT} />
-            <Accuracies height={UPPER_HEIGHT} />
+            <Experiments height={UPPER_SECTION_HEIGHT} />
+            <RunningStatus height={UPPER_SECTION_HEIGHT} />
+            <Accuracies height={UPPER_SECTION_HEIGHT} />
           </div>
           <div className="flex">
-            <Core height={LOWER_HEIGHT} />
+            <Core height={LOWER_SECTION_HEIGHT} />
             <div className="flex flex-col">
               <Predictions
-                height={289}
+                height={260}
                 isExpanded={isPredictionsExpanded}
                 onExpansionClick={handleExpansionClick}
               />
-              <Correlations height={LOWER_HEIGHT - 289} />
+              <Correlations height={LOWER_SECTION_HEIGHT - 260} />
             </div>
           </div>
         </>

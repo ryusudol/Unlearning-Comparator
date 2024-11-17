@@ -88,7 +88,7 @@ export default function Accuracies({ height }: { height: number }) {
   return (
     <section
       style={{ height: height }}
-      className="w-[490px] p-1 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
+      className="w-[440px] p-1 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
     >
       <div className="flex items-center">
         <Chart01Icon />
@@ -112,6 +112,7 @@ export default function Accuracies({ height }: { height: number }) {
             mode="Test"
             gapData={testAccuracyGap}
             maxGap={maxGap}
+            showYAxis={false}
           />
         </div>
       )}

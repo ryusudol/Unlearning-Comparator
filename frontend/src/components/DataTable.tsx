@@ -19,6 +19,7 @@ import { ExperimentsContext } from "../store/experiments-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
 import { cn } from "../utils/common/styles";
+import { COLUMN_WIDTHS } from "./Columns";
 import {
   Table,
   TableBody,
@@ -27,8 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "./UI/table";
-
-const sortables = ["UA", "RA", "TUA", "TRA", "RTE"];
 
 type PerformanceMetrics = {
   [key: string]: {
@@ -180,24 +179,25 @@ export default function DataTable({ columns }: Props) {
   }, [saveBaseline, saveComparison, tableData]);
 
   return (
-    <div className="w-full h-[222px]">
+    <div className="w-full h-[196px]">
       <div className="relative w-full">
-        <Table className="table-fixed w-full border-t">
+        <Table className="w-full table-fixed border-t">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const style = sortables.includes(header.column.id)
-                    ? { width: "78px" }
-                    : header.column.id === "phase"
-                    ? { width: "100px" }
-                    : header.column.id === "baseline"
-                    ? { width: "70px" }
-                    : header.column.id === "comparison"
-                    ? { width: "90px" }
-                    : {};
+                  const columnWidth =
+                    COLUMN_WIDTHS[
+                      header.column.id as keyof typeof COLUMN_WIDTHS
+                    ];
                   return (
-                    <TableHead key={header.id} style={style}>
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        width: `${columnWidth}px`,
+                        minWidth: `${columnWidth}px`,
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -211,8 +211,8 @@ export default function DataTable({ columns }: Props) {
             ))}
           </TableHeader>
         </Table>
-        <ScrollArea className="w-full h-[186px]">
-          <Table className="table-fixed w-full">
+        <ScrollArea className="w-full h-[160px]">
+          <Table className="w-full table-fixed">
             <TableBody
               className={`text-sm ${
                 table.getRowModel().rows?.length <= 5 &&
@@ -227,11 +227,17 @@ export default function DataTable({ columns }: Props) {
                   >
                     {row.getVisibleCells().map((cell, idx) => {
                       const columnId = cell.column.id;
+                      const columnWidth =
+                        COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
 
                       const isPerformanceMetric =
                         columnId in performanceMetrics;
 
-                      let cellStyle = {};
+                      let cellStyle: React.CSSProperties = {
+                        width: `${columnWidth}px`,
+                        minWidth: `${columnWidth}px`,
+                      };
+
                       if (isPerformanceMetric) {
                         const { baseColor } = performanceMetrics[columnId];
                         const value = cell.getValue() as number;
@@ -249,8 +255,9 @@ export default function DataTable({ columns }: Props) {
                           }
 
                           cellStyle = {
+                            ...cellStyle,
                             borderLeft:
-                              columnId === "ua"
+                              columnId === "UA"
                                 ? "1px solid rgb(229 231 235)"
                                 : "none",
                             borderRight:

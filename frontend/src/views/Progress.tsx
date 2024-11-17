@@ -131,13 +131,13 @@ export default function Progress({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[360px] p-1 relative border"
+      className="w-[350px] p-1 relative border"
     >
       <div className="flex items-center">
         <VitalIcon />
         <h5 className="font-semibold ml-1 text-lg">Progress</h5>
       </div>
-      <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-2">
+      <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
         {steps.map((step, idx) => {
           const isNotLastStep = idx !== steps.length - 1;
 
@@ -152,12 +152,12 @@ export default function Progress({ height }: { height: number }) {
               className="relative flex w-full items-start gap-3"
             >
               {isNotLastStep && (
-                <StepperSeparator className="absolute left-[19px] top-8 block h-[calc(100%)] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary">
+                <StepperSeparator className="absolute left-[15px] top-6 block h-[calc(100%)] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary">
                   <div />
                 </StepperSeparator>
               )}
               <StepperTrigger className="p-1 cursor-default">
-                <Button className="w-8 h-8 p-0 rounded-full z-10 cursor-default hover:bg-[#0F172A]">
+                <Button className="w-6 h-6 p-0 rounded-full z-10 cursor-default hover:bg-[#0F172A]">
                   {state === "completed" ||
                   (completedSteps.length && !isRunning) ? (
                     <Check className="size-4" />
@@ -170,10 +170,10 @@ export default function Progress({ height }: { height: number }) {
                 </Button>
               </StepperTrigger>
               <div className="flex flex-col">
-                <StepperTitle className="font-semibold transition text-base">
+                <StepperTitle className="font-semibold transition text-sm">
                   {step.title}
                 </StepperTitle>
-                <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm leading-[18px]">
+                <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm leading-[17px]">
                   {step.description.split("\n").map((el, idx) => (
                     <p key={idx} className="text-black">
                       {el

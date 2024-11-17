@@ -19,6 +19,7 @@ import { GapDataItem } from "../views/Accuracies";
 
 const TOOLTIP_FIX_LENGTH = 3;
 const LABEL_FONT_SIZE = 11;
+
 const chartConfig = {
   value: {
     label: "Gap",
@@ -96,9 +97,15 @@ interface Props {
   mode: "Training" | "Test";
   gapData: GapDataItem[];
   maxGap: number;
+  showYAxis?: boolean;
 }
 
-export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
+export default function VerticalBarChart({
+  mode,
+  gapData,
+  maxGap,
+  showYAxis = true,
+}: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
 
   const remainGapAvgValue = useMemo(() => {
@@ -117,15 +124,18 @@ export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
   const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <h5 className="text-[15px] mb-0.5 ml-5">{mode} Dataset</h5>
-      <ChartContainer config={chartConfig} className="w-[240px] h-[200px]">
+    <div className="flex flex-col justify-center items-center relative bottom-1">
+      <p className="text-[15px] text-center">{mode} Dataset</p>
+      <ChartContainer
+        config={chartConfig}
+        className={`${showYAxis ? "w-[250px]" : "w-[190px]"} h-[182px]`}
+      >
         <BarChart
           accessibilityLayer
           data={gapData}
           layout="vertical"
           margin={{
-            left: 0,
+            left: 14,
             right: 40,
             top: 13,
             bottom: 8,
@@ -139,6 +149,9 @@ export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
             axisLine={true}
             interval={0}
             fontSize={LABEL_FONT_SIZE}
+            tick={showYAxis}
+            width={showYAxis ? 60 : 1}
+            tickMargin={-1}
             tickFormatter={(value) => {
               const label =
                 chartConfig[value as keyof typeof chartConfig]?.label;
@@ -146,6 +159,7 @@ export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
                 forgetClass && label === forgetClassNames[forgetClass];
               return isForgetClass ? label + " (X)" : label;
             }}
+            style={{ whiteSpace: "nowrap" }}
           />
           <XAxis
             dataKey="value"
@@ -157,7 +171,7 @@ export default function VerticalBarChart({ mode, gapData, maxGap }: Props) {
           >
             <Label
               fill="black"
-              className="-translate-y-1 text-[13px] font-light"
+              className="-translate-y-1 text-xs font-light"
               value={`← Baseline High | Comparison High →`}
               offset={-2}
               dx={9}

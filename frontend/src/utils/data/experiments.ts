@@ -3,14 +3,7 @@ import * as d3 from "d3";
 import { Dist } from "../../types/data";
 import { ExperimentData } from "../../types/data";
 import { Experiments } from "../../types/experiments-context";
-import { forgetClassNames } from "../../constants/forgetClassNames";
-import {
-  HeatmapData,
-  TRAINING,
-  TEST,
-  LABEL_HEATMAP,
-  CONFIDENCE_HEATMAP,
-} from "../../views/Predictions";
+import { HeatmapData, TRAINING } from "../../views/Predictions";
 
 type Values = {
   UA: number[];
@@ -118,33 +111,21 @@ export function extractSelectedData(data: ExperimentData | undefined) {
     : [];
 }
 
-export function extractHeatmapData(
-  datasetMode: string,
-  chartMode: string,
-  data: ExperimentData | undefined
-) {
-  let distributionData: Dist | undefined;
-  if (datasetMode === TRAINING && chartMode === LABEL_HEATMAP)
-    distributionData = data?.label_dist;
-  else if (datasetMode === TRAINING && chartMode === CONFIDENCE_HEATMAP)
-    distributionData = data?.conf_dist;
-  else if (datasetMode === TEST && chartMode === LABEL_HEATMAP)
-    distributionData = data?.t_label_dist;
-  else if (datasetMode === TEST && chartMode === CONFIDENCE_HEATMAP)
-    distributionData = data?.t_conf_dist;
+export function extractHeatmapData(datasetMode: string, data: ExperimentData) {
+  let distributionData: number[][];
+  if (datasetMode === TRAINING) distributionData = data.cka.train.forget_class;
+  else distributionData = data.cka.test.forget_class;
 
   let result: HeatmapData = [];
-  if (distributionData) {
-    Object.entries(distributionData).forEach(([_, preds], gtIdx) => {
-      Object.entries(preds).forEach(([_, value], predIdx) => {
-        result.push({
-          x: forgetClassNames[predIdx],
-          y: forgetClassNames[gtIdx],
-          value,
-        });
+  distributionData.forEach((row, gtIdx) => {
+    row.forEach((value, predIdx) => {
+      result.push({
+        x: data.cka.layers[predIdx],
+        y: data.cka.layers[gtIdx],
+        value: value,
       });
     });
-  }
+  });
 
   return result;
 }
@@ -172,7 +153,7 @@ export function extractBubbleChartData(
   if (bubbleChartData) {
     Object.entries(bubbleChartData.label_dist).forEach(
       ([gtIndex, dist], gtIdx) => {
-        Object.entries(dist).forEach(([predIndex, labelValue], predIdx) => {
+        Object.entries(dist).forEach(([_, labelValue], predIdx) => {
           const confValue = bubbleChartData.conf_dist[gtIndex][predIdx];
           result.push({
             x: predIdx,

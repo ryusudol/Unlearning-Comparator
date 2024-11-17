@@ -1,18 +1,13 @@
 import { useState, useContext } from "react";
-import * as d3 from "d3";
 
+import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
 import PredictionChart from "../components/PredictionChart";
-import HeatmapLegend from "../components/HeatmapLegend";
-import BubbleLegend from "../components/BubbleLegend";
+// import HeatmapLegend from "../components/HeatmapLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { RadioGroup, RadioGroupItem } from "../components/UI/radio-group";
-import { Label } from "../components/UI/label";
 import {
   Target02Icon,
-  ChartBubble02Icon,
-  RectangularIcon,
   ArrowExpandIcon,
   ArrowShrinkIcon,
 } from "../components/UI/icons";
@@ -22,7 +17,6 @@ export const TEST = "test";
 export const BUBBLE = "bubble";
 export const LABEL_HEATMAP = "label-heatmap";
 export const CONFIDENCE_HEATMAP = "confidence-heatmap";
-const sizeScale = d3.scaleSqrt().domain([0, 100]).range([0, 12.5]).nice();
 
 export type ChartModeType = "bubble" | "label-heatmap" | "confidence-heatmap";
 export type HeatmapData = { x: string; y: string; value: number }[];
@@ -42,7 +36,7 @@ export default function Predictions({
   const { selectedForgetClasses } = useContext(ForgetClassContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
-  const [chartMode, setChartMode] = useState<ChartModeType>(LABEL_HEATMAP);
+  const [chartMode, setChartMode] = useState<ChartModeType>(BUBBLE);
 
   const expandedStyle = {
     height: `${height * 2}px`,
@@ -57,7 +51,7 @@ export default function Predictions({
     <section
       style={isExpanded ? expandedStyle : unexpandedStyle}
       className={`px-[5px] py-0.5 flex flex-col border-[1px] border-solid transition-all z-10 bg-white absolute ${
-        isExpanded ? `w-[980px] right-0 top-[19px]` : `w-[490px] top-[308px]`
+        isExpanded ? `w-[880px] right-0 top-[19px]` : `w-[440px] top-[282px]`
       }`}
     >
       <div className="flex justify-between">
@@ -68,7 +62,7 @@ export default function Predictions({
           </div>
           {allSelected && (
             <div className="flex items-center">
-              <ChartBubble02Icon
+              {/* <ChartBubble02Icon
                 onClick={() => setChartMode(BUBBLE)}
                 className={`cursor-pointer scale-90 ${
                   chartMode === BUBBLE ? "text-black" : "text-gray-400"
@@ -107,7 +101,7 @@ export default function Predictions({
                 <span className="absolute text-[9px] top-[1px] right-[5.5px]">
                   C
                 </span>
-              </div>
+              </div> */}
               {isExpanded ? (
                 <div
                   onClick={onExpansionClick}
@@ -128,29 +122,7 @@ export default function Predictions({
             </div>
           )}
         </div>
-        {allSelected && (
-          <div className="flex items-center">
-            <span className="text-xs font-light mr-2">Dataset:</span>
-            <RadioGroup
-              onValueChange={setDatasetMode}
-              className="flex"
-              defaultValue={TRAINING}
-            >
-              <div className="flex items-center space-x-[2px]">
-                <RadioGroupItem value={TRAINING} id={TRAINING} />
-                <Label className="text-xs font-light" htmlFor={TRAINING}>
-                  Training
-                </Label>
-              </div>
-              <div className="flex items-center space-x-[2px]">
-                <RadioGroupItem value={TEST} id={TEST} />
-                <Label className="text-xs font-light" htmlFor={TEST}>
-                  Test
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )}
+        {allSelected && <DatasetModeSelector onValueChange={setDatasetMode} />}
       </div>
       {/* Charts */}
       {selectedFCExist ? (
@@ -214,9 +186,8 @@ export default function Predictions({
                 {/* <BubbleLegend scale={sizeScale} />
                 <img src="/bubble-legend.png" alt="bubble legend img" /> */}
               </div>
-            ) : (
-              <HeatmapLegend isExpanded={isExpanded} />
-            )}
+            ) : // <HeatmapLegend isExpanded={isExpanded} />
+            null}
           </div>
         )
       ) : (

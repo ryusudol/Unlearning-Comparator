@@ -15,8 +15,8 @@ import { ForgetClassContext } from "../store/forget-class-context";
 import { Mode, Prob, SelectedData, HovereInstance } from "../views/Embeddings";
 
 const CONFIG = {
-  width: 672,
-  height: 672,
+  width: 630,
+  height: 630,
   dotSize: 4,
   minZoom: 0.6,
   maxZoom: 32,
