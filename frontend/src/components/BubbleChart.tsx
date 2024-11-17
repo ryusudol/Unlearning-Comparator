@@ -1,37 +1,163 @@
+import { useContext, useEffect, useRef } from "react";
+import * as d3 from "d3";
+
+import { ForgetClassContext } from "../store/forget-class-context";
+import { ExperimentsContext } from "../store/experiments-context";
+import { extractBubbleChartData } from "../utils/data/experiments";
 import { ModeType } from "./PredictionChart";
+import { forgetClassNames } from "../constants/forgetClassNames";
+
+const SIZE = 250;
 
 interface Props {
   mode: ModeType;
-  id: string;
+  datasetMode: string;
   isExpanded: boolean;
+  showYAxis?: boolean;
 }
 
-export default function BubbleChart({ mode, id, isExpanded }: Props) {
-  const fontSize = isExpanded ? "16px" : "13px";
+export default function BubbleChart({
+  mode,
+  datasetMode,
+  isExpanded,
+  showYAxis = true,
+}: Props) {
+  const { forgetClass } = useContext(ForgetClassContext);
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
+
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  const isBaseline = mode === "Baseline";
+  const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
+
+  useEffect(() => {
+    if (!experiment || !svgRef.current) return;
+
+    const data = extractBubbleChartData(datasetMode, experiment);
+
+    const margin = {
+      top: 10,
+      right: 0,
+      bottom: 42,
+      left: 68,
+    };
+    const width = SIZE - margin.left - margin.right;
+    const height = SIZE - margin.top - margin.bottom;
+
+    d3.select(svgRef.current).selectAll("*").remove();
+
+    const svg = d3
+      .select(svgRef.current)
+      .attr("width", SIZE)
+      .attr("height", SIZE)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const xScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, width]);
+
+    const yScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, height]);
+
+    const colorScale = d3
+      .scaleSequential()
+      .domain([0, 1])
+      .interpolator(d3.interpolateViridis);
+
+    const sizeScale = d3.scaleLinear().domain([0, 1]).range([0.5, 8]);
+
+    const xAxis = d3
+      .axisBottom(xScale)
+      .tickValues(d3.range(0, 10))
+      .tickSize(0)
+      .tickFormat((d) => forgetClassNames[d as number]);
+
+    const yAxis = d3
+      .axisLeft(yScale)
+      .tickValues(d3.range(0, 10))
+      .tickSize(0)
+      .tickPadding(0)
+      .tickFormat((d) =>
+        d === forgetClass
+          ? forgetClassNames[d as number] + " (X)"
+          : forgetClassNames[d as number]
+      );
+
+    svg
+      .append("g")
+      .attr("class", "x-axis")
+      .attr("transform", `translate(0,${height})`)
+      .call(xAxis)
+      .call((g) => {
+        g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
+        g.selectAll(".tick text")
+          .attr("transform", "rotate(-45)")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em");
+      });
+
+    if (showYAxis) {
+      svg
+        .append("g")
+        .attr("class", "y-axis")
+        .call(yAxis)
+        .call((g) => {
+          g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
+          g.selectAll(".tick text")
+            // .attr("transform", "rotate(-45)")
+            .attr("dx", "-.5em");
+        });
+    } else {
+      svg
+        .append("g")
+        .attr("class", "y-axis")
+        .call(yAxis)
+        .call((g) => {
+          g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
+          g.selectAll(".tick text").remove();
+        });
+    }
+
+    svg
+      .selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", (d) => xScale(d.x))
+      .attr("cy", (d) => yScale(d.y))
+      .attr("r", (d) => sizeScale(d.conf))
+      .attr("fill", (d) => colorScale(d.label))
+      .attr("opacity", 0.7)
+      .append("title")
+      .text(
+        (d) => `Label: ${d.label.toFixed(2)}\nConfidence: ${d.conf.toFixed(2)}`
+      );
+  }, [datasetMode, experiment, forgetClass, showYAxis]);
+
+  if (!experiment) return null;
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex items-center ml-4">
-        <span className="text-[17px] text-nowrap">
-          {mode} Model {id !== "" ? `(${id})` : ""}
-        </span>
-      </div>
-      <div className="flex flex-col items-center">
-        <img
-          src="/bubble.png"
-          alt="bubble chart img"
-          style={{
-            height: isExpanded ? "420px" : "205px",
-            marginRight: isExpanded ? "10px" : "0",
-          }}
-        />
+    <div
+      className={`flex flex-col items-center relative ${
+        !showYAxis && "right-[60px]"
+      }`}
+    >
+      {showYAxis && (
         <span
-          style={{ fontSize }}
-          className="text-[11px] font-extralight -mt-[5px]"
+          className={`absolute top-[40%] left-0 -translate-y-1/2 font-extralight -rotate-90 text-nowrap -mx-6 ${
+            isExpanded ? "text-base" : "text-[13px]"
+          }`}
         >
-          Prediction
+          Ground Truth
         </span>
-      </div>
+      )}
+      <svg ref={svgRef}></svg>
+      <span
+        className={`absolute bottom-0 font-extralight ${
+          isExpanded ? "text-base" : "text-[13px]"
+        }`}
+      >
+        Prediction
+      </span>
     </div>
   );
 }
