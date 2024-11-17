@@ -1,14 +1,14 @@
 import { useContext } from "react";
 
-import Heatmap from "../components/Heatmap";
+// import Heatmap from "../components/Heatmap";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ExperimentsContext } from "../store/experiments-context";
-import { extractHeatmapData } from "../utils/data/experiments";
+// import { ExperimentsContext } from "../store/experiments-context";
+// import { extractHeatmapData } from "../utils/data/experiments";
 import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { ChartModeType } from "../views/Predictions";
 
 export type ModeType = "Baseline" | "Comparison";
-type HeatmapData = { x: string; y: string; value: number }[];
+// type HeatmapData = { x: string; y: string; value: number }[];
 
 interface Props {
   mode: ModeType;
@@ -24,18 +24,18 @@ export default function PredictionChart({
   isExpanded,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  // const { baselineExperiment, comparisonExperiment } =
+  //   useContext(ExperimentsContext);
 
   const fontSize = isExpanded ? "16px" : "13px";
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
 
-  const distributionData: HeatmapData = extractHeatmapData(
-    datasetMode,
-    chartMode,
-    isBaseline ? baselineExperiment : comparisonExperiment
-  );
+  // const distributionData: HeatmapData = extractHeatmapData(
+  //   datasetMode,
+  //   chartMode,
+  //   isBaseline ? baselineExperiment : comparisonExperiment
+  // );
 
   return (
     <div
@@ -57,12 +57,12 @@ export default function PredictionChart({
         <div
           className={`flex flex-col items-center ${isBaseline ? "z-10" : ""}`}
         >
-          <Heatmap
+          {/* <Heatmap
             mode={mode}
             isExpanded={isExpanded}
             chartMode={chartMode}
             data={distributionData}
-          />
+          /> */}
           <span
             style={{ fontSize, bottom: isExpanded ? 8 : 0 }}
             className="absolute font-extralight bottom-0 ml-14"

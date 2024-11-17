@@ -15,6 +15,23 @@ function getValueToDisplay(value: unknown) {
     : Number(value);
 }
 
+export const COLUMN_WIDTHS = {
+  id: 36,
+  phase: 78,
+  init: 42,
+  method: 90,
+  epochs: 46,
+  BS: 52,
+  LR: 54,
+  UA: 65,
+  RA: 65,
+  TUA: 65,
+  TRA: 65,
+  RTE: 65,
+  baseline: 50,
+  comparison: 70,
+};
+
 export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "id",
@@ -55,7 +72,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     cell: ({ row }) => {
       const method = row.getValue("method");
       const value = getValueToDisplay(method);
-      return <div className="w-[138px]">{value}</div>;
+      return <div>{value}</div>;
     },
   },
   {

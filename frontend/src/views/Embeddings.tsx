@@ -94,69 +94,69 @@ export default function Embeddings({ height }: { height: number }) {
   return (
     <div
       style={{ height }}
-      className="w-[1538px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]"
+      className="w-[calc(100%)] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px]"
     >
       <ConnectionLine
         from={positionRef.current.from}
         to={positionRef.current.to}
       />
-      <div className="w-[120px] flex flex-col justify-center items-center">
+      <div className="w-[108px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
-        <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
+        <div className="w-full h-[112px] flex flex-col justify-start items-start mb-[5px] p-1 border-[1px] border-solid rounded-[6px]">
           <div className="flex items-center">
-            <span className="mr-1">Metadata</span>
+            <span className="mr-1 text-[15px]">Metadata</span>
             <HelpCircleIcon className="cursor-pointer" />
           </div>
-          <div className="flex flex-col justify-start items-start">
-            <span className="text-[15px] font-light">Method: UMAP</span>
-            <span className="text-[15px] font-light">Points: 2000</span>
-            <span className="text-[15px] font-light">Dimension: 512</span>
-            <span className="text-[15px] font-light">Dataset: Training</span>
+          <div className="flex flex-col justify-start items-start text-sm font-light text-nowrap">
+            <span>Method: UMAP</span>
+            <span>Points: 2000</span>
+            <span>Dimension: 512</span>
+            <span>Dataset: Training</span>
           </div>
         </div>
         {/* Legend - Controls */}
-        <div className="w-full h-[104px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <span>Controls</span>
-          <div>
+        <div className="w-full h-[88px] flex flex-col justify-start items-start mb-[5px] p-1 border-[1px] border-solid rounded-[6px]">
+          <span className="text-[15px]">Controls</span>
+          <div className="text-sm font-light">
             <div className="flex items-center">
               <CursorPointer01Icon className="scale-110 mr-[6px]" />
-              <span className="text-[15px] font-light">Details</span>
+              <span>Details</span>
             </div>
             <div className="flex items-center -my-[2px]">
               <ScrollVerticalIcon className="scale-110 mr-[6px]" />
-              <span className="text-[15px] font-light">Zooming</span>
+              <span>Zooming</span>
             </div>
             <div className="flex items-center">
               <Drag01Icon className="scale-110 mr-[6px]" />
-              <span className="text-[15px] font-light">Panning</span>
+              <span>Panning</span>
             </div>
           </div>
         </div>
         {/* Legend - Data Type */}
-        <div className="w-full h-[86px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <span>Data Type</span>
-          <div>
-            <div className="flex items-center text-[15px] font-light">
+        <div className="w-full h-[72px] flex flex-col justify-start items-start mb-[5px] p-1 border-[1px] border-solid rounded-[6px]">
+          <span className="text-[15px]">Data Type</span>
+          <div className="text-sm font-light">
+            <div className="flex items-center">
               <CircleIcon className="scale-75 mr-[6px]" />
               <span>Remain</span>
             </div>
-            <div className="flex items-center text-[15px] font-light">
+            <div className="flex items-center">
               <MultiplicationSignIcon className="scale-125 mr-[6px]" />
               <span>Forget</span>
             </div>
           </div>
         </div>
         {/* Legend - Predictions */}
-        <div className="w-full h-[370px] flex flex-col justify-start items-start pl-2 pr-0.5 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <span className="mb-1.5">Predictions</span>
+        <div className="w-full h-[326px] flex flex-col justify-start items-start p-1 pr-0.5 border-[1px] border-solid rounded-[6px]">
+          <span className="text-[15px] mb-1">Predictions</span>
           <div>
             {forgetClassNames.map((name, idx) => (
               <div key={idx} className="flex items-center mb-0.5">
                 <div
                   style={{ backgroundColor: `${TABLEAU10[idx]}` }}
-                  className="w-3 h-[30px] mr-1.5"
+                  className="w-2.5 h-[27px] mr-1.5"
                 />
-                <div className="flex items-center text-[15px] font-light">
+                <div className="flex items-center text-sm font-light">
                   <span>{name}</span>
                   {forgetClass !== undefined &&
                     name === forgetClassNames[forgetClass] && (
@@ -168,7 +168,7 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
       </div>
-      <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
+      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
       <Embedding
         mode="Baseline"
         height={height}
@@ -177,7 +177,7 @@ export default function Embeddings({ height }: { height: number }) {
         hoveredInstance={hoveredInstanceRef.current}
         ref={baselineRef}
       />
-      <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
+      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
       <Embedding
         mode="Comparison"
         height={height}

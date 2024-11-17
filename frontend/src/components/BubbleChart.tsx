@@ -7,7 +7,9 @@ import { extractBubbleChartData } from "../utils/data/experiments";
 import { ModeType } from "./PredictionChart";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
-const SIZE = 250;
+const TOTAL_SIZE = 225;
+const MIN_BUBBLE_SIZE = 0.5;
+const MAX_BUBBLE_SIZE = 7;
 
 interface Props {
   mode: ModeType;
@@ -42,15 +44,15 @@ export default function BubbleChart({
       bottom: 42,
       left: 68,
     };
-    const width = SIZE - margin.left - margin.right;
-    const height = SIZE - margin.top - margin.bottom;
+    const width = TOTAL_SIZE - margin.left - margin.right;
+    const height = TOTAL_SIZE - margin.top - margin.bottom;
 
     d3.select(svgRef.current).selectAll("*").remove();
 
     const svg = d3
       .select(svgRef.current)
-      .attr("width", SIZE)
-      .attr("height", SIZE)
+      .attr("width", TOTAL_SIZE)
+      .attr("height", TOTAL_SIZE)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -63,7 +65,10 @@ export default function BubbleChart({
       .domain([0, 1])
       .interpolator(d3.interpolateViridis);
 
-    const sizeScale = d3.scaleLinear().domain([0, 1]).range([0.5, 8]);
+    const sizeScale = d3
+      .scaleLinear()
+      .domain([0, 1])
+      .range([MIN_BUBBLE_SIZE, MAX_BUBBLE_SIZE]);
 
     const xAxis = d3
       .axisBottom(xScale)
@@ -78,7 +83,7 @@ export default function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? forgetClassNames[d as number] + " (X)"
+          ? forgetClassNames[d as number] + "(X)"
           : forgetClassNames[d as number]
       );
 
@@ -138,12 +143,12 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        !showYAxis && "right-[60px]"
+        !showYAxis && "right-[55px]"
       }`}
     >
       {showYAxis && (
         <span
-          className={`absolute top-[40%] left-0 -translate-y-1/2 font-extralight -rotate-90 text-nowrap -mx-6 ${
+          className={`absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-6 ${
             isExpanded ? "text-base" : "text-[13px]"
           }`}
         >
@@ -152,7 +157,7 @@ export default function BubbleChart({
       )}
       <svg ref={svgRef}></svg>
       <span
-        className={`absolute bottom-0 font-extralight ${
+        className={`absolute -bottom-0.5 left-1/2 font-extralight ${
           isExpanded ? "text-base" : "text-[13px]"
         }`}
       >

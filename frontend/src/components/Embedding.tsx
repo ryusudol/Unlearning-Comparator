@@ -85,19 +85,19 @@ const Embedding = forwardRef(
               className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
               onClick={handleResetClick}
             />
-            <div className="flex items-center text-base absolute z-10 right-0 top-6">
-              <span className="mr-1.5">Focus on:</span>
+            <div className="flex items-center absolute z-10 right-0 top-6">
+              <span className="mr-1.5 text-sm">Focus on:</span>
               <Select
                 value={viewMode}
                 defaultValue={VIEW_MODES[0]}
                 onValueChange={(value: ViewModeType) => setViewMode(value)}
               >
-                <SelectTrigger className="w-36 h-7 px-2">
+                <SelectTrigger className="w-32 h-6 px-2">
                   <SelectValue placeholder={0} />
                 </SelectTrigger>
                 <SelectContent>
                   {VIEW_MODES.map((mode, idx) => (
-                    <SelectItem key={idx} value={mode}>
+                    <SelectItem key={idx} value={mode} className="text-sm">
                       {mode}
                     </SelectItem>
                   ))}
@@ -106,13 +106,17 @@ const Embedding = forwardRef(
             </div>
           </div>
         )}
-        <div className="text-[17px] mt-1 flex items-center">
-          {mode === "Baseline" ? <CircleIcon /> : <TriangleIcon />}
+        <div className="text-[15px] mt-1 flex items-center">
+          {mode === "Baseline" ? (
+            <CircleIcon className="w-3 h-3" />
+          ) : (
+            <TriangleIcon className="w-3 h-3" />
+          )}
           <span className="ml-1">
             {mode} Model {idExist ? `(${id})` : ""}
           </span>
         </div>
-        <div className="w-[672px] h-[672px] flex flex-col justify-center items-center">
+        <div className="w-[615px] h-[615px] flex flex-col justify-center items-center">
           <ScatterPlot
             mode={mode}
             data={data}

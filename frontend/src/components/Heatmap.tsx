@@ -1,61 +1,54 @@
-import { useMemo, useContext, useState, useRef } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import * as d3 from "d3";
 
-import { ChartModeType } from "../views/Predictions";
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { ModeType } from "./PredictionChart";
 
+const MARGIN = {
+  top: 0,
+  right: 0,
+  bottom: 58,
+  left: 50,
+};
 const fontColor = "#64758B";
 const WINDOW_OFFSET = 20;
 const TOOLTIP_WIDTH = 100;
 const TOOLTIP_OFFSET = 10;
+const FONT_SIZE = 8;
+const SIZE = 200;
+const XLabelTransform = 8;
+const boundsWidth = SIZE - MARGIN.right - MARGIN.left;
+const boundsHeight = SIZE - MARGIN.top - MARGIN.bottom;
 
 type Props = {
   mode: ModeType;
-  isExpanded: boolean;
-  chartMode: Exclude<ChartModeType, "bubble">;
   data: { x: string; y: string; value: number }[];
+  layers: string[];
 };
 
-export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
-  const { forgetClass } = useContext(ForgetClassContext);
-
+export default function Heatmap({ mode, data, layers }: Props) {
   const [tooltip, setTooltip] = useState({
     display: false,
     x: 0,
     y: 0,
     content: {
-      groundTruth: "",
-      prediction: "",
+      x: "",
+      y: "",
       value: 0,
     },
   });
 
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  const MARGIN = {
-    top: 10,
-    right: 10,
-    bottom: isExpanded ? 50 : 52,
-    left: isExpanded ? 62 : 52,
-  };
-  const fontSize = isExpanded ? 13 : 11;
-  const XLabelTransform = isExpanded ? 24 : 8;
-  const length = isExpanded ? 490 : 250;
-  const boundsWidth = length - MARGIN.right - MARGIN.left;
-  const boundsHeight = length - MARGIN.top - MARGIN.bottom;
+  const isBaseline = mode === "Baseline";
   const allValues = data.map((d) => d.value);
-  const valueName =
-    chartMode === "label-heatmap" ? "Proportion" : "Confidence Score";
 
   const xScale = useMemo(() => {
-    return d3.scaleBand().range([0, boundsWidth]).domain(forgetClassNames);
-  }, [boundsWidth]);
+    return d3.scaleBand().range([0, boundsWidth]).domain(layers);
+  }, [layers]);
 
   const yScale = useMemo(() => {
-    return d3.scaleBand().range([0, boundsHeight]).domain(forgetClassNames);
-  }, [boundsHeight]);
+    return d3.scaleBand().range([0, boundsHeight]).domain(layers);
+  }, [layers]);
 
   const [min, max] = d3.extent(allValues);
 
@@ -65,7 +58,7 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
 
   const colorScale = d3
     .scaleSequential()
-    .interpolator(d3.interpolateViridis)
+    .interpolator(d3.interpolateInferno)
     .domain([min, max]);
 
   const handleMouseEnter = (
@@ -86,8 +79,8 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
       x: xPos,
       y: yPos,
       content: {
-        groundTruth: d.y,
-        prediction: d.x,
+        x: d.y,
+        y: d.x,
         value: d.value,
       },
     });
@@ -101,8 +94,6 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
   };
 
   const allRects = data.map((d, i) => {
-    const textColor = d.value >= 0.75 ? "#000000" : "#FFFFFF";
-
     return (
       <g
         key={i}
@@ -116,25 +107,12 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
           height={yScale.bandwidth()}
           fill={colorScale(d.value)}
         />
-        {isExpanded && (
-          <text
-            x={(xScale(d.x) ?? 0) + xScale.bandwidth() / 2}
-            y={(yScale(d.y) ?? 0) + yScale.bandwidth() / 2}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize={14}
-            fill={textColor}
-          >
-            {d.value.toFixed(3)}
-          </text>
-        )}
       </g>
     );
   });
 
-  const xLabels = forgetClassNames.map((name, i) => {
-    const xPos = xScale(name) ?? 0;
-    const isForgetClass = forgetClass && forgetClassNames[forgetClass] === name;
+  const xLabels = layers.map((layer, i) => {
+    const xPos = xScale(layer) ?? 0;
     return (
       <text
         key={i}
@@ -142,20 +120,19 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
         y={boundsHeight + 6}
         textAnchor="end"
         dominantBaseline="middle"
-        fontSize={fontSize}
+        fontSize={FONT_SIZE}
         fill={fontColor}
         transform={`rotate(-45, ${xPos + xScale.bandwidth() / 2}, ${
           boundsHeight + 6
         })`}
       >
-        {isForgetClass ? name + " (X)" : name}
+        {layer}
       </text>
     );
   });
 
-  const yLabels = forgetClassNames.map((name, i) => {
-    const yPos = yScale(name) ?? 0;
-    const isForgetClass = forgetClass && forgetClassNames[forgetClass] === name;
+  const yLabels = layers.map((layer, i) => {
+    const yPos = yScale(layer) ?? 0;
     return (
       <text
         key={i}
@@ -163,17 +140,29 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
         y={yPos + yScale.bandwidth() / 2}
         textAnchor="end"
         dominantBaseline="middle"
-        fontSize={fontSize}
+        fontSize={FONT_SIZE}
         fill={fontColor}
       >
-        {isForgetClass ? name + " (X)" : name}
+        {layer}
       </text>
     );
   });
 
   return (
-    <div className="-mt-2.5" style={{ position: "relative" }}>
-      <svg width={length} height={length}>
+    <div className={`-mt-3 relative z-10 ${!isBaseline && "right-10 z-0"}`}>
+      <span
+        className={`text-[15px] relative ${
+          isBaseline ? "-right-[56px]" : "-right-[46px]"
+        }`}
+      >
+        {mode + " (Forget Class)"}
+      </span>
+      {isBaseline && (
+        <span className="absolute -left-[52px] top-[40%] -rotate-90 text-xs font-normal">
+          Before Unlearning
+        </span>
+      )}
+      <svg width={SIZE} height={SIZE}>
         <g
           width={boundsWidth}
           height={boundsHeight}
@@ -181,7 +170,17 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
         >
           {allRects}
           {xLabels}
-          {mode === "Baseline" && yLabels}
+          {isBaseline && yLabels}
+          <text
+            x={boundsWidth / 2}
+            y={boundsHeight + 50}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={12}
+            fill="#000"
+          >
+            After Unlearning
+          </text>
         </g>
       </svg>
       {tooltip.display && (
@@ -199,15 +198,15 @@ export default function Heatmap({ mode, isExpanded, chartMode, data }: Props) {
           }}
         >
           <div>
-            <span>Ground Truth</span>:{" "}
-            <span className="font-semibold">{tooltip.content.groundTruth}</span>
+            <span>Before</span>:{" "}
+            <span className="font-semibold">{tooltip.content.x}</span>
           </div>
           <div>
-            <span>Prediction</span>:{" "}
-            <span className="font-semibold">{tooltip.content.prediction}</span>
+            <span>After</span>:{" "}
+            <span className="font-semibold">{tooltip.content.y}</span>
           </div>
           <div>
-            <span>{valueName}</span>:{" "}
+            <span>Value</span>:{" "}
             <span className="font-semibold">{tooltip.content.value}</span>
           </div>
         </div>

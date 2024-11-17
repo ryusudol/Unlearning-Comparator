@@ -21,6 +21,7 @@ const GREEN = "#567C31";
 const RED = "#BE4130";
 const DOT_SIZE = 10;
 const ANIMATION_DURATION = 500;
+const LABEL_FONT_SIZE = 8;
 
 const chartConfig = {
   layer: {
@@ -89,38 +90,41 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   const ckaData = getCkaData(dataset, baselineExperiment, comparisonExperiment);
 
   return (
-    <div>
+    <div className="relative bottom-1.5">
       <CustomLegend />
       <p className="text-[15px] text-center">
         Layer-wise CKA Similarity (Before vs. After Unlearning)
       </p>
       <ChartContainer
-        className="w-[468px] h-[190px] relative -top-0.5"
+        className="w-[430px] h-[150px] relative -top-0.5"
         config={chartConfig}
       >
         <LineChart
           accessibilityLayer
           data={ckaData}
-          width={470}
-          height={190}
           margin={{
             top: 4,
             right: 4,
             bottom: 14,
-            left: -25,
+            left: -24,
           }}
         >
-          <CartesianGrid vertical={false} />
+          <CartesianGrid />
           <XAxis
             dataKey="layer"
             tickLine={false}
+            tickMargin={-2}
             angle={-45}
             textAnchor="end"
-            tick={{ fontSize: 8, fill: "#000000" }}
+            tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
           />
           <YAxis
             tickLine={false}
-            tick={{ fontSize: 8, fill: "#000000" }}
+            domain={[0, 1]}
+            interval={0}
+            tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
+            ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
+            tickMargin={-2}
             label={{
               value: "CKA Similarity",
               angle: -90,
@@ -129,7 +133,6 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
                 fontSize: 12,
                 textAnchor: "middle",
                 fill: "#000000",
-                marginRight: 2,
               },
             }}
           />
@@ -200,7 +203,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[135px] left-14 text-[10px] leading-[10px]">
+    <div className="absolute top-[70px] left-12 text-[10px] leading-[10px]">
       <div className="mb-1 flex items-center">
         <div className="relative">
           <CircleIcon
