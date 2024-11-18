@@ -258,6 +258,7 @@ export default React.memo(function Tooltip({
           <span className="font-semibold">{groundTruth}</span>
         </div>
         <div className="text-sm flex flex-col">
+          <p>Prediction</p>
           <p className="flex items-center text-nowrap">
             <CircleIcon className="w-3 h-3 mr-1" />
             <span className="mr-0.5">Baseline:</span>

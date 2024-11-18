@@ -9,8 +9,8 @@ import { extractBubbleChartData } from "../utils/data/experiments";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
 const TOTAL_SIZE = 225;
-const MIN_BUBBLE_SIZE = 0.5;
-const MAX_BUBBLE_SIZE = 7;
+const MIN_BUBBLE_SIZE = 0.2;
+const MAX_BUBBLE_SIZE = 40;
 
 type ModeType = "Baseline" | "Comparison";
 
@@ -46,7 +46,7 @@ export default function BubbleChart({
     const margin = {
       top: 22,
       right: 0,
-      bottom: 42,
+      bottom: 44,
       left: 64,
     };
     const width = TOTAL_SIZE - margin.left - margin.right;
@@ -135,7 +135,7 @@ export default function BubbleChart({
       .join("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => sizeScale(d.label))
+      .attr("r", (d) => Math.sqrt(sizeScale(d.label)))
       .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
       .append("title")
@@ -177,7 +177,7 @@ export default function BubbleChart({
       )}
       <svg ref={svgRef}></svg>
       <span
-        className={`absolute -bottom-0.5 left-1/2 font-extralight ${
+        className={`absolute -bottom-1 left-[calc(50%+10px)] font-extralight ${
           isExpanded ? "text-base" : "text-[13px]"
         }`}
       >

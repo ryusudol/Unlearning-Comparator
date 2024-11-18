@@ -92,12 +92,12 @@ const Embedding = forwardRef(
                 defaultValue={VIEW_MODES[0]}
                 onValueChange={(value: ViewModeType) => setViewMode(value)}
               >
-                <SelectTrigger className="w-32 h-6 px-2">
+                <SelectTrigger className="w-36 h-6">
                   <SelectValue placeholder={0} />
                 </SelectTrigger>
                 <SelectContent>
                   {VIEW_MODES.map((mode, idx) => (
-                    <SelectItem key={idx} value={mode} className="text-sm">
+                    <SelectItem key={idx} value={mode}>
                       {mode}
                     </SelectItem>
                   ))}
