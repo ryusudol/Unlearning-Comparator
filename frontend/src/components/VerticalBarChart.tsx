@@ -157,9 +157,9 @@ export default function VerticalBarChart({
                 chartConfig[value as keyof typeof chartConfig]?.label;
               const isForgetClass =
                 forgetClass && label === forgetClassNames[forgetClass];
-              return isForgetClass ? label + " (X)" : label;
+              return isForgetClass ? label + "(X)" : label;
             }}
-            style={{ whiteSpace: "nowrap" }}
+            style={{ whiteSpace: "nowrap", textWrap: "nowrap" }}
           />
           <XAxis
             dataKey="value"
