@@ -87,7 +87,7 @@ export default function Predictions({
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div className="flex items-center">
+          <div className="flex items-center relative -top-0.5">
             <BubbleChart
               mode="Baseline"
               datasetMode={datasetMode}

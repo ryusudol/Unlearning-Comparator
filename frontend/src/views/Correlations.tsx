@@ -44,7 +44,7 @@ export default function Correlations({ height }: { height: number }) {
         allSelected ? (
           <div className="flex flex-col items-center">
             <LineChart dataset={dataset} />
-            <div className="flex items-center relative left-1.5">
+            <div className="flex items-center relative right-[9px]">
               <Heatmap mode="Baseline" data={baselineData} layers={layers} />
               <Heatmap
                 mode="Comparison"

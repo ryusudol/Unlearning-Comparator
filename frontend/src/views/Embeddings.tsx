@@ -102,7 +102,7 @@ export default function Embeddings({ height }: { height: number }) {
       />
       <div className="w-[108px] flex flex-col justify-center items-center">
         {/* Legend - Metadata */}
-        <div className="w-full h-[112px] flex flex-col justify-start items-start mb-[5px] p-1 border-[1px] border-solid rounded-[6px]">
+        <div className="w-full h-[112px] flex flex-col justify-start items-start mb-[5px] px-1 py-0.5 border-[1px] border-solid rounded-[6px]">
           <div className="flex items-center">
             <span className="mr-1 text-[15px]">Metadata</span>
             <HelpCircleIcon className="cursor-pointer" />
@@ -115,7 +115,7 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
         {/* Legend - Controls */}
-        <div className="w-full h-[88px] flex flex-col justify-start items-start mb-[5px] p-1 border-[1px] border-solid rounded-[6px]">
+        <div className="w-full h-[88px] flex flex-col justify-start items-start mb-[5px] px-1 py-0.5 border-[1px] border-solid rounded-[6px]">
           <span className="text-[15px]">Controls</span>
           <div className="text-sm font-light">
             <div className="flex items-center">
@@ -133,7 +133,7 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
         {/* Legend - Data Type */}
-        <div className="w-full h-[72px] flex flex-col justify-start items-start mb-[5px] p-1 border-[1px] border-solid rounded-[6px]">
+        <div className="w-full h-[72px] flex flex-col justify-start items-start mb-[5px] px-1 py-0.5 border-[1px] border-solid rounded-[6px]">
           <span className="text-[15px]">Data Type</span>
           <div className="text-sm font-light">
             <div className="flex items-center">
@@ -147,7 +147,7 @@ export default function Embeddings({ height }: { height: number }) {
           </div>
         </div>
         {/* Legend - Predictions */}
-        <div className="w-full h-[326px] flex flex-col justify-start items-start p-1 pr-0.5 border-[1px] border-solid rounded-[6px]">
+        <div className="w-full h-[326px] flex flex-col justify-start items-start px-1 py-0.5 pr-0.5 border-[1px] border-solid rounded-[6px]">
           <span className="text-[15px] mb-1">Predictions</span>
           <div>
             {forgetClassNames.map((name, idx) => (

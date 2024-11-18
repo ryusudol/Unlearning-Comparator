@@ -92,12 +92,12 @@ const Embedding = forwardRef(
                 defaultValue={VIEW_MODES[0]}
                 onValueChange={(value: ViewModeType) => setViewMode(value)}
               >
-                <SelectTrigger className="w-32 h-6 px-2">
+                <SelectTrigger className="w-36 h-6">
                   <SelectValue placeholder={0} />
                 </SelectTrigger>
                 <SelectContent>
                   {VIEW_MODES.map((mode, idx) => (
-                    <SelectItem key={idx} value={mode} className="text-sm">
+                    <SelectItem key={idx} value={mode}>
                       {mode}
                     </SelectItem>
                   ))}
@@ -113,7 +113,7 @@ const Embedding = forwardRef(
             <TriangleIcon className="w-3 h-3" />
           )}
           <span className="ml-1">
-            {mode} Model {idExist ? `(${id})` : ""}
+            {mode} {idExist ? `(${id})` : ""}
           </span>
         </div>
         <div className="w-[615px] h-[615px] flex flex-col justify-center items-center">
