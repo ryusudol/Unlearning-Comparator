@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
+import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -101,6 +102,7 @@ export default function BubbleChart({
         g.selectAll(".tick text")
           .attr("transform", "rotate(-45)")
           .style("text-anchor", "end")
+          .style("font-family", "Roboto Condensed")
           .attr("dx", "-.8em")
           .attr("dy", ".15em");
       });
@@ -112,7 +114,9 @@ export default function BubbleChart({
         .call(yAxis)
         .call((g) => {
           g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
-          g.selectAll(".tick text").attr("dx", "-.5em");
+          g.selectAll(".tick text")
+            .attr("dx", "-.5em")
+            .style("font-family", "Roboto Condensed");
         });
     } else {
       svg
@@ -131,8 +135,8 @@ export default function BubbleChart({
       .join("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => sizeScale(d.conf))
-      .attr("fill", (d) => colorScale(d.label))
+      .attr("r", (d) => sizeScale(d.label))
+      .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
       .append("title")
       .text(
@@ -148,16 +152,23 @@ export default function BubbleChart({
         !showYAxis && "right-[54px] z-0"
       }`}
     >
-      <span
-        className={`text-[15px] text-nowrap absolute ${
-          isBaseline ? "left-[75px]" : "left-[65px]"
+      <div
+        className={`flex items-center text-[15px] text-nowrap absolute ${
+          isBaseline ? "left-[90px]" : "left-[78px]"
         }`}
       >
-        {mode} Model ({id})
-      </span>
+        {isBaseline ? (
+          <CircleIcon className="w-3 h-3 mr-1" />
+        ) : (
+          <TriangleIcon className="w-3 h-3 mr-1" />
+        )}
+        <span>
+          {mode} ({id})
+        </span>
+      </div>
       {showYAxis && (
         <span
-          className={`absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-6 ${
+          className={`absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-7 ${
             isExpanded ? "text-base" : "text-[13px]"
           }`}
         >

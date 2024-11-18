@@ -7,7 +7,7 @@ export default function HeatmapLegend() {
   const legendRef = useRef<SVGSVGElement>(null);
 
   const width = 8;
-  const height = 142;
+  const height = 172;
 
   useEffect(() => {
     if (legendRef.current) {
@@ -77,7 +77,7 @@ export default function HeatmapLegend() {
 
   return (
     <svg
-      className="absolute -right-2 top-0.5 -z-10"
+      className="absolute -right-0 top-[0.5px] -z-10"
       ref={legendRef}
       width={width + margin.left + margin.right}
       height={height + margin.top + margin.bottom}

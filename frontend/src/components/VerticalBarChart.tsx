@@ -18,7 +18,7 @@ import { ForgetClassContext } from "../store/forget-class-context";
 import { GapDataItem } from "../views/Accuracies";
 
 const TOOLTIP_FIX_LENGTH = 3;
-const LABEL_FONT_SIZE = 11;
+const LABEL_FONT_SIZE = 10;
 
 const chartConfig = {
   value: {
@@ -74,7 +74,6 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <p className="font-medium">
           Class: {forgetClassNames[+data.classLabel]}
         </p>
-        <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         <div className="flex items-center">
           <CircleIcon className="w-3 h-3" />
           <p className="ml-1">
@@ -87,6 +86,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
             Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
           </p>
         </div>
+        <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
       </div>
     );
   }
@@ -125,7 +125,13 @@ export default function VerticalBarChart({
 
   return (
     <div className="flex flex-col justify-center items-center relative bottom-1">
-      <p className="text-[15px] text-center">{mode} Dataset</p>
+      <span
+        className={`text-[15px] relative ${
+          mode === "Training" ? "left-4" : "right-3.5"
+        }`}
+      >
+        {mode} Dataset
+      </span>
       <ChartContainer
         config={chartConfig}
         className={`${showYAxis ? "w-[250px]" : "w-[190px]"} h-[182px]`}
@@ -159,7 +165,7 @@ export default function VerticalBarChart({
                 forgetClass && label === forgetClassNames[forgetClass];
               return isForgetClass ? label + "(X)" : label;
             }}
-            style={{ whiteSpace: "nowrap", textWrap: "nowrap" }}
+            style={{ whiteSpace: "nowrap", textWrap: "nowrap", fill: "black" }}
           />
           <XAxis
             dataKey="value"

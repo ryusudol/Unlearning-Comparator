@@ -113,7 +113,7 @@ const Embedding = forwardRef(
             <TriangleIcon className="w-3 h-3" />
           )}
           <span className="ml-1">
-            {mode} Model {idExist ? `(${id})` : ""}
+            {mode} {idExist ? `(${id})` : ""}
           </span>
         </div>
         <div className="w-[615px] h-[615px] flex flex-col justify-center items-center">

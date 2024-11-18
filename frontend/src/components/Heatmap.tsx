@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useRef } from "react";
 import * as d3 from "d3";
 
+import { CircleIcon, TriangleIcon } from "./UI/icons";
+
 const MARGIN = {
   top: 0,
   right: 0,
@@ -12,7 +14,7 @@ const WINDOW_OFFSET = 20;
 const TOOLTIP_WIDTH = 100;
 const TOOLTIP_OFFSET = 10;
 const FONT_SIZE = 8;
-const SIZE = 200;
+const SIZE = 230;
 const XLabelTransform = 8;
 const boundsWidth = SIZE - MARGIN.right - MARGIN.left;
 const boundsHeight = SIZE - MARGIN.top - MARGIN.bottom;
@@ -117,16 +119,13 @@ export default function Heatmap({ mode, data, layers }: Props) {
       <text
         key={i}
         x={xPos + xScale.bandwidth() - XLabelTransform}
-        y={boundsHeight + 6}
+        y={boundsHeight + 8}
         textAnchor="end"
         dominantBaseline="middle"
         fontSize={FONT_SIZE}
         fill={fontColor}
-        transform={`rotate(-45, ${xPos + xScale.bandwidth() / 2}, ${
-          boundsHeight + 6
-        })`}
       >
-        {layer}
+        {i}
       </text>
     );
   });
@@ -143,23 +142,30 @@ export default function Heatmap({ mode, data, layers }: Props) {
         fontSize={FONT_SIZE}
         fill={fontColor}
       >
-        {layer}
+        {i}
       </text>
     );
   });
 
   return (
-    <div className={`-mt-3 relative ${isBaseline ? "z-10" : "right-10 z-0"}`}>
-      <span
-        className={`text-[15px] relative ${
-          isBaseline ? "-right-[56px]" : "-right-[46px]"
+    <div
+      className={`-mt-3 relative ${isBaseline ? "z-10" : "right-[44px] z-0"}`}
+    >
+      <div
+        className={`flex items-center text-[15px] relative ${
+          isBaseline ? "-right-[64px]" : "-right-[53px]"
         }`}
       >
-        {mode + " (Forget Class)"}
-      </span>
+        {isBaseline ? (
+          <CircleIcon className="w-3 h-3 mr-1" />
+        ) : (
+          <TriangleIcon className="w-3 h-3 mr-1" />
+        )}
+        <span>{mode + " (Forget Class)"}</span>
+      </div>
       {isBaseline && (
-        <span className="absolute -left-[52px] top-[40%] -rotate-90 text-xs font-normal">
-          Before Unlearning
+        <span className="text-nowrap absolute -left-[29px] top-[40%] -rotate-90 text-xs font-normal">
+          Layers Before Unlearning
         </span>
       )}
       <svg width={SIZE} height={SIZE}>
@@ -173,13 +179,13 @@ export default function Heatmap({ mode, data, layers }: Props) {
           {isBaseline && yLabels}
           <text
             x={boundsWidth / 2}
-            y={boundsHeight + 50}
+            y={boundsHeight + 20}
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize={12}
             fill="#000"
           >
-            After Unlearning
+            Layers After Unlearning
           </text>
         </g>
       </svg>
@@ -206,7 +212,7 @@ export default function Heatmap({ mode, data, layers }: Props) {
             <span className="font-semibold">{tooltip.content.y}</span>
           </div>
           <div>
-            <span>Value</span>:{" "}
+            <span>Similarity</span>:{" "}
             <span className="font-semibold">{tooltip.content.value}</span>
           </div>
         </div>

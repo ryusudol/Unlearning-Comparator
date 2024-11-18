@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 
-import { TABLEAU10 } from "../constants/tableau10";
 import { CircleIcon, TriangleIcon } from "./UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
@@ -12,7 +11,6 @@ const COMPARISON_OPACITY = 1;
 const TICK_PADDING = 8;
 const BAR_HEIGHT = 8;
 const FONT_SIZE = "14px";
-const FONT_WEIGHT = 500;
 const LEGEND_RECT_SIZE = 12;
 const margin = { top: 30, right: 20, bottom: 20, left: 85 };
 
@@ -231,8 +229,7 @@ export default React.memo(function Tooltip({
       .call(xAxis)
       .selectAll("text")
       .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed")
-      .style("font-weight", FONT_WEIGHT);
+      .style("font-family", "Roboto Condensed");
 
     svg.select(".domain").remove();
 
@@ -244,8 +241,7 @@ export default React.memo(function Tooltip({
       .call(yAxis)
       .selectAll("text")
       .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed")
-      .style("font-weight", FONT_WEIGHT);
+      .style("font-family", "Roboto Condensed");
   }, [barChartData, firstTableauColor, forgetClass]);
 
   return (
@@ -265,22 +261,12 @@ export default React.memo(function Tooltip({
           <p className="flex items-center text-nowrap">
             <CircleIcon className="w-3 h-3 mr-1" />
             <span className="mr-0.5">Baseline:</span>
-            <span
-              style={{ color: TABLEAU10[predictionIdx] }}
-              className="font-semibold"
-            >
-              {baselinePrediction}
-            </span>
+            <span className="font-semibold">{baselinePrediction}</span>
           </p>
           <p className="flex items-center text-nowrap">
             <TriangleIcon className="w-3 h-3 mr-1" />
             <span className="mr-0.5">Comparison:</span>
-            <span
-              style={{ color: TABLEAU10[comparisonIdx] }}
-              className="font-semibold"
-            >
-              {comparisonPrediction}
-            </span>
+            <span className="font-semibold">{comparisonPrediction}</span>
           </p>
         </div>
       </div>

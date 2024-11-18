@@ -107,7 +107,7 @@ export const useScatterPlotRenderer = (
       .attr("fill", (d) => scales.z(d[3] as number))
       .attr("stroke", (d) => {
         const color = d3.color(scales.z(d[3] as number));
-        return color ? color.darker().toString() : "black";
+        return color ? color.darker().darker().toString() : "black";
       })
       .attr("stroke-width", config.XStrokeWidth)
       .style("cursor", "pointer")

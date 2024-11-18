@@ -93,7 +93,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
     <div className="relative bottom-1.5">
       <CustomLegend />
       <p className="text-[15px] text-center">
-        Layer-wise CKA Similarity (Before vs. After Unlearning)
+        Per-layer Similarity Before/After Unlearning
       </p>
       <ChartContainer
         className="w-[430px] h-[150px] relative -top-0.5"
@@ -104,9 +104,9 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
           data={ckaData}
           margin={{
             top: 4,
-            right: 4,
+            right: 14,
             bottom: 14,
-            left: -24,
+            left: -30,
           }}
         >
           <CartesianGrid />
@@ -129,6 +129,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               value: "CKA Similarity",
               angle: -90,
               position: "center",
+              dx: 6,
               style: {
                 fontSize: 12,
                 textAnchor: "middle",
@@ -203,8 +204,37 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[70px] left-12 text-[10px] leading-[10px]">
-      <div className="mb-1 flex items-center">
+    <div className="absolute top-[76px] left-12 text-[10px] leading-3">
+      <div className="flex items-center">
+        <div className="relative">
+          <CircleIcon
+            className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
+            style={{ color: GREEN }}
+          />
+          <div
+            className="absolute top-1/2 w-[18px] h-[1px]"
+            style={{
+              backgroundColor: GREEN,
+              transform: "translate(-4px, -50%)",
+            }}
+          />
+        </div>
+        <span>Baseline (Remain Classes)</span>
+      </div>
+      <div className="flex items-center">
+        <div className="relative">
+          <TriangleIcon width={10} height={10} color={GREEN} className="mr-2" />
+          <div
+            className="absolute top-1/2 w-[18px]"
+            style={{
+              borderTop: `1px dashed ${GREEN}`,
+              transform: "translate(-4px, -50%)",
+            }}
+          />
+        </div>
+        <span>Comparison (Remain Classes)</span>
+      </div>
+      <div className="flex items-center">
         <div className="relative">
           <CircleIcon
             className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
@@ -222,22 +252,6 @@ function CustomLegend() {
       </div>
       <div className="mb-1 flex items-center">
         <div className="relative">
-          <CircleIcon
-            className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
-            style={{ color: GREEN }}
-          />
-          <div
-            className="absolute top-1/2 w-[18px] h-[1px]"
-            style={{
-              backgroundColor: GREEN,
-              transform: "translate(-4px, -50%)",
-            }}
-          />
-        </div>
-        <span>Baseline (Remain Classes)</span>
-      </div>
-      <div className="mb-1 flex items-center">
-        <div className="relative">
           <TriangleIcon width={10} height={10} color={RED} className="mr-2" />
           <div
             className="absolute top-1/2 w-[18px]"
@@ -248,19 +262,6 @@ function CustomLegend() {
           />
         </div>
         <span>Comparison (Forget Class)</span>
-      </div>
-      <div className="flex items-center">
-        <div className="relative">
-          <TriangleIcon width={10} height={10} color={GREEN} className="mr-2" />
-          <div
-            className="absolute top-1/2 w-[18px]"
-            style={{
-              borderTop: `1px dashed ${GREEN}`,
-              transform: "translate(-4px, -50%)",
-            }}
-          />
-        </div>
-        <span>Comparison (Remain Classes)</span>
       </div>
     </div>
   );

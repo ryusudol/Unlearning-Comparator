@@ -23,12 +23,12 @@ export const COLUMN_WIDTHS = {
   epochs: 46,
   BS: 52,
   LR: 54,
-  UA: 65,
-  RA: 65,
-  TUA: 65,
-  TRA: 65,
-  RTE: 65,
-  baseline: 50,
+  UA: 63,
+  RA: 63,
+  TUA: 63,
+  TRA: 63,
+  RTE: 63,
+  baseline: 60,
   comparison: 70,
 };
 
