@@ -1,8 +1,6 @@
 import React, { useMemo, useState, useRef } from "react";
 import * as d3 from "d3";
 
-import { ModeType } from "./PredictionChart";
-
 const MARGIN = {
   top: 0,
   right: 0,
@@ -18,6 +16,8 @@ const SIZE = 200;
 const XLabelTransform = 8;
 const boundsWidth = SIZE - MARGIN.right - MARGIN.left;
 const boundsHeight = SIZE - MARGIN.top - MARGIN.bottom;
+
+type ModeType = "Baseline" | "Comparison";
 
 type Props = {
   mode: ModeType;
@@ -149,7 +149,7 @@ export default function Heatmap({ mode, data, layers }: Props) {
   });
 
   return (
-    <div className={`-mt-3 relative z-10 ${!isBaseline && "right-10 z-0"}`}>
+    <div className={`-mt-3 relative ${isBaseline ? "z-10" : "right-10 z-0"}`}>
       <span
         className={`text-[15px] relative ${
           isBaseline ? "-right-[56px]" : "-right-[46px]"

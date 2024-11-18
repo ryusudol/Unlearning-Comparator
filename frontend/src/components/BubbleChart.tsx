@@ -5,12 +5,13 @@ import { BaselineComparisonContext } from "../store/baseline-comparison-context"
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ExperimentsContext } from "../store/experiments-context";
 import { extractBubbleChartData } from "../utils/data/experiments";
-import { ModeType } from "./PredictionChart";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
 const TOTAL_SIZE = 225;
 const MIN_BUBBLE_SIZE = 0.5;
 const MAX_BUBBLE_SIZE = 7;
+
+type ModeType = "Baseline" | "Comparison";
 
 interface Props {
   mode: ModeType;
