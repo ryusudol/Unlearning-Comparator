@@ -2,11 +2,7 @@ import * as d3 from "d3";
 
 const RECT_HEIGHT = 160;
 
-interface Props {
-  isExpanded: boolean;
-}
-
-export default function BubbleChartLegend({ isExpanded }: Props) {
+export default function BubbleChartLegend() {
   const colorScale = d3
     .scaleSequential()
     .domain([0, 1])
@@ -58,7 +54,7 @@ export default function BubbleChartLegend({ isExpanded }: Props) {
 
   return (
     <svg
-      className="absolute right-0.5 top-1 -z-10"
+      className="absolute right-0 bottom-[34px] -z-10"
       width={legendWidth}
       height={legendHeight}
     >

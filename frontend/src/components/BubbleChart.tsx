@@ -9,22 +9,20 @@ import { extractBubbleChartData } from "../utils/data/experiments";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
 const TOTAL_SIZE = 225;
-const MIN_BUBBLE_SIZE = 0.2;
-const MAX_BUBBLE_SIZE = 40;
+const MIN_BUBBLE_SIZE = 10;
+const MAX_BUBBLE_SIZE = 58;
 
 type ModeType = "Baseline" | "Comparison";
 
 interface Props {
   mode: ModeType;
   datasetMode: string;
-  isExpanded: boolean;
   showYAxis?: boolean;
 }
 
 export default function BubbleChart({
   mode,
   datasetMode,
-  isExpanded,
   showYAxis = true,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -135,7 +133,7 @@ export default function BubbleChart({
       .join("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => Math.sqrt(sizeScale(d.label)))
+      .attr("r", (d) => (d.label === 0 ? 0 : Math.sqrt(sizeScale(d.label))))
       .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
       .append("title")
@@ -167,20 +165,12 @@ export default function BubbleChart({
         </span>
       </div>
       {showYAxis && (
-        <span
-          className={`absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-7 ${
-            isExpanded ? "text-base" : "text-[13px]"
-          }`}
-        >
+        <span className="absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-7 text-[13px]">
           Ground Truth
         </span>
       )}
       <svg ref={svgRef}></svg>
-      <span
-        className={`absolute -bottom-1 left-[calc(50%+10px)] font-extralight ${
-          isExpanded ? "text-base" : "text-[13px]"
-        }`}
-      >
+      <span className="absolute -bottom-1 left-[calc(50%+10px)] font-extralight text-[13px]">
         Prediction
       </span>
     </div>

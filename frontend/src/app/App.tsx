@@ -16,17 +16,12 @@ export default function App() {
   const { experimentLoading } = useContext(ExperimentsContext);
 
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [isPredictionsExpanded, setIsPredictionsExpanded] = useState(false);
 
   useEffect(() => {
     setIsPageLoading(false);
   }, []);
 
   if (isPageLoading) return <div></div>;
-
-  const handleExpansionClick = () => {
-    setIsPredictionsExpanded((prev) => !prev);
-  };
 
   return (
     <section className="w-[1822px] relative">
@@ -41,11 +36,7 @@ export default function App() {
           <div className="flex">
             <Core height={LOWER_SECTION_HEIGHT} />
             <div className="flex flex-col">
-              <Predictions
-                height={260}
-                isExpanded={isPredictionsExpanded}
-                onExpansionClick={handleExpansionClick}
-              />
+              <Predictions height={260} />
               <Correlations height={LOWER_SECTION_HEIGHT - 260} />
             </div>
           </div>
