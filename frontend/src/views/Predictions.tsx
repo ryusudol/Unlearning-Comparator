@@ -2,8 +2,7 @@ import { useState, useContext } from "react";
 
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
-import PredictionChart from "../components/PredictionChart";
-// import HeatmapLegend from "../components/HeatmapLegend";
+import BubbleChartLegend from "../components/BubbleChartLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import {
@@ -36,16 +35,14 @@ export default function Predictions({
   const { selectedForgetClasses } = useContext(ForgetClassContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
-  const [chartMode, setChartMode] = useState<ChartModeType>(BUBBLE);
 
+  const allSelected = baseline !== "" && comparison !== "";
+  const selectedFCExist = selectedForgetClasses.length !== 0;
+  const unexpandedStyle = { height };
   const expandedStyle = {
     height: `${height * 2}px`,
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
   };
-  const unexpandedStyle = { height: `${height}px` };
-
-  const allSelected = baseline !== "" && comparison !== "";
-  const selectedFCExist = selectedForgetClasses.length !== 0;
 
   return (
     <section
@@ -62,46 +59,6 @@ export default function Predictions({
           </div>
           {allSelected && (
             <div className="flex items-center">
-              {/* <ChartBubble02Icon
-                onClick={() => setChartMode(BUBBLE)}
-                className={`cursor-pointer scale-90 ${
-                  chartMode === BUBBLE ? "text-black" : "text-gray-400"
-                }`}
-              />
-              <div
-                onClick={() => setChartMode(LABEL_HEATMAP)}
-                className={`relative cursor-pointer ${
-                  chartMode === LABEL_HEATMAP ? "text-black" : "text-gray-400"
-                }`}
-              >
-                <RectangularIcon
-                  className={`rotate-90 scale-90 ${
-                    chartMode === LABEL_HEATMAP ? "text-black" : "text-gray-400"
-                  }`}
-                />
-                <span className="absolute text-[9px] top-[1px] right-[5.7px]">
-                  R
-                </span>
-              </div>
-              <div
-                onClick={() => setChartMode(CONFIDENCE_HEATMAP)}
-                className={`relative cursor-pointer mr-3 ${
-                  chartMode === CONFIDENCE_HEATMAP
-                    ? "text-black"
-                    : "text-gray-400"
-                }`}
-              >
-                <RectangularIcon
-                  className={`rotate-90 scale-90 ${
-                    chartMode === CONFIDENCE_HEATMAP
-                      ? "text-black"
-                      : "text-gray-400"
-                  }`}
-                />
-                <span className="absolute text-[9px] top-[1px] right-[5.5px]">
-                  C
-                </span>
-              </div> */}
               {isExpanded ? (
                 <div
                   onClick={onExpansionClick}
@@ -124,70 +81,25 @@ export default function Predictions({
         </div>
         {allSelected && <DatasetModeSelector onValueChange={setDatasetMode} />}
       </div>
-      {/* Charts */}
       {selectedFCExist ? (
         !allSelected ? (
           <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div
-            className={`flex justify-start items-center ${
-              isExpanded ? "mt-2" : "mt-0"
-            }`}
-          >
-            {chartMode !== BUBBLE && (
-              <span
-                className={`font-extralight -rotate-90 text-nowrap -ml-6 -mr-9 ${
-                  isExpanded ? "text-base" : "text-[13px]"
-                }`}
-              >
-                Ground Truth
-              </span>
-            )}
-            {chartMode === BUBBLE && (
-              <>
-                <BubbleChart
-                  mode="Baseline"
-                  datasetMode={datasetMode}
-                  isExpanded={isExpanded}
-                />
-                <BubbleChart
-                  mode="Comparison"
-                  datasetMode={datasetMode}
-                  isExpanded={isExpanded}
-                  showYAxis={false}
-                />
-              </>
-            )}
-            {chartMode !== BUBBLE && (
-              <>
-                <PredictionChart
-                  mode="Baseline"
-                  datasetMode={datasetMode}
-                  chartMode={chartMode}
-                  isExpanded={isExpanded}
-                />
-                <PredictionChart
-                  mode="Comparison"
-                  datasetMode={datasetMode}
-                  chartMode={chartMode}
-                  isExpanded={isExpanded}
-                />
-              </>
-            )}
-            {/* Legend */}
-            {chartMode === BUBBLE ? (
-              <div
-                className={`flex flex-col items-center ${
-                  isExpanded ? "ml-3" : "ml-1"
-                }`}
-              >
-                {/* <BubbleLegend scale={sizeScale} />
-                <img src="/bubble-legend.png" alt="bubble legend img" /> */}
-              </div>
-            ) : // <HeatmapLegend isExpanded={isExpanded} />
-            null}
+          <div className="flex items-center">
+            <BubbleChart
+              mode="Baseline"
+              datasetMode={datasetMode}
+              isExpanded={isExpanded}
+            />
+            <BubbleChart
+              mode="Comparison"
+              datasetMode={datasetMode}
+              isExpanded={isExpanded}
+              showYAxis={false}
+            />
+            <BubbleChartLegend isExpanded={isExpanded} />
           </div>
         )
       ) : (

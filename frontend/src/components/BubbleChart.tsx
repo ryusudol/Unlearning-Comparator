@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ExperimentsContext } from "../store/experiments-context";
 import { extractBubbleChartData } from "../utils/data/experiments";
@@ -24,6 +25,7 @@ export default function BubbleChart({
   isExpanded,
   showYAxis = true,
 }: Props) {
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
@@ -31,6 +33,7 @@ export default function BubbleChart({
   const svgRef = useRef<SVGSVGElement>(null);
 
   const isBaseline = mode === "Baseline";
+  const id = isBaseline ? baseline : comparison;
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
 
   useEffect(() => {
@@ -39,10 +42,10 @@ export default function BubbleChart({
     const data = extractBubbleChartData(datasetMode, experiment);
 
     const margin = {
-      top: 10,
+      top: 22,
       right: 0,
       bottom: 42,
-      left: 68,
+      left: 64,
     };
     const width = TOTAL_SIZE - margin.left - margin.right;
     const height = TOTAL_SIZE - margin.top - margin.bottom;
@@ -108,9 +111,7 @@ export default function BubbleChart({
         .call(yAxis)
         .call((g) => {
           g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
-          g.selectAll(".tick text")
-            // .attr("transform", "rotate(-45)")
-            .attr("dx", "-.5em");
+          g.selectAll(".tick text").attr("dx", "-.5em");
         });
     } else {
       svg
@@ -142,10 +143,17 @@ export default function BubbleChart({
 
   return (
     <div
-      className={`flex flex-col items-center relative ${
-        !showYAxis && "right-[55px]"
+      className={`flex flex-col items-center relative z-10 ${
+        !showYAxis && "right-[54px] z-0"
       }`}
     >
+      <span
+        className={`text-[15px] text-nowrap absolute ${
+          isBaseline ? "left-[75px]" : "left-[65px]"
+        }`}
+      >
+        {mode} Model ({id})
+      </span>
       {showYAxis && (
         <span
           className={`absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-6 ${
