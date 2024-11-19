@@ -145,26 +145,21 @@ async def calculate_cka_similarity(
     forget_class, 
     device
 ):
-    # detailed_layers = [
-    #     'conv1',
-    #     'layer1.0.conv1', 'layer1.0.conv2', 'layer1.1.conv1', 'layer1.1.conv2',
-    #     'layer2.0.conv1', 'layer2.0.conv2', 'layer2.1.conv1', 'layer2.1.conv2',
-    #     'layer3.0.conv1', 'layer3.0.conv2', 'layer3.1.conv1', 'layer3.1.conv2',
-    #     'layer4.0.conv1', 'layer4.0.conv2', 'layer4.1.conv1', 'layer4.1.conv2',
-    #     'fc'
-    # ]
-    
+    # List of layers to analyze in ResNet18 model
+    # conv1: First convolutional layer
+    # layerX.Y: ResNet block Y in group X
+    # fc: Final fully connected layer
     detailed_layers = [
-        'conv1',              # 
-        'layer1.1.conv2',     # 첫 번째 블록의 마지막
-        'layer2.0.conv1',     # 다운샘플링 시작
-        'layer2.1.conv2',     # 두 번째 블록의 마지막
-        'layer3.0.conv1',     # 다운샘플링 시작
-        'layer3.1.conv2',     # 세 번째 블록의 마지막
-        'layer4.0.conv1',     # 다운샘플링 시작
-        'layer4.1.conv2',     # 마지막 블록의 마지막
-        'avgpool',            # avgpool 8192 -> 512
-        'fc'                  # fc 512 -> 10
+        'conv1',
+        'layer1.0',
+        'layer1.1',     
+        'layer2.0',     
+        'layer2.1',     
+        'layer3.0',     
+        'layer3.1',  
+        'layer4.0',     
+        'layer4.1',
+        'fc'
     ]
 
     # detailed_layers = [conv1, bn1, relu, maxpool,
