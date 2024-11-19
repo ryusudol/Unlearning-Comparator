@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
 import { CircleIcon, TriangleIcon } from "./UI/icons";
@@ -9,7 +9,7 @@ import { extractBubbleChartData } from "../utils/data/experiments";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
 const TOTAL_SIZE = 225;
-const MIN_BUBBLE_SIZE = 10;
+const MIN_BUBBLE_SIZE = 1;
 const MAX_BUBBLE_SIZE = 58;
 
 type ModeType = "Baseline" | "Comparison";
@@ -30,7 +30,20 @@ export default function BubbleChart({
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
+  const [tooltip, setTooltip] = useState({
+    display: false,
+    x: 0,
+    y: 0,
+    content: {
+      groundTruth: 0,
+      prediction: 0,
+      label: 0,
+      conf: 0,
+    },
+  });
+
   const svgRef = useRef<SVGSVGElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
@@ -136,18 +149,43 @@ export default function BubbleChart({
       .attr("r", (d) => (d.label === 0 ? 0 : Math.sqrt(sizeScale(d.label))))
       .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
-      .append("title")
-      .text(
-        (d) => `Label: ${d.label.toFixed(2)}\nConfidence: ${d.conf.toFixed(2)}`
-      );
+      .on("mouseenter", (event, d: any) => {
+        const rect = event.target.getBoundingClientRect();
+        const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
+
+        let xPos = rect.right + 10;
+        let yPos = rect.top + rect.height / 2;
+
+        if (xPos + tooltipWidth > window.innerWidth - 20) {
+          xPos = rect.left - tooltipWidth;
+        }
+
+        setTooltip({
+          display: true,
+          x: xPos,
+          y: yPos,
+          content: {
+            groundTruth: d.y,
+            prediction: d.x,
+            label: d.label,
+            conf: d.conf,
+          },
+        });
+      })
+      .on("mouseleave", () => {
+        setTooltip((prev) => ({
+          ...prev,
+          display: false,
+        }));
+      });
   }, [datasetMode, experiment, forgetClass, showYAxis]);
 
   if (!experiment) return null;
 
   return (
     <div
-      className={`flex flex-col items-center relative z-10 ${
-        !showYAxis && "right-[54px] z-0"
+      className={`flex flex-col items-center relative ${
+        showYAxis ? "z-10" : "right-[54px] z-0"
       }`}
     >
       <div
@@ -165,12 +203,52 @@ export default function BubbleChart({
         </span>
       </div>
       {showYAxis && (
-        <span className="absolute top-[40%] left-0 font-extralight -rotate-90 text-nowrap -mx-7 text-[13px]">
+        <span className="absolute top-[40%] left-0 -rotate-90 text-nowrap -mx-7 text-[13px]">
           Ground Truth
         </span>
       )}
       <svg ref={svgRef}></svg>
-      <span className="absolute -bottom-1 left-[calc(50%+10px)] font-extralight text-[13px]">
+      {tooltip.display && (
+        <div
+          ref={tooltipRef}
+          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+            tooltip.display ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          style={{
+            position: "fixed",
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translateY(-50%)",
+            pointerEvents: "none",
+          }}
+        >
+          <div>
+            <span>Ground Truth</span>:{" "}
+            <span className="font-semibold">
+              {forgetClassNames[tooltip.content.groundTruth]}
+            </span>
+          </div>
+          <div>
+            <span>Prediction</span>:{" "}
+            <span className="font-semibold">
+              {forgetClassNames[tooltip.content.prediction]}
+            </span>
+          </div>
+          <div>
+            <span>Label</span>:{" "}
+            <span className="font-semibold">
+              {tooltip.content.label.toFixed(3)}
+            </span>
+          </div>
+          <div>
+            <span>Confidence</span>:{" "}
+            <span className="font-semibold">
+              {tooltip.content.conf.toFixed(3)}
+            </span>
+          </div>
+        </div>
+      )}
+      <span className="absolute -bottom-1 left-[calc(50%+10px)] text-[13px]">
         Prediction
       </span>
     </div>
