@@ -68,8 +68,8 @@ export default function Heatmap({ mode, data, layers }: Props) {
     d: { x: string; y: string; value: number }
   ) => {
     const rect = event.currentTarget.getBoundingClientRect();
-
     const tooltipWidth = tooltipRef.current?.offsetWidth || TOOLTIP_WIDTH;
+
     let xPos = rect.right + TOOLTIP_OFFSET;
     let yPos = rect.top + rect.height / 2;
 
@@ -168,7 +168,7 @@ export default function Heatmap({ mode, data, layers }: Props) {
           Layers Before Unlearning
         </span>
       )}
-      <svg width={SIZE} height={SIZE}>
+      <svg width={SIZE} height={SIZE} className={isBaseline ? "z-10" : "z-0"}>
         <g
           width={boundsWidth}
           height={boundsHeight}
@@ -192,7 +192,7 @@ export default function Heatmap({ mode, data, layers }: Props) {
       {tooltip.display && (
         <div
           ref={tooltipRef}
-          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
             tooltip.display ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           style={{
@@ -201,6 +201,7 @@ export default function Heatmap({ mode, data, layers }: Props) {
             top: tooltip.y,
             transform: "translateY(-50%)",
             pointerEvents: "none",
+            zIndex: 20,
           }}
         >
           <div>
