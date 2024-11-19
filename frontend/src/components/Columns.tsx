@@ -123,8 +123,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const ua = row.getValue("UA");
-      const value = getValueToDisplay(ua);
-      return <div className="text-center">{value}</div>;
+      const value = getValueToDisplay(ua) as number;
+      return (
+        <div className="text-center">
+          {value === 0 || value === 1 ? value : value.toFixed(3)}
+        </div>
+      );
     },
   },
   {
@@ -148,8 +152,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const ra = row.getValue("RA");
-      const value = getValueToDisplay(ra);
-      return <div className="text-center">{value}</div>;
+      const value = getValueToDisplay(ra) as number;
+      return (
+        <div className="text-center">
+          {value === 0 || value === 1 ? value : value.toFixed(3)}
+        </div>
+      );
     },
   },
   {
@@ -173,8 +181,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const tua = row.getValue("TUA");
-      const value = getValueToDisplay(tua);
-      return <div className="text-center">{value}</div>;
+      const value = getValueToDisplay(tua) as number;
+      return (
+        <div className="text-center">
+          {value === 0 || value === 1 ? value : value.toFixed(3)}
+        </div>
+      );
     },
   },
   {
@@ -199,7 +211,11 @@ export const columns: ColumnDef<ExperimentData>[] = [
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
       const value = getValueToDisplay(tra) as number;
-      return <div className="text-center">{value.toFixed(3)}</div>;
+      return (
+        <div className="text-center">
+          {value === 0 || value === 1 ? value : value.toFixed(3)}
+        </div>
+      );
     },
   },
   {

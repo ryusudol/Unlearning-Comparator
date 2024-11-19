@@ -90,7 +90,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   const ckaData = getCkaData(dataset, baselineExperiment, comparisonExperiment);
 
   return (
-    <div className="relative bottom-1.5">
+    <div className="relative bottom-0">
       <CustomLegend />
       <p className="text-[15px] text-center">
         Per-layer Similarity Before/After Unlearning
@@ -111,12 +111,22 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
         >
           <CartesianGrid />
           <XAxis
-            dataKey="layer"
             tickLine={false}
-            tickMargin={-2}
-            angle={-45}
-            textAnchor="end"
+            tickMargin={-1}
+            textAnchor="middle"
             tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
+            ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+            label={{
+              value: "Layers",
+              position: "center",
+              dx: 1,
+              dy: 2,
+              style: {
+                fontSize: 12,
+                textAnchor: "middle",
+                fill: "#000000",
+              },
+            }}
           />
           <YAxis
             tickLine={false}
@@ -204,7 +214,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[76px] left-12 text-[10px] leading-3">
+    <div className="absolute top-[76px] left-10 text-[10px] leading-3">
       <div className="flex items-center">
         <div className="relative">
           <CircleIcon

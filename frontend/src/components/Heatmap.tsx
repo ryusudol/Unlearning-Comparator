@@ -149,7 +149,9 @@ export default function Heatmap({ mode, data, layers }: Props) {
 
   return (
     <div
-      className={`-mt-3 relative ${isBaseline ? "z-10" : "right-[44px] z-0"}`}
+      className={`relative bottom-4 ${
+        isBaseline ? "z-10" : "right-[44px] z-0"
+      }`}
     >
       <div
         className={`flex items-center text-[15px] relative ${
