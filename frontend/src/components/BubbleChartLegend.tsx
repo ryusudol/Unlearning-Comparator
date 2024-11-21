@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-const RECT_HEIGHT = 160;
+const RECT_HEIGHT = 190;
 
 export default function BubbleChartLegend() {
   const colorScale = d3
@@ -9,18 +9,18 @@ export default function BubbleChartLegend() {
     .interpolator(d3.interpolateViridis);
 
   const legendWidth = 35;
-  const legendHeight = 220;
+  const legendHeight = 254;
   const tickCount = 6;
   const ticks = d3.range(0, tickCount).map((d) => 1 - d / (tickCount - 1));
 
-  const circleTicks = [10, 35, 80];
+  const circleTicks = [2, 25, 80];
   const diameter = 25;
   const dashWidth = 12;
   const scale = (value: number) => Math.sqrt(value) * 0.8;
 
   const allCircles = circleTicks.map((tick, i) => {
     const xCenter = diameter / 2 + 1.5;
-    const yCircleTop = 45 - 2 * scale(tick);
+    const yCircleTop = 18 - 2 * scale(tick);
     const yCircleCenter = yCircleTop + scale(tick);
 
     return (
@@ -46,7 +46,7 @@ export default function BubbleChartLegend() {
           fontSize={6}
           alignmentBaseline="middle"
         >
-          {(ticks[ticks.length - i - 1] * 10).toFixed(0)}
+          {(i * 0.5).toFixed(1)}
         </text>
       </g>
     );
@@ -54,7 +54,7 @@ export default function BubbleChartLegend() {
 
   return (
     <svg
-      className="absolute right-0 bottom-[34px] -z-10"
+      className="z-50 absolute right-0"
       width={legendWidth}
       height={legendHeight}
     >
@@ -68,7 +68,7 @@ export default function BubbleChartLegend() {
       </defs>
       <rect
         x={10}
-        y={50}
+        y={24}
         width={8}
         height={RECT_HEIGHT}
         fill="url(#colorGradient)"
@@ -77,15 +77,15 @@ export default function BubbleChartLegend() {
         <g key={i}>
           <line
             x1={18}
-            y1={50 + tick * RECT_HEIGHT}
+            y1={24 + tick * RECT_HEIGHT}
             x2={22}
-            y2={50 + tick * RECT_HEIGHT}
+            y2={24 + tick * RECT_HEIGHT}
             stroke="black"
             strokeWidth={1}
           />
           <text
             x={24}
-            y={50 + tick * RECT_HEIGHT}
+            y={24 + tick * RECT_HEIGHT}
             fontSize={8}
             dominantBaseline="middle"
           >

@@ -22,7 +22,7 @@ export default function Core({ height }: { height: number }) {
   return (
     <section
       style={{ height }}
-      className="w-[1382px] p-1 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
+      className="w-[1312px] p-1 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
     >
       <div className="flex items-center mb-0.5">
         <div

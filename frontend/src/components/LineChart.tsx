@@ -96,7 +96,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
         Per-layer Similarity Before/After Unlearning
       </p>
       <ChartContainer
-        className="w-[430px] h-[150px] relative -top-0.5"
+        className="w-[500px] h-[265px] relative -top-0.5"
         config={chartConfig}
       >
         <LineChart
