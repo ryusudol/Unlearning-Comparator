@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 
-import { NeuralNetworkIcon } from "./UI/icons";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Prob } from "../views/Embeddings";
@@ -260,12 +263,12 @@ export default React.memo(function Tooltip({
         <div className="text-sm flex flex-col">
           <p>Prediction</p>
           <p className="flex items-center text-nowrap">
-            <NeuralNetworkIcon className="mr-1 text-blue-500" />
+            <BaselineNeuralNetworkIcon className="mr-1" />
             <span className="mr-0.5">Baseline:</span>
             <span className="font-semibold">{baselinePrediction}</span>
           </p>
           <p className="flex items-center text-nowrap">
-            <NeuralNetworkIcon className="mr-1 text-orange-500" />
+            <ComparisonNeuralNetworkIcon className="mr-1" />
             <span className="mr-0.5">Comparison:</span>
             <span className="font-semibold">{comparisonPrediction}</span>
           </p>

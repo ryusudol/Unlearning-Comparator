@@ -1,7 +1,10 @@
 import { useState, useContext, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import { NeuralNetworkIcon } from "./UI/icons";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -47,9 +50,6 @@ export default function BubbleChart({
 
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
-  const symbolStyle = isBaseline
-    ? "mr-1 text-blue-500"
-    : "mr-1 text-orange-500";
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
 
   useEffect(() => {
@@ -194,7 +194,11 @@ export default function BubbleChart({
       <div
         className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[22%]`}
       >
-        <NeuralNetworkIcon className={symbolStyle} />
+        {isBaseline ? (
+          <BaselineNeuralNetworkIcon className="mr-1" />
+        ) : (
+          <ComparisonNeuralNetworkIcon className="mr-1" />
+        )}
         <span>
           {mode} ({id})
         </span>

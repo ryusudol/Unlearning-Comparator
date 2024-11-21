@@ -10,7 +10,7 @@ interface Props {
 
 export default function DatasetModeSelector({ onValueChange }: Props) {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center mr-[25px]">
       <span className="text-xs font-light mr-2">Dataset:</span>
       <RadioGroup
         className="flex"
