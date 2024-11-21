@@ -30,8 +30,8 @@ export const COLUMN_WIDTHS = {
   TRA: 50,
   RTE: 54,
   MIA: 50,
-  baseline: 72,
-  comparison: 90,
+  baseline: 66,
+  comparison: 80,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
@@ -253,7 +253,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     id: "baseline",
     header: () => (
       <div className="w-full text-center flex items-center">
-        <NeuralNetworkIcon className="mr-0.5 text-purple-500" />
+        <NeuralNetworkIcon className="mr-0.5 text-blue-500" />
         <span>Baseline</span>
       </div>
     ),

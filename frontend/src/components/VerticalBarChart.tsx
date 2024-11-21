@@ -75,7 +75,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           Class: {forgetClassNames[+data.classLabel]}
         </p>
         <div className="flex items-center">
-          <NeuralNetworkIcon className="text-purple-500 mr-1" />
+          <NeuralNetworkIcon className="text-blue-500 mr-1" />
           <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         </div>
         <div className="flex items-center">
@@ -132,7 +132,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={chartConfig}
-        className={`${showYAxis ? "w-[280px]" : "w-[220px]"} h-[256px]`}
+        className={`${showYAxis ? "w-[276px]" : "w-[216px]"} h-[242px]`}
       >
         <BarChart
           accessibilityLayer
@@ -163,7 +163,7 @@ export default function VerticalBarChart({
                 forgetClass && label === forgetClassNames[forgetClass];
               return isForgetClass ? label + " (X)" : label;
             }}
-            style={{ whiteSpace: "nowrap", fill: "black" }}
+            style={{ whiteSpace: "nowrap", fill: "black", textWrap: "nowrap" }}
           />
           <XAxis
             dataKey="value"

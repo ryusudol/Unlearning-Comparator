@@ -50,7 +50,7 @@ const Embedding = forwardRef(
     const id = isBaseline ? baseline : comparison;
     const idExist = id !== "";
     const symbolStyle = isBaseline
-      ? "mr-1 text-purple-500"
+      ? "mr-1 text-blue-500"
       : "mr-1 text-orange-500";
 
     useEffect(() => {

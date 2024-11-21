@@ -260,7 +260,7 @@ export default React.memo(function Tooltip({
         <div className="text-sm flex flex-col">
           <p>Prediction</p>
           <p className="flex items-center text-nowrap">
-            <NeuralNetworkIcon className="mr-1 text-purple-500" />
+            <NeuralNetworkIcon className="mr-1 text-blue-500" />
             <span className="mr-0.5">Baseline:</span>
             <span className="font-semibold">{baselinePrediction}</span>
           </p>

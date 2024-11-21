@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
-import BubbleChartLegend from "../components/BubbleChartLegend";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Target02Icon } from "../components/UI/icons";
@@ -43,14 +42,13 @@ export default function Predictions({ height }: { height: number }) {
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div className="flex items-center relative -top-1.5">
+          <div className="flex items-center relative -top-1.5 left-1">
             <BubbleChart mode="Baseline" datasetMode={datasetMode} />
             <BubbleChart
               mode="Comparison"
               datasetMode={datasetMode}
               showYAxis={false}
             />
-            <BubbleChartLegend />
           </div>
         )
       ) : (
