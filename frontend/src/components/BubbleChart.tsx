@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from "react";
+import { useState, useContext, useEffect, useRef, useCallback } from "react";
 import * as d3 from "d3";
 
 import {
@@ -58,6 +58,18 @@ export default function BubbleChart({
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
+
+  const handleMouseOut = useCallback(
+    (event: MouseEvent) => {
+      event.stopPropagation();
+      setTooltip((prev) => ({
+        ...prev,
+        display: false,
+      }));
+      onHoverEnd();
+    },
+    [onHoverEnd]
+  );
 
   useEffect(() => {
     if (!experiment || !svgRef.current) return;
@@ -163,7 +175,9 @@ export default function BubbleChart({
       .attr("height", 20)
       .attr("fill", "transparent")
       .style("cursor", "pointer")
-      .on("mouseenter", (event, d: any) => {
+      .on("mouseover", (event, d: any) => {
+        event.stopPropagation();
+
         const rect = event.target.getBoundingClientRect();
         const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
 
@@ -192,15 +206,7 @@ export default function BubbleChart({
 
         onHover(d.y);
       })
-      .on("mouseleave", () => {
-        setTooltip((prev) => ({
-          ...prev,
-          display: false,
-        }));
-
-        svg.selectAll(".x-axis .tick text").style("font-weight", "normal");
-        onHoverEnd();
-      });
+      .on("mouseout", handleMouseOut);
 
     svg
       .selectAll("circle")
@@ -224,11 +230,31 @@ export default function BubbleChart({
     datasetMode,
     experiment,
     forgetClass,
-    showYAxis,
+    handleMouseOut,
     hoveredY,
     onHover,
-    onHoverEnd,
+    showYAxis,
   ]);
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (svgRef.current && tooltip.display) {
+        const svgRect = svgRef.current.getBoundingClientRect();
+        const isOutside =
+          event.clientX < svgRect.left ||
+          event.clientX > svgRect.right ||
+          event.clientY < svgRect.top ||
+          event.clientY > svgRect.bottom;
+
+        if (isOutside) {
+          handleMouseOut(event);
+        }
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [handleMouseOut, tooltip.display]);
 
   if (!experiment) return null;
 
@@ -260,7 +286,7 @@ export default function BubbleChart({
         <div
           ref={tooltipRef}
           className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
-            tooltip.display ? "opacity-100" : "opacity-0 pointer-events-none"
+            tooltip.display ? "opacity-100" : "opacity-0"
           }`}
           style={{
             position: "fixed",
