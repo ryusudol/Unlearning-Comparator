@@ -196,6 +196,12 @@ export default function DataTable({ columns }: Props) {
                       style={{
                         width: `${columnWidth}px`,
                         minWidth: `${columnWidth}px`,
+                        ...(header.column.id === "baseline" && {
+                          paddingRight: 0,
+                        }),
+                        ...(header.column.id === "comparison" && {
+                          paddingLeft: 0,
+                        }),
                       }}
                     >
                       {header.isPlaceholder
@@ -236,6 +242,8 @@ export default function DataTable({ columns }: Props) {
                       let cellStyle: React.CSSProperties = {
                         width: `${columnWidth}px`,
                         minWidth: `${columnWidth}px`,
+                        ...(columnId === "baseline" && { paddingRight: 0 }),
+                        ...(columnId === "comparison" && { paddingLeft: 0 }),
                       };
 
                       if (isPerformanceMetric) {

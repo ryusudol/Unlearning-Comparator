@@ -75,7 +75,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           Class: {forgetClassNames[+data.classLabel]}
         </p>
         <div className="flex items-center">
-          <NeuralNetworkIcon className="text-purple-500 mr-1" />
+          <NeuralNetworkIcon className="text-blue-500 mr-1" />
           <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         </div>
         <div className="flex items-center">
@@ -122,7 +122,7 @@ export default function VerticalBarChart({
   const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
 
   return (
-    <div className="flex flex-col justify-center items-center relative bottom-1">
+    <div className="flex flex-col justify-center items-center relative">
       <span
         className={`text-[15px] relative ${
           mode === "Training" ? "left-4" : "right-3.5"
@@ -132,7 +132,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={chartConfig}
-        className={`${showYAxis ? "w-[280px]" : "w-[220px]"} h-[256px]`}
+        className={`${showYAxis ? "w-[265px]" : "w-[205px]"} h-[230px]`}
       >
         <BarChart
           accessibilityLayer
@@ -163,7 +163,7 @@ export default function VerticalBarChart({
                 forgetClass && label === forgetClassNames[forgetClass];
               return isForgetClass ? label + " (X)" : label;
             }}
-            style={{ whiteSpace: "nowrap", fill: "black" }}
+            style={{ whiteSpace: "nowrap", fill: "black", textWrap: "nowrap" }}
           />
           <XAxis
             dataKey="value"
@@ -184,7 +184,7 @@ export default function VerticalBarChart({
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" barSize={10} />
+          <Bar dataKey="gap" layout="vertical" barSize={12} />
           <ReferenceLine
             x={remainGapAvg}
             stroke="#777"

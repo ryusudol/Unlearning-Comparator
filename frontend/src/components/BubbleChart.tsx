@@ -8,9 +8,9 @@ import { ExperimentsContext } from "../store/experiments-context";
 import { extractBubbleChartData } from "../utils/data/experiments";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
-const TOTAL_SIZE = 260;
+const TOTAL_SIZE = 255;
 const MIN_BUBBLE_SIZE = 1;
-const MAX_BUBBLE_SIZE = 58;
+const MAX_BUBBLE_SIZE = 90;
 
 type ModeType = "Baseline" | "Comparison";
 
@@ -48,7 +48,7 @@ export default function BubbleChart({
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
   const symbolStyle = isBaseline
-    ? "mr-1 text-purple-500"
+    ? "mr-1 text-blue-500"
     : "mr-1 text-orange-500";
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
 
@@ -82,7 +82,7 @@ export default function BubbleChart({
     const colorScale = d3
       .scaleSequential()
       .domain([0, 1])
-      .interpolator(d3.interpolateViridis);
+      .interpolator(d3.interpolateWarm);
 
     const sizeScale = d3
       .scaleLinear()
@@ -188,11 +188,11 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "z-10" : "right-[55px] z-0"
+        showYAxis ? "z-10" : "right-[48px] z-0"
       }`}
     >
       <div
-        className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[18%]`}
+        className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[22%]`}
       >
         <NeuralNetworkIcon className={symbolStyle} />
         <span>
@@ -200,7 +200,7 @@ export default function BubbleChart({
         </span>
       </div>
       {showYAxis && (
-        <span className="absolute top-[42%] left-0 -rotate-90 text-nowrap -mx-7 text-[13px]">
+        <span className="absolute top-[42%] left-1 -rotate-90 text-nowrap -mx-7 text-xs">
           Ground Truth
         </span>
       )}
@@ -245,9 +245,7 @@ export default function BubbleChart({
           </div>
         </div>
       )}
-      <span className="absolute bottom-0.5 left-1/2 text-[13px]">
-        Prediction
-      </span>
+      <span className="absolute -bottom-0.5 left-1/2 text-xs">Prediction</span>
     </div>
   );
 }
