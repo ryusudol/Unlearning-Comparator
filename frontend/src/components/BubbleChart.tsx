@@ -14,18 +14,25 @@ import { forgetClassNames } from "../constants/forgetClassNames";
 const TOTAL_SIZE = 255;
 const MIN_BUBBLE_SIZE = 1;
 const MAX_BUBBLE_SIZE = 90;
+const BASIC_FONT_WEIGHT = 300;
 
 type ModeType = "Baseline" | "Comparison";
 
 interface Props {
   mode: ModeType;
   datasetMode: string;
+  hoveredY: number | null;
+  onHover: (y: number) => void;
+  onHoverEnd: () => void;
   showYAxis?: boolean;
 }
 
 export default function BubbleChart({
   mode,
   datasetMode,
+  hoveredY,
+  onHover,
+  onHoverEnd,
   showYAxis = true,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -117,6 +124,7 @@ export default function BubbleChart({
           .attr("transform", "rotate(-45)")
           .style("text-anchor", "end")
           .style("font-family", "Roboto Condensed")
+          .style("font-weight", BASIC_FONT_WEIGHT)
           .attr("dx", "-.8em")
           .attr("dy", ".15em");
       });
@@ -139,19 +147,22 @@ export default function BubbleChart({
         .call(yAxis)
         .call((g) => {
           g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
-          g.selectAll(".tick text").remove();
+          g.selectAll(".tick text")
+            .style("font-family", "Roboto Condensed")
+            .remove();
         });
     }
 
     svg
-      .selectAll("circle")
+      .selectAll("rect")
       .data(data)
-      .join("circle")
-      .attr("cx", (d) => xScale(d.x))
-      .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => (d.label === 0 ? 0 : Math.sqrt(sizeScale(d.label))))
-      .attr("fill", (d) => colorScale(d.conf))
-      .attr("opacity", 0.7)
+      .join("rect")
+      .attr("x", (d) => xScale(d.x) - 10)
+      .attr("y", (d) => yScale(d.y) - 10)
+      .attr("width", 20)
+      .attr("height", 20)
+      .attr("fill", "transparent")
+      .style("cursor", "pointer")
       .on("mouseenter", (event, d: any) => {
         const rect = event.target.getBoundingClientRect();
         const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
@@ -174,14 +185,50 @@ export default function BubbleChart({
             conf: d.conf,
           },
         });
+
+        svg
+          .selectAll(".x-axis .tick text")
+          .style("font-weight", (t: any) => (t === d.x ? "bold" : "normal"));
+
+        onHover(d.y);
       })
       .on("mouseleave", () => {
         setTooltip((prev) => ({
           ...prev,
           display: false,
         }));
+
+        svg.selectAll(".x-axis .tick text").style("font-weight", "normal");
+        onHoverEnd();
       });
-  }, [datasetMode, experiment, forgetClass, showYAxis]);
+
+    svg
+      .selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", (d) => xScale(d.x))
+      .attr("cy", (d) => yScale(d.y))
+      .attr("r", (d) => (d.label === 0 ? 0 : Math.sqrt(sizeScale(d.label))))
+      .attr("fill", (d) => colorScale(d.conf))
+      .attr("opacity", 0.7)
+      .style("pointer-events", "none");
+
+    if (!svgRef.current) return;
+
+    d3.select(svgRef.current)
+      .selectAll(".y-axis .tick text")
+      .style("font-weight", (t: any) => {
+        return t === hoveredY ? "bold" : BASIC_FONT_WEIGHT;
+      });
+  }, [
+    datasetMode,
+    experiment,
+    forgetClass,
+    showYAxis,
+    hoveredY,
+    onHover,
+    onHoverEnd,
+  ]);
 
   if (!experiment) return null;
 
