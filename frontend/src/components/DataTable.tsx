@@ -170,13 +170,17 @@ export default function DataTable({ columns }: Props) {
 
   useEffect(() => {
     if (tableData.length > 0) {
-      saveBaseline(tableData[0].id);
-      saveComparison(tableData[1]?.id);
+      if (!baseline) {
+        saveBaseline(tableData[0].id);
+      }
+      if (!comparison && tableData[1]) {
+        saveComparison(tableData[1].id);
+      }
     } else {
       saveBaseline("");
       saveComparison("");
     }
-  }, [saveBaseline, saveComparison, tableData]);
+  }, [baseline, comparison, saveBaseline, saveComparison, tableData]);
 
   return (
     <div className="w-full h-[196px]">

@@ -10,7 +10,10 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { NeuralNetworkIcon } from "./UI/icons";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "./UI/chart";
@@ -75,11 +78,11 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           Class: {forgetClassNames[+data.classLabel]}
         </p>
         <div className="flex items-center">
-          <NeuralNetworkIcon className="text-blue-500 mr-1" />
+          <BaselineNeuralNetworkIcon className="mr-1" />
           <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         </div>
         <div className="flex items-center">
-          <NeuralNetworkIcon className="text-orange-500 mr-1" />
+          <ComparisonNeuralNetworkIcon className="mr-1" />
           <p>
             Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
           </p>
@@ -163,7 +166,12 @@ export default function VerticalBarChart({
                 forgetClass && label === forgetClassNames[forgetClass];
               return isForgetClass ? label + " (X)" : label;
             }}
-            style={{ whiteSpace: "nowrap", fill: "black", textWrap: "nowrap" }}
+            style={{
+              whiteSpace: "nowrap",
+              fill: "black",
+              textWrap: "nowrap",
+              textOverflow: "clip",
+            }}
           />
           <XAxis
             dataKey="value"

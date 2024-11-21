@@ -10,7 +10,6 @@ import {
   Image01Icon,
   UserQuestion01Icon,
   ImageDelete01Icon,
-  NeuralNetworkIcon,
   GitCompareIcon,
 } from "../components/UI/icons";
 import {
@@ -156,7 +155,6 @@ export default function PrivacyAttack({ height }: { height: number }) {
           <div className="w-full flex justify-between items-center">
             <div className="flex flex-col items-center">
               <div className="flex items-center">
-                <NeuralNetworkIcon />
                 <span className="ml-[3px] text-[15px]">
                   Baseline Model (id01)
                 </span>

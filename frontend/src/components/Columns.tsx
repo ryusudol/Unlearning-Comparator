@@ -6,7 +6,10 @@ import { ExperimentData } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 import { getPhaseColors } from "../utils/data/colors";
-import { NeuralNetworkIcon } from "./UI/icons";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A"
@@ -254,7 +257,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     header: () => (
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger className="w-full text-center flex items-center">
-          <NeuralNetworkIcon className="mr-1 text-blue-500" />
+          <BaselineNeuralNetworkIcon className="mr-1" />
           <span>Base</span>
         </HoverCardTrigger>
         <HoverCardContent className="w-auto px-3 py-2" side="top">
@@ -268,7 +271,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     header: () => (
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger className="w-full text-center flex items-center">
-          <NeuralNetworkIcon className="mr-1 text-orange-500" />
+          <ComparisonNeuralNetworkIcon className="mr-1" />
           <span>Comp</span>
         </HoverCardTrigger>
         <HoverCardContent className="w-auto px-3 py-2" side="top">

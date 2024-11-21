@@ -8,7 +8,10 @@ import React, {
 } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
-import { NeuralNetworkIcon } from "./UI/icons";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
 import ScatterPlot from "./ScatterPlot";
@@ -49,9 +52,6 @@ const Embedding = forwardRef(
     const isBaseline = mode === "Baseline";
     const id = isBaseline ? baseline : comparison;
     const idExist = id !== "";
-    const symbolStyle = isBaseline
-      ? "mr-1 text-blue-500"
-      : "mr-1 text-orange-500";
 
     useEffect(() => {
       setViewMode(VIEW_MODES[0]);
@@ -110,7 +110,11 @@ const Embedding = forwardRef(
           </div>
         )}
         <div className="text-[15px] mt-1 flex items-center">
-          <NeuralNetworkIcon className={symbolStyle} />
+          {isBaseline ? (
+            <BaselineNeuralNetworkIcon className="mr-1" />
+          ) : (
+            <ComparisonNeuralNetworkIcon className="mr-1" />
+          )}
           <span>
             {mode} {idExist ? `(${id})` : ""}
           </span>
