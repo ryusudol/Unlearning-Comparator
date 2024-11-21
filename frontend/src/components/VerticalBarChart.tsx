@@ -122,7 +122,7 @@ export default function VerticalBarChart({
   const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
 
   return (
-    <div className="flex flex-col justify-center items-center relative bottom-1">
+    <div className="flex flex-col justify-center items-center relative">
       <span
         className={`text-[15px] relative ${
           mode === "Training" ? "left-4" : "right-3.5"
@@ -132,7 +132,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={chartConfig}
-        className={`${showYAxis ? "w-[276px]" : "w-[216px]"} h-[242px]`}
+        className={`${showYAxis ? "w-[265px]" : "w-[205px]"} h-[230px]`}
       >
         <BarChart
           accessibilityLayer
@@ -184,7 +184,7 @@ export default function VerticalBarChart({
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" barSize={10} />
+          <Bar dataKey="gap" layout="vertical" barSize={12} />
           <ReferenceLine
             x={remainGapAvg}
             stroke="#777"

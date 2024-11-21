@@ -24,14 +24,14 @@ export const COLUMN_WIDTHS = {
   epochs: 46,
   BS: 52,
   LR: 54,
-  UA: 50,
-  RA: 50,
-  TUA: 50,
-  TRA: 50,
-  RTE: 54,
-  MIA: 50,
-  baseline: 66,
-  comparison: 80,
+  UA: 60,
+  RA: 60,
+  TUA: 60,
+  TRA: 60,
+  RTE: 60,
+  MIA: 60,
+  baseline: 60,
+  comparison: 60,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
@@ -252,19 +252,29 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     id: "baseline",
     header: () => (
-      <div className="w-full text-center flex items-center">
-        <NeuralNetworkIcon className="mr-0.5 text-blue-500" />
-        <span>Baseline</span>
-      </div>
+      <HoverCard openDelay={0} closeDelay={100}>
+        <HoverCardTrigger className="w-full text-center flex items-center">
+          <NeuralNetworkIcon className="mr-1 text-blue-500" />
+          <span>Base</span>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Baseline Model
+        </HoverCardContent>
+      </HoverCard>
     ),
   },
   {
     id: "comparison",
     header: () => (
-      <div className="w-full text-center flex items-center">
-        <NeuralNetworkIcon className="mr-0.5 text-orange-500" />
-        <span>Comparison</span>
-      </div>
+      <HoverCard openDelay={0} closeDelay={100}>
+        <HoverCardTrigger className="w-full text-center flex items-center">
+          <NeuralNetworkIcon className="mr-1 text-orange-500" />
+          <span>Comp</span>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Comparison Model
+        </HoverCardContent>
+      </HoverCard>
     ),
   },
 ];

@@ -8,7 +8,7 @@ import { ExperimentsContext } from "../store/experiments-context";
 import { extractBubbleChartData } from "../utils/data/experiments";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
-const TOTAL_SIZE = 265;
+const TOTAL_SIZE = 255;
 const MIN_BUBBLE_SIZE = 1;
 const MAX_BUBBLE_SIZE = 90;
 
@@ -82,7 +82,7 @@ export default function BubbleChart({
     const colorScale = d3
       .scaleSequential()
       .domain([0, 1])
-      .interpolator(d3.interpolateViridis);
+      .interpolator(d3.interpolateWarm);
 
     const sizeScale = d3
       .scaleLinear()
@@ -188,11 +188,11 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "z-10" : "right-[50px] z-0"
+        showYAxis ? "z-10" : "right-[48px] z-0"
       }`}
     >
       <div
-        className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[18%]`}
+        className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[22%]`}
       >
         <NeuralNetworkIcon className={symbolStyle} />
         <span>

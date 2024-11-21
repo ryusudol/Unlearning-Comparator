@@ -11,6 +11,7 @@ type Values = {
   TUA: number[];
   TRA: number[];
   RTE: number[];
+  MIA: number[];
 };
 
 type BubbleChartData = {
@@ -30,8 +31,10 @@ const baseColors = {
   TUA: RED,
   TRA: GREEN,
   RTE: RED,
+  MIA: RED,
 };
 
+// TODO: MIA에 있는 RTE 모두 MIA로 변경할 것
 export function calculatePerformanceMetrics(data: Experiments) {
   const values: Values = {
     UA: Object.values(data).map((d) => d.UA),
@@ -39,6 +42,9 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: Object.values(data).map((d) => d.TUA),
     TRA: Object.values(data).map((d) => d.TRA),
     RTE: Object.values(data)
+      .filter((d) => typeof d.RTE === "number")
+      .map((d) => d.RTE as number),
+    MIA: Object.values(data)
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),
   };
@@ -49,6 +55,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.min(values.TUA.map((v) => Number(v)))!,
     TRA: d3.min(values.TRA)!,
     RTE: d3.min(values.RTE)!,
+    MIA: d3.min(values.RTE)!,
   };
 
   const maxs = {
@@ -57,6 +64,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.max(values.TUA.map((v) => Number(v)))!,
     TRA: d3.max(values.TRA)!,
     RTE: d3.max(values.RTE)!,
+    MIA: d3.max(values.RTE)!,
   };
 
   return {
@@ -89,6 +97,13 @@ export function calculatePerformanceMetrics(data: Experiments) {
       baseColor: baseColors.TRA,
     },
     RTE: {
+      colorScale: d3
+        .scaleLinear()
+        .domain([mins.RTE, maxs.RTE])
+        .range([BRIGHTEST, DARKEST]),
+      baseColor: baseColors.RTE,
+    },
+    MIA: {
       colorScale: d3
         .scaleLinear()
         .domain([mins.RTE, maxs.RTE])

@@ -102,7 +102,7 @@ export default function Accuracies({ height }: { height: number }) {
           Select both Baseline and Comparison.
         </p>
       ) : (
-        <div className="w-full flex items-center -mt-0.5 relative">
+        <div className="w-full flex items-center relative ml-0.5">
           <VerticalBarChart
             mode="Training"
             gapData={trainAccuracyGap}

@@ -10,16 +10,17 @@ import {
 
 import { getCkaData } from "../utils/data/getCkaData";
 import { ExperimentsContext } from "../store/experiments-context";
-import { CircleIcon, TriangleIcon } from "./UI/icons";
+import { CircleIcon, MultiplicationSignIcon } from "./UI/icons";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
 } from "../components/UI/chart";
 
-const GREEN = "#567C31";
-const RED = "#BE4130";
+const BLUE = "#3b82f6";
+const ORANGE = "#f97316";
 const DOT_SIZE = 10;
+const CROSS_SIZE = 16;
 const ANIMATION_DURATION = 500;
 const LABEL_FONT_SIZE = 10;
 
@@ -30,19 +31,19 @@ const chartConfig = {
   },
   baselineForgetCka: {
     label: "Baseline (Forget Class)",
-    color: RED,
+    color: BLUE,
   },
   baselineOtherCka: {
     label: "Baseline (Remain Classes)",
-    color: GREEN,
+    color: BLUE,
   },
   comparisonForgetCka: {
     label: "Comparison (Forget Class)",
-    color: RED,
+    color: ORANGE,
   },
   comparisonOtherCka: {
     label: "Comparison (Remain Classes)",
-    color: GREEN,
+    color: ORANGE,
   },
 } satisfies ChartConfig;
 
@@ -52,25 +53,32 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
       <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
         <p className="mb-1 font-bold">{payload[0].payload.layer}</p>
         <div className="flex items-center">
-          <CircleIcon className="w-3 h-3 mr-1" style={{ color: RED }} />
+          <MultiplicationSignIcon
+            className="w-4 h-4 -ml-0.5 mr-0.5"
+            style={{ color: BLUE }}
+          />
+
           <p>
             Baseline (Forget Class): <strong>{payload[0].value}</strong>
           </p>
         </div>
         <div className="flex items-center">
-          <CircleIcon className="w-3 h-3 mr-1" style={{ color: GREEN }} />
+          <CircleIcon className="w-3 h-3 mr-1" style={{ color: BLUE }} />
           <p>
             Baseline (Remain Classes): <strong>{payload[1].value}</strong>
           </p>
         </div>
         <div className="flex items-center">
-          <TriangleIcon className="w-3 h-3 mr-1" color={RED} />
+          <MultiplicationSignIcon
+            className="w-4 h-4 -ml-0.5 mr-0.5"
+            color={ORANGE}
+          />
           <p>
             Comparison (Forget Class): <strong>{payload[2].value}</strong>
           </p>
         </div>
         <div className="flex items-center">
-          <TriangleIcon className="w-3 h-3 mr-1" color={GREEN} />
+          <CircleIcon className="w-3 h-3 mr-1" color={ORANGE} />
           <p>
             Comparison (Remain Classes): <strong>{payload[3].value}</strong>
           </p>
@@ -96,10 +104,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
       <p className="text-[15px] text-center">
         Per-layer Similarity Before/After Unlearning
       </p>
-      <ChartContainer
-        className="w-[498px] h-[260px] relative -top-0.5"
-        config={chartConfig}
-      >
+      <ChartContainer className="w-[490px] h-[258px]" config={chartConfig}>
         <LineChart
           accessibilityLayer
           data={ckaData}
@@ -107,7 +112,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             top: 4,
             right: 20,
             bottom: 34,
-            left: -24,
+            left: -12,
           }}
         >
           <CartesianGrid />
@@ -120,9 +125,9 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
             ticks={layers}
             label={{
-              value: "Layers",
+              value: "ResNet18 Layers",
               position: "center",
-              dx: 10,
+              dx: 34,
               dy: 30,
               style: {
                 fontSize: 12,
@@ -142,7 +147,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               value: "CKA Similarity",
               angle: -90,
               position: "center",
-              dx: 4,
+              dx: -4,
               style: {
                 fontSize: 12,
                 textAnchor: "middle",
@@ -156,7 +161,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             type="linear"
             stroke={chartConfig.baselineForgetCka.color}
             strokeWidth={2}
-            dot={{ fill: RED, stroke: RED }}
+            dot={{ fill: BLUE, stroke: BLUE }}
             animationDuration={ANIMATION_DURATION}
             activeDot={false}
           />
@@ -165,7 +170,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             type="linear"
             stroke={chartConfig.baselineOtherCka.color}
             strokeWidth={2}
-            dot={{ fill: GREEN, stroke: GREEN }}
+            dot={{ fill: BLUE, stroke: BLUE }}
             animationDuration={ANIMATION_DURATION}
             activeDot={false}
           />
@@ -178,12 +183,12 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             animationDuration={ANIMATION_DURATION}
             dot={({ cx, cy }) => {
               return (
-                <TriangleIcon
-                  x={cx - DOT_SIZE / 2}
-                  y={cy - DOT_SIZE / 2}
-                  width={DOT_SIZE}
-                  height={DOT_SIZE}
-                  color={RED}
+                <MultiplicationSignIcon
+                  x={cx - CROSS_SIZE / 2}
+                  y={cy - CROSS_SIZE / 2}
+                  width={CROSS_SIZE}
+                  height={CROSS_SIZE}
+                  color={ORANGE}
                 />
               );
             }}
@@ -198,12 +203,12 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             animationDuration={ANIMATION_DURATION}
             dot={({ cx, cy }) => {
               return (
-                <TriangleIcon
-                  x={cx - DOT_SIZE / 2}
-                  y={cy - DOT_SIZE / 2}
-                  width={DOT_SIZE}
-                  height={DOT_SIZE}
-                  color={GREEN}
+                <MultiplicationSignIcon
+                  x={cx - CROSS_SIZE / 2}
+                  y={cy - CROSS_SIZE / 2}
+                  width={CROSS_SIZE}
+                  height={CROSS_SIZE}
+                  color={ORANGE}
                 />
               );
             }}
@@ -217,17 +222,17 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[126px] left-10 text-xs leading-4">
+    <div className="absolute top-[150px] left-14 text-xs leading-4">
       <div className="flex items-center">
         <div className="relative">
           <CircleIcon
             className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
-            style={{ color: GREEN }}
+            style={{ color: BLUE }}
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
             style={{
-              backgroundColor: GREEN,
+              backgroundColor: BLUE,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -236,11 +241,14 @@ function CustomLegend() {
       </div>
       <div className="flex items-center">
         <div className="relative">
-          <TriangleIcon width={10} height={10} color={GREEN} className="mr-2" />
+          <CircleIcon
+            className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
+            style={{ color: ORANGE }}
+          />
           <div
             className="absolute top-1/2 w-[18px]"
             style={{
-              borderTop: `1px dashed ${GREEN}`,
+              borderTop: `1px dashed ${ORANGE}`,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -249,14 +257,16 @@ function CustomLegend() {
       </div>
       <div className="flex items-center">
         <div className="relative">
-          <CircleIcon
-            className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
-            style={{ color: RED }}
+          <MultiplicationSignIcon
+            width={CROSS_SIZE}
+            height={CROSS_SIZE}
+            color={BLUE}
+            className="mr-[5px] -ml-[3px]"
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
             style={{
-              backgroundColor: RED,
+              backgroundColor: BLUE,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -265,11 +275,16 @@ function CustomLegend() {
       </div>
       <div className="mb-1 flex items-center">
         <div className="relative">
-          <TriangleIcon width={10} height={10} color={RED} className="mr-2" />
+          <MultiplicationSignIcon
+            width={CROSS_SIZE}
+            height={CROSS_SIZE}
+            color={ORANGE}
+            className="mr-[5px] -ml-[3px]"
+          />
           <div
             className="absolute top-1/2 w-[18px]"
             style={{
-              borderTop: `1px dashed ${RED}`,
+              borderTop: `1px dashed ${ORANGE}`,
               transform: "translate(-4px, -50%)",
             }}
           />
