@@ -1,14 +1,14 @@
 import { useState, useContext, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import { CircleIcon, TriangleIcon } from "./UI/icons";
+import { NeuralNetworkIcon } from "./UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ExperimentsContext } from "../store/experiments-context";
 import { extractBubbleChartData } from "../utils/data/experiments";
 import { forgetClassNames } from "../constants/forgetClassNames";
 
-const TOTAL_SIZE = 225;
+const TOTAL_SIZE = 260;
 const MIN_BUBBLE_SIZE = 1;
 const MAX_BUBBLE_SIZE = 58;
 
@@ -47,6 +47,9 @@ export default function BubbleChart({
 
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
+  const symbolStyle = isBaseline
+    ? "mr-1 text-purple-500"
+    : "mr-1 text-orange-500";
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
 
   useEffect(() => {
@@ -99,7 +102,7 @@ export default function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? forgetClassNames[d as number] + "(X)"
+          ? forgetClassNames[d as number] + " (X)"
           : forgetClassNames[d as number]
       );
 
@@ -185,25 +188,19 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "z-10" : "right-[54px] z-0"
+        showYAxis ? "z-10" : "right-[55px] z-0"
       }`}
     >
       <div
-        className={`flex items-center text-[15px] text-nowrap absolute ${
-          isBaseline ? "left-[90px]" : "left-[78px]"
-        }`}
+        className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[18%]`}
       >
-        {isBaseline ? (
-          <CircleIcon className="w-3 h-3 mr-1" />
-        ) : (
-          <TriangleIcon className="w-3 h-3 mr-1" />
-        )}
+        <NeuralNetworkIcon className={symbolStyle} />
         <span>
           {mode} ({id})
         </span>
       </div>
       {showYAxis && (
-        <span className="absolute top-[40%] left-0 -rotate-90 text-nowrap -mx-7 text-[13px]">
+        <span className="absolute top-[42%] left-0 -rotate-90 text-nowrap -mx-7 text-[13px]">
           Ground Truth
         </span>
       )}
@@ -248,7 +245,7 @@ export default function BubbleChart({
           </div>
         </div>
       )}
-      <span className="absolute -bottom-1 left-[calc(50%+10px)] text-[13px]">
+      <span className="absolute bottom-0.5 left-1/2 text-[13px]">
         Prediction
       </span>
     </div>

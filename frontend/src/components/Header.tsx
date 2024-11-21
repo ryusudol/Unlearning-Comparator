@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useMemo } from "react";
 
 import { LogoIcon, PlusIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
@@ -36,11 +36,16 @@ export default function Header() {
   const { saveExperiments, setExperimentsLoading } =
     useContext(ExperimentsContext);
 
-  const unselectForgetClasses = forgetClassNames.filter(
-    (item) => !selectedForgetClasses.includes(forgetClassNames.indexOf(item))
+  const unselectForgetClasses = useMemo(
+    () =>
+      forgetClassNames.filter(
+        (item) =>
+          !selectedForgetClasses.includes(forgetClassNames.indexOf(item))
+      ),
+    [selectedForgetClasses]
   );
-  const [targetFC, setTargetFC] = useState(unselectForgetClasses[0]);
-  const [open, setOpen] = useState(selectedForgetClasses.length === 0);
+  const [targetFC, setTargetFC] = useState(() => unselectForgetClasses[0]);
+  const [open, setOpen] = useState(() => selectedForgetClasses.length === 0);
 
   const fetchAndSaveExperiments = async (forgetClass: string) => {
     const classIndex = forgetClassNames.indexOf(forgetClass);

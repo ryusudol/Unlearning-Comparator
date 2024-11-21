@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 
-import { CircleIcon, TriangleIcon } from "./UI/icons";
+import { NeuralNetworkIcon } from "./UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
 import ScatterPlot from "./ScatterPlot";
@@ -46,7 +46,12 @@ const Embedding = forwardRef(
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
     const scatterRef = useRef(null);
 
-    const id = mode === "Baseline" ? baseline : comparison;
+    const isBaseline = mode === "Baseline";
+    const id = isBaseline ? baseline : comparison;
+    const idExist = id !== "";
+    const symbolStyle = isBaseline
+      ? "mr-1 text-purple-500"
+      : "mr-1 text-orange-500";
 
     useEffect(() => {
       setViewMode(VIEW_MODES[0]);
@@ -72,8 +77,6 @@ const Embedding = forwardRef(
       }
     };
 
-    const idExist = id !== "";
-
     return (
       <div
         style={{ height }}
@@ -96,9 +99,9 @@ const Embedding = forwardRef(
                   <SelectValue placeholder={0} />
                 </SelectTrigger>
                 <SelectContent>
-                  {VIEW_MODES.map((mode, idx) => (
-                    <SelectItem key={idx} value={mode}>
-                      {mode}
+                  {VIEW_MODES.map((viewMode, idx) => (
+                    <SelectItem key={idx} value={viewMode}>
+                      {viewMode}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -107,16 +110,12 @@ const Embedding = forwardRef(
           </div>
         )}
         <div className="text-[15px] mt-1 flex items-center">
-          {mode === "Baseline" ? (
-            <CircleIcon className="w-3 h-3" />
-          ) : (
-            <TriangleIcon className="w-3 h-3" />
-          )}
-          <span className="ml-1">
+          <NeuralNetworkIcon className={symbolStyle} />
+          <span>
             {mode} {idExist ? `(${id})` : ""}
           </span>
         </div>
-        <div className="w-[615px] h-[615px] flex flex-col justify-center items-center">
+        <div className="w-[638px] h-[607px] flex flex-col justify-center items-center">
           <ScatterPlot
             mode={mode}
             data={data}

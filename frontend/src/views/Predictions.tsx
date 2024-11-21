@@ -28,7 +28,7 @@ export default function Predictions({ height }: { height: number }) {
   return (
     <section
       style={{ height }}
-      className="px-[5px] py-0.5 flex flex-col border-[1px] border-solid transition-all z-10 bg-white absolute w-[440px] top-[282px]"
+      className="w-[510px] p-1 flex flex-col border-[1px] border-solid transition-all z-10 bg-white"
     >
       <div className="flex justify-between">
         <div className="flex items-center mr-2">
@@ -43,7 +43,7 @@ export default function Predictions({ height }: { height: number }) {
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div className="flex items-center relative -top-0.5">
+          <div className="flex items-center relative -top-1.5">
             <BubbleChart mode="Baseline" datasetMode={datasetMode} />
             <BubbleChart
               mode="Comparison"

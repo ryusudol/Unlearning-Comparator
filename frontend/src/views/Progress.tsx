@@ -35,6 +35,7 @@ export default function Progress({ height }: { height: number }) {
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
+  const [runningTime, setRunningTime] = useState(0);
 
   const progress = status.progress;
   const steps = getProgressSteps(
@@ -88,15 +89,23 @@ export default function Progress({ height }: { height: number }) {
   ]);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+    let statusIntervalId: NodeJS.Timeout | null = null;
+    let timerIntervalId: NodeJS.Timeout | null = null;
 
     if (isRunning) {
-      intervalId = setInterval(checkStatus, 1000);
+      setRunningTime(0);
+      statusIntervalId = setInterval(checkStatus, 1000);
+      timerIntervalId = setInterval(() => {
+        setRunningTime((prev) => prev + 1);
+      }, 1000);
     }
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (statusIntervalId) {
+        clearInterval(statusIntervalId);
+      }
+      if (timerIntervalId) {
+        clearInterval(timerIntervalId);
       }
     };
   }, [checkStatus, isRunning]);
@@ -113,8 +122,11 @@ export default function Progress({ height }: { height: number }) {
         100
       );
 
-      if (progress.includes("UMAP")) setUmapProgress(progressValue);
-      else setCkaProgress(progressValue);
+      if (progress.includes("UMAP")) {
+        setUmapProgress(progressValue);
+      } else if (progress.includes("CKA")) {
+        setCkaProgress(progressValue);
+      }
 
       if (progressValue === 100) {
         clearInterval(intervalId!);
@@ -129,13 +141,13 @@ export default function Progress({ height }: { height: number }) {
   }, [progress]);
 
   return (
-    <section
-      style={{ height: `${height}px` }}
-      className="w-[350px] p-1 relative border"
-    >
+    <section style={{ height }} className="w-[280px] p-1 relative border">
       <div className="flex items-center">
         <VitalIcon />
         <h5 className="font-semibold ml-1 text-lg">Progress</h5>
+        <span className="ml-1 text-sm">
+          {isRunning || completedSteps.length ? `(${runningTime}s)` : ""}
+        </span>
       </div>
       <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
         {steps.map((step, idx) => {
@@ -149,7 +161,7 @@ export default function Progress({ height }: { height: number }) {
           return (
             <StepperItem
               key={idx}
-              className="relative flex w-full items-start gap-3"
+              className="relative flex w-full items-start gap-2"
             >
               {isNotLastStep && (
                 <StepperSeparator className="absolute left-[15px] top-6 block h-[calc(100%)] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary">

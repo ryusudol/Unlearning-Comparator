@@ -6,6 +6,7 @@ import { ExperimentData } from "../types/data";
 import { Badge } from "./UI/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
 import { getPhaseColors } from "../utils/data/colors";
+import { NeuralNetworkIcon } from "./UI/icons";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A"
@@ -23,13 +24,14 @@ export const COLUMN_WIDTHS = {
   epochs: 46,
   BS: 52,
   LR: 54,
-  UA: 63,
-  RA: 63,
-  TUA: 63,
-  TRA: 63,
-  RTE: 63,
-  baseline: 60,
-  comparison: 70,
+  UA: 50,
+  RA: 50,
+  TUA: 50,
+  TRA: 50,
+  RTE: 54,
+  MIA: 50,
+  baseline: 72,
+  comparison: 90,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
@@ -244,11 +246,25 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
+    id: "MIA",
+    header: () => <div className="w-full text-center">MIA</div>,
+  },
+  {
     id: "baseline",
-    header: () => <div className="w-full text-center">Baseline</div>,
+    header: () => (
+      <div className="w-full text-center flex items-center">
+        <NeuralNetworkIcon className="mr-0.5 text-purple-500" />
+        <span>Baseline</span>
+      </div>
+    ),
   },
   {
     id: "comparison",
-    header: () => <div className="w-full text-center">Comparison</div>,
+    header: () => (
+      <div className="w-full text-center flex items-center">
+        <NeuralNetworkIcon className="mr-0.5 text-orange-500" />
+        <span>Comparison</span>
+      </div>
+    ),
   },
 ];

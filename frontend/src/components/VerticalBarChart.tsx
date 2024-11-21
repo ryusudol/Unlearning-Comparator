@@ -10,7 +10,7 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { CircleIcon, TriangleIcon } from "./UI/icons";
+import { NeuralNetworkIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "./UI/chart";
@@ -75,14 +75,12 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           Class: {forgetClassNames[+data.classLabel]}
         </p>
         <div className="flex items-center">
-          <CircleIcon className="w-3 h-3" />
-          <p className="ml-1">
-            Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
-          </p>
+          <NeuralNetworkIcon className="text-purple-500 mr-1" />
+          <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
         </div>
         <div className="flex items-center">
-          <TriangleIcon className="w-3 h-3" />
-          <p className="ml-1">
+          <NeuralNetworkIcon className="text-orange-500 mr-1" />
+          <p>
             Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
           </p>
         </div>
@@ -134,17 +132,17 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={chartConfig}
-        className={`${showYAxis ? "w-[250px]" : "w-[190px]"} h-[182px]`}
+        className={`${showYAxis ? "w-[280px]" : "w-[220px]"} h-[256px]`}
       >
         <BarChart
           accessibilityLayer
           data={gapData}
           layout="vertical"
           margin={{
-            left: 14,
-            right: 40,
-            top: 13,
-            bottom: 8,
+            left: 8,
+            right: 8,
+            top: 12,
+            bottom: 0,
           }}
         >
           <YAxis
@@ -163,9 +161,9 @@ export default function VerticalBarChart({
                 chartConfig[value as keyof typeof chartConfig]?.label;
               const isForgetClass =
                 forgetClass && label === forgetClassNames[forgetClass];
-              return isForgetClass ? label + "(X)" : label;
+              return isForgetClass ? label + " (X)" : label;
             }}
-            style={{ whiteSpace: "nowrap", textWrap: "nowrap", fill: "black" }}
+            style={{ whiteSpace: "nowrap", fill: "black" }}
           />
           <XAxis
             dataKey="value"
@@ -177,16 +175,16 @@ export default function VerticalBarChart({
           >
             <Label
               fill="black"
-              className="-translate-y-1 text-xs font-light"
+              className="-translate-y-2 text-xs font-light"
               value={`← Baseline High | Comparison High →`}
-              offset={-2}
+              offset={-3}
               dx={9}
               position="bottom"
             />
           </XAxis>
           <ReferenceLine x={0} stroke="#777" />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" />
+          <Bar dataKey="gap" layout="vertical" barSize={10} />
           <ReferenceLine
             x={remainGapAvg}
             stroke="#777"
