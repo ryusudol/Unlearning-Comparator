@@ -23,6 +23,10 @@ const DOT_SIZE = 10;
 const CROSS_SIZE = 16;
 const ANIMATION_DURATION = 500;
 const LABEL_FONT_SIZE = 10;
+const ACTIVE_DOT_SIZE = 14;
+const ACTIVE_CROSS_SIZE = 20;
+const STROKE_WIDTH = 2;
+const STROKE_DASHARRAY = "3 3";
 
 const chartConfig = {
   layer: {
@@ -60,7 +64,6 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
             className="w-4 h-4 -ml-0.5 mr-0.5"
             style={{ color: PURPLE }}
           />
-
           <p>
             Baseline (Forget Class): <strong>{payload[0].value}</strong>
           </p>
@@ -107,12 +110,12 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
       <p className="text-[15px] text-center">
         Per-layer Similarity Before/After Unlearning
       </p>
-      <ChartContainer className="w-[490px] h-[258px]" config={chartConfig}>
+      <ChartContainer className="w-[490px] h-[260px]" config={chartConfig}>
         <LineChart
           accessibilityLayer
           data={ckaData}
           margin={{
-            top: 4,
+            top: 5,
             right: 20,
             bottom: 34,
             left: -12,
@@ -122,7 +125,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
           <XAxis
             dataKey="layer"
             tickLine={false}
-            tickMargin={0}
+            tickMargin={-2}
             angle={-45}
             textAnchor="end"
             tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
@@ -163,48 +166,59 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             dataKey="baselineForgetCka"
             type="linear"
             stroke={chartConfig.baselineForgetCka.color}
-            strokeWidth={2}
+            strokeWidth={STROKE_WIDTH}
             animationDuration={ANIMATION_DURATION}
-            activeDot={false}
-            dot={({ cx, cy }) => {
-              return (
-                <MultiplicationSignIcon
-                  x={cx - CROSS_SIZE / 2}
-                  y={cy - CROSS_SIZE / 2}
-                  width={CROSS_SIZE}
-                  height={CROSS_SIZE}
-                  color={PURPLE}
-                />
-              );
-            }}
+            dot={({ cx, cy }) => (
+              <MultiplicationSignIcon
+                x={cx - CROSS_SIZE / 2}
+                y={cy - CROSS_SIZE / 2}
+                width={CROSS_SIZE}
+                height={CROSS_SIZE}
+                color={PURPLE}
+              />
+            )}
+            activeDot={(props: any) => (
+              <MultiplicationSignIcon
+                x={props.cx - ACTIVE_CROSS_SIZE / 2}
+                y={props.cy - ACTIVE_CROSS_SIZE / 2}
+                width={ACTIVE_CROSS_SIZE}
+                height={ACTIVE_CROSS_SIZE}
+                color={PURPLE}
+              />
+            )}
           />
           <Line
             dataKey="baselineOtherCka"
             type="linear"
             stroke={chartConfig.baselineOtherCka.color}
-            strokeWidth={2}
+            strokeWidth={STROKE_WIDTH}
             animationDuration={ANIMATION_DURATION}
-            activeDot={false}
-            dot={({ cx, cy }) => {
-              return (
-                <CircleIcon
-                  x={cx - DOT_SIZE / 2}
-                  y={cy - DOT_SIZE / 2}
-                  width={DOT_SIZE}
-                  height={DOT_SIZE}
-                  color={PURPLE}
-                />
-              );
-            }}
+            dot={({ cx, cy }) => (
+              <CircleIcon
+                x={cx - DOT_SIZE / 2}
+                y={cy - DOT_SIZE / 2}
+                width={DOT_SIZE}
+                height={DOT_SIZE}
+                color={PURPLE}
+              />
+            )}
+            activeDot={(props: any) => (
+              <CircleIcon
+                x={props.cx - ACTIVE_DOT_SIZE / 2}
+                y={props.cy - ACTIVE_DOT_SIZE / 2}
+                width={ACTIVE_DOT_SIZE}
+                height={ACTIVE_DOT_SIZE}
+                color={PURPLE}
+              />
+            )}
           />
           <Line
             dataKey="comparisonForgetCka"
             type="linear"
             stroke={chartConfig.comparisonForgetCka.color}
-            strokeWidth={2}
-            strokeDasharray="3 3"
+            strokeWidth={STROKE_WIDTH}
+            strokeDasharray={STROKE_DASHARRAY}
             animationDuration={ANIMATION_DURATION}
-            activeDot={false}
             dot={({ cx, cy }) => {
               return (
                 <MultiplicationSignIcon
@@ -216,15 +230,23 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
                 />
               );
             }}
+            activeDot={(props: any) => (
+              <MultiplicationSignIcon
+                x={props.cx - ACTIVE_CROSS_SIZE / 2}
+                y={props.cy - ACTIVE_CROSS_SIZE / 2}
+                width={ACTIVE_CROSS_SIZE}
+                height={ACTIVE_CROSS_SIZE}
+                color={EMERALD}
+              />
+            )}
           />
           <Line
             dataKey="comparisonOtherCka"
             type="linear"
             stroke={chartConfig.comparisonOtherCka.color}
-            strokeWidth={2}
-            strokeDasharray="3 3"
+            strokeWidth={STROKE_WIDTH}
+            strokeDasharray={STROKE_DASHARRAY}
             animationDuration={ANIMATION_DURATION}
-            activeDot={false}
             dot={({ cx, cy }) => {
               return (
                 <CircleIcon
@@ -236,6 +258,15 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
                 />
               );
             }}
+            activeDot={(props: any) => (
+              <CircleIcon
+                x={props.cx - ACTIVE_DOT_SIZE / 2}
+                y={props.cy - ACTIVE_DOT_SIZE / 2}
+                width={ACTIVE_DOT_SIZE}
+                height={ACTIVE_DOT_SIZE}
+                color={EMERALD}
+              />
+            )}
           />
         </LineChart>
       </ChartContainer>
@@ -245,7 +276,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[150px] left-14 text-xs leading-4">
+    <div className="absolute top-[136px] left-14 text-xs leading-4">
       <div className="flex items-center">
         <div className="relative">
           <CircleIcon
