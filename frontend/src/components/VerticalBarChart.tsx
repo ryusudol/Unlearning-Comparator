@@ -128,7 +128,7 @@ export default function VerticalBarChart({
     <div className="flex flex-col justify-center items-center relative">
       <span
         className={`text-[15px] relative ${
-          mode === "Training" ? "left-4" : "right-3.5"
+          mode === "Training" ? "left-8" : "left-0"
         }`}
       >
         {mode} Dataset
@@ -156,6 +156,7 @@ export default function VerticalBarChart({
             axisLine={true}
             interval={0}
             fontSize={LABEL_FONT_SIZE}
+            fontWeight={300}
             tick={showYAxis}
             width={showYAxis ? 60 : 1}
             tickMargin={-1}
@@ -164,13 +165,11 @@ export default function VerticalBarChart({
                 chartConfig[value as keyof typeof chartConfig]?.label;
               const isForgetClass =
                 forgetClass && label === forgetClassNames[forgetClass];
-              return isForgetClass ? label + " (X)" : label;
+              return isForgetClass ? `${label}\u00A0(X)` : label;
             }}
             style={{
               whiteSpace: "nowrap",
               fill: "black",
-              textWrap: "nowrap",
-              textOverflow: "clip",
             }}
           />
           <XAxis
@@ -183,7 +182,7 @@ export default function VerticalBarChart({
           >
             <Label
               fill="black"
-              className="-translate-y-2 text-xs font-light"
+              className="-translate-y-2 text-xs"
               value={`← Baseline High | Comparison High →`}
               offset={-3}
               dx={9}
