@@ -174,7 +174,6 @@ export default function BubbleChart({
       .attr("width", 20)
       .attr("height", 20)
       .attr("fill", "transparent")
-      .style("cursor", "pointer")
       .on("mouseover", (event, d: any) => {
         event.stopPropagation();
 
