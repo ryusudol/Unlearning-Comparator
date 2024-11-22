@@ -20,6 +20,7 @@ export default function Predictions({ height }: { height: number }) {
   const { selectedForgetClasses } = useContext(ForgetClassContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAINING);
+  const [hoveredY, setHoveredY] = useState<number | null>(null);
 
   const allSelected = baseline !== "" && comparison !== "";
   const selectedFCExist = selectedForgetClasses.length !== 0;
@@ -43,11 +44,20 @@ export default function Predictions({ height }: { height: number }) {
           </div>
         ) : (
           <div className="flex items-center relative ml-2">
-            <BubbleChart mode="Baseline" datasetMode={datasetMode} />
+            <BubbleChart
+              mode="Baseline"
+              datasetMode={datasetMode}
+              hoveredY={hoveredY}
+              onHover={(y) => setHoveredY(y)}
+              onHoverEnd={() => setHoveredY(null)}
+            />
             <BubbleChart
               mode="Comparison"
               datasetMode={datasetMode}
               showYAxis={false}
+              hoveredY={hoveredY}
+              onHover={(y) => setHoveredY(y)}
+              onHoverEnd={() => setHoveredY(null)}
             />
           </div>
         )

@@ -169,18 +169,26 @@ export default function DataTable({ columns }: Props) {
   });
 
   useEffect(() => {
-    if (tableData.length > 0) {
-      if (!baseline) {
+    const baselineExists = Object.values(experiments).some(
+      (experiment) => experiment.id === baseline
+    );
+    if (!baselineExists) {
+      if (tableData.length > 0) {
         saveBaseline(tableData[0].id);
-      }
-      if (!comparison && tableData[1]) {
         saveComparison(tableData[1].id);
+      } else {
+        saveBaseline("");
+        saveComparison("");
       }
-    } else {
-      saveBaseline("");
-      saveComparison("");
     }
-  }, [baseline, comparison, saveBaseline, saveComparison, tableData]);
+  }, [
+    baseline,
+    comparison,
+    experiments,
+    saveBaseline,
+    saveComparison,
+    tableData,
+  ]);
 
   return (
     <div className="w-full h-[196px]">
