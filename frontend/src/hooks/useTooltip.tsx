@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { createRoot, Root } from "react-dom/client";
 
-import Tooltip from "../components/Tooltip";
+import Tooltip from "../components/EmbeddingTooltip";
 import { API_URL } from "../constants/common";
 import { Mode, Prob, HovereInstance } from "../views/Embeddings";
 
