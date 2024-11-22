@@ -201,7 +201,9 @@ export default function BubbleChart({
 
         svg
           .selectAll(".x-axis .tick text")
-          .style("font-weight", (t: any) => (t === d.x ? "bold" : "normal"));
+          .style("font-weight", (t: any) =>
+            t === d.x ? "bold" : BASIC_FONT_WEIGHT
+          );
 
         onHover(d.y);
       })
