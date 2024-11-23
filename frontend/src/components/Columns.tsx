@@ -250,7 +250,23 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     id: "MIA",
-    header: () => <div className="w-full text-center">MIA</div>,
+    header: ({ column }) => (
+      <HoverCard openDelay={0} closeDelay={100}>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            MIA
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Membership Inference Attack
+        </HoverCardContent>
+      </HoverCard>
+    ),
   },
   {
     id: "baseline",
