@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState, memo, useCallback } from "react";
 import {
   CartesianGrid,
   Line,
@@ -19,14 +19,28 @@ import {
 
 const PURPLE = "#a855f7";
 const EMERALD = "#10b981";
-const DOT_SIZE = 10;
-const CROSS_SIZE = 16;
+const DOT_SIZE = 12;
+const CROSS_SIZE = 20;
 const ANIMATION_DURATION = 500;
 const LABEL_FONT_SIZE = 10;
-const ACTIVE_DOT_SIZE = 14;
-const ACTIVE_CROSS_SIZE = 20;
+const TICK_FONT_WEIGHT = 300;
+const ACTIVE_DOT_STROKE_WIDTH = 3;
+const ACTIVE_CROSS_STROKE_WIDTH = 2;
 const STROKE_WIDTH = 2;
 const STROKE_DASHARRAY = "3 3";
+const LINEAR = "linear";
+const BLACK = "black";
+const DATAKEYS = [
+  "baselineForgetCka",
+  "baselineOtherCka",
+  "comparisonForgetCka",
+  "comparisonOtherCka",
+];
+const tickStyle = `
+  .recharts-cartesian-axis-tick text {
+    fill: ${BLACK} !important;
+  }
+`;
 
 const chartConfig = {
   layer: {
@@ -51,53 +65,36 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
-        <div className="mb-1">
-          <span>Layer: </span>
-          <strong>{payload[0].payload.layer}</strong>
-        </div>
-        <div className="flex items-center">
-          <MultiplicationSignIcon
-            className="w-4 h-4 -ml-0.5 mr-0.5"
-            style={{ color: PURPLE }}
-          />
-          <p>
-            Baseline (Forget Class): <strong>{payload[0].value}</strong>
-          </p>
-        </div>
-        <div className="flex items-center">
-          <CircleIcon className="w-3 h-3 mr-1" style={{ color: PURPLE }} />
-          <p>
-            Baseline (Remain Classes): <strong>{payload[1].value}</strong>
-          </p>
-        </div>
-        <div className="flex items-center">
-          <MultiplicationSignIcon
-            className="w-4 h-4 -ml-0.5 mr-0.5"
-            color={EMERALD}
-          />
-          <p>
-            Comparison (Forget Class): <strong>{payload[2].value}</strong>
-          </p>
-        </div>
-        <div className="flex items-center">
-          <CircleIcon className="w-3 h-3 mr-1" color={EMERALD} />
-          <p>
-            Comparison (Remain Classes): <strong>{payload[3].value}</strong>
-          </p>
-        </div>
-      </div>
-    );
-  }
-  return null;
-}
+type TickProps = {
+  x: number;
+  y: number;
+  payload: any;
+  hoveredLayer: string | null;
+};
+
+const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
+  <text
+    x={x}
+    y={y}
+    dy={8}
+    textAnchor="end"
+    transform={`rotate(-45, ${x}, ${y})`}
+    fontSize={LABEL_FONT_SIZE}
+    fontWeight={hoveredLayer === payload.value ? "bold" : TICK_FONT_WEIGHT}
+  >
+    {payload.value}
+  </text>
+));
 
 export default function MyLineChart({ dataset }: { dataset: string }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+  const [hoveredLayer, setHoveredLayer] = useState<string | null>(null);
+
+  const renderTick = useCallback(
+    (props: any) => <AxisTick {...props} hoveredLayer={hoveredLayer} />,
+    [hoveredLayer]
+  );
 
   if (!baselineExperiment || !comparisonExperiment) return null;
 
@@ -105,30 +102,37 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   const layers = ckaData.map((data) => data.layer);
 
   return (
-    <div className="relative">
+    <div className="relative bottom-1">
+      <style>{tickStyle}</style>
       <CustomLegend />
-      <p className="text-[15px] text-center">
+      <p className="text-[15px] text-center relative top-1">
         Per-layer Similarity Before/After Unlearning
       </p>
-      <ChartContainer className="w-[490px] h-[260px]" config={chartConfig}>
+      <ChartContainer className="w-[490px] h-[262px]" config={chartConfig}>
         <LineChart
           accessibilityLayer
           data={ckaData}
           margin={{
-            top: 5,
+            top: 7,
             right: 20,
             bottom: 34,
             left: -12,
           }}
+          onMouseMove={(state: any) => {
+            if (state?.activePayload) {
+              setHoveredLayer(state.activePayload[0].payload.layer);
+            }
+          }}
+          onMouseLeave={() => setHoveredLayer(null)}
         >
           <CartesianGrid />
           <XAxis
             dataKey="layer"
             tickLine={false}
+            axisLine={{ stroke: BLACK }}
             tickMargin={-2}
             angle={-45}
-            textAnchor="end"
-            tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
+            tick={renderTick}
             ticks={layers}
             label={{
               value: "ResNet18 Layers",
@@ -138,15 +142,19 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               style: {
                 fontSize: 12,
                 textAnchor: "end",
-                fill: "#000000",
+                fill: BLACK,
               },
             }}
           />
           <YAxis
             tickLine={false}
+            axisLine={{ stroke: BLACK }}
             domain={[0, 1]}
             interval={0}
-            tick={{ fontSize: LABEL_FONT_SIZE, fill: "#000000" }}
+            tick={{
+              fontSize: LABEL_FONT_SIZE,
+              fontWeight: TICK_FONT_WEIGHT,
+            }}
             ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
             tickMargin={-2}
             label={{
@@ -157,130 +165,128 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               style: {
                 fontSize: 12,
                 textAnchor: "middle",
-                fill: "#000000",
+                fill: BLACK,
               },
             }}
           />
           <ChartTooltip cursor={false} content={<CustomTooltip />} />
-          <Line
-            dataKey="baselineForgetCka"
-            type="linear"
-            stroke={chartConfig.baselineForgetCka.color}
-            strokeWidth={STROKE_WIDTH}
-            animationDuration={ANIMATION_DURATION}
-            dot={({ cx, cy }) => (
-              <MultiplicationSignIcon
-                x={cx - CROSS_SIZE / 2}
-                y={cy - CROSS_SIZE / 2}
-                width={CROSS_SIZE}
-                height={CROSS_SIZE}
-                color={PURPLE}
+          {DATAKEYS.map((key, idx) => {
+            const isBaselineLine = key.includes("baseline");
+            const dotColor = isBaselineLine ? PURPLE : EMERALD;
+            const isForgetLine = key.includes("Forget");
+            const dotSize = isForgetLine ? CROSS_SIZE : DOT_SIZE;
+            const activeDotStyle = {
+              stroke: BLACK,
+              strokeWidth: isForgetLine
+                ? ACTIVE_CROSS_STROKE_WIDTH
+                : ACTIVE_DOT_STROKE_WIDTH,
+            };
+
+            return (
+              <Line
+                key={idx}
+                dataKey={key}
+                type={LINEAR}
+                stroke={chartConfig[key as keyof typeof chartConfig].color}
+                strokeWidth={STROKE_WIDTH}
+                strokeDasharray={isBaselineLine ? undefined : STROKE_DASHARRAY}
+                animationDuration={ANIMATION_DURATION}
+                dot={({ cx, cy }) =>
+                  isForgetLine ? (
+                    <MultiplicationSignIcon
+                      x={cx - dotSize / 2}
+                      y={cy - dotSize / 2}
+                      width={dotSize}
+                      height={dotSize}
+                      color={dotColor}
+                    />
+                  ) : (
+                    <CircleIcon
+                      x={cx - dotSize / 2}
+                      y={cy - dotSize / 2}
+                      width={dotSize}
+                      height={dotSize}
+                      color={dotColor}
+                    />
+                  )
+                }
+                activeDot={(props: any) =>
+                  isForgetLine ? (
+                    <MultiplicationSignIcon
+                      x={props.cx - dotSize / 2}
+                      y={props.cy - dotSize / 2}
+                      width={dotSize}
+                      height={dotSize}
+                      color={dotColor}
+                      style={activeDotStyle}
+                    />
+                  ) : (
+                    <CircleIcon
+                      x={props.cx - dotSize / 2}
+                      y={props.cy - dotSize / 2}
+                      width={dotSize}
+                      height={dotSize}
+                      color={dotColor}
+                      style={activeDotStyle}
+                    />
+                  )
+                }
               />
-            )}
-            activeDot={(props: any) => (
-              <MultiplicationSignIcon
-                x={props.cx - ACTIVE_CROSS_SIZE / 2}
-                y={props.cy - ACTIVE_CROSS_SIZE / 2}
-                width={ACTIVE_CROSS_SIZE}
-                height={ACTIVE_CROSS_SIZE}
-                color={PURPLE}
-              />
-            )}
-          />
-          <Line
-            dataKey="baselineOtherCka"
-            type="linear"
-            stroke={chartConfig.baselineOtherCka.color}
-            strokeWidth={STROKE_WIDTH}
-            animationDuration={ANIMATION_DURATION}
-            dot={({ cx, cy }) => (
-              <CircleIcon
-                x={cx - DOT_SIZE / 2}
-                y={cy - DOT_SIZE / 2}
-                width={DOT_SIZE}
-                height={DOT_SIZE}
-                color={PURPLE}
-              />
-            )}
-            activeDot={(props: any) => (
-              <CircleIcon
-                x={props.cx - ACTIVE_DOT_SIZE / 2}
-                y={props.cy - ACTIVE_DOT_SIZE / 2}
-                width={ACTIVE_DOT_SIZE}
-                height={ACTIVE_DOT_SIZE}
-                color={PURPLE}
-              />
-            )}
-          />
-          <Line
-            dataKey="comparisonForgetCka"
-            type="linear"
-            stroke={chartConfig.comparisonForgetCka.color}
-            strokeWidth={STROKE_WIDTH}
-            strokeDasharray={STROKE_DASHARRAY}
-            animationDuration={ANIMATION_DURATION}
-            dot={({ cx, cy }) => {
-              return (
-                <MultiplicationSignIcon
-                  x={cx - CROSS_SIZE / 2}
-                  y={cy - CROSS_SIZE / 2}
-                  width={CROSS_SIZE}
-                  height={CROSS_SIZE}
-                  color={EMERALD}
-                />
-              );
-            }}
-            activeDot={(props: any) => (
-              <MultiplicationSignIcon
-                x={props.cx - ACTIVE_CROSS_SIZE / 2}
-                y={props.cy - ACTIVE_CROSS_SIZE / 2}
-                width={ACTIVE_CROSS_SIZE}
-                height={ACTIVE_CROSS_SIZE}
-                color={EMERALD}
-              />
-            )}
-          />
-          <Line
-            dataKey="comparisonOtherCka"
-            type="linear"
-            stroke={chartConfig.comparisonOtherCka.color}
-            strokeWidth={STROKE_WIDTH}
-            strokeDasharray={STROKE_DASHARRAY}
-            animationDuration={ANIMATION_DURATION}
-            dot={({ cx, cy }) => {
-              return (
-                <CircleIcon
-                  x={cx - DOT_SIZE / 2}
-                  y={cy - DOT_SIZE / 2}
-                  width={DOT_SIZE}
-                  height={DOT_SIZE}
-                  color={EMERALD}
-                />
-              );
-            }}
-            activeDot={(props: any) => (
-              <CircleIcon
-                x={props.cx - ACTIVE_DOT_SIZE / 2}
-                y={props.cy - ACTIVE_DOT_SIZE / 2}
-                width={ACTIVE_DOT_SIZE}
-                height={ACTIVE_DOT_SIZE}
-                color={EMERALD}
-              />
-            )}
-          />
+            );
+          })}
         </LineChart>
       </ChartContainer>
     </div>
   );
 }
 
+function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
+        <div className="flex items-center leading-[18px]">
+          <CircleIcon className="w-3 h-3 mr-1" style={{ color: PURPLE }} />
+          <p>
+            Base. (Remain): <strong>{payload[1].value}</strong>
+          </p>
+        </div>
+        <div className="flex items-center leading-[18px]">
+          <CircleIcon className="w-3 h-3 mr-1" color={EMERALD} />
+          <p>
+            Comp. (Remain): <strong>{payload[3].value}</strong>
+          </p>
+        </div>
+        <div className="flex items-center leading-[18px]">
+          <MultiplicationSignIcon
+            className="w-4 h-4 -ml-0.5 mr-0.5"
+            style={{ color: PURPLE }}
+          />
+          <p>
+            Base. (Forget): <strong>{payload[0].value}</strong>
+          </p>
+        </div>
+        <div className="flex items-center leading-[18px]">
+          <MultiplicationSignIcon
+            className="w-4 h-4 -ml-0.5 mr-0.5"
+            color={EMERALD}
+          />
+          <p>
+            Comp. (Forget): <strong>{payload[2].value}</strong>
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
 function CustomLegend() {
   return (
-    <div className="absolute top-[150px] left-14 text-xs leading-4">
-      <div className="flex items-center">
+    <div className="absolute top-[135px] left-[58px] text-xs leading-4">
+      <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon
-            className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
+            className={`mr-2 relative right-[1px] w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
             style={{ color: PURPLE }}
           />
           <div
@@ -293,10 +299,10 @@ function CustomLegend() {
         </div>
         <span>Baseline (Remain Classes)</span>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon
-            className={`mr-2 w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
+            className={`mr-2 relative right-[1px] w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
             style={{ color: EMERALD }}
           />
           <div
@@ -315,7 +321,7 @@ function CustomLegend() {
             width={CROSS_SIZE}
             height={CROSS_SIZE}
             color={PURPLE}
-            className="mr-[5px] -ml-[3px]"
+            className="relative right-[5px]"
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
@@ -333,7 +339,7 @@ function CustomLegend() {
             width={CROSS_SIZE}
             height={CROSS_SIZE}
             color={EMERALD}
-            className="mr-[5px] -ml-[3px]"
+            className="relative right-[5px]"
           />
           <div
             className="absolute top-1/2 w-[18px]"
