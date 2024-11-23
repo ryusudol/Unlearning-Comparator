@@ -1,4 +1,4 @@
-import { useMemo, useContext } from "react";
+import { useMemo, useContext, useCallback, memo } from "react";
 import {
   Bar,
   BarChart,
@@ -10,18 +10,20 @@ import {
   TooltipProps,
 } from "recharts";
 
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
 import { ChartContainer, type ChartConfig } from "./UI/chart";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { GapDataItem } from "../views/Accuracies";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
 
 const TOOLTIP_FIX_LENGTH = 3;
 const LABEL_FONT_SIZE = 10;
+const TICK_FONT_WEIGHT = 300;
+const BLACK = "black";
 
 const chartConfig = {
   value: {
@@ -69,45 +71,65 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload as GapDataItem;
-    return (
-      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
-        <p className="font-medium">
-          Class: {forgetClassNames[+data.classLabel]}
-        </p>
-        <div className="flex items-center">
-          <BaselineNeuralNetworkIcon className="mr-1" />
-          <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
-        </div>
-        <div className="flex items-center">
-          <ComparisonNeuralNetworkIcon className="mr-1" />
-          <p>
-            Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
-          </p>
-        </div>
-        <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
-      </div>
-    );
-  }
-  return null;
-}
-
 interface Props {
   mode: "Training" | "Test";
   gapData: GapDataItem[];
   maxGap: number;
   showYAxis?: boolean;
+  hoveredClass: string | null;
+  setHoveredClass: (value: string | null) => void;
 }
+
+type TickProps = {
+  x: number;
+  y: number;
+  payload: any;
+  hoveredClass: string | null;
+  forgetClass: number | undefined;
+};
+
+const AxisTick = memo(
+  ({ x, y, payload, hoveredClass, forgetClass }: TickProps) => {
+    const label = chartConfig[payload.value as keyof typeof chartConfig]?.label;
+    const isForgetClass =
+      forgetClass && label === forgetClassNames[forgetClass];
+    const formattedLabel = isForgetClass ? `${label}\u00A0(X)` : label;
+
+    return (
+      <text
+        x={x}
+        y={y}
+        dy={4}
+        textAnchor="end"
+        fontSize={LABEL_FONT_SIZE}
+        fontWeight={hoveredClass === payload.value ? "bold" : TICK_FONT_WEIGHT}
+      >
+        {formattedLabel}
+      </text>
+    );
+  }
+);
 
 export default function VerticalBarChart({
   mode,
   gapData,
   maxGap,
   showYAxis = true,
+  hoveredClass,
+  setHoveredClass,
 }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
+
+  const renderTick = useCallback(
+    (props: any) => (
+      <AxisTick
+        {...props}
+        hoveredClass={hoveredClass}
+        forgetClass={forgetClass}
+      />
+    ),
+    [hoveredClass, forgetClass]
+  );
 
   const remainGapAvgValue = useMemo(() => {
     if (!forgetClass) return 0;
@@ -147,17 +169,23 @@ export default function VerticalBarChart({
             top: 12,
             bottom: 0,
           }}
+          onMouseMove={(state: any) => {
+            if (state?.activePayload) {
+              setHoveredClass(state.activePayload[0].payload.category);
+            }
+          }}
+          onMouseLeave={() => setHoveredClass(null)}
         >
           <YAxis
             limitingConeAngle={30}
             dataKey="category"
             type="category"
             tickLine={false}
-            axisLine={true}
+            axisLine={{ stroke: BLACK }}
             interval={0}
             fontSize={LABEL_FONT_SIZE}
-            fontWeight={300}
-            tick={showYAxis}
+            fontWeight={TICK_FONT_WEIGHT}
+            tick={showYAxis ? renderTick : false}
             width={showYAxis ? 60 : 1}
             tickMargin={-1}
             tickFormatter={(value) => {
@@ -167,21 +195,19 @@ export default function VerticalBarChart({
                 forgetClass && label === forgetClassNames[forgetClass];
               return isForgetClass ? `${label}\u00A0(X)` : label;
             }}
-            style={{
-              whiteSpace: "nowrap",
-              fill: "black",
-            }}
+            style={{ whiteSpace: "nowrap" }}
           />
           <XAxis
             dataKey="value"
             type="number"
+            axisLine={{ stroke: BLACK }}
             domain={[-maxGap, maxGap]}
             tickFormatter={(value) => value.toString()}
             fontSize={LABEL_FONT_SIZE}
             ticks={[-maxGap, 0, maxGap]}
           >
             <Label
-              fill="black"
+              fill={BLACK}
               className="-translate-y-2 text-xs"
               value={`← Baseline High | Comparison High →`}
               offset={-3}
@@ -200,7 +226,7 @@ export default function VerticalBarChart({
               value: `avg (remain): ${remainGapAvg}`,
               position: "top",
               fontSize: LABEL_FONT_SIZE,
-              fill: "#777",
+              fill: BLACK,
               offset: 3.5,
             }}
           />
@@ -208,4 +234,29 @@ export default function VerticalBarChart({
       </ChartContainer>
     </div>
   );
+}
+
+function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload as GapDataItem;
+    return (
+      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
+        <p className="font-medium">
+          Class: {forgetClassNames[+data.classLabel]}
+        </p>
+        <div className="flex items-center">
+          <BaselineNeuralNetworkIcon className="mr-1" />
+          <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+        </div>
+        <div className="flex items-center">
+          <ComparisonNeuralNetworkIcon className="mr-1" />
+          <p>
+            Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+          </p>
+        </div>
+        <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+      </div>
+    );
+  }
+  return null;
 }

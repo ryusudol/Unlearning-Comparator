@@ -1,5 +1,7 @@
 import { UnlearningStatus } from "../../types/settings";
 
+const TO_FIXED_LENGTH = 1;
+
 export const getProgressSteps = (
   status: UnlearningStatus,
   completedSteps: number[],
@@ -22,7 +24,7 @@ export const getProgressSteps = (
         (status.total_epochs === 1 && completedSteps.includes(2)))
         ? status.current_unlearn_accuracy === 0
           ? 0
-          : status.current_unlearn_accuracy.toFixed(3)
+          : status.current_unlearn_accuracy.toFixed(TO_FIXED_LENGTH)
         : "-"
     }**`,
   },
@@ -34,13 +36,13 @@ export const getProgressSteps = (
       (completedSteps.includes(2) && status.progress.includes("Test"))
         ? status.p_training_accuracy === 0
           ? 0
-          : status.p_training_accuracy.toFixed(3)
+          : status.p_training_accuracy.toFixed(TO_FIXED_LENGTH)
         : "-"
     }**\nTest Accuracy: **${
       completedSteps.includes(3)
         ? status.p_test_accuracy === 0
           ? 0
-          : status.p_test_accuracy.toFixed(3)
+          : status.p_test_accuracy.toFixed(TO_FIXED_LENGTH)
         : "-"
     }**`,
   },

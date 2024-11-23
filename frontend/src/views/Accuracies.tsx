@@ -1,4 +1,4 @@
-import { useMemo, useContext } from "react";
+import { useMemo, useContext, useState } from "react";
 
 import VerticalBarChart from "../components/VerticalBarChart";
 import { TABLEAU10 } from "../constants/tableau10";
@@ -27,6 +27,7 @@ export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+  const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
   const baselineTrainAccuracies: number[] | undefined =
     baselineExperiment?.accs;
@@ -107,12 +108,16 @@ export default function Accuracies({ height }: { height: number }) {
             mode="Training"
             gapData={trainAccuracyGap}
             maxGap={maxGap}
+            hoveredClass={hoveredClass}
+            setHoveredClass={setHoveredClass}
           />
           <VerticalBarChart
             mode="Test"
             gapData={testAccuracyGap}
             maxGap={maxGap}
             showYAxis={false}
+            hoveredClass={hoveredClass}
+            setHoveredClass={setHoveredClass}
           />
         </div>
       )}
