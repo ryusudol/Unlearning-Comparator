@@ -137,8 +137,8 @@ export default function BubbleChart({
           .style("text-anchor", "end")
           .style("font-family", "Roboto Condensed")
           .style("font-weight", BASIC_FONT_WEIGHT)
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em");
+          .attr("dx", "-.3em")
+          .attr("dy", ".4em");
       });
 
     if (showYAxis) {
