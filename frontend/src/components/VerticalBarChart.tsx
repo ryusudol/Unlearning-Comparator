@@ -22,6 +22,7 @@ import { GapDataItem } from "../views/Accuracies";
 
 const TOOLTIP_FIX_LENGTH = 3;
 const LABEL_FONT_SIZE = 10;
+const BLACK = "#000000";
 
 const chartConfig = {
   value: {
@@ -153,7 +154,7 @@ export default function VerticalBarChart({
             dataKey="category"
             type="category"
             tickLine={false}
-            axisLine={true}
+            axisLine={{ stroke: BLACK }}
             interval={0}
             fontSize={LABEL_FONT_SIZE}
             fontWeight={300}
@@ -175,6 +176,7 @@ export default function VerticalBarChart({
           <XAxis
             dataKey="value"
             type="number"
+            axisLine={{ stroke: BLACK }}
             domain={[-maxGap, maxGap]}
             tickFormatter={(value) => value.toString()}
             fontSize={LABEL_FONT_SIZE}
