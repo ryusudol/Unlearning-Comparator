@@ -240,10 +240,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as GapDataItem;
     return (
-      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
-        <p className="font-medium">
-          Class: {forgetClassNames[+data.classLabel]}
-        </p>
+      <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
         <div className="flex items-center">
           <BaselineNeuralNetworkIcon className="mr-1" />
           <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
