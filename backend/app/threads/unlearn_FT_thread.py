@@ -155,12 +155,12 @@ class UnlearningFTThread(threading.Thread):
             print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
 
         rte = time.time() - start_time
-        # save_model(
-        #     model=self.model, 
-        #     epochs=epoch + 1, 
-        #     learning_rate=self.request.learning_rate,
-        #     forget_class=self.request.forget_class
-        # )
+        save_model(
+            model=self.model, 
+            epochs=epoch + 1, 
+            learning_rate=self.request.learning_rate,
+            forget_class=self.request.forget_class
+        )
 
         if self.stopped():
             self.status.is_unlearning = False

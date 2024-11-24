@@ -2,9 +2,14 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 
+import matplotlib.pyplot as plt
+from scipy.stats import entropy
+
 from torch_cka import CKA
 from torch.utils.data import DataLoader, Subset
 from app.config import UMAP_DATA_SIZE
+
+import json
 
 async def get_layer_activations_and_predictions(
     model, 
@@ -89,6 +94,53 @@ async def evaluate_model(model, data_loader, criterion, device):
         )
     return avg_loss, accuracy, class_accuracies
 
+# async def evaluate_model_with_distributions(model, data_loader, criterion, device):
+#     model.eval()
+#     total_loss = 0
+#     correct = 0
+#     total = 0
+#     class_correct = [0] * 10
+#     class_total = [0] * 10
+#     label_distribution = np.zeros((10, 10))  # 실제 클래스 vs 예측 클래스
+#     confidence_sum = np.zeros((10, 10))  # 실제 클래스 vs 모든 클래스의 confidence 합
+#     with torch.no_grad():
+#         for data in data_loader:
+#             images, labels = data[0].to(device), data[1].to(device)
+#             outputs = model(images)
+#             loss = criterion(outputs, labels)
+#             total_loss += loss.item()
+            
+#             # Add temperature scaling
+#             temperature = 1.0
+#             scaled_outputs = outputs / temperature
+#             probabilities = F.softmax(scaled_outputs, dim=1)
+#             _, predicted = torch.max(probabilities, 1)
+            
+#             total += labels.size(0)
+#             correct += (predicted == labels).sum().item()
+#             for i in range(labels.size(0)):
+#                 label = labels[i].item()
+#                 pred = predicted[i].item()
+                
+#                 class_total[label] += 1
+#                 if label == pred:
+#                     class_correct[label] += 1
+                
+#                 label_distribution[label][pred] += 1
+#                 confidence_sum[label] += probabilities[i].cpu().numpy()
+
+#     accuracy = correct / total
+#     class_accuracies = {
+#         i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0) 
+#         for i in range(10)
+#     }
+#     avg_loss = total_loss / len(data_loader)
+
+#     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
+#     confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
+    
+#     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
+
 async def evaluate_model_with_distributions(model, data_loader, criterion, device):
     model.eval()
     total_loss = 0
@@ -98,6 +150,11 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     class_total = [0] * 10
     label_distribution = np.zeros((10, 10))  # 실제 클래스 vs 예측 클래스
     confidence_sum = np.zeros((10, 10))  # 실제 클래스 vs 모든 클래스의 confidence 합
+    
+    # Add new arrays for logit statistics
+    class_6_logit_entropies = []
+    class_6_max_logit_gaps = []
+    
     with torch.no_grad():
         for data in data_loader:
             images, labels = data[0].to(device), data[1].to(device)
@@ -123,6 +180,25 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 
                 label_distribution[label][pred] += 1
                 confidence_sum[label] += probabilities[i].cpu().numpy()
+                
+                # Calculate logit statistics for class 6
+                if labels[i].item() == 6:  # For class 6 samples only
+                    logits = outputs[i].cpu().numpy()
+                    probs = F.softmax(outputs[i], dim=0).cpu().numpy()
+                    
+                    # Get max logit probability and sum of other probabilities
+                    max_prob_idx = np.argmax(probs)
+                    prob_max = probs[max_prob_idx]  # probability of max logit
+                    prob_others = 1 - prob_max  # sum of all other probabilities
+                    confidence_score = np.log(prob_max + 1e-45) - np.log(prob_others + 1e-45)
+                    
+                    # Calculate entropy (unchanged)
+                    logits_normalized = logits - np.min(logits)
+                    logit_probs = logits_normalized / np.sum(logits_normalized)
+                    logit_entropy = -np.sum(logit_probs * np.log(logit_probs + 1e-10))
+                    
+                    class_6_logit_entropies.append(logit_entropy)
+                    class_6_max_logit_gaps.append(confidence_score)
 
     accuracy = correct / total
     class_accuracies = {
@@ -134,8 +210,123 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
     confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
     
-    return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
+    # Print entropy statistics
+    entropy_min = np.min(class_6_logit_entropies)
+    entropy_max = np.max(class_6_logit_entropies)
+    entropy_mean = np.mean(class_6_logit_entropies)
+    print(f"Entropy statistics for class 6:")
+    print(f"Min: {entropy_min:.4f}")
+    print(f"Max: {entropy_max:.4f}")
+    print(f"Mean: {entropy_mean:.4f}")
+    
+    def make_break_marks(ax, y_pos):
+        # Create break marks
+        kwargs = dict(transform=ax.transAxes, color='k', clip_on=False)
+        dx = 0.01
+        dy = 0.01
+        ax.plot((-dx, +dx), (y_pos-dy, y_pos+dy), **kwargs)
+        ax.plot((-dx, +dx), (y_pos-2*dy, y_pos+2*dy), **kwargs)
 
+    # numpy array를 list로 변환 (필요한 경우에만)
+    entropy_values = class_6_logit_entropies[-200:]
+    confidence_values = class_6_max_logit_gaps[-200:]
+    
+    # numpy array인 경우에만 tolist() 호출
+    if hasattr(entropy_values, 'tolist'):
+        entropy_values = entropy_values.tolist()
+    if hasattr(confidence_values, 'tolist'):
+        confidence_values = confidence_values.tolist()
+
+    # 데이터를 파이썬 기본 타입으로 변환하고 소수점 2자리까지 반올림
+    def convert_to_python_types(data):
+        if isinstance(data, np.ndarray):
+            return [round(float(x), 2) for x in data]
+        elif isinstance(data, (np.float32, np.float64)):
+            return round(float(data), 2)
+        elif isinstance(data, list):
+            return [round(float(x), 2) for x in data]
+        return data
+
+    # 데이터 준비
+    entropy_values = convert_to_python_types(class_6_logit_entropies[-200:])
+    confidence_values = convert_to_python_types(class_6_max_logit_gaps[-200:])
+
+    # 데이터 준비 및 JSON 저장
+    distribution_data = {
+        "entropy": {
+            "values": entropy_values,
+            "bins": 50,
+            "range": [1.00, 2.25],  # 범위값도 소수점 2자리로 통일
+            "max_display": 40
+        },
+        "confidence": {
+            "values": confidence_values,
+            "bins": 50,
+            "range": [-2.50, 10.00],  # 범위값도 소수점 2자리로 통일
+            "max_display": 40
+        }
+    }
+
+    # JSON 파일로 저장
+    with open('class_6_distribution.json', 'w') as f:
+        json.dump(distribution_data, f, indent=4)
+
+    # 시각화
+    plt.figure(figsize=(10, 5))
+
+    # Left plot (Entropy)
+    plt.subplot(1, 2, 1)
+    ax1 = plt.gca()
+    counts, bin_edges = np.histogram(class_6_logit_entropies[-200:], bins=50, range=(1.0, 2.25))
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    
+    for x, count in zip(bin_centers, counts):
+        if count <= 40:
+            for y in range(count):
+                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
+        else:
+            for y in range(39):
+                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
+            plt.plot(x, 42, 'o', color='gray', alpha=0.7, markersize=5)
+
+    make_break_marks(ax1, 0.9)
+    plt.title('Class 6 Logit Entropy Distribution (Last 200)')
+    plt.xlabel('Entropy')
+    plt.ylabel('Count')
+    plt.gca().yaxis.set_major_locator(plt.MultipleLocator(5))
+    plt.xlim(1.0, 2.25)
+    plt.ylim(-0.5, 43)
+    plt.grid(True, alpha=0.2)
+
+    # Right plot (Confidence)
+    plt.subplot(1, 2, 2)
+    ax2 = plt.gca()
+    counts, bin_edges = np.histogram(class_6_max_logit_gaps[-200:], bins=50, range=(-2.5, 10.0))
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    
+    for x, count in zip(bin_centers, counts):
+        if count <= 40:
+            for y in range(count):
+                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
+        else:
+            for y in range(39):
+                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
+            plt.plot(x, 42, 'o', color='gray', alpha=0.7, markersize=5)
+
+    make_break_marks(ax2, 0.9)
+    plt.title('Class 6 Max Logit Confidence Distribution (Last 200)')
+    plt.xlabel('Log Confidence Score')
+    plt.ylabel('Count')
+    plt.gca().yaxis.set_major_locator(plt.MultipleLocator(5))
+    plt.xlim([-2.5, 10.0])
+    plt.ylim(-0.5, 43)
+    plt.grid(True, alpha=0.2)
+
+    plt.tight_layout()
+    plt.savefig('class_6_entropy_distribution.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+    return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
 
 async def calculate_cka_similarity(
     model_before, 
