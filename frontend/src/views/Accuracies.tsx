@@ -25,24 +25,17 @@ export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+
   const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
-  const baselineTrainAccuracies: number[] | undefined =
-    baselineExperiment?.accs;
-  const comparisonTrainAccuracies: number[] | undefined =
-    comparisonExperiment?.accs;
-  const baselineTestAccuracies: number[] | undefined =
-    baselineExperiment?.t_accs;
-  const comparisonTestAccuracies: number[] | undefined =
-    comparisonExperiment?.t_accs;
-
   const trainAccuracyGap = useMemo(
-    () => getAccuracyGap(baselineTrainAccuracies, comparisonTrainAccuracies),
-    [baselineTrainAccuracies, comparisonTrainAccuracies]
+    () => getAccuracyGap(baselineExperiment?.accs, comparisonExperiment?.accs),
+    [baselineExperiment?.accs, comparisonExperiment?.accs]
   );
   const testAccuracyGap = useMemo(
-    () => getAccuracyGap(baselineTestAccuracies, comparisonTestAccuracies),
-    [baselineTestAccuracies, comparisonTestAccuracies]
+    () =>
+      getAccuracyGap(baselineExperiment?.t_accs, comparisonExperiment?.t_accs),
+    [baselineExperiment?.t_accs, comparisonExperiment?.t_accs]
   );
 
   const trainMaxGap = getMaxGap(trainAccuracyGap);
