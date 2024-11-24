@@ -1,12 +1,10 @@
 import { useMemo, useContext, useState } from "react";
 
 import VerticalBarChart from "../components/VerticalBarChart";
-import { TABLEAU10 } from "../constants/tableau10";
 import { Chart01Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ExperimentsContext } from "../store/experiments-context";
-
-const GAP_FIX_LENGTH = 3;
+import { getAccuracyGap } from "../utils/data/getAccuracyGap";
 
 export interface GapDataItem {
   category: string;
@@ -39,46 +37,11 @@ export default function Accuracies({ height }: { height: number }) {
     comparisonExperiment?.t_accs;
 
   const trainAccuracyGap = useMemo(
-    () =>
-      baselineTrainAccuracies && comparisonTrainAccuracies
-        ? Object.keys(baselineTrainAccuracies).map((key, idx) => {
-            const baselineValue = baselineTrainAccuracies[idx];
-            const comparisonValue = comparisonTrainAccuracies[idx];
-            const categoryLetter = String.fromCharCode(65 + idx);
-            return {
-              category: categoryLetter,
-              classLabel: key,
-              gap: parseFloat(
-                (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-              ),
-              fill: TABLEAU10[idx],
-              baselineAccuracy: baselineValue,
-              comparisonAccuracy: comparisonValue,
-            };
-          })
-        : [],
+    () => getAccuracyGap(baselineTrainAccuracies, comparisonTrainAccuracies),
     [baselineTrainAccuracies, comparisonTrainAccuracies]
   );
-
   const testAccuracyGap = useMemo(
-    () =>
-      baselineTestAccuracies && comparisonTestAccuracies
-        ? Object.keys(baselineTestAccuracies).map((key, idx) => {
-            const baselineValue = baselineTestAccuracies[idx];
-            const comparisonValue = comparisonTestAccuracies[idx];
-            const categoryLetter = String.fromCharCode(65 + idx);
-            return {
-              category: categoryLetter,
-              classLabel: key,
-              gap: parseFloat(
-                (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-              ),
-              fill: TABLEAU10[idx],
-              baselineAccuracy: baselineValue,
-              comparisonAccuracy: comparisonValue,
-            };
-          })
-        : [],
+    () => getAccuracyGap(baselineTestAccuracies, comparisonTestAccuracies),
     [baselineTestAccuracies, comparisonTestAccuracies]
   );
 
