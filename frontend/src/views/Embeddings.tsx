@@ -1,7 +1,7 @@
 import { useContext, useMemo, useRef, useCallback } from "react";
 
 import { ExperimentsContext } from "../store/experiments-context";
-import Embedding from "../components/Embedding";
+import ScatterPlot from "../components/ScatterPlot";
 import ConnectionLine from "../components/ConnectionLine";
 import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";
@@ -48,8 +48,11 @@ export default function Embeddings({ height }: { height: number }) {
         return;
       }
 
-      const oppositeData =
-        source === "Baseline" ? extractedComparisonData : extractedBaselineData;
+      const isBaseline = source === "Baseline";
+
+      const oppositeData = isBaseline
+        ? extractedComparisonData
+        : extractedBaselineData;
 
       const oppositeInstance = oppositeData.find((d) => d[4] === imgIdxOrNull);
       if (!oppositeInstance) return;
@@ -59,12 +62,12 @@ export default function Embeddings({ height }: { height: number }) {
       hoveredInstanceRef.current = {
         imgIdx: imgIdxOrNull,
         source,
-        baselineProb: source === "Baseline" ? prob : oppositeProb,
-        comparisonProb: source === "Comparison" ? prob : oppositeProb,
+        baselineProb: isBaseline ? prob : oppositeProb,
+        comparisonProb: !isBaseline ? prob : oppositeProb,
       };
 
-      const targetRef = source === "Baseline" ? comparisonRef : baselineRef;
-      const currentRef = source === "Baseline" ? baselineRef : comparisonRef;
+      const targetRef = isBaseline ? comparisonRef : baselineRef;
+      const currentRef = isBaseline ? baselineRef : comparisonRef;
 
       if (targetRef.current && currentRef.current) {
         const fromPos = currentRef.current.getInstancePosition(imgIdxOrNull);
@@ -88,7 +91,7 @@ export default function Embeddings({ height }: { height: number }) {
         from={positionRef.current.from}
         to={positionRef.current.to}
       />
-      <Embedding
+      <ScatterPlot
         mode="Baseline"
         height={height}
         data={extractedBaselineData}
@@ -97,7 +100,7 @@ export default function Embeddings({ height }: { height: number }) {
         ref={baselineRef}
       />
       <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
-      <Embedding
+      <ScatterPlot
         mode="Comparison"
         height={height}
         data={extractedComparisonData}
