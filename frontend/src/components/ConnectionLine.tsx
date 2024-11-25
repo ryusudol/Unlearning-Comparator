@@ -25,11 +25,18 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
   const length = Math.hypot(x2 - x1, y2 - y1);
   const angle = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI;
 
+  const shortenedLength = length - 8;
+
+  const offsetX = 4 * Math.cos((angle * Math.PI) / 180);
+  const offsetY = 4 * Math.sin((angle * Math.PI) / 180);
+
   const linePositionStyle: React.CSSProperties = {
     position: "absolute",
     transformOrigin: "0 0",
-    transform: `translate(${x1}px, ${y1}px) rotate(${angle}deg)`,
-    width: `${length}px`,
+    transform: `translate(${x1 + offsetX}px, ${
+      y1 + offsetY
+    }px) rotate(${angle}deg)`,
+    width: `${shortenedLength}px`,
     height: "2px",
     backgroundColor: "black",
   };
