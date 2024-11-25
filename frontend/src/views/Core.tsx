@@ -65,22 +65,22 @@ export default function Core({ height }: { height: number }) {
             {!isEmbeddingMode && <UnderLine />}
           </div>
         </div>
-        <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[1px]">
+        <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm">
           <div className="flex items-center mr-5">
-            <span className="text-[15px] font-medium mr-2.5">Data Type</span>
+            <span className="font-medium mr-2.5">Data Type</span>
             <ul className="flex items-center gap-2.5">
               <li className="flex items-center">
                 <CircleIcon className="w-3 h-3 mr-1.5 text-[#4f5562]" />
-                <span className="text-[13px]">Remaining Data</span>
+                <span>Remaining Data</span>
               </li>
               <li className="flex items-center">
                 <MultiplicationSignIcon className="text-[#4f5562] mr-1.5" />
-                <span className="text-[13px]">Unlearning Target</span>
+                <span>Unlearning Target</span>
               </li>
             </ul>
           </div>
           <div className="flex items-center">
-            <span className="text-[15px] font-medium mr-2.5">Prediction</span>
+            <span className="font-medium mr-2.5">Prediction</span>
             <ul className="flex items-center gap-2.5">
               {forgetClassNames.map((name, idx) => (
                 <li key={idx} className="flex items-center">
@@ -88,7 +88,7 @@ export default function Core({ height }: { height: number }) {
                     style={{ backgroundColor: TABLEAU10[idx] }}
                     className="w-3.5 h-3.5 mr-1"
                   />
-                  <span className="text-[13px]">{name}</span>
+                  <span>{name}</span>
                 </li>
               ))}
             </ul>
