@@ -105,10 +105,10 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
     <div className="relative bottom-1">
       <style>{tickStyle}</style>
       <CustomLegend />
-      <p className="text-[15px] text-center relative top-1">
+      <p className="text-[15px] text-center relative top-1 mb-1.5">
         Per-layer Similarity Before/After Unlearning
       </p>
-      <ChartContainer className="w-[490px] h-[262px]" config={chartConfig}>
+      <ChartContainer className="w-[490px] h-[256px]" config={chartConfig}>
         <LineChart
           accessibilityLayer
           data={ckaData}
