@@ -7,6 +7,7 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  useReducer,
 } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
@@ -31,8 +32,8 @@ import {
 
 const VIEW_MODES: ViewModeType[] = [
   "All Instances",
-  "Unlearning Target",
-  "Unlearning Failed",
+  "Forgetting Target",
+  "Forgetting Failed",
 ];
 const CONFIG = {
   width: 630,
@@ -52,13 +53,14 @@ const CONFIG = {
   defaultCircleOpacity: 0.6,
 } as const;
 const BLACK = "black";
-const UNLEARNING_TARGET = "Unlearning Target";
-const UNLEARNING_FAILED = "Unlearning Failed";
+const ZOOM_RESET_DURATION = 500;
+const UNLEARNING_TARGET = "Forgetting Target";
+const UNLEARNING_FAILED = "Forgetting Failed";
 
 export type ViewModeType =
   | "All Instances"
-  | "Unlearning Target"
-  | "Unlearning Failed";
+  | "Forgetting Target"
+  | "Forgetting Failed";
 
 interface Props {
   mode: Mode;
@@ -68,13 +70,14 @@ interface Props {
   hoveredInstance: HovereInstance | null;
 }
 
-const Embedding = forwardRef(
+const ScatterPlot = forwardRef(
   ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
     const { baseline, comparison } = useContext(BaselineComparisonContext);
     const { forgetClass } = useContext(ForgetClassContext);
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
+    const hoveredInstanceRef = useRef<HovereInstance | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
@@ -99,6 +102,51 @@ const Embedding = forwardRef(
       null,
       undefined
     > | null>(null);
+
+    const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+
+    useEffect(() => {
+      const refHolder = document.createElement("div");
+      refHolder.setAttribute("data-ref-holder", "true");
+      document.body.appendChild(refHolder);
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "data-hovered-instance"
+          ) {
+            const newValue = refHolder.getAttribute("data-hovered-instance");
+            if (newValue) {
+              hoveredInstanceRef.current = JSON.parse(newValue);
+              forceUpdate();
+            }
+          }
+        });
+      });
+
+      observer.observe(refHolder, {
+        attributes: true,
+      });
+
+      if (ref) {
+        (ref as any).current = {
+          ...((ref as any).current || {}),
+          updateHoveredInstance: (instance: HovereInstance | null) => {
+            hoveredInstanceRef.current = instance;
+            refHolder.setAttribute(
+              "data-hovered-instance",
+              instance ? JSON.stringify(instance) : ""
+            );
+          },
+        };
+      }
+
+      return () => {
+        observer.disconnect();
+        document.body.removeChild(refHolder);
+      };
+    }, [ref]);
 
     const isBaseline = mode === "Baseline";
     const id = isBaseline ? baseline : comparison;
@@ -165,17 +213,17 @@ const Embedding = forwardRef(
       [x, y]
     );
 
+    const zoom = d3
+      .zoom<SVGSVGElement, undefined>()
+      .scaleExtent([CONFIG.minZoom, CONFIG.maxZoom])
+      .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, undefined>) => {
+        handleZoom(event.transform);
+      });
+
     useEffect(() => {
       if (!svgRef.current) return;
 
       const svg = svgRef.current;
-
-      const zoom = d3
-        .zoom<SVGSVGElement, undefined>()
-        .scaleExtent([CONFIG.minZoom, CONFIG.maxZoom])
-        .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, undefined>) => {
-          handleZoom(event.transform);
-        });
 
       zoomRef.current = zoom;
       d3.select<SVGSVGElement, undefined>(svg).call(zoom);
@@ -183,13 +231,13 @@ const Embedding = forwardRef(
       return () => {
         d3.select(svg).on(".zoom", null);
       };
-    }, [handleZoom]);
+    }, [zoom]);
 
     const resetZoom = () => {
       if (zoomRef.current && svgRef.current) {
         d3.select(svgRef.current)
           .transition()
-          .duration(750)
+          .duration(ZOOM_RESET_DURATION)
           .call(zoomRef.current.transform as any, d3.zoomIdentity);
       }
     };
@@ -199,14 +247,13 @@ const Embedding = forwardRef(
         if (tooltipRef.current) {
           tooltipRef.current.remove();
         }
+        if (fetchControllerRef.current) {
+          fetchControllerRef.current.abort();
+        }
       };
     }, []);
 
-    const showTooltip = (
-      event: MouseEvent,
-      data: (number | Prob)[],
-      content: JSX.Element
-    ) => {
+    const showTooltip = (event: MouseEvent, content: JSX.Element) => {
       if (!containerRef.current) return;
 
       if (tooltipRef.current) {
@@ -260,8 +307,11 @@ const Embedding = forwardRef(
       }
     }, []);
 
-    const handleTooltip = useCallback(
-      async (event: MouseEvent, data: (number | Prob)[]) => {
+    const handleInstanceClick = useCallback(
+      async (event: MouseEvent, d: (number | Prob)[]) => {
+        const imgIdx = d[4] as number;
+        onHover(imgIdx, mode, d[5] as Prob);
+
         if (fetchControllerRef.current) {
           fetchControllerRef.current.abort();
         }
@@ -270,7 +320,7 @@ const Embedding = forwardRef(
         fetchControllerRef.current = controller;
 
         try {
-          const response = await fetch(`${API_URL}/image/cifar10/${data[4]}`, {
+          const response = await fetch(`${API_URL}/image/cifar10/${d[4]}`, {
             signal: controller.signal,
           });
 
@@ -279,43 +329,42 @@ const Embedding = forwardRef(
           const blob = await response.blob();
           if (controller.signal.aborted) return;
 
-          const prob = data[5] as Prob;
+          const prob = d[5] as Prob;
           const imageUrl = URL.createObjectURL(blob);
 
-          const barChartData =
-            mode === "Baseline"
-              ? {
-                  baseline: Array.from({ length: 10 }, (_, idx) => ({
-                    class: idx,
-                    value: Number(prob[idx] || 0),
-                  })),
-                  comparison: Array.from({ length: 10 }, (_, idx) => ({
-                    class: idx,
-                    value: Number(hoveredInstance?.comparisonProb?.[idx] || 0),
-                  })),
-                }
-              : {
-                  baseline: Array.from({ length: 10 }, (_, idx) => ({
-                    class: idx,
-                    value: Number(hoveredInstance?.baselineProb?.[idx] || 0),
-                  })),
-                  comparison: Array.from({ length: 10 }, (_, idx) => ({
-                    class: idx,
-                    value: Number(prob[idx] || 0),
-                  })),
-                };
+          const barChartData = isBaseline
+            ? {
+                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(prob[idx] || 0),
+                })),
+                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(hoveredInstance?.comparisonProb?.[idx] || 0),
+                })),
+              }
+            : {
+                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(hoveredInstance?.baselineProb?.[idx] || 0),
+                })),
+                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(prob[idx] || 0),
+                })),
+              };
 
           const tooltipContent = (
             <Tooltip
               width={CONFIG.tooltipXSize}
               height={CONFIG.tooltipYSize}
               imageUrl={imageUrl}
-              data={data}
+              data={d}
               barChartData={barChartData}
             />
           );
 
-          showTooltip(event, data, tooltipContent);
+          showTooltip(event, tooltipContent);
 
           return () => {
             URL.revokeObjectURL(imageUrl);
@@ -325,28 +374,13 @@ const Embedding = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [hoveredInstance?.baselineProb, hoveredInstance?.comparisonProb, mode]
-    );
-
-    useEffect(() => {
-      return () => {
-        if (fetchControllerRef.current) {
-          fetchControllerRef.current.abort();
-        }
-      };
-    }, []);
-
-    const handleClick = useCallback(
-      (event: MouseEvent, d: (number | Prob)[]) => {
-        onHover(d[4] as number, mode, d[5] as Prob);
-        handleTooltip(event, d);
-      },
-      [handleTooltip, mode, onHover]
+      [hoveredInstance, isBaseline, mode, onHover]
     );
 
     const handleMouseEnter = useCallback(
       (event: MouseEvent, d: (number | Prob)[]) => {
-        onHover(d[4] as number, mode);
+        onHover(d[4] as number, mode, d[5] as Prob);
+
         const element = event.currentTarget as Element;
         d3.select(element)
           .attr("stroke", BLACK)
@@ -360,9 +394,9 @@ const Embedding = forwardRef(
       (event: MouseEvent) => {
         onHover(null, mode);
         hideTooltip();
+
         const element = event.currentTarget as Element;
         const selection = d3.select(element);
-
         if (element.tagName === "circle") {
           selection
             .attr("stroke", null)
@@ -442,12 +476,12 @@ const Embedding = forwardRef(
         .style("opacity", CONFIG.defaultCrossOpacity);
 
       circles
-        .on("click", handleClick)
+        .on("click", handleInstanceClick)
         .on("mouseenter", handleMouseEnter)
         .on("mouseleave", handleMouseLeave);
 
       crosses
-        .on("click", handleClick)
+        .on("click", handleInstanceClick)
         .on("mouseenter", handleMouseEnter)
         .on("mouseleave", handleMouseLeave);
 
@@ -471,57 +505,13 @@ const Embedding = forwardRef(
     }, [
       data,
       forgetClass,
-      handleClick,
+      handleInstanceClick,
       handleMouseEnter,
       handleMouseLeave,
       x,
       y,
       z,
     ]);
-
-    useEffect(() => {
-      setViewMode(VIEW_MODES[0]);
-    }, [id]);
-
-    // useImperativeHandle(ref, () => ({
-    //   getInstancePosition: (imgIdx: number) => {
-    //     if (scatterRef.current) {
-    //       return (scatterRef.current as any).getInstancePosition(imgIdx);
-    //     }
-    //     return null;
-    //   },
-    //   reset: () => {
-    //     if (scatterRef.current) {
-    //       (scatterRef.current as any).reset();
-    //     }
-    //   },
-    // }));
-    useImperativeHandle(ref, () => ({
-      reset: resetZoom,
-      getInstancePosition: (imgIdx: number) => {
-        const datum = data.find((d) => d[4] === imgIdx);
-        if (datum && svgRef.current) {
-          const svgElement = svgRef.current;
-          const point = svgElement.createSVGPoint();
-
-          const svgX = x(datum[0] as number);
-          const svgY = y(datum[1] as number);
-
-          point.x = svgX;
-          point.y = svgY;
-
-          const ctm = svgElement.getScreenCTM();
-          if (ctm) {
-            const transformedPoint = point.matrixTransform(ctm);
-            return {
-              x: transformedPoint.x,
-              y: transformedPoint.y,
-            };
-          }
-        }
-        return null;
-      },
-    }));
 
     useEffect(() => {
       if (!circlesRef.current && !crossesRef.current) return;
@@ -557,12 +547,42 @@ const Embedding = forwardRef(
       }
     }, [forgetClass, viewMode]);
 
+    useImperativeHandle(ref, () => ({
+      reset: resetZoom,
+      getInstancePosition: (imgIdx: number) => {
+        const datum = data.find((d) => d[4] === imgIdx);
+        if (datum && svgRef.current) {
+          const svgElement = svgRef.current;
+          const point = svgElement.createSVGPoint();
+
+          const svgX = x(datum[0] as number);
+          const svgY = y(datum[1] as number);
+
+          point.x = svgX;
+          point.y = svgY;
+
+          const ctm = svgElement.getScreenCTM();
+          if (ctm) {
+            const transformedPoint = point.matrixTransform(ctm);
+            return {
+              x: transformedPoint.x,
+              y: transformedPoint.y,
+            };
+          }
+        }
+        return null;
+      },
+      updateHoveredInstance: (instance: HovereInstance | null) => {
+        hoveredInstanceRef.current = instance;
+      },
+    }));
+    console.log("ScatterPlot!");
+
     return (
       <div
         style={{ height }}
         className="flex flex-col justify-start items-center relative"
       >
-        {/* Focus Selector */}
         {idExist && (
           <div>
             <AiOutlineHome
@@ -570,7 +590,7 @@ const Embedding = forwardRef(
               onClick={resetZoom}
             />
             <div className="flex items-center absolute z-10 right-0 top-6">
-              <span className="mr-1.5 text-sm">Focus on:</span>
+              <span className="mr-1.5 text-sm">Highlight:</span>
               <Select
                 value={viewMode}
                 defaultValue={VIEW_MODES[0]}
@@ -590,7 +610,6 @@ const Embedding = forwardRef(
             </div>
           </div>
         )}
-        {/* Mode Indicator */}
         <div className="text-[15px] mt-1 flex items-center">
           {isBaseline ? (
             <BaselineNeuralNetworkIcon className="mr-1" />
@@ -620,4 +639,4 @@ const Embedding = forwardRef(
   }
 );
 
-export default React.memo(Embedding);
+export default React.memo(ScatterPlot);
