@@ -77,6 +77,7 @@ const ScatterPlot = forwardRef(
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
+    const elementMapRef = useRef(new Map<number, Element>());
     const hoveredInstanceRef = useRef<HovereInstance | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -428,6 +429,8 @@ const ScatterPlot = forwardRef(
     useEffect(() => {
       if (!svgRef.current || data.length === 0) return;
 
+      elementMapRef.current.clear();
+
       d3.select(svgRef.current).selectAll("*").remove();
 
       const svg = d3
@@ -459,7 +462,10 @@ const ScatterPlot = forwardRef(
         .attr("fill", (d) => z(d[3] as number))
         .style("cursor", "pointer")
         .style("opacity", CONFIG.defaultCircleOpacity)
-        .style("vector-effect", "non-scaling-stroke");
+        .style("vector-effect", "non-scaling-stroke")
+        .each(function (d) {
+          elementMapRef.current.set(d[4] as number, this);
+        });
 
       const crosses = gDot
         .selectAll<SVGPathElement, (number | Prob)[]>("path")
@@ -484,7 +490,10 @@ const ScatterPlot = forwardRef(
         })
         .attr("stroke-width", CONFIG.XStrokeWidth)
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.defaultCrossOpacity);
+        .style("opacity", CONFIG.defaultCrossOpacity)
+        .each(function (d) {
+          elementMapRef.current.set(d[4] as number, this);
+        });
 
       circles
         .on("click", handleInstanceClick)
@@ -558,6 +567,45 @@ const ScatterPlot = forwardRef(
       }
     }, [forgetClass, viewMode]);
 
+    useEffect(() => {
+      if (!hoveredInstance) return;
+
+      const currentElementMap = elementMapRef.current;
+
+      if (hoveredInstance.source !== mode) {
+        const element = currentElementMap.get(hoveredInstance.imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          selection
+            .attr("stroke", BLACK)
+            .attr("stroke-width", CONFIG.hoveredStrokeWidth);
+        }
+      }
+
+      return () => {
+        if (hoveredInstance.source !== mode) {
+          const element = currentElementMap.get(hoveredInstance.imgIdx);
+          if (element) {
+            const selection = d3.select(element);
+            if (element.tagName === "circle") {
+              selection
+                .attr("stroke", null)
+                .attr("stroke-width", null)
+                .style("opacity", CONFIG.defaultCircleOpacity);
+            } else {
+              const d = selection.datum() as (number | Prob)[];
+              const colorStr = z(d[3] as number);
+              const color = d3.color(colorStr);
+              selection
+                .attr("stroke", color ? color.darker().toString() : BLACK)
+                .attr("stroke-width", CONFIG.XStrokeWidth)
+                .style("opacity", CONFIG.defaultCrossOpacity);
+            }
+          }
+        }
+      };
+    }, [hoveredInstance, mode, z]);
+
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
       getInstancePosition: (imgIdx: number) => {
@@ -585,6 +633,36 @@ const ScatterPlot = forwardRef(
       },
       updateHoveredInstance: (instance: HovereInstance | null) => {
         hoveredInstanceRef.current = instance;
+      },
+      highlightInstance: (imgIdx: number) => {
+        const element = elementMapRef.current.get(imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          selection
+            .attr("stroke", BLACK)
+            .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+            .raise();
+        }
+      },
+      removeHighlight: (imgIdx: number) => {
+        const element = elementMapRef.current.get(imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          if (element.tagName === "circle") {
+            selection
+              .attr("stroke", null)
+              .attr("stroke-width", null)
+              .style("opacity", CONFIG.defaultCircleOpacity);
+          } else {
+            const d = selection.datum() as (number | Prob)[];
+            const colorStr = z(d[3] as number);
+            const color = d3.color(colorStr);
+            selection
+              .attr("stroke", color ? color.darker().toString() : BLACK)
+              .attr("stroke-width", CONFIG.XStrokeWidth)
+              .style("opacity", CONFIG.defaultCrossOpacity);
+          }
+        }
       },
     }));
 

@@ -49,9 +49,14 @@ export default function Embeddings({ height }: { height: number }) {
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
       if (imgIdxOrNull === null || !source) {
+        if (hoveredInstanceRef.current?.imgIdx !== null) {
+          const prevImgIdx = hoveredInstanceRef.current?.imgIdx;
+          baselineRef.current?.removeHighlight(prevImgIdx);
+          comparisonRef.current?.removeHighlight(prevImgIdx);
+        }
+
         positionRef.current = { from: null, to: null };
         hoveredInstanceRef.current = null;
-
         baselineRef.current?.updateHoveredInstance(null);
         comparisonRef.current?.updateHoveredInstance(null);
         return;
@@ -75,6 +80,12 @@ export default function Embeddings({ height }: { height: number }) {
 
       baselineRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
       comparisonRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
+
+      if (isBaseline) {
+        comparisonRef.current?.highlightInstance(imgIdxOrNull);
+      } else {
+        baselineRef.current?.highlightInstance(imgIdxOrNull);
+      }
 
       const targetRef = isBaseline ? comparisonRef : baselineRef;
       const currentRef = isBaseline ? baselineRef : comparisonRef;
