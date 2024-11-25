@@ -32,7 +32,7 @@ export const COLUMN_WIDTHS = {
   TUA: 60,
   TRA: 60,
   RTE: 60,
-  MIA: 60,
+  FQ: 60,
   baseline: 60,
   comparison: 60,
 };
@@ -249,7 +249,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    id: "MIA",
+    id: "FQ",
     header: ({ column }) => (
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
@@ -258,12 +258,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            MIA
+            FQ
             <ArrowUpDown className="w-4" />
           </Button>
         </HoverCardTrigger>
         <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Membership Inference Attack
+          Forgetting Quality
         </HoverCardContent>
       </HoverCard>
     ),

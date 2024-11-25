@@ -1,6 +1,6 @@
 import { UnlearningStatus } from "../../types/settings";
 
-const TO_FIXED_LENGTH = 1;
+const TO_FIXED_LENGTH = 3;
 
 export const getProgressSteps = (
   status: UnlearningStatus,

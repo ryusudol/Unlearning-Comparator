@@ -39,22 +39,29 @@ export default function Embeddings({ height }: { height: number }) {
     [comparisonExperiment]
   );
 
+  const baselineDataMap = useMemo(() => {
+    return new Map(extractedBaselineData.map((d) => [d[4], d]));
+  }, [extractedBaselineData]);
+  const comparisonDataMap = useMemo(() => {
+    return new Map(extractedComparisonData.map((d) => [d[4], d]));
+  }, [extractedComparisonData]);
+  console.log("Embeddings!");
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
       if (imgIdxOrNull === null || !source) {
+        positionRef.current = { from: null, to: null };
         hoveredInstanceRef.current = null;
-        positionRef.current.from = null;
-        positionRef.current.to = null;
+
+        baselineRef.current?.updateHoveredInstance(null);
+        comparisonRef.current?.updateHoveredInstance(null);
         return;
       }
 
       const isBaseline = source === "Baseline";
+      const oppositeInstance = isBaseline
+        ? comparisonDataMap.get(imgIdxOrNull)
+        : baselineDataMap.get(imgIdxOrNull);
 
-      const oppositeData = isBaseline
-        ? extractedComparisonData
-        : extractedBaselineData;
-
-      const oppositeInstance = oppositeData.find((d) => d[4] === imgIdxOrNull);
       if (!oppositeInstance) return;
 
       const oppositeProb = oppositeInstance[5] as Prob;
@@ -65,6 +72,9 @@ export default function Embeddings({ height }: { height: number }) {
         baselineProb: isBaseline ? prob : oppositeProb,
         comparisonProb: !isBaseline ? prob : oppositeProb,
       };
+
+      baselineRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
+      comparisonRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
 
       const targetRef = isBaseline ? comparisonRef : baselineRef;
       const currentRef = isBaseline ? baselineRef : comparisonRef;
@@ -79,13 +89,13 @@ export default function Embeddings({ height }: { height: number }) {
         };
       }
     },
-    [extractedBaselineData, extractedComparisonData]
+    [baselineDataMap, comparisonDataMap]
   );
 
   return (
     <div
       style={{ height }}
-      className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px]"
+      className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px] rounded-tr-none"
     >
       <ConnectionLine
         from={positionRef.current.from}
