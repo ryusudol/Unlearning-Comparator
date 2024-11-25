@@ -150,7 +150,7 @@ export default function VerticalBarChart({
     <div className="flex flex-col justify-center items-center relative">
       <span
         className={`text-[15px] relative ${
-          mode === "Training" ? "left-8" : "left-0"
+          mode === "Training" ? "left-[30px]" : "left-0"
         }`}
       >
         {mode} Dataset
