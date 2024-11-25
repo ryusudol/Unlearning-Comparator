@@ -106,6 +106,10 @@ const ScatterPlot = forwardRef(
     const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
     useEffect(() => {
+      hoveredInstanceRef.current = hoveredInstance;
+    }, [hoveredInstance]);
+
+    useEffect(() => {
       const refHolder = document.createElement("div");
       refHolder.setAttribute("data-ref-holder", "true");
       document.body.appendChild(refHolder);
@@ -332,6 +336,8 @@ const ScatterPlot = forwardRef(
           const prob = d[5] as Prob;
           const imageUrl = URL.createObjectURL(blob);
 
+          const currentHoveredInstance = hoveredInstanceRef.current;
+
           const barChartData = isBaseline
             ? {
                 baseline: Array.from({ length: 10 }, (_, idx) => ({
@@ -340,13 +346,17 @@ const ScatterPlot = forwardRef(
                 })),
                 comparison: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(hoveredInstance?.comparisonProb?.[idx] || 0),
+                  value: Number(
+                    currentHoveredInstance?.comparisonProb?.[idx] || 0
+                  ),
                 })),
               }
             : {
                 baseline: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(hoveredInstance?.baselineProb?.[idx] || 0),
+                  value: Number(
+                    currentHoveredInstance?.baselineProb?.[idx] || 0
+                  ),
                 })),
                 comparison: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
@@ -374,7 +384,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [hoveredInstance, isBaseline, mode, onHover]
+      [isBaseline, mode, onHover]
     );
 
     const handleMouseEnter = useCallback(
