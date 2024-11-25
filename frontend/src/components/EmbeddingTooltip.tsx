@@ -13,9 +13,12 @@ const BASELINE_OPACITY = 0.6;
 const COMPARISON_OPACITY = 1;
 const TICK_PADDING = 8;
 const BAR_HEIGHT = 8;
-const FONT_SIZE = "14px";
-const LEGEND_RECT_SIZE = 12;
-const margin = { top: 30, right: 20, bottom: 20, left: 85 };
+const FONT_SIZE = "12px";
+const TICK_FONT_SIZE = "10px";
+const TICK_FONT_WEIGHT = 300;
+const ROBOTO_CONDENSED = "Roboto Condensed";
+const LEGEND_RECT_SIZE = 10;
+const margin = { top: 18, right: 8, bottom: 30, left: 60 };
 
 interface Props {
   width: number;
@@ -54,8 +57,8 @@ export default React.memo(function Tooltip({
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const width = 300;
-    const height = 300;
+    const width = 244;
+    const height = 244;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -109,7 +112,7 @@ export default React.memo(function Tooltip({
     const legend = svg
       .append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${width - margin.right - 166}, 8)`);
+      .attr("transform", `translate(${width - margin.right - 130}, 0)`);
 
     legend
       .append("rect")
@@ -119,15 +122,15 @@ export default React.memo(function Tooltip({
 
     legend
       .append("text")
-      .attr("x", 20)
-      .attr("y", 10)
+      .attr("x", 14)
+      .attr("y", 9)
       .text("Baseline")
       .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed");
+      .style("font-family", ROBOTO_CONDENSED);
 
     const comparisonLegend = legend
       .append("g")
-      .attr("transform", "translate(80, 0)");
+      .attr("transform", "translate(60, 0)");
 
     comparisonLegend
       .append("rect")
@@ -145,11 +148,11 @@ export default React.memo(function Tooltip({
 
     comparisonLegend
       .append("text")
-      .attr("x", 20)
-      .attr("y", 10)
+      .attr("x", 14)
+      .attr("y", 9)
       .text("Comparison")
       .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed");
+      .style("font-family", ROBOTO_CONDENSED);
 
     const xScale = d3
       .scaleLinear()
@@ -231,8 +234,9 @@ export default React.memo(function Tooltip({
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(xAxis)
       .selectAll("text")
-      .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed");
+      .style("font-size", TICK_FONT_SIZE)
+      .style("font-weight", TICK_FONT_WEIGHT)
+      .style("font-family", ROBOTO_CONDENSED);
 
     svg.select(".domain").remove();
 
@@ -243,24 +247,24 @@ export default React.memo(function Tooltip({
       .attr("transform", `translate(${margin.left},0)`)
       .call(yAxis)
       .selectAll("text")
-      .style("font-size", FONT_SIZE)
-      .style("font-family", "Roboto Condensed");
+      .style("font-size", TICK_FONT_SIZE)
+      .style("font-weight", TICK_FONT_WEIGHT)
+      .style("font-family", ROBOTO_CONDENSED)
+      .text((d: any) => {
+        const classIndex = forgetClassNames.indexOf(d);
+        return classIndex === forgetClass ? `${d} (X)` : d;
+      });
   }, [barChartData, firstTableauColor, forgetClass]);
 
   return (
-    <div
-      style={{ width: `${width}px`, height: `${height}px` }}
-      className="flex items-center"
-    >
-      <div className="mt-2 mr-2">
-        <div className="flex justify-center">
-          <img src={imageUrl} alt="cifar-10" width="160" height="160" />
-        </div>
-        <div className="text-sm mt-1">
+    <div style={{ width, height }} className="flex justify-center items-center">
+      <div className="text-sm">
+        <img src={imageUrl} alt="cifar-10" width="160" height="160" />
+        <div className="mt-1">
           <span>Ground Truth:</span>{" "}
           <span className="font-semibold">{groundTruth}</span>
         </div>
-        <div className="text-sm flex flex-col">
+        <div className="flex flex-col">
           <p>Predicted Class</p>
           <p className="flex items-center text-nowrap">
             <BaselineNeuralNetworkIcon className="mr-1" />
@@ -274,9 +278,9 @@ export default React.memo(function Tooltip({
           </p>
         </div>
       </div>
-      <div className="relative z-50 bottom-2.5">
-        <svg ref={svgRef} className="w-full max-w-4xl" />
-        <p className="text-sm absolute font-medium -bottom-[18px] right-[calc(50%-2rem)] translate-x-1/2">
+      <div>
+        <svg ref={svgRef} className="w-full" />
+        <p className="text-xs absolute font-medium bottom-1 right-[calc(24%+2px)] translate-x-1/2">
           Confidence Score
         </p>
       </div>
