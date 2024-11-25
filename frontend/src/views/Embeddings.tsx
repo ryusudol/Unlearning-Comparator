@@ -2,11 +2,11 @@ import { useContext, useMemo, useRef, useCallback } from "react";
 
 import { ExperimentsContext } from "../store/experiments-context";
 import ScatterPlot from "../components/ScatterPlot";
-import ConnectionLine from "../components/ConnectionLine";
+import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
 import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";
 
-type Coordinate = { x: number; y: number };
+export type Coordinate = { x: number; y: number };
 type Position = {
   from: Coordinate | null;
   to: Coordinate | null;
@@ -45,13 +45,18 @@ export default function Embeddings({ height }: { height: number }) {
   const comparisonDataMap = useMemo(() => {
     return new Map(extractedComparisonData.map((d) => [d[4], d]));
   }, [extractedComparisonData]);
-  console.log("Embeddings!");
+
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
       if (imgIdxOrNull === null || !source) {
+        if (hoveredInstanceRef.current?.imgIdx !== null) {
+          const prevImgIdx = hoveredInstanceRef.current?.imgIdx;
+          baselineRef.current?.removeHighlight(prevImgIdx);
+          comparisonRef.current?.removeHighlight(prevImgIdx);
+        }
+
         positionRef.current = { from: null, to: null };
         hoveredInstanceRef.current = null;
-
         baselineRef.current?.updateHoveredInstance(null);
         comparisonRef.current?.updateHoveredInstance(null);
         return;
@@ -76,6 +81,12 @@ export default function Embeddings({ height }: { height: number }) {
       baselineRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
       comparisonRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
 
+      if (isBaseline) {
+        comparisonRef.current?.highlightInstance(imgIdxOrNull);
+      } else {
+        baselineRef.current?.highlightInstance(imgIdxOrNull);
+      }
+
       const targetRef = isBaseline ? comparisonRef : baselineRef;
       const currentRef = isBaseline ? baselineRef : comparisonRef;
 
@@ -97,10 +108,7 @@ export default function Embeddings({ height }: { height: number }) {
       style={{ height }}
       className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px] rounded-tr-none"
     >
-      <ConnectionLine
-        from={positionRef.current.from}
-        to={positionRef.current.to}
-      />
+      <ConnectionLineWrapper positionRef={positionRef} />
       <ScatterPlot
         mode="Baseline"
         height={height}

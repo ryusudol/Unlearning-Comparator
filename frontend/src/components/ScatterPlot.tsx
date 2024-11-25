@@ -13,7 +13,7 @@ import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
-import Tooltip from "./EmbeddingTooltip";
+import EmbeddingTooltip from "./EmbeddingTooltip";
 import { API_URL } from "../constants/common";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -47,8 +47,8 @@ const CONFIG = {
   loweredOpacity: 0.1,
   hoveredStrokeWidth: 2,
   paddingRatio: 0.01,
-  tooltipXSize: 460,
-  tooltipYSize: 320,
+  tooltipXSize: 400,
+  tooltipYSize: 250,
   defaultCrossOpacity: 0.85,
   defaultCircleOpacity: 0.6,
 } as const;
@@ -77,6 +77,7 @@ const ScatterPlot = forwardRef(
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
+    const elementMapRef = useRef(new Map<number, Element>());
     const hoveredInstanceRef = useRef<HovereInstance | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -104,6 +105,10 @@ const ScatterPlot = forwardRef(
     > | null>(null);
 
     const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+
+    useEffect(() => {
+      hoveredInstanceRef.current = hoveredInstance;
+    }, [hoveredInstance]);
 
     useEffect(() => {
       const refHolder = document.createElement("div");
@@ -332,6 +337,8 @@ const ScatterPlot = forwardRef(
           const prob = d[5] as Prob;
           const imageUrl = URL.createObjectURL(blob);
 
+          const currentHoveredInstance = hoveredInstanceRef.current;
+
           const barChartData = isBaseline
             ? {
                 baseline: Array.from({ length: 10 }, (_, idx) => ({
@@ -340,13 +347,17 @@ const ScatterPlot = forwardRef(
                 })),
                 comparison: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(hoveredInstance?.comparisonProb?.[idx] || 0),
+                  value: Number(
+                    currentHoveredInstance?.comparisonProb?.[idx] || 0
+                  ),
                 })),
               }
             : {
                 baseline: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(hoveredInstance?.baselineProb?.[idx] || 0),
+                  value: Number(
+                    currentHoveredInstance?.baselineProb?.[idx] || 0
+                  ),
                 })),
                 comparison: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
@@ -355,12 +366,13 @@ const ScatterPlot = forwardRef(
               };
 
           const tooltipContent = (
-            <Tooltip
+            <EmbeddingTooltip
               width={CONFIG.tooltipXSize}
               height={CONFIG.tooltipYSize}
               imageUrl={imageUrl}
               data={d}
               barChartData={barChartData}
+              isBaseline={isBaseline}
             />
           );
 
@@ -374,7 +386,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [hoveredInstance, isBaseline, mode, onHover]
+      [isBaseline, mode, onHover]
     );
 
     const handleMouseEnter = useCallback(
@@ -417,6 +429,8 @@ const ScatterPlot = forwardRef(
     useEffect(() => {
       if (!svgRef.current || data.length === 0) return;
 
+      elementMapRef.current.clear();
+
       d3.select(svgRef.current).selectAll("*").remove();
 
       const svg = d3
@@ -448,7 +462,10 @@ const ScatterPlot = forwardRef(
         .attr("fill", (d) => z(d[3] as number))
         .style("cursor", "pointer")
         .style("opacity", CONFIG.defaultCircleOpacity)
-        .style("vector-effect", "non-scaling-stroke");
+        .style("vector-effect", "non-scaling-stroke")
+        .each(function (d) {
+          elementMapRef.current.set(d[4] as number, this);
+        });
 
       const crosses = gDot
         .selectAll<SVGPathElement, (number | Prob)[]>("path")
@@ -473,7 +490,10 @@ const ScatterPlot = forwardRef(
         })
         .attr("stroke-width", CONFIG.XStrokeWidth)
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.defaultCrossOpacity);
+        .style("opacity", CONFIG.defaultCrossOpacity)
+        .each(function (d) {
+          elementMapRef.current.set(d[4] as number, this);
+        });
 
       circles
         .on("click", handleInstanceClick)
@@ -547,6 +567,45 @@ const ScatterPlot = forwardRef(
       }
     }, [forgetClass, viewMode]);
 
+    useEffect(() => {
+      if (!hoveredInstance) return;
+
+      const currentElementMap = elementMapRef.current;
+
+      if (hoveredInstance.source !== mode) {
+        const element = currentElementMap.get(hoveredInstance.imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          selection
+            .attr("stroke", BLACK)
+            .attr("stroke-width", CONFIG.hoveredStrokeWidth);
+        }
+      }
+
+      return () => {
+        if (hoveredInstance.source !== mode) {
+          const element = currentElementMap.get(hoveredInstance.imgIdx);
+          if (element) {
+            const selection = d3.select(element);
+            if (element.tagName === "circle") {
+              selection
+                .attr("stroke", null)
+                .attr("stroke-width", null)
+                .style("opacity", CONFIG.defaultCircleOpacity);
+            } else {
+              const d = selection.datum() as (number | Prob)[];
+              const colorStr = z(d[3] as number);
+              const color = d3.color(colorStr);
+              selection
+                .attr("stroke", color ? color.darker().toString() : BLACK)
+                .attr("stroke-width", CONFIG.XStrokeWidth)
+                .style("opacity", CONFIG.defaultCrossOpacity);
+            }
+          }
+        }
+      };
+    }, [hoveredInstance, mode, z]);
+
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
       getInstancePosition: (imgIdx: number) => {
@@ -575,8 +634,37 @@ const ScatterPlot = forwardRef(
       updateHoveredInstance: (instance: HovereInstance | null) => {
         hoveredInstanceRef.current = instance;
       },
+      highlightInstance: (imgIdx: number) => {
+        const element = elementMapRef.current.get(imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          selection
+            .attr("stroke", BLACK)
+            .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+            .raise();
+        }
+      },
+      removeHighlight: (imgIdx: number) => {
+        const element = elementMapRef.current.get(imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          if (element.tagName === "circle") {
+            selection
+              .attr("stroke", null)
+              .attr("stroke-width", null)
+              .style("opacity", CONFIG.defaultCircleOpacity);
+          } else {
+            const d = selection.datum() as (number | Prob)[];
+            const colorStr = z(d[3] as number);
+            const color = d3.color(colorStr);
+            selection
+              .attr("stroke", color ? color.darker().toString() : BLACK)
+              .attr("stroke-width", CONFIG.XStrokeWidth)
+              .style("opacity", CONFIG.defaultCrossOpacity);
+          }
+        }
+      },
     }));
-    console.log("ScatterPlot!");
 
     return (
       <div
