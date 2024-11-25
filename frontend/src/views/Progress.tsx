@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from "react";
-import { Check, Dot, Loader2 } from "lucide-react";
+import { Check, Clock, Dot, Loader2 } from "lucide-react";
 
+import { Separator } from "../components/UI/separator";
 import { Button } from "../components/UI/button";
 import { fetchDataFile } from "../utils/api/unlearning";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -142,14 +143,20 @@ export default function Progress({ height }: { height: number }) {
 
   return (
     <section style={{ height }} className="w-[280px] p-1 relative border">
-      <div className="flex items-center">
+      <div className="flex items-center gap-1">
         <VitalIcon />
-        <h5 className="font-semibold ml-1 text-lg">Progress</h5>
-        <span className="ml-1 text-sm">
-          {isRunning || completedSteps.length
-            ? `(${runningTime.toFixed(1)}s)`
-            : ""}
-        </span>
+        <h5 className="font-semibold text-lg">Progress</h5>
+        <Separator orientation="vertical" className="h-4 mx-1" />
+        <div>
+          {isRunning || completedSteps.length ? (
+            <div className="flex items-center gap-1 relative top-0.5">
+              <Clock className="text-muted-foreground w-3 h-3" />
+              <span className="text-sm">{runningTime.toFixed(1)}s</span>
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
       <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
         {steps.map((step, idx) => {

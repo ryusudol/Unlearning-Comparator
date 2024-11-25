@@ -23,8 +23,8 @@ type BubbleChartData = {
 
 const BRIGHTEST = 0;
 const DARKEST = 1;
-const RED = "#D98585";
-const GREEN = "#429D4D";
+const RED = "#bb151a";
+const GREEN = "#157f3b";
 const baseColors = {
   UA: RED,
   RA: GREEN,
