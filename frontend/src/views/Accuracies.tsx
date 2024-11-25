@@ -1,12 +1,10 @@
 import { useMemo, useContext, useState } from "react";
 
 import VerticalBarChart from "../components/VerticalBarChart";
-import { TABLEAU10 } from "../constants/tableau10";
 import { Chart01Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ExperimentsContext } from "../store/experiments-context";
-
-const GAP_FIX_LENGTH = 3;
+import { getAccuracyGap } from "../utils/data/getAccuracyGap";
 
 export interface GapDataItem {
   category: string;
@@ -27,59 +25,17 @@ export default function Accuracies({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+
   const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
-  const baselineTrainAccuracies: number[] | undefined =
-    baselineExperiment?.accs;
-  const comparisonTrainAccuracies: number[] | undefined =
-    comparisonExperiment?.accs;
-  const baselineTestAccuracies: number[] | undefined =
-    baselineExperiment?.t_accs;
-  const comparisonTestAccuracies: number[] | undefined =
-    comparisonExperiment?.t_accs;
-
   const trainAccuracyGap = useMemo(
-    () =>
-      baselineTrainAccuracies && comparisonTrainAccuracies
-        ? Object.keys(baselineTrainAccuracies).map((key, idx) => {
-            const baselineValue = baselineTrainAccuracies[idx];
-            const comparisonValue = comparisonTrainAccuracies[idx];
-            const categoryLetter = String.fromCharCode(65 + idx);
-            return {
-              category: categoryLetter,
-              classLabel: key,
-              gap: parseFloat(
-                (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-              ),
-              fill: TABLEAU10[idx],
-              baselineAccuracy: baselineValue,
-              comparisonAccuracy: comparisonValue,
-            };
-          })
-        : [],
-    [baselineTrainAccuracies, comparisonTrainAccuracies]
+    () => getAccuracyGap(baselineExperiment?.accs, comparisonExperiment?.accs),
+    [baselineExperiment?.accs, comparisonExperiment?.accs]
   );
-
   const testAccuracyGap = useMemo(
     () =>
-      baselineTestAccuracies && comparisonTestAccuracies
-        ? Object.keys(baselineTestAccuracies).map((key, idx) => {
-            const baselineValue = baselineTestAccuracies[idx];
-            const comparisonValue = comparisonTestAccuracies[idx];
-            const categoryLetter = String.fromCharCode(65 + idx);
-            return {
-              category: categoryLetter,
-              classLabel: key,
-              gap: parseFloat(
-                (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-              ),
-              fill: TABLEAU10[idx],
-              baselineAccuracy: baselineValue,
-              comparisonAccuracy: comparisonValue,
-            };
-          })
-        : [],
-    [baselineTestAccuracies, comparisonTestAccuracies]
+      getAccuracyGap(baselineExperiment?.t_accs, comparisonExperiment?.t_accs),
+    [baselineExperiment?.t_accs, comparisonExperiment?.t_accs]
   );
 
   const trainMaxGap = getMaxGap(trainAccuracyGap);
