@@ -576,7 +576,6 @@ const ScatterPlot = forwardRef(
         hoveredInstanceRef.current = instance;
       },
     }));
-    console.log("ScatterPlot!");
 
     return (
       <div
