@@ -96,8 +96,8 @@ export default function Progress({ height }: { height: number }) {
       setRunningTime(0);
       statusIntervalId = setInterval(checkStatus, 1000);
       timerIntervalId = setInterval(() => {
-        setRunningTime((prev) => prev + 1);
-      }, 1000);
+        setRunningTime((prev) => prev + 0.1);
+      }, 100);
     }
 
     return () => {
@@ -146,7 +146,9 @@ export default function Progress({ height }: { height: number }) {
         <VitalIcon />
         <h5 className="font-semibold ml-1 text-lg">Progress</h5>
         <span className="ml-1 text-sm">
-          {isRunning || completedSteps.length ? `(${runningTime}s)` : ""}
+          {isRunning || completedSteps.length
+            ? `(${runningTime.toFixed(1)}s)`
+            : ""}
         </span>
       </div>
       <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
