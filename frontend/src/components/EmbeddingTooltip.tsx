@@ -29,6 +29,7 @@ interface Props {
     baseline: { class: number; value: number }[];
     comparison: { class: number; value: number }[];
   };
+  isBaseline: boolean;
 }
 
 export default React.memo(function Tooltip({
@@ -37,6 +38,7 @@ export default React.memo(function Tooltip({
   imageUrl,
   data,
   barChartData,
+  isBaseline,
 }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
 
@@ -194,7 +196,9 @@ export default React.memo(function Tooltip({
       .attr("height", BAR_HEIGHT)
       .attr("width", (d) => xScale(d.value) - margin.left)
       .attr("fill", (_, i) => colors[i])
-      .attr("opacity", BASELINE_OPACITY);
+      .attr("opacity", BASELINE_OPACITY)
+      .attr("stroke", isBaseline ? "black" : "none")
+      .attr("stroke-width", isBaseline ? 1 : 0);
 
     g.selectAll(".bar-comparison")
       .data(barChartData.comparison)
@@ -211,7 +215,9 @@ export default React.memo(function Tooltip({
           .attr("height", BAR_HEIGHT)
           .attr("width", x)
           .attr("fill", colors[i])
-          .attr("opacity", COMPARISON_OPACITY);
+          .attr("opacity", COMPARISON_OPACITY)
+          .attr("stroke", !isBaseline ? "black" : "none")
+          .attr("stroke-width", !isBaseline ? 1 : 0);
 
         g.append("rect")
           .attr("x", margin.left)
@@ -254,7 +260,7 @@ export default React.memo(function Tooltip({
         const classIndex = forgetClassNames.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
-  }, [barChartData, firstTableauColor, forgetClass]);
+  }, [barChartData, firstTableauColor, forgetClass, isBaseline]);
 
   return (
     <div style={{ width, height }} className="flex justify-center items-center">

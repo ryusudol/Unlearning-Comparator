@@ -13,7 +13,7 @@ import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
-import Tooltip from "./EmbeddingTooltip";
+import EmbeddingTooltip from "./EmbeddingTooltip";
 import { API_URL } from "../constants/common";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -47,8 +47,8 @@ const CONFIG = {
   loweredOpacity: 0.1,
   hoveredStrokeWidth: 2,
   paddingRatio: 0.01,
-  tooltipXSize: 460,
-  tooltipYSize: 320,
+  tooltipXSize: 400,
+  tooltipYSize: 250,
   defaultCrossOpacity: 0.85,
   defaultCircleOpacity: 0.6,
 } as const;
@@ -365,12 +365,13 @@ const ScatterPlot = forwardRef(
               };
 
           const tooltipContent = (
-            <Tooltip
+            <EmbeddingTooltip
               width={CONFIG.tooltipXSize}
               height={CONFIG.tooltipYSize}
               imageUrl={imageUrl}
               data={d}
               barChartData={barChartData}
+              isBaseline={isBaseline}
             />
           );
 
