@@ -11,7 +11,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
   }
 
   const lineStyle: React.CSSProperties = {
-    position: "absolute",
+    position: "fixed",
     left: 0,
     top: 0,
     pointerEvents: "none",
@@ -35,7 +35,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
   };
 
   return (
-    <div className="z-50" style={lineStyle}>
+    <div className="z-20" style={lineStyle}>
       <div style={linePositionStyle} />
     </div>
   );
