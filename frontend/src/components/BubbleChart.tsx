@@ -173,9 +173,13 @@ export default function BubbleChart({
       .attr("y", (d) => yScale(d.y) - 10)
       .attr("width", 20)
       .attr("height", 20)
+      .attr("rx", 4)
+      .attr("ry", 4)
       .attr("fill", "transparent")
       .on("mouseover", (event, d: any) => {
         event.stopPropagation();
+
+        d3.select(event.target).attr("fill", "rgba(128, 128, 128, 0.2)");
 
         const rect = event.target.getBoundingClientRect();
         const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
@@ -207,7 +211,10 @@ export default function BubbleChart({
 
         onHover(d.y);
       })
-      .on("mouseout", handleMouseOut);
+      .on("mouseout", (event) => {
+        d3.select(event.target).attr("fill", "transparent");
+        handleMouseOut(event);
+      });
 
     svg
       .selectAll("circle")
