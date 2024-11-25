@@ -9,8 +9,8 @@ import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Prob } from "../views/Embeddings";
 
-const BASELINE_OPACITY = 0.6;
-const COMPARISON_OPACITY = 1;
+const LOW_OPACITY = 0.6;
+const HIGH_OPACITY = 1;
 const TICK_PADDING = 8;
 const BAR_HEIGHT = 8;
 const FONT_SIZE = "12px";
@@ -86,7 +86,8 @@ export default React.memo(function Tooltip({
       .attr("x2", 0)
       .attr("y2", 3)
       .attr("stroke", "black")
-      .attr("stroke-width", 2);
+      .attr("stroke-width", 2)
+      .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY);
 
     const legendPattern = defs
       .append("pattern")
@@ -139,7 +140,7 @@ export default React.memo(function Tooltip({
       .attr("width", LEGEND_RECT_SIZE)
       .attr("height", LEGEND_RECT_SIZE)
       .attr("fill", firstTableauColor)
-      .attr("opacity", COMPARISON_OPACITY);
+      .attr("opacity", 1);
 
     comparisonLegend
       .append("rect")
@@ -196,7 +197,7 @@ export default React.memo(function Tooltip({
       .attr("height", BAR_HEIGHT)
       .attr("width", (d) => xScale(d.value) - margin.left)
       .attr("fill", (_, i) => colors[i])
-      .attr("opacity", BASELINE_OPACITY)
+      .attr("opacity", isBaseline ? HIGH_OPACITY : LOW_OPACITY)
       .attr("stroke", isBaseline ? "black" : "none")
       .attr("stroke-width", isBaseline ? 1 : 0);
 
@@ -215,7 +216,7 @@ export default React.memo(function Tooltip({
           .attr("height", BAR_HEIGHT)
           .attr("width", x)
           .attr("fill", colors[i])
-          .attr("opacity", COMPARISON_OPACITY)
+          .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY)
           .attr("stroke", !isBaseline ? "black" : "none")
           .attr("stroke-width", !isBaseline ? 1 : 0);
 
@@ -263,7 +264,10 @@ export default React.memo(function Tooltip({
   }, [barChartData, firstTableauColor, forgetClass, isBaseline]);
 
   return (
-    <div style={{ width, height }} className="flex justify-center items-center">
+    <div
+      style={{ width, height }}
+      className="flex justify-center items-center z-100"
+    >
       <div className="text-sm">
         <img src={imageUrl} alt="cifar-10" width="160" height="160" />
         <div className="mt-1">
