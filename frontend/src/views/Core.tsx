@@ -75,7 +75,7 @@ export default function Core({ height }: { height: number }) {
               </li>
               <li className="flex items-center">
                 <MultiplicationSignIcon className="text-[#4f5562] mr-1.5" />
-                <span>Unlearning Target</span>
+                <span>Forgetting Target</span>
               </li>
             </ul>
           </div>
