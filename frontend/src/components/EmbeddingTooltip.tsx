@@ -1,24 +1,30 @@
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "./UI/icons";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { Prob } from "../views/Embeddings";
 
+const BLACK = "black";
 const LOW_OPACITY = 0.6;
 const HIGH_OPACITY = 1;
-const TICK_PADDING = 8;
-const BAR_HEIGHT = 8;
-const FONT_SIZE = "12px";
+const TICK_PADDING = 6;
+const BAR_HEIGHT = 7;
+const LEGEND_X = 11;
+const LEGEND_Y = 7;
+const LEGEND_X_OFFSET = 113;
+const LEGEND_GAP = 55;
+const LEGEND_RECT_COLOR = "#334155";
+const LEGEND_FONT_SIZE = "10px";
+const GRID_LINE_COLOR = "#d8d8d8";
 const TICK_FONT_SIZE = "10px";
 const TICK_FONT_WEIGHT = 300;
 const ROBOTO_CONDENSED = "Roboto Condensed";
-const LEGEND_RECT_SIZE = 10;
-const margin = { top: 18, right: 8, bottom: 30, left: 60 };
+const LEGEND_RECT_SIZE = 8;
+const margin = { top: 14, right: 25, bottom: 30, left: 65 };
 
 interface Props {
   width: number;
@@ -29,25 +35,23 @@ interface Props {
     baseline: { class: number; value: number }[];
     comparison: { class: number; value: number }[];
   };
+  forgetClass: number;
   isBaseline: boolean;
 }
 
-export default React.memo(function Tooltip({
+export default React.memo(function EmbeddingTooltip({
   width,
   height,
   imageUrl,
   data,
   barChartData,
+  forgetClass,
   isBaseline,
 }: Props) {
-  const { forgetClass } = useContext(ForgetClassContext);
-
   const svgRef = useRef(null);
 
   const groundTruthIdx = Number(data[2]);
   const predictionIdx = Number(data[3]);
-
-  const firstTableauColor = d3.schemeTableau10[0];
 
   const groundTruth = forgetClassNames[groundTruthIdx];
   const baselinePrediction = forgetClassNames[predictionIdx];
@@ -59,8 +63,8 @@ export default React.memo(function Tooltip({
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const width = 244;
-    const height = 244;
+    const width = 240;
+    const height = 240;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -85,7 +89,7 @@ export default React.memo(function Tooltip({
       .attr("y1", 0)
       .attr("x2", 0)
       .attr("y2", 3)
-      .attr("stroke", "black")
+      .attr("stroke", BLACK)
       .attr("stroke-width", 2)
       .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY);
 
@@ -109,52 +113,53 @@ export default React.memo(function Tooltip({
       .attr("y1", 0)
       .attr("x2", 0)
       .attr("y2", 3)
-      .attr("stroke", firstTableauColor)
+      .attr("stroke", BLACK)
       .attr("stroke-width", 2);
 
     const legend = svg
       .append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${width - margin.right - 130}, 0)`);
+      .attr(
+        "transform",
+        `translate(${width - margin.right - LEGEND_X_OFFSET}, 1)`
+      );
 
     legend
       .append("rect")
       .attr("width", LEGEND_RECT_SIZE)
       .attr("height", LEGEND_RECT_SIZE)
-      .attr("fill", firstTableauColor);
+      .attr("fill", LEGEND_RECT_COLOR);
 
     legend
       .append("text")
-      .attr("x", 14)
-      .attr("y", 9)
+      .attr("x", LEGEND_X)
+      .attr("y", LEGEND_Y)
       .text("Baseline")
-      .style("font-size", FONT_SIZE)
+      .style("font-size", LEGEND_FONT_SIZE)
       .style("font-family", ROBOTO_CONDENSED);
 
     const comparisonLegend = legend
       .append("g")
-      .attr("transform", "translate(60, 0)");
+      .attr("transform", `translate(${LEGEND_GAP}, 0)`);
 
     comparisonLegend
       .append("rect")
       .attr("width", LEGEND_RECT_SIZE)
       .attr("height", LEGEND_RECT_SIZE)
-      .attr("fill", firstTableauColor)
-      .attr("opacity", 1);
+      .attr("fill", LEGEND_RECT_COLOR);
 
     comparisonLegend
       .append("rect")
       .attr("width", LEGEND_RECT_SIZE)
       .attr("height", LEGEND_RECT_SIZE)
-      .attr("fill", "url(#stripe-legend)")
-      .attr("opacity", 1);
+      .attr("fill", "url(#stripe-legend)");
 
     comparisonLegend
       .append("text")
-      .attr("x", 14)
-      .attr("y", 9)
+      .attr("x", LEGEND_X)
+      .attr("y", LEGEND_Y)
       .text("Comparison")
-      .style("font-size", FONT_SIZE)
+      .style("font-size", LEGEND_FONT_SIZE)
       .style("font-family", ROBOTO_CONDENSED);
 
     const xScale = d3
@@ -181,7 +186,7 @@ export default React.memo(function Tooltip({
       .attr("x2", (d) => xScale(d))
       .attr("y1", margin.top)
       .attr("y2", height - margin.bottom)
-      .attr("stroke", "#d8d8d8")
+      .attr("stroke", GRID_LINE_COLOR)
       .attr("stroke-width", 1);
 
     const colors = d3.schemeTableau10;
@@ -198,7 +203,7 @@ export default React.memo(function Tooltip({
       .attr("width", (d) => xScale(d.value) - margin.left)
       .attr("fill", (_, i) => colors[i])
       .attr("opacity", isBaseline ? HIGH_OPACITY : LOW_OPACITY)
-      .attr("stroke", isBaseline ? "black" : "none")
+      .attr("stroke", isBaseline ? BLACK : "none")
       .attr("stroke-width", isBaseline ? 1 : 0);
 
     g.selectAll(".bar-comparison")
@@ -217,7 +222,7 @@ export default React.memo(function Tooltip({
           .attr("width", x)
           .attr("fill", colors[i])
           .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY)
-          .attr("stroke", !isBaseline ? "black" : "none")
+          .attr("stroke", !isBaseline ? BLACK : "none")
           .attr("stroke-width", !isBaseline ? 1 : 0);
 
         g.append("rect")
@@ -261,7 +266,7 @@ export default React.memo(function Tooltip({
         const classIndex = forgetClassNames.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
-  }, [barChartData, firstTableauColor, forgetClass, isBaseline]);
+  }, [barChartData, forgetClass, isBaseline]);
 
   return (
     <div
@@ -290,7 +295,7 @@ export default React.memo(function Tooltip({
       </div>
       <div>
         <svg ref={svgRef} className="w-full" />
-        <p className="text-xs absolute font-medium bottom-1 right-[calc(24%+2px)] translate-x-1/2">
+        <p className="text-xs absolute font-light bottom-1 right-[calc(24%+2px)] translate-x-1/2">
           Confidence Score
         </p>
       </div>

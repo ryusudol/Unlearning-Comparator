@@ -48,7 +48,7 @@ const CONFIG = {
   hoveredStrokeWidth: 2,
   paddingRatio: 0.01,
   tooltipXSize: 400,
-  tooltipYSize: 250,
+  tooltipYSize: 244,
   defaultCrossOpacity: 0.85,
   defaultCircleOpacity: 0.6,
 } as const;
@@ -312,8 +312,22 @@ const ScatterPlot = forwardRef(
       }
     }, []);
 
+    useEffect(() => {
+      const handleClickOutside = () => {
+        hideTooltip();
+      };
+
+      document.addEventListener("click", handleClickOutside);
+
+      return () => {
+        document.removeEventListener("click", handleClickOutside);
+      };
+    }, [hideTooltip]);
+
     const handleInstanceClick = useCallback(
       async (event: MouseEvent, d: (number | Prob)[]) => {
+        event.stopPropagation();
+
         const imgIdx = d[4] as number;
         onHover(imgIdx, mode, d[5] as Prob);
 
@@ -372,6 +386,7 @@ const ScatterPlot = forwardRef(
               imageUrl={imageUrl}
               data={d}
               barChartData={barChartData}
+              forgetClass={forgetClass!}
               isBaseline={isBaseline}
             />
           );
@@ -386,7 +401,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [isBaseline, mode, onHover]
+      [forgetClass, isBaseline, mode, onHover]
     );
 
     const handleMouseEnter = useCallback(
@@ -405,7 +420,6 @@ const ScatterPlot = forwardRef(
     const handleMouseLeave = useCallback(
       (event: MouseEvent) => {
         onHover(null, mode);
-        hideTooltip();
 
         const element = event.currentTarget as Element;
         const selection = d3.select(element);
@@ -423,7 +437,7 @@ const ScatterPlot = forwardRef(
             .style("opacity", CONFIG.defaultCrossOpacity);
         }
       },
-      [hideTooltip, mode, onHover, z]
+      [mode, onHover, z]
     );
 
     useEffect(() => {
