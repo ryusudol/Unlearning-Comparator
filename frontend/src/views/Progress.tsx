@@ -142,7 +142,10 @@ export default function Progress({ height }: { height: number }) {
   }, [progress]);
 
   return (
-    <section style={{ height }} className="w-[280px] p-1 relative border">
+    <section
+      style={{ height }}
+      className="w-[280px] p-1 relative border border-t-0"
+    >
       <div className="flex items-center gap-1">
         <VitalIcon />
         <h5 className="font-semibold text-lg">Progress</h5>

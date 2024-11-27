@@ -1,8 +1,7 @@
 import { useContext, useState, useMemo } from "react";
 
-import { LogoIcon, PlusIcon } from "./UI/icons";
+import { LogoIcon, PlusIcon, MultiplicationSignIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
-import { Tabs, TabsList, TabsTrigger } from "./UI/tabs";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Experiments } from "../types/experiments-context";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -32,6 +31,7 @@ export default function Header() {
     selectedForgetClasses,
     saveForgetClass,
     addSelectedForgetClass,
+    deleteSelectedForgetClass,
   } = useContext(ForgetClassContext);
   const { saveExperiments, setExperimentsLoading } =
     useContext(ExperimentsContext);
@@ -65,10 +65,34 @@ export default function Header() {
   };
 
   const handleAddClick = async () => {
-    await fetchAndSaveExperiments(targetFC);
     addSelectedForgetClass(targetFC);
     saveForgetClass(targetFC);
     setOpen(false);
+    await fetchAndSaveExperiments(targetFC);
+  };
+
+  const handleDeleteClick = async (targetClass: string) => {
+    const firstSelectedForgetClass = selectedForgetClasses[0];
+    const secondSelectedForgetClass = selectedForgetClasses[1];
+    const targetSelectedForgetClassesIndex = selectedForgetClasses.indexOf(
+      forgetClassNames.indexOf(targetClass)
+    );
+
+    deleteSelectedForgetClass(targetClass);
+
+    if (targetClass === forgetClassNames[forgetClass as number]) {
+      if (selectedForgetClasses.length === 0) {
+        saveForgetClass(undefined);
+        setOpen(true);
+      } else {
+        const autoSelectedForgetClass =
+          targetSelectedForgetClassesIndex === 0
+            ? forgetClassNames[secondSelectedForgetClass]
+            : forgetClassNames[firstSelectedForgetClass];
+        saveForgetClass(autoSelectedForgetClass);
+        await fetchAndSaveExperiments(autoSelectedForgetClass);
+      }
+    }
   };
 
   return (
@@ -81,93 +105,119 @@ export default function Header() {
               UnlearningComparator
             </span>
           </div>
-          <Tabs
-            className="relative -bottom-2.5 flex items-center"
-            onValueChange={handleForgetClassChange}
-            value={
-              forgetClass !== undefined ? forgetClassNames[forgetClass] : ""
-            }
-          >
-            <TabsList className="bg-transparent">
-              {selectedForgetClasses.map((selectedForgetClass, idx) => (
-                <TabsTrigger
-                  key={idx}
-                  value={forgetClassNames[selectedForgetClass]}
-                  className="h-[30px] rounded-b-none data-[state=active]:shadow-none"
+          <div className="flex items-center gap-1 relative -bottom-2.5">
+            {selectedForgetClasses.map((selectedForgetClass, idx) => (
+              <div key={idx} className="flex items-center relative">
+                <div
+                  className={
+                    "flex justify-center items-center h-[30px] pl-3 pr-[22px] rounded-t cursor-pointer transition " +
+                    (selectedForgetClass === forgetClass
+                      ? "bg-white text-black"
+                      : "text-white hover:bg-gray-800 relative bottom-[1px]")
+                  }
+                  onClick={() =>
+                    handleForgetClassChange(
+                      forgetClassNames[selectedForgetClass]
+                    )
+                  }
                 >
-                  <span className="px-1 border-b-2 border-black text-base">
+                  <span
+                    className={`px-1 font-medium ${
+                      selectedForgetClass === forgetClass
+                        ? "border-b-2 border-black"
+                        : "text-[#64758B]"
+                    }`}
+                  >
                     Forget: {forgetClassNames[selectedForgetClass]}
                   </span>
-                </TabsTrigger>
-              ))}
-              <Dialog
-                open={open}
-                onOpenChange={
-                  selectedForgetClasses.length === 0
-                    ? undefined
-                    : (value: boolean) => {
-                        setOpen(value);
-                        setTargetFC(unselectForgetClasses[0]);
-                      }
-                }
-              >
-                <DialogTrigger className="w-8 h-[30px] flex justify-center items-center ml-1 mb-0.5 transition hover:bg-gray-800 rounded-t">
-                  <PlusIcon className="w-3.5 h-3.5" color="#64758B" />
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[320px] p-4">
-                  <DialogHeader>
-                    <DialogTitle>
-                      Which class do you want to unlearn?
-                    </DialogTitle>
-                    <DialogDescription>
-                      <p>
-                        Select a class that you want to unlearn. Click add when
-                        you're done.
-                      </p>
-                      <div className="grid grid-cols-2 gap-y-4 text-black mt-4">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground">
-                            Dataset
-                          </span>
-                          <span className="text-sm font-semibold -mt-[3px]">
-                            CIFAR-10
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground">
-                            Model
-                          </span>
-                          <span className="text-sm font-semibold -mt-[3px]">
-                            ResNet18
-                          </span>
-                        </div>
+                </div>
+                <div
+                  className={
+                    "w-2.5 h-2.5 rounded-full cursor-pointer flex justify-center items-center absolute right-2.5 hover:scale-125 " +
+                    (selectedForgetClass === forgetClass
+                      ? "bg-gray-300"
+                      : "bg-gray-700")
+                  }
+                  onClick={() =>
+                    handleDeleteClick(forgetClassNames[selectedForgetClass])
+                  }
+                >
+                  <MultiplicationSignIcon
+                    className={
+                      "w-2 h-2 " +
+                      (selectedForgetClass === forgetClass
+                        ? "text-gray-500"
+                        : "text-gray-500")
+                    }
+                  />
+                </div>
+              </div>
+            ))}
+            <Dialog
+              open={open}
+              onOpenChange={
+                selectedForgetClasses.length === 0
+                  ? undefined
+                  : (value: boolean) => {
+                      setOpen(value);
+                      setTargetFC(unselectForgetClasses[0]);
+                    }
+              }
+            >
+              <DialogTrigger className="w-8 h-[30px] flex justify-center items-center mb-0.5 transition hover:bg-gray-800 rounded-t">
+                <PlusIcon className="w-3.5 h-3.5" color="#64758B" />
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[320px] p-4">
+                <DialogHeader>
+                  <DialogTitle>Which class do you want to unlearn?</DialogTitle>
+                  <DialogDescription>
+                    <p>
+                      Select a class that you want to unlearn. Click add when
+                      you're done.
+                    </p>
+                    <div className="grid grid-cols-2 gap-y-4 text-black mt-4">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">
+                          Dataset
+                        </span>
+                        <span className="text-sm font-semibold -mt-[3px]">
+                          CIFAR-10
+                        </span>
                       </div>
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex flex-col items-start">
-                    <Label className="text-xs text-muted-foreground text-center text-nowrap mb-0.5">
-                      Forget Class
-                    </Label>
-                    <Select defaultValue={targetFC} onValueChange={setTargetFC}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder={targetFC} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {unselectForgetClasses.map((forgetClass) => (
-                          <SelectItem key={forgetClass} value={forgetClass}>
-                            {forgetClass}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleAddClick} content="Add" />
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </TabsList>
-          </Tabs>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">
+                          Model
+                        </span>
+                        <span className="text-sm font-semibold -mt-[3px]">
+                          ResNet18
+                        </span>
+                      </div>
+                    </div>
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-start">
+                  <Label className="text-xs text-muted-foreground text-center text-nowrap mb-0.5">
+                    Forget Class
+                  </Label>
+                  <Select defaultValue={targetFC} onValueChange={setTargetFC}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={targetFC} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {unselectForgetClasses.map((forgetClass) => (
+                        <SelectItem key={forgetClass} value={forgetClass}>
+                          {forgetClass}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleAddClick} content="Add" />
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
       <div className="flex ml-5 relative top-1.5 right-[364px] text-[13px]">
