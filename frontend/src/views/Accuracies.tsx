@@ -45,7 +45,7 @@ export default function Accuracies({ height }: { height: number }) {
   return (
     <section
       style={{ height }}
-      className="w-[510px] p-1 flex flex-col border-[1px] border-solid relative"
+      className="w-[510px] p-1 flex flex-col border border-t-0 relative"
     >
       <div className="flex items-center">
         <Chart01Icon />

@@ -13,7 +13,7 @@ export const ForgetClassContext = createContext<ForgetClassContextType>({
   forgetClass: undefined,
   selectedForgetClasses: [],
 
-  saveForgetClass: (forgetClass: string) => {},
+  saveForgetClass: (forgetClass: string | undefined) => {},
   addSelectedForgetClass: (forgetClass: string) => {},
   retrieveForgetClassContextData: () => {},
   clearForgetClass: () => {},
@@ -67,10 +67,12 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
         const newSelectedForgetClasses = originalSelectedForgetClasses.filter(
           (item) => item !== action.payload
         );
-        return {
+        const newState = {
           ...state,
           selectedForgetClasses: newSelectedForgetClasses,
         };
+        sessionStorage.setItem(FORGET_CLASS, JSON.stringify(newState));
+        return newState;
       }
       return state;
 
@@ -89,12 +91,17 @@ export default function ForgetClassContextProvider({
     selectedForgetClasses: [],
   });
 
-  const handleSaveForgetClass = useCallback((forgetClass: string) => {
-    dispatch({
-      type: "SAVE_FORGET_CLASS",
-      payload: forgetClassNames.indexOf(forgetClass),
-    });
-  }, []);
+  const handleSaveForgetClass = useCallback(
+    (forgetClass: string | undefined) => {
+      dispatch({
+        type: "SAVE_FORGET_CLASS",
+        payload: forgetClass
+          ? forgetClassNames.indexOf(forgetClass)
+          : undefined,
+      });
+    },
+    []
+  );
 
   const handleAddSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
