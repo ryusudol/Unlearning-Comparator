@@ -217,7 +217,7 @@ export default React.memo(function EmbeddingTooltip({
         (d) => (yScale(forgetClassNames[d.class]) ?? 0) + BAR_HEIGHT - 1
       )
       .text((d) => d.value.toFixed(2))
-      .style("font-size", "10px")
+      .style("font-size", "9px")
       .style("font-family", ROBOTO_CONDENSED)
       .attr("opacity", isBaseline ? HIGH_OPACITY : LOW_OPACITY);
 
@@ -244,7 +244,7 @@ export default React.memo(function EmbeddingTooltip({
           .attr("x", margin.left + x + 5)
           .attr("y", y + BAR_HEIGHT - 1)
           .text(d.value.toFixed(2))
-          .style("font-size", "10px")
+          .style("font-size", "9px")
           .style("font-family", ROBOTO_CONDENSED)
           .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY);
 
