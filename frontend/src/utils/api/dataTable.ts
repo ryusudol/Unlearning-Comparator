@@ -51,7 +51,7 @@ export async function downloadJSON(forgetClass: number, fileName: string) {
 export async function downloadPTH(forgetClass: number, fileName: string) {
   try {
     const response = await fetch(
-      `${API_URL}/data/${forgetClass}/weights/${fileName}`
+      `${API_URL}/data/${forgetClass}/${fileName}/weights`
     );
 
     if (!response.ok) {
