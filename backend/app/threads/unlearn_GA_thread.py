@@ -162,7 +162,8 @@ class UnlearningGAThread(threading.Thread):
             model=self.model, 
             data_loader=self.train_loader,
             criterion=self.criterion, 
-            device=self.device
+            device=self.device,
+            forget_class=self.request.forget_class
         )
         
         unlearn_accuracy = train_class_accuracies[self.request.forget_class]
@@ -195,7 +196,8 @@ class UnlearningGAThread(threading.Thread):
             model=self.model, 
             data_loader=self.test_loader, 
             criterion=self.criterion, 
-            device=self.device
+            device=self.device,
+            forget_class=self.request.forget_class
         )
 
         # Update test evaluation status for remain classes only

@@ -205,7 +205,8 @@ class UnlearningRLThread(threading.Thread):
             model=self.model, 
             data_loader=self.train_loader,
             criterion=self.criterion, 
-            device=self.device
+            device=self.device,
+            forget_class=self.request.forget_class
         )
 
         # Update training evaluation status for remain classes only
@@ -239,7 +240,8 @@ class UnlearningRLThread(threading.Thread):
             model=self.model, 
             data_loader=self.test_loader, 
             criterion=self.criterion, 
-            device=self.device
+            device=self.device,
+            forget_class=self.request.forget_class
         )
 
         # Update test evaluation status for remain classes only
