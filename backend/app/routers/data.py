@@ -39,17 +39,6 @@ async def download_trained_model(filename: str):
     
     return FileResponse(file_path, media_type='application/octet-stream', filename=filename)
 
-@router.get("/data/{forget_class}/file_lists", response_model=List[str])
-async def list_json_files(forget_class: str):
-    data_dir = os.path.join('data', forget_class)
-    if not os.path.exists(data_dir):
-        raise HTTPException(status_code=404, detail=f"Directory for {forget_class} not found")
-    
-    json_files = [f[:-5] for f in os.listdir(data_dir) if f.endswith('.json')]
-    if not json_files:
-        raise HTTPException(status_code=404, detail=f"No JSON files found in {forget_class}")
-    return json_files
-
 @router.get("/data/{forget_class}/all")
 async def get_all_json_files(forget_class: str):
     data_dir = os.path.join('data', forget_class)
@@ -82,22 +71,18 @@ async def get_all_json_files(forget_class: str):
     
     return all_data
 
-@router.delete("/data/{forget_class}/{filename}")
-async def delete_json_file(forget_class: str, filename: str):
-    if not filename.endswith('.json'):
-        filename = f"{filename}.json"
+@router.get("/data/{forget_class}/{filename}/weights")
+async def get_model_file(forget_class: str, filename: str):
+    if not filename.endswith('.pth'):
+        filename = f"{filename}.pth"
     
-    data_dir = os.path.join('data', forget_class)
-    file_path = os.path.join(data_dir, filename)
+    model_dir = os.path.join('unlearned_models', forget_class)
+    file_path = os.path.join(model_dir, filename)
     
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail=f"File {filename} not found")
+        raise HTTPException(status_code=404, detail=f"Model file {filename} not found")
     
-    try:
-        os.remove(file_path)
-        return {"message": f"File {filename} successfully deleted"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
+    return FileResponse(file_path, media_type='application/octet-stream', filename=filename)
 
 @router.get("/data/{forget_class}/{filename}")
 async def get_json_file(forget_class: str, filename: str):
@@ -116,6 +101,35 @@ async def get_json_file(forget_class: str, filename: str):
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+
+@router.delete("/data/{forget_class}/{filename}")
+async def delete_files(forget_class: str, filename: str):
+    response_messages = []
+    
+    # JSON 파일 삭제 시도
+    json_filename = f"{filename}.json" if not filename.endswith('.json') else filename
+    json_path = os.path.join('data', forget_class, json_filename)
+    if os.path.exists(json_path):
+        try:
+            os.remove(json_path)
+            response_messages.append(f"JSON file {json_filename} successfully deleted")
+        except Exception as e:
+            response_messages.append(f"Error deleting JSON file: {str(e)}")
+    
+    # PTH 파일 삭제 시도
+    pth_filename = f"{filename}.pth" if not filename.endswith('.pth') else filename
+    pth_path = os.path.join('unlearned_models', forget_class, pth_filename)
+    if os.path.exists(pth_path):
+        try:
+            os.remove(pth_path)
+            response_messages.append(f"Model file {pth_filename} successfully deleted")
+        except Exception as e:
+            response_messages.append(f"Error deleting model file: {str(e)}")
+    
+    if not response_messages:
+        raise HTTPException(status_code=404, detail="No files found to delete")
+    
+    return {"messages": response_messages}
 
 @router.get("/image/cifar10/{index}")
 async def get_image(index: int):

@@ -184,7 +184,6 @@ class UnlearningRetrainThread(threading.Thread):
         print()
         save_model(
             model=self.model, 
-            epochs=self.epochs, 
-            learning_rate=self.learning_rate,
-            forget_class=self.forget_class
+            forget_class=self.forget_class,
+            model_name=self.status.recent_id
         )

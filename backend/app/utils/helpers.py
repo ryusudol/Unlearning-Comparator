@@ -11,15 +11,14 @@ def set_seed(seed):
 
 def save_model(
     model, 
-    epochs, 
-    learning_rate,
-    forget_class=-1
+    forget_class=-1,
+    model_name="ffff",
 ):
-    save_dir = 'unlearned_models'
+    save_dir = f'unlearned_models/{forget_class}'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
-    model_filename = f"ResNet18_CIFAR10_{epochs}epochs_{learning_rate}lr_{'train' if forget_class == -1 else f'forget_{forget_class}'}.pth"
+    model_filename = f"{model_name}.pth"
     model_path = os.path.join(save_dir, model_filename)
     
     torch.save(model.state_dict(), model_path)

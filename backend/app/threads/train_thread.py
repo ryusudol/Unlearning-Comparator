@@ -196,7 +196,6 @@ class TrainingThread(threading.Thread):
         
         save_model(
             model=self.model, 
-            epochs=self.epochs, 
-            learning_rate=self.learning_rate, 
-            forget_class=-1
+            forget_class=-1,
+            model_name="ffff",
         )

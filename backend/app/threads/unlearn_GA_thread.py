@@ -138,12 +138,6 @@ class UnlearningGAThread(threading.Thread):
             print(f"ETA: {self.status.estimated_time_remaining:.1f}s")
 
         rte = time.time() - start_time
-        save_model(
-            model=self.model, 
-            epochs=epoch + 1, 
-            learning_rate=self.request.learning_rate,
-            forget_class=self.request.forget_class
-        )
         
         if self.stopped():
             self.status.is_unlearning = False
@@ -311,6 +305,12 @@ class UnlearningGAThread(threading.Thread):
         with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
 
+        save_model(
+            model=self.model, 
+            forget_class=self.request.forget_class,
+            model_name=self.status.recent_id,
+        )
+        
         print(f"Results saved to {result_path}")
         print("Custom Unlearning inference completed!")
         self.status.progress = "Completed"
