@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import * as d3 from "d3";
 
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
@@ -28,7 +29,7 @@ export default function Predictions({ height }: { height: number }) {
   return (
     <section
       style={{ height }}
-      className="w-[510px] p-1 flex flex-col border-[1px] border-solid transition-all z-10"
+      className="w-[510px] p-1 flex flex-col border-[1px] border-solid transition-all z-10 relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center mr-2">
@@ -66,6 +67,53 @@ export default function Predictions({ height }: { height: number }) {
           Select the target forget class first.
         </div>
       )}
+      <BubbleChartLegend />
     </section>
   );
 }
+
+function BubbleChartLegend() {
+  return (
+    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[58%] gap-3 text-[#666666]">
+      <div className="flex flex-col items-center">
+        <div className="flex items-center gap-5">
+          <div className="w-1 h-1 rounded-full bg-[#666666]" />
+          <div className="w-2 h-2 rounded-full bg-[#666666]" />
+          <div className="w-3 h-3 rounded-full bg-[#666666]" />
+        </div>
+        <div className="text-nowrap flex items-center gap-2">
+          <span className="text-[9px]">
+            <span className="font-semibold">Less</span> Frequent
+          </span>
+          <span className="text-[9px]">
+            <span className="font-semibold">More</span> Frequent
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-col items-center relative top-0.5">
+        <ColorBar />
+        <div className="text-nowrap flex items-center gap-2">
+          <span className="text-[9px]">
+            <span className="font-semibold">Less</span> Confident
+          </span>
+          <span className="text-[9px]">
+            <span className="font-semibold">More</span> Confident
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const ColorBar = () => {
+  const steps = 10;
+  const colors = Array.from({ length: steps }, (_, i) => {
+    const percent = (i / (steps - 1)) * 100;
+    const color = d3.interpolateWarm(i / (steps - 1));
+    return `${color} ${percent}%`;
+  });
+
+  const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
+
+  return <div className="w-16 h-2" style={{ background: gradient }} />;
+};

@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
 import {
@@ -269,7 +270,7 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "z-10" : "right-[48px] z-0"
+        showYAxis ? "" : "right-[48px]"
       }`}
     >
       <div
@@ -290,46 +291,49 @@ export default function BubbleChart({
         </span>
       )}
       <svg ref={svgRef}></svg>
-      {tooltip.display && (
-        <div
-          ref={tooltipRef}
-          className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
-            tooltip.display ? "opacity-100" : "opacity-0"
-          }`}
-          style={{
-            position: "fixed",
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: "translateY(-50%)",
-            pointerEvents: "none",
-          }}
-        >
-          <div>
-            <span>Ground Truth</span>:{" "}
-            <span className="font-semibold">
-              {forgetClassNames[tooltip.content.groundTruth]}
-            </span>
-          </div>
-          <div>
-            <span>Prediction</span>:{" "}
-            <span className="font-semibold">
-              {forgetClassNames[tooltip.content.prediction]}
-            </span>
-          </div>
-          <div>
-            <span>Label</span>:{" "}
-            <span className="font-semibold">
-              {tooltip.content.label.toFixed(3)}
-            </span>
-          </div>
-          <div>
-            <span>Confidence</span>:{" "}
-            <span className="font-semibold">
-              {tooltip.content.conf.toFixed(3)}
-            </span>
-          </div>
-        </div>
-      )}
+      {tooltip.display &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            className={`w-auto h-auto bg-white px-1.5 py-1 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+              tooltip.display ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              position: "fixed",
+              left: tooltip.x,
+              top: tooltip.y,
+              transform: "translateY(-50%)",
+              pointerEvents: "none",
+              zIndex: 10,
+            }}
+          >
+            <div>
+              <span>Ground Truth</span>:{" "}
+              <span className="font-semibold">
+                {forgetClassNames[tooltip.content.groundTruth]}
+              </span>
+            </div>
+            <div>
+              <span>Prediction</span>:{" "}
+              <span className="font-semibold">
+                {forgetClassNames[tooltip.content.prediction]}
+              </span>
+            </div>
+            <div>
+              <span>Label</span>:{" "}
+              <span className="font-semibold">
+                {tooltip.content.label.toFixed(3)}
+              </span>
+            </div>
+            <div>
+              <span>Confidence</span>:{" "}
+              <span className="font-semibold">
+                {tooltip.content.conf.toFixed(3)}
+              </span>
+            </div>
+          </div>,
+          document.body
+        )}
       <span className="absolute -bottom-0.5 left-1/2 text-xs">Prediction</span>
     </div>
   );
