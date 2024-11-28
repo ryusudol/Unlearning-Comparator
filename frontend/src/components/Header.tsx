@@ -144,7 +144,7 @@ export default function Header() {
                 >
                   <MultiplicationSignIcon
                     className={
-                      "w-[11px] h-[11px] " +
+                      "w-2.5 h-2.5 " +
                       (selectedForgetClass === forgetClass
                         ? "text-gray-500"
                         : "text-gray-500")
