@@ -110,7 +110,7 @@ export default function Header() {
               <div key={idx} className="flex items-center relative">
                 <div
                   className={
-                    "flex justify-center items-center h-[30px] pl-3 pr-[22px] rounded-t cursor-pointer transition " +
+                    "flex justify-center items-center h-[30px] pl-2.5 pr-[22px] rounded-t cursor-pointer transition " +
                     (selectedForgetClass === forgetClass
                       ? "bg-white text-black"
                       : "text-white hover:bg-gray-800 relative bottom-[1px]")
@@ -124,7 +124,7 @@ export default function Header() {
                   <span
                     className={`px-1 font-medium ${
                       selectedForgetClass === forgetClass
-                        ? "border-b-2 border-black"
+                        ? "text-black"
                         : "text-[#64758B]"
                     }`}
                   >
@@ -133,7 +133,7 @@ export default function Header() {
                 </div>
                 <div
                   className={
-                    "w-2.5 h-2.5 rounded-full cursor-pointer flex justify-center items-center absolute right-2.5 hover:scale-125 " +
+                    "w-[11px] h-[11px] rounded-full cursor-pointer flex justify-center items-center absolute right-2.5 hover:scale-125 " +
                     (selectedForgetClass === forgetClass
                       ? "bg-gray-300"
                       : "bg-gray-700")
@@ -144,13 +144,16 @@ export default function Header() {
                 >
                   <MultiplicationSignIcon
                     className={
-                      "w-2 h-2 " +
+                      "w-[11px] h-[11px] " +
                       (selectedForgetClass === forgetClass
                         ? "text-gray-500"
                         : "text-gray-500")
                     }
                   />
                 </div>
+                {selectedForgetClass === forgetClass && (
+                  <div className="w-[calc(100%-19px)] h-0.5 absolute bottom-[1px] left-[10px] bg-black" />
+                )}
               </div>
             ))}
             <Dialog
