@@ -17,7 +17,6 @@ const LEGEND_X = 11;
 const LEGEND_Y = 7;
 const LEGEND_X_OFFSET = 113;
 const LEGEND_GAP = 55;
-const LEGEND_RECT_COLOR = "#334155";
 const LEGEND_FONT_SIZE = "10px";
 const GRID_LINE_COLOR = "#d8d8d8";
 const TICK_FONT_SIZE = "10px";
@@ -49,6 +48,8 @@ export default React.memo(function EmbeddingTooltip({
   isBaseline,
 }: Props) {
   const svgRef = useRef(null);
+
+  const legendRectColor = d3.schemeTableau10[0];
 
   const groundTruthIdx = Number(data[2]);
   const predictionIdx = Number(data[3]);
@@ -113,7 +114,7 @@ export default React.memo(function EmbeddingTooltip({
       .attr("y1", 0)
       .attr("x2", 0)
       .attr("y2", 3)
-      .attr("stroke", BLACK)
+      .attr("stroke", legendRectColor)
       .attr("stroke-width", 2);
 
     const legend = svg
@@ -128,7 +129,7 @@ export default React.memo(function EmbeddingTooltip({
       .append("rect")
       .attr("width", LEGEND_RECT_SIZE)
       .attr("height", LEGEND_RECT_SIZE)
-      .attr("fill", LEGEND_RECT_COLOR);
+      .attr("fill", legendRectColor);
 
     legend
       .append("text")
@@ -146,7 +147,7 @@ export default React.memo(function EmbeddingTooltip({
       .append("rect")
       .attr("width", LEGEND_RECT_SIZE)
       .attr("height", LEGEND_RECT_SIZE)
-      .attr("fill", LEGEND_RECT_COLOR);
+      .attr("fill", legendRectColor);
 
     comparisonLegend
       .append("rect")
@@ -206,6 +207,20 @@ export default React.memo(function EmbeddingTooltip({
       .attr("stroke", isBaseline ? BLACK : "none")
       .attr("stroke-width", isBaseline ? 1 : 0);
 
+    g.selectAll(".baseline-value")
+      .data(barChartData.baseline)
+      .join("text")
+      .attr("class", "baseline-value")
+      .attr("x", (d) => xScale(d.value) + 5)
+      .attr(
+        "y",
+        (d) => (yScale(forgetClassNames[d.class]) ?? 0) + BAR_HEIGHT - 1
+      )
+      .text((d) => d.value.toFixed(2))
+      .style("font-size", "10px")
+      .style("font-family", ROBOTO_CONDENSED)
+      .attr("opacity", isBaseline ? HIGH_OPACITY : LOW_OPACITY);
+
     g.selectAll(".bar-comparison")
       .data(barChartData.comparison)
       .join("g")
@@ -224,6 +239,14 @@ export default React.memo(function EmbeddingTooltip({
           .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY)
           .attr("stroke", !isBaseline ? BLACK : "none")
           .attr("stroke-width", !isBaseline ? 1 : 0);
+
+        g.append("text")
+          .attr("x", margin.left + x + 5)
+          .attr("y", y + BAR_HEIGHT - 1)
+          .text(d.value.toFixed(2))
+          .style("font-size", "10px")
+          .style("font-family", ROBOTO_CONDENSED)
+          .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY);
 
         g.append("rect")
           .attr("x", margin.left)
@@ -266,7 +289,7 @@ export default React.memo(function EmbeddingTooltip({
         const classIndex = forgetClassNames.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
-  }, [barChartData, forgetClass, isBaseline]);
+  }, [barChartData, forgetClass, isBaseline, legendRectColor]);
 
   return (
     <div

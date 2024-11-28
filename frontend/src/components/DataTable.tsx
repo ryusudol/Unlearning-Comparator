@@ -10,9 +10,12 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
+import { fetchAllExperimentsData } from "../utils/api/unlearning";
+import { deleteRow, downloadJSON, downloadPTH } from "../utils/api/dataTable";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { calculatePerformanceMetrics } from "../utils/data/experiments";
 import { ExperimentData } from "../types/data";
+import { Experiments } from "../types/experiments-context";
 import { hexToRgba } from "../utils/data/colors";
 import { ScrollArea } from "./UI/scroll-area";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -21,6 +24,12 @@ import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
 import { cn } from "../utils/common/styles";
 import { COLUMN_WIDTHS } from "./Columns";
 import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "./UI/context-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -28,6 +37,9 @@ import {
   TableHeader,
   TableRow,
 } from "./UI/table";
+
+const BASELINE = "baseline";
+const COMPARISON = "comparison";
 
 type PerformanceMetrics = {
   [key: string]: {
@@ -42,7 +54,8 @@ interface Props {
 
 export default function DataTable({ columns }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
-  const { experiments } = useContext(ExperimentsContext);
+  const { experiments, saveExperiments, setExperimentsLoading } =
+    useContext(ExperimentsContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
   );
@@ -72,7 +85,7 @@ export default function DataTable({ columns }: Props) {
   ) as PerformanceMetrics;
 
   const modifiedColumns = columns.map((column) => {
-    if (column.id === "baseline") {
+    if (column.id === BASELINE) {
       return {
         ...column,
         cell: ({ row }: CellContext<ExperimentData, unknown>) => (
@@ -93,7 +106,7 @@ export default function DataTable({ columns }: Props) {
         ),
       };
     }
-    if (column.id === "comparison") {
+    if (column.id === COMPARISON) {
       return {
         ...column,
         cell: ({ row }: CellContext<ExperimentData, unknown>) => (
@@ -190,6 +203,69 @@ export default function DataTable({ columns }: Props) {
     tableData,
   ]);
 
+  const handleDeleteRow = async (id: string) => {
+    try {
+      await deleteRow(forgetClass as number, id);
+      setExperimentsLoading(true);
+      const allData: Experiments = await fetchAllExperimentsData(
+        forgetClass as number
+      );
+      if ("detail" in allData) saveExperiments({});
+      else saveExperiments(allData);
+    } catch (error) {
+      console.error("Failed to delete the row:", error);
+    } finally {
+      setExperimentsLoading(false);
+    }
+  };
+
+  const handleDownloadJSON = async (id: string) => {
+    try {
+      const json = await downloadJSON(forgetClass as number, id);
+
+      const jsonString = JSON.stringify(json, null, 2);
+
+      const blob = new Blob([jsonString], { type: "application/json" });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${id}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download the JSON file:", error);
+    }
+  };
+
+  const handleDownloadPTH = async (id: string) => {
+    try {
+      const pth = await downloadPTH(forgetClass as number, id);
+
+      const blob = new Blob([pth], {
+        type: "application/octet-stream",
+        endings: "transparent",
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${id}.pth`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download the PTH file:", error);
+    }
+  };
+
   return (
     <div className="w-full h-[196px]">
       <div className="relative w-full">
@@ -208,10 +284,10 @@ export default function DataTable({ columns }: Props) {
                       style={{
                         width: `${columnWidth}px`,
                         minWidth: `${columnWidth}px`,
-                        ...(header.column.id === "baseline" && {
+                        ...(header.column.id === BASELINE && {
                           paddingRight: 0,
                         }),
-                        ...(header.column.id === "comparison" && {
+                        ...(header.column.id === COMPARISON && {
                           paddingLeft: 0,
                         }),
                       }}
@@ -239,67 +315,91 @@ export default function DataTable({ columns }: Props) {
             >
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell, idx) => {
-                      const columnId = cell.column.id;
-                      const columnWidth =
-                        COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
+                  <ContextMenu>
+                    <ContextMenuTrigger className="contents">
+                      <TableRow
+                        key={row.id}
+                        id={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell, idx) => {
+                          const columnId = cell.column.id;
+                          const columnWidth =
+                            COLUMN_WIDTHS[
+                              columnId as keyof typeof COLUMN_WIDTHS
+                            ];
 
-                      const isPerformanceMetric =
-                        columnId in performanceMetrics;
+                          const isPerformanceMetric =
+                            columnId in performanceMetrics;
 
-                      let cellStyle: React.CSSProperties = {
-                        width: `${columnWidth}px`,
-                        minWidth: `${columnWidth}px`,
-                        ...(columnId === "baseline" && { paddingRight: 0 }),
-                        ...(columnId === "comparison" && { paddingLeft: 0 }),
-                      };
+                          let cellStyle: React.CSSProperties = {
+                            width: `${columnWidth}px`,
+                            minWidth: `${columnWidth}px`,
+                            ...(columnId === BASELINE && { paddingRight: 0 }),
+                            ...(columnId === COMPARISON && { paddingLeft: 0 }),
+                          };
 
-                      if (isPerformanceMetric) {
-                        const { baseColor } = performanceMetrics[columnId];
-                        const value = cell.getValue() as number;
-                        const opacity = opacityMapping[columnId]?.[value] ?? 0;
+                          if (isPerformanceMetric) {
+                            const { baseColor } = performanceMetrics[columnId];
+                            const value = cell.getValue() as number;
+                            const opacity =
+                              opacityMapping[columnId]?.[value] ?? 0;
 
-                        if (baseColor) {
-                          let color, textColor;
+                            if (baseColor) {
+                              let color, textColor;
 
-                          if (tableData.length === 1 && value === 0) {
-                            color = "#FFFFFF";
-                            textColor = "#000000";
-                          } else {
-                            color = hexToRgba(baseColor, opacity);
-                            textColor = opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                              if (tableData.length === 1 && value === 0) {
+                                color = "#FFFFFF";
+                                textColor = "#000000";
+                              } else {
+                                color = hexToRgba(baseColor, opacity);
+                                textColor =
+                                  opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                              }
+
+                              cellStyle = {
+                                ...cellStyle,
+                                borderLeft:
+                                  columnId === "UA"
+                                    ? "1px solid rgb(229 231 235)"
+                                    : "none",
+                                borderRight:
+                                  idx === row.getVisibleCells().length - 1
+                                    ? "none"
+                                    : "1px solid rgb(229 231 235)",
+                                backgroundColor: color,
+                                color: textColor,
+                              };
+                            }
                           }
 
-                          cellStyle = {
-                            ...cellStyle,
-                            borderLeft:
-                              columnId === "UA"
-                                ? "1px solid rgb(229 231 235)"
-                                : "none",
-                            borderRight:
-                              idx === row.getVisibleCells().length - 1
-                                ? "none"
-                                : "1px solid rgb(229 231 235)",
-                            backgroundColor: color,
-                            color: textColor,
-                          };
-                        }
-                      }
-
-                      return (
-                        <TableCell key={cell.id} style={cellStyle}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
+                          return (
+                            <TableCell key={cell.id} style={cellStyle}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
+                        Delete Row
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => handleDownloadJSON(row.id)}
+                      >
+                        Download JSON
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => handleDownloadPTH(row.id)}
+                      >
+                        Download PTH
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 ))
               ) : (
                 <TableRow>

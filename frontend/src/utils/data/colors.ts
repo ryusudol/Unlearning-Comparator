@@ -20,11 +20,11 @@ export function getPhaseColors(
     color = `rgba(34, 139, 34, ${colorOpacity})`;
     backgroundColor = `rgba(34, 139, 34, ${backgroundColorOpacity})`;
   } else if (phase === "Pretrained") {
-    color = `rgba(80, 80, 80, ${colorOpacity})`;
-    backgroundColor = `rgba(80, 80, 80, ${backgroundColorOpacity})`;
+    color = `rgba(255, 50, 50, ${colorOpacity})`;
+    backgroundColor = `rgba(255, 50, 50, ${backgroundColorOpacity})`;
   } else {
-    color = `rgba(218, 165, 32, ${colorOpacity})`;
-    backgroundColor = `rgba(218, 165, 32, ${backgroundColorOpacity})`;
+    color = `rgba(80,80,80, ${colorOpacity})`;
+    backgroundColor = `rgba(80,80,80, ${backgroundColorOpacity})`;
   }
   return { color, backgroundColor };
 }
