@@ -60,7 +60,18 @@ export async function downloadPTH(forgetClass: number, fileName: string) {
       );
     }
 
-    return await response.json();
+    const blob = await response.blob();
+    
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName}.pth`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    return blob;
   } catch (error) {
     console.error("Failed to download the PTH file:", error);
 

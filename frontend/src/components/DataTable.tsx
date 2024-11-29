@@ -244,23 +244,7 @@ export default function DataTable({ columns }: Props) {
 
   const handleDownloadPTH = async (id: string) => {
     try {
-      const pth = await downloadPTH(forgetClass as number, id);
-
-      const blob = new Blob([pth], {
-        type: "application/octet-stream",
-        endings: "transparent",
-      });
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${id}.pth`;
-
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      await downloadPTH(forgetClass as number, id);
     } catch (error) {
       console.error("Failed to download the PTH file:", error);
     }
@@ -386,7 +370,7 @@ export default function DataTable({ columns }: Props) {
                     </ContextMenuTrigger>
                     <ContextMenuContent>
                       <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
-                        Delete Row
+                        Delete
                       </ContextMenuItem>
                       <ContextMenuItem
                         onClick={() => handleDownloadJSON(row.id)}
