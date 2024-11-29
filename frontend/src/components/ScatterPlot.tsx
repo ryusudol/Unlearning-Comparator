@@ -47,8 +47,8 @@ const CONFIG = {
   loweredOpacity: 0.1,
   hoveredStrokeWidth: 2,
   paddingRatio: 0.01,
-  tooltipXSize: 400,
-  tooltipYSize: 244,
+  tooltipXSize: 440,
+  tooltipYSize: 264,
   defaultCrossOpacity: 0.85,
   defaultCircleOpacity: 0.6,
 } as const;
