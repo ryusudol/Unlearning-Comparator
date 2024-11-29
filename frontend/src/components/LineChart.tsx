@@ -102,7 +102,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   const layers = ckaData.map((data) => data.layer);
 
   return (
-    <div className="relative bottom-1">
+    <div className="relative bottom-1 right-0.5">
       <style>{tickStyle}</style>
       <CustomLegend />
       <p className="text-[15px] text-center relative top-1 mb-1.5">
