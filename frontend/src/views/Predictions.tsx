@@ -5,7 +5,7 @@ import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
-import { Target02Icon } from "../components/UI/icons";
+import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
 
 export const TRAINING = "training";
 export const TEST = "test";
@@ -44,7 +44,7 @@ export default function Predictions({ height }: { height: number }) {
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div className="flex items-center relative ml-2">
+          <div className="flex items-center relative ml-2 top-[13px]">
             <BubbleChart
               mode="Baseline"
               datasetMode={datasetMode}
@@ -74,32 +74,27 @@ export default function Predictions({ height }: { height: number }) {
 
 function BubbleChartLegend() {
   return (
-    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[58%] gap-3 text-[#666666]">
-      <div className="flex flex-col items-center">
-        <div className="flex items-center gap-5">
-          <div className="w-1 h-1 rounded-full bg-[#666666]" />
-          <div className="w-2 h-2 rounded-full bg-[#666666]" />
-          <div className="w-3 h-3 rounded-full bg-[#666666]" />
-        </div>
-        <div className="text-nowrap flex items-center gap-2">
-          <span className="text-[9px]">
-            <span className="font-semibold">Less</span> Frequent
-          </span>
-          <span className="text-[9px]">
-            <span className="font-semibold">More</span> Frequent
-          </span>
-        </div>
+    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[60%] gap-7 text-[#666666]">
+      <div
+        className="grid grid-cols-3 gap-x-2 place-items-center relative text-[9px]"
+        style={{ gridTemplateRows: "18px 14px" }}
+      >
+        <div className="w-1.5 h-1.5 rounded-full bg-[#666666]" />
+        <div className="w-3 h-3 rounded-full bg-[#666666]" />
+        <div className="w-[18px] h-[18px] rounded-full bg-[#666666]" />
+        <span>Less</span>
+        <ShortArrow />
+        <span>More</span>
+        <span className="absolute top-[26px] text-[10px]">Frequent</span>
       </div>
-      <div className="flex flex-col items-center relative top-0.5">
+      <div className="flex flex-col items-center gap-1 relative top-0.5">
         <ColorBar />
-        <div className="text-nowrap flex items-center gap-2">
-          <span className="text-[9px]">
-            <span className="font-semibold">Less</span> Confident
-          </span>
-          <span className="text-[9px]">
-            <span className="font-semibold">More</span> Confident
-          </span>
+        <div className="text-nowrap flex items-center gap-2 text-[9px]">
+          <span>Less</span>
+          <LongArrow />
+          <span>More</span>
         </div>
+        <span className="text-[10px] absolute top-[22px]">Confident</span>
       </div>
     </div>
   );
@@ -115,5 +110,5 @@ const ColorBar = () => {
 
   const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
 
-  return <div className="w-16 h-2" style={{ background: gradient }} />;
+  return <div className="w-[107px] h-2.5" style={{ background: gradient }} />;
 };

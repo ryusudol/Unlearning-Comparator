@@ -12,7 +12,7 @@ const BLACK = "black";
 const LOW_OPACITY = 0.6;
 const HIGH_OPACITY = 1;
 const TICK_PADDING = 6;
-const BAR_HEIGHT = 7;
+const BAR_HEIGHT = 8;
 const LEGEND_X = 11;
 const LEGEND_Y = 7;
 const LEGEND_X_OFFSET = 113;
@@ -23,7 +23,7 @@ const TICK_FONT_SIZE = "10px";
 const TICK_FONT_WEIGHT = 300;
 const ROBOTO_CONDENSED = "Roboto Condensed";
 const LEGEND_RECT_SIZE = 8;
-const margin = { top: 14, right: 25, bottom: 30, left: 65 };
+const margin = { top: 14, right: 25, bottom: 30, left: 70 };
 
 interface Props {
   width: number;
@@ -64,8 +64,8 @@ export default React.memo(function EmbeddingTooltip({
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const width = 240;
-    const height = 240;
+    const width = 260;
+    const height = 260;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -207,20 +207,6 @@ export default React.memo(function EmbeddingTooltip({
       .attr("stroke", isBaseline ? BLACK : "none")
       .attr("stroke-width", isBaseline ? 1 : 0);
 
-    g.selectAll(".baseline-value")
-      .data(barChartData.baseline)
-      .join("text")
-      .attr("class", "baseline-value")
-      .attr("x", (d) => xScale(d.value) + 5)
-      .attr(
-        "y",
-        (d) => (yScale(forgetClassNames[d.class]) ?? 0) + BAR_HEIGHT - 1
-      )
-      .text((d) => d.value.toFixed(2))
-      .style("font-size", "9px")
-      .style("font-family", ROBOTO_CONDENSED)
-      .attr("opacity", isBaseline ? HIGH_OPACITY : LOW_OPACITY);
-
     g.selectAll(".bar-comparison")
       .data(barChartData.comparison)
       .join("g")
@@ -239,14 +225,6 @@ export default React.memo(function EmbeddingTooltip({
           .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY)
           .attr("stroke", !isBaseline ? BLACK : "none")
           .attr("stroke-width", !isBaseline ? 1 : 0);
-
-        g.append("text")
-          .attr("x", margin.left + x + 5)
-          .attr("y", y + BAR_HEIGHT - 1)
-          .text(d.value.toFixed(2))
-          .style("font-size", "9px")
-          .style("font-family", ROBOTO_CONDENSED)
-          .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY);
 
         g.append("rect")
           .attr("x", margin.left)
@@ -297,7 +275,7 @@ export default React.memo(function EmbeddingTooltip({
       className="flex justify-center items-center z-100"
     >
       <div className="text-sm">
-        <img src={imageUrl} alt="cifar-10" width="160" height="160" />
+        <img src={imageUrl} alt="cifar-10" width="176" height="176" />
         <div className="mt-1">
           <span>Ground Truth:</span>{" "}
           <span className="font-semibold">{groundTruth}</span>

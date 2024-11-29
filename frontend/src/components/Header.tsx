@@ -110,7 +110,7 @@ export default function Header() {
               <div key={idx} className="flex items-center relative">
                 <div
                   className={
-                    "flex justify-center items-center h-[30px] pl-2.5 pr-[22px] rounded-t cursor-pointer transition " +
+                    "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t cursor-pointer transition " +
                     (selectedForgetClass === forgetClass
                       ? "bg-white text-black"
                       : "text-white hover:bg-gray-800 relative bottom-[1px]")
@@ -131,26 +131,17 @@ export default function Header() {
                     Forget: {forgetClassNames[selectedForgetClass]}
                   </span>
                 </div>
-                <div
-                  className={
-                    "w-[11px] h-[11px] rounded-full cursor-pointer flex justify-center items-center absolute right-2.5 hover:scale-125 " +
-                    (selectedForgetClass === forgetClass
-                      ? "bg-gray-300"
-                      : "bg-gray-700")
-                  }
+                <MultiplicationSignIcon
                   onClick={() =>
                     handleDeleteClick(forgetClassNames[selectedForgetClass])
                   }
-                >
-                  <MultiplicationSignIcon
-                    className={
-                      "w-2.5 h-2.5 " +
-                      (selectedForgetClass === forgetClass
-                        ? "text-gray-500"
-                        : "text-gray-500")
-                    }
-                  />
-                </div>
+                  className={
+                    "w-3.5 h-3.5 p-[1px] cursor-pointer rounded-full absolute right-2.5 bg-transparent transition " +
+                    (selectedForgetClass === forgetClass
+                      ? "text-gray-500 hover:bg-gray-300"
+                      : "text-gray-500 hover:bg-gray-700")
+                  }
+                />
                 {selectedForgetClass === forgetClass && (
                   <div className="w-[calc(100%-19px)] h-0.5 absolute bottom-[1px] left-[10px] bg-black" />
                 )}

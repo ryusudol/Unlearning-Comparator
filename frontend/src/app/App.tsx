@@ -33,9 +33,9 @@ export default function App() {
             <Core height={677} />
           </div>
           <div>
-            <Accuracies height={300} />
-            <Predictions height={300} />
-            <Correlations height={311} />
+            <Accuracies height={293} />
+            <Predictions height={310} />
+            <Correlations height={308} />
           </div>
         </div>
       )}
