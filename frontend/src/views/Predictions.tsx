@@ -7,20 +7,19 @@ import { BaselineComparisonContext } from "../store/baseline-comparison-context"
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
 
-export const TRAINING = "training";
+export const TRAIN = "train";
 export const TEST = "test";
 export const BUBBLE = "bubble";
 export const LABEL_HEATMAP = "label-heatmap";
 export const CONFIDENCE_HEATMAP = "confidence-heatmap";
 
 export type ChartModeType = "bubble" | "label-heatmap" | "confidence-heatmap";
-export type HeatmapData = { x: string; y: string; value: number }[];
 
 export default function Predictions({ height }: { height: number }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
 
-  const [datasetMode, setDatasetMode] = useState(TRAINING);
+  const [datasetMode, setDatasetMode] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
 
   const allSelected = baseline !== "" && comparison !== "";
