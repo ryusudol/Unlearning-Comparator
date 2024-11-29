@@ -15,7 +15,13 @@ export const CONFIDENCE_HEATMAP = "confidence-heatmap";
 
 export type ChartModeType = "bubble" | "label-heatmap" | "confidence-heatmap";
 
-export default function Predictions({ height }: { height: number }) {
+export default function Predictions({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
 
@@ -27,8 +33,8 @@ export default function Predictions({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height }}
-      className="w-[510px] p-1 flex flex-col border-[1px] border-solid transition-all z-10 relative"
+      style={{ width, height }}
+      className="p-1 flex flex-col border transition-all z-10 relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center mr-2">
@@ -43,7 +49,7 @@ export default function Predictions({ height }: { height: number }) {
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div className="flex items-center relative ml-2 top-[13px]">
+          <div className="flex items-center relative ml-1.5 top-[13px]">
             <BubbleChart
               mode="Baseline"
               datasetMode={datasetMode}

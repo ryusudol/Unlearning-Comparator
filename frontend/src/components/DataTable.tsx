@@ -386,7 +386,7 @@ export default function DataTable({ columns }: Props) {
                     </ContextMenuTrigger>
                     <ContextMenuContent>
                       <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
-                        Delete Row
+                        Delete
                       </ContextMenuItem>
                       <ContextMenuItem
                         onClick={() => handleDownloadJSON(row.id)}
