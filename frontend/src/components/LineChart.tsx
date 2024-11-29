@@ -286,8 +286,8 @@ function CustomLegend() {
       <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon
-            className={`mr-2 relative right-[1px] w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
-            style={{ color: PURPLE }}
+            className={`mr-2 relative right-[1px]`}
+            style={{ color: PURPLE, width: DOT_SIZE, height: DOT_SIZE }}
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
@@ -302,8 +302,8 @@ function CustomLegend() {
       <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon
-            className={`mr-2 relative right-[1px] w-[${DOT_SIZE}px] h-[${DOT_SIZE}px]`}
-            style={{ color: EMERALD }}
+            className={`mr-2 relative right-[1px]`}
+            style={{ color: EMERALD, width: DOT_SIZE, height: DOT_SIZE }}
           />
           <div
             className="absolute top-1/2 w-[18px]"
