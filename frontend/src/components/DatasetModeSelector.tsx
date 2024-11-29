@@ -9,7 +9,7 @@ interface Props {
 export default function DatasetModeSelector({ onValueChange }: Props) {
   return (
     <div className="flex items-center relative right-4">
-      <span className="text-xs font-light mr-2">Dataset:</span>
+      {/* <span className="text-xs font-light mr-2">Dataset:</span> */}
       <RadioGroup
         className="flex"
         defaultValue={TRAIN}

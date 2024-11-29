@@ -79,9 +79,9 @@ export default function Predictions({
 
 function BubbleChartLegend() {
   return (
-    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[60%] gap-7 text-[#666666]">
+    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[50%] gap-7 text-[#666666]">
       <div
-        className="grid grid-cols-3 gap-x-2 place-items-center relative text-[9px]"
+        className="grid grid-cols-3 gap-x-2 place-items-center relative text-[10px]"
         style={{ gridTemplateRows: "18px 14px" }}
       >
         <div className="w-1.5 h-1.5 rounded-full bg-[#666666]" />
@@ -90,16 +90,16 @@ function BubbleChartLegend() {
         <span>Less</span>
         <ShortArrow />
         <span>More</span>
-        <span className="absolute top-[26px] text-[10px]">Frequent</span>
+        <span className="absolute top-[27px] text-[13px]">Frequent</span>
       </div>
       <div className="flex flex-col items-center gap-1 relative top-0.5">
         <ColorBar />
-        <div className="text-nowrap flex items-center gap-2 text-[9px]">
+        <div className="text-nowrap flex items-center gap-2 text-[10px]">
           <span>Less</span>
           <LongArrow />
           <span>More</span>
         </div>
-        <span className="text-[10px] absolute top-[22px]">Confident</span>
+        <span className="absolute top-[25px] text-[13px]">Confident</span>
       </div>
     </div>
   );
