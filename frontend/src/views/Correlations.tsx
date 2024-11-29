@@ -6,14 +6,21 @@ import { Layers02Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { TRAIN } from "./Predictions";
 
-export default function Correlations({ height }: { height: number }) {
+export default function Correlations({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
-  const [dataset, setDataset] = useState("training");
+  const [dataset, setDataset] = useState(TRAIN);
 
   if (!baselineExperiment || !comparisonExperiment) return null;
 
@@ -21,8 +28,8 @@ export default function Correlations({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height }}
-      className="w-[510px] px-[5px] py-0.5 flex flex-col border-[1px] border-solid relative"
+      style={{ width, height }}
+      className="px-[5px] py-0.5 flex flex-col border relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center">

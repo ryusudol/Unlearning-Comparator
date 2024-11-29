@@ -9,6 +9,8 @@ import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
 
+const ANALYSIS_VIEW_WIDTH = 493;
+
 export default function App() {
   const { experimentLoading } = useContext(ExperimentsContext);
 
@@ -21,7 +23,7 @@ export default function App() {
   if (isPageLoading) return <div></div>;
 
   return (
-    <section className="w-[1822px] relative">
+    <section className="w-[1805px] relative">
       <Header />
       {!experimentLoading && (
         <div className="flex items-center">
@@ -33,9 +35,9 @@ export default function App() {
             <Core height={677} />
           </div>
           <div>
-            <Accuracies height={293} />
-            <Predictions height={310} />
-            <Correlations height={308} />
+            <Accuracies width={ANALYSIS_VIEW_WIDTH} height={293} />
+            <Predictions width={ANALYSIS_VIEW_WIDTH} height={310} />
+            <Correlations width={ANALYSIS_VIEW_WIDTH} height={308} />
           </div>
         </div>
       )}

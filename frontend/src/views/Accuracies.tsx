@@ -21,7 +21,13 @@ function getMaxGap(gapData: GapDataItem[]) {
   );
 }
 
-export default function Accuracies({ height }: { height: number }) {
+export default function Accuracies({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
@@ -44,8 +50,8 @@ export default function Accuracies({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height }}
-      className="w-[510px] p-1 flex flex-col border border-t-0 relative"
+      style={{ width, height }}
+      className="p-1 flex flex-col border border-t-0 relative"
     >
       <div className="flex items-center">
         <Chart01Icon />
@@ -59,7 +65,7 @@ export default function Accuracies({ height }: { height: number }) {
           Select both Baseline and Comparison.
         </p>
       ) : (
-        <div className="w-full flex items-center relative ml-0.5">
+        <div className="w-full flex items-center relative">
           <VerticalBarChart
             mode="Training"
             gapData={trainAccuracyGap}

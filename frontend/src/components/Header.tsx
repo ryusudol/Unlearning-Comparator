@@ -214,7 +214,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className="flex ml-5 relative top-1.5 right-[364px] text-[13px]">
+      <div className="flex ml-5 relative top-1.5 right-[347px] text-[13px]">
         <div className="flex flex-col mr-10">
           <span className="text-[10px] text-gray-300">Dataset</span>
           <span className="text-xs font-semibold -mt-[3px]">CIFAR-10</span>

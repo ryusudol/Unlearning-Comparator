@@ -27,10 +27,7 @@ export default function Core({ height }: { height: number }) {
   const isEmbeddingMode = displayMode === EMBEDDINGS;
 
   return (
-    <section
-      style={{ height }}
-      className="w-[1312px] p-1 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
-    >
+    <section style={{ height }} className="w-[1312px] p-1 border border-l-0">
       <div className="flex justify-between items-center">
         <div className="flex items-center mb-0.5">
           <div

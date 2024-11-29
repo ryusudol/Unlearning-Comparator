@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { Dist } from "../../types/data";
 import { ExperimentData } from "../../types/data";
 import { Experiments } from "../../types/experiments-context";
-import { HeatmapData, TRAINING } from "../../views/Predictions";
+import { TRAIN } from "../../views/Predictions";
 
 type Values = {
   UA: number[];
@@ -126,25 +126,6 @@ export function extractSelectedData(data: ExperimentData | undefined) {
     : [];
 }
 
-export function extractHeatmapData(datasetMode: string, data: ExperimentData) {
-  let distributionData: number[][];
-  if (datasetMode === TRAINING) distributionData = data.cka.train.forget_class;
-  else distributionData = data.cka.test.forget_class;
-
-  let result: HeatmapData = [];
-  distributionData.forEach((row, gtIdx) => {
-    row.forEach((value, predIdx) => {
-      result.push({
-        x: data.cka.layers[predIdx],
-        y: data.cka.layers[gtIdx],
-        value: value,
-      });
-    });
-  });
-
-  return result;
-}
-
 export function extractBubbleChartData(
   datasetMode: string,
   data: ExperimentData
@@ -153,7 +134,7 @@ export function extractBubbleChartData(
     label_dist: Dist;
     conf_dist: Dist;
   };
-  if (datasetMode === TRAINING)
+  if (datasetMode === TRAIN)
     bubbleChartData = {
       label_dist: data.label_dist,
       conf_dist: data.conf_dist,

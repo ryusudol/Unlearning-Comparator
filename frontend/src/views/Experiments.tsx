@@ -47,7 +47,7 @@ export default function Experiments({ height }: { height: number }) {
   return (
     <section
       style={{ height: `${height}px` }}
-      className="w-[1032px] p-1 relative border-x-[1px] border-b-[1px]"
+      className="w-[1032px] p-1 relative border border-t-0 border-l-0"
     >
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center ml-0.5">
