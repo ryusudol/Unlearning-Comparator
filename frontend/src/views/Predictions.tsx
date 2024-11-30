@@ -49,7 +49,7 @@ export default function Predictions({
             Select both Baseline and Comparison.
           </div>
         ) : (
-          <div className="flex items-center relative ml-1.5 top-[13px]">
+          <div className="flex items-center relative ml-1.5 top-5">
             <BubbleChart
               mode="Baseline"
               datasetMode={datasetMode}
@@ -79,7 +79,7 @@ export default function Predictions({
 
 function BubbleChartLegend() {
   return (
-    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[50%] gap-7 text-[#666666]">
+    <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[50%] gap-11 text-[#666666]">
       <div
         className="grid grid-cols-3 gap-x-2 place-items-center relative text-[10px]"
         style={{ gridTemplateRows: "18px 14px" }}
@@ -115,5 +115,5 @@ const ColorBar = () => {
 
   const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
 
-  return <div className="w-[107px] h-2.5" style={{ background: gradient }} />;
+  return <div className="w-[110px] h-2.5" style={{ background: gradient }} />;
 };
