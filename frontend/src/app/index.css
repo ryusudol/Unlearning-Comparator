@@ -101,7 +101,7 @@ html {
 body {
   overscroll-behavior: none;
   height: 100vh;
-  weight: 100vw;
+  overflow-y: hidden;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
