@@ -29,7 +29,7 @@ export default function Correlations({
   return (
     <section
       style={{ width, height }}
-      className="px-[5px] py-0.5 flex flex-col border relative"
+      className="px-1 flex flex-col border relative"
     >
       <div className="flex justify-between">
         <div className="flex items-center">
