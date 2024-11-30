@@ -36,8 +36,8 @@ export default function App() {
           </div>
           <div>
             <Accuracies width={ANALYSIS_VIEW_WIDTH} height={293} />
-            <Predictions width={ANALYSIS_VIEW_WIDTH} height={310} />
-            <Correlations width={ANALYSIS_VIEW_WIDTH} height={308} />
+            <Predictions width={ANALYSIS_VIEW_WIDTH} height={316} />
+            <Correlations width={ANALYSIS_VIEW_WIDTH} height={302} />
           </div>
         </div>
       )}
