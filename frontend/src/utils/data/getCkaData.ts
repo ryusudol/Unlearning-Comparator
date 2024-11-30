@@ -1,4 +1,5 @@
 import { ExperimentData } from "../../types/data";
+import { TRAIN } from "../../views/Predictions";
 
 export const getCkaData = (
   dataset: string,
@@ -8,11 +9,11 @@ export const getCkaData = (
   const layers = baselineExperiment.cka.layers;
 
   const baselineCka =
-    dataset === "training"
+    dataset === TRAIN
       ? baselineExperiment.cka.train
       : baselineExperiment.cka.test;
   const comparisonCka =
-    dataset === "training"
+    dataset === TRAIN
       ? comparisonExperiment.cka.train
       : comparisonExperiment.cka.test;
 
