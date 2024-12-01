@@ -22,15 +22,19 @@ import {
   SelectValue,
 } from "./UI/select";
 
+const CUSTOM = "custom";
+
 export default function Unlearning() {
+  const { forgetClass } = useContext(ForgetClassContext);
   const { updateIsRunning, initStatus, updateActiveStep } =
     useContext(RunningStatusContext);
-  const { forgetClass } = useContext(ForgetClassContext);
 
   const [epochs, setEpochs] = useState([10]);
   const [learningRateLog, setLearningRateLog] = useState([-2]);
   const [batchSizeLog, setBatchSizeLog] = useState([6]);
   const [method, setMethod] = useState("ft");
+
+  const isCustom = method === CUSTOM;
 
   const handleMethodSelection = (value: string) => {
     const { epochs, learning_rate } = getDefaultUnlearningConfig(value);
@@ -58,7 +62,7 @@ export default function Unlearning() {
     initStatus();
     updateActiveStep(1);
 
-    method === "custom"
+    isCustom
       ? await executeCustomUnlearning(
           config.custom_file as File,
           forgetClass as number
@@ -83,11 +87,7 @@ export default function Unlearning() {
           onValueChange={handleMethodSelection}
           name="method"
         >
-          <SelectTrigger
-            name="method"
-            className="h-[25px] text-base"
-            id="method"
-          >
+          <SelectTrigger className="h-[25px] text-base">
             <SelectValue placeholder={UNLEARNING_METHODS[0]} />
           </SelectTrigger>
           <SelectContent>
@@ -106,7 +106,7 @@ export default function Unlearning() {
           </SelectContent>
         </Select>
       </div>
-      {method === "custom" ? (
+      {isCustom ? (
         <div className="flex justify-between items-center">
           <div className="flex items-center mb-1">
             <HyperparametersIcon className="w-3.5" />
