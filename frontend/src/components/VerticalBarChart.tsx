@@ -85,14 +85,13 @@ type TickProps = {
   y: number;
   payload: any;
   hoveredClass: string | null;
-  forgetClass: number | undefined;
+  forgetClass: number;
 };
 
 const AxisTick = memo(
   ({ x, y, payload, hoveredClass, forgetClass }: TickProps) => {
     const label = chartConfig[payload.value as keyof typeof chartConfig]?.label;
-    const isForgetClass =
-      forgetClass && label === forgetClassNames[forgetClass];
+    const isForgetClass = label === forgetClassNames[forgetClass];
     const formattedLabel = isForgetClass ? `${label}\u00A0(X)` : label;
 
     return (
@@ -125,18 +124,17 @@ export default function VerticalBarChart({
       <AxisTick
         {...props}
         hoveredClass={hoveredClass}
-        forgetClass={forgetClass}
+        forgetClass={forgetClass as number}
       />
     ),
     [hoveredClass, forgetClass]
   );
 
   const remainGapAvgValue = useMemo(() => {
-    if (!forgetClass) return 0;
-
     const remainingData = gapData.filter(
       (datum) =>
-        forgetClassNames[+datum.classLabel] !== forgetClassNames[forgetClass]
+        forgetClassNames[+datum.classLabel] !==
+        forgetClassNames[forgetClass as number]
     );
 
     return remainingData.length
@@ -192,7 +190,7 @@ export default function VerticalBarChart({
               const label =
                 chartConfig[value as keyof typeof chartConfig]?.label;
               const isForgetClass =
-                forgetClass && label === forgetClassNames[forgetClass];
+                label === forgetClassNames[forgetClass as number];
               return isForgetClass ? `${label}\u00A0(X)` : label;
             }}
             style={{ whiteSpace: "nowrap" }}

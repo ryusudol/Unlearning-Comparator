@@ -441,7 +441,12 @@ const ScatterPlot = forwardRef(
     );
 
     useEffect(() => {
-      if (!svgRef.current || data.length === 0) return;
+      if (!svgRef.current || data.length === 0 || !idExist) {
+        if (svgRef.current) {
+          d3.select(svgRef.current).selectAll("*").remove();
+        }
+        return;
+      }
 
       elementMapRef.current.clear();
 
@@ -545,6 +550,7 @@ const ScatterPlot = forwardRef(
       x,
       y,
       z,
+      idExist,
     ]);
 
     useEffect(() => {

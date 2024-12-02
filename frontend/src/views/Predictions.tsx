@@ -3,6 +3,7 @@ import * as d3 from "d3";
 
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
+import Indicator from "../components/Indicator";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
@@ -29,7 +30,6 @@ export default function Predictions({
   const [hoveredY, setHoveredY] = useState<number | null>(null);
 
   const allSelected = baseline !== "" && comparison !== "";
-  const selectedFCExist = selectedForgetClasses.length !== 0;
 
   return (
     <section
@@ -43,11 +43,9 @@ export default function Predictions({
         </div>
         {allSelected && <DatasetModeSelector onValueChange={setDatasetMode} />}
       </div>
-      {selectedFCExist ? (
+      {selectedForgetClasses.length !== 0 ? (
         !allSelected ? (
-          <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
-            Select both Baseline and Comparison.
-          </div>
+          <Indicator about="BaselineComparison" />
         ) : (
           <div className="flex items-center relative ml-1.5 top-5">
             <BubbleChart
@@ -68,11 +66,9 @@ export default function Predictions({
           </div>
         )
       ) : (
-        <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
-          Select the target forget class first.
-        </div>
+        <Indicator about="ForgetClass" />
       )}
-      <BubbleChartLegend />
+      {allSelected && <BubbleChartLegend />}
     </section>
   );
 }
@@ -81,7 +77,7 @@ function BubbleChartLegend() {
   return (
     <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[50%] gap-11 text-[#666666]">
       <div
-        className="grid grid-cols-3 gap-x-2 place-items-center relative text-[10px]"
+        className="grid grid-cols-3 gap-x-2 place-items-center relative left-2.5 text-[10px]"
         style={{ gridTemplateRows: "18px 14px" }}
       >
         <div className="w-1.5 h-1.5 rounded-full bg-[#666666]" />

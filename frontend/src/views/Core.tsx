@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
+import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
+import { ForgetClassContext } from "../store/forget-class-context";
 import { Separator } from "../components/UI/separator";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
@@ -22,7 +24,11 @@ export default function Core({
   width: number;
   height: number;
 }) {
+  const { forgetClass } = useContext(ForgetClassContext);
+
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
+
+  const forgetClassExist = forgetClass !== undefined;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -68,12 +74,16 @@ export default function Core({
             {!isEmbeddingMode && <UnderLine />}
           </div>
         </div>
-        {displayMode === EMBEDDINGS && <EmbeddingLegend />}
+        {forgetClassExist && isEmbeddingMode && <EmbeddingLegend />}
       </div>
-      {isEmbeddingMode ? (
-        <Embeddings height={HEIGHT} />
+      {forgetClassExist ? (
+        isEmbeddingMode ? (
+          <Embeddings height={HEIGHT} />
+        ) : (
+          <PrivacyAttack height={HEIGHT} />
+        )
       ) : (
-        <PrivacyAttack height={HEIGHT} />
+        <Indicator about="ForgetClass" />
       )}
     </section>
   );
