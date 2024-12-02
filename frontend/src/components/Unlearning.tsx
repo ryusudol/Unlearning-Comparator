@@ -107,7 +107,7 @@ export default function Unlearning() {
         </Select>
       </div>
       {isCustom ? (
-        <div className="flex justify-between items-center">
+        <div className="w-full grid grid-cols-2 gap-y-2">
           <div className="flex items-center mb-1">
             <HyperparametersIcon className="w-3.5" />
             <p className="ml-1 text-nowrap">Custom File</p>
@@ -115,7 +115,8 @@ export default function Unlearning() {
           <Input
             type="file"
             name="custom_file"
-            className="w-40 h-[25px] -mr-[3px] pt-[1px] px-1.5 cursor-pointer"
+            accept=".pth"
+            className="h-[25px] py-0.5 px-[7px] cursor-pointer"
           />
         </div>
       ) : (
