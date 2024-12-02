@@ -54,7 +54,7 @@ interface Props {
 
 export default function DataTable({ columns }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
-  const { experiments, saveExperiments, setExperimentsLoading } =
+  const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
@@ -206,7 +206,7 @@ export default function DataTable({ columns }: Props) {
   const handleDeleteRow = async (id: string) => {
     try {
       await deleteRow(forgetClass as number, id);
-      setExperimentsLoading(true);
+      setIsExperimentsLoading(true);
       const allData: Experiments = await fetchAllExperimentsData(
         forgetClass as number
       );
@@ -215,7 +215,7 @@ export default function DataTable({ columns }: Props) {
     } catch (error) {
       console.error("Failed to delete the row:", error);
     } finally {
-      setExperimentsLoading(false);
+      setIsExperimentsLoading(false);
     }
   };
 

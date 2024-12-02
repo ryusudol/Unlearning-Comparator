@@ -22,13 +22,13 @@ export const ExperimentsContext = createContext<ContextType>({
   experiments: {},
   baselineExperiment: undefined,
   comparisonExperiment: undefined,
-  experimentLoading: false,
+  isExperimentLoading: false,
 
   addExperiment: (experiment: ExperimentData) => {},
   saveExperiments: (experiments: Experiments) => {},
   retrieveExperiments: () => {},
   deleteExperiment: (id: string) => {},
-  setExperimentsLoading: (loading: boolean) => {},
+  setIsExperimentsLoading: (loading: boolean) => {},
 });
 
 function ExperimentsReducer(state: Context, action: Action): Context {
@@ -61,12 +61,12 @@ function ExperimentsReducer(state: Context, action: Action): Context {
         );
         return {
           ...parsedExperimentsContext,
-          experimentLoading: false,
+          isExperimentLoading: false,
         };
       }
       return {
         ...state,
-        experimentLoading: false,
+        isExperimentLoading: false,
       };
 
     case "DELETE_EXPERIMENT":
@@ -79,8 +79,8 @@ function ExperimentsReducer(state: Context, action: Action): Context {
       );
       return { ...state, experiments: remainingExperiments };
 
-    case "SET_LOADING":
-      return { ...state, experimentLoading: action.payload };
+    case "SET_IS_EXPERIMENTS_LOADING":
+      return { ...state, isExperimentLoading: action.payload };
 
     default:
       return state;
@@ -98,7 +98,7 @@ export default function ExperimentsContextProvider({
     experiments: {},
     baselineExperiment: undefined,
     comparisonExperiment: undefined,
-    experimentLoading: false,
+    isExperimentLoading: false,
   });
 
   const baselineExperiment = useMemo(() => {
@@ -125,8 +125,8 @@ export default function ExperimentsContextProvider({
     dispatch({ type: "DELETE_EXPERIMENT", payload: id });
   }, []);
 
-  const handleSetLoading = useCallback((loading: boolean) => {
-    dispatch({ type: "SET_LOADING", payload: loading });
+  const handleSetIsExperimentsLoading = useCallback((loading: boolean) => {
+    dispatch({ type: "SET_IS_EXPERIMENTS_LOADING", payload: loading });
   }, []);
 
   useEffect(() => {
@@ -137,13 +137,13 @@ export default function ExperimentsContextProvider({
     experiments: experimentsContext.experiments,
     baselineExperiment,
     comparisonExperiment,
-    experimentLoading: experimentsContext.experimentLoading,
+    isExperimentLoading: experimentsContext.isExperimentLoading,
 
     addExperiment: handleAddExperiment,
     saveExperiments: handleSaveExperiments,
     retrieveExperiments: handleRetrieveExperiments,
     deleteExperiment: handleDeleteExperiment,
-    setExperimentsLoading: handleSetLoading,
+    setIsExperimentsLoading: handleSetIsExperimentsLoading,
   };
 
   return (

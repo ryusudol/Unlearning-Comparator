@@ -12,7 +12,7 @@ import Correlations from "../views/Correlations";
 const ANALYSIS_VIEW_WIDTH = 493;
 
 export default function App() {
-  const { experimentLoading } = useContext(ExperimentsContext);
+  const { isExperimentLoading } = useContext(ExperimentsContext);
 
   const [isPageLoading, setIsPageLoading] = useState(true);
 
@@ -25,7 +25,7 @@ export default function App() {
   return (
     <section className="w-[1805px] relative">
       <Header />
-      {!experimentLoading && (
+      {!isExperimentLoading && (
         <div className="flex items-center">
           <div>
             <div className="flex items-center">

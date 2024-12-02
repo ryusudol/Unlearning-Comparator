@@ -6,7 +6,7 @@ export interface Context {
   experiments: Experiments;
   baselineExperiment: ExperimentData | undefined;
   comparisonExperiment: ExperimentData | undefined;
-  experimentLoading: boolean;
+  isExperimentLoading: boolean;
 }
 
 export interface ContextType extends Context {
@@ -14,7 +14,7 @@ export interface ContextType extends Context {
   saveExperiments: (experiments: Experiments) => void;
   retrieveExperiments: () => void;
   deleteExperiment: (id: string) => void;
-  setExperimentsLoading: (loading: boolean) => void;
+  setIsExperimentsLoading: (loading: boolean) => void;
 }
 
 export type Action =
@@ -22,4 +22,4 @@ export type Action =
   | { type: "SAVE_EXPERIMENTS"; payload: Experiments }
   | { type: "RETRIEVE_EXPERIMENTS" }
   | { type: "DELETE_EXPERIMENT"; payload: string }
-  | { type: "SET_LOADING"; payload: boolean };
+  | { type: "SET_IS_EXPERIMENTS_LOADING"; payload: boolean };
