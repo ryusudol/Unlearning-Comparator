@@ -1,147 +1,130 @@
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useRef, useCallback } from "react";
 
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
-import Embedding from "../components/Embedding";
-import { basicData } from "../constants/basicData";
+import { ExperimentsContext } from "../store/experiments-context";
+import ScatterPlot from "../components/ScatterPlot";
+import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
 import { Separator } from "../components/UI/separator";
-import { TABLEAU10 } from "../constants/tableau10";
-import { forgetClassNames } from "../constants/forgetClassNames";
-import {
-  HelpCircleIcon,
-  CircleIcon,
-  CursorPointer01Icon,
-  Drag01Icon,
-  MultiplicationSignIcon,
-  ScrollVerticalIcon,
-} from "../components/UI/icons";
+import { extractSelectedData } from "../utils/data/experiments";
+
+export type Coordinate = { x: number; y: number };
+type Position = {
+  from: Coordinate | null;
+  to: Coordinate | null;
+};
+export type Mode = "Baseline" | "Comparison";
+export type HovereInstance = {
+  imgIdx: number;
+  source: Mode;
+  baselineProb?: Prob;
+  comparisonProb?: Prob;
+} | null;
+export type Prob = { [key: string]: number };
+export type SelectedData = (number | Prob)[][];
 
 export default function Embeddings({ height }: { height: number }) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { forgetClass } = useContext(ForgetClassContext);
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
-  const baselineData = useMemo(() => {
-    return basicData.find((datum) => datum.id === baseline);
-  }, [baseline]);
-  const comparisonData = useMemo(() => {
-    return basicData.find((datum) => datum.id === comparison);
-  }, [comparison]);
+  const hoveredInstanceRef = useRef<HovereInstance>(null);
+  const positionRef = useRef<Position>({ from: null, to: null });
+  const baselineRef = useRef<any>(null);
+  const comparisonRef = useRef<any>(null);
 
-  // [
-  //   0: x,
-  //   1: y,
-  //   2: original class,
-  //   3: predicted class,
-  //   4:img_idx,
-  //   5: forget_class
-  // ]
-  const BaselineData = useMemo(() => {
-    return baselineData
-      ? baselineData.detailed_results.map((result) => [
-          result.umap_embedding[0],
-          result.umap_embedding[1],
-          result.ground_truth,
-          result.predicted_class,
-          result.original_index,
-          baselineData.forget_class,
-        ])
-      : undefined;
-  }, [baselineData]);
-  const ComparisonData = useMemo(() => {
-    return comparisonData
-      ? comparisonData.detailed_results.map((result) => [
-          result.umap_embedding[0],
-          result.umap_embedding[1],
-          result.ground_truth,
-          result.predicted_class,
-          result.original_index,
-          comparisonData.forget_class,
-        ])
-      : undefined;
-  }, [comparisonData]);
+  const extractedBaselineData = useMemo(
+    () => extractSelectedData(baselineExperiment),
+    [baselineExperiment]
+  );
+  const extractedComparisonData = useMemo(
+    () => extractSelectedData(comparisonExperiment),
+    [comparisonExperiment]
+  );
+
+  const baselineDataMap = useMemo(() => {
+    return new Map(extractedBaselineData.map((d) => [d[4], d]));
+  }, [extractedBaselineData]);
+  const comparisonDataMap = useMemo(() => {
+    return new Map(extractedComparisonData.map((d) => [d[4], d]));
+  }, [extractedComparisonData]);
+
+  const handleHover = useCallback(
+    (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
+      if (imgIdxOrNull === null || !source) {
+        if (hoveredInstanceRef.current?.imgIdx !== null) {
+          const prevImgIdx = hoveredInstanceRef.current?.imgIdx;
+          baselineRef.current?.removeHighlight(prevImgIdx);
+          comparisonRef.current?.removeHighlight(prevImgIdx);
+        }
+
+        positionRef.current = { from: null, to: null };
+        hoveredInstanceRef.current = null;
+        baselineRef.current?.updateHoveredInstance(null);
+        comparisonRef.current?.updateHoveredInstance(null);
+        return;
+      }
+
+      const isBaseline = source === "Baseline";
+      const oppositeInstance = isBaseline
+        ? comparisonDataMap.get(imgIdxOrNull)
+        : baselineDataMap.get(imgIdxOrNull);
+
+      if (!oppositeInstance) return;
+
+      const oppositeProb = oppositeInstance[5] as Prob;
+
+      hoveredInstanceRef.current = {
+        imgIdx: imgIdxOrNull,
+        source,
+        baselineProb: isBaseline ? prob : oppositeProb,
+        comparisonProb: !isBaseline ? prob : oppositeProb,
+      };
+
+      baselineRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
+      comparisonRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
+
+      if (isBaseline) {
+        comparisonRef.current?.highlightInstance(imgIdxOrNull);
+      } else {
+        baselineRef.current?.highlightInstance(imgIdxOrNull);
+      }
+
+      const targetRef = isBaseline ? comparisonRef : baselineRef;
+      const currentRef = isBaseline ? baselineRef : comparisonRef;
+
+      if (targetRef.current && currentRef.current) {
+        const fromPos = currentRef.current.getInstancePosition(imgIdxOrNull);
+        const toPos = targetRef.current.getInstancePosition(imgIdxOrNull);
+
+        positionRef.current = {
+          from: { ...fromPos },
+          to: { ...toPos },
+        };
+      }
+    },
+    [baselineDataMap, comparisonDataMap]
+  );
 
   return (
-    <div className="w-[1538px] h-[715px] flex justify-start px-1.5 items-center border-[1px] border-solid rounded-b-[6px] rounded-tr-[6px]">
-      <div className="w-[120px] flex flex-col justify-center items-center">
-        {/* Legend - Metadata */}
-        <div className="w-full h-[128px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <div className="flex items-center">
-            <span className="mr-1">Metadata</span>
-            <HelpCircleIcon className="cursor-pointer" />
-          </div>
-          <div className="flex flex-col justify-start items-start">
-            <span className="text-[15px] font-light">Methods: UMAP</span>
-            <span className="text-[15px] font-light">Points: 2000</span>
-            <span className="text-[15px] font-light">Dimension: 8192</span>
-            <span className="text-[15px] font-light">Dataset: Training</span>
-          </div>
-        </div>
-        {/* Legend - Controls */}
-        <div className="w-full h-[104px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <span>Controls</span>
-          <div>
-            <div className="flex items-center">
-              <CursorPointer01Icon className="scale-110 mr-[6px]" />
-              <span className="text-[15px] font-light">Details</span>
-            </div>
-            <div className="flex items-center -my-[2px]">
-              <ScrollVerticalIcon className="scale-110 mr-[6px]" />
-              <span className="text-[15px] font-light">Zooming</span>
-            </div>
-            <div className="flex items-center">
-              <Drag01Icon className="scale-110 mr-[6px]" />
-              <span className="text-[15px] font-light">Panning</span>
-            </div>
-          </div>
-        </div>
-        {/* Legend - Data Type */}
-        <div className="w-full h-[86px] flex flex-col justify-start items-start mb-[5px] px-2 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <span>Data Type</span>
-          <div>
-            <div className="flex items-center text-[15px] font-light">
-              <CircleIcon className="scale-75 mr-[6px]" />
-              <span>Remain</span>
-            </div>
-            <div className="flex items-center text-[15px] font-light">
-              <MultiplicationSignIcon className="scale-125 mr-[6px]" />
-              <span>Forget</span>
-            </div>
-          </div>
-        </div>
-        {/* Legend - Predictions */}
-        <div className="w-full h-[370px] flex flex-col justify-start items-start pl-2 pr-0.5 py-[5px] border-[1px] border-solid rounded-[6px]">
-          <span className="mb-1.5">Predictions</span>
-          <div>
-            {forgetClassNames.map((name, idx) => (
-              <div key={idx} className="flex items-center mb-0.5">
-                <div
-                  style={{ backgroundColor: `${TABLEAU10[idx]}` }}
-                  className="w-3 h-[30px] mr-1.5"
-                />
-                <div className="flex items-center text-[15px] font-light">
-                  <span>{name}</span>
-                  {forgetClass && name === forgetClassNames[forgetClass] && (
-                    <span className="ml-0.5">(X)</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
-      <Embedding
+    <div
+      style={{ height }}
+      className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px] rounded-tr-none"
+    >
+      <ConnectionLineWrapper positionRef={positionRef} />
+      <ScatterPlot
         mode="Baseline"
         height={height}
-        data={BaselineData}
-        id={baseline}
+        data={extractedBaselineData}
+        onHover={handleHover}
+        hoveredInstance={hoveredInstanceRef.current}
+        ref={baselineRef}
       />
-      <Separator orientation="vertical" className="h-[702px] w-[1px] mx-2.5" />
-      <Embedding
+      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
+      <ScatterPlot
         mode="Comparison"
         height={height}
-        data={ComparisonData}
-        id={comparison}
+        data={extractedComparisonData}
+        onHover={handleHover}
+        hoveredInstance={hoveredInstanceRef.current}
+        ref={comparisonRef}
       />
     </div>
   );

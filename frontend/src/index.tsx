@@ -7,6 +7,7 @@ import OverviewContextProvider from "./store/overview-context";
 import RunningStatusContextProvider from "./store/running-status-context";
 import BaselineComparisonContextProvider from "./store/baseline-comparison-context";
 import ForgetClassContextProvider from "./store/forget-class-context";
+import ExperimentsContextProvider from "./store/experiments-context";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -17,7 +18,9 @@ root.render(
       <RunningStatusContextProvider>
         <BaselineComparisonContextProvider>
           <ForgetClassContextProvider>
-            <App />
+            <ExperimentsContextProvider>
+              <App />
+            </ExperimentsContextProvider>
           </ForgetClassContextProvider>
         </BaselineComparisonContextProvider>
       </RunningStatusContextProvider>

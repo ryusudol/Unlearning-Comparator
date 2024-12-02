@@ -1,4 +1,4 @@
-import { useEffect, createContext, useReducer } from "react";
+import { useEffect, createContext, useReducer, useCallback } from "react";
 
 import {
   Action,
@@ -33,10 +33,17 @@ function BaselineReducer(state: Context, action: Action): Context {
     case "RETRIEVE_CONTEXT":
       const savedContext = sessionStorage.getItem(CONTEXT);
       if (savedContext) {
-        const parsedBaseline = JSON.parse(savedContext);
+        const parsedContext = JSON.parse(savedContext);
+        sessionStorage.setItem(
+          CONTEXT,
+          JSON.stringify({
+            baseline: parsedContext.baseline,
+            comparison: parsedContext.comparison,
+          })
+        );
         return {
-          baseline: parsedBaseline.baseline,
-          comparison: parsedBaseline.comparison,
+          baseline: parsedContext.baseline,
+          comparison: parsedContext.comparison,
         };
       }
       return state;
@@ -60,25 +67,25 @@ export default function BaselineContextProvider({
     comparison: "",
   });
 
-  function handleSaveBaseline(baseline: string) {
+  const handleSaveBaseline = useCallback((baseline: string) => {
     dispatch({ type: "SAVE_BASELINE", payload: baseline });
-  }
+  }, []);
 
-  function handleSaveComparison(comparison: string) {
+  const handleSaveComparison = useCallback((comparison: string) => {
     dispatch({ type: "SAVE_COMPARISON", payload: comparison });
-  }
+  }, []);
 
-  function handleRetrieveContext() {
+  const handleRetrieveContext = useCallback(() => {
     dispatch({ type: "RETRIEVE_CONTEXT" });
-  }
+  }, []);
 
-  function handleClearContext() {
+  const handleClearContext = useCallback(() => {
     dispatch({ type: "CLEAR_CONTEXT" });
-  }
+  }, []);
 
   useEffect(() => {
     handleRetrieveContext();
-  }, []);
+  }, [handleRetrieveContext]);
 
   const ctxValue: ContextType = {
     baseline: context.baseline ?? "",

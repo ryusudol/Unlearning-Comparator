@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import Dict
 
 class TrainingStatus:
     def __init__(self):
@@ -15,28 +15,10 @@ class TrainingStatus:
         self.best_test_accuracy = 0
         self.train_class_accuracies: Dict[int, float] = {}
         self.test_class_accuracies: Dict[int, float] = {}
-        self.start_time = None
-        self.estimated_time_remaining = None
+        self.start_time = 0
+        self.estimated_time_remaining = 0
         self.umap_embeddings = None
-        self.svg_files: Optional[List[str]] = None
         self.cancel_requested = False
-
-    def reset(self):
-        self.__init__()
-
-class InferenceStatus:
-    def __init__(self):
-        self.is_inferencing = False
-        self.progress = 0
-        self.current_step = ""
-        self.start_time = None
-        self.estimated_time_remaining = None
-        self.train_accuracy = 0
-        self.test_accuracy = 0
-        self.train_class_accuracies: Dict[int, float] = {}
-        self.test_class_accuracies: Dict[int, float] = {}
-        self.umap_embeddings = None
-        self.svg_file = None
 
     def reset(self):
         self.__init__()
@@ -44,24 +26,35 @@ class InferenceStatus:
 class UnlearningStatus:
     def __init__(self):
         self.is_unlearning = False
-        self.progress = 0
+        self.recent_id = None
+        self.progress = "Idle"
         self.current_epoch = 0
         self.total_epochs = 0
+        self.current_unlearn_loss = 0
+        self.current_unlearn_accuracy = 0
+        self.estimated_time_remaining = 0
+        self.cancel_requested = False
+        self.forget_class = -1
+
+        # for retraining
         self.current_loss = 0
         self.current_accuracy = 0
-        self.test_loss = 0
-        self.start_time = None
-        self.estimated_time_remaining = 0
-        self.umap_embedding = None
-        self.cancel_requested = False
-        self.forget_class = None
+        self.best_loss = 9999.99
+        self.best_accuracy = 0
+        self.test_loss = 9999.99
+        self.test_accuracy = 0
+        self.best_test_accuracy = 0
 
-        self.unlearn_accuracy = 0 # UA 
-        self.remain_accuracy = 0 # RA
-        self.test_accuracy = 0 # TA
-        self.train_class_accuracies: Dict[int, float] = {0} # Train Metrics
-        self.test_class_accuracies: Dict[int, float] = {0} # Test Metrics
-        self.svg_file: List[str] = None
+        # for Evaluation progress
+        self.method = ""
+        self.p_training_loss = 0
+        self.p_training_accuracy = 0
+        self.p_test_loss = 0
+        self.p_test_accuracy = 0
+
+        self.train_class_accuracies: Dict[int, float] = {}
+        self.test_class_accuracies: Dict[int, float] = {}
+        self.start_time = None
 
     def reset(self):
         self.__init__()

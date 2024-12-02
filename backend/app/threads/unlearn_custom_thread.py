@@ -1,39 +1,53 @@
 import threading
 import asyncio
 import torch
-import torch.nn as nn
 import time
 import json
 import os
 import uuid
 
-from app.models.neural_network import get_resnet18
-from app.utils.helpers import set_seed, get_data_loaders
 from app.utils.evaluation import (
 	evaluate_model_with_distributions, 
 	get_layer_activations_and_predictions, 
 	calculate_cka_similarity
 )
 from app.utils.visualization import compute_umap_embedding
-from app.config.settings import UNLEARN_SEED, UMAP_DATA_SIZE, UMAP_DATASET
+from app.utils.helpers import format_distribution, compress_prob_array
+from app.config import (
+	UMAP_DATA_SIZE, 
+	UMAP_DATASET, 
+	UNLEARN_SEED
+)
 
-class UnlearningInference(threading.Thread):
+class UnlearningCustomThread(threading.Thread):
     def __init__(self, 
-                 forget_class, 
-                 status, 
-                 weights_path_before, 
-                 weights_path_after
-                 ):
+                 forget_class,
+                 status,
+                 model_before,
+                 model_after,
+                 train_loader,
+                 test_loader,
+                 train_set,
+                 test_set,
+                 criterion,
+                 device):
         threading.Thread.__init__(self)
         self.forget_class = forget_class
         self.is_training_eval = (forget_class == -1)
         self.status = status
-        self.weights_path_before = weights_path_before
-        self.weights_path_after = weights_path_after
+        self.model_before = model_before
+        self.model_after = model_after
+        self.train_loader = train_loader
+        self.test_loader = test_loader
+        self.train_set = train_set
+        self.test_set = test_set
+        self.criterion = criterion
+        self.device = device
         self.num_classes = 10
+        self.remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
+
         self.exception = None
         self.loop = None
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
         self._stop_event = threading.Event()
 
     def stop(self):
@@ -58,59 +72,68 @@ class UnlearningInference(threading.Thread):
             print(f"  Class {i}:")
             for j in range(10):
                 print(f"    Predicted as {j}: {distribution[i][j]:.3f}")
-
-    def format_distribution(self, distribution):
-        return {
-            f"gt_{i}": {
-                f"pred_{j}": round(float(distribution[i][j]), 3) for j in range(10)
-            }
-            for i in range(10)
-        }
     
     async def async_run(self):
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
-        set_seed(UNLEARN_SEED)
+        self.status.progress = "Starting Inference"
+        self.status.method = "Custom"
+        self.status.recent_id = uuid.uuid4().hex[:4]
+        
+        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        generator = torch.Generator()
+        generator.manual_seed(UNLEARN_SEED)
+        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
+        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        umap_subset_loader = torch.utils.data.DataLoader(
+            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
+        )
+        
         start_time = time.time()
-
-        train_loader, test_loader, train_set, test_set = get_data_loaders(batch_size=1024)
-        criterion = nn.CrossEntropyLoss()
-        model_before = get_resnet18().to(self.device)
-        model_before.load_state_dict(torch.load(self.weights_path_before, map_location=self.device))
-        model_after = get_resnet18().to(self.device)
-        model_after.load_state_dict(torch.load(self.weights_path_after, map_location=self.device))
         
         print(f"Models loaded successfully at{time.time() - start_time:.3f} seconds")
+        
+        # Evaluate on train set
+        self.status.progress = "Evaluating Train Set"
         print("Start Train set evaluation")
+
         if self.stopped():
+            self.status.is_unlearning = False
             return
         
         # Evaluate on train set
         (
-            train_loss, 
+            train_loss,
             train_accuracy, 
             train_class_accuracies, 
             train_label_dist, 
             train_conf_dist
         ) = await evaluate_model_with_distributions (
-            model=model_after, 
-            data_loader=train_loader,
-            criterion=criterion, 
-            device=self.device
+            model=self.model_after, 
+            data_loader=self.train_loader,
+            criterion=self.criterion, 
+            device=self.device,
+            forget_class=self.forget_class
         )
-        self.status.current_loss = train_loss
-        self.status.current_accuracy = train_accuracy
-        self.status.train_class_accuracies = train_class_accuracies
+
+        # Update training evaluation status for remain classes only
+        self.status.p_training_loss = train_loss
+        if self.is_training_eval:
+            self.status.p_training_accuracy = train_accuracy
+        else:
+            remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+            self.status.p_training_accuracy = remain_train_accuracy
 
         if self.is_training_eval:
-            self.status.unlearn_accuracy = "N/A"
-            self.status.remain_accuracy = round(train_accuracy, 3)
+            unlearn_accuracy = "N/A"
+            remain_accuracy = round(train_accuracy, 3)
         else:
-            remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
-            self.status.unlearn_accuracy = train_class_accuracies[self.forget_class]
-            self.status.remain_accuracy = round(sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes), 3)
+            unlearn_accuracy = train_class_accuracies[self.forget_class]
+            remain_accuracy = round(
+                sum(train_class_accuracies[i] for i in self.remain_classes) / len(self. remain_classes), 3
+            )
 
         print("Train Class Accuracies:")
-        for i, acc in self.status.train_class_accuracies.items():
+        for i, acc in train_class_accuracies.items():
             print(f"  Class {i}: {acc:.3f}")
         print(f"Train set evaluation finished at {time.time() - start_time:.3f} seconds")
         if self.stopped():
@@ -122,6 +145,7 @@ class UnlearningInference(threading.Thread):
         # self.print_distribution(train_conf_dist)
         
         # Evaluate on test set
+        self.status.progress = "Evaluating Test Set"
         print("Start Test set evaluation")
         (
             test_loss, 
@@ -130,38 +154,37 @@ class UnlearningInference(threading.Thread):
             test_label_dist, 
             test_conf_dist
         ) = await evaluate_model_with_distributions(
-            model=model_after, 
-            data_loader=test_loader, 
-            criterion=criterion, 
-            device=self.device
+            model=self.model_after, 
+            data_loader=self.test_loader, 
+            criterion=self.criterion, 
+            device=self.device,
+            forget_class=self.forget_class
         )
 
-        self.status.test_loss = test_loss
+        # Update test evaluation status for remain classes only
+        self.status.p_test_loss = test_loss
         if self.is_training_eval:
-            self.status.test_accuracy = test_accuracy / 10.0
+            self.status.p_test_accuracy = test_accuracy
         else:
-            self.status.test_accuracy = (test_accuracy * 10.0 - test_class_accuracies[self.forget_class]) / 9.0 
+            remain_test_accuracy = sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+            self.status.p_test_accuracy = remain_test_accuracy
 
-        self.status.test_class_accuracies = test_class_accuracies
+        if not self.is_training_eval:
+            test_accuracy = round(
+                sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
+            )
         
         print("Test Class Accuracies:")
-        for i, acc in self.status.test_class_accuracies.items():
+        for i, acc in test_class_accuracies.items():
             print(f"  Class {i}: {acc:.3f}")
 
         print(f"Test set evaluation finished at {time.time() - start_time:.3f} seconds")
 
         if self.stopped():
             return
-        # print("Test Label Distribution:")
-        # self.print_distribution(test_label_dist)
-        # print("Test Confidence Distribution:")
-        # self.print_distribution(test_conf_dist)
-
+        
         # UMAP and activation calculation
-        dataset = train_set if UMAP_DATASET == 'train' else test_set
-        subset_indices = torch.randperm(len(dataset))[:UMAP_DATA_SIZE]
-        subset = torch.utils.data.Subset(dataset, subset_indices)
-        subset_loader = torch.utils.data.DataLoader(subset, batch_size=UMAP_DATA_SIZE, shuffle=False)
+        self.status.progress = "Computing UMAP"
         
         print("Computing layer activations")
         (
@@ -169,15 +192,16 @@ class UnlearningInference(threading.Thread):
             predicted_labels, 
             probs, 
         ) = await get_layer_activations_and_predictions(
-            model=model_after,
-            data_loader=subset_loader,
+            model=self.model_after,
+            data_loader=umap_subset_loader,
             device=self.device,
         )
         print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
 
+        # UMAP embedding computation
         print("Computing UMAP embedding")
-        forget_labels = torch.tensor([label == self.forget_class for _, label in subset])
-        umap_embedding, _ = await compute_umap_embedding(
+        forget_labels = torch.tensor([label == self.forget_class for _, label in umap_subset])
+        umap_embedding = await compute_umap_embedding(
             activation=activations, 
             labels=predicted_labels, 
             forget_class=self.forget_class,
@@ -185,35 +209,53 @@ class UnlearningInference(threading.Thread):
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
 
+        # Detailed results preparation
         detailed_results = []
-        for i in range(len(subset)):
-            original_index = subset_indices[i].item()
-            ground_truth = subset.dataset.targets[subset_indices[i]]
+        for i in range(len(umap_subset)):
+            original_index = umap_subset_indices[i].item()
+            ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
             is_forget = ground_truth == self.forget_class
-            detailed_results.append({
-                "index": i,
-                "ground_truth": int(ground_truth),
-                "original_index": int(original_index),
-                "predicted_class": int(predicted_labels[i]),
-                "is_forget": bool(is_forget),
-                "umap_embedding": [round(float(coord), 3) for coord in umap_embedding[i]],
-                "prob": [round(float(l), 3) for l in probs[i]],
-            })
+            detailed_results.append([
+                int(ground_truth),                             # gt
+                int(predicted_labels[i]),                      # pred
+                int(original_index),                           # img
+                1 if is_forget else 0,                         # forget as binary
+                round(float(umap_embedding[i][0]), 2),         # x coordinate
+                round(float(umap_embedding[i][1]), 2),         # y coordinate
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
+            ])
+
+        # Decode comment can be updated to:
+        # function decodeDetailedResults(compressedArray) {
+        #   return {
+        #     gt: compressedArray[0],
+        #     pred: compressedArray[1],
+        #     img: compressedArray[2],
+        #     forget: Boolean(compressedArray[3]),
+        #     xy: [compressedArray[4], compressedArray[5]],
+        #     prob: compressedArray[6]
+        #   };
+        # }
+
+        # Test accuracy calculation
         if self.is_training_eval:
-            test_unlearn_accuracy = "N/A"  # test set의 unlearn_accuracy도 N/A로 설정, 나중에 코드 합치기 (train test-> train test)
+            test_unlearn_accuracy = "N/A"
             test_remain_accuracy = round(test_accuracy, 3) 
         else:
-            remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
             test_unlearn_accuracy = test_class_accuracies[self.forget_class]
-            test_remain_accuracy = round(sum(test_class_accuracies[i] for i in remain_classes), 3)
+            test_remain_accuracy = round(
+                sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
+            )
                                          
-        print("Calculating CKA similarity")
+        # CKA similarity calculation
         if not self.is_training_eval:
+            self.status.progress = "Calculating CKA Similarity"
+            print("Calculating CKA similarity")
             cka_results = await calculate_cka_similarity(
-                model_before=model_before,
-                model_after=model_after,
-                train_loader=train_loader,
-                test_loader=test_loader,
+                model_before=self.model_before,
+                model_after=self.model_after,
+                train_loader=self.train_loader,
+                test_loader=self.test_loader,
                 forget_class=self.forget_class,
                 device=self.device
             )
@@ -221,31 +263,38 @@ class UnlearningInference(threading.Thread):
 
         # Prepare results dictionary
         results = {
-            "id": uuid.uuid4().hex[:4],
-            "forget_class": "N/A" if self.is_training_eval else self.forget_class,
-            "phase": "Training" if self.is_training_eval else "Unlearning",
-            "init_id": "N/A",
-            "method": "Custom",
-            "epochs": 30,
-            "batch_size": 128,
-            "learning_rate": 0.01,
-            "unlearn_accuracy": "N/A" if self.is_training_eval else round(self.status.unlearn_accuracy, 3),
-            "remain_accuracy": self.status.remain_accuracy,
-            "test_unlearn_accuracy": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),
-            "test_remain_accuracy": test_remain_accuracy,
-            "RTE": 1890.1,
-            "train_class_accuracies": {k: round(v, 3) for k, v in train_class_accuracies.items()},
-            "test_class_accuracies": {k: round(v, 3) for k, v in test_class_accuracies.items()},
-            "train_label_distribution": self.format_distribution(train_label_dist),
-            "train_confidence_distribution": self.format_distribution(train_conf_dist),
-            "test_label_distribution": self.format_distribution(test_label_dist),
-            "test_confidence_distribution": self.format_distribution(test_conf_dist),
-            "similarity": "N/A" if self.is_training_eval else cka_results["similarity"],
-            "detailed_results": detailed_results,
+            "id": self.status.recent_id,
+            "fc": "N/A" if self.is_training_eval else self.forget_class,
+            "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
+            "init": "N/A",
+            "method": "N/A",
+            "epochs": 200,
+            "BS": 128,
+            "LR": 0.1,
+            "UA": "N/A" if self.is_training_eval else round(unlearn_accuracy, 3),
+            "RA": remain_accuracy,
+            "TUA": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),
+            "TRA": test_remain_accuracy,
+            "RTE": "N/A",
+            "accs": [round(v, 3) for v in train_class_accuracies.values()],
+            "label_dist": format_distribution(train_label_dist),
+            "conf_dist": format_distribution(train_conf_dist),
+            "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
+            "t_label_dist": format_distribution(test_label_dist),
+            "t_conf_dist": format_distribution(test_conf_dist),
+            "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
+            "points": detailed_results,
         }
+
         # Save results to JSON file
         os.makedirs('data', exist_ok=True)
-        with open(f'data/{results["id"]}.json', 'w') as f:
+        forget_class_dir = os.path.join('data', str(self.forget_class))
+        os.makedirs(forget_class_dir, exist_ok=True)
+
+        result_path = os.path.join(forget_class_dir, f'{results["id"]}.json')
+        with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
-        print(f"Results saved to data/{results['id']}.json")
+
+        print(f"Results saved to {result_path}")
         print(f"Custom unlearning inference completed at {time.time() - start_time:.3f} seconds")
+        self.status.progress = "Completed"

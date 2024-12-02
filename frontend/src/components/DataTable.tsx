@@ -10,13 +10,25 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { Data } from "../types/data";
-import { hexToRgba } from "../util";
-import { ScrollArea } from "./UI/scroll-area";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { fetchAllExperimentsData } from "../utils/api/unlearning";
+import { deleteRow, downloadJSON, downloadPTH } from "../utils/api/dataTable";
 import { ForgetClassContext } from "../store/forget-class-context";
+import { calculatePerformanceMetrics } from "../utils/data/experiments";
+import { ExperimentData } from "../types/data";
+import { Experiments } from "../types/experiments-context";
+import { hexToRgba } from "../utils/data/colors";
+import { ScrollArea } from "./UI/scroll-area";
+import { ExperimentsContext } from "../store/experiments-context";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
-import { cn } from "../lib/utils";
+import { cn } from "../utils/common/styles";
+import { COLUMN_WIDTHS } from "./Columns";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "./UI/context-menu";
 import {
   Table,
   TableBody,
@@ -26,43 +38,58 @@ import {
   TableRow,
 } from "./UI/table";
 
-const sortables = [
-  "unlearn_accuracy",
-  "remain_accuracy",
-  "test_unlearn_accuracy",
-  "test_remain_accuracy",
-  "RTE",
-];
+const BASELINE = "baseline";
+const COMPARISON = "comparison";
+
+type PerformanceMetrics = {
+  [key: string]: {
+    colorScale: d3.ScaleLinear<number, number, never>;
+    baseColor: string;
+  };
+};
 
 interface Props {
-  columns: ColumnDef<Data>[];
-  data: Data[];
-  performanceMetrics: {
-    [key: string]: {
-      colorScale: d3.ScaleLinear<number, number, never>;
-      baseColor: string;
-    };
-  };
+  columns: ColumnDef<ExperimentData>[];
 }
 
-export default function DataTable({
-  columns,
-  data,
-  performanceMetrics,
-}: Props) {
+export default function DataTable({ columns }: Props) {
   const { forgetClass } = useContext(ForgetClassContext);
+  const { experiments, saveExperiments, setIsExperimentsLoading } =
+    useContext(ExperimentsContext);
   const { baseline, comparison, saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  const tableData = useMemo(() => {
+    const experimentsArray = Object.values(experiments);
+    const pretrainedExp = experimentsArray.find(
+      (exp) => exp.id === `000${forgetClass}`
+    );
+    const retrainedExp = experimentsArray.find(
+      (exp) => exp.id === `a00${forgetClass}`
+    );
+
+    if (!pretrainedExp || !retrainedExp) return [];
+
+    const remainingExps = experimentsArray.filter(
+      (exp) => exp.id !== pretrainedExp.id && exp.id !== retrainedExp.id
+    );
+
+    return [pretrainedExp, retrainedExp, ...remainingExps];
+  }, [experiments, forgetClass]);
+
+  const performanceMetrics = calculatePerformanceMetrics(
+    experiments
+  ) as PerformanceMetrics;
+
   const modifiedColumns = columns.map((column) => {
-    if (column.id === "baseline") {
+    if (column.id === BASELINE) {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data, unknown>) => (
-          <RadioGroup className="flex items-center ml-[34px]">
+        cell: ({ row }: CellContext<ExperimentData, unknown>) => (
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
               className={cn(
@@ -79,11 +106,11 @@ export default function DataTable({
         ),
       };
     }
-    if (column.id === "comparison") {
+    if (column.id === COMPARISON) {
       return {
         ...column,
-        cell: ({ row }: CellContext<Data, unknown>) => (
-          <RadioGroup className="flex items-center ml-[26px]">
+        cell: ({ row }: CellContext<ExperimentData, unknown>) => (
+          <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
               className={cn(
@@ -103,27 +130,18 @@ export default function DataTable({
     return column;
   });
 
-  const tableData = useMemo(() => {
-    const forgetData = data.filter(
-      (datum) => datum.forget_class === forgetClass
-    );
-    const retrainData = forgetData.filter(
-      (forgetDatum) => forgetDatum.method === "Retrain"
-    );
-    const otherData = forgetData.filter(
-      (forgetDatum) => forgetDatum.method !== "Retrain"
-    );
-
-    return [...retrainData, ...otherData];
-  }, [data, forgetClass]);
-
   const opacityMapping = useMemo(() => {
     const mapping: { [key: string]: { [value: number]: number } } = {};
 
     Object.keys(performanceMetrics).forEach((columnId) => {
+      if (!performanceMetrics[columnId]) return;
+
       const values = tableData
-        .map((datum) => datum[columnId as keyof Data] as number)
-        .filter((value) => typeof value === "number");
+        .map((datum) => datum[columnId as keyof ExperimentData] as number)
+        .filter(
+          (value) =>
+            value !== undefined && value !== null && typeof value === "number"
+        );
 
       const uniqueValues = Array.from(new Set(values));
 
@@ -153,8 +171,8 @@ export default function DataTable({
   }, [tableData, performanceMetrics]);
 
   const table = useReactTable({
-    getRowId: (row: Data) => row.id,
-    data: tableData,
+    getRowId: (row: ExperimentData) => row.id,
+    data: tableData as ExperimentData[],
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -164,29 +182,100 @@ export default function DataTable({
   });
 
   useEffect(() => {
-    if (tableData.length > 0) {
-      saveBaseline(tableData[0].id);
-      saveComparison(tableData[1]?.id);
-    } else {
-      saveBaseline("");
-      saveComparison("");
+    const baselineExists = Object.values(experiments).some(
+      (experiment) => experiment.id === baseline
+    );
+    if (!baselineExists) {
+      if (tableData.length > 0) {
+        saveBaseline(tableData[0].id);
+        saveComparison(tableData[1].id);
+      } else {
+        saveBaseline("");
+        saveComparison("");
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableData]);
+  }, [
+    baseline,
+    comparison,
+    experiments,
+    saveBaseline,
+    saveComparison,
+    tableData,
+  ]);
+
+  const handleDeleteRow = async (id: string) => {
+    try {
+      await deleteRow(forgetClass as number, id);
+      setIsExperimentsLoading(true);
+      const allData: Experiments = await fetchAllExperimentsData(
+        forgetClass as number
+      );
+      if ("detail" in allData) saveExperiments({});
+      else saveExperiments(allData);
+    } catch (error) {
+      console.error("Failed to delete the row:", error);
+    } finally {
+      setIsExperimentsLoading(false);
+    }
+  };
+
+  const handleDownloadJSON = async (id: string) => {
+    try {
+      const json = await downloadJSON(forgetClass as number, id);
+
+      const jsonString = JSON.stringify(json, null, 2);
+
+      const blob = new Blob([jsonString], { type: "application/json" });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${id}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download the JSON file:", error);
+    }
+  };
+
+  const handleDownloadPTH = async (id: string) => {
+    try {
+      await downloadPTH(forgetClass as number, id);
+    } catch (error) {
+      console.error("Failed to download the PTH file:", error);
+    }
+  };
 
   return (
-    <div className="w-full h-[222px]">
-      <Table className="table-fixed w-full border-none">
-        <ScrollArea className="w-full h-[220px]">
-          <TableHeader className="bg-[#F5F6F9]">
+    <div className="w-full h-[196px]">
+      <div className="relative w-full">
+        <Table className="w-full table-fixed border-t">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const style = sortables.includes(header.column.id)
-                    ? { width: "80px" }
-                    : {};
+                  const columnWidth =
+                    COLUMN_WIDTHS[
+                      header.column.id as keyof typeof COLUMN_WIDTHS
+                    ];
                   return (
-                    <TableHead key={header.id} style={style}>
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        width: `${columnWidth}px`,
+                        minWidth: `${columnWidth}px`,
+                        ...(header.column.id === BASELINE && {
+                          paddingRight: 0,
+                        }),
+                        ...(header.column.id === COMPARISON && {
+                          paddingLeft: 0,
+                        }),
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -199,80 +288,117 @@ export default function DataTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody
-            className={`text-sm ${
-              table.getRowModel().rows?.length <= 5 &&
-              "[&_tr:last-child]:border-b"
-            }`}
-          >
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell, idx) => {
-                    const columnId = cell.column.id;
+        </Table>
+        <ScrollArea className="w-full h-[160px]">
+          <Table className="w-full table-fixed">
+            <TableBody
+              className={`text-sm ${
+                table.getRowModel().rows?.length <= 5 &&
+                "[&_tr:last-child]:border-b"
+              }`}
+            >
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <ContextMenu>
+                    <ContextMenuTrigger className="contents">
+                      <TableRow
+                        key={row.id}
+                        id={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell, idx) => {
+                          const columnId = cell.column.id;
+                          const columnWidth =
+                            COLUMN_WIDTHS[
+                              columnId as keyof typeof COLUMN_WIDTHS
+                            ];
 
-                    const isPerformanceMetric =
-                      performanceMetrics[columnId] !== undefined;
+                          const isPerformanceMetric =
+                            columnId in performanceMetrics;
 
-                    let cellStyle = {};
-                    if (isPerformanceMetric) {
-                      const { baseColor } = performanceMetrics[columnId];
-                      const value = cell.getValue() as number;
-                      const opacity = opacityMapping[columnId]?.[value] ?? 0;
+                          let cellStyle: React.CSSProperties = {
+                            width: `${columnWidth}px`,
+                            minWidth: `${columnWidth}px`,
+                            ...(columnId === BASELINE && { paddingRight: 0 }),
+                            ...(columnId === COMPARISON && { paddingLeft: 0 }),
+                          };
 
-                      if (baseColor) {
-                        let color, textColor;
+                          if (isPerformanceMetric) {
+                            const { baseColor } = performanceMetrics[columnId];
+                            const value = cell.getValue() as number;
+                            const opacity =
+                              opacityMapping[columnId]?.[value] ?? 0;
 
-                        if (tableData.length === 1 && value === 0) {
-                          color = "#FFFFFF";
-                          textColor = "#000000";
-                        } else {
-                          color = hexToRgba(baseColor, opacity);
-                          textColor = opacity >= 0.8 ? "#FFFFFF" : "#000000";
-                        }
+                            if (baseColor) {
+                              let color, textColor;
 
-                        cellStyle = {
-                          borderLeft:
-                            columnId === "unlearn_accuracy"
-                              ? "1px solid rgb(229 231 235)"
-                              : "none",
-                          borderRight:
-                            idx === row.getVisibleCells().length - 1
-                              ? "none"
-                              : "1px solid rgb(229 231 235)",
-                          backgroundColor: color,
-                          color: textColor,
-                        };
-                      }
-                    }
+                              if (tableData.length === 1 && value === 0) {
+                                color = "#FFFFFF";
+                                textColor = "#000000";
+                              } else {
+                                color = hexToRgba(baseColor, opacity);
+                                textColor =
+                                  opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                              }
 
-                    return (
-                      <TableCell key={cell.id} style={cellStyle}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    );
-                  })}
+                              cellStyle = {
+                                ...cellStyle,
+                                borderLeft:
+                                  columnId === "UA"
+                                    ? "1px solid rgb(229 231 235)"
+                                    : "none",
+                                borderRight:
+                                  idx === row.getVisibleCells().length - 1
+                                    ? "none"
+                                    : "1px solid rgb(229 231 235)",
+                                backgroundColor: color,
+                                color: textColor,
+                              };
+                            }
+                          }
+
+                          return (
+                            <TableCell key={cell.id} style={cellStyle}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
+                        Delete
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => handleDownloadJSON(row.id)}
+                      >
+                        Download JSON
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => handleDownloadPTH(row.id)}
+                      >
+                        Download PTH
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-[178px] text-center text-gray-500 text-[15px]"
+                  >
+                    Run Training or Unlearning from the left first.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-[178px] text-center text-gray-500 text-[15px]"
-                >
-                  Run Training or Unlearning from the left first.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+              )}
+            </TableBody>
+          </Table>
         </ScrollArea>
-      </Table>
+      </div>
     </div>
   );
 }

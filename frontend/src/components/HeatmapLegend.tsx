@@ -3,11 +3,11 @@ import * as d3 from "d3";
 
 const margin = { top: 10, right: 30, bottom: 10, left: 0 };
 
-export default function HeatmapLegend({ isExpanded }: { isExpanded: boolean }) {
+export default function HeatmapLegend() {
   const legendRef = useRef<SVGSVGElement>(null);
 
-  const width = isExpanded ? 12 : 8;
-  const height = isExpanded ? 430 : 188;
+  const width = 8;
+  const height = 172;
 
   useEffect(() => {
     if (legendRef.current) {
@@ -29,7 +29,7 @@ export default function HeatmapLegend({ isExpanded }: { isExpanded: boolean }) {
 
       const stops = d3.range(0, 1.01, 0.01).map((t) => ({
         offset: `${t * 100}%`,
-        color: d3.interpolateViridis(t),
+        color: d3.interpolateInferno(t),
       }));
 
       linearGradient
@@ -77,7 +77,7 @@ export default function HeatmapLegend({ isExpanded }: { isExpanded: boolean }) {
 
   return (
     <svg
-      className={`${isExpanded ? "mb-[31px]" : "mb-[32.5px]"} -ml-1`}
+      className="absolute -right-0 top-[0.5px] -z-10"
       ref={legendRef}
       width={width + margin.left + margin.right}
       height={height + margin.top + margin.bottom}

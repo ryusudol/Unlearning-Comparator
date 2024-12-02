@@ -1,19 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
+import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import { ChartScatterIcon } from "../components/UI/icons";
-// import { Slider } from "../components/ui/slider";
-// import { RepeatIcon } from "../components/ui/icons";
+import { ForgetClassContext } from "../store/forget-class-context";
+import { Separator } from "../components/UI/separator";
+import { forgetClassNames } from "../constants/forgetClassNames";
+import { TABLEAU10 } from "../constants/tableau10";
+import {
+  ChartScatterIcon,
+  CircleIcon,
+  MultiplicationSignIcon,
+} from "../components/UI/icons";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
-const HEIGHT = 715;
+const HEIGHT = 635;
 
-export default function Core({ height }: { height: number }) {
+export default function Core({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
+  const { forgetClass } = useContext(ForgetClassContext);
+
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
-  // const [neighbors, setNeighbors] = useState([5]);
-  // const [dist, setDist] = useState([0.1]);
+
+  const forgetClassExist = forgetClass !== undefined;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -21,34 +36,26 @@ export default function Core({ height }: { height: number }) {
     else setDisplayMode(ATTACK);
   };
 
-  // const handleReplayClick = () => {
-  //   console.log("Replay Button Clicked !");
-  // };
-
   const isEmbeddingMode = displayMode === EMBEDDINGS;
-  const isAttackMode = displayMode === ATTACK;
 
   return (
-    <section
-      style={{ height: `${height}` }}
-      className="w-[1552px] p-1 border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)]"
-    >
-      <div className="flex justify-between items-center mb-0.5">
-        <div className="flex items-center">
+    <section style={{ width, height }} className="p-1 border border-l-0">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center mb-0.5">
           <div
             id={EMBEDDINGS}
             onClick={handleDisplayModeChange}
             className={`relative z-10 flex items-center mr-3 cursor-pointer pb-0.5 px-1 ${
-              isAttackMode && "text-gray-400 border-none"
+              !isEmbeddingMode && "text-gray-400 border-none"
             }`}
           >
-            <ChartScatterIcon className={isAttackMode ? "opacity-40" : ""} />
+            <ChartScatterIcon
+              className={!isEmbeddingMode ? "opacity-40" : ""}
+            />
             <button className="font-semibold ml-[3px] text-lg">
               Embeddings
             </button>
-            {isEmbeddingMode && (
-              <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
-            )}
+            {isEmbeddingMode && <UnderLine />}
           </div>
           <div
             onClick={handleDisplayModeChange}
@@ -64,55 +71,64 @@ export default function Core({ height }: { height: number }) {
             <button id={ATTACK} className="font-semibold ml-[3px] text-lg">
               Privacy Attack
             </button>
-            {isAttackMode && (
-              <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
-            )}
+            {!isEmbeddingMode && <UnderLine />}
           </div>
         </div>
-        {/* {isEmbeddingMode && (
-          <div className="w-[680px] flex justify-end items-center z-10">
-            <div className="flex items-center">
-              <span>neighbors</span>
-              <div className="flex items-center">
-                <Slider
-                  onValueChange={(value: number[]) => setNeighbors(value)}
-                  value={neighbors}
-                  defaultValue={[5]}
-                  className="w-[100px] mx-2 cursor-pointer"
-                  min={5}
-                  max={15}
-                  step={1}
-                />
-                <span className="w-2 text-[14px]">{neighbors}</span>
-              </div>
-            </div>
-            <div className="flex items-center mx-8">
-              <span>min_dist</span>
-              <div className="flex items-center">
-                <Slider
-                  onValueChange={(value: number[]) => setDist(value)}
-                  value={dist}
-                  defaultValue={[0.1]}
-                  className="w-[100px] mx-2 cursor-pointer"
-                  min={0.1}
-                  max={0.5}
-                  step={0.05}
-                />
-                <span className="w-4 text-[14px]">{dist}</span>
-              </div>
-            </div>
-            <RepeatIcon
-              onClick={handleReplayClick}
-              className="scale-125 cursor-pointer mr-2"
-            />
-          </div>
-        )} */}
+        {forgetClassExist && isEmbeddingMode && <EmbeddingLegend />}
       </div>
-      {isEmbeddingMode ? (
-        <Embeddings height={HEIGHT} />
+      {forgetClassExist ? (
+        isEmbeddingMode ? (
+          <Embeddings height={HEIGHT} />
+        ) : (
+          <PrivacyAttack height={HEIGHT} />
+        )
       ) : (
-        <PrivacyAttack height={HEIGHT} />
+        <Indicator about="ForgetClass" />
       )}
     </section>
+  );
+}
+
+function UnderLine() {
+  return (
+    <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
+  );
+}
+
+function EmbeddingLegend() {
+  return (
+    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm">
+      <div className="flex items-center mr-5">
+        <span className="font-medium mr-2.5">Data Type</span>
+        <ul className="flex items-center gap-2.5">
+          <li className="flex items-center">
+            <CircleIcon className="w-3 h-3 mr-1.5 text-[#4f5562]" />
+            <span>Remaining Data</span>
+          </li>
+          <li className="flex items-center">
+            <MultiplicationSignIcon className="text-[#4f5562] mr-1.5" />
+            <span>Forgetting Target</span>
+          </li>
+        </ul>
+      </div>
+      <div className="flex items-center">
+        <span className="font-medium mr-2.5">Prediction</span>
+        <ul className="flex items-center gap-2.5">
+          {forgetClassNames.map((name, idx) => (
+            <li key={idx} className="flex items-center">
+              <div
+                style={{ backgroundColor: TABLEAU10[idx] }}
+                className="w-3.5 h-3.5 mr-1"
+              />
+              <span>{name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <Separator
+        orientation="horizontal"
+        className="absolute bottom-0 h-[1px] w-[calc(100%-16px)]"
+      />
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, createContext, useReducer } from "react";
+import { useEffect, createContext, useReducer, useCallback } from "react";
 
 import { forgetClassNames } from "../constants/forgetClassNames";
 import {
@@ -13,7 +13,7 @@ export const ForgetClassContext = createContext<ForgetClassContextType>({
   forgetClass: undefined,
   selectedForgetClasses: [],
 
-  saveForgetClass: (forgetClass: string) => {},
+  saveForgetClass: (forgetClass: string | undefined) => {},
   addSelectedForgetClass: (forgetClass: string) => {},
   retrieveForgetClassContextData: () => {},
   clearForgetClass: () => {},
@@ -34,7 +34,6 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
       const target = action.payload;
       if (!state.selectedForgetClasses.includes(target)) {
         const selectedForgetClasses = [...state.selectedForgetClasses, target];
-        selectedForgetClasses.sort((a, b) => a - b);
         sessionStorage.setItem(
           FORGET_CLASS,
           JSON.stringify({ ...state, selectedForgetClasses })
@@ -67,10 +66,12 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
         const newSelectedForgetClasses = originalSelectedForgetClasses.filter(
           (item) => item !== action.payload
         );
-        return {
+        const newState = {
           ...state,
           selectedForgetClasses: newSelectedForgetClasses,
         };
+        sessionStorage.setItem(FORGET_CLASS, JSON.stringify(newState));
+        return newState;
       }
       return state;
 
@@ -89,38 +90,43 @@ export default function ForgetClassContextProvider({
     selectedForgetClasses: [],
   });
 
-  function handleSaveForgetClass(forgetClass: string) {
-    dispatch({
-      type: "SAVE_FORGET_CLASS",
-      payload: forgetClassNames.indexOf(forgetClass),
-    });
-  }
+  const handleSaveForgetClass = useCallback(
+    (forgetClass: string | undefined) => {
+      dispatch({
+        type: "SAVE_FORGET_CLASS",
+        payload: forgetClass
+          ? forgetClassNames.indexOf(forgetClass)
+          : undefined,
+      });
+    },
+    []
+  );
 
-  function handleAddSelectedForgetClass(forgetClass: string) {
+  const handleAddSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: "ADD_SELECTED_FORGET_CLASS",
       payload: forgetClassNames.indexOf(forgetClass),
     });
-  }
+  }, []);
 
-  function handleRetrieveForgetClassContextData() {
+  const handleRetrieveForgetClassContextData = useCallback(() => {
     dispatch({ type: "RETRIEVE_FORGET_CLASS_CONTEXT_DATA" });
-  }
+  }, []);
 
-  function handleClearForgetClass() {
+  const handleClearForgetClass = useCallback(() => {
     dispatch({ type: "CLEAR_FORGET_CLASS" });
-  }
+  }, []);
 
-  function handleDeleteSelectedForgetClass(forgetClass: string) {
+  const handleDeleteSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: "DELETE_SELECTED_FORGET_CLASS",
       payload: forgetClassNames.indexOf(forgetClass),
     });
-  }
+  }, []);
 
   useEffect(() => {
     handleRetrieveForgetClassContextData();
-  }, []);
+  }, [handleRetrieveForgetClassContextData]);
 
   const ctxValue: ForgetClassContextType = {
     forgetClass: state.forgetClass,

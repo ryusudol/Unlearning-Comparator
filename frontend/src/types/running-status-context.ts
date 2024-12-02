@@ -1,24 +1,23 @@
-import { TrainingStatus, UnlearningStatus } from "./settings";
-
-export type Status = TrainingStatus | UnlearningStatus | undefined;
+import { UnlearningStatus } from "./settings";
 
 export interface RunningStatus {
   isRunning: boolean;
-  indicator: string;
-  status: Status;
+  status: UnlearningStatus;
+  activeStep: number;
+  completedSteps: number[];
 }
 
 export interface RunningStatusContextType extends RunningStatus {
-  initRunningStatus: () => void;
-  saveRunningStatus: (status: RunningStatus) => void;
   updateIsRunning: (isRunning: boolean) => void;
-  updateIndicator: (indicator: string) => void;
-  updateStatus: (status: Status) => void;
+  initStatus: () => void;
+  retrieveStatus: () => void;
+  updateStatus: (status: UnlearningStatus) => void;
+  updateActiveStep: (step: number) => void;
 }
 
 export type Action =
-  | { type: "INIT_RUNNING_STATUS" }
-  | { type: "SAVE_RUNNING_STATUS"; payload: RunningStatus }
   | { type: "UPDATE_IS_RUNNING"; payload: boolean }
-  | { type: "UPDATE_INDICATOR"; payload: string }
-  | { type: "UPDATE_STATUS"; payload: Status };
+  | { type: "INIT_STATUS" }
+  | { type: "RETRIEVE_STATUS" }
+  | { type: "UPDATE_STATUS"; payload: UnlearningStatus }
+  | { type: "UPDATE_ACTIVE_STEP"; payload: number };

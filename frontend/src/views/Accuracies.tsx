@@ -1,13 +1,12 @@
-import { useMemo, useContext } from "react";
+import { useMemo, useContext, useState } from "react";
 
+import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/VerticalBarChart";
-import { TABLEAU10 } from "../constants/tableau10";
-import { basicData } from "../constants/basicData";
 import { Chart01Icon } from "../components/UI/icons";
-import { ClassAccuracies } from "../types/data";
+import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-
-const GAP_FIX_LENGTH = 3;
+import { ExperimentsContext } from "../store/experiments-context";
+import { getAccuracyGap } from "../utils/data/getAccuracyGap";
 
 export interface GapDataItem {
   category: string;
@@ -24,75 +23,28 @@ function getMaxGap(gapData: GapDataItem[]) {
   );
 }
 
-export default function Accuracies({ height }: { height: number }) {
+export default function Accuracies({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
+  const { forgetClass } = useContext(ForgetClassContext);
   const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
-  const baselineData = useMemo(
-    () => basicData.filter((datum) => datum.id === baseline)[0],
-    [baseline]
-  );
-  const comparisonData = useMemo(
-    () => basicData.filter((datum) => datum.id === comparison)[0],
-    [comparison]
-  );
-
-  const baselineTrainAccuracies: ClassAccuracies =
-    baselineData?.train_class_accuracies;
-  const comparisonTrainAccuracies: ClassAccuracies =
-    comparisonData?.train_class_accuracies;
-  const baselineTestAccuracies: ClassAccuracies =
-    baselineData?.test_class_accuracies;
-  const comparisonTestAccuracies: ClassAccuracies =
-    comparisonData?.test_class_accuracies;
+  const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
   const trainAccuracyGap = useMemo(
-    () =>
-      baselineTrainAccuracies && comparisonTrainAccuracies
-        ? Object.keys(baselineTrainAccuracies).map((key, idx) => {
-            const baselineValue =
-              baselineTrainAccuracies[key as unknown as keyof ClassAccuracies];
-            const comparisonValue =
-              comparisonTrainAccuracies[
-                key as unknown as keyof ClassAccuracies
-              ];
-            const categoryLetter = String.fromCharCode(65 + idx);
-            return {
-              category: categoryLetter,
-              classLabel: key,
-              gap: parseFloat(
-                (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-              ),
-              fill: TABLEAU10[idx],
-              baselineAccuracy: baselineValue,
-              comparisonAccuracy: comparisonValue,
-            };
-          })
-        : [],
-    [baselineTrainAccuracies, comparisonTrainAccuracies]
+    () => getAccuracyGap(baselineExperiment?.accs, comparisonExperiment?.accs),
+    [baselineExperiment?.accs, comparisonExperiment?.accs]
   );
-
   const testAccuracyGap = useMemo(
     () =>
-      baselineTestAccuracies && comparisonTestAccuracies
-        ? Object.keys(baselineTestAccuracies).map((key, idx) => {
-            const baselineValue =
-              baselineTestAccuracies[key as unknown as keyof ClassAccuracies];
-            const comparisonValue =
-              comparisonTestAccuracies[key as unknown as keyof ClassAccuracies];
-            const categoryLetter = String.fromCharCode(65 + idx);
-            return {
-              category: categoryLetter,
-              classLabel: key,
-              gap: parseFloat(
-                (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-              ),
-              fill: TABLEAU10[idx],
-              baselineAccuracy: baselineValue,
-              comparisonAccuracy: comparisonValue,
-            };
-          })
-        : [],
-    [baselineTestAccuracies, comparisonTestAccuracies]
+      getAccuracyGap(baselineExperiment?.t_accs, comparisonExperiment?.t_accs),
+    [baselineExperiment?.t_accs, comparisonExperiment?.t_accs]
   );
 
   const trainMaxGap = getMaxGap(trainAccuracyGap);
@@ -101,8 +53,8 @@ export default function Accuracies({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height: height }}
-      className="w-[490px] px-[5px] py-0.5 flex flex-col border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] relative"
+      style={{ width, height }}
+      className="p-1 flex flex-col border border-t-0 relative"
     >
       <div className="flex items-center">
         <Chart01Icon />
@@ -111,23 +63,30 @@ export default function Accuracies({ height }: { height: number }) {
           <span className="ml-1">(Comparison - Baseline)</span>
         </h5>
       </div>
-      {baseline === "" || comparison === "" ? (
-        <p className="h-full flex justify-center items-center text-[15px] text-gray-500">
-          Select both Baseline and Comparison.
-        </p>
+      {forgetClass !== undefined ? (
+        baseline === "" || comparison === "" ? (
+          <Indicator about="BaselineComparison" />
+        ) : (
+          <div className="w-full flex items-center relative">
+            <VerticalBarChart
+              mode="Training"
+              gapData={trainAccuracyGap}
+              maxGap={maxGap}
+              hoveredClass={hoveredClass}
+              setHoveredClass={setHoveredClass}
+            />
+            <VerticalBarChart
+              mode="Test"
+              gapData={testAccuracyGap}
+              maxGap={maxGap}
+              showYAxis={false}
+              hoveredClass={hoveredClass}
+              setHoveredClass={setHoveredClass}
+            />
+          </div>
+        )
       ) : (
-        <div className="w-full flex justify-center items-center -mt-0.5">
-          <VerticalBarChart
-            mode="Training"
-            gapData={trainAccuracyGap}
-            maxGap={maxGap}
-          />
-          <VerticalBarChart
-            mode="Test"
-            gapData={testAccuracyGap}
-            maxGap={maxGap}
-          />
-        </div>
+        <Indicator about="ForgetClass" />
       )}
     </section>
   );

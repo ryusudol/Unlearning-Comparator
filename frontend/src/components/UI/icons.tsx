@@ -88,13 +88,36 @@ export const ChartScatterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const NeuralNetworkIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const BaselineNeuralNetworkIcon = (
+  props: React.SVGProps<SVGSVGElement>
+) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     width={16}
     height={16}
-    color={"#000000"}
+    color={"#a855f7"}
+    fill={"none"}
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M12 1.75C10.7574 1.75 9.75 2.75736 9.75 4C9.75 4.0142 9.75013 4.02836 9.75039 4.0425L6.56356 5.6822C6.05963 5.11059 5.32193 4.75 4.5 4.75C2.98122 4.75 1.75 5.98122 1.75 7.5C1.75 9.01223 2.97062 10.2394 4.48037 10.2499L7.06846 17.1515C6.27776 17.6345 5.75 18.5056 5.75 19.5C5.75 21.0188 6.98122 22.25 8.5 22.25C10.0188 22.25 11.25 21.0188 11.25 19.5C11.25 19.3014 11.2289 19.1077 11.189 18.9211L14.9502 16.1002C15.2816 15.8516 15.3487 15.3815 15.1002 15.0502C14.8517 14.7188 14.3816 14.6516 14.0502 14.9002L10.4723 17.5836C9.97689 17.0739 9.2856 16.7555 8.51992 16.7501L5.93177 9.84834C6.72234 9.3653 7.25 8.49427 7.25 7.5C7.25 7.34185 7.23665 7.18682 7.21102 7.03597L10.2837 5.455C10.5059 5.7168 10.7868 5.9271 11.1062 6.06549L10.3793 9.33671C9.43853 9.60614 8.75 10.4727 8.75 11.5C8.75 12.7426 9.75736 13.75 11 13.75C11.9591 13.75 12.7781 13.1499 13.1018 12.3047L15.794 12.5361C16.0496 14.0759 17.3877 15.25 19 15.25C20.7949 15.25 22.25 13.7949 22.25 12C22.25 10.2051 20.7949 8.75 19 8.75C18.5312 8.75 18.0855 8.84928 17.6829 9.02795L14.1617 4.62639C14.2192 4.42755 14.25 4.21737 14.25 4C14.25 2.75736 13.2426 1.75 12 1.75ZM13.2412 5.87698C13.0525 6.002 12.8439 6.09933 12.6211 6.16317L11.8941 9.43466C12.4819 9.68946 12.9395 10.1878 13.1398 10.8024L15.8944 11.0392C16.0203 10.6316 16.2243 10.2582 16.4889 9.93662L13.2412 5.87698Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+export const ComparisonNeuralNetworkIcon = (
+  props: React.SVGProps<SVGSVGElement>
+) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    color={"#10b981"}
     fill={"none"}
     {...props}
   >
@@ -323,7 +346,6 @@ export const CircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     width={16}
     height={16}
     color={"#000000"}
-    fill={"none"}
     {...props}
   >
     <path
@@ -939,5 +961,70 @@ export const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <rect width="349.03" height="349.031" fill="white" />
       </clipPath>
     </defs>
+  </svg>
+);
+
+export const VitalIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="m3 12h4l3-9 4 18 3-9h4"
+      stroke={props.color ?? "#000"}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
+export const TriangleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    {...props}
+  >
+    <path
+      d="M12 2.25C12.2724 2.25 12.5233 2.39767 12.6556 2.63577L22.6556 20.6358C22.7847 20.8681 22.7812 21.1513 22.6464 21.3803C22.5116 21.6094 22.2657 21.75 22 21.75H2C1.73426 21.75 1.48836 21.6094 1.3536 21.3803C1.21883 21.1513 1.21533 20.8681 1.34438 20.6358L11.3444 2.63577C11.4767 2.39767 11.7276 2.25 12 2.25Z"
+      fill="currentColor"
+      stroke="currentColor"
+    />
+  </svg>
+);
+
+export const ShortArrow = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width="25"
+    height="8"
+    viewBox="0 0 25 8"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M24.3536 4.35355C24.5488 4.15829 24.5488 3.84171 24.3536 3.64645L21.1716 0.464466C20.9763 0.269204 20.6597 0.269204 20.4645 0.464466C20.2692 0.659728 20.2692 0.976311 20.4645 1.17157L23.2929 4L20.4645 6.82843C20.2692 7.02369 20.2692 7.34027 20.4645 7.53553C20.6597 7.7308 20.9763 7.7308 21.1716 7.53553L24.3536 4.35355ZM0 4.5H24V3.5H0V4.5Z"
+      fill={props.color ?? "#666666"}
+    />
+  </svg>
+);
+
+export const LongArrow = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width="57"
+    height="8"
+    viewBox="0 0 57 8"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M56.3536 4.35355C56.5488 4.15829 56.5488 3.84171 56.3536 3.64645L53.1716 0.464466C52.9763 0.269204 52.6597 0.269204 52.4645 0.464466C52.2692 0.659728 52.2692 0.976311 52.4645 1.17157L55.2929 4L52.4645 6.82843C52.2692 7.02369 52.2692 7.34027 52.4645 7.53553C52.6597 7.7308 52.9763 7.7308 53.1716 7.53553L56.3536 4.35355ZM0 4.5H56V3.5H0V4.5Z"
+      fill={props.color ?? "#666666"}
+    />
   </svg>
 );

@@ -1,24 +1,40 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useCallback, useEffect } from "react";
 
+import { UnlearningStatus } from "../types/settings";
 import {
   RunningStatus,
   RunningStatusContextType,
   Action,
-  Status,
 } from "../types/running-status-context";
 
 const RUNNING_STATUS = "running-status";
+const initialStatus: UnlearningStatus = {
+  is_unlearning: false,
+  progress: "Idle",
+  recent_id: null,
+  current_epoch: 0,
+  total_epochs: 0,
+  current_unlearn_loss: 0,
+  current_unlearn_accuracy: 0,
+  p_training_loss: 0,
+  p_training_accuracy: 0,
+  p_test_loss: 0,
+  p_test_accuracy: 0,
+  method: "",
+  estimated_time_remaining: 0,
+};
 
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
-  indicator: "",
-  status: undefined,
+  status: initialStatus,
+  activeStep: 0,
+  completedSteps: [],
 
-  initRunningStatus: () => {},
-  saveRunningStatus: () => {},
   updateIsRunning: () => {},
-  updateIndicator: () => {},
-  updateStatus: () => {},
+  initStatus: () => {},
+  retrieveStatus: () => {},
+  updateStatus: (status: UnlearningStatus) => {},
+  updateActiveStep: (step: number) => {},
 });
 
 function runningStatusReducer(
@@ -26,30 +42,6 @@ function runningStatusReducer(
   action: Action
 ): RunningStatus {
   switch (action.type) {
-    case "INIT_RUNNING_STATUS":
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({
-          isRunning: false,
-          indicator: "",
-          status: undefined,
-        })
-      );
-      return {
-        isRunning: false,
-        indicator: "",
-        status: undefined,
-      };
-
-    case "SAVE_RUNNING_STATUS":
-      const runningStatus = action.payload;
-      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(runningStatus));
-      return {
-        isRunning: runningStatus.isRunning,
-        indicator: runningStatus.indicator,
-        status: runningStatus.status,
-      };
-
     case "UPDATE_IS_RUNNING":
       const isRunning = action.payload;
       sessionStorage.setItem(
@@ -58,21 +50,60 @@ function runningStatusReducer(
       );
       return { ...state, isRunning };
 
-    case "UPDATE_INDICATOR":
-      const indicator = action.payload;
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({ ...state, indicator })
-      );
-      return { ...state, indicator };
+    case "INIT_STATUS":
+      const initializedStatus = {
+        ...state,
+        status: initialStatus,
+        completedSteps: [],
+      };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(initializedStatus));
+      return initializedStatus;
+
+    case "RETRIEVE_STATUS":
+      const savedStatus = sessionStorage.getItem(RUNNING_STATUS);
+      if (savedStatus) {
+        const parsedStatus: RunningStatus = JSON.parse(savedStatus);
+        sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(parsedStatus));
+        return parsedStatus;
+      }
+      return state;
 
     case "UPDATE_STATUS":
       const status = action.payload;
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({ ...state, status })
-      );
-      return { ...state, status };
+      const progress =
+        status.is_unlearning && status.progress === "Idle"
+          ? "Unlearning"
+          : !status.is_unlearning
+          ? "Idle"
+          : status.progress;
+      let completedSteps: number[] = [];
+      if (
+        (progress === "Unlearning" &&
+          status.current_epoch !== status.total_epochs) ||
+        (progress === "Unlearning" && status.is_unlearning)
+      ) {
+        completedSteps = [1];
+      } else if (progress.includes("Evaluating")) {
+        completedSteps = [1, 2];
+      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
+        completedSteps = [1, 2, 3];
+      } else {
+        completedSteps = [1, 2, 3];
+      }
+
+      const updatedStatus = {
+        ...state,
+        status: { ...status, progress },
+        completedSteps,
+      };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
+      return updatedStatus;
+
+    case "UPDATE_ACTIVE_STEP":
+      const step = action.payload;
+      const updatedActiveStep = { ...state, activeStep: step };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedActiveStep));
+      return updatedActiveStep;
 
     default:
       return state;
@@ -86,40 +117,46 @@ export default function RunningStatusContextProvider({
 }) {
   const [runningStatus, dispatch] = useReducer(runningStatusReducer, {
     isRunning: false,
-    indicator: "",
-    status: undefined,
+    status: initialStatus,
+    activeStep: 0,
+    completedSteps: [],
   });
 
-  function handleInitRunningStatus() {
-    dispatch({ type: "INIT_RUNNING_STATUS" });
-  }
-
-  function handleSaveRunningStatus(runningStatus: RunningStatus) {
-    dispatch({ type: "SAVE_RUNNING_STATUS", payload: runningStatus });
-  }
-
-  function handleUpdateIsRunning(isRunning: boolean) {
+  const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
     dispatch({ type: "UPDATE_IS_RUNNING", payload: isRunning });
-  }
+  }, []);
 
-  function handleUpdateIndicator(indicator: string) {
-    dispatch({ type: "UPDATE_INDICATOR", payload: indicator });
-  }
+  const handleInitStatus = useCallback(() => {
+    dispatch({ type: "INIT_STATUS" });
+  }, []);
 
-  function handleUpdateStatus(status: Status) {
+  const handleRetrieveStatus = useCallback(() => {
+    dispatch({ type: "RETRIEVE_STATUS" });
+  }, []);
+
+  const handleUpdateStatus = useCallback((status: UnlearningStatus) => {
     dispatch({ type: "UPDATE_STATUS", payload: status });
-  }
+  }, []);
+
+  const handleUpdateActiveStep = useCallback((step: number) => {
+    dispatch({ type: "UPDATE_ACTIVE_STEP", payload: step });
+  }, []);
+
+  useEffect(() => {
+    handleRetrieveStatus();
+  }, [handleRetrieveStatus]);
 
   const ctxValue: RunningStatusContextType = {
     isRunning: runningStatus.isRunning,
-    indicator: runningStatus.indicator,
     status: runningStatus.status,
+    activeStep: runningStatus.activeStep,
+    completedSteps: runningStatus.completedSteps,
 
-    initRunningStatus: handleInitRunningStatus,
-    saveRunningStatus: handleSaveRunningStatus,
     updateIsRunning: handleUpdateIsRunning,
-    updateIndicator: handleUpdateIndicator,
+    initStatus: handleInitStatus,
+    retrieveStatus: handleRetrieveStatus,
     updateStatus: handleUpdateStatus,
+    updateActiveStep: handleUpdateActiveStep,
   };
 
   return (

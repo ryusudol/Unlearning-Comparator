@@ -1,86 +1,191 @@
 import React, {
+  useState,
+  useEffect,
+  useContext,
   useImperativeHandle,
   forwardRef,
-  useEffect,
   useRef,
   useMemo,
+  useCallback,
+  useReducer,
 } from "react";
+import { createRoot, Root } from "react-dom/client";
+import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { basicData } from "../constants/basicData";
-import { ModeType } from "./Embedding";
+import EmbeddingTooltip from "./EmbeddingTooltip";
+import { API_URL } from "../constants/common";
+import { ForgetClassContext } from "../store/forget-class-context";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "./UI/icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./UI/select";
 
-const API_URL = "http://localhost:8000";
-const dotSize = 4;
-const minZoom = 0.6;
-const maxZoom = 32;
-const width = 672;
-const height = 672;
-const XSizeDivider = 0.4;
-const XStrokeWidth = 1;
-const crossSize = 4;
-const defaultCrossOpacity = 0.85;
-const defaultCircleOpacity = 0.6;
-const loweredOpacity = 0.1;
+const VIEW_MODES: ViewModeType[] = [
+  "All Instances",
+  "Forgetting Target",
+  "Forgetting Failed",
+];
+const CONFIG = {
+  width: 630,
+  height: 630,
+  dotSize: 4,
+  minZoom: 0.6,
+  maxZoom: 32,
+  XSizeDivider: 0.4,
+  XStrokeWidth: 1,
+  crossSize: 4,
+  loweredOpacity: 0.1,
+  hoveredStrokeWidth: 2,
+  paddingRatio: 0.01,
+  tooltipXSize: 440,
+  tooltipYSize: 264,
+  defaultCrossOpacity: 0.85,
+  defaultCircleOpacity: 0.6,
+} as const;
+const BLACK = "black";
+const ZOOM_RESET_DURATION = 500;
+const UNLEARNING_TARGET = "Forgetting Target";
+const UNLEARNING_FAILED = "Forgetting Failed";
+
+export type ViewModeType =
+  | "All Instances"
+  | "Forgetting Target"
+  | "Forgetting Failed";
 
 interface Props {
-  mode: ModeType;
-  data: number[][] | undefined;
-  viewMode: "All Instances" | "Unlearning Target" | "Unlearning Failed";
+  mode: Mode;
+  height: number;
+  data: SelectedData;
+  onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
+  hoveredInstance: HovereInstance | null;
 }
 
-const ScatterPlot = React.memo(
-  forwardRef(({ mode, data, viewMode }: Props, ref) => {
+const ScatterPlot = forwardRef(
+  ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
+    const { baseline, comparison } = useContext(BaselineComparisonContext);
+    const { forgetClass } = useContext(ForgetClassContext);
+
+    const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
+
+    const elementMapRef = useRef(new Map<number, Element>());
+    const hoveredInstanceRef = useRef<HovereInstance | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
     const tooltipRef = useRef<HTMLDivElement | null>(null);
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const svgSelectionRef =
-      useRef<d3.Selection<SVGSVGElement, undefined, null, undefined>>();
+    const rootRef = useRef<Root | null>(null);
+    const fetchControllerRef = useRef<AbortController | null>(null);
     const circlesRef = useRef<d3.Selection<
       SVGCircleElement,
-      number[],
-      SVGGElement,
-      unknown
-    > | null>(null);
-    const crossesRef = useRef<d3.Selection<
-      d3.BaseType | SVGPathElement,
-      number[],
+      (number | Prob)[],
       SVGGElement,
       undefined
     > | null>(null);
+    const crossesRef = useRef<d3.Selection<
+      SVGPathElement,
+      (number | Prob)[],
+      SVGGElement,
+      undefined
+    > | null>(null);
+    const gMainRef = useRef<d3.Selection<
+      SVGGElement,
+      unknown,
+      null,
+      undefined
+    > | null>(null);
 
-    const unlearnedFCIndices = new Set(
-      basicData.map((item) => item.forget_class)
-    );
-    const unlearnedFCList = forgetClassNames.filter((_, idx) =>
-      unlearnedFCIndices.has(idx)
-    );
+    const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
-    const processedData = useMemo(() => data || [], [data]);
+    useEffect(() => {
+      hoveredInstanceRef.current = hoveredInstance;
+    }, [hoveredInstance]);
+
+    useEffect(() => {
+      const refHolder = document.createElement("div");
+      refHolder.setAttribute("data-ref-holder", "true");
+      document.body.appendChild(refHolder);
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "data-hovered-instance"
+          ) {
+            const newValue = refHolder.getAttribute("data-hovered-instance");
+            if (newValue) {
+              hoveredInstanceRef.current = JSON.parse(newValue);
+              forceUpdate();
+            }
+          }
+        });
+      });
+
+      observer.observe(refHolder, {
+        attributes: true,
+      });
+
+      if (ref) {
+        (ref as any).current = {
+          ...((ref as any).current || {}),
+          updateHoveredInstance: (instance: HovereInstance | null) => {
+            hoveredInstanceRef.current = instance;
+            refHolder.setAttribute(
+              "data-hovered-instance",
+              instance ? JSON.stringify(instance) : ""
+            );
+          },
+        };
+      }
+
+      return () => {
+        observer.disconnect();
+        document.body.removeChild(refHolder);
+      };
+    }, [ref]);
+
+    const isBaseline = mode === "Baseline";
+    const id = isBaseline ? baseline : comparison;
+    const idExist = id !== "";
 
     const x = useMemo(() => {
-      if (processedData.length === 0) {
-        return d3.scaleLinear().domain([0, 1]).range([0, width]);
+      if (data.length === 0) {
+        return d3.scaleLinear().domain([0, 1]).range([0, CONFIG.width]);
       }
+
       return d3
         .scaleLinear()
-        .domain(d3.extent(processedData, (d) => d[0]) as [number, number])
+        .domain(d3.extent(data, (d) => d[0] as number) as [number, number])
         .nice()
-        .range([0, width]);
-    }, [processedData]);
+        .range([0, CONFIG.width]);
+    }, [data]);
 
     const y = useMemo(() => {
-      if (processedData.length === 0) {
-        return d3.scaleLinear().domain([0, 1]).range([height, 0]);
+      if (data.length === 0) {
+        return d3.scaleLinear().domain([0, 1]).range([CONFIG.height, 0]);
       }
+
+      const [min, max] = d3.extent(data, (d) => d[1] as number) as [
+        number,
+        number
+      ];
+      const padding = (max - min) * CONFIG.paddingRatio;
+
       return d3
         .scaleLinear()
-        .domain(d3.extent(processedData, (d) => d[1]) as [number, number])
+        .domain([min - padding, max + padding])
         .nice()
-        .range([height, 0]);
-    }, [processedData]);
+        .range([CONFIG.height, 0]);
+    }, [data]);
 
     const z = useMemo(
       () =>
@@ -91,272 +196,555 @@ const ScatterPlot = React.memo(
       []
     );
 
-    useEffect(() => {
-      const chart = () => {
-        const svg = d3
-          .create<SVGSVGElement>("svg")
-          .attr("viewBox", [0, 0, width, height])
-          .attr("width", width)
-          .attr("height", height)
-          .attr("preserveAspectRatio", "xMidYMid meet");
-
-        const gMain = svg.append("g");
-
-        gMain
-          .append("rect")
-          .attr("width", width)
-          .attr("height", height)
-          .style("fill", "none")
-          .style("pointer-events", "all");
-
-        const gDot = gMain.append("g");
-
-        const circles = gDot
-          .selectAll<SVGCircleElement, number[]>("circle")
-          .data(processedData.filter((d) => d[2] !== d[5]))
-          .join("circle")
-          .attr("cx", (d) => x(d[0]))
-          .attr("cy", (d) => y(d[1]))
-          .attr("r", dotSize)
-          .attr("fill", (d) => z(d[3]))
-          .style("cursor", "pointer")
-          .style("opacity", defaultCircleOpacity);
-
-        const crosses = gDot
-          .selectAll("path")
-          .data(processedData.filter((d) => d[2] === d[5]))
-          .join("path")
-          .attr(
-            "transform",
-            (d) => `translate(${x(d[0])},${y(d[1])}) rotate(45)`
-          )
-          .attr(
-            "d",
-            d3
-              .symbol()
-              .type(d3.symbolCross)
-              .size(Math.pow(crossSize / XSizeDivider, 2))
-          )
-          .attr("fill", (d) => z(d[3]))
-          .attr("stroke", (d) => {
-            const color = d3.color(z(d[3]));
-            return color ? color.darker().toString() : "black";
-          })
-          .attr("stroke-width", XStrokeWidth)
-          .style("cursor", "pointer")
-          .style("opacity", defaultCrossOpacity);
-
-        circlesRef.current = circles;
-        crossesRef.current = crosses;
-
-        function handleMouseEnter(event: any, d: number[]) {
-          if (containerRef.current) {
-            const containerRect = containerRef.current.getBoundingClientRect();
-            const tooltipSize = 140;
-            let xPos = event.clientX - containerRect.left + 10;
-            let yPos = event.clientY - containerRect.top + 10;
-
-            if (xPos + tooltipSize > containerRect.width)
-              xPos = event.clientX - containerRect.left - tooltipSize - 10;
-            if (yPos + tooltipSize > containerRect.height)
-              yPos = event.clientY - containerRect.top - tooltipSize - 10;
-
-            const index = d[4];
-            fetch(`${API_URL}/image/cifar10/${index}`)
-              .then((response) => response.blob())
-              .then((blob) => {
-                const imageUrl = URL.createObjectURL(blob);
-                if (tooltipRef.current) {
-                  tooltipRef.current.style.display = "block";
-                  tooltipRef.current.style.left = `${xPos}px`;
-                  tooltipRef.current.style.top = `${yPos}px`;
-                  tooltipRef.current.innerHTML = `
-                    <div style="display: flex; justify-content: center;">
-                      <img src="${imageUrl}" alt="cifar-10 image" width="140" height="140" />
-                    </div>
-                    <div style="font-size: 14px; margin-top: 4px">
-                      <span style="font-weight: 500;">Ground Truth</span>: ${
-                        forgetClassNames[d[2]]
-                      }</div>
-                    <div style="font-size: 14px;">
-                      <span style="font-weight: 500;">Prediction</span>: ${
-                        forgetClassNames[d[3]]
-                      }</div>
-                  `;
-                }
-              });
-          }
-        }
-
-        function handleMouseLeave() {
-          if (tooltipRef.current) tooltipRef.current.style.display = "none";
-        }
-
-        circles
-          .on("mouseenter", handleMouseEnter)
-          .on("mouseleave", handleMouseLeave);
-
-        crosses
-          .on("mouseenter", handleMouseEnter)
-          .on("mouseleave", handleMouseLeave);
-
-        function zoomed(event: d3.D3ZoomEvent<SVGSVGElement, undefined>) {
-          const transform = event.transform;
-          gMain.attr("transform", transform.toString());
+    const handleZoom = useCallback(
+      (transform: d3.ZoomTransform) => {
+        if (gMainRef.current) {
+          gMainRef.current.attr("transform", transform.toString());
 
           if (circlesRef.current) {
-            circlesRef.current.attr("r", dotSize / transform.k);
+            circlesRef.current.attr("r", CONFIG.dotSize / transform.k);
           }
 
           if (crossesRef.current) {
             crossesRef.current.attr("transform", (d) => {
-              const xPos = x(d[0]);
-              const yPos = y(d[1]);
+              const xPos = x(d[0] as number);
+              const yPos = y(d[1] as number);
               const scale = 1 / transform.k;
               return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
             });
           }
         }
+      },
+      [x, y]
+    );
 
-        const zoom = d3
-          .zoom<SVGSVGElement, undefined>()
-          .scaleExtent([minZoom, maxZoom])
-          .on("zoom", zoomed);
-
-        zoomRef.current = zoom;
-
-        svg.call(zoom);
-
-        svgSelectionRef.current = svg;
-
-        return svg.node() as SVGSVGElement;
-      };
-
-      if (svgRef.current) {
-        svgRef.current.innerHTML = "";
-      }
-
-      if (processedData.length > 0) {
-        const svg = chart();
-        if (svgRef.current) {
-          svgRef.current.appendChild(svg);
-        }
-      } else {
-        if (svgRef.current) {
-          d3.select(svgRef.current)
-            .append("text")
-            .attr("x", width / 2)
-            .attr("y", height / 2)
-            .attr("text-anchor", "middle")
-            .attr("fill", "gray")
-            .style("font-size", "15px")
-            .text(
-              `${
-                unlearnedFCList.length > 0 ? "S" : "Run Unlearning and s"
-              }elect the ${mode} from above.`
-            );
-        }
-      }
-
-      const currentSvgRef = svgRef.current;
-
-      return () => {
-        if (currentSvgRef) {
-          currentSvgRef.innerHTML = "";
-        }
-      };
-    }, [mode, processedData, unlearnedFCList.length, x, y, z]);
+    const zoom = d3
+      .zoom<SVGSVGElement, undefined>()
+      .scaleExtent([CONFIG.minZoom, CONFIG.maxZoom])
+      .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, undefined>) => {
+        handleZoom(event.transform);
+      });
 
     useEffect(() => {
-      const updateOpacity = () => {
-        if (circlesRef.current) {
-          circlesRef.current
-            .style("opacity", (d: any) => {
-              const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
-              const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
+      if (!svgRef.current) return;
 
-              if (dataCondition || classCondition) return loweredOpacity;
-              return defaultCircleOpacity;
-            })
-            .style("pointer-events", (d: any) => {
-              const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
-              const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
+      const svg = svgRef.current;
 
-              if (dataCondition || classCondition) return "none";
-              return "auto";
-            });
+      zoomRef.current = zoom;
+      d3.select<SVGSVGElement, undefined>(svg).call(zoom);
+
+      return () => {
+        d3.select(svg).on(".zoom", null);
+      };
+    }, [zoom]);
+
+    const resetZoom = () => {
+      if (zoomRef.current && svgRef.current) {
+        d3.select(svgRef.current)
+          .transition()
+          .duration(ZOOM_RESET_DURATION)
+          .call(zoomRef.current.transform as any, d3.zoomIdentity);
+      }
+    };
+
+    useEffect(() => {
+      return () => {
+        if (tooltipRef.current) {
+          tooltipRef.current.remove();
         }
-
-        if (crossesRef.current) {
-          crossesRef.current
-            .style("opacity", (d: any) => {
-              const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
-              const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
-
-              if (dataCondition || classCondition) return loweredOpacity;
-              return defaultCrossOpacity;
-            })
-            .style("pointer-events", (d: any) => {
-              const dataCondition =
-                d[2] !== d[5] && viewMode === "Unlearning Target";
-              const classCondition =
-                d[3] !== d[5] && viewMode === "Unlearning Failed";
-
-              if (dataCondition || classCondition) return "none";
-              return "auto";
-            });
+        if (fetchControllerRef.current) {
+          fetchControllerRef.current.abort();
         }
       };
+    }, []);
 
-      updateOpacity();
-    }, [viewMode]);
+    const showTooltip = (event: MouseEvent, content: JSX.Element) => {
+      if (!containerRef.current) return;
+
+      if (tooltipRef.current) {
+        rootRef.current?.unmount();
+        tooltipRef.current.remove();
+      }
+
+      const containerRect = containerRef.current.getBoundingClientRect();
+      let xPos = event.clientX - containerRect.left + 10;
+      let yPos = event.clientY - containerRect.top + 10;
+
+      if (xPos + CONFIG.tooltipXSize > containerRect.width) {
+        xPos = event.clientX - containerRect.left - CONFIG.tooltipXSize - 10;
+        if (xPos < 0) {
+          xPos = 0;
+        }
+      }
+
+      if (yPos + CONFIG.tooltipYSize > containerRect.height) {
+        yPos = event.clientY - containerRect.top - CONFIG.tooltipYSize - 10;
+        if (yPos < 0) {
+          yPos = 0;
+        }
+      }
+
+      const tooltipDiv = document.createElement("div");
+      tooltipDiv.style.position = "absolute";
+      tooltipDiv.style.left = `${xPos}px`;
+      tooltipDiv.style.top = `${yPos}px`;
+      tooltipDiv.style.pointerEvents = "none";
+      tooltipDiv.style.backgroundColor = "white";
+      tooltipDiv.style.padding = "5px";
+      tooltipDiv.style.border = "1px solid rgba(0, 0, 0, 0.25)";
+      tooltipDiv.style.borderRadius = "4px";
+      tooltipDiv.style.zIndex = "30";
+      tooltipDiv.className = "shadow-xl";
+
+      containerRef.current.appendChild(tooltipDiv);
+      tooltipRef.current = tooltipDiv;
+
+      rootRef.current = createRoot(tooltipDiv);
+      rootRef.current.render(content);
+    };
+
+    const hideTooltip = useCallback(() => {
+      if (tooltipRef.current) {
+        rootRef.current?.unmount();
+        tooltipRef.current.remove();
+        tooltipRef.current = null;
+        rootRef.current = null;
+      }
+    }, []);
+
+    useEffect(() => {
+      const handleClickOutside = () => {
+        hideTooltip();
+      };
+
+      document.addEventListener("click", handleClickOutside);
+
+      return () => {
+        document.removeEventListener("click", handleClickOutside);
+      };
+    }, [hideTooltip]);
+
+    const handleInstanceClick = useCallback(
+      async (event: MouseEvent, d: (number | Prob)[]) => {
+        event.stopPropagation();
+
+        const imgIdx = d[4] as number;
+        onHover(imgIdx, mode, d[5] as Prob);
+
+        if (fetchControllerRef.current) {
+          fetchControllerRef.current.abort();
+        }
+
+        const controller = new AbortController();
+        fetchControllerRef.current = controller;
+
+        try {
+          const response = await fetch(`${API_URL}/image/cifar10/${d[4]}`, {
+            signal: controller.signal,
+          });
+
+          if (!response.ok) throw new Error("Failed to fetch image");
+
+          const blob = await response.blob();
+          if (controller.signal.aborted) return;
+
+          const prob = d[5] as Prob;
+          const imageUrl = URL.createObjectURL(blob);
+
+          const currentHoveredInstance = hoveredInstanceRef.current;
+
+          const barChartData = isBaseline
+            ? {
+                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(prob[idx] || 0),
+                })),
+                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(
+                    currentHoveredInstance?.comparisonProb?.[idx] || 0
+                  ),
+                })),
+              }
+            : {
+                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(
+                    currentHoveredInstance?.baselineProb?.[idx] || 0
+                  ),
+                })),
+                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                  class: idx,
+                  value: Number(prob[idx] || 0),
+                })),
+              };
+
+          const tooltipContent = (
+            <EmbeddingTooltip
+              width={CONFIG.tooltipXSize}
+              height={CONFIG.tooltipYSize}
+              imageUrl={imageUrl}
+              data={d}
+              barChartData={barChartData}
+              forgetClass={forgetClass!}
+              isBaseline={isBaseline}
+            />
+          );
+
+          showTooltip(event, tooltipContent);
+
+          return () => {
+            URL.revokeObjectURL(imageUrl);
+          };
+        } catch (err) {
+          if (err instanceof Error && err.name === "AbortError") return;
+          console.error("Failed to fetch tooltip data:", err);
+        }
+      },
+      [forgetClass, isBaseline, mode, onHover]
+    );
+
+    const handleMouseEnter = useCallback(
+      (event: MouseEvent, d: (number | Prob)[]) => {
+        onHover(d[4] as number, mode, d[5] as Prob);
+
+        const element = event.currentTarget as Element;
+        d3.select(element)
+          .attr("stroke", BLACK)
+          .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+          .raise();
+      },
+      [mode, onHover]
+    );
+
+    const handleMouseLeave = useCallback(
+      (event: MouseEvent) => {
+        onHover(null, mode);
+
+        const element = event.currentTarget as Element;
+        const selection = d3.select(element);
+        if (element.tagName === "circle") {
+          selection
+            .attr("stroke", null)
+            .attr("stroke-width", null)
+            .style("opacity", CONFIG.defaultCircleOpacity);
+        } else {
+          const colorStr = z((selection.datum() as any)[3]);
+          const color = d3.color(colorStr);
+          selection
+            .attr("stroke", color ? color.darker().toString() : BLACK)
+            .attr("stroke-width", CONFIG.XStrokeWidth)
+            .style("opacity", CONFIG.defaultCrossOpacity);
+        }
+      },
+      [mode, onHover, z]
+    );
+
+    useEffect(() => {
+      if (!svgRef.current || data.length === 0 || !idExist) {
+        if (svgRef.current) {
+          d3.select(svgRef.current).selectAll("*").remove();
+        }
+        return;
+      }
+
+      elementMapRef.current.clear();
+
+      d3.select(svgRef.current).selectAll("*").remove();
+
+      const svg = d3
+        .select(svgRef.current)
+        .attr("viewBox", [0, 0, CONFIG.width, CONFIG.height])
+        .attr("width", CONFIG.width)
+        .attr("height", CONFIG.height)
+        .attr("preserveAspectRatio", "xMidYMid meet");
+
+      const gMain = svg.append("g");
+      gMainRef.current = gMain;
+
+      gMain
+        .append("rect")
+        .attr("width", CONFIG.width)
+        .attr("height", CONFIG.height)
+        .style("fill", "none")
+        .style("pointer-events", "all");
+
+      const gDot = gMain.append("g");
+
+      const circles = gDot
+        .selectAll<SVGCircleElement, (number | Prob)[]>("circle")
+        .data(data.filter((d) => d[2] !== forgetClass))
+        .join("circle")
+        .attr("cx", (d) => x(d[0] as number))
+        .attr("cy", (d) => y(d[1] as number))
+        .attr("r", CONFIG.dotSize)
+        .attr("fill", (d) => z(d[3] as number))
+        .style("cursor", "pointer")
+        .style("opacity", CONFIG.defaultCircleOpacity)
+        .style("vector-effect", "non-scaling-stroke")
+        .each(function (d) {
+          elementMapRef.current.set(d[4] as number, this);
+        });
+
+      const crosses = gDot
+        .selectAll<SVGPathElement, (number | Prob)[]>("path")
+        .data(data.filter((d) => d[2] === forgetClass))
+        .join("path")
+        .attr(
+          "transform",
+          (d) =>
+            `translate(${x(d[0] as number)},${y(d[1] as number)}) rotate(45)`
+        )
+        .attr(
+          "d",
+          d3
+            .symbol()
+            .type(d3.symbolCross)
+            .size(Math.pow(CONFIG.crossSize / CONFIG.XSizeDivider, 2))
+        )
+        .attr("fill", (d) => z(d[3] as number))
+        .attr("stroke", (d) => {
+          const color = d3.color(z(d[3] as number));
+          return color ? color.darker().darker().toString() : "black";
+        })
+        .attr("stroke-width", CONFIG.XStrokeWidth)
+        .style("cursor", "pointer")
+        .style("opacity", CONFIG.defaultCrossOpacity)
+        .each(function (d) {
+          elementMapRef.current.set(d[4] as number, this);
+        });
+
+      circles
+        .on("click", handleInstanceClick)
+        .on("mouseenter", handleMouseEnter)
+        .on("mouseleave", handleMouseLeave);
+
+      crosses
+        .on("click", handleInstanceClick)
+        .on("mouseenter", handleMouseEnter)
+        .on("mouseleave", handleMouseLeave);
+
+      circlesRef.current = circles;
+      crossesRef.current = crosses;
+
+      return () => {
+        if (circlesRef.current) {
+          circlesRef.current
+            .on("click", null)
+            .on("mouseenter", null)
+            .on("mouseleave", null);
+        }
+        if (crossesRef.current) {
+          crossesRef.current
+            .on("click", null)
+            .on("mouseenter", null)
+            .on("mouseleave", null);
+        }
+      };
+    }, [
+      data,
+      forgetClass,
+      handleInstanceClick,
+      handleMouseEnter,
+      handleMouseLeave,
+      x,
+      y,
+      z,
+      idExist,
+    ]);
+
+    useEffect(() => {
+      if (!circlesRef.current && !crossesRef.current) return;
+
+      const updateOpacity = (selection: d3.Selection<any, any, any, any>) => {
+        selection
+          .style("opacity", (d: any) => {
+            const dataCondition =
+              d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
+            const classCondition =
+              d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
+
+            if (dataCondition || classCondition) return CONFIG.loweredOpacity;
+            return selection.node()?.tagName === "circle"
+              ? CONFIG.defaultCircleOpacity
+              : CONFIG.defaultCrossOpacity;
+          })
+          .style("pointer-events", (d: any) => {
+            const dataCondition =
+              d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
+            const classCondition =
+              d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
+
+            return dataCondition || classCondition ? "none" : "auto";
+          });
+      };
+
+      if (circlesRef.current) {
+        updateOpacity(circlesRef.current);
+      }
+      if (crossesRef.current) {
+        updateOpacity(crossesRef.current);
+      }
+    }, [forgetClass, viewMode]);
+
+    useEffect(() => {
+      if (!hoveredInstance) return;
+
+      const currentElementMap = elementMapRef.current;
+
+      if (hoveredInstance.source !== mode) {
+        const element = currentElementMap.get(hoveredInstance.imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          selection
+            .attr("stroke", BLACK)
+            .attr("stroke-width", CONFIG.hoveredStrokeWidth);
+        }
+      }
+
+      return () => {
+        if (hoveredInstance.source !== mode) {
+          const element = currentElementMap.get(hoveredInstance.imgIdx);
+          if (element) {
+            const selection = d3.select(element);
+            if (element.tagName === "circle") {
+              selection
+                .attr("stroke", null)
+                .attr("stroke-width", null)
+                .style("opacity", CONFIG.defaultCircleOpacity);
+            } else {
+              const d = selection.datum() as (number | Prob)[];
+              const colorStr = z(d[3] as number);
+              const color = d3.color(colorStr);
+              selection
+                .attr("stroke", color ? color.darker().toString() : BLACK)
+                .attr("stroke-width", CONFIG.XStrokeWidth)
+                .style("opacity", CONFIG.defaultCrossOpacity);
+            }
+          }
+        }
+      };
+    }, [hoveredInstance, mode, z]);
 
     useImperativeHandle(ref, () => ({
-      reset: () => {
-        if (zoomRef.current && svgSelectionRef.current) {
-          zoomRef.current.transform(
-            svgSelectionRef.current.transition().duration(750),
-            d3.zoomIdentity
-          );
+      reset: resetZoom,
+      getInstancePosition: (imgIdx: number) => {
+        const datum = data.find((d) => d[4] === imgIdx);
+        if (datum && svgRef.current) {
+          const svgElement = svgRef.current;
+          const point = svgElement.createSVGPoint();
+
+          const svgX = x(datum[0] as number);
+          const svgY = y(datum[1] as number);
+
+          point.x = svgX;
+          point.y = svgY;
+
+          const ctm = svgElement.getScreenCTM();
+          if (ctm) {
+            const transformedPoint = point.matrixTransform(ctm);
+            return {
+              x: transformedPoint.x,
+              y: transformedPoint.y,
+            };
+          }
+        }
+        return null;
+      },
+      updateHoveredInstance: (instance: HovereInstance | null) => {
+        hoveredInstanceRef.current = instance;
+      },
+      highlightInstance: (imgIdx: number) => {
+        const element = elementMapRef.current.get(imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          selection
+            .attr("stroke", BLACK)
+            .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+            .raise();
+        }
+      },
+      removeHighlight: (imgIdx: number) => {
+        const element = elementMapRef.current.get(imgIdx);
+        if (element) {
+          const selection = d3.select(element);
+          if (element.tagName === "circle") {
+            selection
+              .attr("stroke", null)
+              .attr("stroke-width", null)
+              .style("opacity", CONFIG.defaultCircleOpacity);
+          } else {
+            const d = selection.datum() as (number | Prob)[];
+            const colorStr = z(d[3] as number);
+            const color = d3.color(colorStr);
+            selection
+              .attr("stroke", color ? color.darker().toString() : BLACK)
+              .attr("stroke-width", CONFIG.XStrokeWidth)
+              .style("opacity", CONFIG.defaultCrossOpacity);
+          }
         }
       },
     }));
 
     return (
       <div
-        ref={containerRef}
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "relative",
-        }}
+        style={{ height }}
+        className="flex flex-col justify-start items-center relative"
       >
-        <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
-        <div
-          ref={tooltipRef}
-          style={{
-            position: "absolute",
-            display: "none",
-            pointerEvents: "none",
-            backgroundColor: "white",
-            padding: "5px",
-            border: "1px solid rgba(0, 0, 0, 0.25)",
-            borderRadius: "4px",
-          }}
-          className="shadow-xl"
-        ></div>
+        {idExist && (
+          <div>
+            <AiOutlineHome
+              className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
+              onClick={resetZoom}
+            />
+            <div className="flex items-center absolute z-10 right-0 top-6">
+              <span className="mr-1.5 text-sm">Highlight:</span>
+              <Select
+                value={viewMode}
+                defaultValue={VIEW_MODES[0]}
+                onValueChange={(value: ViewModeType) => setViewMode(value)}
+              >
+                <SelectTrigger className="w-36 h-6">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {VIEW_MODES.map((viewMode, idx) => (
+                    <SelectItem key={idx} value={viewMode}>
+                      {viewMode}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+        <div className="text-[15px] mt-1 flex items-center">
+          {isBaseline ? (
+            <BaselineNeuralNetworkIcon className="mr-1" />
+          ) : (
+            <ComparisonNeuralNetworkIcon className="mr-1" />
+          )}
+          <span>
+            {mode} {idExist ? `(${id})` : ""}
+          </span>
+        </div>
+        <div className="w-[638px] h-[607px] flex flex-col justify-center items-center">
+          <div
+            ref={containerRef}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
+          </div>
+        </div>
       </div>
     );
-  })
+  }
 );
 
-export default ScatterPlot;
+export default React.memo(ScatterPlot);
