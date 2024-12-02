@@ -20,7 +20,13 @@ import {
   StepperTrigger,
 } from "../components/UI/stepper";
 
-export default function Progress({ height }: { height: number }) {
+export default function Progress({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
@@ -143,8 +149,8 @@ export default function Progress({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height }}
-      className="w-[280px] p-1 relative border border-t-0"
+      style={{ width, height }}
+      className="p-1 relative border border-t-0"
     >
       <div className="flex items-center gap-1">
         <VitalIcon />

@@ -22,7 +22,13 @@ const DEFENSE = "defense";
 
 type ModeType = "unlearning" | "defense";
 
-export default function Experiments({ height }: { height: number }) {
+export default function Experiments({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const { selectedForgetClasses } = useContext(ForgetClassContext);
   const { isRunning } = useContext(RunningStatusContext);
 
@@ -46,8 +52,8 @@ export default function Experiments({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height }}
-      className="w-[1032px] p-1 relative border border-t-0 border-l-0"
+      style={{ width, height }}
+      className="p-1 relative border border-t-0 border-l-0"
     >
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center ml-0.5">

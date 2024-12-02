@@ -15,7 +15,13 @@ const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 const HEIGHT = 635;
 
-export default function Core({ height }: { height: number }) {
+export default function Core({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -27,7 +33,7 @@ export default function Core({ height }: { height: number }) {
   const isEmbeddingMode = displayMode === EMBEDDINGS;
 
   return (
-    <section style={{ height }} className="w-[1312px] p-1 border border-l-0">
+    <section style={{ width, height }} className="p-1 border border-l-0">
       <div className="flex justify-between items-center">
         <div className="flex items-center mb-0.5">
           <div
