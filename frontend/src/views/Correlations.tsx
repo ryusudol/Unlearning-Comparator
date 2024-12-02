@@ -16,10 +16,11 @@ export default function Correlations({
   height: number;
 }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { selectedForgetClasses } = useContext(ForgetClassContext);
+  const { forgetClass } = useContext(ForgetClassContext);
 
   const [dataset, setDataset] = useState(TRAIN);
 
+  const forgetClassExist = forgetClass !== undefined;
   const allSelected = baseline !== "" && comparison !== "";
 
   return (
@@ -34,9 +35,11 @@ export default function Correlations({
             Layer-Wise Correlations
           </h5>
         </div>
-        {allSelected && <DatasetModeSelector onValueChange={setDataset} />}
+        {forgetClassExist && allSelected && (
+          <DatasetModeSelector onValueChange={setDataset} />
+        )}
       </div>
-      {selectedForgetClasses.length > 0 ? (
+      {forgetClassExist ? (
         allSelected ? (
           <LineChart dataset={dataset} />
         ) : (

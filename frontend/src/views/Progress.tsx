@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 import { Check, Clock, Dot, Loader2 } from "lucide-react";
 
+import Indicator from "../components/Indicator";
 import { Separator } from "../components/UI/separator";
 import { Button } from "../components/UI/button";
 import { fetchDataFile } from "../utils/api/unlearning";
@@ -172,7 +173,7 @@ export default function Progress({
           </>
         )}
       </div>
-      {forgetClassExist && (
+      {forgetClassExist ? (
         <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
           {steps.map((step, idx) => {
             const isNotLastStep = idx !== steps.length - 1;
@@ -229,6 +230,8 @@ export default function Progress({
             );
           })}
         </Stepper>
+      ) : (
+        <Indicator about="ForgetClass" />
       )}
     </section>
   );
