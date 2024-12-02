@@ -1,21 +1,44 @@
-# Machine Unlearning Dashboard
-It's a Machine Unlearning Dashboard that provides training, evaluation of unlearning, and attack simulation.
+# Machine Unlearning Comparator
 
-## How to start the frontend
+A visualization tool for comparing different machine unlearning methods and evaluating their effectiveness through privacy attacks.
 
-* Install [pnpm](https://pnpm.io/installation) to set up the development environment.
+## Features
 
-**1. Clone the repository and move to the frontend directory**
-```shell
-git clone https://github.com/gnueaj/mu-dashboard.git && cd mu-dashboard/frontend
-```
+The Machine Unlearning Comparator provides comparison of various baseline methods:
+- FineTuning
+- Gradient Ascent
+- Random Labeling
 
-**2. Download necessary modules using `pnpm`**
-```shell
-pnpm install
-```
+It includes various visualizations and evaluations through privacy attacks to assess the effectiveness of each method.
 
-**3. Run the project**
-```shell
-`pnpm dev` or `pnpm start`
-```
+![Machine Unlearning Comparator](img/comparator.png)
+
+## Demo
+
+Try our live demo: [Machine Unlearning Comparator](https://gnueaj.github.io/Unlearning-Comparator/)
+
+## How to Start
+
+### Backend
+
+1. **Install Dependencies Using Hatch**
+   ```shell
+   hatch shell
+   ```
+
+2. **Start the Backend Server**
+   ```shell
+   hatch run start
+   ```
+
+### Frontend
+
+1. **Install Dependencies Using pnpm**
+   ```shell
+   pnpm install
+   ```
+
+2. **Start the Frontend Server**
+   ```shell
+   pnpm start
+   ```
