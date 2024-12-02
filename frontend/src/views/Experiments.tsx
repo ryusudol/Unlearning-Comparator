@@ -43,9 +43,7 @@ export default function Experiments({
   const isUnlearning = mode === UNLEARNING;
   const isDefense = mode === DEFENSE;
 
-  const handleAddExpClick = () => {
-    setOpen(true);
-  };
+  const handleAddExpClick = () => {};
 
   const handleExperimentModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     setMode(e.currentTarget.id as ModeType);
@@ -68,24 +66,16 @@ export default function Experiments({
               setOpen(value);
             }}
           >
-            <DialogTrigger disabled={isRunning}>
+            <DialogTrigger disabled={true}>
               <Button
                 onClick={handleAddExpClick}
                 content={
                   <>
-                    <PlusIcon
-                      color={isRunning ? "#d1d5db" : "white"}
-                      className="w-2.5 h-2.5 mr-1.5"
-                    />
-                    <span className={isRunning ? "text-gray-300" : ""}>
-                      Add Experiment
-                    </span>
+                    <PlusIcon color="#d1d5db" className="w-2.5 h-2.5 mr-1.5" />
+                    <span className="text-gray-300">Add Experiment</span>
                   </>
                 }
-                className={`px-2.5 mr-0.5 ${
-                  isRunning &&
-                  "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
-                }`}
+                className="px-2.5 mr-0.5 bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
               />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[400px] p-4">
