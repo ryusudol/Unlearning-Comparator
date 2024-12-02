@@ -10,8 +10,9 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
+import { useToast } from "../hooks/use-toast";
 import { fetchAllExperimentsData } from "../utils/api/unlearning";
-import { deleteRow, downloadJSON, downloadPTH } from "../utils/api/dataTable";
+import { deleteRow } from "../utils/api/dataTable";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { calculatePerformanceMetrics } from "../utils/data/experiments";
 import { ExperimentData } from "../types/data";
@@ -61,6 +62,8 @@ export default function DataTable({ columns }: Props) {
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const { toast } = useToast();
 
   const tableData = useMemo(() => {
     const experimentsArray = Object.values(experiments);
@@ -204,6 +207,14 @@ export default function DataTable({ columns }: Props) {
   ]);
 
   const handleDeleteRow = async (id: string) => {
+    if (id.startsWith("000") || id.startsWith("a00")) {
+      toast({
+        description:
+          "You can't delete the Pretrained and Retrained experiments.",
+      });
+      return;
+    }
+
     try {
       await deleteRow(forgetClass as number, id);
       setIsExperimentsLoading(true);
@@ -216,37 +227,6 @@ export default function DataTable({ columns }: Props) {
       console.error("Failed to delete the row:", error);
     } finally {
       setIsExperimentsLoading(false);
-    }
-  };
-
-  const handleDownloadJSON = async (id: string) => {
-    try {
-      const json = await downloadJSON(forgetClass as number, id);
-
-      const jsonString = JSON.stringify(json, null, 2);
-
-      const blob = new Blob([jsonString], { type: "application/json" });
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${id}.json`;
-
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Failed to download the JSON file:", error);
-    }
-  };
-
-  const handleDownloadPTH = async (id: string) => {
-    try {
-      await downloadPTH(forgetClass as number, id);
-    } catch (error) {
-      console.error("Failed to download the PTH file:", error);
     }
   };
 
@@ -371,16 +351,6 @@ export default function DataTable({ columns }: Props) {
                     <ContextMenuContent>
                       <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
                         Delete
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => handleDownloadJSON(row.id)}
-                      >
-                        Download JSON
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => handleDownloadPTH(row.id)}
-                      >
-                        Download PTH
                       </ContextMenuItem>
                     </ContextMenuContent>
                   </ContextMenu>
