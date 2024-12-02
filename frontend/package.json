@@ -17,7 +17,6 @@
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slider": "^1.2.0",
     "@radix-ui/react-slot": "^1.1.0",
-    "@radix-ui/react-toast": "^1.2.2",
     "@tanstack/react-table": "^8.20.5",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -30,7 +29,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
-    "gh-pages": "^6.2.0",
     "lucide-react": "^0.438.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -48,9 +46,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "pnpm start",
-    "predeploy": "pnpm run build",
-    "deploy": "gh-pages -d build"
+    "dev": "pnpm start"
   },
   "eslintConfig": {
     "extends": [

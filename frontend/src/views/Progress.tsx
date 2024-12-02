@@ -157,7 +157,7 @@ export default function Progress({
       <div className="flex items-center gap-1">
         <VitalIcon />
         <h5 className="font-semibold text-lg">Progress</h5>
-        {forgetClassExist && runningTime !== 0 && (
+        {forgetClassExist && (
           <>
             <Separator orientation="vertical" className="h-4 mx-1" />
             <div>
