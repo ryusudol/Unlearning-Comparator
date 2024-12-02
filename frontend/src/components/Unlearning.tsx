@@ -37,10 +37,14 @@ export default function Unlearning() {
   const isCustom = method === CUSTOM;
 
   const handleMethodSelection = (value: string) => {
-    const { epochs, learning_rate } = getDefaultUnlearningConfig(value);
-    setMethod(value);
-    setEpochs([epochs]);
-    setLearningRateLog([learning_rate]);
+    if (value !== CUSTOM) {
+      const { epochs, learning_rate, batch_size } =
+        getDefaultUnlearningConfig(value);
+      setMethod(value);
+      setEpochs([epochs]);
+      setLearningRateLog([learning_rate]);
+      setBatchSizeLog([batch_size]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
