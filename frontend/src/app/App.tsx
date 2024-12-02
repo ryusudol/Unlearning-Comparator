@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { ExperimentsContext } from "../store/experiments-context";
 import Header from "../components/Header";
 import Experiments from "../views/Experiments";
-import RunningStatus from "../views/Progress";
+import Progress from "../views/Progress";
 import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
@@ -30,7 +30,7 @@ export default function App() {
           <div>
             <div className="flex items-center">
               <Experiments height={234} />
-              <RunningStatus height={234} />
+              <Progress height={234} />
             </div>
             <Core height={677} />
           </div>
