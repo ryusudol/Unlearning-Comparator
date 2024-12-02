@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
+import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
+import { ForgetClassContext } from "../store/forget-class-context";
 import { Separator } from "../components/UI/separator";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { TABLEAU10 } from "../constants/tableau10";
@@ -15,8 +17,18 @@ const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 const HEIGHT = 635;
 
-export default function Core({ height }: { height: number }) {
+export default function Core({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
+  const { forgetClass } = useContext(ForgetClassContext);
+
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
+
+  const forgetClassExist = forgetClass !== undefined;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -27,7 +39,7 @@ export default function Core({ height }: { height: number }) {
   const isEmbeddingMode = displayMode === EMBEDDINGS;
 
   return (
-    <section style={{ height }} className="w-[1312px] p-1 border border-l-0">
+    <section style={{ width, height }} className="p-1 border border-l-0">
       <div className="flex justify-between items-center">
         <div className="flex items-center mb-0.5">
           <div
@@ -62,12 +74,16 @@ export default function Core({ height }: { height: number }) {
             {!isEmbeddingMode && <UnderLine />}
           </div>
         </div>
-        {displayMode === EMBEDDINGS && <EmbeddingLegend />}
+        {forgetClassExist && isEmbeddingMode && <EmbeddingLegend />}
       </div>
-      {isEmbeddingMode ? (
-        <Embeddings height={HEIGHT} />
+      {forgetClassExist ? (
+        isEmbeddingMode ? (
+          <Embeddings height={HEIGHT} />
+        ) : (
+          <PrivacyAttack height={HEIGHT} />
+        )
       ) : (
-        <PrivacyAttack height={HEIGHT} />
+        <Indicator about="ForgetClass" />
       )}
     </section>
   );

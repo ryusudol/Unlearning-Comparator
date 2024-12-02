@@ -1,10 +1,10 @@
 import { useState, useContext } from "react";
 
+import Indicator from "../components/Indicator";
 import LineChart from "../components/LineChart";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import { Layers02Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { TRAIN } from "./Predictions";
 
@@ -17,12 +17,8 @@ export default function Correlations({
 }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { selectedForgetClasses } = useContext(ForgetClassContext);
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
 
   const [dataset, setDataset] = useState(TRAIN);
-
-  if (!baselineExperiment || !comparisonExperiment) return null;
 
   const allSelected = baseline !== "" && comparison !== "";
 
@@ -44,14 +40,10 @@ export default function Correlations({
         allSelected ? (
           <LineChart dataset={dataset} />
         ) : (
-          <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
-            Select both Baseline and Comparison.
-          </div>
+          <Indicator about="BaselineComparison" />
         )
       ) : (
-        <div className="w-full h-full flex justify-center items-center text-[15px] text-gray-500">
-          Select the target forget class first.
-        </div>
+        <Indicator about="ForgetClass" />
       )}
     </section>
   );

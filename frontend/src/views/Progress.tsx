@@ -20,7 +20,13 @@ import {
   StepperTrigger,
 } from "../components/UI/stepper";
 
-export default function Progress({ height }: { height: number }) {
+export default function Progress({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
   const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
@@ -38,6 +44,7 @@ export default function Progress({ height }: { height: number }) {
   const [ckaProgress, setCkaProgress] = useState(0);
   const [runningTime, setRunningTime] = useState(0);
 
+  const forgetClassExist = forgetClass !== undefined;
   const progress = status.progress;
   const steps = getProgressSteps(
     status,
@@ -143,80 +150,86 @@ export default function Progress({ height }: { height: number }) {
 
   return (
     <section
-      style={{ height }}
-      className="w-[280px] p-1 relative border border-t-0"
+      style={{ width, height }}
+      className="p-1 relative border border-t-0"
     >
       <div className="flex items-center gap-1">
         <VitalIcon />
         <h5 className="font-semibold text-lg">Progress</h5>
-        <Separator orientation="vertical" className="h-4 mx-1" />
-        <div>
-          {isRunning || completedSteps.length ? (
-            <div className="flex items-center gap-1 relative top-0.5">
-              <Clock className="text-muted-foreground w-3 h-3" />
-              <span className="text-sm">{runningTime.toFixed(1)}s</span>
-            </div>
-          ) : (
-            ""
-          )}
-        </div>
-      </div>
-      <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
-        {steps.map((step, idx) => {
-          const isNotLastStep = idx !== steps.length - 1;
-
-          let state: "completed" | "active" | "inactive";
-          if (step.step < activeStep) state = "completed";
-          else if (step.step === activeStep) state = "active";
-          else state = "inactive";
-
-          return (
-            <StepperItem
-              key={idx}
-              className="relative flex w-full items-start gap-2"
-            >
-              {isNotLastStep && (
-                <StepperSeparator className="absolute left-[15px] top-6 block h-[calc(100%)] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary">
-                  <div />
-                </StepperSeparator>
+        {forgetClassExist && (
+          <>
+            <Separator orientation="vertical" className="h-4 mx-1" />
+            <div>
+              {isRunning || completedSteps.length ? (
+                <div className="flex items-center gap-1 relative top-0.5">
+                  <Clock className="text-muted-foreground w-3 h-3" />
+                  <span className="text-sm">{runningTime.toFixed(1)}s</span>
+                </div>
+              ) : (
+                ""
               )}
-              <StepperTrigger className="p-1 cursor-default">
-                <Button className="w-6 h-6 p-0 rounded-full z-10 cursor-default hover:bg-[#0F172A]">
-                  {state === "completed" ||
-                  (completedSteps.length && !isRunning) ? (
-                    <Check className="size-4" />
-                  ) : state === "active" ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (!completedSteps.length || isRunning) &&
-                    state === "inactive" ? (
-                    <Dot className="size-4" />
-                  ) : null}
-                </Button>
-              </StepperTrigger>
-              <div className="flex flex-col">
-                <StepperTitle className="font-semibold transition text-sm">
-                  {step.title}
-                </StepperTitle>
-                <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm leading-[17px]">
-                  {step.description.split("\n").map((el, idx) => (
-                    <p key={idx} className="text-black">
-                      {el
-                        .split("**")
-                        .map((part, partIdx) =>
-                          partIdx % 2 === 1 ? (
-                            <strong key={partIdx}>{part}</strong>
-                          ) : (
-                            part
-                          )
-                        )}
-                    </p>
-                  ))}
-                </StepperDescription>
-              </div>
-            </StepperItem>
-          );
-        })}
-      </Stepper>
+            </div>
+          </>
+        )}
+      </div>
+      {forgetClassExist && (
+        <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
+          {steps.map((step, idx) => {
+            const isNotLastStep = idx !== steps.length - 1;
+
+            let state: "completed" | "active" | "inactive";
+            if (step.step < activeStep) state = "completed";
+            else if (step.step === activeStep) state = "active";
+            else state = "inactive";
+
+            return (
+              <StepperItem
+                key={idx}
+                className="relative flex w-full items-start gap-2"
+              >
+                {isNotLastStep && (
+                  <StepperSeparator className="absolute left-[15px] top-6 block h-[calc(100%)] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary">
+                    <div />
+                  </StepperSeparator>
+                )}
+                <StepperTrigger className="p-1 cursor-default">
+                  <Button className="w-6 h-6 p-0 rounded-full z-10 cursor-default hover:bg-[#0F172A]">
+                    {state === "completed" ||
+                    (completedSteps.length && !isRunning) ? (
+                      <Check className="size-4" />
+                    ) : state === "active" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (!completedSteps.length || isRunning) &&
+                      state === "inactive" ? (
+                      <Dot className="size-4" />
+                    ) : null}
+                  </Button>
+                </StepperTrigger>
+                <div className="flex flex-col">
+                  <StepperTitle className="font-semibold transition text-sm">
+                    {step.title}
+                  </StepperTitle>
+                  <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm leading-[17px]">
+                    {step.description.split("\n").map((el, idx) => (
+                      <p key={idx} className="text-black">
+                        {el
+                          .split("**")
+                          .map((part, partIdx) =>
+                            partIdx % 2 === 1 ? (
+                              <strong key={partIdx}>{part}</strong>
+                            ) : (
+                              part
+                            )
+                          )}
+                      </p>
+                    ))}
+                  </StepperDescription>
+                </div>
+              </StepperItem>
+            );
+          })}
+        </Stepper>
+      )}
     </section>
   );
 }

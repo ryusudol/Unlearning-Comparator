@@ -33,7 +33,7 @@ export default function Header() {
     addSelectedForgetClass,
     deleteSelectedForgetClass,
   } = useContext(ForgetClassContext);
-  const { saveExperiments, setExperimentsLoading } =
+  const { saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
 
   const unselectForgetClasses = useMemo(
@@ -49,13 +49,13 @@ export default function Header() {
 
   const fetchAndSaveExperiments = async (forgetClass: string) => {
     const classIndex = forgetClassNames.indexOf(forgetClass);
-    setExperimentsLoading(true);
+    setIsExperimentsLoading(true);
     try {
       const allData: Experiments = await fetchAllExperimentsData(classIndex);
       if ("detail" in allData) saveExperiments({});
       else saveExperiments(allData);
     } finally {
-      setExperimentsLoading(false);
+      setIsExperimentsLoading(false);
     }
   };
 
