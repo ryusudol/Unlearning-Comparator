@@ -241,15 +241,28 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
       <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
         <div className="flex items-center">
           <BaselineNeuralNetworkIcon className="mr-1" />
-          <p>Baseline: {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+          <p>
+            Baseline:{" "}
+            <span className="font-semibold">
+              {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+            </span>
+          </p>
         </div>
         <div className="flex items-center">
           <ComparisonNeuralNetworkIcon className="mr-1" />
           <p>
-            Comparison: {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+            Comparison:{" "}
+            <span className="font-semibold">
+              {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+            </span>
           </p>
         </div>
-        <p>Difference: {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}</p>
+        <p>
+          Difference:{" "}
+          <span className="font-semibold">
+            {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}
+          </span>
+        </p>
       </div>
     );
   }

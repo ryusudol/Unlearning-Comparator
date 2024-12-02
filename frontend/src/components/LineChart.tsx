@@ -247,13 +247,15 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <div className="flex items-center leading-[18px]">
           <CircleIcon className="w-3 h-3 mr-1" style={{ color: PURPLE }} />
           <p>
-            Base. (Remain): <strong>{payload[1].value}</strong>
+            Base. (Remain):{" "}
+            <span className="font-semibold">{payload[1].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
           <CircleIcon className="w-3 h-3 mr-1" color={EMERALD} />
           <p>
-            Comp. (Remain): <strong>{payload[3].value}</strong>
+            Comp. (Remain):{" "}
+            <span className="font-semibold">{payload[3].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
@@ -262,7 +264,8 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
             style={{ color: PURPLE }}
           />
           <p>
-            Base. (Forget): <strong>{payload[0].value}</strong>
+            Base. (Forget):{" "}
+            <span className="font-semibold">{payload[0].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
@@ -271,7 +274,8 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
             color={EMERALD}
           />
           <p>
-            Comp. (Forget): <strong>{payload[2].value}</strong>
+            Comp. (Forget):{" "}
+            <span className="font-semibold">{payload[2].value}</span>
           </p>
         </div>
       </div>
@@ -282,7 +286,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[135px] left-[58px] text-xs leading-4">
+    <div className="absolute top-[125px] left-[62px] text-xs leading-4">
       <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon
