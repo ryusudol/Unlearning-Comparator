@@ -209,7 +209,7 @@ export default function VerticalBarChart({
               className="-translate-y-2 text-xs"
               value={`← Baseline High | Comparison High →`}
               offset={-3}
-              dx={9}
+              dx={8.5}
               position="bottom"
             />
           </XAxis>

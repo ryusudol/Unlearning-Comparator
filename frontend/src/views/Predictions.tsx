@@ -24,11 +24,12 @@ export default function Predictions({
   height: number;
 }) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { selectedForgetClasses } = useContext(ForgetClassContext);
+  const { forgetClass } = useContext(ForgetClassContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
 
+  const forgetClassExist = forgetClass !== undefined;
   const allSelected = baseline !== "" && comparison !== "";
 
   return (
@@ -41,9 +42,11 @@ export default function Predictions({
           <Target02Icon />
           <h5 className="font-semibold ml-1 text-lg">Predictions</h5>
         </div>
-        {allSelected && <DatasetModeSelector onValueChange={setDatasetMode} />}
+        {forgetClassExist && allSelected && (
+          <DatasetModeSelector onValueChange={setDatasetMode} />
+        )}
       </div>
-      {selectedForgetClasses.length !== 0 ? (
+      {forgetClassExist ? (
         !allSelected ? (
           <Indicator about="BaselineComparison" />
         ) : (
@@ -68,7 +71,7 @@ export default function Predictions({
       ) : (
         <Indicator about="ForgetClass" />
       )}
-      {allSelected && <BubbleChartLegend />}
+      {allSelected && forgetClassExist && <BubbleChartLegend />}
     </section>
   );
 }
