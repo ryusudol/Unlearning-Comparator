@@ -369,9 +369,14 @@ export default function DataTable({ columns }: Props) {
                       </TableRow>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
-                      <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
-                        Delete
-                      </ContextMenuItem>
+                      {!row.id.startsWith("000") &&
+                        !row.id.startsWith("a00") && (
+                          <ContextMenuItem
+                            onClick={() => handleDeleteRow(row.id)}
+                          >
+                            Delete
+                          </ContextMenuItem>
+                        )}
                       <ContextMenuItem
                         onClick={() => handleDownloadJSON(row.id)}
                       >
