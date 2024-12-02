@@ -1,19 +1,19 @@
 export function getDefaultUnlearningConfig(method: string) {
-  let epochs, learning_rate;
+  let epochs, learning_rate, batch_size;
 
   if (method === "ft") {
     epochs = 10;
     learning_rate = -2;
+    batch_size = 6;
   } else if (method === "rl") {
     epochs = 3;
-    learning_rate = -2;
-  } else if (method === "ga") {
-    epochs = 3;
     learning_rate = -4;
+    batch_size = 5;
   } else {
-    epochs = 30;
-    learning_rate = -2;
+    epochs = 5;
+    learning_rate = -3;
+    batch_size = 8;
   }
 
-  return { epochs, learning_rate };
+  return { epochs, learning_rate, batch_size };
 }

@@ -34,7 +34,6 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
       const target = action.payload;
       if (!state.selectedForgetClasses.includes(target)) {
         const selectedForgetClasses = [...state.selectedForgetClasses, target];
-        selectedForgetClasses.sort((a, b) => a - b);
         sessionStorage.setItem(
           FORGET_CLASS,
           JSON.stringify({ ...state, selectedForgetClasses })

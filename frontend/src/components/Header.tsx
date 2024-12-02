@@ -78,10 +78,12 @@ export default function Header() {
       forgetClassNames.indexOf(targetClass)
     );
 
+    const willBeEmpty = selectedForgetClasses.length === 1;
+
     deleteSelectedForgetClass(targetClass);
 
     if (targetClass === forgetClassNames[forgetClass as number]) {
-      if (selectedForgetClasses.length === 0) {
+      if (willBeEmpty) {
         saveForgetClass(undefined);
         setOpen(true);
       } else {
