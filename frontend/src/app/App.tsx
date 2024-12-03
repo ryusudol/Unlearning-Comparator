@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 
-import { ExperimentsContext } from "../store/experiments-context";
 import Header from "../components/Header";
 import Experiments from "../views/Experiments";
 import Progress from "../views/Progress";
@@ -8,6 +7,7 @@ import Accuracies from "../views/Accuracies";
 import Core from "../views/Core";
 import Predictions from "../views/Predictions";
 import Correlations from "../views/Correlations";
+import { ExperimentsContext } from "../store/experiments-context";
 
 const CORE_WIDTH = 1312;
 const EXPERIMENTS_WIDTH = 1032;
