@@ -10,10 +10,17 @@ Try our live demo: [Machine Unlearning Comparator](https://gnueaj.github.io/Unle
 
 ## Features
 
+### Built-in Baseline Methods
 The Machine Unlearning Comparator provides comparison of various baseline methods:
-- FineTuning
-- Gradient Ascent
-- Random Labeling
+- Fine-Tuning
+- Gradient-Ascent
+- Random-Labeling
+
+### **Custom Method Integration** ✨
+**Upload and evaluate your own unlearning methods!** The comparator supports custom implementations, enabling you to:
+- **Benchmark** your novel approaches against established baselines
+- **Upload** your custom unlearning implementations for comparison
+- **Compare** results using standardized evaluation metrics and privacy attacks
 
 It includes various visualizations and evaluations through privacy attacks to assess the effectiveness of each method.
 
