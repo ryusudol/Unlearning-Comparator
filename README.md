@@ -1,6 +1,6 @@
 # Machine Unlearning Comparator
 
-A visualization tool for comparing different machine unlearning methods and evaluating their effectiveness through privacy attacks.
+A visualization tool for evaluating machine unlearning methods using metrics and privacy attacks. Compare different unlearning approaches and assess their effectiveness through comprehensive analysis.
 
 ## Demo
 
