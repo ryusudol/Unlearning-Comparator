@@ -298,7 +298,7 @@ export default React.memo(function EmbeddingTooltip({
       </div>
       <div>
         <svg ref={svgRef} className="w-full" />
-        <p className="text-xs absolute font-light bottom-1 right-[calc(24%+2px)] translate-x-1/2">
+        <p className="text-xs absolute bottom-1 right-[calc(24%+2px)] translate-x-1/2">
           Confidence Score
         </p>
       </div>

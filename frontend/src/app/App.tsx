@@ -36,7 +36,7 @@ export default function App() {
   if (isPageLoading) return <div></div>;
 
   return (
-    <section className="w-[1805px] relative">
+    <section className="w-screen relative">
       <Header />
       {!isExperimentLoading && (
         <div className="flex items-center">

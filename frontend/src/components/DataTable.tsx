@@ -396,7 +396,7 @@ export default function DataTable({ columns }: Props) {
                     colSpan={columns.length}
                     className="h-[178px] text-center text-gray-500 text-[15px]"
                   >
-                    Run Training or Unlearning from the left first.
+                    Failed to load the data.
                   </TableCell>
                 </TableRow>
               )}

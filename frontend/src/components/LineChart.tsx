@@ -37,10 +37,24 @@ const DATAKEYS = [
   "comparisonOtherCka",
 ];
 const tickStyle = `
-  .recharts-cartesian-axis-tick text {
-    fill: ${BLACK} !important;
+.recharts-cartesian-axis-tick text {
+  fill: ${BLACK} !important;
   }
-`;
+  `;
+
+const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
+  <text
+    x={x}
+    y={y}
+    dy={8}
+    textAnchor="end"
+    transform={`rotate(-45, ${x}, ${y})`}
+    fontSize={LABEL_FONT_SIZE}
+    fontWeight={hoveredLayer === payload.value ? "bold" : TICK_FONT_WEIGHT}
+  >
+    {payload.value}
+  </text>
+));
 
 const chartConfig = {
   layer: {
@@ -71,20 +85,6 @@ type TickProps = {
   payload: any;
   hoveredLayer: string | null;
 };
-
-const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
-  <text
-    x={x}
-    y={y}
-    dy={8}
-    textAnchor="end"
-    transform={`rotate(-45, ${x}, ${y})`}
-    fontSize={LABEL_FONT_SIZE}
-    fontWeight={hoveredLayer === payload.value ? "bold" : TICK_FONT_WEIGHT}
-  >
-    {payload.value}
-  </text>
-));
 
 export default function MyLineChart({ dataset }: { dataset: string }) {
   const { baselineExperiment, comparisonExperiment } =
