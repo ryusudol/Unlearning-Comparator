@@ -49,3 +49,6 @@ It includes various visualizations and evaluations through privacy attacks to as
    ```shell
    pnpm start
    ```
+   
+## Related Resources
+- [ResNet18 CIFAR-10 Unlearning Models on Hugging Face](https://huggingface.co/jaeunglee/resnet18-cifar10-unlearning)
