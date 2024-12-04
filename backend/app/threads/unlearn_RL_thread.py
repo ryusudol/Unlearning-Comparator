@@ -304,7 +304,7 @@ class UnlearningRLThread(threading.Thread):
                 1 if is_forget else 0,                         # forget as binary
                 round(float(umap_embedding[i][0]), 3),         # x coordinate
                 round(float(umap_embedding[i][1]), 3),         # y coordinate
-                compress_prob_array(probs[i].tolist()),                 # compressed probabilities
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
             ])
 
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]

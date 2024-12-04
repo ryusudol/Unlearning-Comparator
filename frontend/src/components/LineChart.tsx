@@ -286,7 +286,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[130px] left-[60px] text-xs leading-4">
+    <div className="absolute top-[128px] left-[60px] text-xs leading-4">
       <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon

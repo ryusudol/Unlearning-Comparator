@@ -236,6 +236,19 @@ class UnlearningGAThread(threading.Thread):
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
 
+         # CKA similarity calculation
+        self.status.progress = "Calculating CKA Similarity"
+        print("Calculating CKA similarity")
+        cka_results = await calculate_cka_similarity(
+            model_before=self.model_before,
+            model_after=self.model,
+            train_loader=self.train_loader,
+            test_loader=self.test_loader,
+            forget_class=self.request.forget_class,
+            device=self.device
+        )
+        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
+
         # Detailed results preparation
         self.status.progress = "Preparing Results"
         detailed_results = []
@@ -258,19 +271,6 @@ class UnlearningGAThread(threading.Thread):
            sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
         )
         
-        # CKA similarity calculation
-        self.status.progress = "Calculating CKA Similarity"
-        print("Calculating CKA similarity")
-        cka_results = await calculate_cka_similarity(
-            model_before=self.model_before,
-            model_after=self.model,
-            train_loader=self.train_loader,
-            test_loader=self.test_loader,
-            forget_class=self.request.forget_class,
-            device=self.device
-        )
-        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
-
         # Prepare results dictionary
         results = {
             "id": self.status.recent_id,
