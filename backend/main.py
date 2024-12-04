@@ -1,10 +1,16 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import train, unlearn, data
+from app.utils.helpers import download_weights_from_hub
 
 # Constants
 ALLOW_ORIGINS = ["*"]  # TODO: Update URL after deployment
-# ALLOW_ORIGINS = ["http://localhost:3000"]
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    download_weights_from_hub()
+    yield
 
 def setup_middleware(app: FastAPI) -> None:
     app.add_middleware(
@@ -21,7 +27,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(data.router)
 
 def create_app() -> FastAPI:
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
     setup_middleware(app)
     register_routers(app)
     return app

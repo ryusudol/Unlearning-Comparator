@@ -139,11 +139,7 @@ class UnlearningCustomThread(threading.Thread):
         if self.stopped():
             return
 
-        # print("Train Label Distribution:")
-        # self.print_distribution(train_label_dist)
-        # print("Train Confidence Distribution:")
-        # self.print_distribution(train_conf_dist)
-        
+
         # Evaluate on test set
         self.status.progress = "Evaluating Test Set"
         print("Start Test set evaluation")
