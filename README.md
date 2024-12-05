@@ -12,9 +12,9 @@ Try our live demo: [Machine Unlearning Comparator](https://gnueaj.github.io/Mach
 
 ### Built-in Baseline Methods
 The Machine Unlearning Comparator provides comparison of various baseline methods:
-- Fine-Tuning
-- Gradient-Ascent
-- Random-Labeling
+- **Fine-Tuning**: Leverages catastrophic forgetting by fine-tuning the model on remaining data with increased learning rate
+- **Gradient-Ascent**: Moves in the direction of increasing loss for forget samples using negative gradients
+- **Random-Labeling**: Fine-tunes the model by randomly reassigning labels for forget samples, excluding the original forget class labels
 
 ### **Custom Method Integration** ✨
 **Upload and evaluate your own unlearning methods!** The comparator supports custom implementations, enabling you to:
