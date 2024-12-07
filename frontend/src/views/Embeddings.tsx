@@ -1,15 +1,20 @@
-import { useContext, useMemo, useRef, useCallback } from "react";
+import { useContext, useMemo, useRef, useCallback, useState } from "react";
 
-import { ExperimentsContext } from "../store/experiments-context";
 import ScatterPlot from "../components/ScatterPlot";
 import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
+import { ExperimentsContext } from "../store/experiments-context";
 import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";
+import { HelpCircleIcon } from "../components/UI/icons";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../components/UI/popover";
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogContent,
+  DialogTrigger,
+  DialogFooter,
+} from "../components/UI/dialog";
 
 export type Coordinate = { x: number; y: number };
 type Position = {
@@ -29,6 +34,8 @@ export type SelectedData = (number | Prob)[][];
 export default function Embeddings({ height }: { height: number }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+
+  const [open, setOpen] = useState(false);
 
   const hoveredInstanceRef = useRef<HovereInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
@@ -114,17 +121,29 @@ export default function Embeddings({ height }: { height: number }) {
       className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px] rounded-tr-none relative"
     >
       <ConnectionLineWrapper positionRef={positionRef} />
-      <Popover>
-        <PopoverTrigger className="flex items-center justify-center w-4 h-4 p-0.5 rounded-full border border-black absolute top-[7px] left-7 z-10 cursor-pointer text-sm">
-          !
-        </PopoverTrigger>
-        <PopoverContent>
-          <p>Method: UMAP</p>
-          <p>Training Dataset</p>
-          <p>Penultimate Layer 512차원 액티베이션</p>
-          <p>Hovering, Click, Zoom, Panning</p>
-        </PopoverContent>
-      </Popover>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger>
+          <HelpCircleIcon className="z-10 w-[18px] h-[18px] absolute right-1 bottom-1 cursor-pointer" />
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[320px] p-2 gap-1.5">
+          <DialogHeader>
+            <DialogTitle>Embeddings</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <p className="text-sm">
+            The scatter plots present two-dimensional mapping of 512-dimensional
+            penultimate layer activations extracted from 2,000 data points in
+            the Training Dataset, utilizing Uniform Manifold Approximation and
+            Projection for Dimension Reduction (UMAP) for dimensionality
+            reduction.
+          </p>
+          <DialogFooter>
+            <p className="text-xs text-muted-foreground">
+              Click anywhere to dismiss
+            </p>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <ScatterPlot
         mode="Baseline"
         height={height}
