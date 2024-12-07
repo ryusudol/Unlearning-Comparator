@@ -223,7 +223,7 @@ export default function BubbleChart({
       .join("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => (d.label === 0 ? 0 : Math.sqrt(sizeScale(d.label))))
+      .attr("r", (d) => (d.label >= 0.002 ? Math.sqrt(sizeScale(d.label)) : 0))
       .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
       .style("pointer-events", "none");
@@ -270,7 +270,7 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "" : "right-[48px]"
+        showYAxis ? "z-10" : "right-[48px] z-0"
       }`}
     >
       <div

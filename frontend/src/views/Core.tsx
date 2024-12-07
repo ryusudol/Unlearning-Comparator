@@ -11,6 +11,7 @@ import {
   ChartScatterIcon,
   CircleIcon,
   MultiplicationSignIcon,
+  DarkShieldIcon,
 } from "../components/UI/icons";
 
 const EMBEDDINGS = "embeddings";
@@ -63,10 +64,8 @@ export default function Core({
               isEmbeddingMode && "text-gray-400 border-none"
             }`}
           >
-            <img
-              src="/hacker.png"
-              alt="Attack logo img"
-              className={`w-4 ${isEmbeddingMode && "opacity-40"}`}
+            <DarkShieldIcon
+              className={`w-4 h-4 ${isEmbeddingMode && "opacity-40"}`}
             />
             <button id={ATTACK} className="font-semibold ml-[3px] text-lg">
               Privacy Attack
