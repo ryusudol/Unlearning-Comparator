@@ -885,7 +885,7 @@ export const AlertCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const ShieldIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const BrightShieldIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="16"
     height="16"
@@ -910,7 +910,20 @@ export const ShieldIcon = (props: React.SVGProps<SVGSVGElement>) => (
       </clipPath>
     </defs>
   </svg>
-  // <svg height="512" viewBox="0 0 24 24" width="512" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><path d="m20.18164 4.18164a17.37181 17.37181 0 0 1 -3.93164-.88864 17.30919 17.30919 0 0 1 -3.33887-1.59961 1.756 1.756 0 0 0 -1.82226 0l-.001.001a17.327 17.327 0 0 1 -3.33787 1.59861 17.37551 17.37551 0 0 1 -3.93066.88867 1.74735 1.74735 0 0 0 -1.56934 1.73923v5.19531a10.75556 10.75556 0 0 0 5.5293 9.39649l3.37011 1.873a1.73414 1.73414 0 0 0 1.7002 0l3.37109-1.873a10.75556 10.75556 0 0 0 5.5293-9.39649v-5.19531a1.74728 1.74728 0 0 0 -1.56836-1.73926zm-4.20215 6.002-3.75 4a.9987.9987 0 0 1 -1.39355.06348l-2.25-2a.99954.99954 0 1 1 1.32812-1.49414l1.52246 1.35254 3.084-3.28906a1.00278 1.00278 0 0 1 .72948-.31646 1.00006 1.00006 0 0 1 .72949 1.68359z"/></g></svg>
+);
+
+export const DarkShieldIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    height="512"
+    viewBox="0 0 24 24"
+    width="512"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <g id="Layer_2" data-name="Layer 2">
+      <path d="m20.18164 4.18164a17.37181 17.37181 0 0 1 -3.93164-.88864 17.30919 17.30919 0 0 1 -3.33887-1.59961 1.756 1.756 0 0 0 -1.82226 0l-.001.001a17.327 17.327 0 0 1 -3.33787 1.59861 17.37551 17.37551 0 0 1 -3.93066.88867 1.74735 1.74735 0 0 0 -1.56934 1.73923v5.19531a10.75556 10.75556 0 0 0 5.5293 9.39649l3.37011 1.873a1.73414 1.73414 0 0 0 1.7002 0l3.37109-1.873a10.75556 10.75556 0 0 0 5.5293-9.39649v-5.19531a1.74728 1.74728 0 0 0 -1.56836-1.73926zm-4.20215 6.002-3.75 4a.9987.9987 0 0 1 -1.39355.06348l-2.25-2a.99954.99954 0 1 1 1.32812-1.49414l1.52246 1.35254 3.084-3.28906a1.00278 1.00278 0 0 1 .72948-.31646 1.00006 1.00006 0 0 1 .72949 1.68359z" />
+    </g>
+  </svg>
 );
 
 export const LogoIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -980,22 +993,6 @@ export const VitalIcon = (props: React.SVGProps<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth="2"
-    />
-  </svg>
-);
-
-export const TriangleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    width={16}
-    height={16}
-    {...props}
-  >
-    <path
-      d="M12 2.25C12.2724 2.25 12.5233 2.39767 12.6556 2.63577L22.6556 20.6358C22.7847 20.8681 22.7812 21.1513 22.6464 21.3803C22.5116 21.6094 22.2657 21.75 22 21.75H2C1.73426 21.75 1.48836 21.6094 1.3536 21.3803C1.21883 21.1513 1.21533 20.8681 1.34438 20.6358L11.3444 2.63577C11.4767 2.39767 11.7276 2.25 12 2.25Z"
-      fill="currentColor"
-      stroke="currentColor"
     />
   </svg>
 );

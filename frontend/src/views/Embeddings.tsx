@@ -5,6 +5,11 @@ import ScatterPlot from "../components/ScatterPlot";
 import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
 import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../components/UI/popover";
 
 export type Coordinate = { x: number; y: number };
 type Position = {
@@ -106,9 +111,20 @@ export default function Embeddings({ height }: { height: number }) {
   return (
     <div
       style={{ height }}
-      className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px] rounded-tr-none"
+      className="w-full flex justify-start px-1.5 items-center border-[1px] border-solid rounded-[6px] rounded-tr-none relative"
     >
       <ConnectionLineWrapper positionRef={positionRef} />
+      <Popover>
+        <PopoverTrigger className="flex items-center justify-center w-4 h-4 p-0.5 rounded-full border border-black absolute top-[7px] left-7 z-10 cursor-pointer text-sm">
+          !
+        </PopoverTrigger>
+        <PopoverContent>
+          <p>Method: UMAP</p>
+          <p>Training Dataset</p>
+          <p>Penultimate Layer 512차원 액티베이션</p>
+          <p>Hovering, Click, Zoom, Panning</p>
+        </PopoverContent>
+      </Popover>
       <ScatterPlot
         mode="Baseline"
         height={height}
