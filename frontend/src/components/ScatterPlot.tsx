@@ -626,6 +626,10 @@ const ScatterPlot = forwardRef(
       };
     }, [hoveredInstance, mode, z]);
 
+    useEffect(() => {
+      setViewMode(VIEW_MODES[0]);
+    }, [data]);
+
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
       getInstancePosition: (imgIdx: number) => {
