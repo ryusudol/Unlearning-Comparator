@@ -270,7 +270,7 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "" : "right-[48px]"
+        showYAxis ? "z-10" : "right-[48px] z-0"
       }`}
     >
       <div
