@@ -101,7 +101,7 @@ function EmbeddingLegend() {
         <span className="font-medium mr-2.5">Data Type</span>
         <ul className="flex items-center gap-2.5">
           <li className="flex items-center">
-            <CircleIcon className="w-3 h-3 mr-1.5 text-[#4f5562]" />
+            <CircleIcon className="w-2 h-2 mr-1.5 text-[#4f5562]" />
             <span>Remaining Data</span>
           </li>
           <li className="flex items-center">
