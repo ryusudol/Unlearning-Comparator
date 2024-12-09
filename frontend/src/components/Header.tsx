@@ -230,7 +230,7 @@ export default function Header() {
       </div>
       <GithubIcon
         onClick={handleGithubIconClick}
-        className="w-6 h-6 cursor-pointer"
+        className="w-7 h-7 cursor-pointer"
       />
       <div className="flex absolute right-[363px] bottom-1 text-[13px]">
         <div className="flex flex-col mr-10">
