@@ -651,8 +651,10 @@ const ScatterPlot = forwardRef(
           const svgX = x(datum[0] as number);
           const svgY = y(datum[1] as number);
 
-          point.x = svgX;
-          point.y = svgY;
+          const transform = d3.zoomTransform(svgElement);
+
+          point.x = transform.applyX(svgX);
+          point.y = transform.applyY(svgY);
 
           const ctm = svgElement.getScreenCTM();
           if (ctm) {
