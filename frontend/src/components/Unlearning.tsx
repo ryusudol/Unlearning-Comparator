@@ -74,7 +74,7 @@ export default function Unlearning() {
     };
 
     updateIsRunning(true);
-    initStatus();
+    initStatus(forgetClass as number);
     updateActiveStep(1);
 
     isCustom
