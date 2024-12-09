@@ -270,13 +270,6 @@ const ScatterPlot = forwardRef(
       let xPos = event.clientX - containerRect.left + 10;
       let yPos = event.clientY - containerRect.top + 10;
 
-      if (xPos + CONFIG.tooltipXSize > containerRect.width) {
-        xPos = event.clientX - containerRect.left - CONFIG.tooltipXSize - 10;
-        if (xPos < 0) {
-          xPos = 0;
-        }
-      }
-
       if (yPos + CONFIG.tooltipYSize > containerRect.height) {
         yPos = event.clientY - containerRect.top - CONFIG.tooltipYSize - 10;
         if (yPos < 0) {
