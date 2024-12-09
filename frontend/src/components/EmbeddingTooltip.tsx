@@ -49,7 +49,7 @@ export default React.memo(function EmbeddingTooltip({
 }: Props) {
   const svgRef = useRef(null);
 
-  const legendRectColor = "#898989";
+  const legendRectColor = d3.schemeTableau10[9];
 
   const groundTruthIdx = Number(data[2]);
   const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
@@ -108,7 +108,7 @@ export default React.memo(function EmbeddingTooltip({
       .append("rect")
       .attr("width", 3)
       .attr("height", 3)
-      .attr("fill", "white");
+      .attr("fill", legendRectColor);
 
     legendPattern
       .append("line")
@@ -116,7 +116,7 @@ export default React.memo(function EmbeddingTooltip({
       .attr("y1", 0)
       .attr("x2", 0)
       .attr("y2", 3)
-      .attr("stroke", legendRectColor)
+      .attr("stroke", BLACK)
       .attr("stroke-width", 2);
 
     const basleineLegend = svg
