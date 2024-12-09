@@ -96,7 +96,7 @@ function UnderLine() {
 
 function EmbeddingLegend() {
   return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm">
+    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm z-10">
       <div className="flex items-center mr-5">
         <span className="font-medium mr-2.5">Data Type</span>
         <ul className="flex items-center gap-2.5">
@@ -126,7 +126,7 @@ function EmbeddingLegend() {
       </div>
       <Separator
         orientation="horizontal"
-        className="absolute bottom-0 h-[1px] w-[calc(100%-16px)]"
+        className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"
       />
     </div>
   );
