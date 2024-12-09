@@ -320,7 +320,7 @@ export default function BubbleChart({
               </span>
             </div>
             <div>
-              <span>Label</span>:{" "}
+              <span>Proportion</span>:{" "}
               <span className="font-semibold">
                 {tooltip.content.label.toFixed(3)}
               </span>

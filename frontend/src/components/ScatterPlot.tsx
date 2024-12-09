@@ -229,12 +229,29 @@ const ScatterPlot = forwardRef(
       if (!svgRef.current) return;
 
       const svg = svgRef.current;
+      d3.select(svg).style("cursor", "grab");
+
+      const handleMouseDown = () => {
+        d3.select(svg).style("cursor", "grabbing");
+      };
+
+      const handleMouseUp = () => {
+        console.log("up!");
+        d3.select(svg).style("cursor", "grab");
+      };
+
+      svg.addEventListener("mousedown", handleMouseDown);
+      svg.addEventListener("mouseup", handleMouseUp, true);
+      window.addEventListener("mouseup", handleMouseUp);
 
       zoomRef.current = zoom;
       d3.select<SVGSVGElement, undefined>(svg).call(zoom);
 
       return () => {
         d3.select(svg).on(".zoom", null);
+        svg.removeEventListener("mousedown", handleMouseDown);
+        svg.removeEventListener("mouseup", handleMouseUp, true);
+        window.removeEventListener("mouseup", handleMouseUp);
       };
     }, [zoom]);
 
@@ -634,8 +651,10 @@ const ScatterPlot = forwardRef(
           const svgX = x(datum[0] as number);
           const svgY = y(datum[1] as number);
 
-          point.x = svgX;
-          point.y = svgY;
+          const transform = d3.zoomTransform(svgElement);
+
+          point.x = transform.applyX(svgX);
+          point.y = transform.applyY(svgY);
 
           const ctm = svgElement.getScreenCTM();
           if (ctm) {

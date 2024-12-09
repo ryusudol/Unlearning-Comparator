@@ -45,10 +45,13 @@ export default function Progress({
   const [ckaProgress, setCkaProgress] = useState(0);
   const [runningTime, setRunningTime] = useState(0);
 
-  const forgetClassExist = forgetClass !== undefined;
-  const progress = status.progress;
+  const forgetClassExist =
+    forgetClass !== undefined && status[forgetClass as number] !== undefined;
+  const progress = forgetClassExist
+    ? status[forgetClass as number].progress
+    : "";
   const steps = getProgressSteps(
-    status,
+    status[forgetClass as number],
     completedSteps,
     activeStep,
     umapProgress,
@@ -59,7 +62,10 @@ export default function Progress({
     try {
       const unlearningStatus = await fetchUnlearningStatus();
 
-      updateStatus(unlearningStatus);
+      updateStatus({
+        status: unlearningStatus,
+        forgetClass: forgetClass as number,
+      });
 
       const progress = unlearningStatus.progress;
       if (progress.includes("Evaluating")) {
@@ -124,30 +130,32 @@ export default function Progress({
     const startTime = Date.now();
     const duration = 10000;
 
-    intervalId = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progressValue = Math.min(
-        Math.floor((elapsed / duration) * 100),
-        100
-      );
+    if (forgetClassExist) {
+      intervalId = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progressValue = Math.min(
+          Math.floor((elapsed / duration) * 100),
+          100
+        );
 
-      if (progress.includes("UMAP")) {
-        setUmapProgress(progressValue);
-      } else if (progress.includes("CKA")) {
-        setCkaProgress(progressValue);
-      }
+        if (progress.includes("UMAP")) {
+          setUmapProgress(progressValue);
+        } else if (progress.includes("CKA")) {
+          setCkaProgress(progressValue);
+        }
 
-      if (progressValue === 100) {
-        clearInterval(intervalId!);
-      }
-    }, 100);
+        if (progressValue === 100) {
+          clearInterval(intervalId!);
+        }
+      }, 100);
+    }
 
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [progress]);
+  }, [progress, forgetClassExist]);
 
   return (
     <section

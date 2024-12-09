@@ -123,7 +123,7 @@ export default function Embeddings({ height }: { height: number }) {
       <ConnectionLineWrapper positionRef={positionRef} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger>
-          <HelpCircleIcon className="z-10 w-[18px] h-[18px] absolute right-1 bottom-1 cursor-pointer" />
+          <HelpCircleIcon className="z-10 w-[18px] h-[18px] absolute left-7 top-1.5 cursor-pointer" />
         </DialogTrigger>
         <DialogContent className="sm:max-w-[320px] p-2 gap-1.5">
           <DialogHeader>

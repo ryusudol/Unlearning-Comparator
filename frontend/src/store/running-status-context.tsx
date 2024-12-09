@@ -5,6 +5,7 @@ import {
   RunningStatus,
   RunningStatusContextType,
   Action,
+  UpdateStatusPayload,
 } from "../types/running-status-context";
 
 const RUNNING_STATUS = "running-status";
@@ -26,14 +27,14 @@ const initialStatus: UnlearningStatus = {
 
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
-  status: initialStatus,
+  status: [],
   activeStep: 0,
   completedSteps: [],
 
   updateIsRunning: () => {},
-  initStatus: () => {},
+  initStatus: (forgetClass: number) => {},
   retrieveStatus: () => {},
-  updateStatus: (status: UnlearningStatus) => {},
+  updateStatus: (payload: UpdateStatusPayload) => {},
   updateActiveStep: (step: number) => {},
 });
 
@@ -51,9 +52,12 @@ function runningStatusReducer(
       return { ...state, isRunning };
 
     case "INIT_STATUS":
+      const forgetClass = action.payload;
+      const newStatus = [...state.status];
+      newStatus[forgetClass] = initialStatus;
       const initializedStatus = {
         ...state,
-        status: initialStatus,
+        status: newStatus,
         completedSteps: [],
       };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(initializedStatus));
@@ -69,7 +73,7 @@ function runningStatusReducer(
       return state;
 
     case "UPDATE_STATUS":
-      const status = action.payload;
+      const { status, forgetClass: fgClass } = action.payload;
       const progress =
         status.is_unlearning && status.progress === "Idle"
           ? "Unlearning"
@@ -91,9 +95,11 @@ function runningStatusReducer(
         completedSteps = [1, 2, 3];
       }
 
+      const updatedStatusArray = [...state.status];
+      updatedStatusArray[fgClass] = { ...status, progress };
       const updatedStatus = {
         ...state,
-        status: { ...status, progress },
+        status: updatedStatusArray,
         completedSteps,
       };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
@@ -117,7 +123,7 @@ export default function RunningStatusContextProvider({
 }) {
   const [runningStatus, dispatch] = useReducer(runningStatusReducer, {
     isRunning: false,
-    status: initialStatus,
+    status: Array(10).fill(initialStatus),
     activeStep: 0,
     completedSteps: [],
   });
@@ -126,16 +132,16 @@ export default function RunningStatusContextProvider({
     dispatch({ type: "UPDATE_IS_RUNNING", payload: isRunning });
   }, []);
 
-  const handleInitStatus = useCallback(() => {
-    dispatch({ type: "INIT_STATUS" });
+  const handleInitStatus = useCallback((forgetClass: number) => {
+    dispatch({ type: "INIT_STATUS", payload: forgetClass });
   }, []);
 
   const handleRetrieveStatus = useCallback(() => {
     dispatch({ type: "RETRIEVE_STATUS" });
   }, []);
 
-  const handleUpdateStatus = useCallback((status: UnlearningStatus) => {
-    dispatch({ type: "UPDATE_STATUS", payload: status });
+  const handleUpdateStatus = useCallback((payload: UpdateStatusPayload) => {
+    dispatch({ type: "UPDATE_STATUS", payload });
   }, []);
 
   const handleUpdateActiveStep = useCallback((step: number) => {
