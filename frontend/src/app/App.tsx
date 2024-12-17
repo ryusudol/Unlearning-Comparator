@@ -24,19 +24,34 @@ const CORRELATIONS_HEIGHT =
   ACCURACIES_HEIGHT -
   PREDICTIONS_HEIGHT;
 
+function calculateZoom() {
+  const screenWidth = window.innerWidth;
+  const appWidth = 1805;
+  return screenWidth / appWidth;
+}
+
 export default function App() {
   const { isExperimentLoading } = useContext(ExperimentsContext);
 
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     setIsPageLoading(false);
+
+    const handleResize = () => {
+      setZoom(calculateZoom());
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   if (isPageLoading) return <div></div>;
 
   return (
-    <section className="relative">
+    <section className="relative" style={{ zoom }}>
       <Header />
       {!isExperimentLoading && (
         <div className="flex items-center">
