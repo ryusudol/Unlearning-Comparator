@@ -6,6 +6,7 @@ backend/unlearned_models/
 backend/uploaded_models/
 backend/**/*.png
 backend/**/*.json
+backend/backend/
 Unlearn-Saliency/
 Unlearning-inversion-attacks/
 d3ex/
