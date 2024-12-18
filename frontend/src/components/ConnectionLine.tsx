@@ -1,4 +1,5 @@
 import React from "react";
+import { calculateZoom } from "../app/App";
 
 interface ConnectionLineProps {
   from: { x: number; y: number } | null;
@@ -10,6 +11,8 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
     return null;
   }
 
+  const zoom = calculateZoom();
+
   const lineStyle: React.CSSProperties = {
     position: "fixed",
     left: 0,
@@ -17,10 +20,10 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
     pointerEvents: "none",
   };
 
-  const x1 = from.x;
-  const y1 = from.y;
-  const x2 = to.x;
-  const y2 = to.y;
+  const x1 = from.x / zoom;
+  const y1 = from.y / zoom;
+  const x2 = to.x / zoom;
+  const y2 = to.y / zoom;
 
   const length = Math.hypot(x2 - x1, y2 - y1);
   const angle = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI;

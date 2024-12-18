@@ -5,7 +5,12 @@ import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
 import { ExperimentsContext } from "../store/experiments-context";
 import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";
-import { HelpCircleIcon } from "../components/UI/icons";
+import {
+  HelpCircleIcon,
+  CursorPointerIcon,
+  ScrollVerticalIcon,
+  DragIcon,
+} from "../components/UI/icons";
 import {
   Dialog,
   DialogHeader,
@@ -13,7 +18,6 @@ import {
   DialogDescription,
   DialogContent,
   DialogTrigger,
-  DialogFooter,
 } from "../components/UI/dialog";
 
 export type Coordinate = { x: number; y: number };
@@ -123,25 +127,44 @@ export default function Embeddings({ height }: { height: number }) {
       <ConnectionLineWrapper positionRef={positionRef} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger>
-          <HelpCircleIcon className="z-10 w-[18px] h-[18px] absolute left-7 top-1.5 cursor-pointer" />
+          <HelpCircleIcon className="z-10 w-4 h-4 absolute left-7 top-[7px] cursor-pointer" />
         </DialogTrigger>
         <DialogContent className="sm:max-w-[320px] p-2 gap-1.5">
-          <DialogHeader>
-            <DialogTitle>Embeddings</DialogTitle>
+          <DialogHeader className="hidden">
+            <DialogTitle></DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
-          <p className="text-sm">
-            The scatter plots present two-dimensional mapping of 512-dimensional
-            penultimate layer activations extracted from 2,000 data points in
-            the Training Dataset, utilizing Uniform Manifold Approximation and
-            Projection for Dimension Reduction (UMAP) for dimensionality
-            reduction.
-          </p>
-          <DialogFooter>
-            <p className="text-xs text-muted-foreground">
-              Click anywhere to dismiss
-            </p>
-          </DialogFooter>
+          <div className="flex flex-col gap-5">
+            <div>
+              <p className="font-medium leading-none tracking-tight mb-1.5">
+                Embeddings
+              </p>
+              <p className="text-sm">
+                The scatter plots present two-dimensional UMAP projections of
+                the 512-dimensional penultimate-layer activations extracted from
+                2,000 data points in the training dataset.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium leading-none tracking-tight mb-1.5">
+                Controls
+              </p>
+              <div className="text-sm flex flex-col gap-1">
+                <div className="flex items-center gap-1">
+                  <CursorPointerIcon />
+                  <span>Click a point for details</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <ScrollVerticalIcon />
+                  <span>Scroll to zoom</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <DragIcon />
+                  <span>Drag to pan</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
       <ScatterPlot

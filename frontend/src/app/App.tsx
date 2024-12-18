@@ -24,7 +24,8 @@ const CORRELATIONS_HEIGHT =
   ACCURACIES_HEIGHT -
   PREDICTIONS_HEIGHT;
 
-function calculateZoom() {
+
+export function calculateZoom() {
   const screenWidth = window.innerWidth;
   const appWidth = 1805;
   return screenWidth / appWidth;
