@@ -94,14 +94,8 @@
   padding: 0;
 }
 
-html {
-  overscroll-behavior: none;
-}
-
 body {
-  overscroll-behavior: none;
   height: 100vh;
-  overflow-y: hidden;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
