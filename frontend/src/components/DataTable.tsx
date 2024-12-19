@@ -304,6 +304,7 @@ export default function DataTable({ columns }: Props) {
                       <TableRow
                         key={row.id}
                         id={row.id}
+                        className="!border-b"
                         data-state={row.getIsSelected() && "selected"}
                       >
                         {row.getVisibleCells().map((cell, idx) => {
