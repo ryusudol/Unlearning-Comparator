@@ -14,6 +14,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import EmbeddingTooltip from "./EmbeddingTooltip";
+import { calculateZoom } from "../app/App";
 import { API_URL } from "../constants/common";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -284,11 +285,17 @@ const ScatterPlot = forwardRef(
       }
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      let xPos = event.clientX - containerRect.left + 10;
-      let yPos = event.clientY - containerRect.top + 10;
+      const zoomFactor = calculateZoom();
 
-      if (yPos + CONFIG.tooltipYSize > containerRect.height) {
-        yPos = event.clientY - containerRect.top - CONFIG.tooltipYSize - 10;
+      // 마우스 좌표를 확대/축소 비율에 맞게 조정
+      let xPos = (event.clientX - containerRect.left) / zoomFactor + 10;
+      let yPos = (event.clientY - containerRect.top) / zoomFactor + 10;
+
+      if (yPos + CONFIG.tooltipYSize > containerRect.height / zoomFactor) {
+        yPos =
+          (event.clientY - containerRect.top) / zoomFactor -
+          CONFIG.tooltipYSize -
+          10;
         if (yPos < 0) {
           yPos = 0;
         }
