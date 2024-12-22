@@ -6,7 +6,7 @@ interface ConnectionLineProps {
   to: { x: number; y: number } | null;
 }
 
-const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
+const ConnectionLine = ({ from, to }: ConnectionLineProps) => {
   if (!from || !to) {
     return null;
   }
