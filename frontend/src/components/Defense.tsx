@@ -4,7 +4,11 @@ import { Slider } from "./UI/slider";
 import { Label } from "./UI/label";
 import { DEFENSE_METHODS } from "../constants/defense";
 import { DefenseConfigurationData } from "../types/settings";
-import { HyperparametersIcon, StartPointIcon, ShieldIcon } from "./UI/icons";
+import {
+  HyperparametersIcon,
+  StartPointIcon,
+  BrightShieldIcon,
+} from "./UI/icons";
 import {
   Select,
   SelectContent,
@@ -71,7 +75,7 @@ export default function Defense() {
         </Select>
         {/* Method */}
         <div className="flex items-center mb-1">
-          <ShieldIcon className="w-4 h-4 mr-1" />
+          <BrightShieldIcon className="w-4 h-4 mr-1" />
           <Label className="text-base text-nowrap" htmlFor="method">
             Method
           </Label>

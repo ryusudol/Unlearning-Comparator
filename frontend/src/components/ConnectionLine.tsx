@@ -1,14 +1,22 @@
 import React from "react";
 
+import { calculateZoom } from "../app/App";
+
 interface ConnectionLineProps {
   from: { x: number; y: number } | null;
   to: { x: number; y: number } | null;
 }
 
-const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
+export default function ConnectionLine({ from, to }: ConnectionLineProps) {
   if (!from || !to) {
     return null;
   }
+
+  const zoom = calculateZoom();
+  const scrollbarWidth =
+    window.innerWidth - document.documentElement.clientWidth;
+  const adjustedZoom =
+    ((window.innerWidth - scrollbarWidth) / window.innerWidth) * zoom;
 
   const lineStyle: React.CSSProperties = {
     position: "fixed",
@@ -17,10 +25,10 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
     pointerEvents: "none",
   };
 
-  const x1 = from.x;
-  const y1 = from.y;
-  const x2 = to.x;
-  const y2 = to.y;
+  const x1 = from.x / adjustedZoom;
+  const y1 = from.y / adjustedZoom;
+  const x2 = to.x / adjustedZoom;
+  const y2 = to.y / adjustedZoom;
 
   const length = Math.hypot(x2 - x1, y2 - y1);
   const angle = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI;
@@ -46,6 +54,4 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({ from, to }) => {
       <div style={linePositionStyle} />
     </div>
   );
-};
-
-export default ConnectionLine;
+}

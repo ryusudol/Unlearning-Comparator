@@ -23,6 +23,17 @@ import {
 } from "./UI/select";
 
 const CUSTOM = "custom";
+const LEARNING_RATE = [
+  "1e-5",
+  "5e-5",
+  "1e-4",
+  "5e-4",
+  "1e-3",
+  "5e-3",
+  "1e-2",
+  "5e-2",
+  "1e-1",
+];
 
 export default function Unlearning() {
   const { forgetClass } = useContext(ForgetClassContext);
@@ -30,7 +41,7 @@ export default function Unlearning() {
     useContext(RunningStatusContext);
 
   const [epochs, setEpochs] = useState([10]);
-  const [learningRateLog, setLearningRateLog] = useState([-2]);
+  const [learningRateIdx, setLearningRateIdx] = useState([6]);
   const [batchSizeLog, setBatchSizeLog] = useState([6]);
   const [method, setMethod] = useState("ft");
 
@@ -42,7 +53,7 @@ export default function Unlearning() {
         getDefaultUnlearningConfig(value);
       setMethod(value);
       setEpochs([epochs]);
-      setLearningRateLog([learning_rate]);
+      setLearningRateIdx([learning_rate]);
       setBatchSizeLog([batch_size]);
     }
   };
@@ -58,12 +69,12 @@ export default function Unlearning() {
       method: config.method as string,
       forget_class: forgetClass as number,
       epochs: epochs[0],
-      learning_rate: parseFloat(Math.pow(10, learningRateLog[0]).toFixed(5)),
+      learning_rate: parseFloat(LEARNING_RATE[learningRateIdx[0]]),
       batch_size: Math.pow(2, batchSizeLog[0]),
     };
 
     updateIsRunning(true);
-    initStatus();
+    initStatus(forgetClass as number);
     updateActiveStep(1);
 
     isCustom
@@ -142,12 +153,12 @@ export default function Unlearning() {
             <span className="text-sm">Learning Rate</span>
             <Slider
               name="learning_rate"
-              value={learningRateLog}
-              setValue={setLearningRateLog}
-              min={-5}
-              max={-1}
+              value={learningRateIdx}
+              setValue={setLearningRateIdx}
+              min={0}
+              max={8}
               step={1}
-              displayValue={`1e${learningRateLog[0]}`}
+              displayValue={`${LEARNING_RATE[learningRateIdx[0]]}`}
             />
             <span className="text-sm">Batch Size</span>
             <Slider

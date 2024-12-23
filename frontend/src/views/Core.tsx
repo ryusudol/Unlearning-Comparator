@@ -11,6 +11,7 @@ import {
   ChartScatterIcon,
   CircleIcon,
   MultiplicationSignIcon,
+  DarkShieldIcon,
 } from "../components/UI/icons";
 
 const EMBEDDINGS = "embeddings";
@@ -63,10 +64,8 @@ export default function Core({
               isEmbeddingMode && "text-gray-400 border-none"
             }`}
           >
-            <img
-              src="/hacker.png"
-              alt="Attack logo img"
-              className={`w-4 ${isEmbeddingMode && "opacity-40"}`}
+            <DarkShieldIcon
+              className={`w-4 h-4 ${isEmbeddingMode && "opacity-40"}`}
             />
             <button id={ATTACK} className="font-semibold ml-[3px] text-lg">
               Privacy Attack
@@ -97,12 +96,12 @@ function UnderLine() {
 
 function EmbeddingLegend() {
   return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm">
+    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm z-10">
       <div className="flex items-center mr-5">
         <span className="font-medium mr-2.5">Data Type</span>
         <ul className="flex items-center gap-2.5">
           <li className="flex items-center">
-            <CircleIcon className="w-3 h-3 mr-1.5 text-[#4f5562]" />
+            <CircleIcon className="w-2 h-2 mr-1.5 text-[#4f5562]" />
             <span>Remaining Data</span>
           </li>
           <li className="flex items-center">
@@ -127,7 +126,7 @@ function EmbeddingLegend() {
       </div>
       <Separator
         orientation="horizontal"
-        className="absolute bottom-0 h-[1px] w-[calc(100%-16px)]"
+        className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"
       />
     </div>
   );

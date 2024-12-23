@@ -3,7 +3,6 @@ import io
 import json
 import os
 from collections import OrderedDict
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response
@@ -13,31 +12,6 @@ from app.utils import load_cifar10_data
 
 router = APIRouter()
 x_train, y_train = load_cifar10_data()
-
-def get_trained_model_files() -> List[str]:
-    saved_models_dir = 'trained_models'
-    if not os.path.exists(saved_models_dir):
-        return []
-    
-    model_files = [f for f in os.listdir(saved_models_dir) if f.endswith('.pth')]
-    return model_files
-
-@router.get("/trained_models", response_model=List[str])
-async def list_trained_models():
-    model_files = get_trained_model_files()
-    if not model_files:
-        raise HTTPException(status_code=404, detail="No trained model files found")
-    return model_files
-
-@router.get("/trained_models/{filename}")
-async def download_trained_model(filename: str):
-    saved_models_dir = 'saved_models'
-    file_path = os.path.join(saved_models_dir, filename)
-    
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Trained model file not found")
-    
-    return FileResponse(file_path, media_type='application/octet-stream', filename=filename)
 
 @router.get("/data/{forget_class}/all")
 async def get_all_json_files(forget_class: str):
@@ -106,7 +80,7 @@ async def get_json_file(forget_class: str, filename: str):
 async def delete_files(forget_class: str, filename: str):
     response_messages = []
     
-    # JSON 파일 삭제 시도
+    # JSON delete
     json_filename = f"{filename}.json" if not filename.endswith('.json') else filename
     json_path = os.path.join('data', forget_class, json_filename)
     if os.path.exists(json_path):
@@ -116,7 +90,7 @@ async def delete_files(forget_class: str, filename: str):
         except Exception as e:
             response_messages.append(f"Error deleting JSON file: {str(e)}")
     
-    # PTH 파일 삭제 시도
+    # PTH delete
     pth_filename = f"{filename}.pth" if not filename.endswith('.pth') else filename
     pth_path = os.path.join('unlearned_models', forget_class, pth_filename)
     if os.path.exists(pth_path):
@@ -145,4 +119,19 @@ async def get_image(index: int):
     img_byte_arr = img_byte_arr.getvalue()
 
     return Response(content=img_byte_arr, media_type="image/png")
+
+@router.get("/trained_models")
+async def get_trained_model():
+    """Download the trained model file (0000.pth)"""
+    model_dir = 'trained_models'
+    file_path = os.path.join(model_dir, '0000.pth')
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Trained model file not found")
+    
+    return FileResponse(
+        path=file_path,
+        media_type='application/octet-stream',
+        filename='0000.pth'
+    )
 

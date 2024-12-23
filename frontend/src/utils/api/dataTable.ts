@@ -49,10 +49,13 @@ export async function downloadJSON(forgetClass: number, fileName: string) {
 }
 
 export async function downloadPTH(forgetClass: number, fileName: string) {
+  const fetchUrl = fileName.startsWith("000")
+    ? `${API_URL}/trained_models`
+    : `${API_URL}/data/${forgetClass}/${fileName}/weights`;
+  console.log(fetchUrl);
+
   try {
-    const response = await fetch(
-      `${API_URL}/data/${forgetClass}/${fileName}/weights`
-    );
+    const response = await fetch(fetchUrl);
 
     if (!response.ok) {
       throw new Error(
@@ -61,16 +64,16 @@ export async function downloadPTH(forgetClass: number, fileName: string) {
     }
 
     const blob = await response.blob();
-    
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
     a.download = `${fileName}.pth`;
     document.body.appendChild(a);
     a.click();
-    window.URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(blobUrl);
     document.body.removeChild(a);
-    
+
     return blob;
   } catch (error) {
     console.error("Failed to download the PTH file:", error);
