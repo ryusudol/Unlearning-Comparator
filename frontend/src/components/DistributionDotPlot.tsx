@@ -1,15 +1,16 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import { DataPoint } from "../views/PrivacyAttack";
+import { DataPoint } from "./Discriminator";
 
-const MARGIN = { top: 22, right: 4, bottom: 80, left: 4 };
+const MARGIN = { top: 22, right: 5, bottom: 80, left: 20 };
 const LEGEND_DATA = [
   { label: "denied loan / would default", color: "#808080", align: "left" },
   { label: "granted loan / defaults", color: "#60a5fa", align: "right" },
   { label: "denied loan / would pay back", color: "#404040", align: "left" },
   { label: "granted loan / pays back", color: "#1e40af", align: "right" },
 ];
+const GRID_COLOR = "#efefef";
 
 interface Props {
   data: DataPoint[];
@@ -23,8 +24,8 @@ export default function DistributionPlot({
   setThreshold,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const width = 480;
-  const height = 250;
+  const width = 400;
+  const height = 300;
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -46,10 +47,59 @@ export default function DistributionPlot({
       .domain([0, 30])
       .range([height - MARGIN.bottom, MARGIN.top]);
 
+    const grid = svg.append("g").attr("class", "grid");
+
+    // x-axis grid
+    grid
+      .append("g")
+      .attr("transform", `translate(0,${height - MARGIN.bottom})`)
+      .call(
+        d3
+          .axisBottom(xScale)
+          .ticks(6)
+          .tickSize(-(height - MARGIN.top - MARGIN.bottom))
+          .tickFormat(() => "")
+      )
+      .call((g) => g.select(".domain").remove())
+      .call((g) =>
+        g
+          .selectAll(".tick line")
+          .attr("stroke", GRID_COLOR)
+          .attr("stroke-width", "1")
+      );
+
+    // y-axis grid
+    grid
+      .append("g")
+      .attr("transform", `translate(${MARGIN.left}, 0)`)
+      .call(
+        d3
+          .axisLeft(yScale)
+          .ticks(7)
+          .tickSize(-width + MARGIN.left + MARGIN.right)
+          .tickFormat(() => "")
+      )
+      .call((g) => g.select(".domain").remove())
+      .call((g) =>
+        g
+          .selectAll(".tick line")
+          .attr("stroke", GRID_COLOR)
+          .attr("stroke-width", "1")
+      );
+
+    // x-axis
     svg
       .append("g")
       .attr("transform", `translate(0,${height - MARGIN.bottom})`)
-      .call(d3.axisBottom(xScale).ticks(6));
+      .call(d3.axisBottom(xScale).ticks(6))
+      .call((g) => g.selectAll(".tick line").attr("stroke-width", "1"));
+
+    // y-axis
+    svg
+      .append("g")
+      .attr("transform", `translate(${MARGIN.left}, 0)`)
+      .call(d3.axisLeft(yScale).ticks(7))
+      .call((g) => g.selectAll(".tick line").attr("stroke-width", "1"));
 
     svg
       .selectAll("circle")
@@ -63,28 +113,24 @@ export default function DistributionPlot({
         const pointsInBin = data.filter(
           (p) => Math.floor(p.entropy / binWidth) === bin
         );
-        const defaultPoints = pointsInBin.filter((p) => p.type === "default");
         const paybackPoints = pointsInBin.filter((p) => p.type === "payback");
+        const defaultPoints = pointsInBin.filter((p) => p.type === "default");
 
-        const lessPoints =
-          defaultPoints.length <= paybackPoints.length
-            ? defaultPoints
-            : paybackPoints;
-        const morePoints =
-          defaultPoints.length > paybackPoints.length
-            ? defaultPoints
-            : paybackPoints;
-
-        if (
-          (d.type === "default" &&
-            defaultPoints.length <= paybackPoints.length) ||
-          (d.type === "payback" && paybackPoints.length < defaultPoints.length)
-        ) {
-          const position = lessPoints.indexOf(d);
+        if (d.type === "payback") {
+          const position = paybackPoints.indexOf(d);
           return yScale(position + 1);
         } else {
-          const position = morePoints.indexOf(d) + lessPoints.length;
-          return yScale(position + 1);
+          if (defaultPoints.length > paybackPoints.length) {
+            const position = defaultPoints.indexOf(d);
+            if (position >= paybackPoints.length) {
+              return yScale(position + 1);
+            } else {
+              return yScale(position + 1);
+            }
+          } else {
+            const position = defaultPoints.indexOf(d);
+            return yScale(position + 1);
+          }
         }
       })
       .attr("r", 2.5)
@@ -130,8 +176,9 @@ export default function DistributionPlot({
       .append("line")
       .attr("y1", MARGIN.top)
       .attr("y2", height - MARGIN.bottom)
-      .attr("stroke", "black")
-      .attr("stroke-width", 2);
+      .attr("stroke", "#ff4d4d")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,3");
 
     thresholdGroup
       .append("rect")
