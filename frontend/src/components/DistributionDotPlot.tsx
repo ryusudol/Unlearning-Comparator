@@ -1,50 +1,30 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-const MARGIN = { top: 40, right: 40, bottom: 50, left: 40 };
+import { DataPoint } from "../views/PrivacyAttack";
+
+const MARGIN = { top: 22, right: 4, bottom: 80, left: 4 };
 const LEGEND_DATA = [
-  { label: "denied loan / would default", color: "#808080" },
-  { label: "denied loan / would pay back", color: "#404040" },
-  { label: "granted loan / defaults", color: "#60a5fa" },
-  { label: "granted loan / pays back", color: "#1e40af" },
+  { label: "denied loan / would default", color: "#808080", align: "left" },
+  { label: "granted loan / defaults", color: "#60a5fa", align: "right" },
+  { label: "denied loan / would pay back", color: "#404040", align: "left" },
+  { label: "granted loan / pays back", color: "#1e40af", align: "right" },
 ];
 
-interface DataPoint {
-  entropy: number;
-  type: "default" | "payback";
-  status: "denied" | "granted";
+interface Props {
+  data: DataPoint[];
+  threshold: number;
+  setThreshold: (value: number) => void;
 }
 
-const generateData = (): DataPoint[] => {
-  const data: DataPoint[] = [];
-
-  for (let i = 0; i < 200; i++) {
-    const entropy = Math.round(d3.randomNormal(3, 1)() * 4) / 4;
-    data.push({
-      entropy,
-      type: "default",
-      status: entropy < 4 ? "denied" : "granted",
-    });
-  }
-
-  for (let i = 0; i < 200; i++) {
-    const entropy = Math.round(d3.randomNormal(5, 1)() * 4) / 4;
-    data.push({
-      entropy,
-      type: "payback",
-      status: entropy < 4 ? "denied" : "granted",
-    });
-  }
-
-  return data;
-};
-const DATA = generateData();
-
-export default function DistributionPlot() {
+export default function DistributionPlot({
+  data,
+  threshold,
+  setThreshold,
+}: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [threshold, setThreshold] = useState(4);
-  const width = 600;
-  const height = 300;
+  const width = 480;
+  const height = 250;
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -73,28 +53,41 @@ export default function DistributionPlot() {
 
     svg
       .selectAll("circle")
-      .data(DATA)
+      .data(data)
       .enter()
       .append("circle")
       .attr("cx", (d) => xScale(d.entropy))
       .attr("cy", (d, i) => {
         const binWidth = 0.25;
         const bin = Math.floor(d.entropy / binWidth);
-        const pointsInBin = DATA.filter(
+        const pointsInBin = data.filter(
           (p) => Math.floor(p.entropy / binWidth) === bin
         );
         const defaultPoints = pointsInBin.filter((p) => p.type === "default");
         const paybackPoints = pointsInBin.filter((p) => p.type === "payback");
 
-        if (d.type === "default") {
-          const position = defaultPoints.indexOf(d);
+        const lessPoints =
+          defaultPoints.length <= paybackPoints.length
+            ? defaultPoints
+            : paybackPoints;
+        const morePoints =
+          defaultPoints.length > paybackPoints.length
+            ? defaultPoints
+            : paybackPoints;
+
+        if (
+          (d.type === "default" &&
+            defaultPoints.length <= paybackPoints.length) ||
+          (d.type === "payback" && paybackPoints.length < defaultPoints.length)
+        ) {
+          const position = lessPoints.indexOf(d);
           return yScale(position + 1);
         } else {
-          const position = paybackPoints.indexOf(d) + defaultPoints.length;
+          const position = morePoints.indexOf(d) + lessPoints.length;
           return yScale(position + 1);
         }
       })
-      .attr("r", 4)
+      .attr("r", 2.5)
       .attr("fill", (d) => {
         if (d.entropy < threshold) {
           return d.type === "default" ? "#808080" : "#404040";
@@ -105,16 +98,18 @@ export default function DistributionPlot() {
 
     const dragLine = d3.drag().on("drag", (event) => {
       const newX = event.x;
-      const newThreshold = xScale.invert(newX);
+      const newThreshold = Math.round(xScale.invert(newX) * 20) / 20;
 
       if (newThreshold >= -2 && newThreshold <= 10) {
         setThreshold(newThreshold);
-
-        thresholdGroup.attr("transform", `translate(${newX}, 0)`);
+        thresholdGroup.attr(
+          "transform",
+          `translate(${xScale(newThreshold)}, 0)`
+        );
 
         svg
           .selectAll("circle")
-          .data<DataPoint>(DATA)
+          .data<DataPoint>(data)
           .attr("fill", (d) => {
             if (d.entropy < newThreshold) {
               return d.type === "default" ? "#808080" : "#404040";
@@ -150,32 +145,44 @@ export default function DistributionPlot() {
       .append("text")
       .attr("y", MARGIN.top - 10)
       .attr("text-anchor", "middle")
-      .text(`threshold: ${threshold.toFixed(1)}`);
+      .attr("font-weight", 300)
+      .text(`Threshold: ${threshold.toFixed(2)}`);
 
     const legend = svg
       .append("g")
-      .attr("transform", `translate(${MARGIN.left}, ${height - 20})`);
+      .attr(
+        "transform",
+        `translate(${width / 2 + 10}, ${height - MARGIN.bottom + 30})`
+      );
+
+    const legendHeight = 20;
 
     LEGEND_DATA.forEach((item, i) => {
-      const legendRow = legend
+      const y = Math.floor(i / 2) * legendHeight;
+      const x = item.align === "left" ? 0 : width - 200;
+
+      const legendItem = legend
         .append("g")
-        .attr("transform", `translate(${i * 200}, 0)`);
+        .attr("transform", `translate(${x}, ${y})`);
 
-      legendRow
-        .append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", 4)
-        .style("fill", item.color);
+      legendItem
+        .append("rect")
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("y", 0)
+        .attr("fill", item.color);
 
-      legendRow
+      legendItem
         .append("text")
-        .attr("x", 10)
-        .attr("y", 4)
+        .attr("x", 25)
+        .attr("y", 15 / 2)
+        .attr("dy", "0.35em")
         .text(item.label)
-        .style("font-size", "12px");
+        .style("font-size", "12px")
+        .style("font-family", "Roboto, sans-serif")
+        .style("font-weight", "300");
     });
-  }, [threshold]);
+  }, [data, setThreshold, threshold]);
 
   return <svg ref={svgRef}></svg>;
 }
