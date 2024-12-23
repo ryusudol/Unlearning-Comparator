@@ -46,7 +46,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       style={{ height }}
       className="w-full flex justify-evenly items-center border-[1px] border-solid border-[rgba(0, 0, 0, 0.2)] rounded-[6px]"
     >
-      <div className="flex flex-col items-center">
+      {/* <div className="flex flex-col items-center">
         <div className="flex flex-col items-center">
           <p className="text-[15px]">
             Retrain vs Comparison {comparison !== "" && `(${comparison})`}
@@ -57,7 +57,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
             setThreshold={setThreshold}
           />
         </div>
-        <div className="flex items-center gap-16">
+        <div className="flex items-center gap-8">
           <div className="flex flex-col items-center">
             <p className="text-[15px]">False Positive Ratio</p>
             <p className="text-sm font-light">
@@ -79,6 +79,40 @@ export default function PrivacyAttack({ height }: { height: number }) {
         </div>
         <p className="font-bold text-[15px]">Forgetting Quality: 0.8165</p>
       </div>
+
+      <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center">
+          <p className="text-[15px]">
+            Retrain vs Comparison {comparison !== "" && `(${comparison})`}
+          </p>
+          <DistributionDotPlot
+            data={DATA}
+            threshold={threshold}
+            setThreshold={setThreshold}
+          />
+        </div>
+        <div className="flex items-center gap-8">
+          <div className="flex flex-col items-center">
+            <p className="text-[15px]">False Positive Ratio</p>
+            <p className="text-sm font-light">
+              Lorem ipsum dolor sit amet
+              <br />
+              consectetur adipisicing elit.
+            </p>
+            <PieChart data={DATA} threshold={threshold} />
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="text-[15px]">False Negative Ratio</p>
+            <p className="text-sm font-light">
+              Lorem ipsum dolor sit amet
+              <br />
+              consectetur adipisicing elit.
+            </p>
+            <PieChart data={DATA} threshold={threshold} />
+          </div>
+        </div>
+        <p className="font-bold text-[15px]">Forgetting Quality: 0.8165</p>
+      </div> */}
     </div>
   );
 }
