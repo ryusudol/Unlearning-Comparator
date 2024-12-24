@@ -251,7 +251,7 @@ export default function DataTable({ columns }: Props) {
   };
 
   return (
-    <div className="w-full h-[196px]">
+    <div className="w-full h-[197px]">
       <div className="relative w-full">
         <Table className="w-full table-fixed border-t">
           <TableHeader>
@@ -289,7 +289,7 @@ export default function DataTable({ columns }: Props) {
             ))}
           </TableHeader>
         </Table>
-        <ScrollArea className="w-full h-[160px]">
+        <ScrollArea className="w-full h-[161px]">
           <Table className="w-full table-fixed">
             <TableBody
               className={`text-sm ${
