@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 
+import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/DataTable";
 import Unlearning from "../components/Unlearning";
@@ -56,11 +57,8 @@ export default function Experiments({
       style={{ width, height }}
       className="p-1 relative border border-t-0 border-l-0"
     >
-      <div className="flex justify-between items-center mb-1">
-        <div className="flex items-center ml-0.5">
-          <SettingsIcon className="scale-110" />
-          <h5 className="font-semibold ml-1 text-lg">Experiments</h5>
-        </div>
+      <div className="flex justify-between items-center mb-[3px]">
+        <Title Icon={<SettingsIcon />} title="Experiments" />
         {forgetClass !== undefined && (
           <Dialog
             open={open}
@@ -68,24 +66,16 @@ export default function Experiments({
               setOpen(value);
             }}
           >
-            <DialogTrigger disabled={isRunning}>
+            <DialogTrigger disabled={true}>
               <Button
                 onClick={handleAddExpClick}
                 content={
                   <>
-                    <PlusIcon
-                      color={isRunning ? "#d1d5db" : "white"}
-                      className="w-2.5 h-2.5 mr-1.5"
-                    />
-                    <span className={isRunning ? "text-gray-300" : ""}>
-                      Add Experiment
-                    </span>
+                    <PlusIcon color="#d1d5db" className="w-2.5 h-2.5 mr-1.5" />
+                    <span className="text-gray-300">Add Experiment</span>
                   </>
                 }
-                className={`px-2.5 mr-0.5 ${
-                  isRunning &&
-                  "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
-                }`}
+                className="px-2.5 mr-0.5 bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
               />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[400px] p-4">
