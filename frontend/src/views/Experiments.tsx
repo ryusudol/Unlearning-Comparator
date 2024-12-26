@@ -58,7 +58,11 @@ export default function Experiments({
       className="p-1 relative border border-t-0 border-l-0"
     >
       <div className="flex justify-between items-center mb-[3px]">
-        <Title Icon={<SettingsIcon />} title="Experiments" />
+        <Title
+          Icon={<SettingsIcon />}
+          title="Experiments"
+          customClass="right-[1px]"
+        />
         {forgetClass !== undefined && (
           <Dialog
             open={open}
@@ -66,16 +70,24 @@ export default function Experiments({
               setOpen(value);
             }}
           >
-            <DialogTrigger disabled={true}>
+            <DialogTrigger disabled={isRunning}>
               <Button
                 onClick={handleAddExpClick}
                 content={
                   <>
-                    <PlusIcon color="#d1d5db" className="w-2.5 h-2.5 mr-1.5" />
-                    <span className="text-gray-300">Add Experiment</span>
+                    <PlusIcon
+                      color={isRunning ? "#d1d5db" : "white"}
+                      className="w-2.5 h-2.5 mr-1.5"
+                    />
+                    <span className={isRunning ? "text-gray-300" : ""}>
+                      Add Experiment
+                    </span>
                   </>
                 }
-                className="px-2.5 mr-0.5 bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
+                className={`px-2.5 mr-0.5 ${
+                  isRunning &&
+                  "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
+                }`}
               />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[400px] p-4">
