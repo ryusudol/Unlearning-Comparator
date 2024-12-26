@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 import { Check, Clock, Dot, Loader2 } from "lucide-react";
 
+import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import { Separator } from "../components/UI/separator";
 import { Button } from "../components/UI/button";
@@ -45,10 +46,13 @@ export default function Progress({
   const [ckaProgress, setCkaProgress] = useState(0);
   const [runningTime, setRunningTime] = useState(0);
 
-  const forgetClassExist = forgetClass !== undefined;
-  const progress = status.progress;
+  const forgetClassExist =
+    forgetClass !== undefined && status[forgetClass as number] !== undefined;
+  const progress = forgetClassExist
+    ? status[forgetClass as number].progress
+    : "";
   const steps = getProgressSteps(
-    status,
+    status[forgetClass as number],
     completedSteps,
     activeStep,
     umapProgress,
@@ -59,7 +63,10 @@ export default function Progress({
     try {
       const unlearningStatus = await fetchUnlearningStatus();
 
-      updateStatus(unlearningStatus);
+      updateStatus({
+        status: unlearningStatus,
+        forgetClass: forgetClass as number,
+      });
 
       const progress = unlearningStatus.progress;
       if (progress.includes("Evaluating")) {
@@ -124,55 +131,59 @@ export default function Progress({
     const startTime = Date.now();
     const duration = 10000;
 
-    intervalId = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progressValue = Math.min(
-        Math.floor((elapsed / duration) * 100),
-        100
-      );
+    if (forgetClassExist) {
+      intervalId = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progressValue = Math.min(
+          Math.floor((elapsed / duration) * 100),
+          100
+        );
 
-      if (progress.includes("UMAP")) {
-        setUmapProgress(progressValue);
-      } else if (progress.includes("CKA")) {
-        setCkaProgress(progressValue);
-      }
+        if (progress.includes("UMAP")) {
+          setUmapProgress(progressValue);
+        } else if (progress.includes("CKA")) {
+          setCkaProgress(progressValue);
+        }
 
-      if (progressValue === 100) {
-        clearInterval(intervalId!);
-      }
-    }, 100);
+        if (progressValue === 100) {
+          clearInterval(intervalId!);
+        }
+      }, 100);
+    }
 
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [progress]);
+  }, [progress, forgetClassExist]);
 
   return (
     <section
       style={{ width, height }}
       className="p-1 relative border border-t-0"
     >
-      <div className="flex items-center gap-1">
-        <VitalIcon />
-        <h5 className="font-semibold text-lg">Progress</h5>
-        {forgetClassExist && (
-          <>
-            <Separator orientation="vertical" className="h-4 mx-1" />
-            <div>
-              {isRunning || completedSteps.length ? (
-                <div className="flex items-center gap-1 relative top-0.5">
-                  <Clock className="text-muted-foreground w-3 h-3" />
-                  <span className="text-sm">{runningTime.toFixed(1)}s</span>
-                </div>
-              ) : (
-                ""
-              )}
+      <Title
+        Icon={<VitalIcon />}
+        title="Progress"
+        AdditionalContent={
+          forgetClassExist && (
+            <div className="ml-1">
+              <Separator orientation="vertical" className="h-4 mx-1" />
+              <div className="">
+                {isRunning || completedSteps.length ? (
+                  <div className="flex items-center gap-1 relative top-0.5">
+                    <Clock className="text-muted-foreground w-3 h-3" />
+                    <span className="text-sm">{runningTime.toFixed(1)}s</span>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          )
+        }
+      />
       {forgetClassExist ? (
         <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
           {steps.map((step, idx) => {

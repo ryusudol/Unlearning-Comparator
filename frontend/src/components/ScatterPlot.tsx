@@ -14,6 +14,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import EmbeddingTooltip from "./EmbeddingTooltip";
+import { calculateZoom } from "../app/App";
 import { API_URL } from "../constants/common";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
@@ -229,12 +230,29 @@ const ScatterPlot = forwardRef(
       if (!svgRef.current) return;
 
       const svg = svgRef.current;
+      d3.select(svg).style("cursor", "grab");
+
+      const handleMouseDown = () => {
+        d3.select(svg).style("cursor", "grabbing");
+      };
+
+      const handleMouseUp = () => {
+        console.log("up!");
+        d3.select(svg).style("cursor", "grab");
+      };
+
+      svg.addEventListener("mousedown", handleMouseDown);
+      svg.addEventListener("mouseup", handleMouseUp, true);
+      window.addEventListener("mouseup", handleMouseUp);
 
       zoomRef.current = zoom;
       d3.select<SVGSVGElement, undefined>(svg).call(zoom);
 
       return () => {
         d3.select(svg).on(".zoom", null);
+        svg.removeEventListener("mousedown", handleMouseDown);
+        svg.removeEventListener("mouseup", handleMouseUp, true);
+        window.removeEventListener("mouseup", handleMouseUp);
       };
     }, [zoom]);
 
@@ -267,18 +285,17 @@ const ScatterPlot = forwardRef(
       }
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      let xPos = event.clientX - containerRect.left + 10;
-      let yPos = event.clientY - containerRect.top + 10;
+      const zoomFactor = calculateZoom();
 
-      if (xPos + CONFIG.tooltipXSize > containerRect.width) {
-        xPos = event.clientX - containerRect.left - CONFIG.tooltipXSize - 10;
-        if (xPos < 0) {
-          xPos = 0;
-        }
-      }
+      // 마우스 좌표를 확대/축소 비율에 맞게 조정
+      let xPos = (event.clientX - containerRect.left) / zoomFactor + 10;
+      let yPos = (event.clientY - containerRect.top) / zoomFactor + 10;
 
-      if (yPos + CONFIG.tooltipYSize > containerRect.height) {
-        yPos = event.clientY - containerRect.top - CONFIG.tooltipYSize - 10;
+      if (yPos + CONFIG.tooltipYSize > containerRect.height / zoomFactor) {
+        yPos =
+          (event.clientY - containerRect.top) / zoomFactor -
+          CONFIG.tooltipYSize -
+          10;
         if (yPos < 0) {
           yPos = 0;
         }
@@ -626,6 +643,10 @@ const ScatterPlot = forwardRef(
       };
     }, [hoveredInstance, mode, z]);
 
+    useEffect(() => {
+      setViewMode(VIEW_MODES[0]);
+    }, [data]);
+
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
       getInstancePosition: (imgIdx: number) => {
@@ -637,8 +658,10 @@ const ScatterPlot = forwardRef(
           const svgX = x(datum[0] as number);
           const svgY = y(datum[1] as number);
 
-          point.x = svgX;
-          point.y = svgY;
+          const transform = d3.zoomTransform(svgElement);
+
+          point.x = transform.applyX(svgX);
+          point.y = transform.applyY(svgY);
 
           const ctm = svgElement.getScreenCTM();
           if (ctm) {

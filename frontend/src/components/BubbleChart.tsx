@@ -6,6 +6,7 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "./UI/icons";
+import { calculateZoom } from "../app/App";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { ExperimentsContext } from "../store/experiments-context";
@@ -56,6 +57,7 @@ export default function BubbleChart({
   const svgRef = useRef<SVGSVGElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  const zoom = calculateZoom();
   const isBaseline = mode === "Baseline";
   const id = isBaseline ? baseline : comparison;
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
@@ -185,8 +187,8 @@ export default function BubbleChart({
         const rect = event.target.getBoundingClientRect();
         const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
 
-        let xPos = rect.right + 10;
-        let yPos = rect.top + rect.height / 2;
+        let xPos = (rect.right + 10) / zoom;
+        let yPos = (rect.top + rect.height / 2) / zoom;
 
         if (xPos + tooltipWidth > window.innerWidth - 20) {
           xPos = rect.left - tooltipWidth;
@@ -223,7 +225,7 @@ export default function BubbleChart({
       .join("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => (d.label === 0 ? 0 : Math.sqrt(sizeScale(d.label))))
+      .attr("r", (d) => (d.label >= 0.002 ? Math.sqrt(sizeScale(d.label)) : 0))
       .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
       .style("pointer-events", "none");
@@ -243,6 +245,7 @@ export default function BubbleChart({
     hoveredY,
     onHover,
     showYAxis,
+    zoom,
   ]);
 
   useEffect(() => {
@@ -270,7 +273,7 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "" : "right-[48px]"
+        showYAxis ? "z-10" : "right-[48px] z-0"
       }`}
     >
       <div
@@ -305,6 +308,7 @@ export default function BubbleChart({
               transform: "translateY(-50%)",
               pointerEvents: "none",
               zIndex: 10,
+              zoom,
             }}
           >
             <div>
@@ -320,7 +324,7 @@ export default function BubbleChart({
               </span>
             </div>
             <div>
-              <span>Label</span>:{" "}
+              <span>Proportion</span>:{" "}
               <span className="font-semibold">
                 {tooltip.content.label.toFixed(3)}
               </span>
@@ -334,7 +338,9 @@ export default function BubbleChart({
           </div>,
           document.body
         )}
-      <span className="absolute -bottom-0.5 left-1/2 text-xs">Prediction</span>
+      <span className="absolute -bottom-0.5 left-[calc(50%+5px)] text-xs">
+        Prediction
+      </span>
     </div>
   );
 }

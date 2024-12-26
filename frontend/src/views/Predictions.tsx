@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import * as d3 from "d3";
 
+import Title from "../components/Title";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/BubbleChart";
 import Indicator from "../components/Indicator";
@@ -38,10 +39,11 @@ export default function Predictions({
       className="p-1 flex flex-col border transition-all z-10 relative"
     >
       <div className="flex justify-between">
-        <div className="flex items-center mr-2">
-          <Target02Icon />
-          <h5 className="font-semibold ml-1 text-lg">Predictions</h5>
-        </div>
+        <Title
+          Icon={<Target02Icon />}
+          title="Predictions"
+          customClass="bottom-[2px] right-[1px]"
+        />
         {forgetClassExist && allSelected && (
           <DatasetModeSelector onValueChange={setDatasetMode} />
         )}
@@ -91,7 +93,7 @@ function BubbleChartLegend() {
         <span>More</span>
         <span className="absolute top-[27px] text-[13px]">Frequent</span>
       </div>
-      <div className="flex flex-col items-center gap-1 relative top-0.5">
+      <div className="flex flex-col items-center gap-[2px] relative top-0.5">
         <ColorBar />
         <div className="text-nowrap flex items-center gap-2 text-[10px]">
           <span>Less</span>
@@ -114,5 +116,18 @@ const ColorBar = () => {
 
   const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
 
-  return <div className="w-[110px] h-2.5" style={{ background: gradient }} />;
+  return (
+    <div className="relative w-[110px] h-3">
+      <div
+        className="absolute w-full h-full"
+        style={{ background: gradient }}
+      />
+      <div className="absolute -bottom-[4.5px] left-0.5">
+        <span className="text-[10px] text-white">0</span>
+      </div>
+      <div className="absolute -bottom-[4.5px] right-0.5">
+        <span className="text-[10px] text-[#666666]">1</span>
+      </div>
+    </div>
+  );
 };

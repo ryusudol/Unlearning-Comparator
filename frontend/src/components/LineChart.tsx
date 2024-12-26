@@ -8,6 +8,7 @@ import {
   TooltipProps,
 } from "recharts";
 
+import { calculateZoom } from "../app/App";
 import { getCkaData } from "../utils/data/getCkaData";
 import { ExperimentsContext } from "../store/experiments-context";
 import { CircleIcon, MultiplicationSignIcon } from "./UI/icons";
@@ -37,10 +38,24 @@ const DATAKEYS = [
   "comparisonOtherCka",
 ];
 const tickStyle = `
-  .recharts-cartesian-axis-tick text {
-    fill: ${BLACK} !important;
+.recharts-cartesian-axis-tick text {
+  fill: ${BLACK} !important;
   }
-`;
+  `;
+
+const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
+  <text
+    x={x}
+    y={y}
+    dy={8}
+    textAnchor="end"
+    transform={`rotate(-45, ${x}, ${y})`}
+    fontSize={LABEL_FONT_SIZE}
+    fontWeight={hoveredLayer === payload.value ? "bold" : TICK_FONT_WEIGHT}
+  >
+    {payload.value}
+  </text>
+));
 
 const chartConfig = {
   layer: {
@@ -72,23 +87,10 @@ type TickProps = {
   hoveredLayer: string | null;
 };
 
-const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
-  <text
-    x={x}
-    y={y}
-    dy={8}
-    textAnchor="end"
-    transform={`rotate(-45, ${x}, ${y})`}
-    fontSize={LABEL_FONT_SIZE}
-    fontWeight={hoveredLayer === payload.value ? "bold" : TICK_FONT_WEIGHT}
-  >
-    {payload.value}
-  </text>
-));
-
-export default function MyLineChart({ dataset }: { dataset: string }) {
+export default function _LineChart({ dataset }: { dataset: string }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+
   const [hoveredLayer, setHoveredLayer] = useState<string | null>(null);
 
   const renderTick = useCallback(
@@ -102,13 +104,17 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
   const layers = ckaData.map((data) => data.layer);
 
   return (
-    <div className="relative bottom-1 right-0.5">
+    <div className="relative bottom-1.5 right-3.5">
       <style>{tickStyle}</style>
       <CustomLegend />
-      <p className="text-[15px] text-center relative top-1 mb-1.5">
+      <p className="text-[15px] text-center relative top-1 mb-1.5 ml-[25px]">
         Per-layer Similarity Before/After Unlearning
       </p>
-      <ChartContainer className="w-[480px] h-[250px]" config={chartConfig}>
+      <ChartContainer
+        className="w-[492px] h-[251px]"
+        config={chartConfig}
+        style={{ position: "relative" }}
+      >
         <LineChart
           accessibilityLayer
           data={ckaData}
@@ -116,7 +122,7 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
             top: 7,
             right: 20,
             bottom: 34,
-            left: -12,
+            left: 0,
           }}
           onMouseMove={(state: any) => {
             if (state?.activePayload) {
@@ -169,7 +175,11 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
               },
             }}
           />
-          <ChartTooltip cursor={false} content={<CustomTooltip />} />
+          <ChartTooltip
+            cursor={false}
+            content={<CustomTooltip />}
+            wrapperStyle={{ zIndex: 9999 }}
+          />
           {DATAKEYS.map((key, idx) => {
             const isBaselineLine = key.includes("baseline");
             const dotColor = isBaselineLine ? PURPLE : EMERALD;
@@ -241,9 +251,14 @@ export default function MyLineChart({ dataset }: { dataset: string }) {
 }
 
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+  const zoom = calculateZoom();
+
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
+      <div
+        style={{ zoom, zIndex: 9999 }}
+        className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl"
+      >
         <div className="flex items-center leading-[18px]">
           <CircleIcon className="w-3 h-3 mr-1" style={{ color: PURPLE }} />
           <p>
@@ -286,7 +301,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-[128px] left-[60px] text-xs leading-4">
+    <div className="absolute top-32 left-[72px] text-xs leading-4 z-10">
       <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon

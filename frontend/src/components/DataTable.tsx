@@ -251,7 +251,7 @@ export default function DataTable({ columns }: Props) {
   };
 
   return (
-    <div className="w-full h-[196px]">
+    <div className="w-full h-[197px]">
       <div className="relative w-full">
         <Table className="w-full table-fixed border-t">
           <TableHeader>
@@ -289,7 +289,7 @@ export default function DataTable({ columns }: Props) {
             ))}
           </TableHeader>
         </Table>
-        <ScrollArea className="w-full h-[160px]">
+        <ScrollArea className="w-full h-[161px]">
           <Table className="w-full table-fixed">
             <TableBody
               className={`text-sm ${
@@ -304,6 +304,7 @@ export default function DataTable({ columns }: Props) {
                       <TableRow
                         key={row.id}
                         id={row.id}
+                        className="!border-b"
                         data-state={row.getIsSelected() && "selected"}
                       >
                         {row.getVisibleCells().map((cell, idx) => {
@@ -369,9 +370,14 @@ export default function DataTable({ columns }: Props) {
                       </TableRow>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
-                      <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
-                        Delete
-                      </ContextMenuItem>
+                      {!row.id.startsWith("000") &&
+                        !row.id.startsWith("a00") && (
+                          <ContextMenuItem
+                            onClick={() => handleDeleteRow(row.id)}
+                          >
+                            Delete
+                          </ContextMenuItem>
+                        )}
                       <ContextMenuItem
                         onClick={() => handleDownloadJSON(row.id)}
                       >
@@ -391,7 +397,7 @@ export default function DataTable({ columns }: Props) {
                     colSpan={columns.length}
                     className="h-[178px] text-center text-gray-500 text-[15px]"
                   >
-                    Run Training or Unlearning from the left first.
+                    Failed to load the data.
                   </TableCell>
                 </TableRow>
               )}

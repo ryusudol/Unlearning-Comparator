@@ -1,5 +1,6 @@
 import { useMemo, useContext, useState } from "react";
 
+import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/VerticalBarChart";
 import { Chart01Icon } from "../components/UI/icons";
@@ -56,18 +57,19 @@ export default function Accuracies({
       style={{ width, height }}
       className="p-1 flex flex-col border border-t-0 relative"
     >
-      <div className="flex items-center">
-        <Chart01Icon />
-        <h5 className="font-semibold ml-1 text-lg">
-          Accuracies
+      <Title
+        Icon={<Chart01Icon />}
+        title="Accuracies"
+        customClass="bottom-[2px] right-[1px]"
+        AdditionalContent={
           <span className="ml-1">(Comparison - Baseline)</span>
-        </h5>
-      </div>
+        }
+      />
       {forgetClass !== undefined ? (
         baseline === "" || comparison === "" ? (
           <Indicator about="BaselineComparison" />
         ) : (
-          <div className="w-full flex items-center relative">
+          <div className="w-full flex items-center relative bottom-0.5">
             <VerticalBarChart
               mode="Training"
               gapData={trainAccuracyGap}

@@ -1,6 +1,5 @@
 import { useContext, useState, useMemo } from "react";
 
-import { LogoIcon, PlusIcon, MultiplicationSignIcon } from "./UI/icons";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Experiments } from "../types/experiments-context";
@@ -8,6 +7,12 @@ import { ExperimentsContext } from "../store/experiments-context";
 import { fetchAllExperimentsData } from "../utils/api/unlearning";
 import { Label } from "./UI/label";
 import Button from "./Button";
+import {
+  LogoIcon,
+  PlusIcon,
+  MultiplicationSignIcon,
+  GithubIcon,
+} from "./UI/icons";
 import {
   Dialog,
   DialogContent,
@@ -97,8 +102,15 @@ export default function Header() {
     }
   };
 
+  const handleGithubIconClick = () => {
+    window.open(
+      "https://github.com/gnueaj/Machine-Unlearning-Comparator",
+      "_blank"
+    );
+  };
+
   return (
-    <div className="w-full text-white bg-black h-12 flex justify-between items-center px-4 relative">
+    <div className="w-[1805px] text-white bg-black h-12 flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
           <div className="flex items-center">
@@ -216,7 +228,11 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className="flex ml-5 relative top-1.5 right-[347px] text-[13px]">
+      <GithubIcon
+        onClick={handleGithubIconClick}
+        className="w-7 h-7 cursor-pointer"
+      />
+      <div className="flex absolute right-[362px] bottom-1 text-[13px]">
         <div className="flex flex-col mr-10">
           <span className="text-[10px] text-gray-300">Dataset</span>
           <span className="text-xs font-semibold -mt-[3px]">CIFAR-10</span>

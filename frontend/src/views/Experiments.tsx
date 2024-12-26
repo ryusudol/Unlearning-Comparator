@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 
+import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/DataTable";
 import Unlearning from "../components/Unlearning";
@@ -56,11 +57,12 @@ export default function Experiments({
       style={{ width, height }}
       className="p-1 relative border border-t-0 border-l-0"
     >
-      <div className="flex justify-between items-center mb-1">
-        <div className="flex items-center ml-0.5">
-          <SettingsIcon className="scale-110" />
-          <h5 className="font-semibold ml-1 text-lg">Experiments</h5>
-        </div>
+      <div className="flex justify-between items-center mb-[3px]">
+        <Title
+          Icon={<SettingsIcon />}
+          title="Experiments"
+          customClass="right-[1px]"
+        />
         {forgetClass !== undefined && (
           <Dialog
             open={open}
