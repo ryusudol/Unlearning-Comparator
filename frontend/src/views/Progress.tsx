@@ -168,18 +168,18 @@ export default function Progress({
         title="Progress"
         AdditionalContent={
           forgetClassExist && (
-            <div className="ml-1">
-              <Separator orientation="vertical" className="h-4 mx-1" />
-              <div className="">
-                {isRunning || completedSteps.length ? (
-                  <div className="flex items-center gap-1 relative top-0.5">
-                    <Clock className="text-muted-foreground w-3 h-3" />
-                    <span className="text-sm">{runningTime.toFixed(1)}s</span>
+            <div className="flex items-center gap-1.5 ml-1.5">
+              {isRunning || completedSteps.length ? (
+                <>
+                  <Separator orientation="vertical" className="h-4" />
+                  <div>
+                    <div className="flex items-center gap-1 relative top-0.5">
+                      <Clock className="text-muted-foreground w-3 h-3" />
+                      <span className="text-sm">{runningTime.toFixed(1)}s</span>
+                    </div>
                   </div>
-                ) : (
-                  ""
-                )}
-              </div>
+                </>
+              ) : null}
             </div>
           )
         }

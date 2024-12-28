@@ -237,7 +237,6 @@ const ScatterPlot = forwardRef(
       };
 
       const handleMouseUp = () => {
-        console.log("up!");
         d3.select(svg).style("cursor", "grab");
       };
 

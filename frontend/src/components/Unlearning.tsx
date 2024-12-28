@@ -44,6 +44,7 @@ export default function Unlearning() {
   const [learningRateIdx, setLearningRateIdx] = useState([6]);
   const [batchSizeLog, setBatchSizeLog] = useState([6]);
   const [method, setMethod] = useState("ft");
+  const [selectedFileName, setSelectedFileName] = useState("No file chosen");
 
   const isCustom = method === CUSTOM;
 
@@ -56,6 +57,11 @@ export default function Unlearning() {
       setLearningRateIdx([learning_rate]);
       setBatchSizeLog([batch_size]);
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0];
+    setSelectedFileName(file ? file.name : "No file chosen");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -127,12 +133,19 @@ export default function Unlearning() {
             <HyperparametersIcon className="w-3.5" />
             <p className="ml-1 text-nowrap">Custom File</p>
           </div>
-          <Input
-            type="file"
-            name="custom_file"
-            accept=".pth"
-            className="h-[25px] py-0.5 px-[7px] cursor-pointer"
-          />
+          <div className="relative">
+            <Input
+              type="file"
+              name="custom_file"
+              accept=".pth"
+              onChange={handleFileChange}
+              className="h-[25px] py-0.5 px-[7px] cursor-pointer opacity-0 absolute inset-0"
+            />
+            <div className="h-[25px] py-0.5 px-3 border rounded-md bg-background flex items-center">
+              <span className="mr-2 text-nowrap">Choose File</span>
+              <span className="text-sm truncate">{selectedFileName}</span>
+            </div>
+          </div>
         </div>
       ) : (
         <div>
