@@ -207,11 +207,42 @@ export default function DataTable({ columns }: Props) {
     try {
       await deleteRow(forgetClass as number, id);
       setIsExperimentsLoading(true);
-      const allData: Experiments = await fetchAllExperimentsData(
+      const allExperiments: Experiments = await fetchAllExperimentsData(
         forgetClass as number
       );
-      if ("detail" in allData) saveExperiments({});
-      else saveExperiments(allData);
+      if ("detail" in allExperiments) {
+        saveExperiments({});
+      } else {
+        const sortedExperiments = Object.fromEntries(
+          Object.entries(allExperiments).sort(([id1], [id2]) =>
+            id1.localeCompare(id2)
+          )
+        );
+        saveExperiments(sortedExperiments);
+        if (id === baseline) {
+          if (!comparison.startsWith("000")) {
+            saveBaseline(`000${forgetClass}`);
+          } else if (!comparison.startsWith("a00")) {
+            saveBaseline(`a00${forgetClass}`);
+          } else {
+            const nextBaselineExperiment = Object.values(
+              sortedExperiments
+            ).find((experiment) => experiment.id !== comparison);
+            saveBaseline(nextBaselineExperiment!.id);
+          }
+        } else if (id === comparison) {
+          if (!baseline.startsWith("000")) {
+            saveComparison(`000${forgetClass}`);
+          } else if (!baseline.startsWith("a00")) {
+            saveComparison(`a00${forgetClass}`);
+          } else {
+            const nextComparisonExperiment = Object.values(
+              sortedExperiments
+            ).find((experiment) => experiment.id !== baseline);
+            saveComparison(nextComparisonExperiment!.id);
+          }
+        }
+      }
     } catch (error) {
       console.error("Failed to delete the row:", error);
     } finally {
