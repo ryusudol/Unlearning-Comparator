@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 import { Clock } from "lucide-react";
 
+import View from "../components/View";
 import Stepper from "../components/Stepper";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
@@ -157,10 +158,7 @@ export default function Progress({
   }, [forgetClassExist, progress]);
 
   return (
-    <section
-      style={{ width, height }}
-      className="p-1 relative border border-t-0"
-    >
+    <View width={width} height={height} className="border-t-0">
       <Title
         Icon={<VitalIcon />}
         title="Progress"
@@ -192,6 +190,6 @@ export default function Progress({
       ) : (
         <Indicator about="ForgetClass" />
       )}
-    </section>
+    </View>
   );
 }
