@@ -443,27 +443,50 @@ const ScatterPlot = forwardRef(
       [mode, onHover]
     );
 
+    const shouldLowerOpacity = useCallback(
+      (d: (number | Prob)[]) => {
+        const dataCondition =
+          d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
+        const classCondition =
+          d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
+        return dataCondition || classCondition;
+      },
+      [forgetClass, viewMode]
+    );
+
     const handleMouseLeave = useCallback(
       (event: MouseEvent) => {
         onHover(null, mode);
 
         const element = event.currentTarget as Element;
         const selection = d3.select(element);
+        const d = selection.datum() as (number | Prob)[];
+
         if (element.tagName === "circle") {
           selection
             .attr("stroke", null)
             .attr("stroke-width", null)
-            .style("opacity", CONFIG.defaultCircleOpacity);
+            .style(
+              "opacity",
+              shouldLowerOpacity(d)
+                ? CONFIG.loweredOpacity
+                : CONFIG.defaultCircleOpacity
+            );
         } else {
-          const colorStr = z((selection.datum() as any)[3]);
+          const colorStr = z(d[3] as number);
           const color = d3.color(colorStr);
           selection
             .attr("stroke", color ? color.darker().toString() : BLACK)
             .attr("stroke-width", CONFIG.XStrokeWidth)
-            .style("opacity", CONFIG.defaultCrossOpacity);
+            .style(
+              "opacity",
+              shouldLowerOpacity(d)
+                ? CONFIG.loweredOpacity
+                : CONFIG.defaultCrossOpacity
+            );
         }
       },
-      [mode, onHover, z]
+      [mode, onHover, shouldLowerOpacity, z]
     );
 
     const transformedData = useMemo(() => {
@@ -617,25 +640,16 @@ const ScatterPlot = forwardRef(
 
       const updateOpacity = (selection: d3.Selection<any, any, any, any>) => {
         selection
-          .style("opacity", (d: any) => {
-            const dataCondition =
-              d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
-            const classCondition =
-              d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
-
-            if (dataCondition || classCondition) return CONFIG.loweredOpacity;
-            return selection.node()?.tagName === "circle"
+          .style("opacity", (d: any) =>
+            shouldLowerOpacity(d)
+              ? CONFIG.loweredOpacity
+              : selection.node()?.tagName === "circle"
               ? CONFIG.defaultCircleOpacity
-              : CONFIG.defaultCrossOpacity;
-          })
-          .style("pointer-events", (d: any) => {
-            const dataCondition =
-              d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
-            const classCondition =
-              d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
-
-            return dataCondition || classCondition ? "none" : "auto";
-          });
+              : CONFIG.defaultCrossOpacity
+          )
+          .style("pointer-events", (d: any) =>
+            shouldLowerOpacity(d) ? "none" : "auto"
+          );
       };
 
       if (svgElements.current.circles) {
@@ -644,7 +658,7 @@ const ScatterPlot = forwardRef(
       if (svgElements.current.crosses) {
         updateOpacity(svgElements.current.crosses);
       }
-    }, [forgetClass, viewMode]);
+    }, [shouldLowerOpacity]);
 
     useEffect(() => {
       if (!hoveredInstance) return;
@@ -723,29 +737,40 @@ const ScatterPlot = forwardRef(
         const element = elementMapRef.current.get(imgIdx);
         if (element) {
           const selection = d3.select(element);
-          selection
-            .attr("stroke", BLACK)
-            .attr("stroke-width", CONFIG.hoveredStrokeWidth)
-            .raise();
+          const d = selection.datum() as (number | Prob)[];
+
+          if (!shouldLowerOpacity(d)) {
+            selection
+              .attr("stroke", BLACK)
+              .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+              .raise();
+          }
         }
       },
       removeHighlight: (imgIdx: number) => {
         const element = elementMapRef.current.get(imgIdx);
         if (element) {
           const selection = d3.select(element);
-          if (element.tagName === "circle") {
+          const d = selection.datum() as (number | Prob)[];
+          const isCircle = element.tagName === "circle";
+          const opacityValue = shouldLowerOpacity(d)
+            ? CONFIG.loweredOpacity
+            : isCircle
+            ? CONFIG.defaultCircleOpacity
+            : CONFIG.defaultCrossOpacity;
+
+          if (isCircle) {
             selection
               .attr("stroke", null)
               .attr("stroke-width", null)
-              .style("opacity", CONFIG.defaultCircleOpacity);
+              .style("opacity", opacityValue);
           } else {
-            const d = selection.datum() as (number | Prob)[];
             const colorStr = z(d[3] as number);
             const color = d3.color(colorStr);
             selection
               .attr("stroke", color ? color.darker().toString() : BLACK)
               .attr("stroke-width", CONFIG.XStrokeWidth)
-              .style("opacity", CONFIG.defaultCrossOpacity);
+              .style("opacity", opacityValue);
           }
         }
       },
