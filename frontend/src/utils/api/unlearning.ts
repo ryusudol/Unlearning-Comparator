@@ -1,5 +1,5 @@
 import { ExperimentData } from "../../types/data";
-import { UnlearningConfigurationData } from "../../types/settings";
+import { UnlearningConfigurationData } from "../../types/experiments";
 import { API_URL } from "../../constants/common";
 
 export async function executeMethodUnlearning(

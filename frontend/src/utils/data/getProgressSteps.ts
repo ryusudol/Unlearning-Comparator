@@ -1,4 +1,4 @@
-import { UnlearningStatus } from "../../types/settings";
+import { UnlearningStatus } from "../../types/experiments";
 
 const TO_FIXED_LENGTH = 3;
 

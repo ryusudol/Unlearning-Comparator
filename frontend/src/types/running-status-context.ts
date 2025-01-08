@@ -1,4 +1,4 @@
-import { UnlearningStatus } from "./settings";
+import { UnlearningStatus } from "./experiments";
 
 export type UpdateStatusPayload = {
   status: UnlearningStatus;

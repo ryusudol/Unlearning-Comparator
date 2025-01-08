@@ -9,7 +9,7 @@ import { RunningStatusContext } from "../../store/running-status-context";
 import { ForgetClassContext } from "../../store/forget-class-context";
 import { UNLEARNING_METHODS } from "../../constants/experiments";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
-import { UnlearningConfigurationData } from "../../types/settings";
+import { UnlearningConfigurationData } from "../../types/experiments";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
