@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import View from "../components/View";
 import Title from "../components/Title";
 import DatasetModeSelector from "../components/DatasetModeSelector";
-import BubbleChart from "../components/BubbleChart";
+import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";

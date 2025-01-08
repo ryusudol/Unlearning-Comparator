@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
 
-import Unlearning from "../components/Unlearning";
-import Defense from "../components/Defense";
-import Button from "../components/Button";
-import { PlusIcon } from "../components/UI/icons";
-import { RunningStatusContext } from "../store/running-status-context";
+import Unlearning from "./Unlearning";
+import Defense from "./Defense";
+import Button from "../Button";
+import { PlusIcon } from "../UI/icons";
+import { RunningStatusContext } from "../../store/running-status-context";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
-} from "../components/UI/dialog";
+} from "../UI/dialog";
 
 const UNLEARNING = "unlearning";
 const DEFENSE = "defense";

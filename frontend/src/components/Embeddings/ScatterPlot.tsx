@@ -14,22 +14,27 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import EmbeddingTooltip from "./EmbeddingTooltip";
-import { calculateZoom } from "../app/App";
-import { API_URL } from "../constants/common";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
+import { calculateZoom } from "../../app/App";
+import { API_URL } from "../../constants/common";
+import { ForgetClassContext } from "../../store/forget-class-context";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import {
+  Mode,
+  SelectedData,
+  HovereInstance,
+  Prob,
+} from "../../views/Embeddings";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
+} from "../UI/icons";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./UI/select";
+} from "../UI/select";
 
 const VIEW_MODES: ViewModeType[] = [
   "All Instances",

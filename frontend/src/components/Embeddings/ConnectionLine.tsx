@@ -1,6 +1,6 @@
 import React from "react";
 
-import { calculateZoom } from "../app/App";
+import { calculateZoom } from "../../app/App";
 
 interface ConnectionLineProps {
   from: { x: number; y: number } | null;

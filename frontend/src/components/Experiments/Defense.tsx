@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 
-import { Slider } from "./UI/slider";
-import { Label } from "./UI/label";
-import { DEFENSE_METHODS } from "../constants/defense";
-import { DefenseConfigurationData } from "../types/settings";
+import { Slider } from "../UI/slider";
+import { Label } from "../UI/label";
+import { DEFENSE_METHODS } from "../../constants/defense";
+import { DefenseConfigurationData } from "../../types/settings";
 import {
   HyperparametersIcon,
   StartPointIcon,
   BrightShieldIcon,
-} from "./UI/icons";
+} from "../UI/icons";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./UI/select";
+} from "../UI/select";
 
 export default function Defense() {
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);

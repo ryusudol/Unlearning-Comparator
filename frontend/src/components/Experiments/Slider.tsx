@@ -1,4 +1,4 @@
-import { Slider } from "./UI/slider";
+import { Slider } from "../UI/slider";
 
 interface Props {
   name: string;

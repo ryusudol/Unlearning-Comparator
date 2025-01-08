@@ -1,8 +1,7 @@
-import React from "react";
 import { Check, Dot, Loader2 } from "lucide-react";
 
-import { Button } from "../components/UI/button";
-import { Step } from "../views/Progress";
+import { Button } from "../UI/button";
+import { Step } from "../../views/Progress";
 import {
   Stepper,
   StepperDescription,
@@ -10,7 +9,7 @@ import {
   StepperSeparator,
   StepperTitle,
   StepperTrigger,
-} from "../components/UI/stepper";
+} from "../UI/stepper";
 
 export default function _Stepper({
   steps,

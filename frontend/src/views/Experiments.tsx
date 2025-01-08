@@ -1,11 +1,11 @@
 import { useContext } from "react";
 
-import AddExperimentButton from "../components/AddExperimentButton";
 import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
-import DataTable from "../components/DataTable";
-import { columns } from "../components/Columns";
+import DataTable from "../components/Experiments/DataTable";
+import AddExperimentButton from "../components/Experiments/AddExperimentButton";
+import { columns } from "../components/Experiments/Columns";
 import { SettingsIcon } from "../components/UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 

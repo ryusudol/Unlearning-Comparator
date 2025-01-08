@@ -1,26 +1,26 @@
 import React, { useContext, useState } from "react";
 
-import Button from "./Button";
+import Button from "../Button";
 import Slider from "./Slider";
-import { Input } from "./UI/input";
-import { Label } from "./UI/label";
-import { HyperparametersIcon, EraserIcon, PlusIcon } from "./UI/icons";
-import { RunningStatusContext } from "../store/running-status-context";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { UNLEARNING_METHODS } from "../constants/unlearning";
-import { getDefaultUnlearningConfig } from "../utils/config/unlearning";
-import { UnlearningConfigurationData } from "../types/settings";
+import { Input } from "../UI/input";
+import { Label } from "../UI/label";
+import { HyperparametersIcon, EraserIcon, PlusIcon } from "../UI/icons";
+import { RunningStatusContext } from "../../store/running-status-context";
+import { ForgetClassContext } from "../../store/forget-class-context";
+import { UNLEARNING_METHODS } from "../../constants/unlearning";
+import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
+import { UnlearningConfigurationData } from "../../types/settings";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
-} from "../utils/api/unlearning";
+} from "../../utils/api/unlearning";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./UI/select";
+} from "../UI/select";
 
 const CUSTOM = "custom";
 const LEARNING_RATE = [

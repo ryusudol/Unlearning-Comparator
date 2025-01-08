@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useCallback } from "react";
 import { Clock } from "lucide-react";
 
 import View from "../components/View";
-import Stepper from "../components/Stepper";
+import Stepper from "../components/Progress/Stepper";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import { Separator } from "../components/UI/separator";

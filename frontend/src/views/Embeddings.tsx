@@ -1,9 +1,9 @@
 import { useContext, useMemo, useRef, useCallback } from "react";
 
 import View from "../components/View";
-import InformationButton from "../components/InformationButton";
-import ScatterPlot from "../components/ScatterPlot";
-import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
+import InformationButton from "../components/Embeddings/InformationButton";
+import ScatterPlot from "../components/Embeddings/ScatterPlot";
+import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
 import { ExperimentsContext } from "../store/experiments-context";
 import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";

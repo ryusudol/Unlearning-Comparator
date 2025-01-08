@@ -3,7 +3,7 @@ import { useState, useContext } from "react";
 import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
-import LineChart from "../components/LineChart";
+import LineChart from "../components/Correlations/LineChart";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import { Layers02Icon } from "../components/UI/icons";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";

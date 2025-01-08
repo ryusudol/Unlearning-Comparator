@@ -3,7 +3,7 @@ import { useMemo, useContext, useState } from "react";
 import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
-import VerticalBarChart from "../components/VerticalBarChart";
+import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
 import { Chart01Icon } from "../components/UI/icons";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
