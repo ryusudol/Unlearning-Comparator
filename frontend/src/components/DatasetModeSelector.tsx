@@ -1,6 +1,6 @@
 import { Label } from "./UI/label";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
-import { TRAIN, TEST } from "../views/Predictions";
+import { TRAIN, TEST } from "../constants/common";
 
 interface Props {
   onValueChange: (value: string) => void;

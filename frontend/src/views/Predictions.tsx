@@ -6,25 +6,13 @@ import Title from "../components/Title";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
+import { ViewProps } from "../types/common";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
+import { TRAIN } from "../constants/common";
 
-export const TRAIN = "train";
-export const TEST = "test";
-export const BUBBLE = "bubble";
-export const LABEL_HEATMAP = "label-heatmap";
-export const CONFIDENCE_HEATMAP = "confidence-heatmap";
-
-export type ChartModeType = "bubble" | "label-heatmap" | "confidence-heatmap";
-
-export default function Predictions({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
+export default function Predictions({ width, height }: ViewProps) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClass } = useContext(ForgetClassContext);
 

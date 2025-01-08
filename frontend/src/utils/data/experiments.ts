@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { Dist } from "../../types/data";
 import { ExperimentData } from "../../types/data";
 import { Experiments } from "../../types/experiments-context";
-import { TRAIN } from "../../views/Predictions";
+import { TRAIN } from "../../constants/common";
 
 type Values = {
   UA: number[];

@@ -1,7 +1,7 @@
 import { Check, Dot, Loader2 } from "lucide-react";
 
 import { Button } from "../UI/button";
-import { Step } from "../../views/Progress";
+import { Step } from "../../types/progress";
 import {
   Stepper,
   StepperDescription,

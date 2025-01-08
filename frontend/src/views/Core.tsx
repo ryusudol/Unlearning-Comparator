@@ -5,6 +5,7 @@ import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
+import { ViewProps } from "../types/common";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Separator } from "../components/UI/separator";
 import { forgetClassNames } from "../constants/forgetClassNames";
@@ -20,13 +21,7 @@ const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 const HEIGHT = 635;
 
-export default function Core({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
+export default function Core({ width, height }: ViewProps) {
   const { forgetClass } = useContext(ForgetClassContext);
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
