@@ -18,7 +18,7 @@ export default function Correlations({ width, height }: ViewProps) {
   const [dataset, setDataset] = useState(TRAIN);
 
   const forgetClassExist = forgetClass !== undefined;
-  const allSelected = baseline !== "" && comparison !== "";
+  const bothBaseCompExist = baseline !== "" && comparison !== "";
 
   return (
     <View width={width} height={height}>
@@ -28,12 +28,12 @@ export default function Correlations({ width, height }: ViewProps) {
           title="Layer-Wise Correlations"
           customClass="bottom-[2px]"
         />
-        {forgetClassExist && allSelected && (
+        {forgetClassExist && bothBaseCompExist && (
           <DatasetModeSelector onValueChange={setDataset} />
         )}
       </div>
       {forgetClassExist ? (
-        allSelected ? (
+        bothBaseCompExist ? (
           <LineChart dataset={dataset} />
         ) : (
           <Indicator about="BaselineComparison" />

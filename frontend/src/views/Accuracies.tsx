@@ -35,7 +35,7 @@ export default function Accuracies({ width, height }: ViewProps) {
   const maxGap = Math.max(trainMaxGap, testMaxGap);
 
   const forgetClassExist = forgetClass !== undefined;
-  const bothBaselineComparisonExist = baseline !== "" && comparison !== "";
+  const bothBaseCompExist = baseline !== "" && comparison !== "";
 
   return (
     <View width={width} height={height} className="border-t-0">
@@ -48,7 +48,7 @@ export default function Accuracies({ width, height }: ViewProps) {
         }
       />
       {forgetClassExist ? (
-        bothBaselineComparisonExist ? (
+        bothBaseCompExist ? (
           <div className="w-full flex items-center relative bottom-0.5">
             <VerticalBarChart
               mode="Training"
