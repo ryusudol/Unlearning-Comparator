@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { Slider } from "../UI/slider";
 import { Label } from "../UI/label";
-import { DEFENSE_METHODS } from "../../constants/defense";
+import { DEFENSE_METHODS } from "../../constants/experiments";
 import { DefenseConfigurationData } from "../../types/settings";
 import {
   HyperparametersIcon,

@@ -6,7 +6,7 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
-import { calculateZoom } from "../../app/App";
+import { calculateZoom } from "../../utils/util";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { ForgetClassContext } from "../../store/forget-class-context";
 import { ExperimentsContext } from "../../store/experiments-context";

@@ -14,7 +14,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import EmbeddingTooltip from "./EmbeddingTooltip";
-import { calculateZoom } from "../../app/App";
+import { calculateZoom } from "../../utils/util";
 import { API_URL } from "../../constants/common";
 import { ForgetClassContext } from "../../store/forget-class-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";

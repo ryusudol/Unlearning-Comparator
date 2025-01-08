@@ -7,7 +7,7 @@ import { Label } from "../UI/label";
 import { HyperparametersIcon, EraserIcon, PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { ForgetClassContext } from "../../store/forget-class-context";
-import { UNLEARNING_METHODS } from "../../constants/unlearning";
+import { UNLEARNING_METHODS } from "../../constants/experiments";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { UnlearningConfigurationData } from "../../types/settings";
 import {

@@ -8,7 +8,7 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { calculateZoom } from "../../app/App";
+import { calculateZoom } from "../../utils/util";
 import { getCkaData } from "../../utils/data/getCkaData";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { CircleIcon, MultiplicationSignIcon } from "../UI/icons";
