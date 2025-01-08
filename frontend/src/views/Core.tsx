@@ -31,8 +31,12 @@ export default function Core({ width, height }: ViewProps) {
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
-    if (id === EMBEDDINGS) setDisplayMode(EMBEDDINGS);
-    else setDisplayMode(ATTACK);
+
+    if (id === EMBEDDINGS) {
+      setDisplayMode(EMBEDDINGS);
+    } else {
+      setDisplayMode(ATTACK);
+    }
   };
 
   return (
@@ -83,6 +87,7 @@ export default function Core({ width, height }: ViewProps) {
   );
 }
 
+// Components
 function UnderLine() {
   return (
     <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
