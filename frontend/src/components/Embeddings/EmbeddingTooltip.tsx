@@ -6,7 +6,7 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import { forgetClassNames } from "../../constants/forgetClassNames";
-import { Prob } from "../../views/Embeddings";
+import { Prob } from "../../types/embeddings";
 
 const BLACK = "black";
 const LOW_OPACITY = 0.6;

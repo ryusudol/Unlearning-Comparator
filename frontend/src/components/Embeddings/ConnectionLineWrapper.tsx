@@ -1,7 +1,7 @@
 import React, { memo, useRef, useEffect, useState } from "react";
 
 import ConnectionLine from "./ConnectionLine";
-import { Coordinate } from "../../views/Embeddings";
+import { Coordinate } from "../../types/embeddings";
 
 type Position = {
   from: Coordinate | null;

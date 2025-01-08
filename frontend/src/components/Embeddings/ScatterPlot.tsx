@@ -21,9 +21,10 @@ import { BaselineComparisonContext } from "../../store/baseline-comparison-conte
 import {
   Mode,
   SelectedData,
-  HovereInstance,
+  HoverInstance,
   Prob,
-} from "../../views/Embeddings";
+  ViewModeType,
+} from "../../types/embeddings";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
@@ -63,17 +64,12 @@ const ZOOM_RESET_DURATION = 500;
 const UNLEARNING_TARGET = "Forgetting Target";
 const UNLEARNING_FAILED = "Forgetting Failed";
 
-export type ViewModeType =
-  | "All Instances"
-  | "Forgetting Target"
-  | "Forgetting Failed";
-
 interface Props {
   mode: Mode;
   height: number;
   data: SelectedData;
   onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
-  hoveredInstance: HovereInstance | null;
+  hoveredInstance: HoverInstance | null;
 }
 
 const ScatterPlot = forwardRef(
@@ -84,7 +80,7 @@ const ScatterPlot = forwardRef(
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
     const elementMapRef = useRef(new Map<number, Element>());
-    const hoveredInstanceRef = useRef<HovereInstance | null>(null);
+    const hoveredInstanceRef = useRef<HoverInstance | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
@@ -148,7 +144,7 @@ const ScatterPlot = forwardRef(
       if (ref) {
         (ref as any).current = {
           ...((ref as any).current || {}),
-          updateHoveredInstance: (instance: HovereInstance | null) => {
+          updateHoveredInstance: (instance: HoverInstance | null) => {
             hoveredInstanceRef.current = instance;
             refHolder.setAttribute(
               "data-hovered-instance",
@@ -758,7 +754,7 @@ const ScatterPlot = forwardRef(
         }
         return null;
       },
-      updateHoveredInstance: (instance: HovereInstance | null) => {
+      updateHoveredInstance: (instance: HoverInstance | null) => {
         hoveredInstanceRef.current = instance;
       },
       highlightInstance: (imgIdx: number) => {
