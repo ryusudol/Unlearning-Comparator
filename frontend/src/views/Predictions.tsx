@@ -64,6 +64,7 @@ export default function Predictions({ width, height }: ViewProps) {
   );
 }
 
+//Components
 function BubbleChartLegend() {
   return (
     <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[50%] gap-11 text-[#666666]">
