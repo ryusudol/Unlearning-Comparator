@@ -1,5 +1,5 @@
 import View from "../components/View";
-import Discriminator from "../components/Discriminator";
+import Discriminator from "../components/PrivacyAttack/Discriminator";
 
 export default function PrivacyAttack({ height }: { height: number }) {
   return (

@@ -1,33 +1,19 @@
 import { useContext, useMemo, useRef, useCallback } from "react";
 
 import View from "../components/View";
-import InformationButton from "../components/InformationButton";
-import ScatterPlot from "../components/ScatterPlot";
-import ConnectionLineWrapper from "../components/ConnectionLineWrapper";
+import InformationButton from "../components/Embeddings/InformationButton";
+import ScatterPlot from "../components/Embeddings/ScatterPlot";
+import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
+import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
 import { ExperimentsContext } from "../store/experiments-context";
-import { Separator } from "../components/UI/separator";
 import { extractSelectedData } from "../utils/data/experiments";
-
-export type Coordinate = { x: number; y: number };
-type Position = {
-  from: Coordinate | null;
-  to: Coordinate | null;
-};
-export type Mode = "Baseline" | "Comparison";
-export type HovereInstance = {
-  imgIdx: number;
-  source: Mode;
-  baselineProb?: Prob;
-  comparisonProb?: Prob;
-} | null;
-export type Prob = { [key: string]: number };
-export type SelectedData = (number | Prob)[][];
+import { Separator } from "../components/UI/separator";
 
 export default function Embeddings({ height }: { height: number }) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
-  const hoveredInstanceRef = useRef<HovereInstance>(null);
+  const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);

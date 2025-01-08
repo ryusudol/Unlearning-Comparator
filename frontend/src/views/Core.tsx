@@ -5,6 +5,7 @@ import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
+import { ViewProps } from "../types/common";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { Separator } from "../components/UI/separator";
 import { forgetClassNames } from "../constants/forgetClassNames";
@@ -20,13 +21,7 @@ const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 const HEIGHT = 635;
 
-export default function Core({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
+export default function Core({ width, height }: ViewProps) {
   const { forgetClass } = useContext(ForgetClassContext);
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
@@ -36,8 +31,12 @@ export default function Core({
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
-    if (id === EMBEDDINGS) setDisplayMode(EMBEDDINGS);
-    else setDisplayMode(ATTACK);
+
+    if (id === EMBEDDINGS) {
+      setDisplayMode(EMBEDDINGS);
+    } else {
+      setDisplayMode(ATTACK);
+    }
   };
 
   return (
@@ -88,6 +87,7 @@ export default function Core({
   );
 }
 
+// Components
 function UnderLine() {
   return (
     <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />

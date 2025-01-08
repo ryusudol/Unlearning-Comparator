@@ -3,7 +3,7 @@ import * as d3 from "d3";
 
 import DistributionDotPlot from "./DistributionDotPlot";
 import PieChart from "./PieChart";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 
 export type DataPoint = {
   entropy: number;

@@ -14,22 +14,28 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import EmbeddingTooltip from "./EmbeddingTooltip";
-import { calculateZoom } from "../app/App";
-import { API_URL } from "../constants/common";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { Mode, SelectedData, HovereInstance, Prob } from "../views/Embeddings";
+import { calculateZoom } from "../../utils/util";
+import { API_URL } from "../../constants/common";
+import { ForgetClassContext } from "../../store/forget-class-context";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import {
+  Mode,
+  SelectedData,
+  HoverInstance,
+  Prob,
+  ViewModeType,
+} from "../../types/embeddings";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
+} from "../UI/icons";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./UI/select";
+} from "../UI/select";
 
 const VIEW_MODES: ViewModeType[] = [
   "All Instances",
@@ -58,17 +64,12 @@ const ZOOM_RESET_DURATION = 500;
 const UNLEARNING_TARGET = "Forgetting Target";
 const UNLEARNING_FAILED = "Forgetting Failed";
 
-export type ViewModeType =
-  | "All Instances"
-  | "Forgetting Target"
-  | "Forgetting Failed";
-
 interface Props {
   mode: Mode;
   height: number;
   data: SelectedData;
   onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
-  hoveredInstance: HovereInstance | null;
+  hoveredInstance: HoverInstance | null;
 }
 
 const ScatterPlot = forwardRef(
@@ -79,7 +80,7 @@ const ScatterPlot = forwardRef(
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
     const elementMapRef = useRef(new Map<number, Element>());
-    const hoveredInstanceRef = useRef<HovereInstance | null>(null);
+    const hoveredInstanceRef = useRef<HoverInstance | null>(null);
     const svgRef = useRef<SVGSVGElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, undefined>>();
@@ -143,7 +144,7 @@ const ScatterPlot = forwardRef(
       if (ref) {
         (ref as any).current = {
           ...((ref as any).current || {}),
-          updateHoveredInstance: (instance: HovereInstance | null) => {
+          updateHoveredInstance: (instance: HoverInstance | null) => {
             hoveredInstanceRef.current = instance;
             refHolder.setAttribute(
               "data-hovered-instance",
@@ -753,7 +754,7 @@ const ScatterPlot = forwardRef(
         }
         return null;
       },
-      updateHoveredInstance: (instance: HovereInstance | null) => {
+      updateHoveredInstance: (instance: HoverInstance | null) => {
         hoveredInstanceRef.current = instance;
       },
       highlightInstance: (imgIdx: number) => {

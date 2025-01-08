@@ -10,25 +10,29 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { fetchAllExperimentsData } from "../utils/api/unlearning";
-import { deleteRow, downloadJSON, downloadPTH } from "../utils/api/dataTable";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { calculatePerformanceMetrics } from "../utils/data/experiments";
-import { ExperimentData } from "../types/data";
-import { Experiments } from "../types/experiments-context";
-import { hexToRgba } from "../utils/data/colors";
-import { ScrollArea } from "./UI/scroll-area";
-import { ExperimentsContext } from "../store/experiments-context";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
-import { cn } from "../utils/common/styles";
+import { fetchAllExperimentsData } from "../../utils/api/unlearning";
+import {
+  deleteRow,
+  downloadJSON,
+  downloadPTH,
+} from "../../utils/api/dataTable";
+import { ForgetClassContext } from "../../store/forget-class-context";
+import { calculatePerformanceMetrics } from "../../utils/data/experiments";
+import { ExperimentData } from "../../types/data";
+import { Experiments } from "../../types/experiments-context";
+import { hexToRgba } from "../../utils/data/colors";
+import { ScrollArea } from "../UI/scroll-area";
+import { ExperimentsContext } from "../../store/experiments-context";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
+import { cn } from "../../utils/common/styles";
 import { COLUMN_WIDTHS } from "./Columns";
 import {
   ContextMenu,
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
-} from "./UI/context-menu";
+} from "../UI/context-menu";
 import {
   Table,
   TableBody,
@@ -36,7 +40,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./UI/table";
+} from "../UI/table";
 
 const BASELINE = "baseline";
 const COMPARISON = "comparison";

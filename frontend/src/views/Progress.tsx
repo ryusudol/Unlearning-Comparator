@@ -2,32 +2,22 @@ import { useState, useEffect, useContext, useCallback } from "react";
 import { Clock } from "lucide-react";
 
 import View from "../components/View";
-import Stepper from "../components/Stepper";
+import Stepper from "../components/Progress/Stepper";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
+import { ViewProps } from "../types/common";
+import { Step } from "../types/progress";
+import { VitalIcon } from "../components/UI/icons";
 import { Separator } from "../components/UI/separator";
 import { fetchDataFile } from "../utils/api/unlearning";
-import { ExperimentsContext } from "../store/experiments-context";
-import { RunningStatusContext } from "../store/running-status-context";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { fetchUnlearningStatus, cancelUnlearning } from "../utils/api/requests";
-import { VitalIcon } from "../components/UI/icons";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { RunningStatusContext } from "../store/running-status-context";
+import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
-export type Step = {
-  step: number;
-  title: string;
-  description: string;
-};
-
-export default function Progress({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
+export default function Progress({ width, height }: ViewProps) {
   const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
   const { saveComparison } = useContext(BaselineComparisonContext);

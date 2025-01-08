@@ -5,13 +5,13 @@ import * as d3 from "d3";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
-import { calculateZoom } from "../app/App";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { ExperimentsContext } from "../store/experiments-context";
-import { extractBubbleChartData } from "../utils/data/experiments";
-import { forgetClassNames } from "../constants/forgetClassNames";
+} from "../UI/icons";
+import { calculateZoom } from "../../utils/util";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { ForgetClassContext } from "../../store/forget-class-context";
+import { ExperimentsContext } from "../../store/experiments-context";
+import { extractBubbleChartData } from "../../utils/data/experiments";
+import { forgetClassNames } from "../../constants/forgetClassNames";
 
 const TOTAL_SIZE = 255;
 const MIN_BUBBLE_SIZE = 1;

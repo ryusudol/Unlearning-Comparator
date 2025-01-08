@@ -1,6 +1,6 @@
 import { createContext, useReducer, useCallback, useEffect } from "react";
 
-import { UnlearningStatus } from "../types/settings";
+import { UnlearningStatus } from "../types/experiments";
 import {
   RunningStatus,
   RunningStatusContextType,

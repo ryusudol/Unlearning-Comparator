@@ -1,15 +1,19 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-import { Button } from "./UI/button";
-import { ExperimentData } from "../types/data";
-import { Badge } from "./UI/badge";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./UI/hover-card";
-import { getPhaseColors } from "../utils/data/colors";
+import { Badge } from "../UI/badge";
+import { Button } from "../UI/button";
+import { ExperimentData } from "../../types/data";
+import { getPhaseColors } from "../../utils/data/colors";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../UI/hover-card";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
+} from "../UI/icons";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A"

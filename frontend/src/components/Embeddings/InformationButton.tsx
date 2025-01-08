@@ -5,7 +5,7 @@ import {
   CursorPointerIcon,
   ScrollVerticalIcon,
   DragIcon,
-} from "../components/UI/icons";
+} from "../UI/icons";
 import {
   Dialog,
   DialogHeader,
@@ -13,7 +13,7 @@ import {
   DialogDescription,
   DialogContent,
   DialogTrigger,
-} from "../components/UI/dialog";
+} from "../UI/dialog";
 
 export default function InformationButton() {
   const [open, setOpen] = useState(false);

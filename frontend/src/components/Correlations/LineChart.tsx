@@ -8,15 +8,11 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { calculateZoom } from "../app/App";
-import { getCkaData } from "../utils/data/getCkaData";
-import { ExperimentsContext } from "../store/experiments-context";
-import { CircleIcon, MultiplicationSignIcon } from "./UI/icons";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-} from "../components/UI/chart";
+import { calculateZoom } from "../../utils/util";
+import { getCkaData } from "../../utils/data/getCkaData";
+import { ExperimentsContext } from "../../store/experiments-context";
+import { CircleIcon, MultiplicationSignIcon } from "../UI/icons";
+import { ChartConfig, ChartContainer, ChartTooltip } from "../UI/chart";
 
 const PURPLE = "#a855f7";
 const EMERALD = "#10b981";

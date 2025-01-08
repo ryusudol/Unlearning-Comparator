@@ -4,9 +4,9 @@ import * as d3 from "d3";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { Prob } from "../views/Embeddings";
+} from "../UI/icons";
+import { forgetClassNames } from "../../constants/forgetClassNames";
+import { Prob } from "../../types/embeddings";
 
 const BLACK = "black";
 const LOW_OPACITY = 0.6;
