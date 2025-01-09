@@ -1,39 +1,24 @@
-import { useState, useEffect, useContext, useCallback } from "react";
-import { Clock } from "lucide-react";
+import { useState, useEffect, useContext } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
+import Timer from "../components/Progress/Timer";
 import { ViewProps } from "../types/common";
 import { Step } from "../types/progress";
 import { VitalIcon } from "../components/UI/icons";
-import { Separator } from "../components/UI/separator";
-import { fetchDataFile } from "../utils/api/unlearning";
-import { fetchUnlearningStatus, cancelUnlearning } from "../utils/api/requests";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { RunningStatusContext } from "../store/running-status-context";
-import { ExperimentsContext } from "../store/experiments-context";
 import { ForgetClassContext } from "../store/forget-class-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
 export default function Progress({ width, height }: ViewProps) {
-  const { addExperiment } = useContext(ExperimentsContext);
   const { forgetClass } = useContext(ForgetClassContext);
-  const { saveComparison } = useContext(BaselineComparisonContext);
-  const {
-    isRunning,
-    status,
-    activeStep,
-    updateIsRunning,
-    completedSteps,
-    updateStatus,
-    updateActiveStep,
-  } = useContext(RunningStatusContext);
+  const { isRunning, status, activeStep, completedSteps } =
+    useContext(RunningStatusContext);
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
-  const [runningTime, setRunningTime] = useState(0);
 
   const forgetClassExist =
     forgetClass !== undefined && status[forgetClass as number] !== undefined;
@@ -47,73 +32,6 @@ export default function Progress({ width, height }: ViewProps) {
     umapProgress,
     ckaProgress
   );
-
-  const checkStatus = useCallback(async () => {
-    try {
-      const unlearningStatus = await fetchUnlearningStatus();
-
-      updateStatus({
-        status: unlearningStatus,
-        forgetClass: forgetClass as number,
-      });
-
-      const progress = unlearningStatus.progress;
-      if (progress.includes("Evaluating")) {
-        updateActiveStep(2);
-      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
-        updateActiveStep(3);
-      }
-
-      if (!unlearningStatus.is_unlearning) {
-        updateIsRunning(false);
-        updateActiveStep(0);
-
-        try {
-          const newData = await fetchDataFile(
-            forgetClass as number,
-            unlearningStatus.recent_id as string
-          );
-          addExperiment(newData);
-          saveComparison(newData.id);
-        } catch (error) {
-          console.error("Failed to fetch data file:", error);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch unlearning status:", error);
-      updateIsRunning(false);
-      await cancelUnlearning();
-    }
-  }, [
-    addExperiment,
-    forgetClass,
-    saveComparison,
-    updateActiveStep,
-    updateIsRunning,
-    updateStatus,
-  ]);
-
-  useEffect(() => {
-    let statusIntervalId: NodeJS.Timeout | null = null;
-    let timerIntervalId: NodeJS.Timeout | null = null;
-
-    if (isRunning) {
-      setRunningTime(0);
-      statusIntervalId = setInterval(checkStatus, 1000);
-      timerIntervalId = setInterval(() => {
-        setRunningTime((prev) => prev + 0.1);
-      }, 100);
-    }
-
-    return () => {
-      if (statusIntervalId) {
-        clearInterval(statusIntervalId);
-      }
-      if (timerIntervalId) {
-        clearInterval(timerIntervalId);
-      }
-    };
-  }, [checkStatus, isRunning]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -155,17 +73,7 @@ export default function Progress({ width, height }: ViewProps) {
         AdditionalContent={
           forgetClassExist && (
             <div className="flex items-center gap-1.5 ml-1.5">
-              {isRunning || completedSteps.length ? (
-                <>
-                  <Separator orientation="vertical" className="h-4" />
-                  <div>
-                    <div className="flex items-center gap-1 relative top-0.5">
-                      <Clock className="text-muted-foreground w-3 h-3" />
-                      <span className="text-sm">{runningTime.toFixed(1)}s</span>
-                    </div>
-                  </div>
-                </>
-              ) : null}
+              {isRunning || completedSteps.length ? <Timer /> : null}
             </div>
           )
         }

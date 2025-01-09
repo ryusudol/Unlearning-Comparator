@@ -23,6 +23,7 @@ const initialStatus: UnlearningStatus = {
   p_test_accuracy: 0,
   method: "",
   estimated_time_remaining: 0,
+  elapsed_time: 0,
 };
 
 export const RunningStatusContext = createContext<RunningStatusContextType>({
@@ -73,7 +74,7 @@ function runningStatusReducer(
       return state;
 
     case "UPDATE_STATUS":
-      const { status, forgetClass: fgClass } = action.payload;
+      const { status, forgetClass: fgClass, elapsedTime } = action.payload;
       const progress =
         status.is_unlearning && status.progress === "Idle"
           ? "Unlearning"
@@ -96,7 +97,11 @@ function runningStatusReducer(
       }
 
       const updatedStatusArray = [...state.status];
-      updatedStatusArray[fgClass] = { ...status, progress };
+      updatedStatusArray[fgClass] = {
+        ...status,
+        progress,
+        elapsed_time: elapsedTime,
+      };
       const updatedStatus = {
         ...state,
         status: updatedStatusArray,

@@ -3,6 +3,7 @@ import { UnlearningStatus } from "./experiments";
 export type UpdateStatusPayload = {
   status: UnlearningStatus;
   forgetClass: number;
+  elapsedTime: number;
 };
 
 export interface RunningStatus {
