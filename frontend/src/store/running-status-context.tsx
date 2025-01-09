@@ -1,5 +1,7 @@
 import { createContext, useReducer, useCallback, useEffect } from "react";
 
+import { RUNNING_STATUS_ACTIONS } from "../constants/actions";
+import { RUNNING_STATUS } from "../constants/storageKeys";
 import { UnlearningStatus } from "../types/experiments";
 import {
   RunningStatus,
@@ -8,7 +10,6 @@ import {
   UpdateStatusPayload,
 } from "../types/running-status-context";
 
-const RUNNING_STATUS = "running-status";
 const initialStatus: UnlearningStatus = {
   is_unlearning: false,
   progress: "Idle",
@@ -44,7 +45,7 @@ function runningStatusReducer(
   action: Action
 ): RunningStatus {
   switch (action.type) {
-    case "UPDATE_IS_RUNNING":
+    case RUNNING_STATUS_ACTIONS.UPDATE_IS_RUNNING:
       const isRunning = action.payload;
       sessionStorage.setItem(
         RUNNING_STATUS,
@@ -52,7 +53,7 @@ function runningStatusReducer(
       );
       return { ...state, isRunning };
 
-    case "INIT_STATUS":
+    case RUNNING_STATUS_ACTIONS.INIT_STATUS:
       const forgetClass = action.payload;
       const newStatus = [...state.status];
       newStatus[forgetClass] = initialStatus;
@@ -64,7 +65,7 @@ function runningStatusReducer(
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(initializedStatus));
       return initializedStatus;
 
-    case "RETRIEVE_STATUS":
+    case RUNNING_STATUS_ACTIONS.RETRIEVE_STATUS:
       const savedStatus = sessionStorage.getItem(RUNNING_STATUS);
       if (savedStatus) {
         const parsedStatus: RunningStatus = JSON.parse(savedStatus);
@@ -73,7 +74,7 @@ function runningStatusReducer(
       }
       return state;
 
-    case "UPDATE_STATUS":
+    case RUNNING_STATUS_ACTIONS.UPDATE_STATUS:
       const { status, forgetClass: fgClass, elapsedTime } = action.payload;
       const progress =
         status.is_unlearning && status.progress === "Idle"
@@ -110,7 +111,7 @@ function runningStatusReducer(
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
       return updatedStatus;
 
-    case "UPDATE_ACTIVE_STEP":
+    case RUNNING_STATUS_ACTIONS.UPDATE_ACTIVE_STEP:
       const step = action.payload;
       const updatedActiveStep = { ...state, activeStep: step };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedActiveStep));
@@ -134,23 +135,32 @@ export default function RunningStatusContextProvider({
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
-    dispatch({ type: "UPDATE_IS_RUNNING", payload: isRunning });
+    dispatch({
+      type: RUNNING_STATUS_ACTIONS.UPDATE_IS_RUNNING,
+      payload: isRunning,
+    });
   }, []);
 
   const handleInitStatus = useCallback((forgetClass: number) => {
-    dispatch({ type: "INIT_STATUS", payload: forgetClass });
+    dispatch({
+      type: RUNNING_STATUS_ACTIONS.INIT_STATUS,
+      payload: forgetClass,
+    });
   }, []);
 
   const handleRetrieveStatus = useCallback(() => {
-    dispatch({ type: "RETRIEVE_STATUS" });
+    dispatch({ type: RUNNING_STATUS_ACTIONS.RETRIEVE_STATUS });
   }, []);
 
   const handleUpdateStatus = useCallback((payload: UpdateStatusPayload) => {
-    dispatch({ type: "UPDATE_STATUS", payload });
+    dispatch({ type: RUNNING_STATUS_ACTIONS.UPDATE_STATUS, payload });
   }, []);
 
   const handleUpdateActiveStep = useCallback((step: number) => {
-    dispatch({ type: "UPDATE_ACTIVE_STEP", payload: step });
+    dispatch({
+      type: RUNNING_STATUS_ACTIONS.UPDATE_ACTIVE_STEP,
+      payload: step,
+    });
   }, []);
 
   useEffect(() => {
