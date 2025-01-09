@@ -33,6 +33,7 @@ export interface UnlearningStatus {
   p_test_accuracy: number;
   method: string;
   estimated_time_remaining: number;
+  elapsed_time: number;
 }
 
 // Temporarily created

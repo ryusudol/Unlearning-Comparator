@@ -1,13 +1,13 @@
 import { useEffect, createContext, useReducer, useCallback } from "react";
 
+import { FORGET_CLASS } from "../constants/storageKeys";
+import { FORGET_CLASS_ACTIONS } from "../constants/actions";
 import { forgetClassNames } from "../constants/forgetClassNames";
 import {
   Action,
   ForgetClass,
   ForgetClassContextType,
 } from "../types/forget-class-context";
-
-const FORGET_CLASS = "forgetClass";
 
 export const ForgetClassContext = createContext<ForgetClassContextType>({
   forgetClass: undefined,
@@ -22,7 +22,7 @@ export const ForgetClassContext = createContext<ForgetClassContextType>({
 
 function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
   switch (action.type) {
-    case "SAVE_FORGET_CLASS":
+    case FORGET_CLASS_ACTIONS.SAVE_FORGET_CLASS:
       const forgetClass = action.payload;
       sessionStorage.setItem(
         FORGET_CLASS,
@@ -30,7 +30,7 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
       );
       return { ...state, forgetClass };
 
-    case "ADD_SELECTED_FORGET_CLASS":
+    case FORGET_CLASS_ACTIONS.ADD_SELECTED_FORGET_CLASS:
       const target = action.payload;
       if (!state.selectedForgetClasses.includes(target)) {
         const selectedForgetClasses = [...state.selectedForgetClasses, target];
@@ -42,7 +42,7 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
       }
       return state;
 
-    case "RETRIEVE_FORGET_CLASS_CONTEXT_DATA":
+    case FORGET_CLASS_ACTIONS.RETRIEVE_FORGET_CLASS_CONTEXT_DATA:
       const savedContext = sessionStorage.getItem(FORGET_CLASS);
       if (savedContext) {
         const parsedContext = JSON.parse(savedContext);
@@ -53,11 +53,11 @@ function BaselineReducer(state: ForgetClass, action: Action): ForgetClass {
       }
       return state;
 
-    case "CLEAR_FORGET_CLASS":
+    case FORGET_CLASS_ACTIONS.CLEAR_FORGET_CLASS:
       sessionStorage.removeItem(FORGET_CLASS);
       return { ...state, forgetClass: 0 };
 
-    case "DELETE_SELECTED_FORGET_CLASS":
+    case FORGET_CLASS_ACTIONS.DELETE_SELECTED_FORGET_CLASS:
       const savedForgetClassContext = sessionStorage.getItem(FORGET_CLASS);
       if (savedForgetClassContext) {
         const parsedContext = JSON.parse(savedForgetClassContext);
@@ -93,7 +93,7 @@ export default function ForgetClassContextProvider({
   const handleSaveForgetClass = useCallback(
     (forgetClass: string | undefined) => {
       dispatch({
-        type: "SAVE_FORGET_CLASS",
+        type: FORGET_CLASS_ACTIONS.SAVE_FORGET_CLASS,
         payload: forgetClass
           ? forgetClassNames.indexOf(forgetClass)
           : undefined,
@@ -104,22 +104,22 @@ export default function ForgetClassContextProvider({
 
   const handleAddSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
-      type: "ADD_SELECTED_FORGET_CLASS",
+      type: FORGET_CLASS_ACTIONS.ADD_SELECTED_FORGET_CLASS,
       payload: forgetClassNames.indexOf(forgetClass),
     });
   }, []);
 
   const handleRetrieveForgetClassContextData = useCallback(() => {
-    dispatch({ type: "RETRIEVE_FORGET_CLASS_CONTEXT_DATA" });
+    dispatch({ type: FORGET_CLASS_ACTIONS.RETRIEVE_FORGET_CLASS_CONTEXT_DATA });
   }, []);
 
   const handleClearForgetClass = useCallback(() => {
-    dispatch({ type: "CLEAR_FORGET_CLASS" });
+    dispatch({ type: FORGET_CLASS_ACTIONS.CLEAR_FORGET_CLASS });
   }, []);
 
   const handleDeleteSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
-      type: "DELETE_SELECTED_FORGET_CLASS",
+      type: FORGET_CLASS_ACTIONS.DELETE_SELECTED_FORGET_CLASS,
       payload: forgetClassNames.indexOf(forgetClass),
     });
   }, []);
