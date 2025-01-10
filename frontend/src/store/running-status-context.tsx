@@ -76,12 +76,33 @@ function runningStatusReducer(
 
     case RUNNING_STATUS_ACTIONS.UPDATE_STATUS:
       const { status, forgetClass: fgClass, elapsedTime } = action.payload;
+
+      const currentStatus = state.status[fgClass];
+
       const progress =
         status.is_unlearning && status.progress === "Idle"
           ? "Unlearning"
           : !status.is_unlearning
           ? "Idle"
           : status.progress;
+
+      const _newStatus: UnlearningStatus = {
+        ...status,
+        progress,
+        elapsed_time: elapsedTime,
+      };
+
+      const { elapsed_time: _current, ...currentStatusWithoutTime } =
+        currentStatus;
+      const { elapsed_time: _new, ...newStatusWithoutTime } = _newStatus;
+
+      if (
+        JSON.stringify(currentStatusWithoutTime) ===
+        JSON.stringify(newStatusWithoutTime)
+      ) {
+        return state;
+      }
+
       let completedSteps: number[] = [];
       if (
         (progress === "Unlearning" &&
@@ -97,15 +118,11 @@ function runningStatusReducer(
         completedSteps = [1, 2, 3];
       }
 
-      const updatedStatusArray = [...state.status];
-      updatedStatusArray[fgClass] = {
-        ...status,
-        progress,
-        elapsed_time: elapsedTime,
-      };
+      const newStatusArray = [...state.status];
+      newStatusArray[fgClass] = _newStatus;
       const updatedStatus = {
         ...state,
-        status: updatedStatusArray,
+        status: newStatusArray,
         completedSteps,
       };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));

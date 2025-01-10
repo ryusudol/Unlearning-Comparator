@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
@@ -20,17 +20,20 @@ export default function Progress({ width, height }: ViewProps) {
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
 
-  const forgetClassExist =
-    forgetClass !== undefined && status[forgetClass as number] !== undefined;
+  const forgetClassExist = forgetClass !== undefined;
   const progress = forgetClassExist
     ? status[forgetClass as number].progress
     : "";
-  const steps: Step[] = getProgressSteps(
-    status[forgetClass as number],
-    completedSteps,
-    activeStep,
-    umapProgress,
-    ckaProgress
+  const steps: Step[] = useMemo(
+    () =>
+      getProgressSteps(
+        status[forgetClass as number],
+        completedSteps,
+        activeStep,
+        umapProgress,
+        ckaProgress
+      ),
+    [activeStep, ckaProgress, completedSteps, forgetClass, status, umapProgress]
   );
 
   useEffect(() => {
