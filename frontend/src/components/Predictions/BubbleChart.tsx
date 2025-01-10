@@ -6,12 +6,12 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { extractBubbleChartData } from "../../utils/data/experiments";
-import { forgetClassNames } from "../../constants/forgetClassNames";
+import { FORGET_CLASS_NAMES } from "../../constants/common";
 
 const TOTAL_SIZE = 255;
 const MIN_BUBBLE_SIZE = 1;
@@ -37,10 +37,11 @@ export default function BubbleChart({
   onHoverEnd,
   showYAxis = true,
 }: Props) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { forgetClass } = useContext(ForgetClassContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+
+  const { forgetClass } = useForgetClass();
+  const { baseline, comparison } = useModelSelection();
 
   const [tooltip, setTooltip] = useState({
     display: false,
@@ -115,7 +116,7 @@ export default function BubbleChart({
       .axisBottom(xScale)
       .tickValues(d3.range(0, 10))
       .tickSize(0)
-      .tickFormat((d) => forgetClassNames[d as number]);
+      .tickFormat((d) => FORGET_CLASS_NAMES[d as number]);
 
     const yAxis = d3
       .axisLeft(yScale)
@@ -124,8 +125,8 @@ export default function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? forgetClassNames[d as number] + " (X)"
-          : forgetClassNames[d as number]
+          ? FORGET_CLASS_NAMES[d as number] + " (X)"
+          : FORGET_CLASS_NAMES[d as number]
       );
 
     svg
@@ -317,13 +318,13 @@ export default function BubbleChart({
             <div>
               <span>Ground Truth</span>:{" "}
               <span className="font-semibold">
-                {forgetClassNames[tooltip.content.groundTruth]}
+                {FORGET_CLASS_NAMES[tooltip.content.groundTruth]}
               </span>
             </div>
             <div>
               <span>Prediction</span>:{" "}
               <span className="font-semibold">
-                {forgetClassNames[tooltip.content.prediction]}
+                {FORGET_CLASS_NAMES[tooltip.content.prediction]}
               </span>
             </div>
             <div>

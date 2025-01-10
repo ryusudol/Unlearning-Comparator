@@ -1,13 +1,13 @@
 import { useEffect, createContext, useReducer, useCallback } from "react";
 
-import { FORGET_CLASS } from "../constants/storageKeys";
-import { FORGET_CLASS_ACTIONS } from "../constants/actions";
-import { forgetClassNames } from "../constants/forgetClassNames";
 import {
   Action,
   ForgetClass,
   ForgetClassContextType,
 } from "../types/forget-class-context";
+import { FORGET_CLASS_ACTIONS } from "../constants/actions";
+import { FORGET_CLASS_NAMES } from "../constants/common";
+import { FORGET_CLASS } from "../constants/storageKeys";
 
 export const ForgetClassContext = createContext<ForgetClassContextType>({
   forgetClass: undefined,
@@ -95,7 +95,7 @@ export default function ForgetClassContextProvider({
       dispatch({
         type: FORGET_CLASS_ACTIONS.SAVE_FORGET_CLASS,
         payload: forgetClass
-          ? forgetClassNames.indexOf(forgetClass)
+          ? FORGET_CLASS_NAMES.indexOf(forgetClass)
           : undefined,
       });
     },
@@ -105,7 +105,7 @@ export default function ForgetClassContextProvider({
   const handleAddSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: FORGET_CLASS_ACTIONS.ADD_SELECTED_FORGET_CLASS,
-      payload: forgetClassNames.indexOf(forgetClass),
+      payload: FORGET_CLASS_NAMES.indexOf(forgetClass),
     });
   }, []);
 
@@ -120,7 +120,7 @@ export default function ForgetClassContextProvider({
   const handleDeleteSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: FORGET_CLASS_ACTIONS.DELETE_SELECTED_FORGET_CLASS,
-      payload: forgetClassNames.indexOf(forgetClass),
+      payload: FORGET_CLASS_NAMES.indexOf(forgetClass),
     });
   }, []);
 

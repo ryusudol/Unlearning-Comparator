@@ -8,14 +8,18 @@ import {
   TooltipProps,
 } from "recharts";
 
+import {
+  CKA_DATA_KEYS,
+  LINE_CHART_TICK_STYLE,
+  LINE_CHART_CONFIG,
+} from "../../constants/correlations";
 import { calculateZoom } from "../../utils/util";
 import { getCkaData } from "../../utils/data/getCkaData";
+import { COLORS } from "../../constants/colors";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { CircleIcon, MultiplicationSignIcon } from "../UI/icons";
-import { ChartConfig, ChartContainer, ChartTooltip } from "../UI/chart";
+import { ChartContainer, ChartTooltip } from "../UI/chart";
 
-const PURPLE = "#a855f7";
-const EMERALD = "#10b981";
 const DOT_SIZE = 12;
 const CROSS_SIZE = 20;
 const ANIMATION_DURATION = 500;
@@ -25,19 +29,6 @@ const ACTIVE_DOT_STROKE_WIDTH = 3;
 const ACTIVE_CROSS_STROKE_WIDTH = 2;
 const STROKE_WIDTH = 2;
 const STROKE_DASHARRAY = "3 3";
-const LINEAR = "linear";
-const BLACK = "black";
-const DATAKEYS = [
-  "baselineForgetCka",
-  "baselineOtherCka",
-  "comparisonForgetCka",
-  "comparisonOtherCka",
-];
-const tickStyle = `
-.recharts-cartesian-axis-tick text {
-  fill: ${BLACK} !important;
-  }
-  `;
 
 const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
   <text
@@ -52,29 +43,6 @@ const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
     {payload.value}
   </text>
 ));
-
-const chartConfig = {
-  layer: {
-    label: "Layer",
-    color: "#000",
-  },
-  baselineForgetCka: {
-    label: "Baseline (Forget Class)",
-    color: PURPLE,
-  },
-  baselineOtherCka: {
-    label: "Baseline (Remain Classes)",
-    color: PURPLE,
-  },
-  comparisonForgetCka: {
-    label: "Comparison (Forget Class)",
-    color: EMERALD,
-  },
-  comparisonOtherCka: {
-    label: "Comparison (Remain Classes)",
-    color: EMERALD,
-  },
-} satisfies ChartConfig;
 
 type TickProps = {
   x: number;
@@ -101,14 +69,14 @@ export default function _LineChart({ dataset }: { dataset: string }) {
 
   return (
     <div className="relative bottom-1.5 right-3.5">
-      <style>{tickStyle}</style>
+      <style>{LINE_CHART_TICK_STYLE}</style>
       <CustomLegend />
       <p className="text-[15px] text-center relative top-1 mb-1.5 ml-12">
         Per-layer Similarity Before/After Unlearning
       </p>
       <ChartContainer
         className="w-[492px] h-[251px]"
-        config={chartConfig}
+        config={LINE_CHART_CONFIG}
         style={{ position: "relative" }}
       >
         <LineChart
@@ -131,7 +99,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           <XAxis
             dataKey="layer"
             tickLine={false}
-            axisLine={{ stroke: BLACK }}
+            axisLine={{ stroke: COLORS.BLACK }}
             tickMargin={-2}
             angle={-45}
             tick={renderTick}
@@ -144,13 +112,13 @@ export default function _LineChart({ dataset }: { dataset: string }) {
               style: {
                 fontSize: 12,
                 textAnchor: "end",
-                fill: BLACK,
+                fill: COLORS.BLACK,
               },
             }}
           />
           <YAxis
             tickLine={false}
-            axisLine={{ stroke: BLACK }}
+            axisLine={{ stroke: COLORS.BLACK }}
             domain={[0, 1]}
             interval={0}
             tick={{
@@ -167,7 +135,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
               style: {
                 fontSize: 12,
                 textAnchor: "middle",
-                fill: BLACK,
+                fill: COLORS.BLACK,
               },
             }}
           />
@@ -176,13 +144,13 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             content={<CustomTooltip />}
             wrapperStyle={{ zIndex: 9999 }}
           />
-          {DATAKEYS.map((key, idx) => {
+          {CKA_DATA_KEYS.map((key, idx) => {
             const isBaselineLine = key.includes("baseline");
-            const dotColor = isBaselineLine ? PURPLE : EMERALD;
+            const dotColor = isBaselineLine ? COLORS.PURPLE : COLORS.EMERALD;
             const isForgetLine = key.includes("Forget");
             const dotSize = isForgetLine ? CROSS_SIZE : DOT_SIZE;
             const activeDotStyle = {
-              stroke: BLACK,
+              stroke: COLORS.BLACK,
               strokeWidth: isForgetLine
                 ? ACTIVE_CROSS_STROKE_WIDTH
                 : ACTIVE_DOT_STROKE_WIDTH,
@@ -192,8 +160,10 @@ export default function _LineChart({ dataset }: { dataset: string }) {
               <Line
                 key={idx}
                 dataKey={key}
-                type={LINEAR}
-                stroke={chartConfig[key as keyof typeof chartConfig].color}
+                type="linear"
+                stroke={
+                  LINE_CHART_CONFIG[key as keyof typeof LINE_CHART_CONFIG].color
+                }
                 strokeWidth={STROKE_WIDTH}
                 strokeDasharray={isBaselineLine ? undefined : STROKE_DASHARRAY}
                 animationDuration={ANIMATION_DURATION}
@@ -256,14 +226,17 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl"
       >
         <div className="flex items-center leading-[18px]">
-          <CircleIcon className="w-3 h-3 mr-1" style={{ color: PURPLE }} />
+          <CircleIcon
+            className="w-3 h-3 mr-1"
+            style={{ color: COLORS.PURPLE }}
+          />
           <p>
             Base. (Remain):{" "}
             <span className="font-semibold">{payload[1].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
-          <CircleIcon className="w-3 h-3 mr-1" color={EMERALD} />
+          <CircleIcon className="w-3 h-3 mr-1" color={COLORS.EMERALD} />
           <p>
             Comp. (Remain):{" "}
             <span className="font-semibold">{payload[3].value}</span>
@@ -272,7 +245,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <div className="flex items-center leading-[18px]">
           <MultiplicationSignIcon
             className="w-4 h-4 -ml-0.5 mr-0.5"
-            style={{ color: PURPLE }}
+            style={{ color: COLORS.PURPLE }}
           />
           <p>
             Base. (Forget):{" "}
@@ -282,7 +255,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <div className="flex items-center leading-[18px]">
           <MultiplicationSignIcon
             className="w-4 h-4 -ml-0.5 mr-0.5"
-            color={EMERALD}
+            color={COLORS.EMERALD}
           />
           <p>
             Comp. (Forget):{" "}
@@ -302,12 +275,12 @@ function CustomLegend() {
         <div className="relative">
           <CircleIcon
             className={`mr-2 relative right-[1px]`}
-            style={{ color: PURPLE, width: DOT_SIZE, height: DOT_SIZE }}
+            style={{ color: COLORS.PURPLE, width: DOT_SIZE, height: DOT_SIZE }}
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
             style={{
-              backgroundColor: PURPLE,
+              backgroundColor: COLORS.PURPLE,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -318,12 +291,12 @@ function CustomLegend() {
         <div className="relative">
           <CircleIcon
             className={`mr-2 relative right-[1px]`}
-            style={{ color: EMERALD, width: DOT_SIZE, height: DOT_SIZE }}
+            style={{ color: COLORS.EMERALD, width: DOT_SIZE, height: DOT_SIZE }}
           />
           <div
             className="absolute top-1/2 w-[18px]"
             style={{
-              borderTop: `1px dashed ${EMERALD}`,
+              borderTop: `1px dashed ${COLORS.EMERALD}`,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -335,13 +308,13 @@ function CustomLegend() {
           <MultiplicationSignIcon
             width={CROSS_SIZE}
             height={CROSS_SIZE}
-            color={PURPLE}
+            color={COLORS.PURPLE}
             className="relative right-[5px]"
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
             style={{
-              backgroundColor: PURPLE,
+              backgroundColor: COLORS.PURPLE,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -353,13 +326,13 @@ function CustomLegend() {
           <MultiplicationSignIcon
             width={CROSS_SIZE}
             height={CROSS_SIZE}
-            color={EMERALD}
+            color={COLORS.EMERALD}
             className="relative right-[5px]"
           />
           <div
             className="absolute top-1/2 w-[18px]"
             style={{
-              borderTop: `1px dashed ${EMERALD}`,
+              borderTop: `1px dashed ${COLORS.EMERALD}`,
               transform: "translate(-4px, -50%)",
             }}
           />

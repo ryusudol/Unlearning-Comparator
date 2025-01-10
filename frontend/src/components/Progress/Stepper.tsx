@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Check, Dot, Loader2 } from "lucide-react";
 
 import { Button } from "../UI/button";
@@ -11,7 +12,7 @@ import {
   StepperTrigger,
 } from "../UI/stepper";
 
-export default function _Stepper({
+const _Stepper = memo(function _Stepper({
   steps,
   activeStep,
   completedSteps,
@@ -80,4 +81,6 @@ export default function _Stepper({
       })}
     </Stepper>
   );
-}
+});
+
+export default _Stepper;

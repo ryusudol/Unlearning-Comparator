@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import * as d3 from "d3";
 
 import View from "../components/View";
@@ -6,21 +6,18 @@ import Title from "../components/Title";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { useModelSelection } from "../hooks/useModelSelection";
 import { ViewProps } from "../types/common";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
 
 export default function Predictions({ width, height }: ViewProps) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { forgetClass } = useContext(ForgetClassContext);
+  const { areAllModelsSelected } = useModelSelection();
+  const { forgetClassExist } = useForgetClass();
 
   const [datasetMode, setDatasetMode] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
-
-  const forgetClassExist = forgetClass !== undefined;
-  const allSelected = baseline !== "" && comparison !== "";
 
   return (
     <View width={width} height={height}>
@@ -30,12 +27,12 @@ export default function Predictions({ width, height }: ViewProps) {
           title="Predictions"
           customClass="bottom-[2px] right-[1px]"
         />
-        {forgetClassExist && allSelected && (
+        {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDatasetMode} />
         )}
       </div>
       {forgetClassExist ? (
-        !allSelected ? (
+        !areAllModelsSelected ? (
           <Indicator about="BaselineComparison" />
         ) : (
           <div className="flex items-center relative ml-1.5 top-5">
@@ -59,7 +56,7 @@ export default function Predictions({ width, height }: ViewProps) {
       ) : (
         <Indicator about="ForgetClass" />
       )}
-      {allSelected && forgetClassExist && <BubbleChartLegend />}
+      {areAllModelsSelected && forgetClassExist && <BubbleChartLegend />}
     </View>
   );
 }

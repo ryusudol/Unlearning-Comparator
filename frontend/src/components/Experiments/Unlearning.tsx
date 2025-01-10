@@ -2,12 +2,12 @@ import React, { useContext, useState } from "react";
 
 import Button from "../Button";
 import Slider from "./Slider";
+import { useForgetClass } from "../../hooks/useForgetClass";
 import { Input } from "../UI/input";
 import { Label } from "../UI/label";
 import { HyperparametersIcon, EraserIcon, PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { UNLEARNING_METHODS } from "../../constants/experiments";
+import { UNLEARNING_METHODS, LEARNING_RATE } from "../../constants/experiments";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import {
@@ -23,22 +23,12 @@ import {
 } from "../UI/select";
 
 const CUSTOM = "custom";
-const LEARNING_RATE = [
-  "1e-5",
-  "5e-5",
-  "1e-4",
-  "5e-4",
-  "1e-3",
-  "5e-3",
-  "1e-2",
-  "5e-2",
-  "1e-1",
-];
 
 export default function Unlearning() {
-  const { forgetClass } = useContext(ForgetClassContext);
   const { updateIsRunning, initStatus, updateActiveStep } =
     useContext(RunningStatusContext);
+
+  const { forgetClassNumber } = useForgetClass();
 
   const [epochs, setEpochs] = useState([10]);
   const [learningRateIdx, setLearningRateIdx] = useState([6]);
@@ -73,20 +63,20 @@ export default function Unlearning() {
 
     const runningConfig: UnlearningConfigurationData = {
       method: config.method as string,
-      forget_class: forgetClass as number,
+      forget_class: forgetClassNumber,
       epochs: epochs[0],
       learning_rate: parseFloat(LEARNING_RATE[learningRateIdx[0]]),
       batch_size: Math.pow(2, batchSizeLog[0]),
     };
 
     updateIsRunning(true);
-    initStatus(forgetClass as number);
+    initStatus(forgetClassNumber);
     updateActiveStep(1);
 
     isCustom
       ? await executeCustomUnlearning(
           config.custom_file as File,
-          forgetClass as number
+          forgetClassNumber
         )
       : await executeMethodUnlearning(runningConfig);
   };

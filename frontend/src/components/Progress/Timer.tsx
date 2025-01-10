@@ -5,19 +5,24 @@ import {
   fetchUnlearningStatus,
   cancelUnlearning,
 } from "../../utils/api/requests";
+import {
+  getCurrentProgress,
+  getCompletedSteps,
+} from "../../utils/data/running-status-context";
+import { useForgetClass } from "../../hooks/useForgetClass";
 import { ExperimentsContext } from "../../store/experiments-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { fetchDataFile } from "../../utils/api/unlearning";
 import { Separator } from "../../components/UI/separator";
 
 export default function Timer() {
-  const { forgetClass } = useContext(ForgetClassContext);
   const { addExperiment } = useContext(ExperimentsContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
   const { status, isRunning, updateIsRunning, updateStatus, updateActiveStep } =
     useContext(RunningStatusContext);
+
+  const { forgetClassNumber } = useForgetClass();
 
   const [runningTime, setRunningTime] = useState(0);
 
@@ -31,13 +36,20 @@ export default function Timer() {
     try {
       const unlearningStatus = await fetchUnlearningStatus();
 
+      const progress = getCurrentProgress(unlearningStatus);
+      const completedSteps: number[] = getCompletedSteps(
+        progress,
+        unlearningStatus
+      );
+
       updateStatus({
         status: unlearningStatus,
-        forgetClass: forgetClass as number,
+        forgetClass: forgetClassNumber,
+        progress,
         elapsedTime: runningTimeRef.current,
+        completedSteps,
       });
 
-      const progress = unlearningStatus.progress;
       if (progress.includes("Evaluating")) {
         updateActiveStep(2);
       } else if (progress.includes("UMAP") || progress.includes("CKA")) {
@@ -50,7 +62,7 @@ export default function Timer() {
 
         try {
           const newData = await fetchDataFile(
-            forgetClass as number,
+            forgetClassNumber,
             unlearningStatus.recent_id as string
           );
           addExperiment(newData);
@@ -66,7 +78,7 @@ export default function Timer() {
     }
   }, [
     addExperiment,
-    forgetClass,
+    forgetClassNumber,
     saveComparison,
     updateActiveStep,
     updateIsRunning,
@@ -104,7 +116,7 @@ export default function Timer() {
           <span className="text-sm">
             {isRunning
               ? runningTime.toFixed(1)
-              : status[forgetClass as number].elapsed_time.toFixed(1)}
+              : status[forgetClassNumber].elapsed_time.toFixed(1)}
             s
           </span>
         </div>

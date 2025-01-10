@@ -10,23 +10,6 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 
-import { fetchAllExperimentsData } from "../../utils/api/unlearning";
-import {
-  deleteRow,
-  downloadJSON,
-  downloadPTH,
-} from "../../utils/api/dataTable";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { calculatePerformanceMetrics } from "../../utils/data/experiments";
-import { ExperimentData } from "../../types/data";
-import { Experiments } from "../../types/experiments-context";
-import { hexToRgba } from "../../utils/data/colors";
-import { ScrollArea } from "../UI/scroll-area";
-import { ExperimentsContext } from "../../store/experiments-context";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
-import { cn } from "../../utils/common/styles";
-import { COLUMN_WIDTHS } from "./Columns";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -41,28 +24,42 @@ import {
   TableHeader,
   TableRow,
 } from "../UI/table";
+import {
+  deleteRow,
+  downloadJSON,
+  downloadPTH,
+} from "../../utils/api/dataTable";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { useModelSelection } from "../../hooks/useModelSelection";
+import { fetchAllExperimentsData } from "../../utils/api/unlearning";
+import { calculatePerformanceMetrics } from "../../utils/data/experiments";
+import { ExperimentData } from "../../types/data";
+import { PerformanceMetrics } from "../../types/experiments";
+import { Experiments } from "../../types/experiments-context";
+import { hexToRgba } from "../../utils/data/colors";
+import { ScrollArea } from "../UI/scroll-area";
+import { ExperimentsContext } from "../../store/experiments-context";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
+import { cn } from "../../utils/util";
+import { COLUMN_WIDTHS } from "./Columns";
 
 const BASELINE = "baseline";
 const COMPARISON = "comparison";
 
-type PerformanceMetrics = {
-  [key: string]: {
-    colorScale: d3.ScaleLinear<number, number, never>;
-    baseColor: string;
-  };
-};
-
-interface Props {
+export default function DataTable({
+  columns,
+}: {
   columns: ColumnDef<ExperimentData>[];
-}
-
-export default function DataTable({ columns }: Props) {
-  const { forgetClass } = useContext(ForgetClassContext);
+}) {
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
-  const { baseline, comparison, saveBaseline, saveComparison } = useContext(
+  const { saveBaseline, saveComparison } = useContext(
     BaselineComparisonContext
   );
+
+  const { forgetClass, forgetClassNumber } = useForgetClass();
+  const { baseline, comparison } = useModelSelection();
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -209,10 +206,10 @@ export default function DataTable({ columns }: Props) {
 
   const handleDeleteRow = async (id: string) => {
     try {
-      await deleteRow(forgetClass as number, id);
+      await deleteRow(forgetClassNumber, id);
       setIsExperimentsLoading(true);
       const allExperiments: Experiments = await fetchAllExperimentsData(
-        forgetClass as number
+        forgetClassNumber
       );
       if ("detail" in allExperiments) {
         saveExperiments({});
@@ -256,7 +253,7 @@ export default function DataTable({ columns }: Props) {
 
   const handleDownloadJSON = async (id: string) => {
     try {
-      const json = await downloadJSON(forgetClass as number, id);
+      const json = await downloadJSON(forgetClassNumber, id);
 
       const jsonString = JSON.stringify(json, null, 2);
 
@@ -279,7 +276,7 @@ export default function DataTable({ columns }: Props) {
 
   const handleDownloadPTH = async (id: string) => {
     try {
-      await downloadPTH(forgetClass as number, id);
+      await downloadPTH(forgetClassNumber, id);
     } catch (error) {
       console.error("Failed to download the PTH file:", error);
     }

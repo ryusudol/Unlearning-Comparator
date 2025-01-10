@@ -1,7 +1,6 @@
 import React, {
   useState,
   useEffect,
-  useContext,
   useImperativeHandle,
   forwardRef,
   useRef,
@@ -14,10 +13,10 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import EmbeddingTooltip from "./EmbeddingTooltip";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
 import { API_URL } from "../../constants/common";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import {
   Mode,
   SelectedData,
@@ -74,8 +73,8 @@ interface Props {
 
 const ScatterPlot = forwardRef(
   ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
-    const { baseline, comparison } = useContext(BaselineComparisonContext);
-    const { forgetClass } = useContext(ForgetClassContext);
+    const { forgetClass } = useForgetClass();
+    const { baseline, comparison } = useModelSelection();
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 

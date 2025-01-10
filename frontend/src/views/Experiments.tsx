@@ -1,19 +1,15 @@
-import { useContext } from "react";
-
 import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
 import AddExperimentButton from "../components/Experiments/AddExperimentButton";
+import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 import { columns } from "../components/Experiments/Columns";
 import { SettingsIcon } from "../components/UI/icons";
-import { ForgetClassContext } from "../store/forget-class-context";
 
 export default function Experiments({ width, height }: ViewProps) {
-  const { forgetClass } = useContext(ForgetClassContext);
-
-  const forgetClassExist = forgetClass !== undefined;
+  const { forgetClassExist } = useForgetClass();
 
   return (
     <View width={width} height={height} className="border-t-0 border-l-0">
