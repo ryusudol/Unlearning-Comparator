@@ -5,6 +5,10 @@ import {
   fetchUnlearningStatus,
   cancelUnlearning,
 } from "../../utils/api/requests";
+import {
+  getCurrentProgress,
+  getCompletedSteps,
+} from "../../utils/data/running-status-context";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { ForgetClassContext } from "../../store/forget-class-context";
 import { RunningStatusContext } from "../../store/running-status-context";
@@ -31,13 +35,20 @@ export default function Timer() {
     try {
       const unlearningStatus = await fetchUnlearningStatus();
 
+      const progress = getCurrentProgress(unlearningStatus);
+      const completedSteps: number[] = getCompletedSteps(
+        progress,
+        unlearningStatus
+      );
+
       updateStatus({
         status: unlearningStatus,
         forgetClass: forgetClass as number,
+        progress,
         elapsedTime: runningTimeRef.current,
+        completedSteps,
       });
 
-      const progress = unlearningStatus.progress;
       if (progress.includes("Evaluating")) {
         updateActiveStep(2);
       } else if (progress.includes("UMAP") || progress.includes("CKA")) {

@@ -34,6 +34,7 @@ export interface UnlearningStatus {
   method: string;
   estimated_time_remaining: number;
   elapsed_time: number;
+  completed_steps: number[];
 }
 
 // Temporarily created

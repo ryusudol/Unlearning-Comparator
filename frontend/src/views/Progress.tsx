@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
@@ -14,8 +14,7 @@ import { getProgressSteps } from "../utils/data/getProgressSteps";
 
 export default function Progress({ width, height }: ViewProps) {
   const { forgetClass } = useContext(ForgetClassContext);
-  const { isRunning, status, activeStep, completedSteps } =
-    useContext(RunningStatusContext);
+  const { isRunning, status, activeStep } = useContext(RunningStatusContext);
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
@@ -26,14 +25,22 @@ export default function Progress({ width, height }: ViewProps) {
     : "";
   const steps: Step[] = useMemo(
     () =>
-      getProgressSteps(
-        status[forgetClass as number],
-        completedSteps,
-        activeStep,
-        umapProgress,
-        ckaProgress
-      ),
-    [activeStep, ckaProgress, completedSteps, forgetClass, status, umapProgress]
+      forgetClassExist
+        ? getProgressSteps(
+            status[forgetClass],
+            activeStep,
+            umapProgress,
+            ckaProgress
+          )
+        : [],
+    [
+      activeStep,
+      ckaProgress,
+      forgetClass,
+      forgetClassExist,
+      status,
+      umapProgress,
+    ]
   );
 
   useEffect(() => {
@@ -76,7 +83,9 @@ export default function Progress({ width, height }: ViewProps) {
         AdditionalContent={
           forgetClassExist && (
             <div className="flex items-center gap-1.5 ml-1.5">
-              {isRunning || completedSteps.length ? <Timer /> : null}
+              {isRunning || status[forgetClass].completed_steps.length ? (
+                <Timer />
+              ) : null}
             </div>
           )
         }
@@ -85,7 +94,7 @@ export default function Progress({ width, height }: ViewProps) {
         <Stepper
           steps={steps}
           activeStep={activeStep}
-          completedSteps={completedSteps}
+          completedSteps={status[forgetClass].completed_steps}
           isRunning={isRunning}
         />
       ) : (

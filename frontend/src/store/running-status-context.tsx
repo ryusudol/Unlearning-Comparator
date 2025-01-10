@@ -25,13 +25,13 @@ const initialStatus: UnlearningStatus = {
   method: "",
   estimated_time_remaining: 0,
   elapsed_time: 0,
+  completed_steps: [],
 };
 
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
   status: [],
   activeStep: 0,
-  completedSteps: [],
 
   updateIsRunning: () => {},
   initStatus: (forgetClass: number) => {},
@@ -75,21 +75,21 @@ function runningStatusReducer(
       return state;
 
     case RUNNING_STATUS_ACTIONS.UPDATE_STATUS:
-      const { status, forgetClass: fgClass, elapsedTime } = action.payload;
+      const {
+        status,
+        forgetClass: fgClass,
+        progress,
+        elapsedTime,
+        completedSteps: _completedSteps,
+      } = action.payload;
 
       const currentStatus = state.status[fgClass];
-
-      const progress =
-        status.is_unlearning && status.progress === "Idle"
-          ? "Unlearning"
-          : !status.is_unlearning
-          ? "Idle"
-          : status.progress;
 
       const _newStatus: UnlearningStatus = {
         ...status,
         progress,
         elapsed_time: elapsedTime,
+        completed_steps: _completedSteps,
       };
 
       const { elapsed_time: _current, ...currentStatusWithoutTime } =
@@ -103,27 +103,12 @@ function runningStatusReducer(
         return state;
       }
 
-      let completedSteps: number[] = [];
-      if (
-        (progress === "Unlearning" &&
-          status.current_epoch !== status.total_epochs) ||
-        (progress === "Unlearning" && status.is_unlearning)
-      ) {
-        completedSteps = [1];
-      } else if (progress.includes("Evaluating")) {
-        completedSteps = [1, 2];
-      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
-        completedSteps = [1, 2, 3];
-      } else {
-        completedSteps = [1, 2, 3];
-      }
-
       const newStatusArray = [...state.status];
       newStatusArray[fgClass] = _newStatus;
       const updatedStatus = {
         ...state,
         status: newStatusArray,
-        completedSteps,
+        completedSteps: _completedSteps,
       };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
       return updatedStatus;
@@ -148,7 +133,6 @@ export default function RunningStatusContextProvider({
     isRunning: false,
     status: Array(10).fill(initialStatus),
     activeStep: 0,
-    completedSteps: [],
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
@@ -188,7 +172,6 @@ export default function RunningStatusContextProvider({
     isRunning: runningStatus.isRunning,
     status: runningStatus.status,
     activeStep: runningStatus.activeStep,
-    completedSteps: runningStatus.completedSteps,
 
     updateIsRunning: handleUpdateIsRunning,
     initStatus: handleInitStatus,
