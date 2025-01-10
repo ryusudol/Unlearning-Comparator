@@ -1,8 +1,14 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 import {
   CORE_HEIGHT,
   EXPERIMENTS_PROGRESS_HEIGHT,
   APP_WIDTH,
 } from "../constants/layout";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export function calculateZoom() {
   const screenWidth = window.innerWidth;

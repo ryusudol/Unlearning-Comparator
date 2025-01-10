@@ -25,7 +25,7 @@ import { ScrollArea } from "../UI/scroll-area";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
-import { cn } from "../../utils/common/styles";
+import { cn } from "../../utils/util";
 import { COLUMN_WIDTHS } from "./Columns";
 import {
   ContextMenu,

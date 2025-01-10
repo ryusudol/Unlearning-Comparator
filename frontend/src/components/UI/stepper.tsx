@@ -1,4 +1,4 @@
-import { cn } from "../../utils/common/styles";
+import { cn } from "../../utils/util";
 
 interface StepperProps {
   className?: string;
