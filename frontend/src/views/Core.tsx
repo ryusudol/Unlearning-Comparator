@@ -1,32 +1,31 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 
 import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import { ViewProps } from "../types/common";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { Separator } from "../components/UI/separator";
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { TABLEAU10 } from "../constants/tableau10";
 import {
   ChartScatterIcon,
   CircleIcon,
   MultiplicationSignIcon,
   DarkShieldIcon,
 } from "../components/UI/icons";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { ViewProps } from "../types/common";
+import { Separator } from "../components/UI/separator";
+import { FORGET_CLASS_NAMES } from "../constants/common";
+import { TABLEAU10 } from "../constants/colors";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 const HEIGHT = 635;
 
 export default function Core({ width, height }: ViewProps) {
-  const { forgetClass } = useContext(ForgetClassContext);
+  const { forgetClassExist } = useForgetClass();
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
 
-  const forgetClassExist = forgetClass !== undefined;
   const isEmbeddingMode = displayMode === EMBEDDINGS;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -95,7 +94,7 @@ function UnderLine() {
 }
 
 function EmbeddingLegend() {
-  const { forgetClass } = useContext(ForgetClassContext);
+  const { forgetClass } = useForgetClass();
 
   return (
     <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-0.5 text-sm z-10">
@@ -115,7 +114,7 @@ function EmbeddingLegend() {
       <div className="flex items-center">
         <span className="font-medium mr-2.5">Prediction</span>
         <ul className="flex items-center gap-[9.2px]">
-          {forgetClassNames.map((name, idx) => (
+          {FORGET_CLASS_NAMES.map((name, idx) => (
             <li key={idx} className="flex items-center">
               <div
                 style={{ backgroundColor: TABLEAU10[idx] }}

@@ -1,9 +1,9 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import * as d3 from "d3";
 
 import DistributionDotPlot from "./DistributionDotPlot";
 import PieChart from "./PieChart";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { useModelSelection } from "../../hooks/useModelSelection";
 
 export type DataPoint = {
   entropy: number;
@@ -41,7 +41,7 @@ interface Props {
 }
 
 export default function Discriminator({ mode }: Props) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { baseline, comparison } = useModelSelection();
 
   const [threshold, setThreshold] = useState(4);
 

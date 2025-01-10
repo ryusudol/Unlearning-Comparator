@@ -5,7 +5,7 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
-import { forgetClassNames } from "../../constants/forgetClassNames";
+import { FORGET_CLASS_NAMES } from "../../constants/common";
 import { Prob } from "../../types/embeddings";
 
 const BLACK = "black";
@@ -60,12 +60,12 @@ export default React.memo(function EmbeddingTooltip({
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
 
-  const groundTruth = forgetClassNames[groundTruthIdx];
-  const baselinePrediction = forgetClassNames[predictionIdx];
+  const groundTruth = FORGET_CLASS_NAMES[groundTruthIdx];
+  const baselinePrediction = FORGET_CLASS_NAMES[predictionIdx];
   const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const comparisonPrediction = forgetClassNames[comparisonIdx];
+  const comparisonPrediction = FORGET_CLASS_NAMES[comparisonIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -178,7 +178,7 @@ export default React.memo(function EmbeddingTooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(barChartData.baseline.map((d) => forgetClassNames[d.class]))
+      .domain(barChartData.baseline.map((d) => FORGET_CLASS_NAMES[d.class]))
       .range([margin.top, height - margin.bottom])
       .padding(0.2);
 
@@ -209,7 +209,7 @@ export default React.memo(function EmbeddingTooltip({
       .each(function (d, i) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - margin.left;
-        const y = yScale(forgetClassNames[d.class]) ?? 0;
+        const y = yScale(FORGET_CLASS_NAMES[d.class]) ?? 0;
 
         g.append("rect")
           .attr("class", "bar-baseline")
@@ -243,7 +243,7 @@ export default React.memo(function EmbeddingTooltip({
         const g = d3.select(this);
         const barWidth = xScale(d.value) - margin.left;
         const y =
-          (yScale(forgetClassNames[d.class]) ?? 0) + BAR_HEIGHT + BAR_GAP;
+          (yScale(FORGET_CLASS_NAMES[d.class]) ?? 0) + BAR_HEIGHT + BAR_GAP;
 
         g.append("rect")
           .attr("x", margin.left)
@@ -305,7 +305,7 @@ export default React.memo(function EmbeddingTooltip({
       .style("font-weight", TICK_FONT_WEIGHT)
       .style("font-family", ROBOTO_CONDENSED)
       .text((d: any) => {
-        const classIndex = forgetClassNames.indexOf(d);
+        const classIndex = FORGET_CLASS_NAMES.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
   }, [barChartData, forgetClass, isBaseline, legendRectColor]);

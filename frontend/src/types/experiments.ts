@@ -51,8 +51,15 @@ export interface DefenseStatus {
   forget_class: number;
 }
 
-// etc
+// others
 export interface Action {
   type: string;
   payload: string | number;
 }
+
+export type PerformanceMetrics = {
+  [key: string]: {
+    colorScale: d3.ScaleLinear<number, number, never>;
+    baseColor: string;
+  };
+};

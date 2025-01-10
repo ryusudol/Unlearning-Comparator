@@ -1,4 +1,4 @@
-import { TABLEAU10 } from "../../constants/tableau10";
+import { TABLEAU10 } from "../../constants/colors";
 import { GapDataItem } from "../../types/accuracies";
 
 const GAP_FIX_LENGTH = 3;

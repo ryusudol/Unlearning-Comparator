@@ -5,29 +5,27 @@ import Stepper from "../components/Progress/Stepper";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Timer from "../components/Progress/Timer";
+import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 import { Step } from "../types/progress";
 import { VitalIcon } from "../components/UI/icons";
 import { RunningStatusContext } from "../store/running-status-context";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
 export default function Progress({ width, height }: ViewProps) {
-  const { forgetClass } = useContext(ForgetClassContext);
   const { isRunning, status, activeStep } = useContext(RunningStatusContext);
+
+  const { forgetClassNumber, forgetClassExist } = useForgetClass();
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
 
-  const forgetClassExist = forgetClass !== undefined;
-  const progress = forgetClassExist
-    ? status[forgetClass as number].progress
-    : "";
+  const progress = forgetClassExist ? status[forgetClassNumber].progress : "";
   const steps: Step[] = useMemo(
     () =>
       forgetClassExist
         ? getProgressSteps(
-            status[forgetClass],
+            status[forgetClassNumber],
             activeStep,
             umapProgress,
             ckaProgress
@@ -36,8 +34,8 @@ export default function Progress({ width, height }: ViewProps) {
     [
       activeStep,
       ckaProgress,
-      forgetClass,
       forgetClassExist,
+      forgetClassNumber,
       status,
       umapProgress,
     ]
@@ -83,7 +81,7 @@ export default function Progress({ width, height }: ViewProps) {
         AdditionalContent={
           forgetClassExist && (
             <div className="flex items-center gap-1.5 ml-1.5">
-              {isRunning || status[forgetClass].completed_steps.length ? (
+              {isRunning || status[forgetClassNumber].completed_steps.length ? (
                 <Timer />
               ) : null}
             </div>
@@ -94,7 +92,7 @@ export default function Progress({ width, height }: ViewProps) {
         <Stepper
           steps={steps}
           activeStep={activeStep}
-          completedSteps={status[forgetClass].completed_steps}
+          completedSteps={status[forgetClassNumber].completed_steps}
           isRunning={isRunning}
         />
       ) : (

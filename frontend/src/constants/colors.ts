@@ -10,3 +10,9 @@ export const TABLEAU10 = [
   "#9C755F",
   "#BAB0AC",
 ];
+
+export const COLORS = {
+  BLACK: "black",
+  PURPLE: "#a855f7",
+  EMERALD: "#10b981",
+} as const;

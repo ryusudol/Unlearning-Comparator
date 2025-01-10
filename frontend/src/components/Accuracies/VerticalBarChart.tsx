@@ -1,4 +1,4 @@
-import { useMemo, useContext, useCallback, memo } from "react";
+import { useMemo, useCallback, memo } from "react";
 import {
   Bar,
   BarChart,
@@ -10,66 +10,20 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { forgetClassNames } from "../../constants/forgetClassNames";
-import { TABLEAU10 } from "../../constants/tableau10";
-import { ChartContainer, type ChartConfig } from "../UI/chart";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { GapDataItem } from "../../types/accuracies";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
+import { FORGET_CLASS_NAMES } from "../../constants/common";
+import { ChartContainer } from "../UI/chart";
+import { GapDataItem } from "../../types/accuracies";
 
 const TOOLTIP_FIX_LENGTH = 3;
 const LABEL_FONT_SIZE = 10;
 const TICK_FONT_WEIGHT = 300;
 const BLACK = "black";
-
-const chartConfig = {
-  value: {
-    label: "Gap",
-  },
-  A: {
-    label: "airplane",
-    color: TABLEAU10[0],
-  },
-  B: {
-    label: "automobile",
-    color: TABLEAU10[1],
-  },
-  C: {
-    label: "bird",
-    color: TABLEAU10[2],
-  },
-  D: {
-    label: "cat",
-    color: TABLEAU10[3],
-  },
-  E: {
-    label: "deer",
-    color: TABLEAU10[4],
-  },
-  F: {
-    label: "dog",
-    color: TABLEAU10[5],
-  },
-  G: {
-    label: "frog",
-    color: TABLEAU10[6],
-  },
-  H: {
-    label: "horse",
-    color: TABLEAU10[7],
-  },
-  I: {
-    label: "ship",
-    color: TABLEAU10[8],
-  },
-  J: {
-    label: "truck",
-    color: TABLEAU10[9],
-  },
-} satisfies ChartConfig;
 
 interface Props {
   mode: "Training" | "Test";
@@ -80,35 +34,6 @@ interface Props {
   setHoveredClass: (value: string | null) => void;
 }
 
-type TickProps = {
-  x: number;
-  y: number;
-  payload: any;
-  hoveredClass: string | null;
-  forgetClass: number;
-};
-
-const AxisTick = memo(
-  ({ x, y, payload, hoveredClass, forgetClass }: TickProps) => {
-    const label = chartConfig[payload.value as keyof typeof chartConfig]?.label;
-    const isForgetClass = label === forgetClassNames[forgetClass];
-    const formattedLabel = isForgetClass ? `${label}\u00A0(X)` : label;
-
-    return (
-      <text
-        x={x}
-        y={y}
-        dy={4}
-        textAnchor="end"
-        fontSize={LABEL_FONT_SIZE}
-        fontWeight={hoveredClass === payload.value ? "bold" : TICK_FONT_WEIGHT}
-      >
-        {formattedLabel}
-      </text>
-    );
-  }
-);
-
 export default function VerticalBarChart({
   mode,
   gapData,
@@ -117,31 +42,31 @@ export default function VerticalBarChart({
   hoveredClass,
   setHoveredClass,
 }: Props) {
-  const { forgetClass } = useContext(ForgetClassContext);
+  const { forgetClassNumber } = useForgetClass();
 
   const renderTick = useCallback(
     (props: any) => (
       <AxisTick
         {...props}
         hoveredClass={hoveredClass}
-        forgetClass={forgetClass as number}
+        forgetClass={forgetClassNumber}
       />
     ),
-    [hoveredClass, forgetClass]
+    [forgetClassNumber, hoveredClass]
   );
 
   const remainGapAvgValue = useMemo(() => {
     const remainingData = gapData.filter(
       (datum) =>
-        forgetClassNames[+datum.classLabel] !==
-        forgetClassNames[forgetClass as number]
+        FORGET_CLASS_NAMES[+datum.classLabel] !==
+        FORGET_CLASS_NAMES[forgetClassNumber]
     );
 
     return remainingData.length
       ? remainingData.reduce((sum, datum) => sum + datum.gap, 0) /
           remainingData.length
       : 0;
-  }, [gapData, forgetClass]);
+  }, [forgetClassNumber, gapData]);
   const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
 
   return (
@@ -154,7 +79,7 @@ export default function VerticalBarChart({
         {mode} Dataset
       </span>
       <ChartContainer
-        config={chartConfig}
+        config={VERTICAL_BAR_CHART_CONFIG}
         className={`${showYAxis ? "w-[265px]" : "w-[205px]"} h-[233px]`}
       >
         <BarChart
@@ -188,9 +113,11 @@ export default function VerticalBarChart({
             tickMargin={-1}
             tickFormatter={(value) => {
               const label =
-                chartConfig[value as keyof typeof chartConfig]?.label;
+                VERTICAL_BAR_CHART_CONFIG[
+                  value as keyof typeof VERTICAL_BAR_CHART_CONFIG
+                ]?.label;
               const isForgetClass =
-                label === forgetClassNames[forgetClass as number];
+                label === FORGET_CLASS_NAMES[forgetClassNumber];
               return isForgetClass ? `${label}\u00A0(X)` : label;
             }}
             style={{ whiteSpace: "nowrap" }}
@@ -268,3 +195,35 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   }
   return null;
 }
+
+type TickProps = {
+  x: number;
+  y: number;
+  payload: any;
+  hoveredClass: string | null;
+  forgetClass: number;
+};
+
+const AxisTick = memo(
+  ({ x, y, payload, hoveredClass, forgetClass }: TickProps) => {
+    const label =
+      VERTICAL_BAR_CHART_CONFIG[
+        payload.value as keyof typeof VERTICAL_BAR_CHART_CONFIG
+      ]?.label;
+    const isForgetClass = label === FORGET_CLASS_NAMES[forgetClass];
+    const formattedLabel = isForgetClass ? `${label}\u00A0(X)` : label;
+
+    return (
+      <text
+        x={x}
+        y={y}
+        dy={4}
+        textAnchor="end"
+        fontSize={LABEL_FONT_SIZE}
+        fontWeight={hoveredClass === payload.value ? "bold" : TICK_FONT_WEIGHT}
+      >
+        {formattedLabel}
+      </text>
+    );
+  }
+);

@@ -4,18 +4,19 @@ import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
+import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 import { Chart01Icon } from "../components/UI/icons";
-import { ForgetClassContext } from "../store/forget-class-context";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { ExperimentsContext } from "../store/experiments-context";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
 export default function Accuracies({ width, height }: ViewProps) {
-  const { forgetClass } = useContext(ForgetClassContext);
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
+
+  const { forgetClassExist } = useForgetClass();
 
   const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
@@ -34,7 +35,6 @@ export default function Accuracies({ width, height }: ViewProps) {
 
   const maxGap = Math.max(trainMaxGap, testMaxGap);
 
-  const forgetClassExist = forgetClass !== undefined;
   const bothBaseCompExist = baseline !== "" && comparison !== "";
 
   return (
