@@ -14,16 +14,21 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import {
+  FORGET_CLASS_NAMES,
+  FONT_CONFIG,
+  STROKE_CONFIG,
+} from "../../constants/common";
+import { COLORS } from "../../constants/colors";
 import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
-import { FORGET_CLASS_NAMES } from "../../constants/common";
+import { useForgetClass } from "../../hooks/useForgetClass";
 import { ChartContainer } from "../UI/chart";
 import { GapDataItem } from "../../types/accuracies";
 
-const TOOLTIP_FIX_LENGTH = 3;
-const LABEL_FONT_SIZE = 10;
-const TICK_FONT_WEIGHT = 300;
-const BLACK = "black";
+const CONFIG = {
+  TOOLTIP_TO_FIXED_LENGTH: 3,
+  BAR_HEIGHT: 12,
+} as const;
 
 interface Props {
   mode: "Training" | "Test";
@@ -67,7 +72,10 @@ export default function VerticalBarChart({
           remainingData.length
       : 0;
   }, [forgetClassNumber, gapData]);
-  const remainGapAvg = Number(remainGapAvgValue.toFixed(3));
+
+  const remainGapAvg = remainGapAvgValue.toFixed(
+    CONFIG.TOOLTIP_TO_FIXED_LENGTH
+  );
 
   return (
     <div className="flex flex-col justify-center items-center relative">
@@ -104,10 +112,10 @@ export default function VerticalBarChart({
             dataKey="category"
             type="category"
             tickLine={false}
-            axisLine={{ stroke: BLACK }}
+            axisLine={{ stroke: COLORS.BLACK }}
             interval={0}
-            fontSize={LABEL_FONT_SIZE}
-            fontWeight={TICK_FONT_WEIGHT}
+            fontSize={FONT_CONFIG.FONT_SIZE_10}
+            fontWeight={FONT_CONFIG.LIGHT_FONT_WEIGHT}
             tick={showYAxis ? renderTick : false}
             width={showYAxis ? 60 : 1}
             tickMargin={-1}
@@ -125,14 +133,14 @@ export default function VerticalBarChart({
           <XAxis
             dataKey="value"
             type="number"
-            axisLine={{ stroke: BLACK }}
+            axisLine={{ stroke: COLORS.BLACK }}
             domain={[-maxGap, maxGap]}
             tickFormatter={(value) => value.toString()}
-            fontSize={LABEL_FONT_SIZE}
+            fontSize={FONT_CONFIG.FONT_SIZE_10}
             ticks={[-maxGap, 0, maxGap]}
           >
             <Label
-              fill={BLACK}
+              fill={COLORS.BLACK}
               className="-translate-y-2 text-xs"
               value={`← Baseline High | Comparison High →`}
               offset={-1}
@@ -140,18 +148,18 @@ export default function VerticalBarChart({
               position="bottom"
             />
           </XAxis>
-          <ReferenceLine x={0} stroke="#777" />
+          <ReferenceLine x={0} stroke={COLORS.GRAY} />
           <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Bar dataKey="gap" layout="vertical" barSize={12} />
+          <Bar dataKey="gap" layout="vertical" barSize={CONFIG.BAR_HEIGHT} />
           <ReferenceLine
             x={remainGapAvg}
-            stroke="#777"
-            strokeDasharray="3 3"
+            stroke={COLORS.GRAY}
+            strokeDasharray={STROKE_CONFIG.STROKE_DASHARRAY}
             label={{
               value: `avg (remain): ${remainGapAvg}`,
               position: "top",
-              fontSize: LABEL_FONT_SIZE,
-              fill: BLACK,
+              fontSize: FONT_CONFIG.FONT_SIZE_10,
+              fill: COLORS.BLACK,
               offset: 3.5,
             }}
           />
@@ -164,6 +172,7 @@ export default function VerticalBarChart({
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as GapDataItem;
+
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
         <div className="flex items-center">
@@ -171,7 +180,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           <p>
             Baseline:{" "}
             <span className="font-semibold">
-              {data.baselineAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+              {data.baselineAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
             </span>
           </p>
         </div>
@@ -180,14 +189,14 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           <p>
             Comparison:{" "}
             <span className="font-semibold">
-              {data.comparisonAccuracy.toFixed(TOOLTIP_FIX_LENGTH)}
+              {data.comparisonAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
             </span>
           </p>
         </div>
         <p>
           Difference:{" "}
           <span className="font-semibold">
-            {data.gap.toFixed(TOOLTIP_FIX_LENGTH)}
+            {data.gap.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
           </span>
         </p>
       </div>
@@ -219,8 +228,12 @@ const AxisTick = memo(
         y={y}
         dy={4}
         textAnchor="end"
-        fontSize={LABEL_FONT_SIZE}
-        fontWeight={hoveredClass === payload.value ? "bold" : TICK_FONT_WEIGHT}
+        fontSize={FONT_CONFIG.FONT_SIZE_10}
+        fontWeight={
+          hoveredClass === payload.value
+            ? "bold"
+            : FONT_CONFIG.LIGHT_FONT_WEIGHT
+        }
       >
         {formattedLabel}
       </text>

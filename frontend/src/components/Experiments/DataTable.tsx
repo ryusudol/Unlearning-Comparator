@@ -29,6 +29,7 @@ import {
   downloadJSON,
   downloadPTH,
 } from "../../utils/api/dataTable";
+import { COLORS } from "../../constants/colors";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
@@ -366,12 +367,12 @@ export default function DataTable({
                               let color, textColor;
 
                               if (tableData.length === 1 && value === 0) {
-                                color = "#FFFFFF";
-                                textColor = "#000000";
+                                color = COLORS.WHITE;
+                                textColor = COLORS.BLACK;
                               } else {
                                 color = hexToRgba(baseColor, opacity);
                                 textColor =
-                                  opacity >= 0.8 ? "#FFFFFF" : "#000000";
+                                  opacity >= 0.8 ? COLORS.WHITE : COLORS.BLACK;
                               }
 
                               cellStyle = {

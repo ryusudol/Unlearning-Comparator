@@ -2,21 +2,13 @@ import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
 import { DataPoint } from "./Discriminator";
+import { COLORS } from "../../constants/colors";
+import { PieDataPoint } from "../../types/privacy-attack";
 
-const WIDTH = 160;
-const HEIGHT = 160;
-const RADIUS = Math.min(WIDTH, HEIGHT) / 2.5;
-const COLORS = {
-  deniedDefault: "#808080",
-  deniedPayback: "#404040",
-  grantedDefault: "#60a5fa",
-  grantedPayback: "#1e40af",
-};
-
-type PieDataPoint = {
-  label: string;
-  value: number;
-  color: string;
+const CONFIG = {
+  WIDTH: 160,
+  HEIGHT: 160,
+  RADIUS: Math.min(160, 160) / 2.5,
 };
 
 interface Props {
@@ -37,7 +29,10 @@ export default function PieChartDisplay({ data, threshold }: Props) {
 
     const g = svg
       .append("g")
-      .attr("transform", `translate(${WIDTH / 2}, ${HEIGHT / 2})`);
+      .attr(
+        "transform",
+        `translate(${CONFIG.WIDTH / 2}, ${CONFIG.HEIGHT / 2})`
+      );
 
     const pie = d3
       .pie<PieDataPoint>()
@@ -47,7 +42,7 @@ export default function PieChartDisplay({ data, threshold }: Props) {
     const arc = d3
       .arc<d3.PieArcDatum<PieDataPoint>>()
       .innerRadius(0)
-      .outerRadius(RADIUS);
+      .outerRadius(CONFIG.RADIUS);
 
     g.selectAll("path")
       .data(pie(processedData))
@@ -57,7 +52,7 @@ export default function PieChartDisplay({ data, threshold }: Props) {
       .attr("fill", (d) => d.data.color);
   }, [data, threshold]);
 
-  return <svg ref={svgRef} width={WIDTH} height={HEIGHT}></svg>;
+  return <svg ref={svgRef} width={CONFIG.WIDTH} height={CONFIG.HEIGHT}></svg>;
 }
 
 function processData(data: DataPoint[], threshold: number) {
@@ -66,25 +61,25 @@ function processData(data: DataPoint[], threshold: number) {
       label: "denied loan / would default",
       value: data.filter((d) => d.entropy < threshold && d.type === "default")
         .length,
-      color: COLORS.deniedDefault,
+      color: COLORS.LIGHT_GRAY,
     },
     {
       label: "denied loan / would pay back",
       value: data.filter((d) => d.entropy < threshold && d.type === "payback")
         .length,
-      color: COLORS.deniedPayback,
+      color: COLORS.DARK_GRAY,
     },
     {
       label: "granted loan / defaults",
       value: data.filter((d) => d.entropy >= threshold && d.type === "default")
         .length,
-      color: COLORS.grantedDefault,
+      color: COLORS.LIGHT_BLUE,
     },
     {
       label: "granted loan / pays back",
       value: data.filter((d) => d.entropy >= threshold && d.type === "payback")
         .length,
-      color: COLORS.grantedPayback,
+      color: COLORS.DARK_BLUE,
     },
   ];
 }

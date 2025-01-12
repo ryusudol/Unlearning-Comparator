@@ -13,22 +13,25 @@ import {
   LINE_CHART_TICK_STYLE,
   LINE_CHART_CONFIG,
 } from "../../constants/correlations";
+import {
+  STROKE_CONFIG,
+  FONT_CONFIG,
+  ANIMATION_DURATION,
+} from "../../constants/common";
+import { COLORS } from "../../constants/colors";
 import { calculateZoom } from "../../utils/util";
 import { getCkaData } from "../../utils/data/getCkaData";
-import { COLORS } from "../../constants/colors";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { CircleIcon, MultiplicationSignIcon } from "../UI/icons";
 import { ChartContainer, ChartTooltip } from "../UI/chart";
 
-const DOT_SIZE = 12;
-const CROSS_SIZE = 20;
-const ANIMATION_DURATION = 500;
-const LABEL_FONT_SIZE = 10;
-const TICK_FONT_WEIGHT = 300;
-const ACTIVE_DOT_STROKE_WIDTH = 3;
-const ACTIVE_CROSS_STROKE_WIDTH = 2;
-const STROKE_WIDTH = 2;
-const STROKE_DASHARRAY = "3 3";
+const CONFIG = {
+  DOT_SIZE: 12,
+  CROSS_SIZE: 20,
+  ACTIVE_DOT_STROKE_WIDTH: 3,
+  ACTIVE_CROSS_STROKE_WIDTH: 2,
+  zIndex: 9999,
+} as const;
 
 const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
   <text
@@ -37,8 +40,10 @@ const AxisTick = memo(({ x, y, payload, hoveredLayer }: TickProps) => (
     dy={8}
     textAnchor="end"
     transform={`rotate(-45, ${x}, ${y})`}
-    fontSize={LABEL_FONT_SIZE}
-    fontWeight={hoveredLayer === payload.value ? "bold" : TICK_FONT_WEIGHT}
+    fontSize={FONT_CONFIG.FONT_SIZE_10}
+    fontWeight={
+      hoveredLayer === payload.value ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
+    }
   >
     {payload.value}
   </text>
@@ -95,7 +100,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           }}
           onMouseLeave={() => setHoveredLayer(null)}
         >
-          <CartesianGrid />
+          <CartesianGrid stroke={COLORS.GRID_COLOR} />
           <XAxis
             dataKey="layer"
             tickLine={false}
@@ -122,8 +127,8 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             domain={[0, 1]}
             interval={0}
             tick={{
-              fontSize: LABEL_FONT_SIZE,
-              fontWeight: TICK_FONT_WEIGHT,
+              fontSize: FONT_CONFIG.FONT_SIZE_10,
+              fontWeight: FONT_CONFIG.LIGHT_FONT_WEIGHT,
             }}
             ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
             tickMargin={-2}
@@ -142,18 +147,18 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           <ChartTooltip
             cursor={false}
             content={<CustomTooltip />}
-            wrapperStyle={{ zIndex: 9999 }}
+            wrapperStyle={{ zIndex: CONFIG.zIndex }}
           />
           {CKA_DATA_KEYS.map((key, idx) => {
             const isBaselineLine = key.includes("baseline");
             const dotColor = isBaselineLine ? COLORS.PURPLE : COLORS.EMERALD;
             const isForgetLine = key.includes("Forget");
-            const dotSize = isForgetLine ? CROSS_SIZE : DOT_SIZE;
+            const dotSize = isForgetLine ? CONFIG.CROSS_SIZE : CONFIG.DOT_SIZE;
             const activeDotStyle = {
               stroke: COLORS.BLACK,
               strokeWidth: isForgetLine
-                ? ACTIVE_CROSS_STROKE_WIDTH
-                : ACTIVE_DOT_STROKE_WIDTH,
+                ? CONFIG.ACTIVE_CROSS_STROKE_WIDTH
+                : CONFIG.ACTIVE_DOT_STROKE_WIDTH,
             };
 
             return (
@@ -164,8 +169,10 @@ export default function _LineChart({ dataset }: { dataset: string }) {
                 stroke={
                   LINE_CHART_CONFIG[key as keyof typeof LINE_CHART_CONFIG].color
                 }
-                strokeWidth={STROKE_WIDTH}
-                strokeDasharray={isBaselineLine ? undefined : STROKE_DASHARRAY}
+                strokeWidth={STROKE_CONFIG.DEFAULT_STROKE_WIDTH}
+                strokeDasharray={
+                  isBaselineLine ? undefined : STROKE_CONFIG.STROKE_DASHARRAY
+                }
                 animationDuration={ANIMATION_DURATION}
                 dot={({ cx, cy }) =>
                   isForgetLine ? (
@@ -222,7 +229,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     return (
       <div
-        style={{ zoom, zIndex: 9999 }}
+        style={{ zoom, zIndex: CONFIG.zIndex }}
         className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl"
       >
         <div className="flex items-center leading-[18px]">
@@ -275,7 +282,11 @@ function CustomLegend() {
         <div className="relative">
           <CircleIcon
             className={`mr-2 relative right-[1px]`}
-            style={{ color: COLORS.PURPLE, width: DOT_SIZE, height: DOT_SIZE }}
+            style={{
+              color: COLORS.PURPLE,
+              width: CONFIG.DOT_SIZE,
+              height: CONFIG.DOT_SIZE,
+            }}
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
@@ -291,7 +302,11 @@ function CustomLegend() {
         <div className="relative">
           <CircleIcon
             className={`mr-2 relative right-[1px]`}
-            style={{ color: COLORS.EMERALD, width: DOT_SIZE, height: DOT_SIZE }}
+            style={{
+              color: COLORS.EMERALD,
+              width: CONFIG.DOT_SIZE,
+              height: CONFIG.DOT_SIZE,
+            }}
           />
           <div
             className="absolute top-1/2 w-[18px]"
@@ -306,8 +321,8 @@ function CustomLegend() {
       <div className="flex items-center">
         <div className="relative">
           <MultiplicationSignIcon
-            width={CROSS_SIZE}
-            height={CROSS_SIZE}
+            width={CONFIG.CROSS_SIZE}
+            height={CONFIG.CROSS_SIZE}
             color={COLORS.PURPLE}
             className="relative right-[5px]"
           />
@@ -324,8 +339,8 @@ function CustomLegend() {
       <div className="mb-1 flex items-center">
         <div className="relative">
           <MultiplicationSignIcon
-            width={CROSS_SIZE}
-            height={CROSS_SIZE}
+            width={CONFIG.CROSS_SIZE}
+            height={CONFIG.CROSS_SIZE}
             color={COLORS.EMERALD}
             className="relative right-[5px]"
           />

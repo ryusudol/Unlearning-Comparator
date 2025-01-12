@@ -12,11 +12,10 @@ import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
-import EmbeddingTooltip from "./EmbeddingTooltip";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { useModelSelection } from "../../hooks/useModelSelection";
-import { calculateZoom } from "../../utils/util";
-import { API_URL } from "../../constants/common";
+import {
+  BaselineNeuralNetworkIcon,
+  ComparisonNeuralNetworkIcon,
+} from "../UI/icons";
 import {
   Mode,
   SelectedData,
@@ -25,16 +24,18 @@ import {
   ViewModeType,
 } from "../../types/embeddings";
 import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "../UI/select";
+import EmbeddingTooltip from "./EmbeddingTooltip";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { useModelSelection } from "../../hooks/useModelSelection";
+import { calculateZoom } from "../../utils/util";
+import { COLORS } from "../../constants/colors";
+import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 
 const VIEW_MODES: ViewModeType[] = [
   "All Instances",
@@ -42,24 +43,22 @@ const VIEW_MODES: ViewModeType[] = [
   "Forgetting Failed",
 ];
 const CONFIG = {
-  width: 630,
-  height: 630,
-  dotSize: 4,
-  minZoom: 0.6,
-  maxZoom: 32,
-  XSizeDivider: 0.4,
-  XStrokeWidth: 1,
-  crossSize: 4,
-  loweredOpacity: 0.1,
-  hoveredStrokeWidth: 2,
-  paddingRatio: 0.01,
-  tooltipXSize: 450,
-  tooltipYSize: 274,
-  defaultCrossOpacity: 0.85,
-  defaultCircleOpacity: 0.6,
+  WIDTH: 630,
+  HEIGHT: 630,
+  DOT_SIZE: 4,
+  CROSS__SIZE: 4,
+  MIN_ZOOM: 0.6,
+  MAX_ZOOM: 32,
+  X_SIZE_DIVIDER: 0.4,
+  X_STROKE_WIDTH: 1,
+  LOWERED_OPACITY: 0.1,
+  HOVERED_STROKE_WIDTH: 2,
+  PADDING_RATIO: 0.01,
+  TOOLTIP_X_SIZE: 450,
+  TOOLTIP_Y_SIZE: 274,
+  DEFAULT_CROSS_OPACITY: 0.85,
+  DEFAULT_CIRCLE_OPACITY: 0.6,
 } as const;
-const BLACK = "black";
-const ZOOM_RESET_DURATION = 500;
 const UNLEARNING_TARGET = "Forgetting Target";
 const UNLEARNING_FAILED = "Forgetting Failed";
 
@@ -165,32 +164,32 @@ const ScatterPlot = forwardRef(
 
     const x = useMemo(() => {
       if (data.length === 0) {
-        return d3.scaleLinear().domain([0, 1]).range([0, CONFIG.width]);
+        return d3.scaleLinear().domain([0, 1]).range([0, CONFIG.WIDTH]);
       }
 
       return d3
         .scaleLinear()
         .domain(d3.extent(data, (d) => d[0] as number) as [number, number])
         .nice()
-        .range([0, CONFIG.width]);
+        .range([0, CONFIG.WIDTH]);
     }, [data]);
 
     const y = useMemo(() => {
       if (data.length === 0) {
-        return d3.scaleLinear().domain([0, 1]).range([CONFIG.height, 0]);
+        return d3.scaleLinear().domain([0, 1]).range([CONFIG.HEIGHT, 0]);
       }
 
       const [min, max] = d3.extent(data, (d) => d[1] as number) as [
         number,
         number
       ];
-      const padding = (max - min) * CONFIG.paddingRatio;
+      const padding = (max - min) * CONFIG.PADDING_RATIO;
 
       return d3
         .scaleLinear()
         .domain([min - padding, max + padding])
         .nice()
-        .range([CONFIG.height, 0]);
+        .range([CONFIG.HEIGHT, 0]);
     }, [data]);
 
     const z = useMemo(
@@ -209,7 +208,7 @@ const ScatterPlot = forwardRef(
         svgElements.current.gMain.attr("transform", transform.toString());
 
         if (svgElements.current.circles) {
-          svgElements.current.circles.attr("r", CONFIG.dotSize / transform.k);
+          svgElements.current.circles.attr("r", CONFIG.DOT_SIZE / transform.k);
         }
 
         if (svgElements.current.crosses) {
@@ -226,7 +225,7 @@ const ScatterPlot = forwardRef(
 
     const zoom = d3
       .zoom<SVGSVGElement, undefined>()
-      .scaleExtent([CONFIG.minZoom, CONFIG.maxZoom])
+      .scaleExtent([CONFIG.MIN_ZOOM, CONFIG.MAX_ZOOM])
       .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, undefined>) => {
         handleZoom(event.transform);
       });
@@ -269,7 +268,7 @@ const ScatterPlot = forwardRef(
       if (zoomRef.current && svgRef.current) {
         d3.select(svgRef.current)
           .transition()
-          .duration(ZOOM_RESET_DURATION)
+          .duration(ANIMATION_DURATION)
           .call(zoomRef.current.transform as any, d3.zoomIdentity);
       }
     };
@@ -302,9 +301,11 @@ const ScatterPlot = forwardRef(
       let xPos = (event.clientX - containerRect.left) / zoom + 10;
       let yPos = (event.clientY - containerRect.top) / zoom + 10;
 
-      if (yPos + CONFIG.tooltipYSize > containerRect.height / zoom) {
+      if (yPos + CONFIG.TOOLTIP_Y_SIZE > containerRect.height / zoom) {
         yPos =
-          (event.clientY - containerRect.top) / zoom - CONFIG.tooltipYSize - 10;
+          (event.clientY - containerRect.top) / zoom -
+          CONFIG.TOOLTIP_Y_SIZE -
+          10;
         if (yPos < 0) {
           yPos = 0;
         }
@@ -407,8 +408,8 @@ const ScatterPlot = forwardRef(
 
           const tooltipContent = (
             <EmbeddingTooltip
-              width={CONFIG.tooltipXSize}
-              height={CONFIG.tooltipYSize}
+              width={CONFIG.TOOLTIP_X_SIZE}
+              height={CONFIG.TOOLTIP_Y_SIZE}
               imageUrl={imageUrl}
               data={d}
               barChartData={barChartData}
@@ -436,8 +437,8 @@ const ScatterPlot = forwardRef(
 
         const element = event.currentTarget as Element;
         d3.select(element)
-          .attr("stroke", BLACK)
-          .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+          .attr("stroke", COLORS.BLACK)
+          .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
           .raise();
       },
       [mode, onHover]
@@ -469,20 +470,20 @@ const ScatterPlot = forwardRef(
             .style(
               "opacity",
               shouldLowerOpacity(d)
-                ? CONFIG.loweredOpacity
-                : CONFIG.defaultCircleOpacity
+                ? CONFIG.LOWERED_OPACITY
+                : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
         } else {
           const colorStr = z(d[3] as number);
           const color = d3.color(colorStr);
           selection
-            .attr("stroke", color ? color.darker().toString() : BLACK)
-            .attr("stroke-width", CONFIG.XStrokeWidth)
+            .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
+            .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
             .style(
               "opacity",
               shouldLowerOpacity(d)
-                ? CONFIG.loweredOpacity
-                : CONFIG.defaultCrossOpacity
+                ? CONFIG.LOWERED_OPACITY
+                : CONFIG.DEFAULT_CROSS_OPACITY
             );
         }
       },
@@ -500,17 +501,17 @@ const ScatterPlot = forwardRef(
 
       const svg = d3
         .select(svgRef.current)
-        .attr("viewBox", [0, 0, CONFIG.width, CONFIG.height])
-        .attr("width", CONFIG.width)
-        .attr("height", CONFIG.height)
+        .attr("viewBox", [0, 0, CONFIG.WIDTH, CONFIG.HEIGHT])
+        .attr("width", CONFIG.WIDTH)
+        .attr("height", CONFIG.HEIGHT)
         .attr("preserveAspectRatio", "xMidYMid meet");
 
       const gMain = svg.append("g");
 
       gMain
         .append("rect")
-        .attr("width", CONFIG.width)
-        .attr("height", CONFIG.height)
+        .attr("width", CONFIG.WIDTH)
+        .attr("height", CONFIG.HEIGHT)
         .style("fill", "none")
         .style("pointer-events", "all");
 
@@ -540,10 +541,10 @@ const ScatterPlot = forwardRef(
         .join("circle")
         .attr("cx", (d) => x(d[0] as number))
         .attr("cy", (d) => y(d[1] as number))
-        .attr("r", CONFIG.dotSize / currentTransform.k)
+        .attr("r", CONFIG.DOT_SIZE / currentTransform.k)
         .attr("fill", (d) => z(d[3] as number))
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.defaultCircleOpacity)
+        .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY)
         .style("vector-effect", "non-scaling-stroke")
         .each(function (d) {
           elementMapRef.current.set(d[4] as number, this);
@@ -565,16 +566,16 @@ const ScatterPlot = forwardRef(
           d3
             .symbol()
             .type(d3.symbolCross)
-            .size(Math.pow(CONFIG.crossSize / CONFIG.XSizeDivider, 2))
+            .size(Math.pow(CONFIG.CROSS__SIZE / CONFIG.X_SIZE_DIVIDER, 2))
         )
         .attr("fill", (d) => z(d[3] as number))
         .attr("stroke", (d) => {
           const color = d3.color(z(d[3] as number));
           return color ? color.darker().darker().toString() : "black";
         })
-        .attr("stroke-width", CONFIG.XStrokeWidth)
+        .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.defaultCrossOpacity)
+        .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY)
         .each(function (d) {
           elementMapRef.current.set(d[4] as number, this);
         });
@@ -654,17 +655,17 @@ const ScatterPlot = forwardRef(
         selection
           .style("opacity", (d: any) =>
             shouldLowerOpacity(d)
-              ? CONFIG.loweredOpacity
+              ? CONFIG.LOWERED_OPACITY
               : isCircle
-              ? CONFIG.defaultCircleOpacity
-              : CONFIG.defaultCrossOpacity
+              ? CONFIG.DEFAULT_CIRCLE_OPACITY
+              : CONFIG.DEFAULT_CROSS_OPACITY
           )
           .style("pointer-events", (d: any) =>
             shouldLowerOpacity(d) ? "none" : "auto"
           );
 
         if (isCircle) {
-          selection.attr("r", CONFIG.dotSize / currentTransform.k);
+          selection.attr("r", CONFIG.DOT_SIZE / currentTransform.k);
         } else {
           selection.attr("transform", (d: any) => {
             const xPos = x(d[0] as number);
@@ -693,8 +694,8 @@ const ScatterPlot = forwardRef(
         if (element) {
           const selection = d3.select(element);
           selection
-            .attr("stroke", BLACK)
-            .attr("stroke-width", CONFIG.hoveredStrokeWidth);
+            .attr("stroke", COLORS.BLACK)
+            .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH);
         }
       }
 
@@ -707,15 +708,18 @@ const ScatterPlot = forwardRef(
               selection
                 .attr("stroke", null)
                 .attr("stroke-width", null)
-                .style("opacity", CONFIG.defaultCircleOpacity);
+                .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY);
             } else {
               const d = selection.datum() as (number | Prob)[];
               const colorStr = z(d[3] as number);
               const color = d3.color(colorStr);
               selection
-                .attr("stroke", color ? color.darker().toString() : BLACK)
-                .attr("stroke-width", CONFIG.XStrokeWidth)
-                .style("opacity", CONFIG.defaultCrossOpacity);
+                .attr(
+                  "stroke",
+                  color ? color.darker().toString() : COLORS.BLACK
+                )
+                .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
+                .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY);
             }
           }
         }
@@ -764,8 +768,8 @@ const ScatterPlot = forwardRef(
 
           if (!shouldLowerOpacity(d)) {
             selection
-              .attr("stroke", BLACK)
-              .attr("stroke-width", CONFIG.hoveredStrokeWidth)
+              .attr("stroke", COLORS.BLACK)
+              .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
               .raise();
           }
         }
@@ -777,10 +781,10 @@ const ScatterPlot = forwardRef(
           const d = selection.datum() as (number | Prob)[];
           const isCircle = element.tagName === "circle";
           const opacityValue = shouldLowerOpacity(d)
-            ? CONFIG.loweredOpacity
+            ? CONFIG.LOWERED_OPACITY
             : isCircle
-            ? CONFIG.defaultCircleOpacity
-            : CONFIG.defaultCrossOpacity;
+            ? CONFIG.DEFAULT_CIRCLE_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY;
 
           if (isCircle) {
             selection
@@ -791,8 +795,8 @@ const ScatterPlot = forwardRef(
             const colorStr = z(d[3] as number);
             const color = d3.color(colorStr);
             selection
-              .attr("stroke", color ? color.darker().toString() : BLACK)
-              .attr("stroke-width", CONFIG.XStrokeWidth)
+              .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
+              .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
               .style("opacity", opacityValue);
           }
         }
