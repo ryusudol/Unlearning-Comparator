@@ -1,9 +1,5 @@
 import React, { useState } from "react";
 
-import { Slider } from "../UI/slider";
-import { Label } from "../UI/label";
-import { DEFENSE_METHODS } from "../../constants/experiments";
-import { DefenseConfigurationData } from "../../types/experiments";
 import {
   HyperparametersIcon,
   StartPointIcon,
@@ -16,6 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../UI/select";
+import { Slider } from "../UI/slider";
+import { Label } from "../UI/label";
+import { DEFENSE_METHODS } from "../../constants/experiments";
+import { DefenseConfigurationData } from "../../types/experiments";
 
 export default function Defense() {
   const [unlearnedModels, setUnlearnedModels] = useState<string[]>([]);
@@ -30,8 +30,6 @@ export default function Defense() {
     const configState = Object.fromEntries(
       fd.entries()
     ) as unknown as DefenseConfigurationData;
-
-    console.log(configState);
   };
 
   return (

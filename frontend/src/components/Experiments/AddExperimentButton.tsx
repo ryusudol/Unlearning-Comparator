@@ -1,10 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
 
-import Unlearning from "./Unlearning";
-import Defense from "./Defense";
-import Button from "../Button";
-import { PlusIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../store/running-status-context";
 import {
   Dialog,
   DialogContent,
@@ -13,11 +8,16 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "../UI/dialog";
+import Unlearning from "./Unlearning";
+import Defense from "./Defense";
+import Button from "../Button";
+import { PlusIcon } from "../UI/icons";
+import { RunningStatusContext } from "../../store/running-status-context";
+
+type ModeType = "unlearning" | "defense";
 
 const UNLEARNING = "unlearning";
 const DEFENSE = "defense";
-
-type ModeType = "unlearning" | "defense";
 
 export default function AddExperimentButton() {
   const { isRunning } = useContext(RunningStatusContext);

@@ -5,29 +5,33 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
-import { FORGET_CLASS_NAMES } from "../../constants/common";
+import {
+  FORGET_CLASS_NAMES,
+  FONT_CONFIG,
+  STROKE_CONFIG,
+} from "../../constants/common";
+import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
 
-const BLACK = "black";
-const LOW_OPACITY = 0.6;
-const HIGH_OPACITY = 1;
-const TICK_PADDING = 6;
-const BAR_HEIGHT = 8;
-const BAR_GAP = 0.5;
-const SELECT_CHART_FONT_SIZE = "8.5px";
-const UNSELECT_CHART_FONT_SIZE = "8px";
-const LEGEND_X = 11;
-const LEGEND_Y = 7;
-const LEGEND_X_OFFSET = 113;
-const LEGEND_GAP = 55;
-const LEGEND_FONT_SIZE = "10px";
-const GRID_LINE_COLOR = "#f0f3f8";
-const GRAY_COLOR = "#898989";
-const TICK_FONT_SIZE = "10px";
-const TICK_FONT_WEIGHT = 300;
-const ROBOTO_CONDENSED = "Roboto Condensed";
-const LEGEND_RECT_SIZE = 8;
-const margin = { top: 15, right: 22, bottom: 30, left: 58 };
+const CONFIG = {
+  LOW_OPACITY: 0.6,
+  HIGH_OPACITY: 1,
+  TICK_PADDING: 6,
+  BAR_HEIGHT: 8,
+  BAR_GAP: 0.5,
+  SELECT_CHART_FONT_SIZE: "8.5px",
+  UNSELECT_CHART_FONT_SIZE: "8px",
+  PATTERN_SIZE: 3,
+  LEGEND_X: 11,
+  LEGEND_Y: 7,
+  LEGEND_X_OFFSET: 113,
+  LEGEND_GAP: 55,
+  LEGEND_FONT_SIZE: "10px",
+  LEGEND_RECT_SIZE: 8,
+  GRID_LINE_COLOR: "#f0f3f8",
+  ROBOTO_CONDENSED: "Roboto Condensed",
+  MARGIN: { top: 15, right: 22, bottom: 30, left: 58 },
+} as const;
 
 interface Props {
   width: number;
@@ -86,8 +90,8 @@ export default React.memo(function EmbeddingTooltip({
       .append("pattern")
       .attr("id", "stripe")
       .attr("patternUnits", "userSpaceOnUse")
-      .attr("width", 3)
-      .attr("height", 3)
+      .attr("width", CONFIG.PATTERN_SIZE)
+      .attr("height", CONFIG.PATTERN_SIZE)
       .attr("patternTransform", "rotate(-45)");
 
     pattern
@@ -95,23 +99,23 @@ export default React.memo(function EmbeddingTooltip({
       .attr("x1", 0)
       .attr("y1", 0)
       .attr("x2", 0)
-      .attr("y2", 3)
-      .attr("stroke", BLACK)
-      .attr("stroke-width", 2)
-      .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY);
+      .attr("y2", CONFIG.PATTERN_SIZE)
+      .attr("stroke", COLORS.BLACK)
+      .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH)
+      .attr("opacity", !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY);
 
     const legendPattern = defs
       .append("pattern")
       .attr("id", "stripe-legend")
       .attr("patternUnits", "userSpaceOnUse")
-      .attr("width", 3)
-      .attr("height", 3)
+      .attr("width", CONFIG.PATTERN_SIZE)
+      .attr("height", CONFIG.PATTERN_SIZE)
       .attr("patternTransform", "rotate(-45)");
 
     legendPattern
       .append("rect")
-      .attr("width", 3)
-      .attr("height", 3)
+      .attr("width", CONFIG.PATTERN_SIZE)
+      .attr("height", CONFIG.PATTERN_SIZE)
       .attr("fill", legendRectColor);
 
     legendPattern
@@ -119,67 +123,67 @@ export default React.memo(function EmbeddingTooltip({
       .attr("x1", 0)
       .attr("y1", 0)
       .attr("x2", 0)
-      .attr("y2", 3)
-      .attr("stroke", BLACK)
-      .attr("stroke-width", 2);
+      .attr("y2", CONFIG.PATTERN_SIZE)
+      .attr("stroke", COLORS.BLACK)
+      .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH);
 
     const basleineLegend = svg
       .append("g")
       .attr("class", "legend")
       .attr(
         "transform",
-        `translate(${width - margin.right - LEGEND_X_OFFSET}, 1)`
+        `translate(${width - CONFIG.MARGIN.right - CONFIG.LEGEND_X_OFFSET}, 1)`
       );
 
     basleineLegend
       .append("rect")
-      .attr("width", LEGEND_RECT_SIZE)
-      .attr("height", LEGEND_RECT_SIZE)
+      .attr("width", CONFIG.LEGEND_RECT_SIZE)
+      .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", legendRectColor)
-      .attr("stroke", isBaseline ? BLACK : "none");
+      .attr("stroke", isBaseline ? COLORS.BLACK : "none");
 
     basleineLegend
       .append("text")
-      .attr("x", LEGEND_X)
-      .attr("y", LEGEND_Y)
+      .attr("x", CONFIG.LEGEND_X)
+      .attr("y", CONFIG.LEGEND_Y)
       .text("Baseline")
-      .style("font-size", LEGEND_FONT_SIZE)
-      .style("font-family", ROBOTO_CONDENSED);
+      .style("font-size", CONFIG.LEGEND_FONT_SIZE)
+      .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
     const comparisonLegend = basleineLegend
       .append("g")
-      .attr("transform", `translate(${LEGEND_GAP}, 0)`);
+      .attr("transform", `translate(${CONFIG.LEGEND_GAP}, 0)`);
 
     comparisonLegend
       .append("rect")
-      .attr("width", LEGEND_RECT_SIZE)
-      .attr("height", LEGEND_RECT_SIZE)
+      .attr("width", CONFIG.LEGEND_RECT_SIZE)
+      .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", legendRectColor);
 
     comparisonLegend
       .append("rect")
-      .attr("width", LEGEND_RECT_SIZE)
-      .attr("height", LEGEND_RECT_SIZE)
+      .attr("width", CONFIG.LEGEND_RECT_SIZE)
+      .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", "url(#stripe-legend)")
-      .attr("stroke", !isBaseline ? BLACK : "none");
+      .attr("stroke", !isBaseline ? COLORS.BLACK : "none");
 
     comparisonLegend
       .append("text")
-      .attr("x", LEGEND_X)
-      .attr("y", LEGEND_Y)
+      .attr("x", CONFIG.LEGEND_X)
+      .attr("y", CONFIG.LEGEND_Y)
       .text("Comparison")
-      .style("font-size", LEGEND_FONT_SIZE)
-      .style("font-family", ROBOTO_CONDENSED);
+      .style("font-size", CONFIG.LEGEND_FONT_SIZE)
+      .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
     const xScale = d3
       .scaleLinear()
       .domain([0, 1])
-      .range([margin.left, width - margin.right]);
+      .range([CONFIG.MARGIN.left, width - CONFIG.MARGIN.right]);
 
     const yScale = d3
       .scaleBand()
       .domain(barChartData.baseline.map((d) => FORGET_CLASS_NAMES[d.class]))
-      .range([margin.top, height - margin.bottom])
+      .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
     const gridLines = svg.append("g").attr("class", "grid-lines");
@@ -193,9 +197,9 @@ export default React.memo(function EmbeddingTooltip({
       .append("line")
       .attr("x1", (d) => xScale(d))
       .attr("x2", (d) => xScale(d))
-      .attr("y1", margin.top)
-      .attr("y2", height - margin.bottom)
-      .attr("stroke", GRID_LINE_COLOR)
+      .attr("y1", CONFIG.MARGIN.top)
+      .attr("y2", height - CONFIG.MARGIN.bottom)
+      .attr("stroke", CONFIG.GRID_LINE_COLOR)
       .attr("stroke-width", 1);
 
     const colors = d3.schemeTableau10;
@@ -208,30 +212,35 @@ export default React.memo(function EmbeddingTooltip({
       .attr("class", "bar-baseline-group")
       .each(function (d, i) {
         const g = d3.select(this);
-        const barWidth = xScale(d.value) - margin.left;
+        const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
         const y = yScale(FORGET_CLASS_NAMES[d.class]) ?? 0;
 
         g.append("rect")
           .attr("class", "bar-baseline")
-          .attr("x", margin.left)
+          .attr("x", CONFIG.MARGIN.left)
           .attr("y", y)
-          .attr("height", BAR_HEIGHT)
+          .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr("opacity", isBaseline ? HIGH_OPACITY : LOW_OPACITY)
-          .attr("stroke", isBaseline ? BLACK : "none")
+          .attr(
+            "opacity",
+            isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
+          )
+          .attr("stroke", isBaseline ? COLORS.BLACK : "none")
           .attr("stroke-width", isBaseline ? 1 : 0);
 
         g.append("text")
-          .attr("x", margin.left + barWidth + 4)
-          .attr("y", y + BAR_HEIGHT / 2)
+          .attr("x", CONFIG.MARGIN.left + barWidth + 4)
+          .attr("y", y + CONFIG.BAR_HEIGHT / 2)
           .attr("dy", "0.35em")
           .attr(
             "font-size",
-            isBaseline ? SELECT_CHART_FONT_SIZE : UNSELECT_CHART_FONT_SIZE
+            isBaseline
+              ? CONFIG.SELECT_CHART_FONT_SIZE
+              : CONFIG.UNSELECT_CHART_FONT_SIZE
           )
-          .attr("font-family", ROBOTO_CONDENSED)
-          .attr("fill", isBaseline ? BLACK : GRAY_COLOR)
+          .attr("font-family", CONFIG.ROBOTO_CONDENSED)
+          .attr("fill", isBaseline ? COLORS.BLACK : COLORS.GRAY)
           .text(d.value);
       });
 
@@ -241,38 +250,45 @@ export default React.memo(function EmbeddingTooltip({
       .attr("class", "bar-comparison-group")
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
-        const barWidth = xScale(d.value) - margin.left;
+        const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
         const y =
-          (yScale(FORGET_CLASS_NAMES[d.class]) ?? 0) + BAR_HEIGHT + BAR_GAP;
+          (yScale(FORGET_CLASS_NAMES[d.class]) ?? 0) +
+          CONFIG.BAR_HEIGHT +
+          CONFIG.BAR_GAP;
 
         g.append("rect")
-          .attr("x", margin.left)
+          .attr("x", CONFIG.MARGIN.left)
           .attr("y", y)
-          .attr("height", BAR_HEIGHT)
+          .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr("opacity", !isBaseline ? HIGH_OPACITY : LOW_OPACITY)
-          .attr("stroke", !isBaseline ? BLACK : "none")
+          .attr(
+            "opacity",
+            !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
+          )
+          .attr("stroke", !isBaseline ? COLORS.BLACK : "none")
           .attr("stroke-width", !isBaseline ? 1 : 0);
 
         g.append("rect")
-          .attr("x", margin.left)
+          .attr("x", CONFIG.MARGIN.left)
           .attr("y", y)
-          .attr("height", BAR_HEIGHT)
+          .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", "url(#stripe)")
           .attr("opacity", 0.5);
 
         g.append("text")
-          .attr("x", margin.left + barWidth + 4)
-          .attr("y", y + BAR_HEIGHT / 2)
+          .attr("x", CONFIG.MARGIN.left + barWidth + 4)
+          .attr("y", y + CONFIG.BAR_HEIGHT / 2)
           .attr("dy", "0.35em")
           .attr(
             "font-size",
-            !isBaseline ? SELECT_CHART_FONT_SIZE : UNSELECT_CHART_FONT_SIZE
+            !isBaseline
+              ? CONFIG.SELECT_CHART_FONT_SIZE
+              : CONFIG.UNSELECT_CHART_FONT_SIZE
           )
-          .attr("font-family", ROBOTO_CONDENSED)
-          .attr("fill", !isBaseline ? BLACK : GRAY_COLOR)
+          .attr("font-family", CONFIG.ROBOTO_CONDENSED)
+          .attr("fill", !isBaseline ? COLORS.BLACK : COLORS.GRAY)
           .text(d.value);
       });
 
@@ -280,30 +296,33 @@ export default React.memo(function EmbeddingTooltip({
       .axisBottom(xScale)
       .ticks(5)
       .tickSize(0)
-      .tickPadding(TICK_PADDING)
+      .tickPadding(CONFIG.TICK_PADDING)
       .tickFormat((d) => d.toString());
 
     svg
       .append("g")
-      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .attr("transform", `translate(0,${height - CONFIG.MARGIN.bottom})`)
       .call(xAxis)
       .selectAll("text")
-      .style("font-size", TICK_FONT_SIZE)
-      .style("font-weight", TICK_FONT_WEIGHT)
-      .style("font-family", ROBOTO_CONDENSED);
+      .style("font-size", FONT_CONFIG.FONT_SIZE_10)
+      .style("font-weight", FONT_CONFIG.LIGHT_FONT_WEIGHT)
+      .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
     svg.select(".domain").remove();
 
-    const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(TICK_PADDING);
+    const yAxis = d3
+      .axisLeft(yScale)
+      .tickSize(0)
+      .tickPadding(CONFIG.TICK_PADDING);
 
     svg
       .append("g")
-      .attr("transform", `translate(${margin.left},0)`)
+      .attr("transform", `translate(${CONFIG.MARGIN.left},0)`)
       .call(yAxis)
       .selectAll("text")
-      .style("font-size", TICK_FONT_SIZE)
-      .style("font-weight", TICK_FONT_WEIGHT)
-      .style("font-family", ROBOTO_CONDENSED)
+      .style("font-size", FONT_CONFIG.FONT_SIZE_10)
+      .style("font-weight", FONT_CONFIG.LIGHT_FONT_WEIGHT)
+      .style("font-family", CONFIG.ROBOTO_CONDENSED)
       .text((d: any) => {
         const classIndex = FORGET_CLASS_NAMES.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;

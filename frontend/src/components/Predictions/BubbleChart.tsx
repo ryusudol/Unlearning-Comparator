@@ -6,17 +6,26 @@ import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
+import {
+  FORGET_CLASS_NAMES,
+  STROKE_CONFIG,
+  FONT_CONFIG,
+} from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { extractBubbleChartData } from "../../utils/data/experiments";
-import { FORGET_CLASS_NAMES } from "../../constants/common";
+import { COLORS } from "../../constants/colors";
 
-const TOTAL_SIZE = 255;
-const MIN_BUBBLE_SIZE = 1;
-const MAX_BUBBLE_SIZE = 90;
-const BASIC_FONT_WEIGHT = 300;
+const CONFIG = {
+  TOTAL_SIZE: 255,
+  MIN_BUBBLE_SIZE: 1,
+  MAX_BUBBLE_SIZE: 90,
+  MIN_VALUE_TO_DISPLAY: 0.002,
+  CELL_SIZE: 20,
+  CELL_ROUNDEDNESS: 4,
+} as const;
 
 type ModeType = "Baseline" | "Comparison";
 
@@ -86,15 +95,15 @@ export default function BubbleChart({
       bottom: 44,
       left: 64,
     };
-    const width = TOTAL_SIZE - margin.left - margin.right;
-    const height = TOTAL_SIZE - margin.top - margin.bottom;
+    const width = CONFIG.TOTAL_SIZE - margin.left - margin.right;
+    const height = CONFIG.TOTAL_SIZE - margin.top - margin.bottom;
 
     d3.select(svgRef.current).selectAll("*").remove();
 
     const svg = d3
       .select(svgRef.current)
-      .attr("width", TOTAL_SIZE)
-      .attr("height", TOTAL_SIZE)
+      .attr("width", CONFIG.TOTAL_SIZE)
+      .attr("height", CONFIG.TOTAL_SIZE)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -110,7 +119,7 @@ export default function BubbleChart({
     const sizeScale = d3
       .scaleLinear()
       .domain([0, 1])
-      .range([MIN_BUBBLE_SIZE, MAX_BUBBLE_SIZE]);
+      .range([CONFIG.MIN_BUBBLE_SIZE, CONFIG.MAX_BUBBLE_SIZE]);
 
     const xAxis = d3
       .axisBottom(xScale)
@@ -135,12 +144,14 @@ export default function BubbleChart({
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
       .call((g) => {
-        g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
+        g.select(".domain")
+          .attr("stroke", COLORS.BLACK)
+          .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
         g.selectAll(".tick text")
           .attr("transform", "rotate(-45)")
           .style("text-anchor", "end")
-          .style("font-family", "Roboto Condensed")
-          .style("font-weight", BASIC_FONT_WEIGHT)
+          .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
+          .style("font-weight", FONT_CONFIG.LIGHT_FONT_WEIGHT)
           .attr("dx", "-.3em")
           .attr("dy", ".4em");
       });
@@ -151,10 +162,12 @@ export default function BubbleChart({
         .attr("class", "y-axis")
         .call(yAxis)
         .call((g) => {
-          g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
+          g.select(".domain")
+            .attr("stroke", COLORS.BLACK)
+            .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
           g.selectAll(".tick text")
             .attr("dx", "-.5em")
-            .style("font-family", "Roboto Condensed");
+            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED);
         });
     } else {
       svg
@@ -162,9 +175,11 @@ export default function BubbleChart({
         .attr("class", "y-axis")
         .call(yAxis)
         .call((g) => {
-          g.select(".domain").attr("stroke", "#000").attr("stroke-width", 1);
+          g.select(".domain")
+            .attr("stroke", COLORS.BLACK)
+            .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
           g.selectAll(".tick text")
-            .style("font-family", "Roboto Condensed")
+            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
             .remove();
         });
     }
@@ -173,12 +188,12 @@ export default function BubbleChart({
       .selectAll("rect")
       .data(data)
       .join("rect")
-      .attr("x", (d) => xScale(d.x) - 10)
-      .attr("y", (d) => yScale(d.y) - 10)
-      .attr("width", 20)
-      .attr("height", 20)
-      .attr("rx", 4)
-      .attr("ry", 4)
+      .attr("x", (d) => xScale(d.x) - CONFIG.CELL_SIZE / 2)
+      .attr("y", (d) => yScale(d.y) - CONFIG.CELL_SIZE / 2)
+      .attr("width", CONFIG.CELL_SIZE)
+      .attr("height", CONFIG.CELL_SIZE)
+      .attr("rx", CONFIG.CELL_ROUNDEDNESS)
+      .attr("ry", CONFIG.CELL_ROUNDEDNESS)
       .attr("fill", "transparent")
       .on("mouseover", (event, d: any) => {
         event.stopPropagation();
@@ -213,7 +228,7 @@ export default function BubbleChart({
         svg
           .selectAll(".x-axis .tick text")
           .style("font-weight", (t: any) =>
-            t === d.x ? "bold" : BASIC_FONT_WEIGHT
+            t === d.x ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
           );
 
         onHover(d.y);
@@ -229,7 +244,11 @@ export default function BubbleChart({
       .join("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) => (d.label >= 0.002 ? Math.sqrt(sizeScale(d.label)) : 0))
+      .attr("r", (d) =>
+        d.label >= CONFIG.MIN_VALUE_TO_DISPLAY
+          ? Math.sqrt(sizeScale(d.label))
+          : 0
+      )
       .attr("fill", (d) => colorScale(d.conf))
       .attr("opacity", 0.7)
       .style("pointer-events", "none");
@@ -239,7 +258,7 @@ export default function BubbleChart({
     d3.select(svgRef.current)
       .selectAll(".y-axis .tick text")
       .style("font-weight", (t: any) => {
-        return t === hoveredY ? "bold" : BASIC_FONT_WEIGHT;
+        return t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT;
       });
   }, [
     datasetMode,
