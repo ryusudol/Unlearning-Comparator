@@ -54,7 +54,7 @@ export default function Accuracies({ width, height }: ViewProps) {
               gapData={trainAccuracyGap}
               maxGap={maxGap}
               hoveredClass={hoveredClass}
-              setHoveredClass={setHoveredClass}
+              onHoverChange={setHoveredClass}
             />
             <VerticalBarChart
               mode="Test"
@@ -62,7 +62,7 @@ export default function Accuracies({ width, height }: ViewProps) {
               maxGap={maxGap}
               showYAxis={false}
               hoveredClass={hoveredClass}
-              setHoveredClass={setHoveredClass}
+              onHoverChange={setHoveredClass}
             />
           </div>
         ) : (
