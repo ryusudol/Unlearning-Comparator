@@ -36,7 +36,7 @@ interface Props {
   maxGap: number;
   showYAxis?: boolean;
   hoveredClass: string | null;
-  setHoveredClass: (value: string | null) => void;
+  onHoverChange: (value: string | null) => void;
 }
 
 export default function VerticalBarChart({
@@ -45,7 +45,7 @@ export default function VerticalBarChart({
   maxGap,
   showYAxis = true,
   hoveredClass,
-  setHoveredClass,
+  onHoverChange,
 }: Props) {
   const { forgetClassNumber } = useForgetClass();
 
@@ -102,10 +102,10 @@ export default function VerticalBarChart({
           }}
           onMouseMove={(state: any) => {
             if (state?.activePayload) {
-              setHoveredClass(state.activePayload[0].payload.category);
+              onHoverChange(state.activePayload[0].payload.category);
             }
           }}
-          onMouseLeave={() => setHoveredClass(null)}
+          onMouseLeave={() => onHoverChange(null)}
         >
           <YAxis
             limitingConeAngle={30}
