@@ -17,24 +17,28 @@ export default function Accuracies({ width, height }: ViewProps) {
 
   const { areAllModelsSelected } = useModelSelection();
   const { forgetClassExist } = useForgetClass();
-  console.log("re-rendered!");
 
   const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
-  const trainAccuracyGap = useMemo(
-    () => getAccuracyGap(baselineExperiment?.accs, comparisonExperiment?.accs),
-    [baselineExperiment?.accs, comparisonExperiment?.accs]
-  );
-  const testAccuracyGap = useMemo(
-    () =>
-      getAccuracyGap(baselineExperiment?.t_accs, comparisonExperiment?.t_accs),
-    [baselineExperiment?.t_accs, comparisonExperiment?.t_accs]
-  );
+  const accuracyData = useMemo(() => {
+    const trainAccuracyGap = getAccuracyGap(
+      baselineExperiment?.accs,
+      comparisonExperiment?.accs
+    );
+    const testAccuracyGap = getAccuracyGap(
+      baselineExperiment?.t_accs,
+      comparisonExperiment?.t_accs
+    );
+    const trainMaxGap = getMaxGap(trainAccuracyGap);
+    const testMaxGap = getMaxGap(testAccuracyGap);
+    const maxGap = Math.max(trainMaxGap, testMaxGap);
 
-  const trainMaxGap = getMaxGap(trainAccuracyGap);
-  const testMaxGap = getMaxGap(testAccuracyGap);
-
-  const maxGap = Math.max(trainMaxGap, testMaxGap);
+    return {
+      trainAccuracyGap,
+      testAccuracyGap,
+      maxGap,
+    };
+  }, [baselineExperiment, comparisonExperiment]);
 
   return (
     <View width={width} height={height} className="border-t-0">
@@ -51,15 +55,15 @@ export default function Accuracies({ width, height }: ViewProps) {
           <div className="w-full flex items-center relative bottom-0.5">
             <VerticalBarChart
               mode="Training"
-              gapData={trainAccuracyGap}
-              maxGap={maxGap}
+              gapData={accuracyData.trainAccuracyGap}
+              maxGap={accuracyData.maxGap}
               hoveredClass={hoveredClass}
               onHoverChange={setHoveredClass}
             />
             <VerticalBarChart
               mode="Test"
-              gapData={testAccuracyGap}
-              maxGap={maxGap}
+              gapData={accuracyData.testAccuracyGap}
+              maxGap={accuracyData.maxGap}
               showYAxis={false}
               hoveredClass={hoveredClass}
               onHoverChange={setHoveredClass}
