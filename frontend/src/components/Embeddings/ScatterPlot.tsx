@@ -230,40 +230,6 @@ const ScatterPlot = forwardRef(
         handleZoom(event.transform);
       });
 
-    // useEffect(() => {
-    //   if (!svgElements.current.svg) return;
-
-    //   const svg = svgElements.current.svg;
-    //   svg.style("cursor", "grab");
-
-    //   const handleMouseDown = () => {
-    //     svg.style("cursor", "grabbing");
-    //   };
-
-    //   const handleMouseUp = () => {
-    //     svg.style("cursor", "grab");
-    //   };
-
-    //   const node = svg.node();
-    //   if (node) {
-    //     node.addEventListener("mousedown", handleMouseDown);
-    //     node.addEventListener("mouseup", handleMouseUp, true);
-    //     window.addEventListener("mouseup", handleMouseUp);
-
-    //     zoomRef.current = zoom;
-    //     svg.call(zoom as any);
-    //   }
-
-    //   return () => {
-    //     if (node) {
-    //       node.removeEventListener("mousedown", handleMouseDown);
-    //       node.removeEventListener("mouseup", handleMouseUp, true);
-    //       window.removeEventListener("mouseup", handleMouseUp);
-    //       svg.on(".zoom", null);
-    //     }
-    //   };
-    // }, [zoom]);
-
     const resetZoom = () => {
       if (zoomRef.current && svgRef.current) {
         d3.select(svgRef.current)
