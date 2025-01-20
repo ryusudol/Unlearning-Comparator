@@ -2,12 +2,15 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.envs.default]
+python = "3.10"
+
 [project]
-name = "mu-vis"
-dynamic = ["version"]
-description = 'mu-vis'
+name = "Machine-Unlearning-Comparator"
+version = "0.1.0"  
+description = "Machine Unlearning Comparator"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8, <3.12"
 license = "MIT"
 keywords = []
 authors = [
@@ -20,7 +23,6 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -42,12 +44,9 @@ dependencies = [
 
 
 [project.urls]
-Documentation = "https://github.com/gnueaj/mu-vis#readme"
-Issues = "https://github.com/gnueaj/mu-vis/issues"
-Source = "https://github.com/gnueaj/mu-vis"
-
-[tool.hatch.version]
-path = "src/mu_vis/__about__.py"
+Documentation = "https://github.com/gnueaj/Machine-Unlearning-Comparator#readme"
+Issues = "https://github.com/gnueaj/Machine-Unlearning-Comparator/issues"
+Source = "https://github.com/gnueaj/Machine-Unlearning-Comparator"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
@@ -61,17 +60,12 @@ start = "uvicorn main:app --reload"
 [tool.hatch.envs.default.scripts]
 start = "uvicorn main:app --reload"
 
+[tool.hatch.build.targets.wheel] 
+packages = ["app"]
+
 [tool.coverage.run]
-source_pkgs = ["mu_vis", "tests"]
 branch = true
 parallel = true
-omit = [
-  "src/mu_vis/__about__.py",
-]
-
-[tool.coverage.paths]
-mu_vis = ["src/mu_vis", "*/mu-vis/src/mu_vis"]
-tests = ["tests", "*/mu-vis/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
