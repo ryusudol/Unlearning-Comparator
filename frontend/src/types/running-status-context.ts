@@ -1,15 +1,17 @@
-import { UnlearningStatus } from "./settings";
+import { UnlearningStatus } from "./experiments";
 
 export type UpdateStatusPayload = {
   status: UnlearningStatus;
   forgetClass: number;
+  progress: string;
+  elapsedTime: number;
+  completedSteps: number[];
 };
 
 export interface RunningStatus {
   isRunning: boolean;
   status: UnlearningStatus[];
   activeStep: number;
-  completedSteps: number[];
 }
 
 export interface RunningStatusContextType extends RunningStatus {

@@ -1,12 +1,5 @@
 import { useContext, useState, useMemo } from "react";
 
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { Experiments } from "../types/experiments-context";
-import { ExperimentsContext } from "../store/experiments-context";
-import { fetchAllExperimentsData } from "../utils/api/unlearning";
-import { Label } from "./UI/label";
-import Button from "./Button";
 import {
   LogoIcon,
   PlusIcon,
@@ -29,10 +22,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./UI/select";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { FORGET_CLASS_NAMES } from "../constants/common";
+import { ForgetClassContext } from "../store/forget-class-context";
+import { Experiments } from "../types/experiments-context";
+import { ExperimentsContext } from "../store/experiments-context";
+import { fetchAllExperimentsData } from "../utils/api/unlearning";
+import { Label } from "./UI/label";
+import Button from "./Button";
 
 export default function Header() {
   const {
-    forgetClass,
     selectedForgetClasses,
     saveForgetClass,
     addSelectedForgetClass,
@@ -41,11 +41,13 @@ export default function Header() {
   const { saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
 
+  const { forgetClass, forgetClassNumber } = useForgetClass();
+
   const unselectForgetClasses = useMemo(
     () =>
-      forgetClassNames.filter(
+      FORGET_CLASS_NAMES.filter(
         (item) =>
-          !selectedForgetClasses.includes(forgetClassNames.indexOf(item))
+          !selectedForgetClasses.includes(FORGET_CLASS_NAMES.indexOf(item))
       ),
     [selectedForgetClasses]
   );
@@ -53,7 +55,7 @@ export default function Header() {
   const [open, setOpen] = useState(() => selectedForgetClasses.length === 0);
 
   const fetchAndSaveExperiments = async (forgetClass: string) => {
-    const classIndex = forgetClassNames.indexOf(forgetClass);
+    const classIndex = FORGET_CLASS_NAMES.indexOf(forgetClass);
     setIsExperimentsLoading(true);
     try {
       const allData: Experiments = await fetchAllExperimentsData(classIndex);
@@ -80,22 +82,22 @@ export default function Header() {
     const firstSelectedForgetClass = selectedForgetClasses[0];
     const secondSelectedForgetClass = selectedForgetClasses[1];
     const targetSelectedForgetClassesIndex = selectedForgetClasses.indexOf(
-      forgetClassNames.indexOf(targetClass)
+      FORGET_CLASS_NAMES.indexOf(targetClass)
     );
 
     const willBeEmpty = selectedForgetClasses.length === 1;
 
     deleteSelectedForgetClass(targetClass);
 
-    if (targetClass === forgetClassNames[forgetClass as number]) {
+    if (targetClass === FORGET_CLASS_NAMES[forgetClassNumber]) {
       if (willBeEmpty) {
         saveForgetClass(undefined);
         setOpen(true);
       } else {
         const autoSelectedForgetClass =
           targetSelectedForgetClassesIndex === 0
-            ? forgetClassNames[secondSelectedForgetClass]
-            : forgetClassNames[firstSelectedForgetClass];
+            ? FORGET_CLASS_NAMES[secondSelectedForgetClass]
+            : FORGET_CLASS_NAMES[firstSelectedForgetClass];
         saveForgetClass(autoSelectedForgetClass);
         await fetchAndSaveExperiments(autoSelectedForgetClass);
       }
@@ -120,47 +122,44 @@ export default function Header() {
             </span>
           </div>
           <div className="flex items-center gap-1 relative -bottom-2.5">
-            {selectedForgetClasses.map((selectedForgetClass, idx) => (
-              <div key={idx} className="flex items-center relative">
-                <div
-                  className={
-                    "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t cursor-pointer transition " +
-                    (selectedForgetClass === forgetClass
-                      ? "bg-white text-black"
-                      : "text-white hover:bg-gray-800 relative bottom-[1px]")
-                  }
-                  onClick={() =>
-                    handleForgetClassChange(
-                      forgetClassNames[selectedForgetClass]
-                    )
-                  }
-                >
-                  <span
-                    className={`px-1 font-medium ${
-                      selectedForgetClass === forgetClass
-                        ? "text-black"
-                        : "text-[#64758B]"
-                    }`}
+            {selectedForgetClasses.map((selectedForgetClass, idx) => {
+              const isSelectedForgetClass = selectedForgetClass === forgetClass;
+              const forgetClassName = FORGET_CLASS_NAMES[selectedForgetClass];
+
+              return (
+                <div key={idx} className="flex items-center relative">
+                  <div
+                    className={
+                      "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t cursor-pointer transition " +
+                      (isSelectedForgetClass
+                        ? "bg-white text-black"
+                        : "text-white hover:bg-gray-800 relative bottom-[1px]")
+                    }
+                    onClick={() => handleForgetClassChange(forgetClassName)}
                   >
-                    Forget: {forgetClassNames[selectedForgetClass]}
-                  </span>
+                    <span
+                      className={`px-1 font-medium ${
+                        isSelectedForgetClass ? "text-black" : "text-[#64758B]"
+                      }`}
+                    >
+                      Forget: {forgetClassName}
+                    </span>
+                  </div>
+                  <MultiplicationSignIcon
+                    onClick={() => handleDeleteClick(forgetClassName)}
+                    className={
+                      "w-3.5 h-3.5 p-[1px] cursor-pointer rounded-full absolute right-2.5 bg-transparent transition " +
+                      (isSelectedForgetClass
+                        ? "text-gray-500 hover:bg-gray-300"
+                        : "text-gray-500 hover:bg-gray-700")
+                    }
+                  />
+                  {isSelectedForgetClass && (
+                    <div className="w-[calc(100%-19px)] h-0.5 absolute bottom-[1px] left-[10px] bg-black" />
+                  )}
                 </div>
-                <MultiplicationSignIcon
-                  onClick={() =>
-                    handleDeleteClick(forgetClassNames[selectedForgetClass])
-                  }
-                  className={
-                    "w-3.5 h-3.5 p-[1px] cursor-pointer rounded-full absolute right-2.5 bg-transparent transition " +
-                    (selectedForgetClass === forgetClass
-                      ? "text-gray-500 hover:bg-gray-300"
-                      : "text-gray-500 hover:bg-gray-700")
-                  }
-                />
-                {selectedForgetClass === forgetClass && (
-                  <div className="w-[calc(100%-19px)] h-0.5 absolute bottom-[1px] left-[10px] bg-black" />
-                )}
-              </div>
-            ))}
+              );
+            })}
             <Dialog
               open={open}
               onOpenChange={

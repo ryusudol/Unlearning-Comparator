@@ -1,5 +1,5 @@
 import { ExperimentData } from "../../types/data";
-import { TRAIN } from "../../views/Predictions";
+import { TRAIN } from "../../constants/common";
 
 export const getCkaData = (
   dataset: string,

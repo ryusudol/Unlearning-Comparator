@@ -1,6 +1,6 @@
 import { Label } from "./UI/label";
 import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
-import { TRAIN, TEST } from "../views/Predictions";
+import { TRAIN, TEST } from "../constants/common";
 
 interface Props {
   onValueChange: (value: string) => void;
@@ -8,8 +8,7 @@ interface Props {
 
 export default function DatasetModeSelector({ onValueChange }: Props) {
   return (
-    <div className="flex items-center relative right-4">
-      {/* <span className="text-xs font-light mr-2">Dataset:</span> */}
+    <div className="flex items-center relative right-4 bottom-0.5">
       <RadioGroup
         className="flex"
         defaultValue={TRAIN}

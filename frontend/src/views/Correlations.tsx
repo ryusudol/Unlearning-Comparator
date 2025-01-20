@@ -1,46 +1,36 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 
+import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
-import LineChart from "../components/LineChart";
+import LineChart from "../components/Correlations/LineChart";
 import DatasetModeSelector from "../components/DatasetModeSelector";
+import { useModelSelection } from "../hooks/useModelSelection";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { ViewProps } from "../types/common";
 import { Layers02Icon } from "../components/UI/icons";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { TRAIN } from "./Predictions";
+import { TRAIN } from "../constants/common";
 
-export default function Correlations({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { forgetClass } = useContext(ForgetClassContext);
+export default function Correlations({ width, height }: ViewProps) {
+  const { forgetClassExist } = useForgetClass();
+  const { areAllModelsSelected } = useModelSelection();
 
   const [dataset, setDataset] = useState(TRAIN);
 
-  const forgetClassExist = forgetClass !== undefined;
-  const allSelected = baseline !== "" && comparison !== "";
-
   return (
-    <section
-      style={{ width, height }}
-      className="p-1 flex flex-col border relative"
-    >
+    <View width={width} height={height}>
       <div className="flex justify-between">
         <Title
           Icon={<Layers02Icon />}
           title="Layer-Wise Correlations"
           customClass="bottom-[2px]"
         />
-        {forgetClassExist && allSelected && (
+        {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDataset} />
         )}
       </div>
       {forgetClassExist ? (
-        allSelected ? (
+        areAllModelsSelected ? (
           <LineChart dataset={dataset} />
         ) : (
           <Indicator about="BaselineComparison" />
@@ -48,6 +38,6 @@ export default function Correlations({
       ) : (
         <Indicator about="ForgetClass" />
       )}
-    </section>
+    </View>
   );
 }

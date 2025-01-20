@@ -1,31 +1,38 @@
-import { UnlearningStatus } from "../../types/settings";
+import { UnlearningStatus } from "../../types/experiments";
 
 const TO_FIXED_LENGTH = 3;
+const UMAP = "UMAP";
+const CKA = "CKA";
+const UNLEARNING = "Unlearning";
+const IDLE = "Idle";
 
 export const getProgressSteps = (
   status: UnlearningStatus,
-  completedSteps: number[],
   activeStep: number,
   umapProgress: number,
   ckaProgress: number
 ) => {
   const method = status && status.method ? status.method : "";
+  const progress = status.progress;
+  const currentUnlearnAccuracy = status.current_unlearn_accuracy;
+  const currentEpoch = status.current_epoch;
+  const totalEpochs = status.total_epochs;
+  const trainingAccuracy = status.p_training_accuracy;
+  const testAccuracy = status.p_test_accuracy;
+  const completedSteps = status.completed_steps;
 
   return [
     {
       step: 1,
       title: "Unlearn",
       description: `Method: **${method ? method : "-"}** | Epochs: **${
-        !completedSteps.includes(1)
-          ? "-"
-          : status.current_epoch + "/" + status.total_epochs
+        !completedSteps.includes(1) ? "-" : currentEpoch + "/" + totalEpochs
       }**\nUnlearning Accuracy: **${
         completedSteps.includes(1) &&
-        (status.current_epoch > 1 ||
-          (status.total_epochs === 1 && completedSteps.includes(2)))
-          ? status.current_unlearn_accuracy === 0
+        (currentEpoch > 1 || (totalEpochs === 1 && completedSteps.includes(2)))
+          ? currentUnlearnAccuracy === 0
             ? 0
-            : status.current_unlearn_accuracy.toFixed(TO_FIXED_LENGTH)
+            : currentUnlearnAccuracy.toFixed(TO_FIXED_LENGTH)
           : "-"
       }**`,
     },
@@ -34,16 +41,16 @@ export const getProgressSteps = (
       title: "Evaluate",
       description: `Training Accuracy: **${
         completedSteps.includes(3) ||
-        (completedSteps.includes(2) && status.progress.includes("Test"))
-          ? status.p_training_accuracy === 0
+        (completedSteps.includes(2) && progress.includes("Test"))
+          ? trainingAccuracy === 0
             ? 0
-            : status.p_training_accuracy.toFixed(TO_FIXED_LENGTH)
+            : trainingAccuracy.toFixed(TO_FIXED_LENGTH)
           : "-"
       }**\nTest Accuracy: **${
         completedSteps.includes(3)
-          ? status.p_test_accuracy === 0
+          ? testAccuracy === 0
             ? 0
-            : status.p_test_accuracy.toFixed(TO_FIXED_LENGTH)
+            : testAccuracy.toFixed(TO_FIXED_LENGTH)
           : "-"
       }**`,
     },
@@ -52,27 +59,24 @@ export const getProgressSteps = (
       title: "Analyze",
       description: `${
         (activeStep === 3 &&
-          (status.progress.includes("UMAP") ||
-            status.progress.includes("CKA"))) ||
+          (progress.includes(UMAP) || progress.includes(CKA))) ||
         (completedSteps.includes(3) &&
-          (status.progress === "Idle" || status.progress === "Unlearning"))
+          (progress === IDLE || progress === UNLEARNING))
           ? `Computing UMAP Embedding... **${
-              !status.progress.includes("UMAP") ? "100" : umapProgress
+              !progress.includes(UMAP) ? "100" : umapProgress
             }%**`
           : "Computing UMAP Embedding"
       }\n${
-        (activeStep === 3 && status.progress.includes("CKA")) ||
+        (activeStep === 3 && progress.includes(CKA)) ||
         (completedSteps.includes(3) &&
-          (status.progress === "Idle" || status.progress === "Unlearning"))
+          (progress === IDLE || progress === UNLEARNING))
           ? `Calculating CKA Similarity... **${
-              status.progress === "Idle" || status.progress === "Unlearning"
-                ? "100"
-                : ckaProgress
+              progress === IDLE || progress === UNLEARNING ? "100" : ckaProgress
             }%**`
           : "Calculating CKA Similarity"
       }\n${
         completedSteps.includes(3) &&
-        (status.progress === "Idle" || status.progress === "Unlearning")
+        (progress === IDLE || progress === UNLEARNING)
           ? `Done! Experiment ID: **${status.recent_id}**`
           : ""
       }`,

@@ -1,55 +1,38 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import * as d3 from "d3";
 
+import View from "../components/View";
 import Title from "../components/Title";
 import DatasetModeSelector from "../components/DatasetModeSelector";
-import BubbleChart from "../components/BubbleChart";
+import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { ForgetClassContext } from "../store/forget-class-context";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { useModelSelection } from "../hooks/useModelSelection";
+import { ViewProps } from "../types/common";
 import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
+import { TRAIN } from "../constants/common";
 
-export const TRAIN = "train";
-export const TEST = "test";
-export const BUBBLE = "bubble";
-export const LABEL_HEATMAP = "label-heatmap";
-export const CONFIDENCE_HEATMAP = "confidence-heatmap";
-
-export type ChartModeType = "bubble" | "label-heatmap" | "confidence-heatmap";
-
-export default function Predictions({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
-  const { forgetClass } = useContext(ForgetClassContext);
+export default function Predictions({ width, height }: ViewProps) {
+  const { areAllModelsSelected } = useModelSelection();
+  const { forgetClassExist } = useForgetClass();
 
   const [datasetMode, setDatasetMode] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
 
-  const forgetClassExist = forgetClass !== undefined;
-  const allSelected = baseline !== "" && comparison !== "";
-
   return (
-    <section
-      style={{ width, height }}
-      className="p-1 flex flex-col border transition-all z-10 relative"
-    >
+    <View width={width} height={height}>
       <div className="flex justify-between">
         <Title
           Icon={<Target02Icon />}
           title="Predictions"
           customClass="bottom-[2px] right-[1px]"
         />
-        {forgetClassExist && allSelected && (
+        {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDatasetMode} />
         )}
       </div>
       {forgetClassExist ? (
-        !allSelected ? (
+        !areAllModelsSelected ? (
           <Indicator about="BaselineComparison" />
         ) : (
           <div className="flex items-center relative ml-1.5 top-5">
@@ -73,11 +56,12 @@ export default function Predictions({
       ) : (
         <Indicator about="ForgetClass" />
       )}
-      {allSelected && forgetClassExist && <BubbleChartLegend />}
-    </section>
+      {areAllModelsSelected && forgetClassExist && <BubbleChartLegend />}
+    </View>
   );
 }
 
+//Components
 function BubbleChartLegend() {
   return (
     <div className="flex items-center absolute top-1.5 left-1/2 -translate-x-[50%] gap-11 text-[#666666]">
@@ -106,7 +90,7 @@ function BubbleChartLegend() {
   );
 }
 
-const ColorBar = () => {
+function ColorBar() {
   const steps = 10;
   const colors = Array.from({ length: steps }, (_, i) => {
     const percent = (i / (steps - 1)) * 100;
@@ -130,4 +114,4 @@ const ColorBar = () => {
       </div>
     </div>
   );
-};
+}
