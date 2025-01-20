@@ -7,6 +7,8 @@ import {
   useMemo,
 } from "react";
 
+import { EXPERIMENTS } from "../constants/storageKeys";
+import { EXPERIMENTS_ACTIONS } from "../constants/actions";
 import { ExperimentData } from "../types/data";
 import { BaselineComparisonContext } from "./baseline-comparison-context";
 import {
@@ -15,8 +17,6 @@ import {
   ContextType,
   Experiments,
 } from "../types/experiments-context";
-
-const EXPERIMENTS = "experiments";
 
 export const ExperimentsContext = createContext<ContextType>({
   experiments: {},
@@ -33,7 +33,7 @@ export const ExperimentsContext = createContext<ContextType>({
 
 function ExperimentsReducer(state: Context, action: Action): Context {
   switch (action.type) {
-    case "ADD_EXPERIMENT":
+    case EXPERIMENTS_ACTIONS.ADD_EXPERIMENT:
       const experiment = action.payload;
       const newExperiments = {
         ...state.experiments,
@@ -45,7 +45,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
       );
       return { ...state, experiments: newExperiments };
 
-    case "SAVE_EXPERIMENTS":
+    case EXPERIMENTS_ACTIONS.SAVE_EXPERIMENTS:
       const experiments = action.payload;
       sessionStorage.setItem(
         EXPERIMENTS,
@@ -53,7 +53,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
       );
       return { ...state, experiments };
 
-    case "RETRIEVE_EXPERIMENTS":
+    case EXPERIMENTS_ACTIONS.RETRIEVE_EXPERIMENTS:
       const savedExperimentsContext = sessionStorage.getItem(EXPERIMENTS);
       if (savedExperimentsContext) {
         const parsedExperimentsContext: Context = JSON.parse(
@@ -69,7 +69,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
         isExperimentLoading: false,
       };
 
-    case "DELETE_EXPERIMENT":
+    case EXPERIMENTS_ACTIONS.DELETE_EXPERIMENT:
       const id = action.payload;
       const { [id]: deletedExperiment, ...remainingExperiments } =
         state.experiments;
@@ -79,7 +79,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
       );
       return { ...state, experiments: remainingExperiments };
 
-    case "SET_IS_EXPERIMENTS_LOADING":
+    case EXPERIMENTS_ACTIONS.SET_IS_EXPERIMENTS_LOADING:
       return { ...state, isExperimentLoading: action.payload };
 
     default:
@@ -110,23 +110,29 @@ export default function ExperimentsContextProvider({
   }, [comparison, experimentsContext.experiments]);
 
   const handleAddExperiment = useCallback((experiment: ExperimentData) => {
-    dispatch({ type: "ADD_EXPERIMENT", payload: experiment });
+    dispatch({ type: EXPERIMENTS_ACTIONS.ADD_EXPERIMENT, payload: experiment });
   }, []);
 
   const handleSaveExperiments = useCallback((experiments: Experiments) => {
-    dispatch({ type: "SAVE_EXPERIMENTS", payload: experiments });
+    dispatch({
+      type: EXPERIMENTS_ACTIONS.SAVE_EXPERIMENTS,
+      payload: experiments,
+    });
   }, []);
 
   const handleRetrieveExperiments = useCallback(() => {
-    dispatch({ type: "RETRIEVE_EXPERIMENTS" });
+    dispatch({ type: EXPERIMENTS_ACTIONS.RETRIEVE_EXPERIMENTS });
   }, []);
 
   const handleDeleteExperiment = useCallback((id: string) => {
-    dispatch({ type: "DELETE_EXPERIMENT", payload: id });
+    dispatch({ type: EXPERIMENTS_ACTIONS.DELETE_EXPERIMENT, payload: id });
   }, []);
 
   const handleSetIsExperimentsLoading = useCallback((loading: boolean) => {
-    dispatch({ type: "SET_IS_EXPERIMENTS_LOADING", payload: loading });
+    dispatch({
+      type: EXPERIMENTS_ACTIONS.SET_IS_EXPERIMENTS_LOADING,
+      payload: loading,
+    });
   }, []);
 
   useEffect(() => {

@@ -1,47 +1,45 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 
+import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import { ForgetClassContext } from "../store/forget-class-context";
-import { Separator } from "../components/UI/separator";
-import { forgetClassNames } from "../constants/forgetClassNames";
-import { TABLEAU10 } from "../constants/tableau10";
 import {
   ChartScatterIcon,
   CircleIcon,
   MultiplicationSignIcon,
   DarkShieldIcon,
 } from "../components/UI/icons";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { ViewProps } from "../types/common";
+import { Separator } from "../components/UI/separator";
+import { FORGET_CLASS_NAMES } from "../constants/common";
+import { TABLEAU10 } from "../constants/colors";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 const HEIGHT = 635;
 
-export default function Core({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) {
-  const { forgetClass } = useContext(ForgetClassContext);
+export default function Core({ width, height }: ViewProps) {
+  const { forgetClassExist } = useForgetClass();
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
 
-  const forgetClassExist = forgetClass !== undefined;
+  const isEmbeddingMode = displayMode === EMBEDDINGS;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
-    if (id === EMBEDDINGS) setDisplayMode(EMBEDDINGS);
-    else setDisplayMode(ATTACK);
+
+    if (id === EMBEDDINGS) {
+      setDisplayMode(EMBEDDINGS);
+    } else {
+      setDisplayMode(ATTACK);
+    }
   };
 
-  const isEmbeddingMode = displayMode === EMBEDDINGS;
-
   return (
-    <section style={{ width, height }} className="p-1 border border-l-0">
+    <View width={width} height={height} className="border-l-0">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1 mb-0.5 relative right-1">
           <Title
@@ -84,10 +82,11 @@ export default function Core({
       ) : (
         <Indicator about="ForgetClass" />
       )}
-    </section>
+    </View>
   );
 }
 
+// Components
 function UnderLine() {
   return (
     <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
@@ -95,31 +94,33 @@ function UnderLine() {
 }
 
 function EmbeddingLegend() {
+  const { forgetClass } = useForgetClass();
+
   return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-[2px] text-sm z-10">
+    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-0.5 text-sm z-10">
       <div className="flex items-center mr-5">
         <span className="font-medium mr-2.5">Data Type</span>
-        <ul className="flex items-center gap-2.5">
+        <ul className="flex items-center gap-[9.2px]">
           <li className="flex items-center">
-            <CircleIcon className="w-2 h-2 mr-1.5 text-[#4f5562]" />
+            <CircleIcon className="w-2 h-2 mr-1 text-[#4f5562]" />
             <span>Remaining Data</span>
           </li>
           <li className="flex items-center">
-            <MultiplicationSignIcon className="text-[#4f5562] mr-1.5" />
+            <MultiplicationSignIcon className="text-[#4f5562] mr-0.5" />
             <span>Forgetting Target</span>
           </li>
         </ul>
       </div>
       <div className="flex items-center">
         <span className="font-medium mr-2.5">Prediction</span>
-        <ul className="flex items-center gap-2.5">
-          {forgetClassNames.map((name, idx) => (
+        <ul className="flex items-center gap-[9.2px]">
+          {FORGET_CLASS_NAMES.map((name, idx) => (
             <li key={idx} className="flex items-center">
               <div
                 style={{ backgroundColor: TABLEAU10[idx] }}
                 className="w-3.5 h-3.5 mr-1"
               />
-              <span>{name}</span>
+              <span>{forgetClass === idx ? name + " (X)" : name}</span>
             </li>
           ))}
         </ul>

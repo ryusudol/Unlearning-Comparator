@@ -1,6 +1,8 @@
 import { createContext, useReducer, useCallback, useEffect } from "react";
 
-import { UnlearningStatus } from "../types/settings";
+import { RUNNING_STATUS_ACTIONS } from "../constants/actions";
+import { RUNNING_STATUS } from "../constants/storageKeys";
+import { UnlearningStatus } from "../types/experiments";
 import {
   RunningStatus,
   RunningStatusContextType,
@@ -8,7 +10,6 @@ import {
   UpdateStatusPayload,
 } from "../types/running-status-context";
 
-const RUNNING_STATUS = "running-status";
 const initialStatus: UnlearningStatus = {
   is_unlearning: false,
   progress: "Idle",
@@ -23,13 +24,14 @@ const initialStatus: UnlearningStatus = {
   p_test_accuracy: 0,
   method: "",
   estimated_time_remaining: 0,
+  elapsed_time: 0,
+  completed_steps: [],
 };
 
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
   status: [],
   activeStep: 0,
-  completedSteps: [],
 
   updateIsRunning: () => {},
   initStatus: (forgetClass: number) => {},
@@ -43,7 +45,7 @@ function runningStatusReducer(
   action: Action
 ): RunningStatus {
   switch (action.type) {
-    case "UPDATE_IS_RUNNING":
+    case RUNNING_STATUS_ACTIONS.UPDATE_IS_RUNNING:
       const isRunning = action.payload;
       sessionStorage.setItem(
         RUNNING_STATUS,
@@ -51,7 +53,7 @@ function runningStatusReducer(
       );
       return { ...state, isRunning };
 
-    case "INIT_STATUS":
+    case RUNNING_STATUS_ACTIONS.INIT_STATUS:
       const forgetClass = action.payload;
       const newStatus = [...state.status];
       newStatus[forgetClass] = initialStatus;
@@ -63,7 +65,7 @@ function runningStatusReducer(
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(initializedStatus));
       return initializedStatus;
 
-    case "RETRIEVE_STATUS":
+    case RUNNING_STATUS_ACTIONS.RETRIEVE_STATUS:
       const savedStatus = sessionStorage.getItem(RUNNING_STATUS);
       if (savedStatus) {
         const parsedStatus: RunningStatus = JSON.parse(savedStatus);
@@ -72,40 +74,46 @@ function runningStatusReducer(
       }
       return state;
 
-    case "UPDATE_STATUS":
-      const { status, forgetClass: fgClass } = action.payload;
-      const progress =
-        status.is_unlearning && status.progress === "Idle"
-          ? "Unlearning"
-          : !status.is_unlearning
-          ? "Idle"
-          : status.progress;
-      let completedSteps: number[] = [];
+    case RUNNING_STATUS_ACTIONS.UPDATE_STATUS:
+      const {
+        status,
+        forgetClass: fgClass,
+        progress,
+        elapsedTime,
+        completedSteps: _completedSteps,
+      } = action.payload;
+
+      const currentStatus = state.status[fgClass];
+
+      const _newStatus: UnlearningStatus = {
+        ...status,
+        progress,
+        elapsed_time: elapsedTime,
+        completed_steps: _completedSteps,
+      };
+
+      const { elapsed_time: _current, ...currentStatusWithoutTime } =
+        currentStatus;
+      const { elapsed_time: _new, ...newStatusWithoutTime } = _newStatus;
+
       if (
-        (progress === "Unlearning" &&
-          status.current_epoch !== status.total_epochs) ||
-        (progress === "Unlearning" && status.is_unlearning)
+        JSON.stringify(currentStatusWithoutTime) ===
+        JSON.stringify(newStatusWithoutTime)
       ) {
-        completedSteps = [1];
-      } else if (progress.includes("Evaluating")) {
-        completedSteps = [1, 2];
-      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
-        completedSteps = [1, 2, 3];
-      } else {
-        completedSteps = [1, 2, 3];
+        return state;
       }
 
-      const updatedStatusArray = [...state.status];
-      updatedStatusArray[fgClass] = { ...status, progress };
+      const newStatusArray = [...state.status];
+      newStatusArray[fgClass] = _newStatus;
       const updatedStatus = {
         ...state,
-        status: updatedStatusArray,
-        completedSteps,
+        status: newStatusArray,
+        completedSteps: _completedSteps,
       };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
       return updatedStatus;
 
-    case "UPDATE_ACTIVE_STEP":
+    case RUNNING_STATUS_ACTIONS.UPDATE_ACTIVE_STEP:
       const step = action.payload;
       const updatedActiveStep = { ...state, activeStep: step };
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedActiveStep));
@@ -125,27 +133,35 @@ export default function RunningStatusContextProvider({
     isRunning: false,
     status: Array(10).fill(initialStatus),
     activeStep: 0,
-    completedSteps: [],
   });
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
-    dispatch({ type: "UPDATE_IS_RUNNING", payload: isRunning });
+    dispatch({
+      type: RUNNING_STATUS_ACTIONS.UPDATE_IS_RUNNING,
+      payload: isRunning,
+    });
   }, []);
 
   const handleInitStatus = useCallback((forgetClass: number) => {
-    dispatch({ type: "INIT_STATUS", payload: forgetClass });
+    dispatch({
+      type: RUNNING_STATUS_ACTIONS.INIT_STATUS,
+      payload: forgetClass,
+    });
   }, []);
 
   const handleRetrieveStatus = useCallback(() => {
-    dispatch({ type: "RETRIEVE_STATUS" });
+    dispatch({ type: RUNNING_STATUS_ACTIONS.RETRIEVE_STATUS });
   }, []);
 
   const handleUpdateStatus = useCallback((payload: UpdateStatusPayload) => {
-    dispatch({ type: "UPDATE_STATUS", payload });
+    dispatch({ type: RUNNING_STATUS_ACTIONS.UPDATE_STATUS, payload });
   }, []);
 
   const handleUpdateActiveStep = useCallback((step: number) => {
-    dispatch({ type: "UPDATE_ACTIVE_STEP", payload: step });
+    dispatch({
+      type: RUNNING_STATUS_ACTIONS.UPDATE_ACTIVE_STEP,
+      payload: step,
+    });
   }, []);
 
   useEffect(() => {
@@ -156,7 +172,6 @@ export default function RunningStatusContextProvider({
     isRunning: runningStatus.isRunning,
     status: runningStatus.status,
     activeStep: runningStatus.activeStep,
-    completedSteps: runningStatus.completedSteps,
 
     updateIsRunning: handleUpdateIsRunning,
     initStatus: handleInitStatus,

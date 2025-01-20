@@ -1,5 +1,5 @@
 import { API_URL } from "../../constants/common";
-import { UnlearningStatus } from "../../types/settings";
+import { UnlearningStatus } from "../../types/experiments";
 
 export async function fetchModelFiles(
   end: "trained_models" | "unlearned_models"
