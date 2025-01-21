@@ -30,7 +30,7 @@ const CONFIG = {
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
   ROBOTO_CONDENSED: "Roboto Condensed",
-  MARGIN: { top: 15, right: 22, bottom: 30, left: 58 },
+  MARGIN: { top: 15, right: 22, bottom: 30, left: 66 },
 } as const;
 
 interface Props {
