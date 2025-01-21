@@ -106,7 +106,7 @@ function EmbeddingLegend() {
             <span>Remaining Data</span>
           </li>
           <li className="flex items-center">
-            <FatMultiplicationSignIcon className="text-[#4f5562] mr-[5px]" />
+            <FatMultiplicationSignIcon className="text-[#4f5562] mr-1" />
             <span>Forgetting Target</span>
           </li>
         </ul>
