@@ -258,6 +258,27 @@ export const MultiplicationSignIcon = (
   </svg>
 );
 
+export const FatMultiplicationSignIcon = (
+  props: React.SVGProps<SVGSVGElement>
+) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    color={"#000000"}
+    fill={"none"}
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M16 12L21 7L17 3L12 8L7 3L3 7L8 12L3 17L7 21L12 16L17 21L21 17L16 12Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export const Target02Icon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
