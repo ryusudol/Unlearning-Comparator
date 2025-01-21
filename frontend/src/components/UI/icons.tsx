@@ -264,8 +264,8 @@ export const FatMultiplicationSignIcon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    width={16}
-    height={16}
+    width={12}
+    height={12}
     color={"#000000"}
     fill={"none"}
     {...props}
@@ -273,8 +273,11 @@ export const FatMultiplicationSignIcon = (
     <path
       fillRule="evenodd"
       clipRule="evenodd"
-      d="M16 12L21 7L17 3L12 8L7 3L3 7L8 12L3 17L7 21L12 16L17 21L21 17L16 12Z"
+      d="M18 12L24 6L18 0L12 6L6 0L0 6L6 12L0 18L6 24L12 18L18 24L24 18L18 12Z"
       fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="0.5"
+      style={{ filter: "brightness(0.85)" }}
     />
   </svg>
 );
