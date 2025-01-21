@@ -16,11 +16,11 @@ import { Prob } from "../../types/embeddings";
 const CONFIG = {
   LOW_OPACITY: 0.6,
   HIGH_OPACITY: 1,
-  TICK_PADDING: 6,
+  TICK_PADDING: 5,
   BAR_HEIGHT: 8,
   BAR_GAP: 0.5,
-  SELECT_CHART_FONT_SIZE: "8.5px",
-  UNSELECT_CHART_FONT_SIZE: "8px",
+  SELECT_CHART_FONT_SIZE: "9px",
+  UNSELECT_CHART_FONT_SIZE: "8.5px",
   PATTERN_SIZE: 3,
   LEGEND_X: 11,
   LEGEND_Y: 7,
@@ -30,7 +30,7 @@ const CONFIG = {
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
   ROBOTO_CONDENSED: "Roboto Condensed",
-  MARGIN: { top: 15, right: 22, bottom: 30, left: 66 },
+  MARGIN: { top: 13, right: 22, bottom: 28, left: 66 },
 } as const;
 
 interface Props {
