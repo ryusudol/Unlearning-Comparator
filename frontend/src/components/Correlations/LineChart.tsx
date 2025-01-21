@@ -5,6 +5,7 @@ import {
   LineChart,
   XAxis,
   YAxis,
+  Tooltip,
   TooltipProps,
 } from "recharts";
 
@@ -71,6 +72,8 @@ export default function _LineChart({ dataset }: { dataset: string }) {
 
   const ckaData = getCkaData(dataset, baselineExperiment, comparisonExperiment);
   const layers = ckaData.map((data) => data.layer);
+
+  const zoom = calculateZoom();
 
   return (
     <div className="relative bottom-1.5 right-3.5">
@@ -144,7 +147,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
               },
             }}
           />
-          <ChartTooltip
+          <Tooltip
             cursor={false}
             content={<CustomTooltip />}
             wrapperStyle={{ zIndex: CONFIG.zIndex }}
@@ -224,12 +227,10 @@ export default function _LineChart({ dataset }: { dataset: string }) {
 }
 
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
-  const zoom = calculateZoom();
-
   if (active && payload && payload.length) {
     return (
       <div
-        style={{ zoom, zIndex: CONFIG.zIndex }}
+        style={{ zIndex: CONFIG.zIndex }}
         className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl"
       >
         <div className="flex items-center leading-[18px]">
@@ -277,7 +278,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 
 function CustomLegend() {
   return (
-    <div className="absolute top-32 left-[72px] text-xs leading-4 z-10">
+    <div className="absolute top-[130px] left-[72px] text-xs leading-4 z-10">
       <div className="flex items-center py-0.5">
         <div className="relative">
           <CircleIcon

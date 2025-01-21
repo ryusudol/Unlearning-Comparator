@@ -8,7 +8,7 @@ import PrivacyAttack from "./PrivacyAttack";
 import {
   ChartScatterIcon,
   CircleIcon,
-  MultiplicationSignIcon,
+  FatMultiplicationSignIcon,
   DarkShieldIcon,
 } from "../components/UI/icons";
 import { useForgetClass } from "../hooks/useForgetClass";
@@ -102,11 +102,11 @@ function EmbeddingLegend() {
         <span className="font-medium mr-2.5">Data Type</span>
         <ul className="flex items-center gap-[9.2px]">
           <li className="flex items-center">
-            <CircleIcon className="w-2 h-2 mr-1 text-[#4f5562]" />
+            <CircleIcon className="w-[9px] h-[9px] mr-1 text-[#4f5562]" />
             <span>Remaining Data</span>
           </li>
           <li className="flex items-center">
-            <MultiplicationSignIcon className="text-[#4f5562] mr-0.5" />
+            <FatMultiplicationSignIcon className="text-[#4f5562] mr-1" />
             <span>Forgetting Target</span>
           </li>
         </ul>

@@ -38,11 +38,13 @@ export default function Unlearning() {
 
   const isCustom = method === CUSTOM;
 
-  const handleMethodSelection = (value: string) => {
-    setMethod(value);
-    if (value !== CUSTOM) {
+  const handleMethodSelection = (method: string) => {
+    setMethod(method);
+
+    if (method !== CUSTOM) {
       const { epochs, learning_rate, batch_size } =
-        getDefaultUnlearningConfig(value);
+        getDefaultUnlearningConfig(method);
+
       setEpochs([epochs]);
       setLearningRateIdx([learning_rate]);
       setBatchSizeLog([batch_size]);
@@ -58,9 +60,7 @@ export default function Unlearning() {
     e.preventDefault();
 
     const fd = new FormData(e.currentTarget);
-
     const config = Object.fromEntries(fd.entries());
-
     const runningConfig: UnlearningConfigurationData = {
       method: config.method as string,
       forget_class: forgetClassNumber,
