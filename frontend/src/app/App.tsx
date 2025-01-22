@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 
-import Header from "../components/Header";
+import Header from "../components/Header/Header";
 import Experiments from "../views/Experiments";
 import Progress from "../views/Progress";
 import Accuracies from "../views/Accuracies";
