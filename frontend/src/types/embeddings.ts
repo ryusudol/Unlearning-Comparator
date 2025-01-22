@@ -20,5 +20,6 @@ export type SelectedData = (number | Prob)[][];
 
 export type ViewModeType =
   | "All Instances"
+  | "Misclassification"
   | "Forgetting Target"
   | "Forgetting Failed";

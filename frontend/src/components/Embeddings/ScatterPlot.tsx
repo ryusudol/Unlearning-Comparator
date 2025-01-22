@@ -39,6 +39,7 @@ import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 
 const VIEW_MODES: ViewModeType[] = [
   "All Instances",
+  "Misclassification",
   "Forgetting Target",
   "Forgetting Failed",
 ];
@@ -59,8 +60,6 @@ const CONFIG = {
   DEFAULT_CROSS_OPACITY: 0.85,
   DEFAULT_CIRCLE_OPACITY: 0.6,
 } as const;
-const UNLEARNING_TARGET = "Forgetting Target";
-const UNLEARNING_FAILED = "Forgetting Failed";
 
 interface Props {
   mode: Mode;
@@ -412,11 +411,18 @@ const ScatterPlot = forwardRef(
 
     const shouldLowerOpacity = useCallback(
       (d: (number | Prob)[]) => {
-        const dataCondition =
-          d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
-        const classCondition =
-          d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
-        return dataCondition || classCondition;
+        const isForgettingData = d[2] === forgetClass;
+        const isRemainData = !isForgettingData;
+
+        if (viewMode === VIEW_MODES[1] /* Misclassification */) {
+          const isMisclassified = d[2] !== d[3];
+          return !isMisclassified;
+        } else if (viewMode === VIEW_MODES[2] /* Forgetting Target */) {
+          return isRemainData;
+        } else if (viewMode === VIEW_MODES[3] /* Forgetting Failed */) {
+          const isForgettingSuccess = isForgettingData && d[3] !== forgetClass;
+          return isRemainData || isForgettingSuccess;
+        }
       },
       [forgetClass, viewMode]
     );
