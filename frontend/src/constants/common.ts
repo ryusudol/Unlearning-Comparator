@@ -1,5 +1,8 @@
 export const API_URL = "http://localhost:8000";
 
+export const DATASETS = ["CIFAR-10", "Fashion-MNIST"];
+export const NEURAL_NETWORK_MODELS = ["ResNet18", "ViT16/Base"];
+
 export const TRAIN = "train";
 export const TEST = "test";
 
