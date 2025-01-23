@@ -12,6 +12,7 @@ import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
+import ViewModeSelector from "./ViewModeSelector";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
@@ -22,27 +23,16 @@ import {
   HoverInstance,
   Prob,
   ViewModeType,
+  SvgElementsRefType,
 } from "../../types/embeddings";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../UI/select";
 import EmbeddingTooltip from "./EmbeddingTooltip";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
+import { VIEW_MODES } from "../../constants/embeddings";
 
-const VIEW_MODES: ViewModeType[] = [
-  "All Instances",
-  "Misclassification",
-  "Forgetting Target",
-  "Forgetting Failed",
-];
 const CONFIG = {
   WIDTH: 630,
   HEIGHT: 630,
@@ -84,23 +74,7 @@ const ScatterPlot = forwardRef(
     const tooltipRef = useRef<HTMLDivElement | null>(null);
     const rootRef = useRef<Root | null>(null);
     const fetchControllerRef = useRef<AbortController | null>(null);
-    const svgElements = useRef<{
-      svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;
-      gMain: d3.Selection<SVGGElement, unknown, null, undefined> | null;
-      gDot: d3.Selection<SVGGElement, unknown, null, undefined> | null;
-      circles: d3.Selection<
-        SVGCircleElement,
-        (number | Prob)[],
-        SVGGElement,
-        undefined
-      > | null;
-      crosses: d3.Selection<
-        SVGPathElement,
-        (number | Prob)[],
-        SVGGElement,
-        undefined
-      > | null;
-    }>({
+    const svgElements = useRef<SvgElementsRefType>({
       svg: null,
       gMain: null,
       gDot: null,
@@ -821,7 +795,7 @@ const ScatterPlot = forwardRef(
             />
             <div className="flex items-center absolute z-10 right-0 top-6">
               <span className="mr-1.5 text-sm">View:</span>
-              <ViewModeSelect viewMode={viewMode} setViewMode={setViewMode} />
+              <ViewModeSelector viewMode={viewMode} setViewMode={setViewMode} />
             </div>
           </div>
         )}
@@ -855,31 +829,3 @@ const ScatterPlot = forwardRef(
 );
 
 export default React.memo(ScatterPlot);
-
-interface ViewModeSelectorProps {
-  viewMode: ViewModeType;
-  setViewMode: (val: ViewModeType) => void;
-}
-
-const ViewModeSelect = React.memo(
-  ({ viewMode, setViewMode }: ViewModeSelectorProps) => {
-    return (
-      <Select
-        value={viewMode}
-        defaultValue={VIEW_MODES[0]}
-        onValueChange={(value: ViewModeType) => setViewMode(value)}
-      >
-        <SelectTrigger className="w-36 h-6">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {VIEW_MODES.map((viewMode, idx) => (
-            <SelectItem key={idx} value={viewMode}>
-              {viewMode}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  }
-);

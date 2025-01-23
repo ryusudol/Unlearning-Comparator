@@ -23,3 +23,21 @@ export type ViewModeType =
   | "Misclassification"
   | "Forgetting Target"
   | "Forgetting Failed";
+
+export type SvgElementsRefType = {
+  svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;
+  gMain: d3.Selection<SVGGElement, unknown, null, undefined> | null;
+  gDot: d3.Selection<SVGGElement, unknown, null, undefined> | null;
+  circles: d3.Selection<
+    SVGCircleElement,
+    (number | Prob)[],
+    SVGGElement,
+    undefined
+  > | null;
+  crosses: d3.Selection<
+    SVGPathElement,
+    (number | Prob)[],
+    SVGGElement,
+    undefined
+  > | null;
+};
