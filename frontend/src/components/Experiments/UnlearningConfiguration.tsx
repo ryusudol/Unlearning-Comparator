@@ -1,15 +1,7 @@
 import React, { useContext, useState } from "react";
 
-import Button from "../Button";
-import Slider from "./Slider";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { Input } from "../UI/input";
-import { Label } from "../UI/label";
-import { HyperparametersIcon, EraserIcon, PlusIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../store/running-status-context";
-import { UNLEARNING_METHODS, LEARNING_RATE } from "../../constants/experiments";
-import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
-import { UnlearningConfigurationData } from "../../types/experiments";
+import Button from "../CustomButton";
+import HyperparameterSlider from "./HyperparameterSlider";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
@@ -21,16 +13,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../UI/select";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { Input } from "../UI/input";
+import { Label } from "../UI/label";
+import { HyperparametersIcon, EraserIcon, PlusIcon } from "../UI/icons";
+import { RunningStatusContext } from "../../store/running-status-context";
+import { UNLEARNING_METHODS, LEARNING_RATE } from "../../constants/experiments";
+import { COLORS } from "../../constants/colors";
+import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
+import { UnlearningConfigurationData } from "../../types/experiments";
 
 const CUSTOM = "custom";
 
-export default function Unlearning() {
+export default function UnlearningConfiguration() {
   const { updateIsRunning, initStatus, updateActiveStep } =
     useContext(RunningStatusContext);
 
   const { forgetClassNumber } = useForgetClass();
 
   const [epochs, setEpochs] = useState([10]);
+
   const [learningRateIdx, setLearningRateIdx] = useState([6]);
   const [batchSizeLog, setBatchSizeLog] = useState([6]);
   const [method, setMethod] = useState("ft");
@@ -90,7 +92,7 @@ export default function Unlearning() {
         <div className="flex items-center mb-1">
           <EraserIcon className="w-4 h-4 mr-1 scale-110" />
           <Label className="text-base text-nowrap" htmlFor="method">
-            Method
+            Unlearning Method
           </Label>
         </div>
         <Select
@@ -143,9 +145,9 @@ export default function Unlearning() {
             <HyperparametersIcon className="w-3.5 ml-[1px] mr-[5px]" />
             <p>Hyperparameters</p>
           </div>
-          <div className="ml-10 grid grid-cols-[auto,1fr] grid-rows-3 gap-y-2">
+          <div className="ml-10 grid grid-cols-[auto,1fr,auto] grid-rows-3 gap-y-2">
             <span className="text-sm">Epochs</span>
-            <Slider
+            <HyperparameterSlider
               name="epochs"
               value={epochs}
               setValue={setEpochs}
@@ -153,8 +155,14 @@ export default function Unlearning() {
               max={20}
               step={1}
             />
+            <div className="flex items-center">
+              <PlusIcon
+                className="w-2 h-2 cursor-pointer ml-1.5"
+                color={COLORS.BUTTON_BG_COLOR}
+              />
+            </div>
             <span className="text-sm">Learning Rate</span>
-            <Slider
+            <HyperparameterSlider
               name="learning_rate"
               value={learningRateIdx}
               setValue={setLearningRateIdx}
@@ -163,8 +171,14 @@ export default function Unlearning() {
               step={1}
               displayValue={`${LEARNING_RATE[learningRateIdx[0]]}`}
             />
+            <div className="flex items-center">
+              <PlusIcon
+                className="w-2 h-2 cursor-pointer ml-1.5"
+                color={COLORS.BUTTON_BG_COLOR}
+              />
+            </div>
             <span className="text-sm">Batch Size</span>
-            <Slider
+            <HyperparameterSlider
               name="batch_size"
               setValue={setBatchSizeLog}
               value={batchSizeLog}
@@ -173,6 +187,12 @@ export default function Unlearning() {
               step={1}
               displayValue={Math.pow(2, batchSizeLog[0])}
             />
+            <div className="flex items-center">
+              <PlusIcon
+                className="w-2 h-2 cursor-pointer ml-1.5"
+                color={COLORS.BUTTON_BG_COLOR}
+              />
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useContext, useMemo, useEffect, useState } from "react";
+import { useContext, useState, useMemo, useEffect } from "react";
 
 import {
   Dialog,
@@ -21,26 +21,67 @@ import {
   DATASETS,
   NEURAL_NETWORK_MODELS,
 } from "../../constants/common";
-import { DatasetContext } from "../../store/dataset-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { NeuralNetworkModelContext } from "../../store/neural-network-model-context";
-import { Label } from "../UI/label";
 import { PlusIcon } from "../UI/icons";
+import { Experiments } from "../../types/experiments-context";
+import { ForgetClassContext } from "../../store/forget-class-context";
+import { ExperimentsContext } from "../../store/experiments-context";
+import { DatasetContext } from "../../store/dataset-context";
+import { NeuralNetworkModelContext } from "../../store/neural-network-model-context";
+import { fetchAllExperimentsData } from "../../utils/api/unlearning";
+import { Label } from "../UI/label";
+import ForgetClassTab from "./ForgetClassTab";
 import Button from "../CustomButton";
 
-interface Props {
+export default function ForgetClassTabs() {
+  const { selectedForgetClasses } = useContext(ForgetClassContext);
+  const { saveExperiments, setIsExperimentsLoading } =
+    useContext(ExperimentsContext);
+
+  const hasNoSelectedForgetClass = selectedForgetClasses.length === 0;
+
+  const [open, setOpen] = useState(hasNoSelectedForgetClass);
+
+  const fetchAndSaveExperiments = async (forgetClass: string) => {
+    const classIndex = FORGET_CLASS_NAMES.indexOf(forgetClass);
+    setIsExperimentsLoading(true);
+    try {
+      const allData: Experiments = await fetchAllExperimentsData(classIndex);
+      if ("detail" in allData) saveExperiments({});
+      else saveExperiments(allData);
+    } finally {
+      setIsExperimentsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1 relative -bottom-2.5">
+      <ForgetClassTab
+        setOpen={setOpen}
+        fetchAndSaveExperiments={fetchAndSaveExperiments}
+      />
+      <ForgetClassTabPlusButton
+        open={open}
+        setOpen={setOpen}
+        fetchAndSaveExperiments={fetchAndSaveExperiments}
+        hasNoSelectedForgetClass={hasNoSelectedForgetClass}
+      />
+    </div>
+  );
+}
+
+interface HeaderModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   fetchAndSaveExperiments: (forgetClass: string) => Promise<void>;
   hasNoSelectedForgetClass: boolean;
 }
 
-export default function ForgetClassTabPlusButton({
+function ForgetClassTabPlusButton({
   open,
   setOpen,
   fetchAndSaveExperiments,
   hasNoSelectedForgetClass,
-}: Props) {
+}: HeaderModalProps) {
   const { addSelectedForgetClass, saveForgetClass, selectedForgetClasses } =
     useContext(ForgetClassContext);
   const { saveDataset } = useContext(DatasetContext);
@@ -55,6 +96,10 @@ export default function ForgetClassTabPlusButton({
     [selectedForgetClasses]
   );
 
+  useEffect(() => {
+    setSelectedForgetClass(unselectForgetClasses[0]);
+  }, [unselectForgetClasses]);
+
   const [selectedForgetClass, setSelectedForgetClass] = useState(
     unselectForgetClasses[0]
   );
@@ -62,10 +107,6 @@ export default function ForgetClassTabPlusButton({
   const [selectedNeuralNetworkModel, setSelectedNeuralNetworkModel] = useState(
     NEURAL_NETWORK_MODELS[0]
   );
-
-  useEffect(() => {
-    setSelectedForgetClass(unselectForgetClasses[0]);
-  }, [unselectForgetClasses]);
 
   const handleButtonClick = async () => {
     addSelectedForgetClass(selectedForgetClass);

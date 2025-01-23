@@ -10,7 +10,7 @@ interface Props {
   displayValue?: number | string;
 }
 
-export default function MySlider({
+export default function HyperparameterSlider({
   name,
   value,
   setValue,

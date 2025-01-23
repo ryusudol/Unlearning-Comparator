@@ -1,5 +1,7 @@
 import React from "react";
+
 import { Button } from "./UI/button";
+import { COLORS } from "../constants/colors";
 
 interface Props {
   content: string | React.ReactNode;
@@ -8,11 +10,16 @@ interface Props {
   className?: string;
 }
 
-export default function MyButton({ onClick, content, type, className }: Props) {
+export default function CustomButton({
+  onClick,
+  content,
+  type,
+  className,
+}: Props) {
   return (
     <Button
       type={type ?? "submit"}
-      className={`bg-[#585858] hover:bg-[#696969] h-7 ${className}`}
+      className={`bg-[${COLORS.BUTTON_BG_COLOR}] hover:bg-[${COLORS.HOVERED_BUTTON_BG_COLOR}] h-7 ${className}`}
       onClick={onClick}
     >
       {content}

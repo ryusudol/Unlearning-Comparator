@@ -7,13 +7,6 @@ export interface UnlearningConfigurationData {
   batch_size: number;
 }
 
-export interface DefenseConfigurationData {
-  method: string;
-  param1: string;
-  param2: number;
-  param3: number;
-}
-
 // Status
 export interface ClassAccuracies {
   [key: string]: number;
@@ -35,20 +28,6 @@ export interface UnlearningStatus {
   estimated_time_remaining: number;
   elapsed_time: number;
   completed_steps: number[];
-}
-
-// Temporarily created
-export interface DefenseStatus {
-  is_defensing: boolean;
-  progress: number;
-  current_epoch: number;
-  total_epochs: number;
-  current_loss: number;
-  best_loss: number;
-  current_accuracy: number;
-  best_accuracy: number;
-  estimated_time_remaining: number | undefined;
-  forget_class: number;
 }
 
 // others
