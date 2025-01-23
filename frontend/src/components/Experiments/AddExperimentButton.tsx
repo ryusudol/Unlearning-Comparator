@@ -1,53 +1,38 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
 } from "../UI/dialog";
-import Unlearning from "./Unlearning";
-import Defense from "./Defense";
-import Button from "../Button";
+import UnlearningConfiguration from "./UnlearningConfiguration";
+import CustomButton from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
-
-type ModeType = "unlearning" | "defense";
-
-const UNLEARNING = "unlearning";
-const DEFENSE = "defense";
 
 export default function AddExperimentButton() {
   const { isRunning } = useContext(RunningStatusContext);
 
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<ModeType>(UNLEARNING);
 
   useEffect(() => {
     if (isRunning) setOpen(false);
   }, [isRunning]);
 
-  const isUnlearning = mode === UNLEARNING;
+  const handleOpenChange = (value: boolean) => {
+    setOpen(value);
+  };
 
   const handleAddExpClick = () => {
     setOpen(true);
   };
 
-  const handleExperimentModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
-    setMode(e.currentTarget.id as ModeType);
-  };
-
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(value: boolean) => {
-        setOpen(value);
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger disabled={isRunning}>
-        <Button
+        <CustomButton
           onClick={handleAddExpClick}
           content={
             <>
@@ -65,42 +50,11 @@ export default function AddExperimentButton() {
           }`}
         />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px] p-4">
-        <DialogHeader className="hidden">
-          <DialogTitle>Run</DialogTitle>
-          <DialogDescription>Running Configuration</DialogDescription>
+      <DialogContent className="max-w-[400px] p-4">
+        <DialogHeader className="">
+          <DialogTitle>Experiment</DialogTitle>
         </DialogHeader>
-        <div className="w-full flex items-center mt-2">
-          <div
-            id={UNLEARNING}
-            onClick={handleExperimentModeChange}
-            className={`w-full h-8 relative flex items-center cursor-pointer ${
-              !isUnlearning && "text-gray-400"
-            }`}
-          >
-            <button className="font-semibold w-full">Unlearning</button>
-            <div
-              className={`absolute w-full h-0.5 bg-black bottom-0 ${
-                !isUnlearning && "bg-gray-400 h-[1px]"
-              }`}
-            />
-          </div>
-          <div
-            id={DEFENSE}
-            onClick={handleExperimentModeChange}
-            className={`w-full h-8 relative flex items-center cursor-pointer ${
-              isUnlearning && "text-gray-400"
-            }`}
-          >
-            <button className="font-semibold w-full">Defense</button>
-            <div
-              className={`absolute w-full h-0.5 bg-black bottom-0 ${
-                isUnlearning && "bg-gray-400 h-[1px]"
-              }`}
-            />
-          </div>
-        </div>
-        {isUnlearning ? <Unlearning /> : <Defense />}
+        <UnlearningConfiguration />
       </DialogContent>
     </Dialog>
   );
