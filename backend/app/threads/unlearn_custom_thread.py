@@ -74,6 +74,13 @@ class UnlearningCustomThread(threading.Thread):
                 print(f"    Predicted as {j}: {distribution[i][j]:.3f}")
     
     async def async_run(self):
+        def print_memory_usage(step_name):
+            allocated = torch.cuda.memory_allocated() / 1024**2  # MB 단위로 변환
+            max_allocated = torch.cuda.max_memory_allocated() / 1024**2
+            print(f"\n[{step_name}] GPU Memory Usage:")
+            print(f"  Currently allocated: {allocated:.2f} MB")
+            print(f"  Maximum allocated: {max_allocated:.2f} MB\n")
+
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
         self.status.progress = "Starting Inference"
         self.status.method = "Custom"
@@ -114,6 +121,7 @@ class UnlearningCustomThread(threading.Thread):
             device=self.device,
             forget_class=self.forget_class
         )
+        print_memory_usage("After Train Evaluation")
 
         # Update training evaluation status for remain classes only
         self.status.p_training_loss = train_loss
@@ -156,6 +164,7 @@ class UnlearningCustomThread(threading.Thread):
             device=self.device,
             forget_class=self.forget_class
         )
+        print_memory_usage("After Test Evaluation")
 
         # Update test evaluation status for remain classes only
         self.status.p_test_loss = test_loss
@@ -192,8 +201,9 @@ class UnlearningCustomThread(threading.Thread):
             data_loader=umap_subset_loader,
             device=self.device,
         )
-        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
-
+        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds") 
+        print_memory_usage("After Computing Activations")
+    
         # UMAP embedding computation
         print("Computing UMAP embedding")
         forget_labels = torch.tensor([label == self.forget_class for _, label in umap_subset])
@@ -204,6 +214,7 @@ class UnlearningCustomThread(threading.Thread):
             forget_labels=forget_labels
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
+        print_memory_usage("After UMAP Computation")
 
         # Detailed results preparation
         detailed_results = []
@@ -256,6 +267,7 @@ class UnlearningCustomThread(threading.Thread):
                 device=self.device
             )
             print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
+            print_memory_usage("After CKA Calculation")
 
         # Prepare results dictionary
         results = {
@@ -263,10 +275,10 @@ class UnlearningCustomThread(threading.Thread):
             "fc": "N/A" if self.is_training_eval else self.forget_class,
             "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
             "init": "N/A",
-            "method": "N/A",
-            "epochs": 200,
-            "BS": 128,
-            "LR": 0.1,
+            "method": "Custom",
+            "epochs": "N/A",
+            "BS": "N/A",
+            "LR": "N/A",
             "UA": "N/A" if self.is_training_eval else round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),
