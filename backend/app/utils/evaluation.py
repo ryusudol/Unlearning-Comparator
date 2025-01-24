@@ -362,11 +362,11 @@ async def calculate_cka_similarity(
         other_indices = (targets != forget_class).nonzero(as_tuple=True)[0]
 
         if is_train:
-            forget_samples = len(forget_indices) // 10
-            other_samples = len(other_indices) // 10
+            forget_samples = len(forget_indices) // 5
+            other_samples = len(other_indices) // 5
         else:
-            forget_samples = len(forget_indices) // 2  
-            other_samples = len(other_indices) // 2
+            forget_samples = len(forget_indices)  
+            other_samples = len(other_indices)
 
         forget_sampled = forget_indices[torch.randperm(len(forget_indices))[:forget_samples]]
         other_sampled = other_indices[torch.randperm(len(other_indices))[:other_samples]]
