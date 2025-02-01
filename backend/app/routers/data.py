@@ -45,6 +45,29 @@ async def get_all_json_files(forget_class: str):
     
     return all_data
 
+@router.get("/data/{forget_class}/all_weights_name")
+async def get_all_weights_name(forget_class: str):
+    """
+    Retrieve all existing weight file names for the provided forget_class.
+    It looks in the 'unlearned_models/{forget_class}' directory for .pth files.
+    """
+    model_dir = os.path.join('unlearned_models', forget_class)
+    
+    if not os.path.exists(model_dir):
+        raise HTTPException(status_code=404, detail=f"Directory for {forget_class} not found")
+    
+    # List all .pth files
+    weight_files = [f for f in os.listdir(model_dir) if f.endswith('.pth')]
+    
+    if not weight_files:
+        raise HTTPException(status_code=404, detail=f"No weight files found in {forget_class}")
+    
+    # Sort the file names alphabetically
+    weight_files.sort()
+    
+    return weight_files
+
+
 @router.get("/data/{forget_class}/{filename}/weights")
 async def get_model_file(forget_class: str, filename: str):
     if not filename.endswith('.pth'):
@@ -134,4 +157,5 @@ async def get_trained_model():
         media_type='application/octet-stream',
         filename='0000.pth'
     )
+
 

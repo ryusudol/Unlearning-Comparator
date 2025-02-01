@@ -11,3 +11,5 @@ Unlearning-inversion-attacks/
 d3ex/
 data/
 attack/
+attack_exp/
+.python-version
