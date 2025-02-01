@@ -388,14 +388,14 @@ const ScatterPlot = forwardRef(
         const isForgettingData = d[2] === forgetClass;
         const isRemainData = !isForgettingData;
 
-        if (viewMode === VIEW_MODES[1] /* Misclassification */) {
-          const isMisclassified = isRemainData && d[2] !== d[3];
-          return !isMisclassified;
-        } else if (viewMode === VIEW_MODES[2] /* Forgetting Target */) {
+        if (viewMode === VIEW_MODES[1] /* Forgetting Target */) {
           return isRemainData;
-        } else if (viewMode === VIEW_MODES[3] /* Forgetting Failed */) {
+        } else if (viewMode === VIEW_MODES[2] /* Forgetting Failed */) {
           const isForgettingSuccess = isForgettingData && d[3] !== forgetClass;
           return isRemainData || isForgettingSuccess;
+        } else if (viewMode === VIEW_MODES[3] /* Misclassification */) {
+          const isMisclassified = isRemainData && d[2] !== d[3];
+          return !isMisclassified;
         }
       },
       [forgetClass, viewMode]
