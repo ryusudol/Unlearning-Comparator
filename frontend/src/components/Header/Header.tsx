@@ -15,7 +15,9 @@ import {
 
 export default function Header() {
   const { dataset, saveDataset } = useContext(DatasetContext);
-  const { neuralNetworkModel } = useContext(NeuralNetworkModelContext);
+  const { neuralNetworkModel, saveNeuralNetworkModel } = useContext(
+    NeuralNetworkModelContext
+  );
 
   const handleGithubIconClick = () => {
     window.open(
@@ -26,6 +28,10 @@ export default function Header() {
 
   const handleDatasetChange = (dataset: string) => {
     saveDataset(dataset);
+  };
+
+  const handleNeuralNetworkModelChange = (model: string) => {
+    saveNeuralNetworkModel(model);
   };
 
   return (
@@ -69,7 +75,7 @@ export default function Header() {
           <span className="text-[10px] text-gray-300">Model</span>
           <Select
             defaultValue={neuralNetworkModel}
-            onValueChange={handleDatasetChange}
+            onValueChange={handleNeuralNetworkModelChange}
             name="neuralNetworkModel"
           >
             <SelectTrigger className="h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
