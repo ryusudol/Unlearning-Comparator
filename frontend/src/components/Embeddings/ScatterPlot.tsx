@@ -49,6 +49,7 @@ const CONFIG = {
   TOOLTIP_Y_SIZE: 274,
   DEFAULT_CROSS_OPACITY: 0.85,
   DEFAULT_CIRCLE_OPACITY: 0.6,
+  MISCLASSIFICATION_CIRCLE_OPACITY: 0.85,
 } as const;
 
 interface Props {
@@ -388,14 +389,14 @@ const ScatterPlot = forwardRef(
         const isForgettingData = d[2] === forgetClass;
         const isRemainData = !isForgettingData;
 
-        if (viewMode === VIEW_MODES[1] /* Misclassification */) {
-          const isMisclassified = d[2] !== d[3];
-          return !isMisclassified;
-        } else if (viewMode === VIEW_MODES[2] /* Forgetting Target */) {
+        if (viewMode === VIEW_MODES[1] /* Forgetting Target */) {
           return isRemainData;
-        } else if (viewMode === VIEW_MODES[3] /* Forgetting Failed */) {
+        } else if (viewMode === VIEW_MODES[2] /* Forgetting Failed */) {
           const isForgettingSuccess = isForgettingData && d[3] !== forgetClass;
           return isRemainData || isForgettingSuccess;
+        } else if (viewMode === VIEW_MODES[3] /* Misclassification */) {
+          const isMisclassified = isRemainData && d[2] !== d[3];
+          return !isMisclassified;
         }
       },
       [forgetClass, viewMode]
@@ -417,6 +418,8 @@ const ScatterPlot = forwardRef(
               "opacity",
               shouldLowerOpacity(d)
                 ? CONFIG.LOWERED_OPACITY
+                : viewMode === VIEW_MODES[3]
+                ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
         } else {
@@ -433,7 +436,7 @@ const ScatterPlot = forwardRef(
             );
         }
       },
-      [mode, onHover, shouldLowerOpacity, z]
+      [mode, onHover, shouldLowerOpacity, viewMode, z]
     );
 
     const transformedData = useMemo(() => {
@@ -490,7 +493,13 @@ const ScatterPlot = forwardRef(
         .attr("r", CONFIG.DOT_SIZE / currentTransform.k)
         .attr("fill", (d) => z(d[3] as number))
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY)
+        .style("opacity", (d) =>
+          shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : viewMode === VIEW_MODES[3]
+            ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+            : CONFIG.DEFAULT_CIRCLE_OPACITY
+        )
         .style("vector-effect", "non-scaling-stroke")
         .each(function (d) {
           elementMapRef.current.set(d[4] as number, this);
@@ -540,13 +549,16 @@ const ScatterPlot = forwardRef(
           .on("mouseleave", handleMouseLeave);
       }
     }, [
-      transformedData,
-      x,
-      y,
-      z,
       handleInstanceClick,
       handleMouseEnter,
       handleMouseLeave,
+      shouldLowerOpacity,
+      transformedData.forgetClassData,
+      transformedData.normalData,
+      viewMode,
+      x,
+      y,
+      z,
     ]);
 
     useEffect(() => {
@@ -636,7 +648,9 @@ const ScatterPlot = forwardRef(
             shouldLowerOpacity(d)
               ? CONFIG.LOWERED_OPACITY
               : isCircle
-              ? CONFIG.DEFAULT_CIRCLE_OPACITY
+              ? viewMode === VIEW_MODES[3]
+                ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+                : CONFIG.DEFAULT_CIRCLE_OPACITY
               : CONFIG.DEFAULT_CROSS_OPACITY
           )
           .style("pointer-events", (d: any) =>
@@ -661,7 +675,7 @@ const ScatterPlot = forwardRef(
       if (svgElements.current.crosses) {
         updateOpacity(svgElements.current.crosses);
       }
-    }, [shouldLowerOpacity, x, y]);
+    }, [shouldLowerOpacity, viewMode, x, y]);
 
     useEffect(() => {
       if (!hoveredInstance) return;

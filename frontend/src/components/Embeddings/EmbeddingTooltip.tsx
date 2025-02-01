@@ -19,6 +19,7 @@ const CONFIG = {
   TICK_PADDING: 5,
   BAR_HEIGHT: 8,
   BAR_GAP: 0.5,
+  BAR_STROKE_WIDTH: 1,
   SELECT_CHART_FONT_SIZE: "9px",
   UNSELECT_CHART_FONT_SIZE: "8.5px",
   PATTERN_SIZE: 3,
@@ -227,7 +228,7 @@ export default React.memo(function EmbeddingTooltip({
             isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
           )
           .attr("stroke", isBaseline ? COLORS.BLACK : "none")
-          .attr("stroke-width", isBaseline ? 1 : 0);
+          .attr("stroke-width", isBaseline ? CONFIG.BAR_STROKE_WIDTH : 0);
 
         g.append("text")
           .attr("x", CONFIG.MARGIN.left + barWidth + 4)
@@ -254,7 +255,8 @@ export default React.memo(function EmbeddingTooltip({
         const y =
           (yScale(FORGET_CLASS_NAMES[d.class]) ?? 0) +
           CONFIG.BAR_HEIGHT +
-          CONFIG.BAR_GAP;
+          CONFIG.BAR_GAP +
+          0.5;
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -267,7 +269,7 @@ export default React.memo(function EmbeddingTooltip({
             !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
           )
           .attr("stroke", !isBaseline ? COLORS.BLACK : "none")
-          .attr("stroke-width", !isBaseline ? 1 : 0);
+          .attr("stroke-width", !isBaseline ? CONFIG.BAR_STROKE_WIDTH : 0);
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
