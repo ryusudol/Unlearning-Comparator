@@ -389,7 +389,7 @@ const ScatterPlot = forwardRef(
         const isRemainData = !isForgettingData;
 
         if (viewMode === VIEW_MODES[1] /* Misclassification */) {
-          const isMisclassified = d[2] !== d[3];
+          const isMisclassified = isRemainData && d[2] !== d[3];
           return !isMisclassified;
         } else if (viewMode === VIEW_MODES[2] /* Forgetting Target */) {
           return isRemainData;
