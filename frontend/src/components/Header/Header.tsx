@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import ForgetClassTabs from "./ForgetClassSection";
+import ForgetClassTabs from "./ForgetClassTabs";
 import { LogoIcon, GithubIcon } from "../UI/icons";
 import { DatasetContext } from "../../store/dataset-context";
 import { NeuralNetworkModelContext } from "../../store/neural-network-model-context";
