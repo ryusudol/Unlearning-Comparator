@@ -9,8 +9,9 @@ import uuid
 from app.utils.evaluation import (
 	evaluate_model_with_distributions, 
 	get_layer_activations_and_predictions, 
-	calculate_cka_similarity
+	calculate_cka_similarity,
 )
+from app.utils.attack import process_attack_metrics
 from app.utils.visualization import compute_umap_embedding
 from app.utils.helpers import format_distribution, compress_prob_array
 from app.config import (
@@ -100,7 +101,7 @@ class UnlearningCustomThread(threading.Thread):
         
         start_time = time.time()
         
-        print(f"Models loaded successfully at{time.time() - start_time:.3f} seconds")
+        print(f"Models loaded successfully at {time.time() - start_time:.3f} seconds")
         
         # Evaluate on train set
         self.status.progress = "Evaluating Train Set"
@@ -122,7 +123,6 @@ class UnlearningCustomThread(threading.Thread):
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.forget_class
         )
 
         # Update training evaluation status for remain classes only
@@ -164,7 +164,6 @@ class UnlearningCustomThread(threading.Thread):
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.forget_class
         )
 
         # Update test evaluation status for remain classes only
@@ -214,7 +213,16 @@ class UnlearningCustomThread(threading.Thread):
             forget_labels=forget_labels
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
-
+        
+        # Process attack metrics using the same umap_subset_loader (entropy printing removed)
+        print("Processing attack metrics on UMAP subset")
+        await process_attack_metrics(
+            model=self.model_after, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.forget_class, 
+        )
+        
         # Detailed results preparation
         detailed_results = []
         for i in range(len(umap_subset)):
@@ -224,7 +232,7 @@ class UnlearningCustomThread(threading.Thread):
             detailed_results.append([
                 int(ground_truth),                             # gt
                 int(predicted_labels[i]),                      # pred
-                int(original_index),                           # img
+                int(original_index),                           # img index
                 1 if is_forget else 0,                         # forget as binary
                 round(float(umap_embedding[i][0]), 2),         # x coordinate
                 round(float(umap_embedding[i][1]), 2),         # y coordinate
