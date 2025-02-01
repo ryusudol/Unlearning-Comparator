@@ -36,7 +36,9 @@ function NeuralNetworkModelReducer(
         const parsedNeuralNetworkModel = JSON.parse(
           retrievedNeuralNetworkModel
         );
-        return { neuralNetworkModel: parsedNeuralNetworkModel.dataset };
+        return {
+          neuralNetworkModel: parsedNeuralNetworkModel.neuralNetworkModel,
+        };
       }
       return state;
 
