@@ -168,10 +168,9 @@ export default function ForgetClassTabPlusButton({
           </Select>
         </div>
         <DialogFooter>
-          <Button
-            onClick={handleButtonClick}
-            content={hasNoSelectedForgetClass ? "Apply" : "Add"}
-          />
+          <Button onClick={handleButtonClick}>
+            {hasNoSelectedForgetClass ? "Apply" : "Add"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
