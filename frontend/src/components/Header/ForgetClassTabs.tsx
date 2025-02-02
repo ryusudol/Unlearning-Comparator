@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 
-import { FORGET_CLASS_NAMES } from "../../constants/common";
+import { CIFAR_10_CLASSES } from "../../constants/common";
 import { Experiments } from "../../types/experiments-context";
 import { ForgetClassContext } from "../../store/forget-class-context";
 import { ExperimentsContext } from "../../store/experiments-context";
@@ -18,7 +18,7 @@ export default function ForgetClassTabs() {
   const [open, setOpen] = useState(hasNoSelectedForgetClass);
 
   const fetchAndSaveExperiments = async (forgetClass: string) => {
-    const classIndex = FORGET_CLASS_NAMES.indexOf(forgetClass);
+    const classIndex = CIFAR_10_CLASSES.indexOf(forgetClass);
     setIsExperimentsLoading(true);
     try {
       const allData: Experiments = await fetchAllExperimentsData(classIndex);

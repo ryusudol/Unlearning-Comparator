@@ -6,7 +6,7 @@ export const NEURAL_NETWORK_MODELS = ["ResNet18", "ViT16/Base"];
 export const TRAIN = "train";
 export const TEST = "test";
 
-export const FORGET_CLASS_NAMES = [
+export const CIFAR_10_CLASSES = [
   "airplane",
   "automobile",
   "bird",
@@ -17,6 +17,19 @@ export const FORGET_CLASS_NAMES = [
   "horse",
   "ship",
   "truck",
+];
+
+export const FASHION_MNIST_CLASSES = [
+  "T-shirt/top",
+  "Trouser",
+  "Pullover",
+  "Dress",
+  "Coat",
+  "Sandal",
+  "Shirt",
+  "Sneaker",
+  "Bag",
+  "Ankle boot",
 ];
 
 export const ANIMATION_DURATION = 500;

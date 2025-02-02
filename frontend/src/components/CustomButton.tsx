@@ -2,26 +2,19 @@ import React from "react";
 
 import { Button } from "./UI/button";
 
-interface Props {
-  content: string | React.ReactNode;
-  onClick?: () => void;
-  type?: "submit" | "reset" | "button" | undefined;
+interface Props
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
+  children: React.ReactNode;
   className?: string;
 }
 
-export default function CustomButton({
-  onClick,
-  content,
-  type,
-  className,
-}: Props) {
+export default function CustomButton({ children, className, ...props }: Props) {
   return (
     <Button
-      type={type ?? "submit"}
       className={`bg-[#585858] hover:bg-[#696969] h-7 ${className}`}
-      onClick={onClick}
+      {...props}
     >
-      {content}
+      {children}
     </Button>
   );
 }

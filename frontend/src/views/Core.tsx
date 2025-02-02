@@ -14,7 +14,7 @@ import {
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 import { Separator } from "../components/UI/separator";
-import { FORGET_CLASS_NAMES } from "../constants/common";
+import { CIFAR_10_CLASSES } from "../constants/common";
 import { TABLEAU10 } from "../constants/colors";
 
 const EMBEDDINGS = "embeddings";
@@ -114,7 +114,7 @@ function EmbeddingLegend() {
       <div className="flex items-center">
         <span className="font-medium mr-2.5">Prediction</span>
         <ul className="flex items-center gap-[9.2px]">
-          {FORGET_CLASS_NAMES.map((name, idx) => (
+          {CIFAR_10_CLASSES.map((name, idx) => (
             <li key={idx} className="flex items-center">
               <div
                 style={{ backgroundColor: TABLEAU10[idx] }}

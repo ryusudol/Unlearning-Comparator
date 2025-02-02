@@ -15,7 +15,7 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import {
-  FORGET_CLASS_NAMES,
+  CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
@@ -63,8 +63,8 @@ export default function VerticalBarChart({
   const remainGapAvgValue = useMemo(() => {
     const remainingData = gapData.filter(
       (datum) =>
-        FORGET_CLASS_NAMES[+datum.classLabel] !==
-        FORGET_CLASS_NAMES[forgetClassNumber]
+        CIFAR_10_CLASSES[+datum.classLabel] !==
+        CIFAR_10_CLASSES[forgetClassNumber]
     );
 
     return remainingData.length
@@ -125,7 +125,7 @@ export default function VerticalBarChart({
                   value as keyof typeof VERTICAL_BAR_CHART_CONFIG
                 ]?.label;
               const isForgetClass =
-                label === FORGET_CLASS_NAMES[forgetClassNumber];
+                label === CIFAR_10_CLASSES[forgetClassNumber];
               return isForgetClass ? `${label}\u00A0(X)` : label;
             }}
             style={{ whiteSpace: "nowrap" }}
@@ -219,7 +219,7 @@ const AxisTick = memo(
       VERTICAL_BAR_CHART_CONFIG[
         payload.value as keyof typeof VERTICAL_BAR_CHART_CONFIG
       ]?.label;
-    const isForgetClass = label === FORGET_CLASS_NAMES[forgetClass];
+    const isForgetClass = label === CIFAR_10_CLASSES[forgetClass];
     const formattedLabel = isForgetClass ? `${label}\u00A0(X)` : label;
 
     return (

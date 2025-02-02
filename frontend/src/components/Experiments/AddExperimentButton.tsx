@@ -7,8 +7,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../UI/dialog";
-import UnlearningConfiguration from "./UnlearningConfiguration";
-import CustomButton from "../CustomButton";
+import UnlearningConfiguration from "./Unlearning";
+import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
 
@@ -32,23 +32,20 @@ export default function AddExperimentButton() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger disabled={isRunning}>
-        <CustomButton
+        <Button
           onClick={handleAddExpClick}
-          content={
-            <>
-              <PlusIcon
-                color={isRunning ? "#d1d5db" : "white"}
-                className="w-2.5 h-2.5 mr-1.5"
-              />
-              <span className={isRunning ? "text-gray-300" : ""}>
-                Add Experiment
-              </span>
-            </>
-          }
           className={`px-2.5 mr-0.5 ${
             isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
           }`}
-        />
+        >
+          <PlusIcon
+            color={isRunning ? "#d1d5db" : "white"}
+            className="w-2.5 h-2.5 mr-1.5"
+          />
+          <span className={isRunning ? "text-gray-300" : ""}>
+            Add Experiment
+          </span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[400px] p-4">
         <DialogHeader className="">

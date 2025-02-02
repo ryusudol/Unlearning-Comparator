@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
 import { MultiplicationSignIcon } from "../UI/icons";
-import { FORGET_CLASS_NAMES } from "../../constants/common";
+import { CIFAR_10_CLASSES } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ForgetClassContext } from "../../store/forget-class-context";
 
@@ -28,20 +28,20 @@ export default function ForgetClassTab({
     const firstSelectedForgetClass = selectedForgetClasses[0];
     const secondSelectedForgetClass = selectedForgetClasses[1];
     const targetSelectedForgetClassesIndex = selectedForgetClasses.indexOf(
-      FORGET_CLASS_NAMES.indexOf(targetClass)
+      CIFAR_10_CLASSES.indexOf(targetClass)
     );
 
     deleteSelectedForgetClass(targetClass);
 
-    if (targetClass === FORGET_CLASS_NAMES[forgetClassNumber]) {
+    if (targetClass === CIFAR_10_CLASSES[forgetClassNumber]) {
       if (selectedForgetClasses.length === 1) {
         saveForgetClass(undefined);
         setOpen(true);
       } else {
         const autoSelectedForgetClass =
           targetSelectedForgetClassesIndex === 0
-            ? FORGET_CLASS_NAMES[secondSelectedForgetClass]
-            : FORGET_CLASS_NAMES[firstSelectedForgetClass];
+            ? CIFAR_10_CLASSES[secondSelectedForgetClass]
+            : CIFAR_10_CLASSES[firstSelectedForgetClass];
         saveForgetClass(autoSelectedForgetClass);
         await fetchAndSaveExperiments(autoSelectedForgetClass);
       }
@@ -52,7 +52,7 @@ export default function ForgetClassTab({
     <>
       {selectedForgetClasses.map((selectedForgetClass, idx) => {
         const isSelectedForgetClass = selectedForgetClass === forgetClass;
-        const forgetClassName = FORGET_CLASS_NAMES[selectedForgetClass];
+        const forgetClassName = CIFAR_10_CLASSES[selectedForgetClass];
 
         return (
           <div key={idx} className="flex items-center relative">

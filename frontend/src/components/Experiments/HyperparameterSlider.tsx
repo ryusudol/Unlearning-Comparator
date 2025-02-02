@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Slider } from "../UI/slider";
 
 interface Props {

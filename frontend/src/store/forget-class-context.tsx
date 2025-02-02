@@ -6,7 +6,7 @@ import {
   ForgetClassContextType,
 } from "../types/forget-class-context";
 import { FORGET_CLASS_ACTIONS } from "../constants/actions";
-import { FORGET_CLASS_NAMES } from "../constants/common";
+import { CIFAR_10_CLASSES } from "../constants/common";
 import { FORGET_CLASS } from "../constants/storageKeys";
 
 export const ForgetClassContext = createContext<ForgetClassContextType>({
@@ -90,7 +90,7 @@ export default function ForgetClassContextProvider({
       dispatch({
         type: FORGET_CLASS_ACTIONS.SAVE_FORGET_CLASS,
         payload: forgetClass
-          ? FORGET_CLASS_NAMES.indexOf(forgetClass)
+          ? CIFAR_10_CLASSES.indexOf(forgetClass)
           : undefined,
       });
     },
@@ -100,7 +100,7 @@ export default function ForgetClassContextProvider({
   const handleAddSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: FORGET_CLASS_ACTIONS.ADD_SELECTED_FORGET_CLASS,
-      payload: FORGET_CLASS_NAMES.indexOf(forgetClass),
+      payload: CIFAR_10_CLASSES.indexOf(forgetClass),
     });
   }, []);
 
@@ -111,7 +111,7 @@ export default function ForgetClassContextProvider({
   const handleDeleteSelectedForgetClass = useCallback((forgetClass: string) => {
     dispatch({
       type: FORGET_CLASS_ACTIONS.DELETE_SELECTED_FORGET_CLASS,
-      payload: FORGET_CLASS_NAMES.indexOf(forgetClass),
+      payload: CIFAR_10_CLASSES.indexOf(forgetClass),
     });
   }, []);
 

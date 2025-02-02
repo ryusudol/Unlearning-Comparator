@@ -6,7 +6,7 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import {
-  FORGET_CLASS_NAMES,
+  CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
@@ -65,12 +65,12 @@ export default React.memo(function EmbeddingTooltip({
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
 
-  const groundTruth = FORGET_CLASS_NAMES[groundTruthIdx];
-  const baselinePrediction = FORGET_CLASS_NAMES[predictionIdx];
+  const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
+  const baselinePrediction = CIFAR_10_CLASSES[predictionIdx];
   const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const comparisonPrediction = FORGET_CLASS_NAMES[comparisonIdx];
+  const comparisonPrediction = CIFAR_10_CLASSES[comparisonIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -183,7 +183,7 @@ export default React.memo(function EmbeddingTooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(barChartData.baseline.map((d) => FORGET_CLASS_NAMES[d.class]))
+      .domain(barChartData.baseline.map((d) => CIFAR_10_CLASSES[d.class]))
       .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
@@ -214,7 +214,7 @@ export default React.memo(function EmbeddingTooltip({
       .each(function (d, i) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
-        const y = yScale(FORGET_CLASS_NAMES[d.class]) ?? 0;
+        const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
 
         g.append("rect")
           .attr("class", "bar-baseline")
@@ -253,7 +253,7 @@ export default React.memo(function EmbeddingTooltip({
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
         const y =
-          (yScale(FORGET_CLASS_NAMES[d.class]) ?? 0) +
+          (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) +
           CONFIG.BAR_HEIGHT +
           CONFIG.BAR_GAP +
           0.5;
@@ -326,7 +326,7 @@ export default React.memo(function EmbeddingTooltip({
       .style("font-weight", FONT_CONFIG.LIGHT_FONT_WEIGHT)
       .style("font-family", CONFIG.ROBOTO_CONDENSED)
       .text((d: any) => {
-        const classIndex = FORGET_CLASS_NAMES.indexOf(d);
+        const classIndex = CIFAR_10_CLASSES.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
   }, [barChartData, forgetClass, isBaseline, legendRectColor]);
