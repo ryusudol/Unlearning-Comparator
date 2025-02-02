@@ -1,35 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import HyperparameterInput from "./HyperparameterInput";
+import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { HyperparametersIcon } from "../UI/icons";
 import { Badge } from "../UI/badge";
-
-const EPOCHS = "epochs";
-const LEARNING_RATE = "learningRate";
-const BATCH_SIZE = "batchSize";
+import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "./Unlearning";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
-  epochs: number | "";
-  epochsList: (number | "")[];
-  learningRate: string;
+  method: string;
+  epochsList: string[];
   learningRateList: string[];
-  batchSize: number | "";
-  batchSizeList: (number | "")[];
-  onPlusClick: (event: React.MouseEvent<HTMLDivElement>) => void;
+  batchSizeList: string[];
+  onPlusClick: (id: string, value: string) => void;
   onBadgeClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function MethodUnlearning({
-  epochs,
+  method,
   epochsList,
-  learningRate,
   learningRateList,
-  batchSize,
   batchSizeList,
   onPlusClick,
   onBadgeClick,
   ...props
 }: Props) {
+  const [initialValues, setInitialValues] = useState(["10", "0.01", "64"]);
+
+  useEffect(() => {
+    const { epochs, learning_rate, batch_size } =
+      getDefaultUnlearningConfig(method);
+
+    setInitialValues([epochs, learning_rate, batch_size]);
+  }, [method]);
+
   return (
     <div>
       <div className="flex items-center mb-2">
@@ -54,11 +57,10 @@ export default function MethodUnlearning({
             </div>
           )}
           <HyperparameterInput
-            id={EPOCHS}
             title="Epochs"
+            initialValue={initialValues[0]}
             paramList={epochsList}
             onPlusClick={onPlusClick}
-            value={epochs}
             {...props}
           />
         </div>
@@ -79,11 +81,10 @@ export default function MethodUnlearning({
             </div>
           )}
           <HyperparameterInput
-            id={LEARNING_RATE}
             title="Learning Rate"
+            initialValue={initialValues[1]}
             paramList={learningRateList}
             onPlusClick={onPlusClick}
-            value={learningRate}
             {...props}
           />
         </div>
@@ -104,11 +105,10 @@ export default function MethodUnlearning({
             </div>
           )}
           <HyperparameterInput
-            id={BATCH_SIZE}
             title="Batch Size"
+            initialValue={initialValues[2]}
             paramList={batchSizeList}
             onPlusClick={onPlusClick}
-            value={batchSize}
             {...props}
           />
         </div>
