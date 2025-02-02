@@ -20,11 +20,10 @@ import {
   ANIMATION_DURATION,
 } from "../../constants/common";
 import { COLORS } from "../../constants/colors";
-import { calculateZoom } from "../../utils/util";
 import { getCkaData } from "../../utils/data/getCkaData";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { CircleIcon, MultiplicationSignIcon } from "../UI/icons";
-import { ChartContainer, ChartTooltip } from "../UI/chart";
+import { ChartContainer } from "../UI/chart";
 
 const CONFIG = {
   DOT_SIZE: 12,
@@ -72,8 +71,6 @@ export default function _LineChart({ dataset }: { dataset: string }) {
 
   const ckaData = getCkaData(dataset, baselineExperiment, comparisonExperiment);
   const layers = ckaData.map((data) => data.layer);
-
-  const zoom = calculateZoom();
 
   return (
     <div className="relative bottom-1.5 right-3.5">
