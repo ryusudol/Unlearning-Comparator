@@ -7,7 +7,7 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import {
-  FORGET_CLASS_NAMES,
+  CIFAR_10_CLASSES,
   STROKE_CONFIG,
   FONT_CONFIG,
 } from "../../constants/common";
@@ -125,7 +125,7 @@ export default function BubbleChart({
       .axisBottom(xScale)
       .tickValues(d3.range(0, 10))
       .tickSize(0)
-      .tickFormat((d) => FORGET_CLASS_NAMES[d as number]);
+      .tickFormat((d) => CIFAR_10_CLASSES[d as number]);
 
     const yAxis = d3
       .axisLeft(yScale)
@@ -134,8 +134,8 @@ export default function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? FORGET_CLASS_NAMES[d as number] + " (X)"
-          : FORGET_CLASS_NAMES[d as number]
+          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          : CIFAR_10_CLASSES[d as number]
       );
 
     svg
@@ -337,13 +337,13 @@ export default function BubbleChart({
             <div>
               <span>Ground Truth</span>:{" "}
               <span className="font-semibold">
-                {FORGET_CLASS_NAMES[tooltip.content.groundTruth]}
+                {CIFAR_10_CLASSES[tooltip.content.groundTruth]}
               </span>
             </div>
             <div>
               <span>Prediction</span>:{" "}
               <span className="font-semibold">
-                {FORGET_CLASS_NAMES[tooltip.content.prediction]}
+                {CIFAR_10_CLASSES[tooltip.content.prediction]}
               </span>
             </div>
             <div>

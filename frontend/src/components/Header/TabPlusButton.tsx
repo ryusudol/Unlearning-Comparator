@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "../UI/select";
 import {
-  FORGET_CLASS_NAMES,
+  CIFAR_10_CLASSES,
   DATASETS,
   NEURAL_NETWORK_MODELS,
 } from "../../constants/common";
@@ -48,9 +48,9 @@ export default function ForgetClassTabPlusButton({
 
   const unselectForgetClasses = useMemo(
     () =>
-      FORGET_CLASS_NAMES.filter(
+      CIFAR_10_CLASSES.filter(
         (item) =>
-          !selectedForgetClasses.includes(FORGET_CLASS_NAMES.indexOf(item))
+          !selectedForgetClasses.includes(CIFAR_10_CLASSES.indexOf(item))
       ),
     [selectedForgetClasses]
   );
