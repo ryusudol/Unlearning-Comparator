@@ -22,7 +22,17 @@ import { UNLEARNING_METHODS } from "../../constants/experiments";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { UnlearningConfigurationData } from "../../types/experiments";
 
+const NO_FILE_CHOSEN = "No file chosen";
+const EPOCHS = "epochs";
+const LEARNING_RATE = "learningRate";
+const BATCH_SIZE = "batchSize";
 const CUSTOM = "custom";
+const CONFIG = {
+  EPOCHS_MIN: 1,
+  EPOCHS_MAX: 20,
+  BATCH_SIZE_MIN: 1,
+  BATCH_SIZE_MAX: 512,
+} as const;
 
 export default function UnlearningConfiguration() {
   const { updateIsRunning, initStatus, updateActiveStep } =
@@ -30,22 +40,38 @@ export default function UnlearningConfiguration() {
 
   const { forgetClassNumber } = useForgetClass();
 
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [method, setMethod] = useState("ft");
+  const [selectedFileName, setSelectedFileName] =
+    useState<string>(NO_FILE_CHOSEN);
   const [epochs, setEpochs] = useState<number | "">(10);
+  const [epochList, setEpochList] = useState<number[]>([]);
+  const [learningRateList, setLearningRateList] = useState<string[]>([]);
+  const [batchSizeList, setBatchSizeList] = useState<number[]>([]);
   const [learningRate, setLearningRate] = useState<string>("0.01");
   const [batchSize, setBatchSize] = useState<number | "">(64);
-  const [method, setMethod] = useState("ft");
-  const [selectedFileName, setSelectedFileName] = useState("No file chosen");
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const isCustom = method === CUSTOM;
 
   useEffect(() => {
-    if (epochs === "" || learningRate === "" || batchSize === "") {
+    if (
+      (isCustom && selectedFileName === NO_FILE_CHOSEN) ||
+      (!isCustom &&
+        (epochList.length === 0 ||
+          learningRateList.length === 0 ||
+          batchSizeList.length === 0))
+    ) {
       setIsDisabled(true);
     } else {
       setIsDisabled(false);
     }
-  }, [batchSize, epochs, learningRate]);
-
-  const isCustom = method === CUSTOM;
+  }, [
+    batchSizeList.length,
+    epochList.length,
+    isCustom,
+    learningRateList.length,
+    selectedFileName,
+  ]);
 
   const handleMethodChange = (method: string) => {
     setMethod(method);
@@ -60,29 +86,72 @@ export default function UnlearningConfiguration() {
     }
   };
 
+  const handlePlusClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const id = event.currentTarget.id;
+    if (id === EPOCHS && epochs !== "") {
+      setEpochList((prev) =>
+        prev.length >= 5 || prev.includes(epochs as number)
+          ? prev
+          : [...prev, epochs as number]
+      );
+    } else if (id === LEARNING_RATE && learningRate !== "") {
+      setLearningRateList((prev) =>
+        prev.length >= 5 || prev.includes(learningRate)
+          ? prev
+          : [...prev, learningRate]
+      );
+    } else if (id === BATCH_SIZE && batchSize !== "") {
+      setBatchSizeList((prev) =>
+        prev.length >= 5 || prev.includes(batchSize as number)
+          ? prev
+          : [...prev, batchSize as number]
+      );
+    }
+  };
+
+  const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const { id, innerHTML: target } = event.currentTarget;
+
+    if (id === EPOCHS) {
+      setEpochList((prev) => prev.filter((item) => item !== Number(target)));
+    } else if (id === LEARNING_RATE) {
+      setLearningRateList((prev) => prev.filter((item) => item !== target));
+    } else if (id === BATCH_SIZE) {
+      setBatchSizeList((prev) =>
+        prev.filter((item) => item !== Number(target))
+      );
+    }
+  };
+
   const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.currentTarget;
     if (value === "") {
-      if (id === "epochs") setEpochs("");
-      else if (id === "learningRate") setLearningRate("");
-      else if (id === "batchSize") setBatchSize("");
+      if (id === EPOCHS) setEpochs("");
+      else if (id === LEARNING_RATE) setLearningRate("");
+      else if (id === BATCH_SIZE) setBatchSize("");
       return;
     }
 
-    if (id === "epochs") {
-      const numericValue = Math.min(Math.max(Number(value), 1), 20);
+    if (id === EPOCHS) {
+      const numericValue = Math.min(
+        Math.max(Number(value), CONFIG.EPOCHS_MIN),
+        CONFIG.EPOCHS_MAX
+      );
       setEpochs(numericValue);
-    } else if (id === "learningRate") {
+    } else if (id === LEARNING_RATE) {
       setLearningRate(value);
-    } else if (id === "batchSize") {
-      const numericValue = Math.min(Math.max(Number(value), 1), 512);
+    } else if (id === BATCH_SIZE) {
+      const numericValue = Math.min(
+        Math.max(Number(value), CONFIG.BATCH_SIZE_MIN),
+        CONFIG.BATCH_SIZE_MAX
+      );
       setBatchSize(numericValue);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
-    setSelectedFileName(file ? file.name : "No file chosen");
+    setSelectedFileName(file ? file.name : NO_FILE_CHOSEN);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -98,24 +167,27 @@ export default function UnlearningConfiguration() {
 
     const fd = new FormData(e.currentTarget);
     const config = Object.fromEntries(fd.entries());
-    const runningConfig: UnlearningConfigurationData = {
-      method: config.method as string,
-      forget_class: forgetClassNumber,
-      epochs: epochs as number,
-      learning_rate: numericLearningRate,
-      batch_size: batchSize as number,
-    };
 
     updateIsRunning(true);
     initStatus(forgetClassNumber);
     updateActiveStep(1);
 
-    isCustom
-      ? await executeCustomUnlearning(
-          config.custom_file as File,
-          forgetClassNumber
-        )
-      : await executeMethodUnlearning(runningConfig);
+    if (isCustom) {
+      await executeCustomUnlearning(
+        config.custom_file as File,
+        forgetClassNumber
+      );
+    } else {
+      const runningConfig: UnlearningConfigurationData = {
+        method: config.method as string,
+        forget_class: forgetClassNumber,
+        epochs: epochs as number,
+        learning_rate: numericLearningRate,
+        batch_size: batchSize as number,
+      };
+
+      await executeMethodUnlearning(runningConfig);
+    }
   };
 
   let configurationContent = isCustom ? (
@@ -123,8 +195,13 @@ export default function UnlearningConfiguration() {
   ) : (
     <MethodUnlearning
       epochs={epochs}
+      epochsList={epochList}
       learningRate={learningRate}
+      learningRateList={learningRateList}
       batchSize={batchSize}
+      batchSizeList={batchSizeList}
+      onPlusClick={handlePlusClick}
+      onBadgeClick={handleBadgeClick}
       onChange={handleValueChange}
     />
   );

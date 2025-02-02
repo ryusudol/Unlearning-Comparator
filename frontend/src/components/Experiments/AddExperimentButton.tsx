@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../UI/dialog";
-import UnlearningConfiguration from "./UnlearningConfiguration";
+import UnlearningConfiguration from "./Unlearning";
 import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
