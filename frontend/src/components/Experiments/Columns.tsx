@@ -28,9 +28,9 @@ export const COLUMN_WIDTHS = {
   phase: 78,
   init: 42,
   method: 90,
-  epochs: 46,
-  BS: 52,
-  LR: 54,
+  epochs: 64,
+  BS: 42,
+  LR: 46,
   UA: 60,
   RA: 60,
   TUA: 60,
@@ -86,7 +86,16 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "epochs",
-    header: "Epochs",
+    header: ({ column }) => (
+      <Button
+        className="w-full px-0 h-[34px]"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Epochs
+        <ArrowUpDown className="w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
       const epochs = row.getValue("epochs");
       const value = getValueToDisplay(epochs);
@@ -95,7 +104,23 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "BS",
-    header: "# Batch",
+    header: ({ column }) => (
+      <HoverCard openDelay={0} closeDelay={100}>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            BS
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Batch Size
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const batchSize = row.getValue("BS");
       const value = getValueToDisplay(batchSize);
@@ -104,7 +129,23 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "LR",
-    header: "LR",
+    header: ({ column }) => (
+      <HoverCard openDelay={0} closeDelay={100}>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            LR
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Learning Rate
+        </HoverCardContent>
+      </HoverCard>
+    ),
     cell: ({ row }) => {
       const learningRate = row.getValue("LR");
       const value = getValueToDisplay(learningRate);
