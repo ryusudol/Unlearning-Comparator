@@ -104,7 +104,7 @@ export default function UnlearningConfiguration() {
     }
   };
 
-  const handleBadgeClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const { id, innerHTML: target } = event.currentTarget;
 
     if (id === EPOCHS) {

@@ -49,7 +49,7 @@ export default function AddExperimentButton() {
       </DialogTrigger>
       <DialogContent className="max-w-[400px] p-4">
         <DialogHeader className="">
-          <DialogTitle>Experiment</DialogTitle>
+          <DialogTitle>Experiments</DialogTitle>
         </DialogHeader>
         <UnlearningConfiguration />
       </DialogContent>

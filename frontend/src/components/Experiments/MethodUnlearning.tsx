@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import HyperparameterInput from "./HyperparameterInput";
-import Button from "../CustomButton";
+import { Badge } from "../UI/badge";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { HyperparametersIcon } from "../UI/icons";
 import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "./Unlearning";
@@ -12,7 +12,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   learningRateList: string[];
   batchSizeList: string[];
   onPlusClick: (id: string, value: string) => void;
-  onBadgeClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onBadgeClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function MethodUnlearning({
@@ -50,17 +50,16 @@ export default function MethodUnlearning({
             {...props}
           />
           {epochsList.length > 0 && (
-            <div className="flex justify-center gap-x-2">
+            <div className="flex gap-x-2">
               {epochsList.map((epoch, idx) => (
-                <Button
-                  type="button"
+                <Badge
                   id={EPOCHS}
                   key={idx}
                   onClick={onBadgeClick}
-                  className="px-2 py-1 text-xs cursor-pointer bg-[#585858] hover:bg-[#696969]"
+                  className="px-2 py-1 text-xs cursor-pointer bg-[#E2E8F0] hover:bg-[#d1d7ef] text-black"
                 >
                   {epoch}
-                </Button>
+                </Badge>
               ))}
             </div>
           )}
@@ -75,17 +74,16 @@ export default function MethodUnlearning({
             {...props}
           />
           {learningRateList.length > 0 && (
-            <div className="flex justify-center gap-x-2 mt-1.5">
+            <div className="flex gap-x-2 mb-1.5">
               {learningRateList.map((rate, idx) => (
-                <Button
-                  type="button"
+                <Badge
                   id={LEARNING_RATE}
                   key={idx}
                   onClick={onBadgeClick}
-                  className="px-2 py-1 text-xs cursor-pointer bg-[#585858] hover:bg-[#696969]"
+                  className="px-2 py-1 text-xs cursor-pointer bg-[#E2E8F0] hover:bg-[#d1d7ef] text-black"
                 >
                   {rate}
-                </Button>
+                </Badge>
               ))}
             </div>
           )}
@@ -100,17 +98,16 @@ export default function MethodUnlearning({
             {...props}
           />
           {batchSizeList.length > 0 && (
-            <div className="flex justify-center gap-x-2 mt-1.5">
+            <div className="flex gap-x-2 mb-1.5">
               {batchSizeList.map((batch, idx) => (
-                <Button
-                  type="button"
+                <Badge
                   id={BATCH_SIZE}
                   key={idx}
                   onClick={onBadgeClick}
-                  className="px-2 py-1 text-xs cursor-pointer bg-[#585858] hover:bg-[#696969]"
+                  className="px-2 py-1 text-xs cursor-pointer bg-[#E2E8F0] hover:bg-[#d1d7ef] text-black"
                 >
                   {batch}
-                </Button>
+                </Badge>
               ))}
             </div>
           )}

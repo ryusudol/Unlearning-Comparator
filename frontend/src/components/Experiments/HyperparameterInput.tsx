@@ -98,7 +98,7 @@ export default function HyperparameterInput({
   };
 
   return (
-    <div className="grid grid-cols-[80px,1fr,auto] gap-y-2">
+    <div className="grid grid-cols-[80px,1fr,auto] gap-y-2 items-center">
       <span className="text-sm">{title}</span>
       <Input
         type="number"
