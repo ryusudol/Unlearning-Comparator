@@ -15,15 +15,10 @@ interface Props
 
 const CONFIG = {
   EPOCHS_MIN: 1,
-  EPOCHS_MAX: 20,
-  LEARNING_RATE_MIN: 0.00001,
-  LEARNING_RATE_MAX: 0.1,
+  LEARNING_RATE_MIN: 0,
+  LEARNING_RATE_MAX: 1,
   BATCH_SIZE_MIN: 1,
-  BATCH_SIZE_MAX: 512,
 } as const;
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(Math.max(value, min), max);
 
 export default function HyperparameterInput({
   title,
@@ -68,29 +63,21 @@ export default function HyperparameterInput({
 
     switch (id) {
       case EPOCHS: {
-        const clamped = clamp(
-          Number(newValue),
-          CONFIG.EPOCHS_MIN,
-          CONFIG.EPOCHS_MAX
-        );
-        setValue(String(clamped));
+        const validValue = Math.max(Number(newValue), CONFIG.EPOCHS_MIN);
+        setValue(String(validValue));
         break;
       }
       case BATCH_SIZE: {
-        const clamped = clamp(
-          Number(newValue),
-          CONFIG.BATCH_SIZE_MIN,
-          CONFIG.BATCH_SIZE_MAX
-        );
-        setValue(String(clamped));
+        const validValue = Math.max(Number(newValue), CONFIG.BATCH_SIZE_MIN);
+        setValue(String(validValue));
         break;
       }
       case LEARNING_RATE: {
         setValue(newValue);
         const numericValue = Number(newValue);
         if (
-          numericValue > CONFIG.LEARNING_RATE_MAX ||
-          numericValue < CONFIG.LEARNING_RATE_MIN
+          numericValue >= CONFIG.LEARNING_RATE_MAX ||
+          numericValue <= CONFIG.LEARNING_RATE_MIN
         ) {
           setIsDisabled(true);
         } else {

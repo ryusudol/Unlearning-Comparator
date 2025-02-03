@@ -42,6 +42,8 @@ export default function UnlearningConfiguration() {
     useState<string>(NO_FILE_CHOSEN);
 
   const isCustom = method === CUSTOM;
+  const totalExperimentsCount =
+    epochList.length * learningRateList.length * batchSizeList.length;
 
   useEffect(() => {
     if (
@@ -86,7 +88,7 @@ export default function UnlearningConfiguration() {
     }
   };
 
-  const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleBadgeClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { id, innerHTML: target } = event.currentTarget;
 
     if (id === EPOCHS) {
@@ -119,14 +121,14 @@ export default function UnlearningConfiguration() {
         forgetClassNumber
       );
     } else {
-      // const runningConfig: UnlearningConfigurationData = {
-      //   method: config.method as string,
-      //   forget_class: forgetClassNumber,
-      //   epochs: epochs as number,
-      //   learning_rate: numericLearningRate,
-      //   batch_size: batchSize as number,
-      // };
-      // await executeMethodUnlearning(runningConfig);
+      const runningConfig: UnlearningConfigurationData = {
+        method: config.method as string,
+        forget_class: forgetClassNumber,
+        epochs: Number(epochList[0]),
+        learning_rate: Number(learningRateList[0]),
+        batch_size: Number(batchSizeList[0]),
+      };
+      await executeMethodUnlearning(runningConfig);
     }
   };
 
@@ -182,7 +184,10 @@ export default function UnlearningConfiguration() {
       {configurationContent}
       <Button className="w-full flex items-center mt-4" disabled={isDisabled}>
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
-        <span className="text-base">Run and Add an Experiment</span>
+        <span className="text-base">
+          Run and Add {totalExperimentsCount} Experiment
+          {totalExperimentsCount !== 1 && "s"}
+        </span>
       </Button>
     </form>
   );
