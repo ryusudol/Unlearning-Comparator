@@ -86,7 +86,7 @@ export default function UnlearningConfiguration() {
     }
   };
 
-  const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleBadgeClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { id, innerHTML: target } = event.currentTarget;
 
     if (id === EPOCHS) {
@@ -119,14 +119,14 @@ export default function UnlearningConfiguration() {
         forgetClassNumber
       );
     } else {
-      // const runningConfig: UnlearningConfigurationData = {
-      //   method: config.method as string,
-      //   forget_class: forgetClassNumber,
-      //   epochs: epochs as number,
-      //   learning_rate: numericLearningRate,
-      //   batch_size: batchSize as number,
-      // };
-      // await executeMethodUnlearning(runningConfig);
+      const runningConfig: UnlearningConfigurationData = {
+        method: config.method as string,
+        forget_class: forgetClassNumber,
+        epochs: Number(epochList[0]),
+        learning_rate: Number(learningRateList[0]),
+        batch_size: Number(batchSizeList[0]),
+      };
+      await executeMethodUnlearning(runningConfig);
     }
   };
 
