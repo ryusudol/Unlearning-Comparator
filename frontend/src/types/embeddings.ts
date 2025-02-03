@@ -20,9 +20,9 @@ export type SelectedData = (number | Prob)[][];
 
 export type ViewModeType =
   | "All Instances"
-  | "Misclassification"
   | "Forgetting Target"
-  | "Forgetting Failed";
+  | "Forgetting Failed"
+  | "Over-Forgotten";
 
 export type SvgElementsRefType = {
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;

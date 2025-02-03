@@ -24,13 +24,13 @@ function getValueToDisplay(value: unknown) {
 }
 
 export const COLUMN_WIDTHS = {
-  id: 36,
+  id: 32,
   phase: 78,
-  init: 42,
+  init: 38,
   method: 90,
   epochs: 64,
-  BS: 42,
-  LR: 46,
+  BS: 44,
+  LR: 60,
   UA: 60,
   RA: 60,
   TUA: 60,
@@ -38,7 +38,7 @@ export const COLUMN_WIDTHS = {
   RTE: 60,
   FQ: 60,
   baseline: 60,
-  comparison: 60,
+  comparison: 52,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
