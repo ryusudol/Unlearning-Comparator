@@ -25,12 +25,12 @@ function getValueToDisplay(value: unknown) {
 
 export const COLUMN_WIDTHS = {
   id: 32,
-  phase: 75,
+  phase: 78,
   init: 38,
   method: 90,
   epochs: 64,
-  BS: 45,
-  LR: 62,
+  BS: 44,
+  LR: 60,
   UA: 60,
   RA: 60,
   TUA: 60,
