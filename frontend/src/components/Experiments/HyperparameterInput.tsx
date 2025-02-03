@@ -35,12 +35,12 @@ export default function HyperparameterInput({
   }, [initialValue]);
 
   useEffect(() => {
-    if (paramList.length === 5) {
+    if (paramList.length === 5 || value.trim() === "") {
       setIsDisabled(true);
     } else {
       setIsDisabled(false);
     }
-  }, [paramList.length]);
+  }, [paramList.length, value]);
 
   const processedTitle = title.replace(/\s+/g, "");
   const id = processedTitle.charAt(0).toLowerCase() + processedTitle.slice(1);
