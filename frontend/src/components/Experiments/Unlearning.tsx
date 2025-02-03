@@ -7,6 +7,7 @@ import {
   executeMethodUnlearning,
   executeCustomUnlearning,
   fetchDataFile,
+  fetchAllWeightNames,
 } from "../../utils/api/unlearning";
 import {
   Select,
@@ -21,7 +22,7 @@ import {
 } from "../../utils/data/running-status-context";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { Label } from "../UI/label";
-import { EraserIcon, PlusIcon } from "../UI/icons";
+import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { ExperimentsContext } from "../../store/experiments-context";
@@ -49,6 +50,8 @@ export default function UnlearningConfiguration() {
 
   const { forgetClassNumber } = useForgetClass();
 
+  const [selectedInitialModel, setSelectedInitialModel] = useState("");
+  const [weightNames, setWeightNames] = useState<string[]>([]);
   const [method, setMethod] = useState("ft");
   const [epochList, setEpochList] = useState<string[]>([]);
   const [learningRateList, setLearningRateList] = useState<string[]>([]);
@@ -60,6 +63,18 @@ export default function UnlearningConfiguration() {
   const isCustom = method === CUSTOM;
   const totalExperimentsCount =
     epochList.length * learningRateList.length * batchSizeList.length;
+
+  useEffect(() => {
+    async function fetchWeights() {
+      try {
+        const names = await fetchAllWeightNames(forgetClassNumber);
+        setWeightNames(names);
+      } catch (error) {
+        console.error("Failed to fetch all weights names: ", error);
+      }
+    }
+    fetchWeights();
+  }, [forgetClassNumber]);
 
   useEffect(() => {
     if (
@@ -80,6 +95,10 @@ export default function UnlearningConfiguration() {
     learningRateList.length,
     selectedFileName,
   ]);
+
+  const handleInitialModelChange = (model: string) => {
+    setSelectedInitialModel(model);
+  };
 
   const handleMethodChange = (method: string) => {
     setMethod(method);
@@ -104,7 +123,7 @@ export default function UnlearningConfiguration() {
     }
   };
 
-  const handleBadgeClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const { id, innerHTML: target } = event.currentTarget;
 
     if (id === EPOCHS) {
@@ -121,7 +140,7 @@ export default function UnlearningConfiguration() {
     setSelectedFileName(file ? file.name : NO_FILE_CHOSEN);
   };
 
-  const pollStatus = async () => {
+  const pollStatus = async (experimentIndex: number) => {
     const startTime = Date.now();
 
     while (true) {
@@ -132,6 +151,7 @@ export default function UnlearningConfiguration() {
       updateStatus({
         status: unlearningStatus,
         forgetClass: forgetClassNumber,
+        experimentIndex,
         progress,
         elapsedTime: Math.round(((Date.now() - startTime) / 1000) * 10) / 10,
         completedSteps,
@@ -144,7 +164,6 @@ export default function UnlearningConfiguration() {
       }
 
       if (!unlearningStatus.is_unlearning) {
-        updateIsRunning(false);
         updateActiveStep(0);
 
         const newData = await fetchDataFile(
@@ -153,7 +172,6 @@ export default function UnlearningConfiguration() {
         );
         addExperiment(newData);
         saveComparison(newData.id);
-
         break;
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -166,16 +184,16 @@ export default function UnlearningConfiguration() {
     const fd = new FormData(e.currentTarget);
     const config = Object.fromEntries(fd.entries());
 
-    if (isCustom) {
-      updateIsRunning(true);
-      initStatus(forgetClassNumber);
-      updateActiveStep(1);
+    updateIsRunning(true);
+    initStatus(forgetClassNumber, totalExperimentsCount);
+    updateActiveStep(1);
 
+    if (isCustom) {
       await executeCustomUnlearning(
         config.custom_file as File,
         forgetClassNumber
       );
-      await pollStatus();
+      await pollStatus(0);
     } else {
       const combinations: Combination[] = [];
       for (const epoch of epochList) {
@@ -190,10 +208,8 @@ export default function UnlearningConfiguration() {
         }
       }
 
-      for (const combination of combinations) {
-        updateIsRunning(true);
-        initStatus(forgetClassNumber);
-        updateActiveStep(1);
+      for (let idx = 0; idx < combinations.length; idx++) {
+        const combination = combinations[idx];
 
         const runningConfig: UnlearningConfigurationData = {
           method: config.method as string,
@@ -205,13 +221,15 @@ export default function UnlearningConfiguration() {
 
         try {
           await executeMethodUnlearning(runningConfig);
-          await pollStatus();
+          await pollStatus(idx);
         } catch (error) {
           console.error("Error occured while unlearning: ", error);
           break;
         }
       }
     }
+
+    updateIsRunning(false);
   };
 
   let configurationContent = isCustom ? (
@@ -234,7 +252,39 @@ export default function UnlearningConfiguration() {
     >
       <div className="w-full grid grid-cols-2 gap-y-2">
         <div className="flex items-center mb-1">
-          <EraserIcon className="w-4 h-4 mr-1 scale-110" />
+          <FlagIcon className="w-[15px] h-[15px] mr-1.5" />
+          <Label className="text-base text-nowrap" htmlFor="model">
+            Initial Model
+          </Label>
+        </div>
+        <Select
+          defaultValue={
+            weightNames ? weightNames[0] : `000${forgetClassNumber}.pth`
+          }
+          onValueChange={handleInitialModelChange}
+          name="model"
+        >
+          <SelectTrigger className="h-[25px] text-base">
+            <SelectValue
+              placeholder={
+                weightNames ? weightNames[0] : `000${forgetClassNumber}.pth`
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {weightNames.map((weightName, idx) => {
+              return (
+                <SelectItem key={idx} value={weightName}>
+                  {weightName}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-full grid grid-cols-2 gap-y-2">
+        <div className="flex items-center mb-1">
+          <EraserIcon className="w-4 h-4 mr-1.5 scale-110" />
           <Label className="text-base text-nowrap" htmlFor="method">
             Unlearning Method
           </Label>

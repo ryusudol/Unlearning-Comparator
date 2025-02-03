@@ -114,3 +114,23 @@ export async function fetchAllExperimentsData(forgetClass: number) {
     throw error;
   }
 }
+
+export async function fetchAllWeightNames(forgetClass: number) {
+  try {
+    const response = await fetch(
+      `${API_URL}/data/${forgetClass}/all_weights_name`
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch all weights names:", error);
+
+    if (error instanceof Error) {
+      alert(`Failed to fetch all weights names: ${error.message}`);
+    } else {
+      alert("An unknown error occurred while fetching all weights names . . .");
+    }
+
+    throw error;
+  }
+}

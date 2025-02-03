@@ -3,6 +3,7 @@ import { UnlearningStatus } from "./experiments";
 export type UpdateStatusPayload = {
   status: UnlearningStatus;
   forgetClass: number;
+  experimentIndex: number;
   progress: string;
   elapsedTime: number;
   completedSteps: number[];
@@ -10,13 +11,15 @@ export type UpdateStatusPayload = {
 
 export interface RunningStatus {
   isRunning: boolean;
-  status: UnlearningStatus[];
+  statuses: UnlearningStatus[][];
   activeStep: number;
+  currentIndex: number;
+  totalExperimentsCount: number;
 }
 
 export interface RunningStatusContextType extends RunningStatus {
   updateIsRunning: (isRunning: boolean) => void;
-  initStatus: (forgetClass: number) => void;
+  initStatus: (forgetClass: number, count: number) => void;
   retrieveStatus: () => void;
   updateStatus: (payload: UpdateStatusPayload) => void;
   updateActiveStep: (step: number) => void;
@@ -24,7 +27,7 @@ export interface RunningStatusContextType extends RunningStatus {
 
 export type Action =
   | { type: "UPDATE_IS_RUNNING"; payload: boolean }
-  | { type: "INIT_STATUS"; payload: number }
+  | { type: "INIT_STATUS"; payload: { forgetClass: number; count: number } }
   | { type: "RETRIEVE_STATUS" }
   | { type: "UPDATE_STATUS"; payload: UpdateStatusPayload }
   | { type: "UPDATE_ACTIVE_STEP"; payload: number };

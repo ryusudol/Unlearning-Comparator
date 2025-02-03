@@ -29,9 +29,13 @@ const _Stepper = memo(function _Stepper({
         const isNotLastStep = idx !== steps.length - 1;
 
         let state: "completed" | "active" | "inactive";
-        if (step.step < activeStep) state = "completed";
-        else if (step.step === activeStep) state = "active";
-        else state = "inactive";
+        if (step.step === activeStep) {
+          state = "active";
+        } else if (completedSteps.includes(step.step)) {
+          state = "completed";
+        } else {
+          state = "inactive";
+        }
 
         return (
           <StepperItem
@@ -45,15 +49,17 @@ const _Stepper = memo(function _Stepper({
             )}
             <StepperTrigger className="p-1 cursor-default">
               <Button className="w-6 h-6 p-0 rounded-full z-10 cursor-default hover:bg-[#0F172A]">
-                {state === "completed" ||
-                (completedSteps.length && !isRunning) ? (
+                {state === "active" ? (
+                  isRunning ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Dot className="size-4" />
+                  )
+                ) : state === "completed" ? (
                   <Check className="size-4" />
-                ) : state === "active" ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (!completedSteps.length || isRunning) &&
-                  state === "inactive" ? (
+                ) : (
                   <Dot className="size-4" />
-                ) : null}
+                )}
               </Button>
             </StepperTrigger>
             <div className="flex flex-col">
