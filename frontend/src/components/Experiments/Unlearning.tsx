@@ -42,6 +42,8 @@ export default function UnlearningConfiguration() {
     useState<string>(NO_FILE_CHOSEN);
 
   const isCustom = method === CUSTOM;
+  const totalExperimentsCount =
+    epochList.length * learningRateList.length * batchSizeList.length;
 
   useEffect(() => {
     if (
@@ -182,7 +184,10 @@ export default function UnlearningConfiguration() {
       {configurationContent}
       <Button className="w-full flex items-center mt-4" disabled={isDisabled}>
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
-        <span className="text-base">Run and Add an Experiment</span>
+        <span className="text-base">
+          Run and Add {totalExperimentsCount} Experiment
+          {totalExperimentsCount !== 1 && "s"}
+        </span>
       </Button>
     </form>
   );
