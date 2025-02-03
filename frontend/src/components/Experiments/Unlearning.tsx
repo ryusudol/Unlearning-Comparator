@@ -6,6 +6,7 @@ import Button from "../CustomButton";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
+  fetchDataFile,
 } from "../../utils/api/unlearning";
 import {
   Select,
@@ -14,12 +15,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../UI/select";
+import {
+  getCurrentProgress,
+  getCompletedSteps,
+} from "../../utils/data/running-status-context";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { Label } from "../UI/label";
 import { EraserIcon, PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
+import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { ExperimentsContext } from "../../store/experiments-context";
 import { UNLEARNING_METHODS } from "../../constants/experiments";
 import { UnlearningConfigurationData } from "../../types/experiments";
+import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const NO_FILE_CHOSEN = "No file chosen";
 export const EPOCHS = "epochs";
@@ -27,8 +35,16 @@ export const LEARNING_RATE = "learningRate";
 export const BATCH_SIZE = "batchSize";
 const CUSTOM = "custom";
 
+type Combination = {
+  epochs: number;
+  learning_rate: number;
+  batch_size: number;
+};
+
 export default function UnlearningConfiguration() {
-  const { updateIsRunning, initStatus, updateActiveStep } =
+  const { addExperiment } = useContext(ExperimentsContext);
+  const { saveComparison } = useContext(BaselineComparisonContext);
+  const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useContext(RunningStatusContext);
 
   const { forgetClassNumber } = useForgetClass();
@@ -105,30 +121,96 @@ export default function UnlearningConfiguration() {
     setSelectedFileName(file ? file.name : NO_FILE_CHOSEN);
   };
 
+  const pollStatus = async () => {
+    const startTime = Date.now();
+
+    while (true) {
+      const unlearningStatus = await fetchUnlearningStatus();
+      const progress = getCurrentProgress(unlearningStatus);
+      const completedSteps = getCompletedSteps(progress, unlearningStatus);
+
+      updateStatus({
+        status: unlearningStatus,
+        forgetClass: forgetClassNumber,
+        progress,
+        elapsedTime: Math.round(((Date.now() - startTime) / 1000) * 10) / 10,
+        completedSteps,
+      });
+
+      if (progress.includes("Evaluating")) {
+        updateActiveStep(2);
+      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
+        updateActiveStep(3);
+      }
+
+      if (!unlearningStatus.is_unlearning) {
+        updateIsRunning(false);
+        updateActiveStep(0);
+
+        const newData = await fetchDataFile(
+          forgetClassNumber,
+          unlearningStatus.recent_id as string
+        );
+        addExperiment(newData);
+        saveComparison(newData.id);
+
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const fd = new FormData(e.currentTarget);
     const config = Object.fromEntries(fd.entries());
 
-    updateIsRunning(true);
-    initStatus(forgetClassNumber);
-    updateActiveStep(1);
-
     if (isCustom) {
+      updateIsRunning(true);
+      initStatus(forgetClassNumber);
+      updateActiveStep(1);
+
       await executeCustomUnlearning(
         config.custom_file as File,
         forgetClassNumber
       );
+      await pollStatus();
     } else {
-      const runningConfig: UnlearningConfigurationData = {
-        method: config.method as string,
-        forget_class: forgetClassNumber,
-        epochs: Number(epochList[0]),
-        learning_rate: Number(learningRateList[0]),
-        batch_size: Number(batchSizeList[0]),
-      };
-      await executeMethodUnlearning(runningConfig);
+      const combinations: Combination[] = [];
+      for (const epoch of epochList) {
+        for (const lr of learningRateList) {
+          for (const bs of batchSizeList) {
+            combinations.push({
+              epochs: Number(epoch),
+              learning_rate: Number(lr),
+              batch_size: Number(bs),
+            });
+          }
+        }
+      }
+
+      for (const combination of combinations) {
+        updateIsRunning(true);
+        initStatus(forgetClassNumber);
+        updateActiveStep(1);
+
+        const runningConfig: UnlearningConfigurationData = {
+          method: config.method as string,
+          forget_class: forgetClassNumber,
+          epochs: combination.epochs,
+          learning_rate: combination.learning_rate,
+          batch_size: combination.batch_size,
+        };
+
+        try {
+          await executeMethodUnlearning(runningConfig);
+          await pollStatus();
+        } catch (error) {
+          console.error("Error occured while unlearning: ", error);
+          break;
+        }
+      }
     }
   };
 
