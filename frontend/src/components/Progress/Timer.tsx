@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Clock } from "lucide-react";
 
 import { RunningStatusContext } from "../../store/running-status-context";
@@ -6,17 +6,12 @@ import { useForgetClass } from "../../hooks/useForgetClass";
 import { Separator } from "../../components/UI/separator";
 
 export default function Timer() {
-  const { status, isRunning } = useContext(RunningStatusContext);
+  const { statuses, isRunning, currentIndex } =
+    useContext(RunningStatusContext);
 
   const { forgetClassNumber } = useForgetClass();
 
   const [runningTime, setRunningTime] = useState(0);
-
-  const runningTimeRef = useRef(runningTime);
-
-  useEffect(() => {
-    runningTimeRef.current = runningTime;
-  }, [runningTime]);
 
   useEffect(() => {
     let timerIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -44,7 +39,9 @@ export default function Timer() {
           <span className="text-sm">
             {isRunning
               ? runningTime.toFixed(1)
-              : status[forgetClassNumber].elapsed_time.toFixed(1)}
+              : statuses[forgetClassNumber][currentIndex].elapsed_time.toFixed(
+                  1
+                )}
             s
           </span>
         </div>

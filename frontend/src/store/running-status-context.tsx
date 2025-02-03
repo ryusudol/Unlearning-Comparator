@@ -28,13 +28,23 @@ const initialStatus: UnlearningStatus = {
   completed_steps: [],
 };
 
+const initialRunningStatus: RunningStatus = {
+  isRunning: false,
+  statuses: Array.from({ length: 10 }, () => []),
+  activeStep: 0,
+  currentIndex: 0,
+  totalExperimentsCount: 0,
+};
+
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
-  status: [],
+  statuses: Array.from({ length: 10 }, () => []),
+  currentIndex: 0,
   activeStep: 0,
+  totalExperimentsCount: 0,
 
   updateIsRunning: () => {},
-  initStatus: (forgetClass: number) => {},
+  initStatus: (forgetClass: number, count: number) => {},
   retrieveStatus: () => {},
   updateStatus: (payload: UpdateStatusPayload) => {},
   updateActiveStep: (step: number) => {},
@@ -45,27 +55,29 @@ function runningStatusReducer(
   action: Action
 ): RunningStatus {
   switch (action.type) {
-    case RUNNING_STATUS_ACTIONS.UPDATE_IS_RUNNING:
+    case RUNNING_STATUS_ACTIONS.UPDATE_IS_RUNNING: {
       const isRunning = action.payload;
-      sessionStorage.setItem(
-        RUNNING_STATUS,
-        JSON.stringify({ ...state, isRunning })
-      );
-      return { ...state, isRunning };
+      const newState = { ...state, isRunning };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(newState));
+      return newState;
+    }
 
-    case RUNNING_STATUS_ACTIONS.INIT_STATUS:
-      const forgetClass = action.payload;
-      const newStatus = [...state.status];
-      newStatus[forgetClass] = initialStatus;
-      const initializedStatus = {
+    case RUNNING_STATUS_ACTIONS.INIT_STATUS: {
+      const { forgetClass, count } = action.payload;
+      const newStatuses = [...state.statuses];
+      newStatuses[forgetClass] = Array.from({ length: count }, () => ({
+        ...initialStatus,
+      }));
+      const newState = {
         ...state,
-        status: newStatus,
-        completedSteps: [],
+        statuses: newStatuses,
+        totalExperimentsCount: count,
       };
-      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(initializedStatus));
-      return initializedStatus;
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(newState));
+      return newState;
+    }
 
-    case RUNNING_STATUS_ACTIONS.RETRIEVE_STATUS:
+    case RUNNING_STATUS_ACTIONS.RETRIEVE_STATUS: {
       const savedStatus = sessionStorage.getItem(RUNNING_STATUS);
       if (savedStatus) {
         const parsedStatus: RunningStatus = JSON.parse(savedStatus);
@@ -73,51 +85,61 @@ function runningStatusReducer(
         return parsedStatus;
       }
       return state;
+    }
 
-    case RUNNING_STATUS_ACTIONS.UPDATE_STATUS:
+    case RUNNING_STATUS_ACTIONS.UPDATE_STATUS: {
       const {
         status,
-        forgetClass: fgClass,
+        forgetClass,
+        experimentIndex,
         progress,
         elapsedTime,
-        completedSteps: _completedSteps,
+        completedSteps,
       } = action.payload;
 
-      const currentStatus = state.status[fgClass];
+      const classStatuses = state.statuses[forgetClass] || [];
 
-      const _newStatus: UnlearningStatus = {
-        ...status,
-        progress,
-        elapsed_time: elapsedTime,
-        completed_steps: _completedSteps,
-      };
-
-      const { elapsed_time: _current, ...currentStatusWithoutTime } =
-        currentStatus;
-      const { elapsed_time: _new, ...newStatusWithoutTime } = _newStatus;
-
-      if (
-        JSON.stringify(currentStatusWithoutTime) ===
-        JSON.stringify(newStatusWithoutTime)
-      ) {
+      if (experimentIndex < 0 || experimentIndex >= classStatuses.length) {
         return state;
       }
 
-      const newStatusArray = [...state.status];
-      newStatusArray[fgClass] = _newStatus;
-      const updatedStatus = {
-        ...state,
-        status: newStatusArray,
-        completedSteps: _completedSteps,
-      };
-      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedStatus));
-      return updatedStatus;
+      const currentStatus = classStatuses[experimentIndex];
 
-    case RUNNING_STATUS_ACTIONS.UPDATE_ACTIVE_STEP:
+      const newStatus: UnlearningStatus = {
+        ...currentStatus,
+        ...status,
+        progress,
+        elapsed_time: elapsedTime,
+        completed_steps: completedSteps,
+      };
+
+      const { elapsed_time: _, ...oldWithoutTime } = currentStatus;
+      const { elapsed_time: __, ...newWithoutTime } = newStatus;
+      if (JSON.stringify(oldWithoutTime) === JSON.stringify(newWithoutTime)) {
+        return state;
+      }
+
+      const updatedClassStatuses = [...classStatuses];
+      updatedClassStatuses[experimentIndex] = newStatus;
+
+      const newStatuses = [...state.statuses];
+      newStatuses[forgetClass] = updatedClassStatuses;
+      const newState = {
+        ...state,
+        statuses: newStatuses,
+        currentIndex: experimentIndex,
+      };
+
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(newState));
+      return newState;
+    }
+
+    case RUNNING_STATUS_ACTIONS.UPDATE_ACTIVE_STEP: {
       const step = action.payload;
-      const updatedActiveStep = { ...state, activeStep: step };
-      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(updatedActiveStep));
-      return updatedActiveStep;
+      const newState = { ...state, activeStep: step };
+      sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(newState));
+      return newState;
+    }
 
     default:
       return state;
@@ -129,11 +151,10 @@ export default function RunningStatusContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [runningStatus, dispatch] = useReducer(runningStatusReducer, {
-    isRunning: false,
-    status: Array(10).fill(initialStatus),
-    activeStep: 0,
-  });
+  const [runningStatus, dispatch] = useReducer(
+    runningStatusReducer,
+    initialRunningStatus
+  );
 
   const handleUpdateIsRunning = useCallback((isRunning: boolean) => {
     dispatch({
@@ -142,10 +163,10 @@ export default function RunningStatusContextProvider({
     });
   }, []);
 
-  const handleInitStatus = useCallback((forgetClass: number) => {
+  const handleInitStatus = useCallback((forgetClass: number, count: number) => {
     dispatch({
       type: RUNNING_STATUS_ACTIONS.INIT_STATUS,
-      payload: forgetClass,
+      payload: { forgetClass, count },
     });
   }, []);
 
@@ -170,8 +191,10 @@ export default function RunningStatusContextProvider({
 
   const ctxValue: RunningStatusContextType = {
     isRunning: runningStatus.isRunning,
-    status: runningStatus.status,
+    statuses: runningStatus.statuses,
+    currentIndex: runningStatus.currentIndex,
     activeStep: runningStatus.activeStep,
+    totalExperimentsCount: runningStatus.totalExperimentsCount,
 
     updateIsRunning: handleUpdateIsRunning,
     initStatus: handleInitStatus,

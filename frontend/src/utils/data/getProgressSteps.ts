@@ -7,11 +7,31 @@ const UNLEARNING = "Unlearning";
 const IDLE = "Idle";
 
 export const getProgressSteps = (
-  status: UnlearningStatus,
+  status: UnlearningStatus | null,
   activeStep: number,
   umapProgress: number,
   ckaProgress: number
 ) => {
+  if (!status) {
+    return [
+      {
+        step: 1,
+        title: "Unlearn",
+        description: `Method: **-** | Epochs: **-**\nCurrent Unlearning Accuracy: **-**`,
+      },
+      {
+        step: 2,
+        title: "Evaluate",
+        description: `Training Accuracy: **-**\nTest Accuracy: **-**`,
+      },
+      {
+        step: 3,
+        title: "Analyze",
+        description: `Computing UMAP Embedding\nCalculating CKA Similarity`,
+      },
+    ];
+  }
+
   const method = status && status.method ? status.method : "";
   const progress = status.progress;
   const currentUnlearnAccuracy = status.current_unlearn_accuracy;
