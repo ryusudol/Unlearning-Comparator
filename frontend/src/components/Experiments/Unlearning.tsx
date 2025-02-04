@@ -20,20 +20,22 @@ import {
   getCurrentProgress,
   getCompletedSteps,
 } from "../../utils/data/running-status-context";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import {
+  UNLEARNING_METHODS,
+  EPOCHS,
+  BATCH_SIZE,
+  LEARNING_RATE,
+} from "../../constants/experiments";
 import { Label } from "../UI/label";
+import { useForgetClass } from "../../hooks/useForgetClass";
 import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { ExperimentsContext } from "../../store/experiments-context";
-import { UNLEARNING_METHODS } from "../../constants/experiments";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const NO_FILE_CHOSEN = "No file chosen";
-export const EPOCHS = "epochs";
-export const LEARNING_RATE = "learningRate";
-export const BATCH_SIZE = "batchSize";
 const CUSTOM = "custom";
 
 type Combination = {
