@@ -48,11 +48,12 @@ import { COLUMN_WIDTHS } from "./Columns";
 const BASELINE = "baseline";
 const COMPARISON = "comparison";
 
-export default function DataTable({
-  columns,
-}: {
+interface Props {
   columns: ColumnDef<ExperimentData>[];
-}) {
+  isExpanded: boolean;
+}
+
+export default function DataTable({ columns, isExpanded }: Props) {
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -284,7 +285,7 @@ export default function DataTable({
   };
 
   return (
-    <div className="w-full h-[197px]">
+    <div className={`w-full ${isExpanded ? "h-auto" : "h-[197px]"}`}>
       <div className="relative w-full">
         <Table className="w-full table-fixed border-t">
           <TableHeader>
@@ -332,10 +333,9 @@ export default function DataTable({
             >
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <ContextMenu>
+                  <ContextMenu key={row.id}>
                     <ContextMenuTrigger className="contents">
                       <TableRow
-                        key={row.id}
                         id={row.id}
                         className="!border-b"
                         data-state={row.getIsSelected() && "selected"}

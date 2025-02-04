@@ -1,6 +1,6 @@
 interface Props {
   width?: number;
-  height: number;
+  height: number | string;
   className?: string;
   children: React.ReactNode;
 }

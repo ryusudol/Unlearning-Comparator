@@ -46,7 +46,7 @@ export default function App() {
     <section className="relative" style={{ zoom }}>
       <Header />
       {!isExperimentLoading && (
-        <div className="flex items-center">
+        <div className="flex items-start">
           <div>
             <div className="flex items-center">
               <Experiments
