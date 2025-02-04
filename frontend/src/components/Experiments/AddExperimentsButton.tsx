@@ -47,8 +47,8 @@ export default function AddExperimentsButton() {
           </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[400px] p-4">
-        <DialogHeader className="">
+      <DialogContent className="max-w-[350px] p-4">
+        <DialogHeader>
           <DialogTitle>Experiments</DialogTitle>
         </DialogHeader>
         <UnlearningConfiguration />
