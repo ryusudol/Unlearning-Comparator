@@ -35,12 +35,12 @@ export default function MethodUnlearning({
 
   return (
     <div>
-      <div className="flex items-center mb-2">
+      <div className="flex items-center mb-1">
         <HyperparametersIcon className="w-3.5 ml-[1px] mr-[7px]" />
         <p>Hyperparameters</p>
       </div>
       <div className="ml-10 grid gap-y-2">
-        <div className="grid gap-y-1.5">
+        <div className="grid gap-y-2">
           <HyperparameterInput
             title="Epochs"
             initialValue={initialValues[0]}
@@ -64,7 +64,7 @@ export default function MethodUnlearning({
           )}
         </div>
 
-        <div className="grid gap-y-1.5">
+        <div className="grid gap-y-2">
           <HyperparameterInput
             title="Learning Rate"
             initialValue={initialValues[1]}
@@ -73,7 +73,7 @@ export default function MethodUnlearning({
             {...props}
           />
           {learningRateList.length > 0 && (
-            <div className="flex gap-x-2 mb-1.5">
+            <div className="flex gap-x-2">
               {learningRateList.map((rate, idx) => (
                 <Badge
                   id={LEARNING_RATE}
@@ -88,7 +88,7 @@ export default function MethodUnlearning({
           )}
         </div>
 
-        <div className="grid gap-y-1.5">
+        <div className="grid gap-y-2">
           <HyperparameterInput
             title="Batch Size"
             initialValue={initialValues[2]}

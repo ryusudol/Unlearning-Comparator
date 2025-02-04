@@ -314,7 +314,7 @@ export default function UnlearningConfiguration() {
         </Select>
       </div>
       {configurationContent}
-      <Button className="w-full flex items-center mt-4" disabled={isDisabled}>
+      <Button className="w-full flex items-center mt-2" disabled={isDisabled}>
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
         <span className="text-base">
           Run and Add {totalExperimentsCount} Experiment
