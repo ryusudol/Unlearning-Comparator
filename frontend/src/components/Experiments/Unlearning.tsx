@@ -326,7 +326,7 @@ export default function UnlearningConfiguration() {
         >
           {totalExperimentsCount}
         </span>{" "}
-        experiments.
+        experiment{totalExperimentsCount > 1 ? "s" : ""}.
       </span>
       <Button className="w-full mt-1 flex items-center" disabled={isDisabled}>
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
