@@ -13,6 +13,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import ViewModeSelector from "./ViewModeSelector";
+import EmbeddingTooltip from "./EmbeddingTooltip";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
@@ -25,7 +26,6 @@ import {
   ViewModeType,
   SvgElementsRefType,
 } from "../../types/embeddings";
-import EmbeddingTooltip from "./EmbeddingTooltip";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
