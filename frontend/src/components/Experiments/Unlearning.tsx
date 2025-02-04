@@ -63,10 +63,6 @@ export default function UnlearningConfiguration() {
   const isCustom = method === CUSTOM;
   const totalExperimentsCount =
     epochList.length * learningRateList.length * batchSizeList.length;
-  const isAnyListEmpty =
-    epochList.length === 0 ||
-    learningRateList.length === 0 ||
-    batchSizeList.length === 0;
 
   useEffect(() => {
     async function fetchWeights() {
@@ -83,13 +79,21 @@ export default function UnlearningConfiguration() {
   useEffect(() => {
     if (
       (isCustom && selectedFileName === NO_FILE_CHOSEN) ||
-      (!isCustom && isAnyListEmpty)
+      (!isCustom && epochList.length === 0) ||
+      learningRateList.length === 0 ||
+      batchSizeList.length === 0
     ) {
       setIsDisabled(true);
     } else {
       setIsDisabled(false);
     }
-  }, [isCustom, selectedFileName, isAnyListEmpty]);
+  }, [
+    batchSizeList.length,
+    epochList.length,
+    isCustom,
+    learningRateList.length,
+    selectedFileName,
+  ]);
 
   const handleInitialModelChange = (model: string) => {
     setSelectedInitialModel(model);
@@ -309,17 +313,22 @@ export default function UnlearningConfiguration() {
         </Select>
       </div>
       {configurationContent}
-      {!isAnyListEmpty && (
-        <span className="text-xs mb-1 mt-1">
-          This action will generate{" "}
-          <span className="text-red-600">{totalExperimentsCount}</span>{" "}
-          experiments.
-        </span>
-      )}
-      <Button
-        className={`w-full flex items-center ${isAnyListEmpty && "mt-2"}`}
-        disabled={isDisabled}
+      <span
+        className={`mb-1 w-full text-center ${
+          batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
+        }`}
       >
+        This action will generate{" "}
+        <span
+          className={`font-bold ${
+            totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
+          }`}
+        >
+          {totalExperimentsCount}
+        </span>{" "}
+        experiments.
+      </span>
+      <Button className="w-full flex items-center" disabled={isDisabled}>
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
         <span className="text-base">Run and Add Experiments</span>
       </Button>

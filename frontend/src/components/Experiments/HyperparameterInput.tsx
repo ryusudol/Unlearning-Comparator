@@ -98,18 +98,18 @@ export default function HyperparameterInput({
   };
 
   return (
-    <div className="grid grid-cols-[80px,1fr,auto] gap-y-2 items-center">
+    <div className="grid grid-cols-[80px,1fr,auto] gap-x-2 gap-y-2 items-center">
       <span className="text-sm">{title}</span>
       <Input
         type="number"
         step={isIntegerInput ? "1" : "any"}
-        className="w-[194px] h-[25px] px-1.5 mx-2"
+        className="w-full h-[25px] px-1.5"
         value={value}
         onChange={handleValueChange}
         {...props}
       />
       <div
-        className={`flex justify-center items-center border rounded ml-1.5 w-[25px] h-[25px] ${
+        className={`flex justify-center items-center border rounded w-[25px] h-[25px] ${
           isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
         }`}
         onClick={handlePlusClick}
