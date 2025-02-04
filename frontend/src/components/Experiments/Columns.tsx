@@ -88,7 +88,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     accessorKey: "epochs",
     header: ({ column }) => (
       <Button
-        className="w-full px-0 h-[34px]"
+        className="w-full px-0 h-[34px] justify-start"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -108,7 +108,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
-            className="w-full px-0 h-[34px]"
+            className="w-full px-0 h-[34px] justify-start"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -133,7 +133,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
-            className="w-full px-0 h-[34px]"
+            className="w-full px-0 h-[34px] justify-start"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >

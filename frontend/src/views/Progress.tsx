@@ -46,14 +46,11 @@ export default function Progress({ width, height }: ViewProps) {
 
   const steps: Step[] = useMemo(
     () =>
-      forgetClassExist && currentStatus
+      forgetClassExist
         ? getProgressSteps(currentStatus, activeStep, umapProgress, ckaProgress)
         : [],
     [activeStep, ckaProgress, currentStatus, forgetClassExist, umapProgress]
   );
-  // console.log("currentStatus:", currentStatus);
-  // console.log("progress:", progress);
-  // console.log("steps:", steps);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;

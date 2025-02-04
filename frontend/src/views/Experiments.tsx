@@ -2,7 +2,7 @@ import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
-import AddExperimentButton from "../components/Experiments/AddExperimentButton";
+import AddExperimentsButton from "../components/Experiments/AddExperimentsButton";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 import { columns } from "../components/Experiments/Columns";
@@ -19,7 +19,7 @@ export default function Experiments({ width, height }: ViewProps) {
           title="Experiments"
           customClass="right-[1px]"
         />
-        {forgetClassExist && <AddExperimentButton />}
+        {forgetClassExist && <AddExperimentsButton />}
       </div>
       {forgetClassExist ? (
         <DataTable columns={columns} />
