@@ -35,12 +35,12 @@ export default function MethodUnlearning({
 
   return (
     <div>
-      <div className="flex items-center mb-1">
+      <div className="flex items-center mb-1.5">
         <HyperparametersIcon className="w-3.5 ml-[1px] mr-[7px]" />
         <p>Hyperparameters</p>
       </div>
-      <div className="ml-10 grid gap-y-2">
-        <div className="grid gap-y-2">
+      <div className="ml-10 grid gap-y-2.5">
+        <div className="grid gap-y-2.5">
           <HyperparameterInput
             title="Epochs"
             initialValue={initialValues[0]}
@@ -64,7 +64,7 @@ export default function MethodUnlearning({
           )}
         </div>
 
-        <div className="grid gap-y-2">
+        <div className="grid gap-y-2.5">
           <HyperparameterInput
             title="Learning Rate"
             initialValue={initialValues[1]}
@@ -88,7 +88,7 @@ export default function MethodUnlearning({
           )}
         </div>
 
-        <div className="grid gap-y-2">
+        <div className="grid gap-y-2.5">
           <HyperparameterInput
             title="Batch Size"
             initialValue={initialValues[2]}
