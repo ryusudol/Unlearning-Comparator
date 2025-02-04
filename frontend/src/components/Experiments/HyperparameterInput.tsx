@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "../UI/input";
 import { PlusIcon } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
-import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "./Unlearning";
+import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
 
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "list"> {

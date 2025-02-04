@@ -4,7 +4,7 @@ import HyperparameterInput from "./HyperparameterInput";
 import { Badge } from "../UI/badge";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { HyperparametersIcon } from "../UI/icons";
-import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "./Unlearning";
+import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   method: string;

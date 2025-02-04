@@ -32,6 +32,12 @@ export default function Progress({ width, height }: ViewProps) {
   const [currentPage, setCurrentPage] = useState(currentIndex + 1);
 
   useEffect(() => {
+    if (isRunning) {
+      setCurrentPage(1);
+    }
+  }, [isRunning]);
+
+  useEffect(() => {
     setCurrentPage(currentIndex + 1);
   }, [currentIndex]);
 
