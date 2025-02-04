@@ -1,4 +1,5 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
+import ReactDOM from "react-dom";
 import {
   ColumnDef,
   SortingState,
@@ -53,6 +54,29 @@ interface Props {
   isExpanded: boolean;
 }
 
+function ExpandedOverlay({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style: React.CSSProperties;
+}) {
+  return ReactDOM.createPortal(
+    <div
+      style={{
+        position: "absolute",
+        ...style,
+        zIndex: 999,
+        backgroundColor: "white",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+      }}
+    >
+      {children}
+    </div>,
+    document.body
+  );
+}
+
 export default function DataTable({ columns, isExpanded }: Props) {
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
@@ -64,6 +88,14 @@ export default function DataTable({ columns, isExpanded }: Props) {
   const { baseline, comparison } = useModelSelection();
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [overlayStyle, setOverlayStyle] = useState<React.CSSProperties>({
+    top: 0,
+    left: 0,
+    width: "100%",
+  });
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const tableData = useMemo(() => {
     const experimentsArray = Object.values(experiments);
@@ -88,49 +120,35 @@ export default function DataTable({ columns, isExpanded }: Props) {
   ) as PerformanceMetrics;
 
   const modifiedColumns = columns.map((column) => {
-    if (column.id === BASELINE) {
-      return {
-        ...column,
-        cell: ({ row }: CellContext<ExperimentData, unknown>) => (
+    if (column.id !== BASELINE && column.id !== COMPARISON) {
+      return column;
+    }
+
+    const isBaselineColumn = column.id === BASELINE;
+    const currentSelection = isBaselineColumn ? baseline : comparison;
+    const saveFunction = isBaselineColumn ? saveBaseline : saveComparison;
+    const disabledValue = isBaselineColumn ? comparison : baseline;
+
+    return {
+      ...column,
+      cell: ({ row }: CellContext<ExperimentData, unknown>) => {
+        const isSelected = currentSelection === row.id;
+        return (
           <RadioGroup className="flex justify-center items-center ml-[0px]">
             <RadioGroupItem
               value={row.id}
               className={cn(
                 "w-[18px] h-[18px] rounded-full",
-                baseline === row.id && "[&_svg]:h-3 [&_svg]:w-3"
+                isSelected && "[&_svg]:h-3 [&_svg]:w-3"
               )}
-              checked={baseline === row.id}
-              onClick={() => {
-                saveBaseline(baseline === row.id ? "" : row.id);
-              }}
-              disabled={comparison === row.id}
+              checked={isSelected}
+              onClick={() => saveFunction(isSelected ? "" : row.id)}
+              disabled={disabledValue === row.id}
             />
           </RadioGroup>
-        ),
-      };
-    }
-    if (column.id === COMPARISON) {
-      return {
-        ...column,
-        cell: ({ row }: CellContext<ExperimentData, unknown>) => (
-          <RadioGroup className="flex justify-center items-center ml-[0px]">
-            <RadioGroupItem
-              value={row.id}
-              className={cn(
-                "w-[18px] h-[18px] rounded-full",
-                comparison === row.id && "[&_svg]:h-3 [&_svg]:w-3"
-              )}
-              checked={comparison === row.id}
-              onClick={() => {
-                saveComparison(comparison === row.id ? "" : row.id);
-              }}
-              disabled={baseline === row.id}
-            />
-          </RadioGroup>
-        ),
-      };
-    }
-    return column;
+        );
+      },
+    };
   });
 
   const opacityMapping = useMemo(() => {
@@ -147,11 +165,8 @@ export default function DataTable({ columns, isExpanded }: Props) {
         );
 
       const uniqueValues = Array.from(new Set(values));
-
       uniqueValues.sort((a, b) => a - b);
-
       const numUniqueValues = uniqueValues.length;
-
       const valueOpacityMap: { [value: number]: number } = {};
 
       if (numUniqueValues === 0) {
@@ -166,7 +181,6 @@ export default function DataTable({ columns, isExpanded }: Props) {
           valueOpacityMap[value] = opacity;
         });
       }
-
       mapping[columnId] = valueOpacityMap;
     });
 
@@ -256,19 +270,14 @@ export default function DataTable({ columns, isExpanded }: Props) {
   const handleDownloadJSON = async (id: string) => {
     try {
       const json = await downloadJSON(forgetClassNumber, id);
-
       const jsonString = JSON.stringify(json, null, 2);
-
       const blob = new Blob([jsonString], { type: "application/json" });
-
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = `${id}.json`;
-
       document.body.appendChild(link);
       link.click();
-
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -284,160 +293,163 @@ export default function DataTable({ columns, isExpanded }: Props) {
     }
   };
 
-  return (
-    <div className={`w-full ${isExpanded ? "h-auto" : "h-[197px]"}`}>
-      <div className="relative w-full">
-        <Table className="w-full table-fixed border-t">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const columnWidth =
-                    COLUMN_WIDTHS[
-                      header.column.id as keyof typeof COLUMN_WIDTHS
-                    ];
-                  return (
-                    <TableHead
-                      key={header.id}
-                      style={{
-                        width: `${columnWidth}px`,
-                        minWidth: `${columnWidth}px`,
-                        ...(header.column.id === BASELINE && {
-                          paddingRight: 0,
-                        }),
-                        ...(header.column.id === COMPARISON && {
-                          paddingLeft: 0,
-                        }),
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-        </Table>
-        <ScrollArea className="w-full h-[161px]">
-          <Table className="w-full table-fixed">
-            <TableBody
-              className={`text-sm ${
-                table.getRowModel().rows?.length <= 5 &&
-                "[&_tr:last-child]:border-b"
-              }`}
-            >
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <ContextMenu key={row.id}>
-                    <ContextMenuTrigger className="contents">
-                      <TableRow
-                        id={row.id}
-                        className="!border-b"
-                        data-state={row.getIsSelected() && "selected"}
-                      >
-                        {row.getVisibleCells().map((cell, idx) => {
-                          const columnId = cell.column.id;
-                          const columnWidth =
-                            COLUMN_WIDTHS[
-                              columnId as keyof typeof COLUMN_WIDTHS
-                            ];
+  useEffect(() => {
+    if (isExpanded && containerRef.current && headerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const headerHeight = headerRef.current.offsetHeight;
+      setOverlayStyle({
+        top: containerRect.top + headerHeight + window.scrollY,
+        left: containerRect.left + window.scrollX,
+        width: containerRect.width,
+      });
+    }
+  }, [isExpanded]);
 
-                          const isPerformanceMetric =
-                            columnId in performanceMetrics;
-
-                          let cellStyle: React.CSSProperties = {
-                            width: `${columnWidth}px`,
-                            minWidth: `${columnWidth}px`,
-                            ...(columnId === BASELINE && { paddingRight: 0 }),
-                            ...(columnId === COMPARISON && { paddingLeft: 0 }),
-                          };
-
-                          if (isPerformanceMetric) {
-                            const { baseColor } = performanceMetrics[columnId];
-                            const value = cell.getValue() as number;
-                            const opacity =
-                              opacityMapping[columnId]?.[value] ?? 0;
-
-                            if (baseColor) {
-                              let color, textColor;
-
-                              if (tableData.length === 1 && value === 0) {
-                                color = COLORS.WHITE;
-                                textColor = COLORS.BLACK;
-                              } else {
-                                color = hexToRgba(baseColor, opacity);
-                                textColor =
-                                  opacity >= 0.8 ? COLORS.WHITE : COLORS.BLACK;
-                              }
-
-                              cellStyle = {
-                                ...cellStyle,
-                                borderLeft:
-                                  columnId === "UA"
-                                    ? "1px solid rgb(229 231 235)"
-                                    : "none",
-                                borderRight:
-                                  idx === row.getVisibleCells().length - 1
-                                    ? "none"
-                                    : "1px solid rgb(229 231 235)",
-                                backgroundColor: color,
-                                color: textColor,
-                              };
-                            }
-                          }
-
-                          return (
-                            <TableCell key={cell.id} style={cellStyle}>
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      {!row.id.startsWith("000") &&
-                        !row.id.startsWith("a00") && (
-                          <ContextMenuItem
-                            onClick={() => handleDeleteRow(row.id)}
-                          >
-                            Delete
-                          </ContextMenuItem>
-                        )}
-                      <ContextMenuItem
-                        onClick={() => handleDownloadJSON(row.id)}
-                      >
-                        Download JSON
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => handleDownloadPTH(row.id)}
-                      >
-                        Download PTH
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-[178px] text-center text-gray-500 text-[15px]"
+  const tableHeader = (
+    <div ref={headerRef}>
+      <Table className="w-full table-fixed border-t">
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const columnWidth =
+                  COLUMN_WIDTHS[header.column.id as keyof typeof COLUMN_WIDTHS];
+                return (
+                  <TableHead
+                    key={header.id}
+                    style={{
+                      width: `${columnWidth}px`,
+                      minWidth: `${columnWidth}px`,
+                      ...(header.column.id === BASELINE && { paddingRight: 0 }),
+                      ...(header.column.id === COMPARISON && {
+                        paddingLeft: 0,
+                      }),
+                    }}
                   >
-                    Failed to load the data.
-                  </TableCell>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+      </Table>
+    </div>
+  );
+
+  const tableBodyContent = (
+    <Table className="w-full table-fixed">
+      <TableBody
+        className={`text-sm ${
+          table.getRowModel().rows?.length <= 5 && "[&_tr:last-child]:border-b"
+        }`}
+      >
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <ContextMenu key={row.id}>
+              <ContextMenuTrigger className="contents">
+                <TableRow
+                  id={row.id}
+                  className="!border-b"
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell, idx) => {
+                    const columnId = cell.column.id;
+                    const columnWidth =
+                      COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
+                    const isPerformanceMetric = columnId in performanceMetrics;
+                    let cellStyle: React.CSSProperties = {
+                      width: `${columnWidth}px`,
+                      minWidth: `${columnWidth}px`,
+                      ...(columnId === BASELINE && { paddingRight: 0 }),
+                      ...(columnId === COMPARISON && { paddingLeft: 0 }),
+                    };
+
+                    if (isPerformanceMetric) {
+                      const { baseColor } = performanceMetrics[columnId];
+                      const value = cell.getValue() as number;
+                      const opacity = opacityMapping[columnId]?.[value] ?? 0;
+                      if (baseColor) {
+                        let color, textColor;
+                        if (tableData.length === 1 && value === 0) {
+                          color = COLORS.WHITE;
+                          textColor = COLORS.BLACK;
+                        } else {
+                          color = hexToRgba(baseColor, opacity);
+                          textColor =
+                            opacity >= 0.8 ? COLORS.WHITE : COLORS.BLACK;
+                        }
+                        cellStyle = {
+                          ...cellStyle,
+                          borderLeft:
+                            columnId === "UA"
+                              ? "1px solid rgb(229 231 235)"
+                              : "none",
+                          borderRight:
+                            idx === row.getVisibleCells().length - 1
+                              ? "none"
+                              : "1px solid rgb(229 231 235)",
+                          backgroundColor: color,
+                          color: textColor,
+                        };
+                      }
+                    }
+
+                    return (
+                      <TableCell key={cell.id} style={cellStyle}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="z-[1000]">
+                {!row.id.startsWith("000") && !row.id.startsWith("a00") && (
+                  <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
+                    Delete
+                  </ContextMenuItem>
+                )}
+                <ContextMenuItem onClick={() => handleDownloadJSON(row.id)}>
+                  Download JSON
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => handleDownloadPTH(row.id)}>
+                  Download PTH
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell
+              colSpan={columns.length}
+              className="h-[178px] text-center text-gray-500 text-[15px]"
+            >
+              Failed to load the data.
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  );
+
+  return (
+    <div ref={containerRef} className="relative w-full overflow-visible">
+      {tableHeader}
+      {isExpanded ? (
+        <ExpandedOverlay style={overlayStyle}>
+          {tableBodyContent}
+        </ExpandedOverlay>
+      ) : (
+        <ScrollArea className="w-full h-[161px]">{tableBodyContent}</ScrollArea>
+      )}
     </div>
   );
 }
