@@ -318,7 +318,7 @@ export default function UnlearningConfiguration() {
           batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
         }`}
       >
-        This action will generate{" "}
+        This configuration will generate{" "}
         <span
           className={`font-bold ${
             totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
@@ -328,7 +328,7 @@ export default function UnlearningConfiguration() {
         </span>{" "}
         experiments.
       </span>
-      <Button className="w-full flex items-center" disabled={isDisabled}>
+      <Button className="w-full mt-1 flex items-center" disabled={isDisabled}>
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
         <span className="text-base">Run and Add Experiments</span>
       </Button>

@@ -34,12 +34,12 @@ export default function MethodUnlearning({
   }, [method]);
 
   return (
-    <div>
+    <div className="w-full">
       <div className="flex items-center mb-1.5">
         <HyperparametersIcon className="w-3.5 ml-[1px] mr-[7px]" />
         <p>Hyperparameters</p>
       </div>
-      <div className="ml-10 grid gap-y-2.5">
+      <div className="w-full pl-8 grid gap-y-2.5">
         <div className="grid gap-y-2.5">
           <HyperparameterInput
             title="Epochs"
