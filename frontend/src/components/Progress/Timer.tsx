@@ -15,11 +15,15 @@ export default function Timer() {
 
   useEffect(() => {
     let timerIntervalId: ReturnType<typeof setInterval> | null = null;
+    let startTime: number;
 
     if (isRunning) {
+      startTime = Date.now();
       setRunningTime(0);
+
       timerIntervalId = setInterval(() => {
-        setRunningTime((prev) => prev + 0.1);
+        const elapsed = (Date.now() - startTime) / 1000;
+        setRunningTime(elapsed);
       }, 100);
     }
 
@@ -40,7 +44,7 @@ export default function Timer() {
             {isRunning
               ? runningTime.toFixed(1)
               : statuses[forgetClassNumber][currentIndex].elapsed_time.toFixed(
-                  1
+                  1,
                 )}
             s
           </span>
