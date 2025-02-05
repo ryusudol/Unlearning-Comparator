@@ -63,8 +63,11 @@ export default function UnlearningConfiguration() {
     useState<string>(NO_FILE_CHOSEN);
 
   const isCustom = method === CUSTOM;
-  const totalExperimentsCount =
-    epochList.length * learningRateList.length * batchSizeList.length;
+  const totalExperimentsCount = isCustom
+    ? selectedFileName === NO_FILE_CHOSEN
+      ? 0
+      : 1
+    : epochList.length * learningRateList.length * batchSizeList.length;
 
   useEffect(() => {
     async function fetchWeights() {
@@ -81,9 +84,10 @@ export default function UnlearningConfiguration() {
   useEffect(() => {
     if (
       (isCustom && selectedFileName === NO_FILE_CHOSEN) ||
-      (!isCustom && epochList.length === 0) ||
-      learningRateList.length === 0 ||
-      batchSizeList.length === 0
+      (!isCustom &&
+        (epochList.length === 0 ||
+          learningRateList.length === 0 ||
+          batchSizeList.length === 0))
     ) {
       setIsDisabled(true);
     } else {
