@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
+import MethodFilterHeader from "./MethodFilterHeader";
 import {
   HoverCard,
   HoverCardContent,
@@ -77,7 +78,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "method",
-    header: "Method",
+    header: ({ column }) => <MethodFilterHeader column={column} />,
+    filterFn: (row, columnId, filterValue) => {
+      const rowValue = row.getValue(columnId);
+      if (filterValue === "all") return true;
+      return String(rowValue) === filterValue;
+    },
     cell: ({ row }) => {
       const method = row.getValue("method");
       const value = getValueToDisplay(method);
