@@ -39,7 +39,11 @@ export default function Experiments({ width, height }: ViewProps) {
             className="w-5 h-5 flex justify-center items-center cursor-pointer ml-0 bg-white hover:bg-[#f8f9fb] transition"
             onClick={handleExpandClick}
           >
-            {isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />}
+            {isExpanded ? (
+              <ArrowDownIcon className="scale-[115%]" />
+            ) : (
+              <ArrowRightIcon className="scale-[115%]" />
+            )}
           </div>
         </div>
         {forgetClassExist && <AddExperimentsButton />}
