@@ -33,54 +33,58 @@ export const ExperimentsContext = createContext<ContextType>({
 
 function ExperimentsReducer(state: Context, action: Action): Context {
   switch (action.type) {
-    case EXPERIMENTS_ACTIONS.ADD_EXPERIMENT:
-      const experiment = action.payload;
+    case EXPERIMENTS_ACTIONS.ADD_EXPERIMENT: {
+      const newExperiment = action.payload;
       const newExperiments = {
         ...state.experiments,
-        [experiment.id]: experiment,
+        [newExperiment.id]: newExperiment,
       };
-      sessionStorage.setItem(
-        EXPERIMENTS,
-        JSON.stringify({ ...state, experiments: newExperiments })
-      );
-      return { ...state, experiments: newExperiments };
+      const result = { ...state, experiments: newExperiments };
+      sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
+      return result;
+    }
 
-    case EXPERIMENTS_ACTIONS.SAVE_EXPERIMENTS:
+    case EXPERIMENTS_ACTIONS.SAVE_EXPERIMENTS: {
       const experiments = action.payload;
-      sessionStorage.setItem(
-        EXPERIMENTS,
-        JSON.stringify({ ...state, experiments })
-      );
-      return { ...state, experiments };
+      const result = { ...state, experiments };
+      sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
+      return result;
+    }
 
-    case EXPERIMENTS_ACTIONS.RETRIEVE_EXPERIMENTS:
+    case EXPERIMENTS_ACTIONS.RETRIEVE_EXPERIMENTS: {
       const savedExperimentsContext = sessionStorage.getItem(EXPERIMENTS);
-      if (savedExperimentsContext) {
-        const parsedExperimentsContext: Context = JSON.parse(
-          savedExperimentsContext
-        );
-        return {
-          ...parsedExperimentsContext,
-          isExperimentLoading: false,
-        };
-      }
-      return {
+      let result = {
         ...state,
         isExperimentLoading: false,
       };
 
-    case EXPERIMENTS_ACTIONS.DELETE_EXPERIMENT:
+      if (savedExperimentsContext) {
+        const parsedExperimentsContext: Context = JSON.parse(
+          savedExperimentsContext,
+        );
+        result = {
+          ...parsedExperimentsContext,
+          isExperimentLoading: false,
+        };
+      }
+      return result;
+    }
+
+    case EXPERIMENTS_ACTIONS.DELETE_EXPERIMENT: {
       const id = action.payload;
       const { [id]: deletedExperiment, ...remainingExperiments } =
         state.experiments;
-      sessionStorage.setItem(
-        EXPERIMENTS,
-        JSON.stringify({ ...state, experiments: remainingExperiments })
-      );
-      return { ...state, experiments: remainingExperiments };
+      const result = {
+        ...state,
+        experiments: remainingExperiments,
+      };
+      sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
+      return result;
+    }
 
-    case EXPERIMENTS_ACTIONS.SET_IS_EXPERIMENTS_LOADING:
+    case EXPERIMENTS_ACTIONS.SET_IS_EXPERIMENTS_LOADING: {
       return { ...state, isExperimentLoading: action.payload };
+    }
 
     default:
       return state;
