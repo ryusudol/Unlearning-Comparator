@@ -101,7 +101,7 @@ def visualize_distributions(logit_entropies, max_logit_gaps, forget_class, t1, t
     plt.grid(True, alpha=0.2)
     
     plt.tight_layout()
-    plt.savefig(f'attack/{forget_class}/class_{forget_class}_entropy_distribution_t1_{t1}_t2_{t2}_{timestamp}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'attack/{forget_class}/class_{forget_class}_entropy_t1_{t1}_t2_{t2}_{timestamp}.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 async def process_attack_metrics(
@@ -110,7 +110,8 @@ async def process_attack_metrics(
         device, 
         forget_class=5, 
         t1=2.0,
-        t2=1.0):
+        t2=1.0
+):
     model.eval()
     logit_entropies = []
     max_logit_gaps = []
@@ -123,12 +124,12 @@ async def process_attack_metrics(
                 if labels[i].item() == forget_class:
                     logits = outputs[i]
                     
-                    # For entropy, use scaled logits (temperature=1.0)
+                    # For entropy, use scaled logits
                     scaled_logits_for_entropy = logits / t1
                     probs_for_entropy = F.softmax(scaled_logits_for_entropy, dim=0).cpu().numpy()
                     logit_entropy = entropy(probs_for_entropy)
                     
-                    # For confidence, use scaled logits (temperature=0.5)
+                    # For confidence, use scaled logits
                     scaled_logits_for_confidence = logits / t2
                     probs_for_confidence = F.softmax(scaled_logits_for_confidence, dim=0).cpu().numpy()
                     max_prob_idx = np.argmax(probs_for_confidence)
@@ -140,9 +141,9 @@ async def process_attack_metrics(
                     max_logit_gaps.append(confidence_score)
     
     distribution_data = prepare_distribution_data(logit_entropies, max_logit_gaps)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now().strftime("%m%d_%H%M%S")
     
-    json_filename = f'attack/{forget_class}/class_{forget_class}_distribution_t1_{t1}_t2_{t2}_{timestamp}.json'
+    json_filename = f'attack/{forget_class}/class_{forget_class}_t1_{t1}_t2_{t2}_{timestamp}.json'
     with open(json_filename, 'w') as f:
         json.dump(distribution_data, f, indent=4)
     
