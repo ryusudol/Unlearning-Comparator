@@ -731,13 +731,13 @@ export const FilterIcon = (props: React.SVGProps<SVGSVGElement>) => (
     width={16}
     height={16}
     color={"#64758B"}
-    fill={"none"}
+    fill={"#64758B"}
     {...props}
   >
     <path
       d="M3.00073 3.10253V6.98276L9.00802 11.9828L9.9627 20.908C9.97018 20.9779 10.0454 21.0185 10.1078 20.9864L13.9732 18.996L15.0151 11.9828L20.9993 6.9692V3.10252C20.9993 3.04725 20.9545 3.00244 20.8993 3.00244L3.10069 3.00245C3.04548 3.00245 3.00073 3.04726 3.00073 3.10253Z"
       stroke="currentColor"
-      strokeWidth="2.5"
+      strokeWidth="1"
     />
   </svg>
 );
