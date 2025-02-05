@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
-import { LogoIcon, GithubIcon } from "../UI/icons";
+import { GithubIcon } from "../UI/icons";
 import { DatasetContext } from "../../store/dataset-context";
 import { NeuralNetworkModelContext } from "../../store/neural-network-model-context";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
@@ -16,13 +16,13 @@ import {
 export default function Header() {
   const { dataset, saveDataset } = useContext(DatasetContext);
   const { neuralNetworkModel, saveNeuralNetworkModel } = useContext(
-    NeuralNetworkModelContext
+    NeuralNetworkModelContext,
   );
 
   const handleGithubIconClick = () => {
     window.open(
       "https://github.com/gnueaj/Machine-Unlearning-Comparator",
-      "_blank"
+      "_blank",
     );
   };
 
@@ -39,9 +39,8 @@ export default function Header() {
       <div>
         <div className="flex items-center relative">
           <div className="flex items-center">
-            <LogoIcon className="w-7 h-7" />
-            <span className="text-2xl font-semibold ml-2 mr-10">
-              UnlearningComparator
+            <span className="text-2xl font-semibold mr-10">
+              Unlearning Comparator
             </span>
           </div>
           <ForgetClassTabs />
