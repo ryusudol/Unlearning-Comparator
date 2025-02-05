@@ -24,7 +24,7 @@ export const ExperimentsContext = createContext<ContextType>({
   comparisonExperiment: undefined,
   isExperimentLoading: false,
 
-  addExperiment: (experiment: ExperimentData) => {},
+  addExperiment: (experiment: ExperimentData, tempIdx?: number) => {},
   saveExperiments: (experiments: Experiments) => {},
   retrieveExperiments: () => {},
   deleteExperiment: (id: string) => {},
@@ -34,11 +34,18 @@ export const ExperimentsContext = createContext<ContextType>({
 function ExperimentsReducer(state: Context, action: Action): Context {
   switch (action.type) {
     case EXPERIMENTS_ACTIONS.ADD_EXPERIMENT: {
-      const newExperiment = action.payload;
-      const newExperiments = {
-        ...state.experiments,
-        [newExperiment.id]: newExperiment,
-      };
+      const { experiment, tempIdx } = action.payload;
+      const newExperiments = experiment.id
+        ? {
+            ...state.experiments,
+            [experiment.id]: experiment,
+          }
+        : tempIdx
+          ? {
+              ...state.experiments,
+              "": experiment,
+            }
+          : { ...state.experiments };
       const result = { ...state, experiments: newExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
       return result;
@@ -113,9 +120,15 @@ export default function ExperimentsContextProvider({
     return experimentsContext.experiments[comparison];
   }, [comparison, experimentsContext.experiments]);
 
-  const handleAddExperiment = useCallback((experiment: ExperimentData) => {
-    dispatch({ type: EXPERIMENTS_ACTIONS.ADD_EXPERIMENT, payload: experiment });
-  }, []);
+  const handleAddExperiment = useCallback(
+    (experiment: ExperimentData, tempIdx?: number) => {
+      dispatch({
+        type: EXPERIMENTS_ACTIONS.ADD_EXPERIMENT,
+        payload: { experiment, tempIdx },
+      });
+    },
+    [],
+  );
 
   const handleSaveExperiments = useCallback((experiments: Experiments) => {
     dispatch({
