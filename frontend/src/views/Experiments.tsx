@@ -7,7 +7,6 @@ import DataTable from "../components/Experiments/DataTable";
 import AddExperimentsButton from "../components/Experiments/AddExperimentsButton";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
-import { columns } from "../components/Experiments/Columns";
 import {
   SettingsIcon,
   ArrowDownIcon,
@@ -50,7 +49,7 @@ export default function Experiments({ width, height }: ViewProps) {
         {forgetClassExist && <AddExperimentsButton />}
       </div>
       {forgetClassExist ? (
-        <DataTable columns={columns} isExpanded={isExpanded} />
+        <DataTable isExpanded={isExpanded} />
       ) : (
         <Indicator about="ForgetClass" />
       )}
