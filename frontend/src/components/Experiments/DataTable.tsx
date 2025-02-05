@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import {
   SortingState,
   getCoreRowModel,
@@ -21,12 +21,7 @@ import { cn } from "../../utils/util";
 import { BASELINE, COMPARISON } from "../../constants/common";
 import { columns } from "./Columns";
 
-const TABLE_CONFIG = {
-  TABLE_HEADER_HEIGHT: 35,
-  TABLE_TOP_OFFSET: 83,
-  TABLE_LEFT_OFFSET: 4,
-  TABLE_WIDTH: 1023,
-} as const;
+const TABLE_HEADER_HEIGHT = 35;
 
 interface Props {
   isExpanded: boolean;
@@ -127,12 +122,12 @@ export default function DataTable({ isExpanded }: Props) {
   ]);
 
   return (
-    <div className="relative w-full overflow-visible">
+    <div className="relative right-1 w-[calc(100%+8px)] overflow-visible">
       <TableHeader table={table} />
       {isExpanded ? (
         <div
           className="absolute z-[49] bg-white shadow-xl rounded-b-md"
-          style={{ top: TABLE_CONFIG.TABLE_HEADER_HEIGHT + 1 }}
+          style={{ top: TABLE_HEADER_HEIGHT + 1 }}
         >
           <TableBody table={table} tableData={tableData} />
         </div>

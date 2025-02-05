@@ -10,7 +10,7 @@ import { ViewProps } from "../types/common";
 import {
   SettingsIcon,
   ArrowDownIcon,
-  ArrowUpIcon,
+  ArrowRightIcon,
 } from "../components/UI/icons";
 
 export default function Experiments({ width, height }: ViewProps) {
@@ -36,13 +36,13 @@ export default function Experiments({ width, height }: ViewProps) {
             customClass="right-[1px]"
           />
           <div
-            className="w-5 h-5 flex justify-center items-center border-[1px] border-[#585858] rounded cursor-pointer ml-3 bg-white hover:bg-[#f8f9fb] transition"
+            className="w-5 h-5 flex justify-center items-center cursor-pointer ml-0 bg-white hover:bg-[#f8f9fb] transition"
             onClick={handleExpandClick}
           >
             {isExpanded ? (
-              <ArrowUpIcon className="scale-90" />
+              <ArrowDownIcon className="scale-[115%]" />
             ) : (
-              <ArrowDownIcon className="scale-90" />
+              <ArrowRightIcon className="scale-[115%]" />
             )}
           </div>
         </div>
