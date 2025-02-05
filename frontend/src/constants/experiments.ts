@@ -1,6 +1,6 @@
 export const UNLEARNING_METHODS = [
   "Fine-Tuning",
-  "Random-Label",
+  "Random-Labeling",
   "Gradient-Ascent",
   "Custom",
 ];
