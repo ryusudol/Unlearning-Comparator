@@ -3,7 +3,7 @@ import { UnlearningConfigurationData } from "../../types/experiments";
 import { API_URL } from "../../constants/common";
 
 export async function executeMethodUnlearning(
-  runningConfig: UnlearningConfigurationData
+  runningConfig: UnlearningConfigurationData,
 ) {
   const method = runningConfig.method;
   const data: Omit<UnlearningConfigurationData, "method"> = {
@@ -22,7 +22,7 @@ export async function executeMethodUnlearning(
 
     if (!response.ok) {
       throw new Error(
-        `Status Code: ${response.status}, Message: ${response.statusText}`
+        `Status Code: ${response.status}, Message: ${response.statusText}`,
       );
     }
   } catch (error) {
@@ -40,7 +40,7 @@ export async function executeMethodUnlearning(
 
 export async function executeCustomUnlearning(
   customFile: File,
-  forgetClass: number
+  forgetClass: number,
 ) {
   try {
     const formData = new FormData();
@@ -54,7 +54,7 @@ export async function executeCustomUnlearning(
 
     if (!response.ok) {
       throw new Error(
-        `Status Code: ${response.status}, Message: ${response.statusText}`
+        `Status Code: ${response.status}, Message: ${response.statusText}`,
       );
     }
   } catch (error) {
@@ -64,7 +64,7 @@ export async function executeCustomUnlearning(
       alert(`Failed to unlearn with the custom file: ${error.message}`);
     } else {
       alert(
-        "An unknown error occurred while executing custom unlearning . . ."
+        "An unknown error occurred while executing custom unlearning . . .",
       );
     }
 
@@ -74,10 +74,10 @@ export async function executeCustomUnlearning(
 
 export async function fetchDataFile(
   forgetClass: number,
-  id: string
+  fileName: string,
 ): Promise<ExperimentData> {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/${id}`);
+    const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`);
 
     return await response.json();
   } catch (error) {
@@ -87,7 +87,7 @@ export async function fetchDataFile(
       alert(`Failed to fetch an unlearned data file: ${error.message}`);
     } else {
       alert(
-        "An unknown error occurred while fetching an unlearned data file . . ."
+        "An unknown error occurred while fetching an unlearned data file . . .",
       );
     }
 
@@ -107,7 +107,7 @@ export async function fetchAllExperimentsData(forgetClass: number) {
       alert(`Failed to fetch all unlearned data file: ${error.message}`);
     } else {
       alert(
-        "An unknown error occurred while fetching all unlearned data file . . ."
+        "An unknown error occurred while fetching all unlearned data file . . .",
       );
     }
 
@@ -118,7 +118,7 @@ export async function fetchAllExperimentsData(forgetClass: number) {
 export async function fetchAllWeightNames(forgetClass: number) {
   try {
     const response = await fetch(
-      `${API_URL}/data/${forgetClass}/all_weights_name`
+      `${API_URL}/data/${forgetClass}/all_weights_name`,
     );
 
     return await response.json();
