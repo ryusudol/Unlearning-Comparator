@@ -12,3 +12,6 @@ backend/*.png
 frontend/
 paper/
 z_dist_exp/
+myenv/
+*.pdf
+*.mdc
