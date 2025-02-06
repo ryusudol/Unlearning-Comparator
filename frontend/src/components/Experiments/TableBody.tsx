@@ -228,7 +228,7 @@ export default function _TableBody({ table, tableData }: Props) {
                       if (isTemporaryRow) {
                         cellStyle = {
                           ...cellStyle,
-                          backgroundColor: "lightgrey",
+                          backgroundColor: "#e2e8f0",
                           color: "black",
                         };
                       }
