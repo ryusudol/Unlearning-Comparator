@@ -38,6 +38,40 @@ import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const CUSTOM = "custom";
 
+let initialExperiment: ExperimentData = {
+  id: "",
+  fc: -1,
+  phase: "Unlearned",
+  init: "",
+  method: "",
+  epochs: 0,
+  BS: 0,
+  LR: 0,
+  UA: 0,
+  RA: 0,
+  TUA: 0,
+  TRA: 0,
+  RTE: "-",
+  accs: [],
+  label_dist: {},
+  conf_dist: {},
+  t_accs: [],
+  t_label_dist: {},
+  t_conf_dist: {},
+  cka: {
+    layers: [],
+    train: {
+      forget_class: [],
+      other_classes: [],
+    },
+    test: {
+      forget_class: [],
+      other_classes: [],
+    },
+  },
+  points: [],
+};
+
 type Combination = {
   epochs: number;
   learning_rate: number;
@@ -190,38 +224,21 @@ export default function UnlearningConfiguration() {
     updateActiveStep(1);
 
     for (let idx = 0; idx < totalExperimentsCount; idx++) {
-      const initialExperiment: ExperimentData = {
+      const methodFullName =
+        method === "ft"
+          ? "Fine-Tuning"
+          : method === "rl"
+          ? "Random-Labeling"
+          : method === "ga"
+          ? "Gradient-Ascent"
+          : "Custom";
+      initialExperiment = {
+        ...initialExperiment,
         id: idx.toString(),
         fc: forgetClassNumber,
         phase: "Unlearned",
         init: selectedInitialModel,
-        method: "method",
-        epochs: 0,
-        BS: 0,
-        LR: 0,
-        UA: 0,
-        RA: 0,
-        TUA: 0,
-        TRA: 0,
-        RTE: "-",
-        accs: [],
-        label_dist: {},
-        conf_dist: {},
-        t_accs: [],
-        t_label_dist: {},
-        t_conf_dist: {},
-        cka: {
-          layers: [],
-          train: {
-            forget_class: [],
-            other_classes: [],
-          },
-          test: {
-            forget_class: [],
-            other_classes: [],
-          },
-        },
-        points: [],
+        method: methodFullName,
       };
       addExperiment(initialExperiment, idx);
     }
