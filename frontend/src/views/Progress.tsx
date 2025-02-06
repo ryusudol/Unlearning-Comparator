@@ -55,18 +55,22 @@ export default function Progress({ width, height }: ViewProps) {
       forgetClassExist
         ? getProgressSteps(currentStatus, activeStep, umapProgress, ckaProgress)
         : [],
-    [activeStep, ckaProgress, currentStatus, forgetClassExist, umapProgress],
+    [activeStep, ckaProgress, currentStatus, forgetClassExist, umapProgress]
   );
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
     const startTime = Date.now();
     const durationInSeconds = 10;
+    const maxProgress = durationInSeconds * 10;
 
     if (forgetClassExist && progress) {
       intervalId = setInterval(() => {
-        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-        const progressValue = Math.min(elapsedSeconds, durationInSeconds);
+        const elapsedTime = Date.now() - startTime;
+        const progressValue = Math.min(
+          Math.floor(elapsedTime / 100),
+          maxProgress
+        );
 
         if (progress.includes("UMAP")) {
           setUmapProgress(progressValue);
@@ -74,7 +78,7 @@ export default function Progress({ width, height }: ViewProps) {
           setCkaProgress(progressValue);
         }
 
-        if (progressValue === durationInSeconds) {
+        if (progressValue === maxProgress) {
           clearInterval(intervalId!);
         }
       }, 100);

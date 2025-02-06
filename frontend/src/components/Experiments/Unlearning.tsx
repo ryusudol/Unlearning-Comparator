@@ -33,6 +33,7 @@ import { RunningStatusContext } from "../../store/running-status-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { UnlearningConfigurationData } from "../../types/experiments";
+import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const CUSTOM = "custom";
@@ -44,7 +45,7 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
-  const { addExperiment } = useContext(ExperimentsContext);
+  const { addExperiment, updateExperiment } = useContext(ExperimentsContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useContext(RunningStatusContext);
@@ -173,7 +174,7 @@ export default function UnlearningConfiguration() {
           forgetClassNumber,
           unlearningStatus.recent_id as string
         );
-        addExperiment(newData);
+        updateExperiment(newData, experimentIndex);
         saveComparison(newData.id);
         break;
       }
@@ -187,6 +188,43 @@ export default function UnlearningConfiguration() {
     updateIsRunning(true);
     initStatus(forgetClassNumber, totalExperimentsCount);
     updateActiveStep(1);
+
+    for (let idx = 0; idx < totalExperimentsCount; idx++) {
+      const initialExperiment: ExperimentData = {
+        id: idx.toString(),
+        fc: forgetClassNumber,
+        phase: "Unlearned",
+        init: selectedInitialModel,
+        method: "method",
+        epochs: 0,
+        BS: 0,
+        LR: 0,
+        UA: 0,
+        RA: 0,
+        TUA: 0,
+        TRA: 0,
+        RTE: "-",
+        accs: [],
+        label_dist: {},
+        conf_dist: {},
+        t_accs: [],
+        t_label_dist: {},
+        t_conf_dist: {},
+        cka: {
+          layers: [],
+          train: {
+            forget_class: [],
+            other_classes: [],
+          },
+          test: {
+            forget_class: [],
+            other_classes: [],
+          },
+        },
+        points: [],
+      };
+      addExperiment(initialExperiment, idx);
+    }
 
     if (isCustom) {
       if (!selectedFile) return;

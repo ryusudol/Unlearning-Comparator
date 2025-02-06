@@ -172,82 +172,94 @@ export default function _TableBody({ table, tableData }: Props) {
         }`}
       >
         {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => (
-            <ContextMenu key={row.id}>
-              <ContextMenuTrigger className="contents">
-                <TableRow
-                  id={row.id}
-                  className="!border-b"
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell, idx) => {
-                    const columnId = cell.column.id;
-                    const columnWidth =
-                      COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
-                    const isPerformanceMetric = columnId in performanceMetrics;
-                    let cellStyle: React.CSSProperties = {
-                      width: `${columnWidth}px`,
-                      minWidth: `${columnWidth}px`,
-                      ...(columnId === BASELINE && { paddingRight: 0 }),
-                      ...(columnId === COMPARISON && { paddingLeft: 0 }),
-                    };
+          table.getRowModel().rows.map((row) => {
+            const isTemporaryRow = row.id.length < 4;
+            return (
+              <ContextMenu key={row.id}>
+                <ContextMenuTrigger className="contents">
+                  <TableRow
+                    id={row.id}
+                    className="!border-b"
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell, idx) => {
+                      const columnId = cell.column.id;
+                      const columnWidth =
+                        COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
+                      const isPerformanceMetric =
+                        columnId in performanceMetrics;
+                      let cellStyle: React.CSSProperties = {
+                        width: `${columnWidth}px`,
+                        minWidth: `${columnWidth}px`,
+                        ...(columnId === BASELINE && { paddingRight: 0 }),
+                        ...(columnId === COMPARISON && { paddingLeft: 0 }),
+                      };
 
-                    if (isPerformanceMetric) {
-                      const { baseColor } = performanceMetrics[columnId];
-                      const value = cell.getValue() as number;
-                      const opacity = opacityMapping[columnId]?.[value] ?? 0;
-                      if (baseColor) {
-                        let color, textColor;
-                        if (tableData.length === 1 && value === 0) {
-                          color = COLORS.WHITE;
-                          textColor = COLORS.BLACK;
-                        } else {
-                          color = hexToRgba(baseColor, opacity);
-                          textColor =
-                            opacity >= 0.8 ? COLORS.WHITE : COLORS.BLACK;
+                      if (isPerformanceMetric) {
+                        const { baseColor } = performanceMetrics[columnId];
+                        const value = cell.getValue() as number;
+                        const opacity = opacityMapping[columnId]?.[value] ?? 0;
+                        if (baseColor) {
+                          let color, textColor;
+                          if (tableData.length === 1 && value === 0) {
+                            color = COLORS.WHITE;
+                            textColor = COLORS.BLACK;
+                          } else {
+                            color = hexToRgba(baseColor, opacity);
+                            textColor =
+                              opacity >= 0.8 ? COLORS.WHITE : COLORS.BLACK;
+                          }
+                          cellStyle = {
+                            ...cellStyle,
+                            borderLeft:
+                              columnId === "UA"
+                                ? "1px solid rgb(229 231 235)"
+                                : "none",
+                            borderRight:
+                              idx === row.getVisibleCells().length - 1
+                                ? "none"
+                                : "1px solid rgb(229 231 235)",
+                            backgroundColor: color,
+                            color: textColor,
+                          };
                         }
+                      }
+
+                      if (isTemporaryRow) {
                         cellStyle = {
                           ...cellStyle,
-                          borderLeft:
-                            columnId === "UA"
-                              ? "1px solid rgb(229 231 235)"
-                              : "none",
-                          borderRight:
-                            idx === row.getVisibleCells().length - 1
-                              ? "none"
-                              : "1px solid rgb(229 231 235)",
-                          backgroundColor: color,
-                          color: textColor,
+                          backgroundColor: "#e2e8f0",
+                          color: "black",
                         };
                       }
-                    }
 
-                    return (
-                      <TableCell key={cell.id} style={cellStyle}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </ContextMenuTrigger>
-              <ContextMenuContent className="z-[50]">
-                {!row.id.startsWith("000") && !row.id.startsWith("a00") && (
-                  <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
-                    Delete
+                      return (
+                        <TableCell key={cell.id} style={cellStyle}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                </ContextMenuTrigger>
+                <ContextMenuContent className="z-[50]">
+                  {!row.id.startsWith("000") && !row.id.startsWith("a00") && (
+                    <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
+                      Delete
+                    </ContextMenuItem>
+                  )}
+                  <ContextMenuItem onClick={() => handleDownloadJSON(row.id)}>
+                    Download JSON
                   </ContextMenuItem>
-                )}
-                <ContextMenuItem onClick={() => handleDownloadJSON(row.id)}>
-                  Download JSON
-                </ContextMenuItem>
-                <ContextMenuItem onClick={() => handleDownloadPTH(row.id)}>
-                  Download PTH
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
-          ))
+                  <ContextMenuItem onClick={() => handleDownloadPTH(row.id)}>
+                    Download PTH
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
+            );
+          })
         ) : (
           <TableRow>
             <TableCell
