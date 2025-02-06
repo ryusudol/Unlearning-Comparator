@@ -233,7 +233,7 @@ export default function UnlearningConfiguration() {
 
   let configurationContent = isCustom ? (
     <CustomUnlearning
-      fileName={selectedFile ? selectedFile.name : "No file chosen"}
+      fileName={selectedFile ? selectedFile.name : ""}
       onChange={handleFileChange}
     />
   ) : (
@@ -283,7 +283,7 @@ export default function UnlearningConfiguration() {
       </div>
       <div className="w-full grid grid-cols-2 gap-y-2">
         <div className="flex items-center mb-1">
-          <EraserIcon className="w-4 h-4 mr-1.5 scale-110" />
+          <EraserIcon className="w-4 h-4 mr-1.5 scale-[115%]" />
           <Label className="text-base text-nowrap">Unlearning Method</Label>
         </div>
         <Select defaultValue="ft" onValueChange={handleMethodChange}>
@@ -307,24 +307,31 @@ export default function UnlearningConfiguration() {
         </Select>
       </div>
       {configurationContent}
-      <span
-        className={`mb-1 w-full text-center ${
-          batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
-        }`}
-      >
-        This configuration will generate{" "}
+      {!isCustom && (
         <span
-          className={`font-bold ${
-            totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
+          className={`mb-1 w-full text-center ${
+            batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
           }`}
         >
-          {totalExperimentsCount}
-        </span>{" "}
-        experiment{totalExperimentsCount > 1 ? "s" : ""}.
-      </span>
-      <Button className="w-full mt-1 flex items-center" disabled={isDisabled}>
+          This configuration will generate{" "}
+          <span
+            className={`font-bold ${
+              totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
+            }`}
+          >
+            {totalExperimentsCount}
+          </span>{" "}
+          experiment{totalExperimentsCount > 1 && "s"}.
+        </span>
+      )}
+      <Button
+        className={`w-full flex items-center ${isCustom ? "mt-2" : "mt-1"}`}
+        disabled={isDisabled}
+      >
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
-        <span className="text-base">Run and Add Experiments</span>
+        <span className="text-base">
+          Run and Add Experiment{totalExperimentsCount > 1 && "s"}
+        </span>
       </Button>
     </form>
   );
