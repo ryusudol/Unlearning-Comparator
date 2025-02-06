@@ -101,7 +101,7 @@ def visualize_distributions(logit_entropies, max_logit_gaps, forget_class, t1, t
     plt.grid(True, alpha=0.2)
     
     plt.tight_layout()
-    plt.savefig(f'attack/{forget_class}/class_{forget_class}_entropy_t1_{t1}_t2_{t2}_{timestamp}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'attack/{forget_class}/class_{forget_class}_entropy_{timestamp}.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 async def process_attack_metrics(
