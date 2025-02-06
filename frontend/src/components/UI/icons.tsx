@@ -69,7 +69,7 @@ export const ChartScatterIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const BaselineNeuralNetworkIcon = (
-  props: React.SVGProps<SVGSVGElement>,
+  props: React.SVGProps<SVGSVGElement>
 ) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,7 @@ export const BaselineNeuralNetworkIcon = (
 );
 
 export const ComparisonNeuralNetworkIcon = (
-  props: React.SVGProps<SVGSVGElement>,
+  props: React.SVGProps<SVGSVGElement>
 ) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +238,7 @@ export const CircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const MultiplicationSignIcon = (
-  props: React.SVGProps<SVGSVGElement>,
+  props: React.SVGProps<SVGSVGElement>
 ) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -259,7 +259,7 @@ export const MultiplicationSignIcon = (
 );
 
 export const FatMultiplicationSignIcon = (
-  props: React.SVGProps<SVGSVGElement>,
+  props: React.SVGProps<SVGSVGElement>
 ) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -776,6 +776,40 @@ export const ArrowDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
       clipRule="evenodd"
       d="M5.99977 8.25005L17.9998 8.25C18.3031 8.25 18.5766 8.43273 18.6927 8.71298C18.8088 8.99324 18.7446 9.31583 18.5301 9.53033L12.5301 15.5303C12.2373 15.8232 11.7624 15.8232 11.4695 15.5303L5.46944 9.53038C5.25494 9.31588 5.19077 8.9933 5.30686 8.71304C5.42294 8.43278 5.69642 8.25005 5.99977 8.25005Z"
       fill="currentColor"
+    />
+  </svg>
+);
+
+export const FileIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={16}
+    height={16}
+    color={"#000000"}
+    fill={"none"}
+    {...props}
+  >
+    <path
+      d="M8 7L16 7"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M8 11L12 11"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M13 21.5V21C13 18.1716 13 16.7574 13.8787 15.8787C14.7574 15 16.1716 15 19 15H19.5M20 13.3431V10C20 6.22876 20 4.34315 18.8284 3.17157C17.6569 2 15.7712 2 12 2C8.22877 2 6.34315 2 5.17157 3.17157C4 4.34314 4 6.22876 4 10L4 14.5442C4 17.7892 4 19.4117 4.88607 20.5107C5.06508 20.7327 5.26731 20.9349 5.48933 21.1139C6.58831 22 8.21082 22 11.4558 22C12.1614 22 12.5141 22 12.8372 21.886C12.9044 21.8623 12.9702 21.835 13.0345 21.8043C13.3436 21.6564 13.593 21.407 14.0919 20.9081L18.8284 16.1716C19.4065 15.5935 19.6955 15.3045 19.8478 14.9369C20 14.5694 20 14.1606 20 13.3431Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
