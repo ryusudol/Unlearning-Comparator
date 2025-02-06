@@ -13,5 +13,6 @@ frontend/
 paper/
 z_dist_exp/
 myenv/
+*.py
 *.pdf
 *.mdc
