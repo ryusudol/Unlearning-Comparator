@@ -1,16 +1,22 @@
 import { ExperimentData } from "./data";
 
-export type Experiments = { [key: string]: ExperimentData };
+export type Experiment = Omit<ExperimentData, "points">;
+
+export type Experiments = { [key: string]: Experiment };
+type AddExperimentPayload = {
+  experiment: ExperimentData;
+  tempIdx?: number;
+};
 
 export interface Context {
   experiments: Experiments;
-  baselineExperiment: ExperimentData | undefined;
-  comparisonExperiment: ExperimentData | undefined;
+  baselineExperiment: Experiment | undefined;
+  comparisonExperiment: Experiment | undefined;
   isExperimentLoading: boolean;
 }
 
 export interface ContextType extends Context {
-  addExperiment: (experiment: ExperimentData) => void;
+  addExperiment: (experiment: ExperimentData, tempIdx?: number) => void;
   saveExperiments: (experiments: Experiments) => void;
   retrieveExperiments: () => void;
   deleteExperiment: (id: string) => void;
@@ -18,7 +24,7 @@ export interface ContextType extends Context {
 }
 
 export type Action =
-  | { type: "ADD_EXPERIMENT"; payload: ExperimentData }
+  | { type: "ADD_EXPERIMENT"; payload: AddExperimentPayload }
   | { type: "SAVE_EXPERIMENTS"; payload: Experiments }
   | { type: "RETRIEVE_EXPERIMENTS" }
   | { type: "DELETE_EXPERIMENT"; payload: string }

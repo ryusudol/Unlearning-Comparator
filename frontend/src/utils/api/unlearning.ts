@@ -72,25 +72,16 @@ export async function executeCustomUnlearning(
   }
 }
 
-export async function fetchDataFile(
+export async function fetchFileData(
   forgetClass: number,
-  id: string
+  fileName: string
 ): Promise<ExperimentData> {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/${id}`);
+    const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`);
 
     return await response.json();
   } catch (error) {
     console.error("Failed to fetch an unlearned data file:", error);
-
-    if (error instanceof Error) {
-      alert(`Failed to fetch an unlearned data file: ${error.message}`);
-    } else {
-      alert(
-        "An unknown error occurred while fetching an unlearned data file . . ."
-      );
-    }
-
     throw error;
   }
 }

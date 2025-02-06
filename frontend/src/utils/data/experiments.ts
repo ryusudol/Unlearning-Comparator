@@ -1,8 +1,7 @@
 import * as d3 from "d3";
 
-import { Dist } from "../../types/data";
-import { ExperimentData } from "../../types/data";
-import { Experiments } from "../../types/experiments-context";
+import { Dist, Point } from "../../types/data";
+import { Experiment, Experiments } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
 type Values = {
@@ -113,9 +112,9 @@ export function calculatePerformanceMetrics(data: Experiments) {
   };
 }
 
-export function extractSelectedData(data: ExperimentData | undefined) {
-  return data
-    ? data.points.map((point) => [
+export function processPointsData(points: Point[]) {
+  return points
+    ? points.map((point) => [
         point[4], // x coordinate
         point[5], // y coordinate
         point[0], // ground truth
@@ -126,10 +125,7 @@ export function extractSelectedData(data: ExperimentData | undefined) {
     : [];
 }
 
-export function extractBubbleChartData(
-  datasetMode: string,
-  data: ExperimentData
-) {
+export function extractBubbleChartData(datasetMode: string, data: Experiment) {
   let bubbleChartData: {
     label_dist: Dist;
     conf_dist: Dist;

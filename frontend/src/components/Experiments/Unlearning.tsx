@@ -6,7 +6,7 @@ import Button from "../CustomButton";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
-  fetchDataFile,
+  fetchFileData,
   fetchAllWeightNames,
 } from "../../utils/api/unlearning";
 import {
@@ -35,7 +35,6 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
 
-const NO_FILE_CHOSEN = "No file chosen";
 const CUSTOM = "custom";
 
 type Combination = {
@@ -59,12 +58,11 @@ export default function UnlearningConfiguration() {
   const [learningRateList, setLearningRateList] = useState<string[]>([]);
   const [batchSizeList, setBatchSizeList] = useState<string[]>([]);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [selectedFileName, setSelectedFileName] =
-    useState<string>(NO_FILE_CHOSEN);
+  const [selectedFile, setSelectedFile] = useState<File>();
 
   const isCustom = method === CUSTOM;
   const totalExperimentsCount = isCustom
-    ? selectedFileName === NO_FILE_CHOSEN
+    ? !selectedFile
       ? 0
       : 1
     : epochList.length * learningRateList.length * batchSizeList.length;
@@ -83,7 +81,7 @@ export default function UnlearningConfiguration() {
 
   useEffect(() => {
     if (
-      (isCustom && selectedFileName === NO_FILE_CHOSEN) ||
+      (isCustom && !selectedFile) ||
       (!isCustom &&
         (epochList.length === 0 ||
           learningRateList.length === 0 ||
@@ -98,7 +96,7 @@ export default function UnlearningConfiguration() {
     epochList.length,
     isCustom,
     learningRateList.length,
-    selectedFileName,
+    selectedFile,
   ]);
 
   const handleInitialModelChange = (model: string) => {
@@ -142,7 +140,7 @@ export default function UnlearningConfiguration() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
-    setSelectedFileName(file ? file.name : NO_FILE_CHOSEN);
+    setSelectedFile(file);
   };
 
   const pollStatus = async (experimentIndex: number) => {
@@ -171,7 +169,7 @@ export default function UnlearningConfiguration() {
       if (!unlearningStatus.is_unlearning) {
         updateActiveStep(0);
 
-        const newData = await fetchDataFile(
+        const newData = await fetchFileData(
           forgetClassNumber,
           unlearningStatus.recent_id as string
         );
@@ -186,18 +184,14 @@ export default function UnlearningConfiguration() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const fd = new FormData(e.currentTarget);
-    const config = Object.fromEntries(fd.entries());
-
     updateIsRunning(true);
     initStatus(forgetClassNumber, totalExperimentsCount);
     updateActiveStep(1);
 
     if (isCustom) {
-      await executeCustomUnlearning(
-        config.custom_file as File,
-        forgetClassNumber
-      );
+      if (!selectedFile) return;
+
+      await executeCustomUnlearning(selectedFile, forgetClassNumber);
       await pollStatus(0);
     } else {
       const combinations: Combination[] = [];
@@ -217,7 +211,7 @@ export default function UnlearningConfiguration() {
         const combination = combinations[idx];
 
         const runningConfig: UnlearningConfigurationData = {
-          method: config.method as string,
+          method,
           forget_class: forgetClassNumber,
           epochs: combination.epochs,
           learning_rate: combination.learning_rate,
@@ -238,7 +232,10 @@ export default function UnlearningConfiguration() {
   };
 
   let configurationContent = isCustom ? (
-    <CustomUnlearning fileName={selectedFileName} onChange={handleFileChange} />
+    <CustomUnlearning
+      fileName={selectedFile ? selectedFile.name : "No file chosen"}
+      onChange={handleFileChange}
+    />
   ) : (
     <MethodUnlearning
       method={method}
@@ -258,16 +255,13 @@ export default function UnlearningConfiguration() {
       <div className="w-full grid grid-cols-2 gap-y-2">
         <div className="flex items-center mb-1">
           <FlagIcon className="w-[15px] h-[15px] mr-1.5" />
-          <Label className="text-base text-nowrap" htmlFor="model">
-            Initial Model
-          </Label>
+          <Label className="text-base text-nowrap">Initial Model</Label>
         </div>
         <Select
           defaultValue={
             weightNames ? weightNames[0] : `000${forgetClassNumber}.pth`
           }
           onValueChange={handleInitialModelChange}
-          name="model"
         >
           <SelectTrigger className="h-[25px] text-base">
             <SelectValue
@@ -290,15 +284,9 @@ export default function UnlearningConfiguration() {
       <div className="w-full grid grid-cols-2 gap-y-2">
         <div className="flex items-center mb-1">
           <EraserIcon className="w-4 h-4 mr-1.5 scale-110" />
-          <Label className="text-base text-nowrap" htmlFor="method">
-            Unlearning Method
-          </Label>
+          <Label className="text-base text-nowrap">Unlearning Method</Label>
         </div>
-        <Select
-          defaultValue="ft"
-          onValueChange={handleMethodChange}
-          name="method"
-        >
+        <Select defaultValue="ft" onValueChange={handleMethodChange}>
           <SelectTrigger className="h-[25px] text-base">
             <SelectValue placeholder={UNLEARNING_METHODS[0]} />
           </SelectTrigger>

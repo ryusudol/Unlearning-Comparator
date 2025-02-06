@@ -14,7 +14,7 @@ type CKA = {
   };
 };
 
-type Point = [
+export type Point = [
   number,
   number,
   number,
