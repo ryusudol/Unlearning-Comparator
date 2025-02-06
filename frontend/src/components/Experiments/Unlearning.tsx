@@ -6,7 +6,7 @@ import Button from "../CustomButton";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
-  fetchDataFile,
+  fetchFileData,
   fetchAllWeightNames,
 } from "../../utils/api/unlearning";
 import {
@@ -113,15 +113,15 @@ export default function UnlearningConfiguration() {
   const handlePlusClick = (id: string, value: string) => {
     if (id === EPOCHS) {
       setEpochList((prev) =>
-        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value],
+        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
       );
     } else if (id === LEARNING_RATE) {
       setLearningRateList((prev) =>
-        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value],
+        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
       );
     } else if (id === BATCH_SIZE) {
       setBatchSizeList((prev) =>
-        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value],
+        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
       );
     }
   };
@@ -169,9 +169,9 @@ export default function UnlearningConfiguration() {
       if (!unlearningStatus.is_unlearning) {
         updateActiveStep(0);
 
-        const newData = await fetchDataFile(
+        const newData = await fetchFileData(
           forgetClassNumber,
-          unlearningStatus.recent_id as string,
+          unlearningStatus.recent_id as string
         );
         addExperiment(newData);
         saveComparison(newData.id);

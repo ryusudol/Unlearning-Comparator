@@ -1,38 +1,86 @@
-import { useContext, useMemo, useRef, useCallback } from "react";
+import {
+  useContext,
+  useMemo,
+  useRef,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import View from "../components/View";
 import InformationButton from "../components/Embeddings/InformationButton";
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
 import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
 import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
-import { ExperimentsContext } from "../store/experiments-context";
-import { extractSelectedData } from "../utils/data/experiments";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { processPointsData } from "../utils/data/experiments";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { fetchFileData } from "../utils/api/unlearning";
 import { Separator } from "../components/UI/separator";
+import { Point } from "../types/data";
 
 export default function Embeddings({ height }: { height: number }) {
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
+
+  const { forgetClassNumber } = useForgetClass();
+
+  const [baselinePoints, setBaselinePoints] = useState<Point[]>([]);
+  const [comparisonPoints, setComparisonPoints] = useState<Point[]>([]);
 
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
 
-  const extractedBaselineData = useMemo(
-    () => extractSelectedData(baselineExperiment),
-    [baselineExperiment]
+  useEffect(() => {
+    async function loadBaselineData() {
+      if (!baseline) return;
+      try {
+        const data = await fetchFileData(forgetClassNumber, baseline);
+        setBaselinePoints(data.points);
+      } catch (error) {
+        if (error instanceof Error) {
+          alert(`Failed to fetch an unlearned data file: ${error.message}`);
+        } else {
+          alert(
+            "An unknown error occurred while fetching an unlearned data file . . ."
+          );
+        }
+        setBaselinePoints([]);
+      }
+    }
+    loadBaselineData();
+  }, [baseline, forgetClassNumber]);
+
+  useEffect(() => {
+    async function loadComparisonData() {
+      if (!comparison) return;
+      try {
+        const data = await fetchFileData(forgetClassNumber, comparison);
+        setComparisonPoints(data.points);
+      } catch (error) {
+        console.error("Error fetching comparison file data:", error);
+        setComparisonPoints([]);
+      }
+    }
+    loadComparisonData();
+  }, [comparison, forgetClassNumber]);
+
+  const processedBaselinePoints = useMemo(
+    () => processPointsData(baselinePoints),
+    [baselinePoints]
   );
-  const extractedComparisonData = useMemo(
-    () => extractSelectedData(comparisonExperiment),
-    [comparisonExperiment]
+  const processedComparisonPoints = useMemo(
+    () => processPointsData(comparisonPoints),
+    [comparisonPoints]
   );
 
   const baselineDataMap = useMemo(() => {
-    return new Map(extractedBaselineData.map((d) => [d[4], d]));
-  }, [extractedBaselineData]);
+    return new Map(processedBaselinePoints.map((d) => [d[4], d]));
+  }, [processedBaselinePoints]);
   const comparisonDataMap = useMemo(() => {
-    return new Map(extractedComparisonData.map((d) => [d[4], d]));
-  }, [extractedComparisonData]);
+    return new Map(processedComparisonPoints.map((d) => [d[4], d]));
+  }, [processedComparisonPoints]);
 
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
@@ -101,7 +149,7 @@ export default function Embeddings({ height }: { height: number }) {
       <ScatterPlot
         mode="Baseline"
         height={height}
-        data={extractedBaselineData}
+        data={processedBaselinePoints}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={baselineRef}
@@ -110,7 +158,7 @@ export default function Embeddings({ height }: { height: number }) {
       <ScatterPlot
         mode="Comparison"
         height={height}
-        data={extractedComparisonData}
+        data={processedComparisonPoints}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={comparisonRef}
