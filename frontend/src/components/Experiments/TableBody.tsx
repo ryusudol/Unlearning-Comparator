@@ -93,12 +93,20 @@ export default function _TableBody({ table, tableData }: Props) {
       if ("detail" in allExperiments) {
         saveExperiments({});
       } else {
+        Object.values(allExperiments).forEach((experiment) => {
+          if (experiment && "points" in experiment) {
+            delete experiment.points;
+          }
+        });
+
         const sortedExperiments = Object.fromEntries(
           Object.entries(allExperiments).sort(([id1], [id2]) =>
             id1.localeCompare(id2)
           )
         );
+
         saveExperiments(sortedExperiments);
+
         if (id === baseline) {
           if (!comparison.startsWith("000")) {
             saveBaseline(`000${forgetClass}`);
