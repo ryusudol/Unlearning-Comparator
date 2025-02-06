@@ -60,6 +60,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
       {showDropdown &&
         createPortal(
           <div
+            ref={dropdownRef}
             className="absolute z-50 bg-white border rounded shadow text-sm"
             style={{
               top: dropdownCoords.top,
@@ -82,7 +83,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
               </div>
             ))}
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );
