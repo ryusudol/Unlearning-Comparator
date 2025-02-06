@@ -35,15 +35,16 @@ function ExperimentsReducer(state: Context, action: Action): Context {
   switch (action.type) {
     case EXPERIMENTS_ACTIONS.ADD_EXPERIMENT: {
       const { experiment, tempIdx } = action.payload;
+      const { points, ...experimentWithoutPoints } = experiment;
       const newExperiments = experiment.id
         ? {
             ...state.experiments,
-            [experiment.id]: experiment,
+            [experiment.id]: experimentWithoutPoints,
           }
         : tempIdx
         ? {
             ...state.experiments,
-            "": experiment,
+            [tempIdx]: experimentWithoutPoints,
           }
         : { ...state.experiments };
       const result = { ...state, experiments: newExperiments };
@@ -59,18 +60,16 @@ function ExperimentsReducer(state: Context, action: Action): Context {
     }
 
     case EXPERIMENTS_ACTIONS.RETRIEVE_EXPERIMENTS: {
-      const savedExperimentsContext = sessionStorage.getItem(EXPERIMENTS);
+      const savedExperiments = sessionStorage.getItem(EXPERIMENTS);
       let result = {
         ...state,
         isExperimentLoading: false,
       };
 
-      if (savedExperimentsContext) {
-        const parsedExperimentsContext: Context = JSON.parse(
-          savedExperimentsContext
-        );
+      if (savedExperiments) {
+        const parsedExperiments: Context = JSON.parse(savedExperiments);
         result = {
-          ...parsedExperimentsContext,
+          ...parsedExperiments,
           isExperimentLoading: false,
         };
       }
@@ -79,7 +78,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
 
     case EXPERIMENTS_ACTIONS.DELETE_EXPERIMENT: {
       const id = action.payload;
-      const { [id]: deletedExperiment, ...remainingExperiments } =
+      const { [id]: targetExperiment, ...remainingExperiments } =
         state.experiments;
       const result = {
         ...state,

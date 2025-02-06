@@ -1,8 +1,7 @@
 import * as d3 from "d3";
 
 import { Dist, Point } from "../../types/data";
-import { ExperimentData } from "../../types/data";
-import { Experiments } from "../../types/experiments-context";
+import { Experiment, Experiments } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
 type Values = {
@@ -126,10 +125,7 @@ export function processPointsData(points: Point[]) {
     : [];
 }
 
-export function extractBubbleChartData(
-  datasetMode: string,
-  data: ExperimentData
-) {
+export function extractBubbleChartData(datasetMode: string, data: Experiment) {
   let bubbleChartData: {
     label_dist: Dist;
     conf_dist: Dist;

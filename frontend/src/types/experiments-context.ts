@@ -1,6 +1,8 @@
 import { ExperimentData } from "./data";
 
-export type Experiments = { [key: string]: ExperimentData };
+export type Experiment = Omit<ExperimentData, "points">;
+
+export type Experiments = { [key: string]: Experiment };
 type AddExperimentPayload = {
   experiment: ExperimentData;
   tempIdx?: number;
@@ -8,8 +10,8 @@ type AddExperimentPayload = {
 
 export interface Context {
   experiments: Experiments;
-  baselineExperiment: ExperimentData | undefined;
-  comparisonExperiment: ExperimentData | undefined;
+  baselineExperiment: Experiment | undefined;
+  comparisonExperiment: Experiment | undefined;
   isExperimentLoading: boolean;
 }
 

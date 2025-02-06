@@ -19,7 +19,7 @@ import { ExperimentData } from "../../types/data";
 import { hexToRgba } from "../../utils/data/colors";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { PerformanceMetrics } from "../../types/experiments";
-import { Experiments } from "../../types/experiments-context";
+import { Experiment, Experiments } from "../../types/experiments-context";
 import { BASELINE, COMPARISON } from "../../constants/common";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
@@ -30,7 +30,7 @@ import { BaselineComparisonContext } from "../../store/baseline-comparison-conte
 
 interface Props {
   table: TableType<ExperimentData>;
-  tableData: ExperimentData[];
+  tableData: Experiment[];
 }
 
 export default function _TableBody({ table, tableData }: Props) {
@@ -54,7 +54,7 @@ export default function _TableBody({ table, tableData }: Props) {
       if (!performanceMetrics[columnId]) return;
 
       const values = tableData
-        .map((datum) => datum[columnId as keyof ExperimentData] as number)
+        .map((datum) => datum[columnId as keyof Experiment] as number)
         .filter(
           (value) =>
             value !== undefined && value !== null && typeof value === "number"
