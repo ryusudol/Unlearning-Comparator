@@ -25,6 +25,7 @@ export const ExperimentsContext = createContext<ContextType>({
   isExperimentLoading: false,
 
   addExperiment: (experiment: ExperimentData, tempIdx?: number) => {},
+  updateExperiment: (experiment: ExperimentData, idx: number) => {},
   saveExperiments: (experiments: Experiments) => {},
   retrieveExperiments: () => {},
   deleteExperiment: (id: string) => {},
@@ -48,6 +49,17 @@ function ExperimentsReducer(state: Context, action: Action): Context {
           }
         : { ...state.experiments };
       const result = { ...state, experiments: newExperiments };
+      sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
+      return result;
+    }
+
+    case EXPERIMENTS_ACTIONS.UPDATE_EXPERIMENT: {
+      const { experiment, idx } = action.payload;
+      const updatedExperiments = {
+        ...state.experiments,
+        [idx]: experiment,
+      };
+      const result = { ...state, experiments: updatedExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
       return result;
     }
@@ -129,6 +141,16 @@ export default function ExperimentsContextProvider({
     []
   );
 
+  const handleUpdateExperiment = useCallback(
+    (experiment: ExperimentData, idx: number) => {
+      dispatch({
+        type: EXPERIMENTS_ACTIONS.UPDATE_EXPERIMENT,
+        payload: { experiment, idx },
+      });
+    },
+    []
+  );
+
   const handleSaveExperiments = useCallback((experiments: Experiments) => {
     dispatch({
       type: EXPERIMENTS_ACTIONS.SAVE_EXPERIMENTS,
@@ -162,6 +184,7 @@ export default function ExperimentsContextProvider({
     isExperimentLoading: experimentsContext.isExperimentLoading,
 
     addExperiment: handleAddExperiment,
+    updateExperiment: handleUpdateExperiment,
     saveExperiments: handleSaveExperiments,
     retrieveExperiments: handleRetrieveExperiments,
     deleteExperiment: handleDeleteExperiment,
