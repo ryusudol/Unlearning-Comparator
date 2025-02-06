@@ -41,11 +41,11 @@ function ExperimentsReducer(state: Context, action: Action): Context {
             [experiment.id]: experiment,
           }
         : tempIdx
-          ? {
-              ...state.experiments,
-              "": experiment,
-            }
-          : { ...state.experiments };
+        ? {
+            ...state.experiments,
+            "": experiment,
+          }
+        : { ...state.experiments };
       const result = { ...state, experiments: newExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
       return result;
@@ -67,7 +67,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
 
       if (savedExperimentsContext) {
         const parsedExperimentsContext: Context = JSON.parse(
-          savedExperimentsContext,
+          savedExperimentsContext
         );
         result = {
           ...parsedExperimentsContext,
@@ -127,7 +127,7 @@ export default function ExperimentsContextProvider({
         payload: { experiment, tempIdx },
       });
     },
-    [],
+    []
   );
 
   const handleSaveExperiments = useCallback((experiments: Experiments) => {
