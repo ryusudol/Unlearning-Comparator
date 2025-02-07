@@ -7,6 +7,8 @@ export type UpdateStatusPayload = {
   progress: string;
   elapsedTime: number;
   completedSteps: number[];
+  learningRate?: number;
+  batchSize?: number;
 };
 
 export interface RunningStatus {

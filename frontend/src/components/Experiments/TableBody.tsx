@@ -27,6 +27,9 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { RunningStatusContext } from "../../store/running-status-context";
+
+const TEMPORARY_ROW_BG_COLOR = "#f0f6fa";
 
 interface Props {
   table: TableType<ExperimentData>;
@@ -34,6 +37,7 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
+  const { statuses } = useContext(RunningStatusContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -172,17 +176,27 @@ export default function _TableBody({ table, tableData }: Props) {
         }`}
       >
         {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => {
+          table.getRowModel().rows.map((row, rowIdx) => {
             const isTemporaryRow = row.id.length < 4;
+            const currentExperiment = statuses[forgetClassNumber].find(
+              (status) => status.is_unlearning
+            );
+            const rowData = row.original;
+            const isTarget =
+              rowData.epochs === currentExperiment?.total_epochs &&
+              rowData.LR === currentExperiment?.learning_rate &&
+              rowData.BS === currentExperiment?.batch_size;
+            const isRunningRow = isTemporaryRow && isTarget;
+
             return (
-              <ContextMenu key={row.id}>
+              <ContextMenu key={rowIdx}>
                 <ContextMenuTrigger className="contents">
                   <TableRow
                     id={row.id}
                     className="!border-b"
                     data-state={row.getIsSelected() && "selected"}
                   >
-                    {row.getVisibleCells().map((cell, idx) => {
+                    {row.getVisibleCells().map((cell, cellIdx) => {
                       const columnId = cell.column.id;
                       const columnWidth =
                         COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
@@ -216,7 +230,7 @@ export default function _TableBody({ table, tableData }: Props) {
                                 ? "1px solid rgb(229 231 235)"
                                 : "none",
                             borderRight:
-                              idx === row.getVisibleCells().length - 1
+                              cellIdx === row.getVisibleCells().length - 1
                                 ? "none"
                                 : "1px solid rgb(229 231 235)",
                             backgroundColor: color,
@@ -225,16 +239,21 @@ export default function _TableBody({ table, tableData }: Props) {
                         }
                       }
 
+                      let additionalClasses = "";
                       if (isTemporaryRow) {
-                        cellStyle = {
-                          ...cellStyle,
-                          backgroundColor: "#e2e8f0",
-                          color: "black",
-                        };
+                        if (isRunningRow) {
+                          additionalClasses = "animate-bgPulse text-black";
+                        } else {
+                          cellStyle.backgroundColor = TEMPORARY_ROW_BG_COLOR;
+                        }
                       }
 
                       return (
-                        <TableCell key={cell.id} style={cellStyle}>
+                        <TableCell
+                          key={cell.id}
+                          style={cellStyle}
+                          className={additionalClasses}
+                        >
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()

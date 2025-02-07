@@ -37,7 +37,6 @@ import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const CUSTOM = "custom";
-
 let initialExperiment: ExperimentData = {
   id: "",
   fc: -1,
@@ -47,10 +46,10 @@ let initialExperiment: ExperimentData = {
   epochs: 0,
   BS: 0,
   LR: 0,
-  UA: 0,
-  RA: 0,
-  TUA: 0,
-  TRA: 0,
+  UA: "-",
+  RA: "-",
+  TUA: "-",
+  TRA: "-",
   RTE: "-",
   accs: [],
   label_dist: {},
@@ -86,7 +85,7 @@ export default function UnlearningConfiguration() {
 
   const { forgetClassNumber } = useForgetClass();
 
-  const [selectedInitialModel, setSelectedInitialModel] = useState("");
+  const [initModel, setInitialModel] = useState(`000${forgetClassNumber}`);
   const [weightNames, setWeightNames] = useState<string[]>([]);
   const [method, setMethod] = useState("ft");
   const [epochList, setEpochList] = useState<string[]>([]);
@@ -135,7 +134,7 @@ export default function UnlearningConfiguration() {
   ]);
 
   const handleInitialModelChange = (model: string) => {
-    setSelectedInitialModel(model);
+    setInitialModel(model);
   };
 
   const handleMethodChange = (method: string) => {
@@ -178,7 +177,11 @@ export default function UnlearningConfiguration() {
     setSelectedFile(file);
   };
 
-  const pollStatus = async (experimentIndex: number) => {
+  const pollStatus = async (
+    experimentIndex: number,
+    learningRate?: number,
+    batchSize?: number
+  ) => {
     const startTime = Date.now();
 
     while (true) {
@@ -193,6 +196,8 @@ export default function UnlearningConfiguration() {
         progress,
         elapsedTime: Math.round(((Date.now() - startTime) / 1000) * 10) / 10,
         completedSteps,
+        learningRate,
+        batchSize,
       });
 
       if (progress.includes("Evaluating")) {
@@ -223,25 +228,14 @@ export default function UnlearningConfiguration() {
     initStatus(forgetClassNumber, totalExperimentsCount);
     updateActiveStep(1);
 
-    for (let idx = 0; idx < totalExperimentsCount; idx++) {
-      const methodFullName =
-        method === "ft"
-          ? "Fine-Tuning"
-          : method === "rl"
-          ? "Random-Labeling"
-          : method === "ga"
-          ? "Gradient-Ascent"
-          : "Custom";
-      initialExperiment = {
-        ...initialExperiment,
-        id: idx.toString(),
-        fc: forgetClassNumber,
-        phase: "Unlearned",
-        init: selectedInitialModel,
-        method: methodFullName,
-      };
-      addExperiment(initialExperiment, idx);
-    }
+    const methodFullName =
+      method === "ft"
+        ? "Fine-Tuning"
+        : method === "rl"
+        ? "Random-Labeling"
+        : method === "ga"
+        ? "Gradient-Ascent"
+        : "Custom";
 
     if (isCustom) {
       if (!selectedFile) return;
@@ -253,6 +247,20 @@ export default function UnlearningConfiguration() {
       for (const epoch of epochList) {
         for (const lr of learningRateList) {
           for (const bs of batchSizeList) {
+            initialExperiment = {
+              ...initialExperiment,
+              id: "-",
+              fc: forgetClassNumber,
+              phase: "Unlearned",
+              init: initModel.split(".")[0],
+              method: methodFullName,
+              epochs: Number(epoch),
+              BS: Number(bs),
+              LR: Number(lr),
+            };
+
+            addExperiment(initialExperiment, combinations.length);
+
             combinations.push({
               epochs: Number(epoch),
               learning_rate: Number(lr),
@@ -275,7 +283,11 @@ export default function UnlearningConfiguration() {
 
         try {
           await executeMethodUnlearning(runningConfig);
-          await pollStatus(idx);
+          await pollStatus(
+            idx,
+            combination.learning_rate,
+            combination.batch_size
+          );
         } catch (error) {
           console.error("Error occured while unlearning: ", error);
           break;
@@ -313,16 +325,12 @@ export default function UnlearningConfiguration() {
           <Label className="text-base text-nowrap">Initial Model</Label>
         </div>
         <Select
-          defaultValue={
-            weightNames ? weightNames[0] : `000${forgetClassNumber}.pth`
-          }
+          defaultValue={weightNames ? weightNames[0] : initModel}
           onValueChange={handleInitialModelChange}
         >
           <SelectTrigger className="h-[25px] text-base">
             <SelectValue
-              placeholder={
-                weightNames ? weightNames[0] : `000${forgetClassNumber}.pth`
-              }
+              placeholder={weightNames ? weightNames[0] : initModel}
             />
           </SelectTrigger>
           <SelectContent>
