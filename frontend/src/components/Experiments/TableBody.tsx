@@ -37,7 +37,7 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
-  const { statuses } = useContext(RunningStatusContext);
+  const { currentIndex } = useContext(RunningStatusContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -178,15 +178,16 @@ export default function _TableBody({ table, tableData }: Props) {
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row, rowIdx) => {
             const isTemporaryRow = row.id.length < 4;
-            const currentExperiment = statuses[forgetClassNumber].find(
-              (status) => status.is_unlearning
-            );
-            const rowData = row.original;
-            const isTarget =
-              rowData.epochs === currentExperiment?.total_epochs &&
-              rowData.LR === currentExperiment?.learning_rate &&
-              rowData.BS === currentExperiment?.batch_size;
-            const isRunningRow = isTemporaryRow && isTarget;
+            let isRunningRow = false;
+            if (isTemporaryRow) {
+              const temporaryExperimentEntries = Object.entries(
+                experiments
+              ).filter(([key]) => key.length < 4);
+              const tempIndex = temporaryExperimentEntries.findIndex(
+                ([, experiment]) => experiment === row.original
+              );
+              isRunningRow = tempIndex === currentIndex;
+            }
 
             return (
               <ContextMenu key={rowIdx}>

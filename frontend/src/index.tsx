@@ -7,8 +7,7 @@ import RunningStatusContextProvider from "./store/running-status-context";
 import BaselineComparisonContextProvider from "./store/baseline-comparison-context";
 import ForgetClassContextProvider from "./store/forget-class-context";
 import ExperimentsContextProvider from "./store/experiments-context";
-import DatasetContextProvider from "./store/dataset-context";
-import NeuralNetworkModelContextProvider from "./store/neural-network-model-context";
+import CombinedContextProvider from "./store/dataset-and-model-context";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -19,11 +18,9 @@ root.render(
       <BaselineComparisonContextProvider>
         <ForgetClassContextProvider>
           <ExperimentsContextProvider>
-            <DatasetContextProvider>
-              <NeuralNetworkModelContextProvider>
-                <App />
-              </NeuralNetworkModelContextProvider>
-            </DatasetContextProvider>
+            <CombinedContextProvider>
+              <App />
+            </CombinedContextProvider>
           </ExperimentsContextProvider>
         </ForgetClassContextProvider>
       </BaselineComparisonContextProvider>

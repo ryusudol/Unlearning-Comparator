@@ -32,9 +32,9 @@ export type ExperimentData = {
   phase: string;
   init: string;
   method: string;
-  epochs: number;
-  BS: number;
-  LR: number;
+  epochs: number | string;
+  BS: number | string;
+  LR: number | string;
   UA: number | string;
   RA: number | string;
   TUA: number | string;
