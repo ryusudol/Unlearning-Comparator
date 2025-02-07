@@ -32,6 +32,7 @@ import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { ExperimentsContext } from "../../store/experiments-context";
+import { RunningIndexContext } from "../../store/running-index-context";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
@@ -43,9 +44,9 @@ let initialExperiment: ExperimentData = {
   phase: "Unlearned",
   init: "",
   method: "",
-  epochs: 0,
-  BS: 0,
-  LR: 0,
+  epochs: "N/A",
+  BS: "N/A",
+  LR: "N/A",
   UA: "-",
   RA: "-",
   TUA: "-",
@@ -78,8 +79,9 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
-  const { addExperiment, updateExperiment } = useContext(ExperimentsContext);
+  const { updateRunningIndex } = useContext(RunningIndexContext);
   const { saveComparison } = useContext(BaselineComparisonContext);
+  const { addExperiment, updateExperiment } = useContext(ExperimentsContext);
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useContext(RunningStatusContext);
 
@@ -189,6 +191,7 @@ export default function UnlearningConfiguration() {
       const progress = getCurrentProgress(unlearningStatus);
       const completedSteps = getCompletedSteps(progress, unlearningStatus);
 
+      updateRunningIndex(experimentIndex);
       updateStatus({
         status: unlearningStatus,
         forgetClass: forgetClassNumber,
@@ -240,6 +243,16 @@ export default function UnlearningConfiguration() {
     if (isCustom) {
       if (!selectedFile) return;
 
+      initialExperiment = {
+        ...initialExperiment,
+        id: "-",
+        fc: forgetClassNumber,
+        init: initModel.split(".")[0],
+        method: methodFullName,
+      };
+
+      addExperiment(initialExperiment, 0);
+
       await executeCustomUnlearning(selectedFile, forgetClassNumber);
       await pollStatus(0);
     } else {
@@ -251,7 +264,6 @@ export default function UnlearningConfiguration() {
               ...initialExperiment,
               id: "-",
               fc: forgetClassNumber,
-              phase: "Unlearned",
               init: initModel.split(".")[0],
               method: methodFullName,
               epochs: Number(epoch),

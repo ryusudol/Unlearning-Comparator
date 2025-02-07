@@ -6,6 +6,6 @@ export const EXPERIMENTS = "experiments";
 
 export const RUNNING_STATUS = "running-status";
 
-export const DATASET = "dataset";
+export const DATASET_AND_MODEL = "dataset-and-model";
 
-export const NEURAL_NETWORK_MODEL = "neural-network-model";
+export const RUNNING_INDEX = "running-index";

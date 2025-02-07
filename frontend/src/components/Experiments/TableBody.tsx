@@ -27,7 +27,7 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { RunningIndexContext } from "../../store/running-index-context";
 
 const TEMPORARY_ROW_BG_COLOR = "#f0f6fa";
 
@@ -37,7 +37,7 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
-  const { statuses } = useContext(RunningStatusContext);
+  const { runningIndex } = useContext(RunningIndexContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -178,15 +178,16 @@ export default function _TableBody({ table, tableData }: Props) {
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row, rowIdx) => {
             const isTemporaryRow = row.id.length < 4;
-            const currentExperiment = statuses[forgetClassNumber].find(
-              (status) => status.is_unlearning
-            );
-            const rowData = row.original;
-            const isTarget =
-              rowData.epochs === currentExperiment?.total_epochs &&
-              rowData.LR === currentExperiment?.learning_rate &&
-              rowData.BS === currentExperiment?.batch_size;
-            const isRunningRow = isTemporaryRow && isTarget;
+            let isRunningRow = false;
+            if (isTemporaryRow) {
+              const temporaryExperimentEntries = Object.entries(
+                experiments
+              ).filter(([key]) => key.length < 4);
+              const tempIndex = temporaryExperimentEntries.findIndex(
+                ([, experiment]) => experiment === row.original
+              );
+              isRunningRow = tempIndex === runningIndex;
+            }
 
             return (
               <ContextMenu key={rowIdx}>

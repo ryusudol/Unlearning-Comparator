@@ -43,12 +43,10 @@ function ExperimentsReducer(state: Context, action: Action): Context {
               ...state.experiments,
               [tempIdx]: experimentWithoutPoints,
             }
-          : experiment.id
-          ? {
+          : {
               ...state.experiments,
               [experiment.id]: experimentWithoutPoints,
-            }
-          : { ...state.experiments };
+            };
       const result = { ...state, experiments: newExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
       return result;

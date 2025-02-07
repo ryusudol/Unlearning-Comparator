@@ -15,7 +15,6 @@ export interface RunningStatus {
   isRunning: boolean;
   statuses: UnlearningStatus[][];
   activeStep: number;
-  currentIndex: number;
   totalExperimentsCount: number;
 }
 

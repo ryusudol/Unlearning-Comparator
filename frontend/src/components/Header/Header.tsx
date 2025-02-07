@@ -2,8 +2,7 @@ import { useContext } from "react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
 import { GithubIcon } from "../UI/icons";
-import { DatasetContext } from "../../store/dataset-context";
-import { NeuralNetworkModelContext } from "../../store/neural-network-model-context";
+import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
   Select,
@@ -14,15 +13,13 @@ import {
 } from "../UI/select";
 
 export default function Header() {
-  const { dataset, saveDataset } = useContext(DatasetContext);
-  const { neuralNetworkModel, saveNeuralNetworkModel } = useContext(
-    NeuralNetworkModelContext,
-  );
+  const { dataset, saveDataset, neuralNetworkModel, saveNeuralNetworkModel } =
+    useContext(DatasetAndModelContext);
 
   const handleGithubIconClick = () => {
     window.open(
       "https://github.com/gnueaj/Machine-Unlearning-Comparator",
-      "_blank",
+      "_blank"
     );
   };
 
