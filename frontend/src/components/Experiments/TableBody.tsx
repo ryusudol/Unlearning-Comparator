@@ -1,5 +1,6 @@
 import React, { useMemo, useContext } from "react";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
+import { Loader2 } from "lucide-react";
 
 import {
   ContextMenu,
@@ -27,7 +28,6 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { RunningIndexContext } from "../../store/running-index-context";
 
 const TEMPORARY_ROW_BG_COLOR = "#f0f6fa";
 
@@ -37,7 +37,6 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
-  const { runningIndex } = useContext(RunningIndexContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -186,7 +185,7 @@ export default function _TableBody({ table, tableData }: Props) {
               const tempIndex = temporaryExperimentEntries.findIndex(
                 ([, experiment]) => experiment === row.original
               );
-              isRunningRow = tempIndex === runningIndex;
+              isRunningRow = tempIndex === 0;
             }
 
             return (
@@ -240,25 +239,23 @@ export default function _TableBody({ table, tableData }: Props) {
                         }
                       }
 
-                      let additionalClasses = "";
                       if (isTemporaryRow) {
-                        if (isRunningRow) {
-                          additionalClasses = "animate-bgPulse text-black";
-                        } else {
-                          cellStyle.backgroundColor = TEMPORARY_ROW_BG_COLOR;
-                        }
+                        cellStyle.backgroundColor = TEMPORARY_ROW_BG_COLOR;
                       }
 
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          style={cellStyle}
-                          className={additionalClasses}
-                        >
-                          {flexRender(
+                      const cellContent =
+                        isRunningRow && columnId === "id" ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
-                          )}
+                          )
+                        );
+
+                      return (
+                        <TableCell key={cell.id} style={cellStyle}>
+                          {cellContent}
                         </TableCell>
                       );
                     })}
