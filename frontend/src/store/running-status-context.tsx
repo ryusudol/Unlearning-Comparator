@@ -26,6 +26,8 @@ const initialStatus: UnlearningStatus = {
   estimated_time_remaining: 0,
   elapsed_time: 0,
   completed_steps: [],
+  learning_rate: 0,
+  batch_size: 0,
 };
 
 const initialRunningStatus: RunningStatus = {
@@ -95,6 +97,8 @@ function runningStatusReducer(
         progress,
         elapsedTime,
         completedSteps,
+        learningRate,
+        batchSize,
       } = action.payload;
 
       const classStatuses = state.statuses[forgetClass] || [];
@@ -111,6 +115,8 @@ function runningStatusReducer(
         progress,
         elapsed_time: elapsedTime,
         completed_steps: completedSteps,
+        learning_rate: learningRate,
+        batch_size: batchSize,
       };
 
       const { elapsed_time: _, ...oldWithoutTime } = currentStatus;

@@ -51,6 +51,10 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        bgPulse: {
+          "0%, 100%": { backgroundColor: "#f0f6fa" },
+          "50%": { backgroundColor: "#e0e6f4" },
+        },
         "accordion-down": {
           from: { height: 0 },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -61,6 +65,7 @@ module.exports = {
         },
       },
       animation: {
+        bgPulse: "bgPulse 2s infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },

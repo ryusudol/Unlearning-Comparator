@@ -33,13 +33,12 @@ const baseColors = {
   FQ: RED,
 };
 
-// TODO: MIA에 있는 RTE 모두 MIA로 변경할 것
 export function calculatePerformanceMetrics(data: Experiments) {
   const values: Values = {
-    UA: Object.values(data).map((d) => d.UA),
-    RA: Object.values(data).map((d) => d.RA),
-    TUA: Object.values(data).map((d) => d.TUA),
-    TRA: Object.values(data).map((d) => d.TRA),
+    UA: Object.values(data).map((d) => Number(d.UA)),
+    RA: Object.values(data).map((d) => Number(d.RA)),
+    TUA: Object.values(data).map((d) => Number(d.TUA)),
+    TRA: Object.values(data).map((d) => Number(d.TRA)),
     RTE: Object.values(data)
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),

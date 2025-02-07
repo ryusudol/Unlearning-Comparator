@@ -37,17 +37,18 @@ function ExperimentsReducer(state: Context, action: Action): Context {
     case EXPERIMENTS_ACTIONS.ADD_EXPERIMENT: {
       const { experiment, tempIdx } = action.payload;
       const { points, ...experimentWithoutPoints } = experiment;
-      const newExperiments = experiment.id
-        ? {
-            ...state.experiments,
-            [experiment.id]: experimentWithoutPoints,
-          }
-        : tempIdx
-        ? {
-            ...state.experiments,
-            [tempIdx]: experimentWithoutPoints,
-          }
-        : { ...state.experiments };
+      const newExperiments =
+        tempIdx !== undefined
+          ? {
+              ...state.experiments,
+              [tempIdx]: experimentWithoutPoints,
+            }
+          : experiment.id
+          ? {
+              ...state.experiments,
+              [experiment.id]: experimentWithoutPoints,
+            }
+          : { ...state.experiments };
       const result = { ...state, experiments: newExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
       return result;
@@ -55,9 +56,11 @@ function ExperimentsReducer(state: Context, action: Action): Context {
 
     case EXPERIMENTS_ACTIONS.UPDATE_EXPERIMENT: {
       const { experiment, idx } = action.payload;
+      const { [idx]: removedExperiment, ...remainingExperiments } =
+        state.experiments;
       const updatedExperiments = {
-        ...state.experiments,
-        [idx]: experiment,
+        ...remainingExperiments,
+        [experiment.id]: experiment,
       };
       const result = { ...state, experiments: updatedExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));

@@ -35,10 +35,10 @@ export type ExperimentData = {
   epochs: number;
   BS: number;
   LR: number;
-  UA: number;
-  RA: number;
-  TUA: number;
-  TRA: number;
+  UA: number | string;
+  RA: number | string;
+  TUA: number | string;
+  TRA: number | string;
   RTE: number | string;
   accs: number[];
   label_dist: Dist;
