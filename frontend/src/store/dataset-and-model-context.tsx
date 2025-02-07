@@ -28,24 +28,23 @@ export const DatasetAndModelContext = createContext<DatasetAndModelContextType>(
   }
 );
 
-function CombinedReducer(
+function DatasetAndModelReducer(
   state: DatasetAndModel,
   action: Action
 ): DatasetAndModel {
   switch (action.type) {
     case DATASET_AND_MODEL_ACTIONS.SAVE_DATASET: {
       const dataset = action.payload;
-      sessionStorage.setItem(DATASET_AND_MODEL, JSON.stringify({ dataset }));
-      return { ...state, dataset };
+      const result = { ...state, dataset };
+      sessionStorage.setItem(DATASET_AND_MODEL, JSON.stringify(result));
+      return result;
     }
 
     case DATASET_AND_MODEL_ACTIONS.SAVE_NEURAL_NETWORK_MODEL: {
       const model = action.payload;
-      sessionStorage.setItem(
-        DATASET_AND_MODEL,
-        JSON.stringify({ neuralNetworkModel: model })
-      );
-      return { ...state, neuralNetworkModel: model };
+      const result = { ...state, neuralNetworkModel: model };
+      sessionStorage.setItem(DATASET_AND_MODEL, JSON.stringify(result));
+      return result;
     }
 
     case DATASET_AND_MODEL_ACTIONS.RETRIEVE_DATASET_AND_MODEL: {
@@ -68,12 +67,12 @@ function CombinedReducer(
   }
 }
 
-export default function CombinedContextProvider({
+export default function DatasetAndModelContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [state, dispatch] = useReducer(CombinedReducer, initialState);
+  const [state, dispatch] = useReducer(DatasetAndModelReducer, initialState);
 
   const handleSaveDataset = useCallback((dataset: string) => {
     dispatch({

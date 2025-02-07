@@ -11,25 +11,22 @@ import { ViewProps } from "../types/common";
 import { Step } from "../types/progress";
 import { VitalIcon } from "../components/UI/icons";
 import { RunningStatusContext } from "../store/running-status-context";
+import { RunningIndexContext } from "../store/running-index-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
 export const PREV = "prev";
 export const NEXT = "next";
 
 export default function Progress({ width, height }: ViewProps) {
-  const {
-    isRunning,
-    statuses,
-    activeStep,
-    currentIndex,
-    totalExperimentsCount,
-  } = useContext(RunningStatusContext);
+  const { isRunning, statuses, activeStep, totalExperimentsCount } =
+    useContext(RunningStatusContext);
+  const { runningIndex } = useContext(RunningIndexContext);
 
   const { forgetClassNumber, forgetClassExist } = useForgetClass();
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
-  const [currentPage, setCurrentPage] = useState(currentIndex + 1);
+  const [currentPage, setCurrentPage] = useState(runningIndex + 1);
 
   useEffect(() => {
     if (isRunning) {
@@ -38,8 +35,8 @@ export default function Progress({ width, height }: ViewProps) {
   }, [isRunning]);
 
   useEffect(() => {
-    setCurrentPage(currentIndex + 1);
-  }, [currentIndex]);
+    setCurrentPage(runningIndex + 1);
+  }, [runningIndex]);
 
   const displayedPageIdx = currentPage - 1;
 
@@ -128,12 +125,12 @@ export default function Progress({ width, height }: ViewProps) {
         <Stepper
           steps={steps}
           activeStep={
-            displayedPageIdx === currentIndex
+            displayedPageIdx === runningIndex
               ? activeStep
               : (currentStatus?.completed_steps?.length ?? 0) + 1
           }
           completedSteps={currentStatus?.completed_steps || []}
-          isRunning={displayedPageIdx === currentIndex ? isRunning : false}
+          isRunning={displayedPageIdx === runningIndex ? isRunning : false}
         />
       ) : (
         <Indicator about="ForgetClass" />

@@ -34,14 +34,12 @@ const initialRunningStatus: RunningStatus = {
   isRunning: false,
   statuses: Array.from({ length: 10 }, () => []),
   activeStep: 0,
-  currentIndex: 0,
   totalExperimentsCount: 0,
 };
 
 export const RunningStatusContext = createContext<RunningStatusContextType>({
   isRunning: false,
   statuses: Array.from({ length: 10 }, () => []),
-  currentIndex: 0,
   activeStep: 0,
   totalExperimentsCount: 0,
 
@@ -133,7 +131,6 @@ function runningStatusReducer(
       const newState = {
         ...state,
         statuses: newStatuses,
-        currentIndex: experimentIndex,
       };
 
       sessionStorage.setItem(RUNNING_STATUS, JSON.stringify(newState));
@@ -198,7 +195,6 @@ export default function RunningStatusContextProvider({
   const ctxValue: RunningStatusContextType = {
     isRunning: runningStatus.isRunning,
     statuses: runningStatus.statuses,
-    currentIndex: runningStatus.currentIndex,
     activeStep: runningStatus.activeStep,
     totalExperimentsCount: runningStatus.totalExperimentsCount,
 

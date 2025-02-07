@@ -27,7 +27,7 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { RunningIndexContext } from "../../store/running-index-context";
 
 const TEMPORARY_ROW_BG_COLOR = "#f0f6fa";
 
@@ -37,7 +37,7 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
-  const { currentIndex } = useContext(RunningStatusContext);
+  const { runningIndex } = useContext(RunningIndexContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -186,7 +186,7 @@ export default function _TableBody({ table, tableData }: Props) {
               const tempIndex = temporaryExperimentEntries.findIndex(
                 ([, experiment]) => experiment === row.original
               );
-              isRunningRow = tempIndex === currentIndex;
+              isRunningRow = tempIndex === runningIndex;
             }
 
             return (
