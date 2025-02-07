@@ -1,5 +1,6 @@
 import React, { useMemo, useContext } from "react";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
+import { Loader2 } from "lucide-react";
 
 import {
   ContextMenu,
@@ -240,25 +241,23 @@ export default function _TableBody({ table, tableData }: Props) {
                         }
                       }
 
-                      let additionalClasses = "";
                       if (isTemporaryRow) {
-                        if (isRunningRow) {
-                          additionalClasses = "animate-bgPulse text-black";
-                        } else {
-                          cellStyle.backgroundColor = TEMPORARY_ROW_BG_COLOR;
-                        }
+                        cellStyle.backgroundColor = TEMPORARY_ROW_BG_COLOR;
                       }
 
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          style={cellStyle}
-                          className={additionalClasses}
-                        >
-                          {flexRender(
+                      const cellContent =
+                        isRunningRow && columnId === "id" ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
-                          )}
+                          )
+                        );
+
+                      return (
+                        <TableCell key={cell.id} style={cellStyle}>
+                          {cellContent}
                         </TableCell>
                       );
                     })}
