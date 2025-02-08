@@ -135,7 +135,7 @@ export default function AttackSuccessFailure({
   }, [ga3Json, isBaseline, retrainJson, threshold]);
 
   return (
-    <div className="mt-2">
+    <div className="relative h-full flex flex-col mt-2">
       <div className="flex items-start justify-around">
         <div>
           <div className="flex items-center">
@@ -158,7 +158,7 @@ export default function AttackSuccessFailure({
           </p>
         </div>
       </div>
-      <div className="flex justify-center gap-4 mt-2">
+      <div className="flex justify-center gap-4 mt-1">
         <div className="flex flex-col items-center">
           <span className="text-sm font-medium mb-1">Correct</span>
           <svg ref={correctRef}></svg>
@@ -168,6 +168,9 @@ export default function AttackSuccessFailure({
           <svg ref={incorrectRef}></svg>
         </div>
       </div>
+      <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
+        Forgetting Quality Score: 0.395
+      </p>
     </div>
   );
 }

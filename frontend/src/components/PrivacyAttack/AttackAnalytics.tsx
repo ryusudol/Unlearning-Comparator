@@ -29,7 +29,7 @@ export default function AttackAnalytics({ mode }: Props) {
   }, []);
 
   return (
-    <div className="flex flex-col">
+    <div className="h-full flex flex-col">
       {data && (
         <AttackPlot
           mode={mode}
