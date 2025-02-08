@@ -141,6 +141,10 @@ export default function ButterflyPlot({
           const j = bin.values.length - displayCount + i;
           const d = bin.values[j];
           const cx = -r - (displayCount - 1 - i) * spacing;
+          const fillOpacityValue =
+            yPos < yScaleB(threshold)
+              ? CONFIG.OPACITY_ABOVE_THRESHOLD
+              : CONFIG.OPACITY_BELOW_THRESHOLD;
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-retrain")
@@ -148,12 +152,13 @@ export default function ButterflyPlot({
             .attr("cx", cx)
             .attr("cy", yPos)
             .attr("r", r)
+            .attr("fill-opacity", fillOpacityValue)
             .attr(
-              "fill-opacity",
-              yPos < yScaleB(threshold)
-                ? CONFIG.OPACITY_ABOVE_THRESHOLD
-                : CONFIG.OPACITY_BELOW_THRESHOLD
-            );
+              "stroke",
+              d3.color(CONFIG.GRAY)?.darker().toString() ?? CONFIG.GRAY
+            )
+            .attr("stroke-width", 0.8)
+            .attr("stroke-opacity", fillOpacityValue);
         }
         if (extraCount > 0) {
           const markerCx = -r - displayCount * spacing;
@@ -169,21 +174,24 @@ export default function ButterflyPlot({
 
       ga3Bins.forEach((bin) => {
         const yPos = yScaleB(bin.bin + binSize / 2);
+        const color = isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
         bin.values.forEach((d, i) => {
           const cx = r + i * (2 * r + 1);
+          const fillOpacityValue =
+            yPos < yScaleB(threshold)
+              ? CONFIG.OPACITY_ABOVE_THRESHOLD
+              : CONFIG.OPACITY_BELOW_THRESHOLD;
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-unlearn")
-            .attr("fill", isBaseline ? COLORS.PURPLE : COLORS.EMERALD)
+            .attr("fill", color)
             .attr("cx", cx)
             .attr("cy", yPos)
             .attr("r", r)
-            .attr(
-              "fill-opacity",
-              yPos < yScaleB(threshold)
-                ? CONFIG.OPACITY_ABOVE_THRESHOLD
-                : CONFIG.OPACITY_BELOW_THRESHOLD
-            );
+            .attr("fill-opacity", fillOpacityValue)
+            .attr("stroke", d3.color(color)?.darker().toString() ?? color)
+            .attr("stroke-width", 0.8)
+            .attr("stroke-opacity", fillOpacityValue);
         });
       });
       const xAxisScaleB = d3
