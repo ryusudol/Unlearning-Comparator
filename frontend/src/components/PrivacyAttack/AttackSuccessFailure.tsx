@@ -180,40 +180,28 @@ export default function AttackSuccessFailure({
   }, [ga3Json, isBaseline, retrainJson, threshold]);
 
   return (
-    <div className="relative h-full flex flex-col mt-2">
+    <div className="relative h-full flex flex-col mt-5">
       <div className="flex items-start justify-around">
         <div>
           <div className="flex items-center">
-            <p className="text-[17px]">Attack Success</p>
-            <span className="ml-3 text-sm font-light">{correctPct}%</span>
+            <p className="text-[17px] mb-0.5">Attack Success</p>
+            <p className="ml-1 text-sm font-light w-11 text-center">
+              {correctPct}%
+            </p>
           </div>
-          <p className="text-sm w-[200px]">
-            Retrain / Pred Retrain (Light Gray) + Unlearn / Pred Unlearn (Dark
-            Purple)
-          </p>
+          <svg ref={correctRef}></svg>
         </div>
         <div>
           <div className="flex items-center">
-            <p className="text-[17px]">Attack Failure</p>
-            <span className="ml-3 text-sm font-light">{incorrectPct}%</span>
+            <p className="text-[17px] mb-0.5">Attack Failure</p>
+            <p className="ml-1 text-sm font-light w-11 text-center">
+              {incorrectPct}%
+            </p>
           </div>
-          <p className="text-sm w-[200px]">
-            Retrain / Pred Retrain (Dark Gray) + Unlearn / Pred Unlearn (Light
-            Purple)
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-center gap-4 mt-1">
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Correct</span>
-          <svg ref={correctRef}></svg>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Incorrect</span>
           <svg ref={incorrectRef}></svg>
         </div>
       </div>
-      <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
+      <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
         Forgetting Quality Score: 0.395
       </p>
     </div>
