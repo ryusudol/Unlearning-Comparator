@@ -19,10 +19,12 @@ const CONFIG = {
   GRAY: "#6a6a6a",
   PURPLE: "#8c63cb",
   VERTICAL_LINE_COLOR: "#efefef",
+  THRESHOLD_STEP: 0.05,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
-  BUTTERFLY_WIDTH: 365,
-  LINE_WIDTH: 140,
+  LINE_WIDTH: 2,
+  BUTTERFLY_CHART_WIDTH: 365,
+  LINE_CHART_WIDTH: 140,
   HEIGHT: 324,
   MARGIN: { top: 6, right: 10, bottom: 18, left: 12 },
 } as const;
@@ -90,7 +92,7 @@ export default function ButterflyPlot({
 
         const svgB = d3
           .select(butterflyRef.current)
-          .attr("width", CONFIG.BUTTERFLY_WIDTH)
+          .attr("width", CONFIG.BUTTERFLY_CHART_WIDTH)
           .attr("height", CONFIG.HEIGHT);
         svgB.selectAll("*").remove();
 
@@ -98,12 +100,14 @@ export default function ButterflyPlot({
           .append("g")
           .attr(
             "transform",
-            `translate(${CONFIG.MARGIN.left + CONFIG.BUTTERFLY_WIDTH / 2}, ${
-              CONFIG.MARGIN.top
-            })`
+            `translate(${
+              CONFIG.MARGIN.left + CONFIG.BUTTERFLY_CHART_WIDTH / 2
+            }, ${CONFIG.MARGIN.top})`
           );
         const innerW =
-          CONFIG.BUTTERFLY_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+          CONFIG.BUTTERFLY_CHART_WIDTH -
+          CONFIG.MARGIN.left -
+          CONFIG.MARGIN.right;
         const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
         const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
         const r = 3;
@@ -206,7 +210,9 @@ export default function ButterflyPlot({
         gB.append("g")
           .attr(
             "transform",
-            `translate(${-CONFIG.BUTTERFLY_WIDTH / 2 + CONFIG.MARGIN.left},0)`
+            `translate(${
+              -CONFIG.BUTTERFLY_CHART_WIDTH / 2 + CONFIG.MARGIN.left
+            },0)`
           )
           .call(d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.5 + 0.5, 0.5)));
 
@@ -216,7 +222,8 @@ export default function ButterflyPlot({
             const [, newY] = d3.pointer(event, gB.node());
             const newThresholdRaw = yScaleB.invert(newY);
             const newThresholdRounded =
-              Math.round(newThresholdRaw / 0.05) * 0.05;
+              Math.round(newThresholdRaw / CONFIG.THRESHOLD_STEP) *
+              CONFIG.THRESHOLD_STEP;
             if (newThresholdRounded >= 0 && newThresholdRounded <= 2.5) {
               setThreshold(newThresholdRounded);
             }
@@ -246,7 +253,7 @@ export default function ButterflyPlot({
 
         const svgL = d3
           .select(lineRef.current)
-          .attr("width", CONFIG.LINE_WIDTH)
+          .attr("width", CONFIG.LINE_CHART_WIDTH)
           .attr("height", CONFIG.HEIGHT);
         svgL.selectAll("*").remove();
         const gL = svgL
@@ -255,7 +262,8 @@ export default function ButterflyPlot({
             "transform",
             `translate(${CONFIG.MARGIN.left},${CONFIG.MARGIN.top})`
           );
-        const wL = CONFIG.LINE_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+        const wL =
+          CONFIG.LINE_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
         const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
         const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
         const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
@@ -296,7 +304,7 @@ export default function ButterflyPlot({
           .attr("class", "line-attack-above")
           .attr("fill", "none")
           .attr("stroke", CONFIG.RED)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", CONFIG.LINE_WIDTH)
           .attr("d", lineAttack)
           .attr("clip-path", `url(#aboveThreshold-${mode})`);
         gL.append("path")
@@ -304,7 +312,7 @@ export default function ButterflyPlot({
           .attr("class", "line-attack-below")
           .attr("fill", "none")
           .attr("stroke", CONFIG.RED)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", CONFIG.LINE_WIDTH)
           .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
           .attr("d", lineAttack)
           .attr("clip-path", `url(#belowThreshold-${mode})`);
@@ -314,7 +322,7 @@ export default function ButterflyPlot({
           .attr("class", "line-fpr-above")
           .attr("fill", "none")
           .attr("stroke", CONFIG.BLUE)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", CONFIG.LINE_WIDTH)
           .attr("d", lineFpr)
           .attr("clip-path", `url(#aboveThreshold-${mode})`);
         gL.append("path")
@@ -322,7 +330,7 @@ export default function ButterflyPlot({
           .attr("class", "line-fpr-below")
           .attr("fill", "none")
           .attr("stroke", CONFIG.BLUE)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", CONFIG.LINE_WIDTH)
           .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
           .attr("d", lineFpr)
           .attr("clip-path", `url(#belowThreshold-${mode})`);
@@ -332,7 +340,7 @@ export default function ButterflyPlot({
           .attr("class", "line-fnr-above")
           .attr("fill", "none")
           .attr("stroke", CONFIG.GREEN)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", CONFIG.LINE_WIDTH)
           .attr("d", lineFnr)
           .attr("clip-path", `url(#aboveThreshold-${mode})`);
         gL.append("path")
@@ -340,7 +348,7 @@ export default function ButterflyPlot({
           .attr("class", "line-fnr-below")
           .attr("fill", "none")
           .attr("stroke", CONFIG.GREEN)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", CONFIG.LINE_WIDTH)
           .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
           .attr("d", lineFnr)
           .attr("clip-path", `url(#belowThreshold-${mode})`);
@@ -377,7 +385,8 @@ export default function ButterflyPlot({
             const [, newY] = d3.pointer(event, gL.node());
             const newThresholdRaw = lineYScale.invert(newY);
             const newThresholdRounded =
-              Math.round(newThresholdRaw / 0.05) * 0.05;
+              Math.round(newThresholdRaw / CONFIG.THRESHOLD_STEP) *
+              CONFIG.THRESHOLD_STEP;
             if (newThresholdRounded >= 0 && newThresholdRounded <= 2.5) {
               setThreshold(newThresholdRounded);
 
@@ -423,7 +432,7 @@ export default function ButterflyPlot({
           .attr("class", "info-group")
           .attr(
             "transform",
-            `translate(${wL - 5}, ${lineYScale(threshold) - 38})`
+            `translate(${wL - 5}, ${lineYScale(threshold) - 42})`
           );
         infoGroup
           .append("text")
@@ -584,7 +593,8 @@ export default function ButterflyPlot({
 
       const svgL = d3.select(lineRef.current);
       const gL = svgL.select<SVGGElement>("g");
-      const wL = CONFIG.LINE_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+      const wL =
+        CONFIG.LINE_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
       const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
@@ -612,7 +622,7 @@ export default function ButterflyPlot({
         );
         infoGroup.attr(
           "transform",
-          `translate(${wL - 5}, ${lineYScale(threshold) - 38})`
+          `translate(${wL - 5}, ${lineYScale(threshold) - 42})`
         );
         infoGroup
           .select("text:nth-child(1)")
