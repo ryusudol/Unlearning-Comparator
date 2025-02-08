@@ -20,6 +20,7 @@ export const COLORS = {
   EMERALD: "#10B981",
 
   GRAY: "#777",
+  DARK_GRAY: "#6a6a6a",
 
   GRID_COLOR: "#EFEFEF",
 

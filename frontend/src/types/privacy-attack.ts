@@ -1,11 +1,15 @@
-export type PieDataPoint = {
-  label: string;
-  value: number;
-  color: string;
-};
+interface Confidence {
+  values: number[];
+  range: number[];
+  bins: number;
+  max_display: number;
+}
 
-export interface RetrainData {
-  entropy: number;
+type Entropy = Confidence;
+
+export interface ExperimentJsonData {
+  confidence: Confidence;
+  entropy: Entropy;
 }
 
 export interface AttackData {
