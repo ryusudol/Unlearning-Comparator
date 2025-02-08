@@ -283,7 +283,7 @@ export default function _TableBody({ table, tableData }: Props) {
               colSpan={columns.length}
               className="h-[178px] text-center text-gray-500 text-[15px]"
             >
-              Failed to load the data.
+              No data found.
             </TableCell>
           </TableRow>
         )}
