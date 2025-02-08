@@ -63,14 +63,18 @@ export default function ButterflyPlot({
     yScale: d3.ScaleLinear<number, number>,
     th: number
   ) => {
-    g.selectAll<SVGCircleElement, { entropy: number }>(
-      ".circle-retrain, .circle-unlearn"
-    ).attr("fill-opacity", function () {
+    const opacityFunction = function (this: SVGCircleElement) {
       const cy = +d3.select(this).attr("cy");
       return cy < yScale(th)
         ? CONFIG.OPACITY_ABOVE_THRESHOLD
         : CONFIG.OPACITY_BELOW_THRESHOLD;
-    });
+    };
+
+    g.selectAll<SVGCircleElement, { entropy: number }>(
+      ".circle-retrain, .circle-unlearn"
+    )
+      .attr("fill-opacity", opacityFunction)
+      .attr("stroke-opacity", opacityFunction);
   };
 
   useEffect(() => {
