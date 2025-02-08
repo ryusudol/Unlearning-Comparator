@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as d3 from "d3";
 
 import { COLORS } from "../../constants/colors";
@@ -19,6 +19,9 @@ export default function AttackSuccessFailure({
   const correctRef = useRef<SVGSVGElement | null>(null);
   const incorrectRef = useRef<SVGSVGElement | null>(null);
 
+  const [correctPct, setCorrectPct] = useState<number>(0);
+  const [incorrectPct, setIncorrectPct] = useState<number>(0);
+
   const isBaseline = mode === "Baseline";
 
   const groupByBin = (data: number[]) => {
@@ -36,6 +39,7 @@ export default function AttackSuccessFailure({
 
   useEffect(() => {
     if (!retrainJson || !ga3Json) return;
+
     const retrainValues: number[] = retrainJson.entropy
       ? retrainJson.entropy.values
       : [];
@@ -57,11 +61,21 @@ export default function AttackSuccessFailure({
       ...incorrectRetrain.map((v) => ({ type: "retrain", value: v })),
     ];
 
+    const totalData = 400;
+    const computedCorrectPct = parseFloat(
+      ((correctGroup.length / totalData) * 100).toFixed(1)
+    );
+    const computedIncorrectPct = parseFloat(
+      ((incorrectGroup.length / totalData) * 100).toFixed(1)
+    );
+    setCorrectPct(computedCorrectPct);
+    setIncorrectPct(computedIncorrectPct);
+
     const circleRadius = 3;
     const circleDiameter = circleRadius * 2;
     const cellSpacing = 1;
     const cellSize = circleDiameter + cellSpacing;
-    const maxColumns = 15;
+    const maxColumns = 20;
 
     const correctSVG = d3.select(correctRef.current);
     correctSVG.selectAll("*").remove();
@@ -75,10 +89,10 @@ export default function AttackSuccessFailure({
       .data(correctGroup)
       .enter()
       .append("circle")
-      .attr("cx", (d, i) => (i % maxColumns) * cellSize + circleRadius)
+      .attr("cx", (_, i) => (i % maxColumns) * cellSize + circleRadius)
       .attr(
         "cy",
-        (d, i) => Math.floor(i / maxColumns) * cellSize + circleRadius
+        (_, i) => Math.floor(i / maxColumns) * cellSize + circleRadius
       )
       .attr("r", circleRadius)
       .attr("fill", (d) =>
@@ -104,10 +118,10 @@ export default function AttackSuccessFailure({
       .data(incorrectGroup)
       .enter()
       .append("circle")
-      .attr("cx", (d, i) => (i % maxColumns) * cellSize + circleRadius)
+      .attr("cx", (_, i) => (i % maxColumns) * cellSize + circleRadius)
       .attr(
         "cy",
-        (d, i) => Math.floor(i / maxColumns) * cellSize + circleRadius
+        (_, i) => Math.floor(i / maxColumns) * cellSize + circleRadius
       )
       .attr("r", circleRadius)
       .attr("fill", (d) =>
@@ -121,23 +135,30 @@ export default function AttackSuccessFailure({
   }, [ga3Json, isBaseline, retrainJson, threshold]);
 
   return (
-    <div className="mt-4">
+    <div className="mt-2">
       <div className="flex items-start justify-around">
         <div>
-          <p className="text-[17px] text-center">Attack Success</p>
+          <div className="flex items-center">
+            <p className="text-[17px]">Attack Success</p>
+            <span className="ml-3 text-sm font-light">{correctPct}%</span>
+          </div>
           <p className="text-sm w-[200px]">
             Retrain / Pred Retrain (Light Gray) + Unlearn / Pred Unlearn (Dark
             Purple)
           </p>
         </div>
         <div>
-          <p className="text-[17px] text-center">Attack Failure</p>
+          <div className="flex items-center">
+            <p className="text-[17px]">Attack Failure</p>
+            <span className="ml-3 text-sm font-light">{incorrectPct}%</span>
+          </div>
           <p className="text-sm w-[200px]">
-            Retrain / Pred Retrain (회색)와 Unlearn / Pred Unlearn (보라색)
+            Retrain / Pred Retrain (Dark Gray) + Unlearn / Pred Unlearn (Light
+            Purple)
           </p>
         </div>
       </div>
-      <div className="flex items-center justify-center gap-4 mt-2">
+      <div className="flex justify-center gap-4 mt-2">
         <div className="flex flex-col items-center">
           <span className="text-sm font-medium mb-1">Correct</span>
           <svg ref={correctRef}></svg>
