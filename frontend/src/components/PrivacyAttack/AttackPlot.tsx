@@ -729,7 +729,7 @@ export default function ButterflyPlot({
   ]);
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center">
       <div className="flex items-center text-[17px]">
         <div className="flex items-center">
           <NeuralNetworkIcon color={CONFIG.GRAY} className="mr-1" />
