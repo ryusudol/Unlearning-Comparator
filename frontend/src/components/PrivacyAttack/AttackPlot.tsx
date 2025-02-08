@@ -1,14 +1,15 @@
 import { useRef, useEffect, useContext } from "react";
 import * as d3 from "d3";
 
-import { useForgetClass } from "../../hooks/useForgetClass";
 import {
   NeuralNetworkIcon,
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
-import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
+import { COLORS } from "../../constants/colors";
 import { LEGEND_DATA } from "../../constants/privacyAttack";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 
 const CONFIG = {
@@ -17,7 +18,6 @@ const CONFIG = {
   BLUE: "#377eb8",
   GREEN: "#4daf4a",
   GRAY: "#6a6a6a",
-  PURPLE: "#8c63cb",
   VERTICAL_LINE_COLOR: "#efefef",
   THRESHOLD_STEP: 0.05,
   OPACITY_ABOVE_THRESHOLD: 1,
@@ -174,7 +174,7 @@ export default function ButterflyPlot({
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-unlearn")
-            .attr("fill", CONFIG.PURPLE)
+            .attr("fill", isBaseline ? COLORS.PURPLE : COLORS.EMERALD)
             .attr("cx", cx)
             .attr("cy", yPos)
             .attr("r", r)
@@ -718,7 +718,15 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
     }
-  }, [attackData, ga3Json, mode, retrainJson, setThreshold, threshold]);
+  }, [
+    attackData,
+    ga3Json,
+    isBaseline,
+    mode,
+    retrainJson,
+    setThreshold,
+    threshold,
+  ]);
 
   return (
     <div className="flex flex-col items-center gap-1">
