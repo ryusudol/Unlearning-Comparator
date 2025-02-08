@@ -24,7 +24,7 @@ const CONFIG = {
   OPACITY_BELOW_THRESHOLD: 0.3,
   LINE_WIDTH: 2,
   BUTTERFLY_CHART_WIDTH: 365,
-  LINE_CHART_WIDTH: 140,
+  LINE_CHART_WIDTH: 146,
   HEIGHT: 324,
   MARGIN: { top: 6, right: 10, bottom: 18, left: 12 },
 } as const;
@@ -432,7 +432,7 @@ export default function ButterflyPlot({
           .attr("class", "info-group")
           .attr(
             "transform",
-            `translate(${wL - 5}, ${lineYScale(threshold) - 42})`
+            `translate(${wL - 8}, ${lineYScale(threshold) - 42})`
           );
         infoGroup
           .append("text")
@@ -461,7 +461,7 @@ export default function ButterflyPlot({
         const legendGroup = gL
           .append("g")
           .attr("class", "legend-group")
-          .attr("transform", `translate(${wL - 15}, 4)`);
+          .attr("transform", `translate(${wL - 20}, 4)`);
         legendGroup
           .append("rect")
           .attr("x", -98)
@@ -622,7 +622,7 @@ export default function ButterflyPlot({
         );
         infoGroup.attr(
           "transform",
-          `translate(${wL - 5}, ${lineYScale(threshold) - 42})`
+          `translate(${wL - 8}, ${lineYScale(threshold) - 42})`
         );
         infoGroup
           .select("text:nth-child(1)")
