@@ -41,7 +41,7 @@ export default function Attackconfiguration({
             })}
           </SelectContent>
         </Select>
-        <p className="text-xs">
+        <p className="text-sm">
           Membership Inference
           <br />
           Attack by output logit
@@ -61,7 +61,7 @@ export default function Attackconfiguration({
               >
                 {method}
               </div>
-              <span className="text-xs font-light">
+              <span className="text-sm font-light">
                 {idx === 0
                   ? "Minimize log"
                   : idx === 1
@@ -74,7 +74,7 @@ export default function Attackconfiguration({
       </div>
       <div className="text-[#cc0000]">
         <span>{thresholdMethod}</span>
-        <p className="text-xs">
+        <p className="text-sm">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt,
           pariatur. Sapiente nobis exercitationem obcaecati ducimus
         </p>

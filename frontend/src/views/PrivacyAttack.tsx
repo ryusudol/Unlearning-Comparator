@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import View from "../components/View";
 import AttackConfiguration from "../components/PrivacyAttack/AttackConfiguration";
-import AttackPlot from "../components/PrivacyAttack/AttackPlot";
+import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Separator } from "../components/UI/separator";
 import { ATTACK_METHODS, THRESHOLD_METHODS } from "../constants/privacyAttack";
 
@@ -30,9 +30,9 @@ export default function PrivacyAttack({ height }: { height: number }) {
         onThresholdChange={handleThresholdMethodClick}
       />
       <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
-      <AttackPlot mode="Baseline" />
+      <AttackAnalytics mode="Baseline" />
       <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
-      <AttackPlot mode="Comparison" />
+      <AttackAnalytics mode="Comparison" />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useContext } from "react";
+import { useRef, useEffect, useContext } from "react";
 import * as d3 from "d3";
 
 import { useForgetClass } from "../../hooks/useForgetClass";
@@ -21,17 +21,25 @@ const CONFIG = {
   VERTICAL_LINE_COLOR: "#efefef",
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
+  BUTTERFLY_WIDTH: 365,
+  LINE_WIDTH: 140,
+  HEIGHT: 324,
+  MARGIN: { top: 6, right: 10, bottom: 18, left: 12 },
 } as const;
 
 interface Props {
   mode: "Baseline" | "Comparison";
+  threshold: number;
+  setThreshold: (value: number) => void;
 }
 
-export default function ButterflyPlot({ mode }: Props) {
+export default function ButterflyPlot({
+  mode,
+  threshold,
+  setThreshold,
+}: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
-
-  const [threshold, setThreshold] = useState<number>(1.25);
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -39,11 +47,6 @@ export default function ButterflyPlot({ mode }: Props) {
   const attackDataRef = useRef<AttackData[]>([]);
 
   const isBaseline = mode === "Baseline";
-
-  const butterflyWidth = 365;
-  const lineWidth = 140;
-  const height = 324;
-  const margin = { top: 6, right: 10, bottom: 18, left: 12 };
 
   const updateThresholdCircles = (
     g: d3.Selection<SVGGElement, unknown, null, undefined>,
@@ -87,18 +90,21 @@ export default function ButterflyPlot({ mode }: Props) {
 
         const svgB = d3
           .select(butterflyRef.current)
-          .attr("width", butterflyWidth)
-          .attr("height", height);
+          .attr("width", CONFIG.BUTTERFLY_WIDTH)
+          .attr("height", CONFIG.HEIGHT);
         svgB.selectAll("*").remove();
 
         const gB = svgB
           .append("g")
           .attr(
             "transform",
-            `translate(${margin.left + butterflyWidth / 2}, ${margin.top})`
+            `translate(${CONFIG.MARGIN.left + CONFIG.BUTTERFLY_WIDTH / 2}, ${
+              CONFIG.MARGIN.top
+            })`
           );
-        const innerW = butterflyWidth - margin.left - margin.right;
-        const innerH = height - margin.top - margin.bottom;
+        const innerW =
+          CONFIG.BUTTERFLY_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+        const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
         const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
         const r = 3;
         const binSize = 0.05;
@@ -200,7 +206,7 @@ export default function ButterflyPlot({ mode }: Props) {
         gB.append("g")
           .attr(
             "transform",
-            `translate(${-butterflyWidth / 2 + margin.left},0)`
+            `translate(${-CONFIG.BUTTERFLY_WIDTH / 2 + CONFIG.MARGIN.left},0)`
           )
           .call(d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.5 + 0.5, 0.5)));
 
@@ -240,14 +246,17 @@ export default function ButterflyPlot({ mode }: Props) {
 
         const svgL = d3
           .select(lineRef.current)
-          .attr("width", lineWidth)
-          .attr("height", height);
+          .attr("width", CONFIG.LINE_WIDTH)
+          .attr("height", CONFIG.HEIGHT);
         svgL.selectAll("*").remove();
         const gL = svgL
           .append("g")
-          .attr("transform", `translate(${margin.left},${margin.top})`);
-        const wL = lineWidth - margin.left - margin.right;
-        const hL = height - margin.top - margin.bottom;
+          .attr(
+            "transform",
+            `translate(${CONFIG.MARGIN.left},${CONFIG.MARGIN.top})`
+          );
+        const wL = CONFIG.LINE_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+        const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
         const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
         const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
 
@@ -565,7 +574,7 @@ export default function ButterflyPlot({ mode }: Props) {
     } else {
       const svgB = d3.select(butterflyRef.current);
       const gB = svgB.select<SVGGElement>("g");
-      const innerH = height - margin.top - margin.bottom;
+      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
       updateThresholdCircles(gB, yScaleB, threshold);
       gB.select(".threshold-group").attr(
@@ -575,8 +584,8 @@ export default function ButterflyPlot({ mode }: Props) {
 
       const svgL = d3.select(lineRef.current);
       const gL = svgL.select<SVGGElement>("g");
-      const wL = lineWidth - margin.left - margin.right;
-      const hL = height - margin.top - margin.bottom;
+      const wL = CONFIG.LINE_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+      const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
         "transform",
@@ -706,7 +715,7 @@ export default function ButterflyPlot({ mode }: Props) {
           .attr("stroke-width", 1);
       });
     }
-  }, [margin.bottom, margin.left, margin.right, margin.top, mode, threshold]);
+  }, [mode, setThreshold, threshold]);
 
   return (
     <div className="flex flex-col items-center gap-1">
