@@ -3,6 +3,16 @@ import * as d3 from "d3";
 
 import { COLORS } from "../../constants/colors";
 
+const CONFIG = {
+  HIGH_OPACITY: 1,
+  LOW_OPACITY: 0.3,
+  CIRCLE_RADIUS: 3,
+  CELL_SIZE: 3 * 2 + 1,
+  MAX_COLUMNS: 20,
+  STROKE_WIDTH: 0.8,
+  TOTAL_DATA_COUNT: 400,
+} as const;
+
 interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
   threshold: number;
@@ -61,40 +71,39 @@ export default function AttackSuccessFailure({
       ...incorrectRetrain.map((v) => ({ type: "retrain", value: v })),
     ];
 
-    const totalData = 400;
     const computedCorrectPct = parseFloat(
-      ((correctGroup.length / totalData) * 100).toFixed(1)
+      ((correctGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(1)
     );
     const computedIncorrectPct = parseFloat(
-      ((incorrectGroup.length / totalData) * 100).toFixed(1)
+      ((incorrectGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(1)
     );
     setCorrectPct(computedCorrectPct);
     setIncorrectPct(computedIncorrectPct);
 
-    const circleRadius = 3;
-    const circleDiameter = circleRadius * 2;
-    const cellSpacing = 1;
-    const cellSize = circleDiameter + cellSpacing;
-    const maxColumns = 20;
-
     const correctSVG = d3.select(correctRef.current);
     correctSVG.selectAll("*").remove();
-    const correctCols = maxColumns;
-    const correctRows = Math.ceil(correctGroup.length / maxColumns);
-    const correctSVGWidth = correctCols * cellSize;
-    const correctSVGHeight = correctRows * cellSize;
+    const correctCols = CONFIG.MAX_COLUMNS;
+    const correctRows = Math.ceil(correctGroup.length / CONFIG.MAX_COLUMNS);
+    const correctSVGWidth = correctCols * CONFIG.CELL_SIZE;
+    const correctSVGHeight = correctRows * CONFIG.CELL_SIZE;
     correctSVG.attr("width", correctSVGWidth).attr("height", correctSVGHeight);
     correctSVG
       .selectAll("circle")
       .data(correctGroup)
       .enter()
       .append("circle")
-      .attr("cx", (_, i) => (i % maxColumns) * cellSize + circleRadius)
+      .attr(
+        "cx",
+        (_, i) =>
+          (i % CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE + CONFIG.CIRCLE_RADIUS
+      )
       .attr(
         "cy",
-        (_, i) => Math.floor(i / maxColumns) * cellSize + circleRadius
+        (_, i) =>
+          Math.floor(i / CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE +
+          CONFIG.CIRCLE_RADIUS
       )
-      .attr("r", circleRadius)
+      .attr("r", CONFIG.CIRCLE_RADIUS)
       .attr("fill", (d) =>
         d.type === "retrain"
           ? COLORS.DARK_GRAY
@@ -102,14 +111,29 @@ export default function AttackSuccessFailure({
           ? COLORS.PURPLE
           : COLORS.EMERALD
       )
-      .attr("fill-opacity", (d) => (d.type === "retrain" ? 0.5 : 1));
+      .attr("fill-opacity", (d) =>
+        d.type === "retrain" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+      )
+      .attr("stroke", (d) => {
+        const fillColor =
+          d.type === "retrain"
+            ? COLORS.DARK_GRAY
+            : isBaseline
+            ? COLORS.PURPLE
+            : COLORS.EMERALD;
+        return d3.color(fillColor)?.darker().toString() ?? fillColor;
+      })
+      .attr("stroke-opacity", (d) =>
+        d.type === "retrain" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+      )
+      .attr("stroke-width", CONFIG.STROKE_WIDTH);
 
     const incorrectSVG = d3.select(incorrectRef.current);
     incorrectSVG.selectAll("*").remove();
-    const incorrectCols = maxColumns;
-    const incorrectRows = Math.ceil(incorrectGroup.length / maxColumns);
-    const incorrectSVGWidth = incorrectCols * cellSize;
-    const incorrectSVGHeight = incorrectRows * cellSize;
+    const incorrectCols = CONFIG.MAX_COLUMNS;
+    const incorrectRows = Math.ceil(incorrectGroup.length / CONFIG.MAX_COLUMNS);
+    const incorrectSVGWidth = incorrectCols * CONFIG.CELL_SIZE;
+    const incorrectSVGHeight = incorrectRows * CONFIG.CELL_SIZE;
     incorrectSVG
       .attr("width", incorrectSVGWidth)
       .attr("height", incorrectSVGHeight);
@@ -118,12 +142,18 @@ export default function AttackSuccessFailure({
       .data(incorrectGroup)
       .enter()
       .append("circle")
-      .attr("cx", (_, i) => (i % maxColumns) * cellSize + circleRadius)
+      .attr(
+        "cx",
+        (_, i) =>
+          (i % CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE + CONFIG.CIRCLE_RADIUS
+      )
       .attr(
         "cy",
-        (_, i) => Math.floor(i / maxColumns) * cellSize + circleRadius
+        (_, i) =>
+          Math.floor(i / CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE +
+          CONFIG.CIRCLE_RADIUS
       )
-      .attr("r", circleRadius)
+      .attr("r", CONFIG.CIRCLE_RADIUS)
       .attr("fill", (d) =>
         d.type === "ga3"
           ? isBaseline
@@ -131,44 +161,47 @@ export default function AttackSuccessFailure({
             : COLORS.EMERALD
           : COLORS.DARK_GRAY
       )
-      .attr("fill-opacity", (d) => (d.type === "ga3" ? 0.5 : 1));
+      .attr("fill-opacity", (d) =>
+        d.type === "ga3" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+      )
+      .attr("stroke", (d) => {
+        const fillColor =
+          d.type === "ga3"
+            ? isBaseline
+              ? COLORS.PURPLE
+              : COLORS.EMERALD
+            : COLORS.DARK_GRAY;
+        return d3.color(fillColor)?.darker().toString() ?? fillColor;
+      })
+      .attr("stroke-opacity", (d) =>
+        d.type === "ga3" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+      )
+      .attr("stroke-width", CONFIG.STROKE_WIDTH);
   }, [ga3Json, isBaseline, retrainJson, threshold]);
 
   return (
-    <div className="relative h-full flex flex-col mt-2">
+    <div className="relative h-full flex flex-col mt-5">
       <div className="flex items-start justify-around">
         <div>
           <div className="flex items-center">
-            <p className="text-[17px]">Attack Success</p>
-            <span className="ml-3 text-sm font-light">{correctPct}%</span>
+            <p className="text-[17px] mb-0.5">Attack Success</p>
+            <p className="ml-1 text-sm font-light w-11 text-center">
+              {correctPct}%
+            </p>
           </div>
-          <p className="text-sm w-[200px]">
-            Retrain / Pred Retrain (Light Gray) + Unlearn / Pred Unlearn (Dark
-            Purple)
-          </p>
+          <svg ref={correctRef}></svg>
         </div>
         <div>
           <div className="flex items-center">
-            <p className="text-[17px]">Attack Failure</p>
-            <span className="ml-3 text-sm font-light">{incorrectPct}%</span>
+            <p className="text-[17px] mb-0.5">Attack Failure</p>
+            <p className="ml-1 text-sm font-light w-11 text-center">
+              {incorrectPct}%
+            </p>
           </div>
-          <p className="text-sm w-[200px]">
-            Retrain / Pred Retrain (Dark Gray) + Unlearn / Pred Unlearn (Light
-            Purple)
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-center gap-4 mt-1">
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Correct</span>
-          <svg ref={correctRef}></svg>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium mb-1">Incorrect</span>
           <svg ref={incorrectRef}></svg>
         </div>
       </div>
-      <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
+      <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
         Forgetting Quality Score: 0.395
       </p>
     </div>

@@ -23,10 +23,12 @@ const CONFIG = {
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   LINE_WIDTH: 2,
+  STROKE_WIDTH: 0.8,
   BUTTERFLY_CHART_WIDTH: 365,
   LINE_CHART_WIDTH: 146,
   HEIGHT: 324,
-  MARGIN: { top: 6, right: 10, bottom: 18, left: 12 },
+  MARGIN: { top: 6, right: 9, bottom: 18, left: 24 },
+  LINE_LEFT_MARGIN: 10,
 } as const;
 
 type EntropyData = { entropy: number };
@@ -63,14 +65,18 @@ export default function ButterflyPlot({
     yScale: d3.ScaleLinear<number, number>,
     th: number
   ) => {
-    g.selectAll<SVGCircleElement, { entropy: number }>(
-      ".circle-retrain, .circle-unlearn"
-    ).attr("fill-opacity", function () {
+    const opacityFunction = function (this: SVGCircleElement) {
       const cy = +d3.select(this).attr("cy");
       return cy < yScale(th)
         ? CONFIG.OPACITY_ABOVE_THRESHOLD
         : CONFIG.OPACITY_BELOW_THRESHOLD;
-    });
+    };
+
+    g.selectAll<SVGCircleElement, { entropy: number }>(
+      ".circle-retrain, .circle-unlearn"
+    )
+      .attr("fill-opacity", opacityFunction)
+      .attr("stroke-opacity", opacityFunction);
   };
 
   useEffect(() => {
@@ -84,12 +90,8 @@ export default function ButterflyPlot({
         : [];
       const ga3Values: number[] = ga3Json.entropy ? ga3Json.entropy.values : [];
 
-      const retrainData = retrainValues.map((v: number) => ({
-        entropy: v,
-      }));
-      const ga3Data = ga3Values.map((v: number) => ({
-        entropy: v,
-      }));
+      const retrainData = retrainValues.map((v: number) => ({ entropy: v }));
+      const ga3Data = ga3Values.map((v: number) => ({ entropy: v }));
 
       const svgB = d3
         .select(butterflyRef.current)
@@ -97,19 +99,19 @@ export default function ButterflyPlot({
         .attr("height", CONFIG.HEIGHT);
       svgB.selectAll("*").remove();
 
+      const innerW =
+        CONFIG.BUTTERFLY_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+
       const gB = svgB
         .append("g")
         .attr(
           "transform",
-          `translate(${
-            CONFIG.MARGIN.left + CONFIG.BUTTERFLY_CHART_WIDTH / 2
-          }, ${CONFIG.MARGIN.top})`
+          `translate(${CONFIG.MARGIN.left + innerW / 2}, ${CONFIG.MARGIN.top})`
         );
-      const innerW =
-        CONFIG.BUTTERFLY_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
-      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
       const r = 3;
+      const circleDiameter = 2 * r + CONFIG.STROKE_WIDTH;
       const binSize = 0.05;
       const createBins = (data: EntropyData[]) => {
         const binsMap: Record<string, EntropyData[]> = {};
@@ -118,21 +120,19 @@ export default function ButterflyPlot({
           if (!binsMap[key]) binsMap[key] = [];
           binsMap[key].push(d);
         });
-
         return Object.keys(binsMap)
           .map((k) => ({ bin: +k, values: binsMap[k] }))
           .sort((a, b) => a.bin - b.bin);
       };
       const retrainBins = createBins(retrainData);
       const ga3Bins = createBins(ga3Data);
-      const maxCount = Math.max(
-        d3.max(retrainBins, (d) => d.values.length) || 0,
-        d3.max(ga3Bins, (d) => d.values.length) || 0
-      );
+      const maxCountRetrain = d3.max(retrainBins, (d) => d.values.length) || 0;
+      const maxCountGa3 = d3.max(ga3Bins, (d) => d.values.length) || 0;
 
       retrainBins.forEach((bin) => {
         const yPos = yScaleB(bin.bin + binSize / 2);
-        const spacing = 2 * r + 1;
+        const spacing = circleDiameter;
+
         const availableWidth = innerW / 2 - r;
         const maxDisplayCount = Math.floor(availableWidth / spacing) + 1;
         const displayCount = Math.min(maxDisplayCount, bin.values.length);
@@ -140,7 +140,12 @@ export default function ButterflyPlot({
         for (let i = 0; i < displayCount; i++) {
           const j = bin.values.length - displayCount + i;
           const d = bin.values[j];
-          const cx = -r - (displayCount - 1 - i) * spacing;
+          const cx =
+            -circleDiameter / 2 - (displayCount - 1 - i) * circleDiameter;
+          const fillOpacityValue =
+            yPos < yScaleB(threshold)
+              ? CONFIG.OPACITY_ABOVE_THRESHOLD
+              : CONFIG.OPACITY_BELOW_THRESHOLD;
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-retrain")
@@ -148,12 +153,13 @@ export default function ButterflyPlot({
             .attr("cx", cx)
             .attr("cy", yPos)
             .attr("r", r)
+            .attr("fill-opacity", fillOpacityValue)
             .attr(
-              "fill-opacity",
-              yPos < yScaleB(threshold)
-                ? CONFIG.OPACITY_ABOVE_THRESHOLD
-                : CONFIG.OPACITY_BELOW_THRESHOLD
-            );
+              "stroke",
+              d3.color(CONFIG.GRAY)?.darker().toString() ?? CONFIG.GRAY
+            )
+            .attr("stroke-width", CONFIG.STROKE_WIDTH)
+            .attr("stroke-opacity", fillOpacityValue);
         }
         if (extraCount > 0) {
           const markerCx = -r - displayCount * spacing;
@@ -169,33 +175,57 @@ export default function ButterflyPlot({
 
       ga3Bins.forEach((bin) => {
         const yPos = yScaleB(bin.bin + binSize / 2);
+        const color = isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
+
         bin.values.forEach((d, i) => {
-          const cx = r + i * (2 * r + 1);
+          const cx = circleDiameter / 2 + i * circleDiameter;
+          const fillOpacityValue =
+            yPos < yScaleB(threshold)
+              ? CONFIG.OPACITY_ABOVE_THRESHOLD
+              : CONFIG.OPACITY_BELOW_THRESHOLD;
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-unlearn")
-            .attr("fill", isBaseline ? COLORS.PURPLE : COLORS.EMERALD)
+            .attr("fill", color)
             .attr("cx", cx)
             .attr("cy", yPos)
             .attr("r", r)
-            .attr(
-              "fill-opacity",
-              yPos < yScaleB(threshold)
-                ? CONFIG.OPACITY_ABOVE_THRESHOLD
-                : CONFIG.OPACITY_BELOW_THRESHOLD
-            );
+            .attr("fill-opacity", fillOpacityValue)
+            .attr("stroke", d3.color(color)?.darker().toString() ?? color)
+            .attr("stroke-width", CONFIG.STROKE_WIDTH)
+            .attr("stroke-opacity", fillOpacityValue);
         });
       });
+
+      const maxDisplayCircles = Math.floor(innerW / 2 / circleDiameter);
+
+      const extraRetrain =
+        maxCountRetrain > maxDisplayCircles
+          ? maxCountRetrain - maxDisplayCircles
+          : 0;
+      const extraGa3 =
+        maxCountGa3 > maxDisplayCircles ? maxCountGa3 - maxDisplayCircles : 0;
+
+      const halfCircles = innerW / 2 / circleDiameter;
       const xAxisScaleB = d3
         .scaleLinear()
-        .domain([-maxCount, maxCount])
+        .domain([-halfCircles, halfCircles])
         .range([-innerW / 2, innerW / 2]);
+
+      const tickStep = 10;
+      const tickMin = Math.ceil(-halfCircles / tickStep) * tickStep;
+      const tickMax = Math.floor(halfCircles / tickStep) * tickStep;
+      const ticks = d3.range(tickMin, tickMax + tickStep, tickStep);
+
       const xAxisB = gB
         .append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0, ${innerH})`)
         .call(
-          d3.axisBottom(xAxisScaleB).tickFormat((d) => Math.abs(+d).toString())
+          d3
+            .axisBottom(xAxisScaleB)
+            .tickValues(ticks)
+            .tickFormat((d) => Math.abs(+d).toString())
         );
       xAxisB
         .selectAll(".tick")
@@ -205,14 +235,30 @@ export default function ButterflyPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisB.lower();
+      const yAxisB = d3.axisLeft(yScaleB);
       gB.append("g")
-        .attr(
-          "transform",
-          `translate(${
-            -CONFIG.BUTTERFLY_CHART_WIDTH / 2 + CONFIG.MARGIN.left
-          },0)`
-        )
-        .call(d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.5 + 0.5, 0.5)));
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${-innerW / 2}, 0)`)
+        .call(yAxisB);
+
+      if (extraRetrain > 0) {
+        gB.append("text")
+          .attr("x", xAxisScaleB(-maxDisplayCircles))
+          .attr("y", innerH + +CONFIG.FONT_SIZE)
+          .attr("text-anchor", "end")
+          .attr("font-size", CONFIG.FONT_SIZE)
+          .attr("fill", "black")
+          .text(`+${extraRetrain}`);
+      }
+      if (extraGa3 > 0) {
+        gB.append("text")
+          .attr("x", xAxisScaleB(maxDisplayCircles))
+          .attr("y", innerH + +CONFIG.FONT_SIZE)
+          .attr("text-anchor", "start")
+          .attr("font-size", CONFIG.FONT_SIZE)
+          .attr("fill", "black")
+          .text(`+${extraGa3}`);
+      }
 
       const dragLineB = d3.drag<SVGGElement, unknown>().on("drag", (event) => {
         const [, newY] = d3.pointer(event, gB.node());
@@ -256,10 +302,10 @@ export default function ButterflyPlot({
         .append("g")
         .attr(
           "transform",
-          `translate(${CONFIG.MARGIN.left},${CONFIG.MARGIN.top})`
+          `translate(${CONFIG.LINE_LEFT_MARGIN},${CONFIG.MARGIN.top})`
         );
       const wL =
-        CONFIG.LINE_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+        CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
       const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
@@ -587,7 +633,7 @@ export default function ButterflyPlot({
       const svgL = d3.select(lineRef.current);
       const gL = svgL.select<SVGGElement>("g");
       const wL =
-        CONFIG.LINE_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+        CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
       const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
@@ -749,7 +795,7 @@ export default function ButterflyPlot({
       </div>
       <div className="flex">
         <svg ref={butterflyRef}></svg>
-        <svg ref={lineRef} className="relative right-[9px]"></svg>
+        <svg ref={lineRef} className="relative right-3.5"></svg>
       </div>
     </div>
   );
