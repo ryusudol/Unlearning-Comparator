@@ -19,12 +19,7 @@ export const COLORS = {
 
   EMERALD: "#10B981",
 
-  LIGHT_GRAY: "#808080",
   GRAY: "#777",
-  DARK_GRAY: "#404040",
-
-  LIGHT_BLUE: "#60A5FA",
-  DARK_BLUE: "#1E40AF",
 
   GRID_COLOR: "#EFEFEF",
 
