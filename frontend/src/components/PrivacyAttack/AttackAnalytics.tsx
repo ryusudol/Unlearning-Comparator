@@ -40,7 +40,14 @@ export default function AttackAnalytics({ mode }: Props) {
           attackData={data.attackData}
         />
       )}
-      <AttackSuccessFailure />
+      {data && (
+        <AttackSuccessFailure
+          mode={mode}
+          threshold={threshold}
+          retrainJson={data.retrainJson}
+          ga3Json={data?.ga3Json}
+        />
+      )}
     </div>
   );
 }
