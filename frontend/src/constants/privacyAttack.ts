@@ -2,8 +2,8 @@ export const ATTACK_METHODS = ["Logit Entropy"];
 
 export const THRESHOLD_METHODS = [
   "MAX QUALITY SCORE",
-  "GROUP UNAWARE",
-  "MIN FNR - FPR",
+  "MAX SUCCESS RATE",
+  "EQUAL THRESHOLD",
 ];
 
 export const LEGEND_DATA = [
