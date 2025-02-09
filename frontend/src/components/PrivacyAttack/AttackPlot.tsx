@@ -32,8 +32,8 @@ const CONFIG = {
   BUTTERFLY_CHART_WIDTH: 380,
   LINE_CHART_WIDTH: 146,
   HEIGHT: 340,
-  MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
-  LINE_LEFT_MARGIN: 10,
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
+  LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
 
@@ -108,14 +108,21 @@ export default function ButterflyPlot({
       svgB.selectAll("*").remove();
 
       const innerW =
-        CONFIG.BUTTERFLY_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
-      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+        CONFIG.BUTTERFLY_CHART_WIDTH -
+        CONFIG.BUTTERFLY_MARGIN.left -
+        CONFIG.BUTTERFLY_MARGIN.right;
+      const innerH =
+        CONFIG.HEIGHT -
+        CONFIG.BUTTERFLY_MARGIN.top -
+        CONFIG.BUTTERFLY_MARGIN.bottom;
 
       const gB = svgB
         .append("g")
         .attr(
           "transform",
-          `translate(${CONFIG.MARGIN.left + innerW / 2}, ${CONFIG.MARGIN.top})`
+          `translate(${CONFIG.BUTTERFLY_MARGIN.left + innerW / 2}, ${
+            CONFIG.BUTTERFLY_MARGIN.top
+          })`
         );
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
       const r = 3;
@@ -334,11 +341,14 @@ export default function ButterflyPlot({
         .append("g")
         .attr(
           "transform",
-          `translate(${CONFIG.LINE_LEFT_MARGIN},${CONFIG.MARGIN.top})`
+          `translate(${CONFIG.LINE_MARGIN.left},${CONFIG.LINE_MARGIN.top})`
         );
       const wL =
-        CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
-      const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+        CONFIG.LINE_CHART_WIDTH -
+        CONFIG.LINE_MARGIN.left -
+        CONFIG.LINE_MARGIN.right;
+      const hL =
+        CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
 
@@ -616,7 +626,7 @@ export default function ButterflyPlot({
       const infoGroup = gL
         .append("g")
         .attr("class", "info-group")
-        .attr("transform", `translate(${infoGroupX + 5}, ${infoGroupY - 42})`);
+        .attr("transform", `translate(${infoGroupX + 2}, ${infoGroupY - 42})`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
@@ -683,7 +693,10 @@ export default function ButterflyPlot({
     } else {
       const svgB = d3.select(butterflyRef.current);
       const gB = svgB.select<SVGGElement>("g");
-      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+      const innerH =
+        CONFIG.HEIGHT -
+        CONFIG.BUTTERFLY_MARGIN.top -
+        CONFIG.BUTTERFLY_MARGIN.bottom;
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
       updateThresholdCircles(gB, yScaleB, threshold);
       gB.select(".threshold-group").attr(
@@ -694,8 +707,11 @@ export default function ButterflyPlot({
       const svgL = d3.select(lineRef.current);
       const gL = svgL.select<SVGGElement>("g");
       const wL =
-        CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
-      const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+        CONFIG.LINE_CHART_WIDTH -
+        CONFIG.LINE_MARGIN.left -
+        CONFIG.LINE_MARGIN.right;
+      const hL =
+        CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
@@ -792,7 +808,7 @@ export default function ButterflyPlot({
 
         infoGroup.attr(
           "transform",
-          `translate(${infoGroupX + 5}, ${infoGroupY - 42})`
+          `translate(${infoGroupX + 2}, ${infoGroupY - 42})`
         );
         infoGroup
           .select("text:nth-child(1)")
