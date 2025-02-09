@@ -235,7 +235,7 @@ export default function ButterflyPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisB.lower();
-      const yAxisB = d3.axisLeft(yScaleB);
+      const yAxisB = d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.51, 0.5));
       gB.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${-innerW / 2}, 0)`)
