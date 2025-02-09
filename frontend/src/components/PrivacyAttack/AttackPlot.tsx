@@ -13,7 +13,9 @@ import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 
 const CONFIG = {
+  FONT_FAMILY: "Roboto Condensed",
   FONT_SIZE: "10",
+  LABEL_FONT_SIZE: "12",
   RED: "#e41a1c",
   BLUE: "#377eb8",
   GREEN: "#4daf4a",
@@ -27,10 +29,10 @@ const CONFIG = {
   OPACITY_BELOW_THRESHOLD: 0.3,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_CHART_WIDTH: 365,
+  BUTTERFLY_CHART_WIDTH: 380,
   LINE_CHART_WIDTH: 146,
-  HEIGHT: 324,
-  MARGIN: { top: 6, right: 9, bottom: 18, left: 24 },
+  HEIGHT: 340,
+  MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
   LINE_LEFT_MARGIN: 10,
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
@@ -235,6 +237,16 @@ export default function ButterflyPlot({
             .tickFormat((d) => Math.abs(+d).toString())
         );
       xAxisB
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("x", 0)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .text("Count");
+      xAxisB
         .selectAll(".tick")
         .append("line")
         .attr("class", "grid-line")
@@ -248,6 +260,16 @@ export default function ButterflyPlot({
         .attr("class", "y-axis")
         .attr("transform", `translate(${-innerW / 2}, 0)`)
         .call(yAxisB);
+      gB.append("text")
+        .attr("class", "axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerH / 2)
+        .attr("y", -190)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .text("Entropy");
 
       if (extraRetrain > 0) {
         gB.append("text")
@@ -416,6 +438,16 @@ export default function ButterflyPlot({
             .tickValues(d3.range(0, 1.0001, 0.25))
             .tickFormat(d3.format(".2f"))
         );
+      xAxisL
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("x", wL / 2)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .text("Value");
       xAxisL
         .selectAll(".tick")
         .append("line")
