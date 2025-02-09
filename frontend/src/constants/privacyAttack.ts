@@ -1,4 +1,4 @@
-export const ATTACK_METHODS = ["Logit Entropy"];
+export const ATTACK_METHODS = ["Logit Entropy", "Max Confidence"];
 
 export const THRESHOLD_METHODS = [
   "MAX QUALITY SCORE",
