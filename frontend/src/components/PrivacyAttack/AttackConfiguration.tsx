@@ -24,7 +24,7 @@ export default function Attackconfiguration({
   onThresholdChange,
 }: Props) {
   return (
-    <div className="max-w-[150px] h-full flex flex-col">
+    <div className="w-[130px] h-full flex flex-col">
       <div className="flex flex-col mb-5">
         <span className="mb-0.5 text-[15px]">Attack Metric</span>
         <Select defaultValue={ATTACK_METHODS[0]} onValueChange={onAttackChange}>
@@ -52,7 +52,7 @@ export default function Attackconfiguration({
       </div>
       <div className="flex flex-col mb-5">
         <span className="mb-0.5 text-[15px]">Threshold Strategy</span>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {THRESHOLD_STRATEGIES.map((item, idx) => {
             const firstSpaceIdx = item.strategy.indexOf(" ");
             const firstChunk = item.strategy.slice(0, firstSpaceIdx);
@@ -64,7 +64,7 @@ export default function Attackconfiguration({
                   id={item.strategy}
                   key={idx}
                   onClick={onThresholdChange}
-                  className="bg-[#cc0000] hover:bg-[#dd0000] transition text-white text-sm font-semibold mb-1 py-1 rounded-lg text-center cursor-pointer"
+                  className="bg-[#cc0000] hover:bg-[#dd0000] transition text-white text-sm font-semibold mb-0.5 py-1 rounded-lg text-center cursor-pointer"
                 >
                   {firstChunk}
                   <br />
