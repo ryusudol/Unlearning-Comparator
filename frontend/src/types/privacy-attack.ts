@@ -18,3 +18,14 @@ export interface AttackData {
   fnr: number;
   attack_score: number;
 }
+
+export interface LineGraphLegendData {
+  color: string;
+  label: string;
+}
+
+export interface ThresholdStrategy {
+  strategy: string;
+  introduction: string;
+  explanation: string;
+}

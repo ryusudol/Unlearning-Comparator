@@ -2,7 +2,7 @@ import React from "react";
 
 import {
   ATTACK_METHODS,
-  THRESHOLD_METHODS,
+  THRESHOLD_STRATEGIES,
 } from "../../constants/privacyAttack";
 import {
   Select,
@@ -14,69 +14,76 @@ import {
 
 interface Props {
   onAttackChange: (method: string) => void;
-  thresholdMethod: string;
+  thresholdStrategy: string;
   onThresholdChange: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function Attackconfiguration({
   onAttackChange,
-  thresholdMethod,
+  thresholdStrategy,
   onThresholdChange,
 }: Props) {
   return (
-    <div className="max-w-[150px] h-full flex flex-col justify-between text-[17px]">
-      <div className="flex flex-col">
-        <span className="mb-0.5">Attack by</span>
+    <div className="w-[130px] h-full flex flex-col mx-1">
+      <div className="flex flex-col mb-5">
+        <span className="mb-0.5 text-[15px]">Attack Metric</span>
         <Select defaultValue={ATTACK_METHODS[0]} onValueChange={onAttackChange}>
-          <SelectTrigger className="h-[25px] text-base mb-1.5">
+          <SelectTrigger className="h-[25px] mb-1.5 text-sm font-light">
             <SelectValue placeholder={ATTACK_METHODS[0]} />
           </SelectTrigger>
           <SelectContent>
             {ATTACK_METHODS.map((method, idx) => {
               return (
-                <SelectItem key={idx} value={method}>
+                <SelectItem
+                  key={idx}
+                  value={method}
+                  className="text-sm font-light"
+                >
                   {method}
                 </SelectItem>
               );
             })}
           </SelectContent>
         </Select>
-        <p className="text-sm">
-          Membership Inference
-          <br />
-          Attack by output logit
-          <br />
-          entropy 수행
+        <p className="text-xs font-light">
+          Simulate membership inference attack using the model’s output logit
+          entropy
         </p>
       </div>
-      <div>
-        <span>Thresholding by</span>
-        <div className="flex flex-col gap-4">
-          {THRESHOLD_METHODS.map((method, idx) => (
-            <div className="flex flex-col">
-              <div
-                key={idx}
-                onClick={onThresholdChange}
-                className="bg-[#cc0000] hover:bg-[#dd0000] transition text-white font-semibold px-4 py-2 rounded-lg text-center cursor-pointer"
-              >
-                {method}
+      <div className="flex flex-col mb-5">
+        <span className="mb-0.5 text-[15px]">Threshold Strategy</span>
+        <div className="flex flex-col gap-2">
+          {THRESHOLD_STRATEGIES.map((item, idx) => {
+            const firstSpaceIdx = item.strategy.indexOf(" ");
+            const firstChunk = item.strategy.slice(0, firstSpaceIdx);
+            const secondChunk = item.strategy.slice(firstSpaceIdx + 1);
+
+            return (
+              <div className="flex flex-col">
+                <div
+                  id={item.strategy}
+                  key={idx}
+                  onClick={onThresholdChange}
+                  className="bg-[#cc0000] hover:bg-[#dd0000] transition text-white text-sm font-semibold mb-0.5 py-1 rounded-lg text-center cursor-pointer"
+                >
+                  {firstChunk}
+                  <br />
+                  {secondChunk}
+                </div>
+                <span className="text-xs font-light">{item.introduction}</span>
               </div>
-              <span className="text-sm font-light">
-                {idx === 0
-                  ? "Minimize log"
-                  : idx === 1
-                  ? "Equality"
-                  : "Equality2"}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className="text-[#cc0000]">
-        <span>{thresholdMethod}</span>
-        <p className="text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt,
-          pariatur. Sapiente nobis exercitationem obcaecati ducimus
+        <span className="text-sm font-medium">{thresholdStrategy}</span>
+        <p className="text-xs leading-[14px]">
+          {
+            THRESHOLD_STRATEGIES.find(
+              (item) => item.strategy === thresholdStrategy
+            )?.explanation
+          }
         </p>
       </div>
     </div>

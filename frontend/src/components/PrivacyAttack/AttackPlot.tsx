@@ -7,28 +7,34 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
-import { LEGEND_DATA } from "../../constants/privacyAttack";
+import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 
 const CONFIG = {
+  FONT_FAMILY: "Roboto Condensed",
   FONT_SIZE: "10",
+  LABEL_FONT_SIZE: "12",
   RED: "#e41a1c",
   BLUE: "#377eb8",
   GREEN: "#4daf4a",
   GRAY: "#6a6a6a",
   VERTICAL_LINE_COLOR: "#efefef",
+  THRESHOLD_LINE_COLOR: "#a5a5a5",
+  THRESHOLD_LINE_DASH: "5,2",
+  THRESHOLD_LINE_WIDTH: 1.2,
   THRESHOLD_STEP: 0.05,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_CHART_WIDTH: 365,
+  BUTTERFLY_CHART_WIDTH: 380,
   LINE_CHART_WIDTH: 146,
-  HEIGHT: 324,
-  MARGIN: { top: 6, right: 9, bottom: 18, left: 24 },
-  LINE_LEFT_MARGIN: 10,
+  HEIGHT: 340,
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
+  LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
+  STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
 
 type EntropyData = { entropy: number };
@@ -40,6 +46,7 @@ interface Props {
   retrainJson: ExperimentJsonData;
   ga3Json: ExperimentJsonData;
   attackData: AttackData[];
+  onUpdateAttackScore: (score: number) => void;
 }
 
 export default function ButterflyPlot({
@@ -49,6 +56,7 @@ export default function ButterflyPlot({
   retrainJson,
   ga3Json,
   attackData,
+  onUpdateAttackScore,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
@@ -100,14 +108,21 @@ export default function ButterflyPlot({
       svgB.selectAll("*").remove();
 
       const innerW =
-        CONFIG.BUTTERFLY_CHART_WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
-      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+        CONFIG.BUTTERFLY_CHART_WIDTH -
+        CONFIG.BUTTERFLY_MARGIN.left -
+        CONFIG.BUTTERFLY_MARGIN.right;
+      const innerH =
+        CONFIG.HEIGHT -
+        CONFIG.BUTTERFLY_MARGIN.top -
+        CONFIG.BUTTERFLY_MARGIN.bottom;
 
       const gB = svgB
         .append("g")
         .attr(
           "transform",
-          `translate(${CONFIG.MARGIN.left + innerW / 2}, ${CONFIG.MARGIN.top})`
+          `translate(${CONFIG.BUTTERFLY_MARGIN.left + innerW / 2}, ${
+            CONFIG.BUTTERFLY_MARGIN.top
+          })`
         );
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
       const r = 3;
@@ -224,9 +239,20 @@ export default function ButterflyPlot({
         .call(
           d3
             .axisBottom(xAxisScaleB)
+            .tickSize(0)
             .tickValues(ticks)
             .tickFormat((d) => Math.abs(+d).toString())
         );
+      xAxisB
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("x", 0)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .text("Count");
       xAxisB
         .selectAll(".tick")
         .append("line")
@@ -235,11 +261,22 @@ export default function ButterflyPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisB.lower();
+      xAxisB.selectAll("text").attr("dy", "10px");
       const yAxisB = d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.51, 0.5));
       gB.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${-innerW / 2}, 0)`)
         .call(yAxisB);
+      gB.append("text")
+        .attr("class", "axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerH / 2)
+        .attr("y", -190)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .text("Entropy");
 
       if (extraRetrain > 0) {
         gB.append("text")
@@ -286,8 +323,10 @@ export default function ButterflyPlot({
       threshGroupB
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", "black")
-        .attr("stroke-dasharray", "3,3")
+        .attr("stroke", CONFIG.THRESHOLD_LINE_COLOR)
+        .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
+        .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
+        .attr("stroke-linecap", "round")
         .attr("x1", -innerW / 2)
         .attr("x2", innerW / 2)
         .attr("y1", 0)
@@ -302,11 +341,14 @@ export default function ButterflyPlot({
         .append("g")
         .attr(
           "transform",
-          `translate(${CONFIG.LINE_LEFT_MARGIN},${CONFIG.MARGIN.top})`
+          `translate(${CONFIG.LINE_MARGIN.left},${CONFIG.LINE_MARGIN.top})`
         );
       const wL =
-        CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
-      const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+        CONFIG.LINE_CHART_WIDTH -
+        CONFIG.LINE_MARGIN.left -
+        CONFIG.LINE_MARGIN.right;
+      const hL =
+        CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
 
@@ -401,10 +443,21 @@ export default function ButterflyPlot({
         .call(
           d3
             .axisBottom(lineXScale)
+            .tickSize(0)
             .tickSizeOuter(0)
             .tickValues(d3.range(0, 1.0001, 0.25))
             .tickFormat(d3.format(".2f"))
         );
+      xAxisL
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("x", wL / 2)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .text("Value");
       xAxisL
         .selectAll(".tick")
         .append("line")
@@ -413,6 +466,7 @@ export default function ButterflyPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisL.lower();
+      xAxisL.selectAll("text").attr("dy", "10px");
       gL.append("line")
         .attr("x1", 0)
         .attr("y1", 0)
@@ -449,11 +503,13 @@ export default function ButterflyPlot({
         .attr("width", wL + 3)
         .attr("height", 10)
         .attr("fill", "transparent");
-      gL.select(".threshold-group")
+      threshGroupL
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", "black")
-        .attr("stroke-dasharray", "3,3")
+        .attr("stroke", CONFIG.THRESHOLD_LINE_COLOR)
+        .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
+        .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
+        .attr("stroke-linecap", "round")
         .attr("x1", -3)
         .attr("x2", wL)
         .attr("y1", 0)
@@ -467,36 +523,6 @@ export default function ButterflyPlot({
             : prev,
         attackData[0]
       );
-      const infoGroup = gL
-        .append("g")
-        .attr("class", "info-group")
-        .attr(
-          "transform",
-          `translate(${wL - 8}, ${lineYScale(threshold) - 42})`
-        );
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .text(`Threshold: ${threshold.toFixed(2)}`);
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("dy", "1.2em")
-        .text(`Attack Score: ${currentData.attack_score.toFixed(2)}`);
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("dy", "2.4em")
-        .text(`FPR: ${currentData.fpr.toFixed(2)}`);
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("dy", "3.6em")
-        .text(`FNR: ${currentData.fnr.toFixed(2)}`);
 
       const legendGroup = gL
         .append("g")
@@ -514,7 +540,7 @@ export default function ButterflyPlot({
         .attr("stroke-width", 1.5)
         .attr("rx", 2)
         .attr("ry", 2);
-      LEGEND_DATA.forEach((item, i) => {
+      LINE_GRAPH_LEGEND_DATA.forEach((item, i) => {
         const yPos = 8 + i * 10;
         const legendItemGroup = legendGroup
           .append("g")
@@ -582,6 +608,49 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
+      const attackIntersection =
+        redInts.length > 0
+          ? redInts[0]
+          : { x: lineXScale(0), y: lineYScale(threshold) };
+
+      let infoGroupX = attackIntersection.x;
+      if (
+        currentData.attack_score >= CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+      ) {
+        infoGroupX = lineXScale(CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP);
+      }
+
+      const infoGroupY =
+        threshold >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+
+      const infoGroup = gL
+        .append("g")
+        .attr("class", "info-group")
+        .attr("transform", `translate(${infoGroupX + 2}, ${infoGroupY - 42})`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .text(`Threshold: ${threshold.toFixed(2)}`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("dy", "1.2em")
+        .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("dy", "2.4em")
+        .text(`FPR: ${currentData.fpr.toFixed(3)}`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("dy", "3.6em")
+        .text(`FNR: ${currentData.fnr.toFixed(3)}`);
+
       const blueInts = getIntersections(
         attackData,
         (d) => d.fpr,
@@ -618,11 +687,16 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
+      onUpdateAttackScore(currentData.attack_score);
+
       chartInitialized.current = true;
     } else {
       const svgB = d3.select(butterflyRef.current);
       const gB = svgB.select<SVGGElement>("g");
-      const innerH = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+      const innerH =
+        CONFIG.HEIGHT -
+        CONFIG.BUTTERFLY_MARGIN.top -
+        CONFIG.BUTTERFLY_MARGIN.bottom;
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
       updateThresholdCircles(gB, yScaleB, threshold);
       gB.select(".threshold-group").attr(
@@ -633,8 +707,12 @@ export default function ButterflyPlot({
       const svgL = d3.select(lineRef.current);
       const gL = svgL.select<SVGGElement>("g");
       const wL =
-        CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
-      const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+        CONFIG.LINE_CHART_WIDTH -
+        CONFIG.LINE_MARGIN.left -
+        CONFIG.LINE_MARGIN.right;
+      const hL =
+        CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
+      const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
         "transform",
@@ -648,34 +726,6 @@ export default function ButterflyPlot({
         .select(`#belowThreshold-${mode} rect`)
         .attr("y", lineYScale(threshold))
         .attr("height", hL - lineYScale(threshold));
-
-      const infoGroup = gL.select(".info-group");
-      if (!infoGroup.empty() && attackDataRef.current.length > 0) {
-        const currentData = attackDataRef.current.reduce(
-          (prev, curr) =>
-            Math.abs(curr.threshold - threshold) <
-            Math.abs(prev.threshold - threshold)
-              ? curr
-              : prev,
-          attackDataRef.current[0]
-        );
-        infoGroup.attr(
-          "transform",
-          `translate(${wL - 8}, ${lineYScale(threshold) - 42})`
-        );
-        infoGroup
-          .select("text:nth-child(1)")
-          .text(`Threshold: ${threshold.toFixed(2)}`);
-        infoGroup
-          .select("text:nth-child(2)")
-          .text(`Attack Score: ${currentData.attack_score.toFixed(2)}`);
-        infoGroup
-          .select("text:nth-child(3)")
-          .text(`FPR: ${currentData.fpr.toFixed(2)}`);
-        infoGroup
-          .select("text:nth-child(4)")
-          .text(`FNR: ${currentData.fnr.toFixed(2)}`);
-      }
 
       let intGroup = gL.select<SVGGElement>(".intersection-group");
       if (intGroup.empty()) {
@@ -728,6 +778,54 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
+      const infoGroup = gL.select(".info-group");
+      if (!infoGroup.empty() && attackDataRef.current.length > 0) {
+        const currentData = attackDataRef.current.reduce(
+          (prev, curr) =>
+            Math.abs(curr.threshold - threshold) <
+            Math.abs(prev.threshold - threshold)
+              ? curr
+              : prev,
+          attackDataRef.current[0]
+        );
+        const attackIntersection =
+          redInts.length > 0
+            ? redInts[0]
+            : { x: lineXScale(0), y: lineYScale(threshold) };
+
+        let infoGroupX = attackIntersection.x;
+        if (
+          currentData.attack_score >=
+          CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+        ) {
+          infoGroupX = d3.scaleLinear().domain([0, 1.05]).range([0, wL])(
+            CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+          );
+        }
+
+        const infoGroupY =
+          threshold >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+
+        infoGroup.attr(
+          "transform",
+          `translate(${infoGroupX + 2}, ${infoGroupY - 42})`
+        );
+        infoGroup
+          .select("text:nth-child(1)")
+          .text(`Threshold: ${threshold.toFixed(2)}`);
+        infoGroup
+          .select("text:nth-child(2)")
+          .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
+        infoGroup
+          .select("text:nth-child(3)")
+          .text(`FPR: ${currentData.fpr.toFixed(3)}`);
+        infoGroup
+          .select("text:nth-child(4)")
+          .text(`FNR: ${currentData.fnr.toFixed(3)}`);
+
+        onUpdateAttackScore(currentData.attack_score);
+      }
+
       const blueInts = getIntersections(
         attackDataRef.current,
         (d) => d.fpr,
@@ -772,11 +870,12 @@ export default function ButterflyPlot({
     retrainJson,
     setThreshold,
     threshold,
+    onUpdateAttackScore,
   ]);
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex items-center text-[17px]">
+      <div className="flex items-center text-[15px]">
         <div className="flex items-center">
           <NeuralNetworkIcon color={CONFIG.GRAY} className="mr-1" />
           <span>Retrain (a00{forgetClassNumber})</span>

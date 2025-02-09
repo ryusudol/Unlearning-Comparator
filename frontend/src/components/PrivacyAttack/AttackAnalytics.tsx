@@ -11,6 +11,8 @@ interface Props {
 
 export default function AttackAnalytics({ mode }: Props) {
   const [threshold, setThreshold] = useState<number>(1.25);
+  const [attackScore, setAttackScore] = useState<number>(0);
+
   const [data, setData] = useState<{
     retrainJson: any;
     ga3Json: any;
@@ -38,6 +40,7 @@ export default function AttackAnalytics({ mode }: Props) {
           retrainJson={data.retrainJson}
           ga3Json={data.ga3Json}
           attackData={data.attackData}
+          onUpdateAttackScore={setAttackScore}
         />
       )}
       {data && (
@@ -45,7 +48,8 @@ export default function AttackAnalytics({ mode }: Props) {
           mode={mode}
           threshold={threshold}
           retrainJson={data.retrainJson}
-          ga3Json={data?.ga3Json}
+          ga3Json={data.ga3Json}
+          attackScore={attackScore}
         />
       )}
     </div>
