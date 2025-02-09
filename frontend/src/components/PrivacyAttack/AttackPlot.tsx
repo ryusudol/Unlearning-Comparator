@@ -224,6 +224,7 @@ export default function ButterflyPlot({
         .call(
           d3
             .axisBottom(xAxisScaleB)
+            .tickSize(0)
             .tickValues(ticks)
             .tickFormat((d) => Math.abs(+d).toString())
         );
@@ -235,6 +236,7 @@ export default function ButterflyPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisB.lower();
+      xAxisB.selectAll("text").attr("dy", "10px");
       const yAxisB = d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.51, 0.5));
       gB.append("g")
         .attr("class", "y-axis")
@@ -401,6 +403,7 @@ export default function ButterflyPlot({
         .call(
           d3
             .axisBottom(lineXScale)
+            .tickSize(0)
             .tickSizeOuter(0)
             .tickValues(d3.range(0, 1.0001, 0.25))
             .tickFormat(d3.format(".2f"))
@@ -413,6 +416,7 @@ export default function ButterflyPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisL.lower();
+      xAxisL.selectAll("text").attr("dy", "10px");
       gL.append("line")
         .attr("x1", 0)
         .attr("y1", 0)
