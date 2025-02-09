@@ -7,7 +7,7 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
-import { LEGEND_DATA } from "../../constants/privacyAttack";
+import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
@@ -530,7 +530,7 @@ export default function ButterflyPlot({
         .attr("stroke-width", 1.5)
         .attr("rx", 2)
         .attr("ry", 2);
-      LEGEND_DATA.forEach((item, i) => {
+      LINE_GRAPH_LEGEND_DATA.forEach((item, i) => {
         const yPos = 8 + i * 10;
         const legendItemGroup = legendGroup
           .append("g")
@@ -859,7 +859,7 @@ export default function ButterflyPlot({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex items-center text-[17px]">
+      <div className="flex items-center text-[15px]">
         <div className="flex items-center">
           <NeuralNetworkIcon color={CONFIG.GRAY} className="mr-1" />
           <span>Retrain (a00{forgetClassNumber})</span>
