@@ -32,6 +32,7 @@ const CONFIG = {
   HEIGHT: 324,
   MARGIN: { top: 6, right: 9, bottom: 18, left: 24 },
   LINE_LEFT_MARGIN: 10,
+  STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
 
 type EntropyData = { entropy: number };
@@ -480,36 +481,6 @@ export default function ButterflyPlot({
             : prev,
         attackData[0]
       );
-      const infoGroup = gL
-        .append("g")
-        .attr("class", "info-group")
-        .attr(
-          "transform",
-          `translate(${wL - 8}, ${lineYScale(threshold) - 42})`
-        );
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .text(`Threshold: ${threshold.toFixed(2)}`);
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("dy", "1.2em")
-        .text(`Attack Score: ${currentData.attack_score.toFixed(2)}`);
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("dy", "2.4em")
-        .text(`FPR: ${currentData.fpr.toFixed(2)}`);
-      infoGroup
-        .append("text")
-        .attr("text-anchor", "end")
-        .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("dy", "3.6em")
-        .text(`FNR: ${currentData.fnr.toFixed(2)}`);
 
       const legendGroup = gL
         .append("g")
@@ -595,6 +566,49 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
+      const attackIntersection =
+        redInts.length > 0
+          ? redInts[0]
+          : { x: lineXScale(0), y: lineYScale(threshold) };
+
+      let infoGroupX = attackIntersection.x;
+      if (
+        currentData.attack_score >= CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+      ) {
+        infoGroupX = lineXScale(CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP);
+      }
+
+      const infoGroupY =
+        threshold >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+
+      const infoGroup = gL
+        .append("g")
+        .attr("class", "info-group")
+        .attr("transform", `translate(${infoGroupX + 5}, ${infoGroupY - 42})`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .text(`Threshold: ${threshold.toFixed(2)}`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("dy", "1.2em")
+        .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("dy", "2.4em")
+        .text(`FPR: ${currentData.fpr.toFixed(3)}`);
+      infoGroup
+        .append("text")
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("dy", "3.6em")
+        .text(`FNR: ${currentData.fnr.toFixed(3)}`);
+
       const blueInts = getIntersections(
         attackData,
         (d) => d.fpr,
@@ -650,6 +664,7 @@ export default function ButterflyPlot({
       const wL =
         CONFIG.LINE_CHART_WIDTH - CONFIG.LINE_LEFT_MARGIN - CONFIG.MARGIN.right;
       const hL = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
+      const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
         "transform",
@@ -663,36 +678,6 @@ export default function ButterflyPlot({
         .select(`#belowThreshold-${mode} rect`)
         .attr("y", lineYScale(threshold))
         .attr("height", hL - lineYScale(threshold));
-
-      const infoGroup = gL.select(".info-group");
-      if (!infoGroup.empty() && attackDataRef.current.length > 0) {
-        const currentData = attackDataRef.current.reduce(
-          (prev, curr) =>
-            Math.abs(curr.threshold - threshold) <
-            Math.abs(prev.threshold - threshold)
-              ? curr
-              : prev,
-          attackDataRef.current[0]
-        );
-        infoGroup.attr(
-          "transform",
-          `translate(${wL - 8}, ${lineYScale(threshold) - 42})`
-        );
-        infoGroup
-          .select("text:nth-child(1)")
-          .text(`Threshold: ${threshold.toFixed(2)}`);
-        infoGroup
-          .select("text:nth-child(2)")
-          .text(`Attack Score: ${currentData.attack_score.toFixed(2)}`);
-        infoGroup
-          .select("text:nth-child(3)")
-          .text(`FPR: ${currentData.fpr.toFixed(2)}`);
-        infoGroup
-          .select("text:nth-child(4)")
-          .text(`FNR: ${currentData.fnr.toFixed(2)}`);
-
-        onUpdateAttackScore(currentData.attack_score);
-      }
 
       let intGroup = gL.select<SVGGElement>(".intersection-group");
       if (intGroup.empty()) {
@@ -744,6 +729,54 @@ export default function ButterflyPlot({
           .attr("stroke", "black")
           .attr("stroke-width", 1);
       });
+
+      const infoGroup = gL.select(".info-group");
+      if (!infoGroup.empty() && attackDataRef.current.length > 0) {
+        const currentData = attackDataRef.current.reduce(
+          (prev, curr) =>
+            Math.abs(curr.threshold - threshold) <
+            Math.abs(prev.threshold - threshold)
+              ? curr
+              : prev,
+          attackDataRef.current[0]
+        );
+        const attackIntersection =
+          redInts.length > 0
+            ? redInts[0]
+            : { x: lineXScale(0), y: lineYScale(threshold) };
+
+        let infoGroupX = attackIntersection.x;
+        if (
+          currentData.attack_score >=
+          CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+        ) {
+          infoGroupX = d3.scaleLinear().domain([0, 1.05]).range([0, wL])(
+            CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+          );
+        }
+
+        const infoGroupY =
+          threshold >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+
+        infoGroup.attr(
+          "transform",
+          `translate(${infoGroupX + 5}, ${infoGroupY - 42})`
+        );
+        infoGroup
+          .select("text:nth-child(1)")
+          .text(`Threshold: ${threshold.toFixed(2)}`);
+        infoGroup
+          .select("text:nth-child(2)")
+          .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
+        infoGroup
+          .select("text:nth-child(3)")
+          .text(`FPR: ${currentData.fpr.toFixed(3)}`);
+        infoGroup
+          .select("text:nth-child(4)")
+          .text(`FNR: ${currentData.fnr.toFixed(3)}`);
+
+        onUpdateAttackScore(currentData.attack_score);
+      }
 
       const blueInts = getIntersections(
         attackDataRef.current,
