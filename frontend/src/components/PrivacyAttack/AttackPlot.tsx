@@ -19,6 +19,9 @@ const CONFIG = {
   GREEN: "#4daf4a",
   GRAY: "#6a6a6a",
   VERTICAL_LINE_COLOR: "#efefef",
+  THRESHOLD_LINE_COLOR: "#a5a5a5",
+  THRESHOLD_LINE_DASH: "5,2",
+  THRESHOLD_LINE_WIDTH: 1.2,
   THRESHOLD_STEP: 0.05,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
@@ -290,8 +293,10 @@ export default function ButterflyPlot({
       threshGroupB
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", "black")
-        .attr("stroke-dasharray", "3,3")
+        .attr("stroke", CONFIG.THRESHOLD_LINE_COLOR)
+        .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
+        .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
+        .attr("stroke-linecap", "round")
         .attr("x1", -innerW / 2)
         .attr("x2", innerW / 2)
         .attr("y1", 0)
@@ -455,11 +460,13 @@ export default function ButterflyPlot({
         .attr("width", wL + 3)
         .attr("height", 10)
         .attr("fill", "transparent");
-      gL.select(".threshold-group")
+      threshGroupL
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", "black")
-        .attr("stroke-dasharray", "3,3")
+        .attr("stroke", CONFIG.THRESHOLD_LINE_COLOR)
+        .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
+        .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
+        .attr("stroke-linecap", "round")
         .attr("x1", -3)
         .attr("x2", wL)
         .attr("y1", 0)
