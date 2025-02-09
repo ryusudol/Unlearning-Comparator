@@ -40,6 +40,7 @@ interface Props {
   retrainJson: ExperimentJsonData;
   ga3Json: ExperimentJsonData;
   attackData: AttackData[];
+  onUpdateAttackScore: (score: number) => void;
 }
 
 export default function ButterflyPlot({
@@ -49,6 +50,7 @@ export default function ButterflyPlot({
   retrainJson,
   ga3Json,
   attackData,
+  onUpdateAttackScore,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
@@ -622,6 +624,8 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
+      onUpdateAttackScore(currentData.attack_score);
+
       chartInitialized.current = true;
     } else {
       const svgB = d3.select(butterflyRef.current);
@@ -679,6 +683,8 @@ export default function ButterflyPlot({
         infoGroup
           .select("text:nth-child(4)")
           .text(`FNR: ${currentData.fnr.toFixed(2)}`);
+
+        onUpdateAttackScore(currentData.attack_score);
       }
 
       let intGroup = gL.select<SVGGElement>(".intersection-group");
@@ -776,6 +782,7 @@ export default function ButterflyPlot({
     retrainJson,
     setThreshold,
     threshold,
+    onUpdateAttackScore,
   ]);
 
   return (

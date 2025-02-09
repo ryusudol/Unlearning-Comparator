@@ -18,6 +18,7 @@ interface AttackSuccessFailureProps {
   threshold: number;
   retrainJson: any;
   ga3Json: any;
+  attackScore: number;
 }
 
 export default function AttackSuccessFailure({
@@ -25,6 +26,7 @@ export default function AttackSuccessFailure({
   threshold,
   retrainJson,
   ga3Json,
+  attackScore,
 }: AttackSuccessFailureProps) {
   const correctRef = useRef<SVGSVGElement | null>(null);
   const incorrectRef = useRef<SVGSVGElement | null>(null);
@@ -33,6 +35,7 @@ export default function AttackSuccessFailure({
   const [incorrectPct, setIncorrectPct] = useState<number>(0);
 
   const isBaseline = mode === "Baseline";
+  const forgettingQualityScore = 1 - attackScore;
 
   const groupByBin = (data: number[]) => {
     const bins: Record<number, number[]> = {};
@@ -202,7 +205,8 @@ export default function AttackSuccessFailure({
         </div>
       </div>
       <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
-        Forgetting Quality Score: 0.395
+        Forgetting Quality Score:{" "}
+        {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
       </p>
     </div>
   );
