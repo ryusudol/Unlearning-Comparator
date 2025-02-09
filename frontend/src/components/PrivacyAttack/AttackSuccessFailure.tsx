@@ -61,9 +61,9 @@ export default function AttackSuccessFailure({
       retrainValues.filter((v) => v < threshold)
     );
     const correctGA3 = groupByBin(ga3Values.filter((v) => v > threshold));
-    const incorrectGA3 = groupByBin(ga3Values.filter((v) => v < threshold));
+    const incorrectGA3 = groupByBin(ga3Values.filter((v) => v <= threshold));
     const incorrectRetrain = groupByBin(
-      retrainValues.filter((v) => v > threshold)
+      retrainValues.filter((v) => v >= threshold)
     );
     const correctGroup = [
       ...correctRetrain.map((v) => ({ type: "retrain", value: v })),
@@ -75,10 +75,10 @@ export default function AttackSuccessFailure({
     ];
 
     const computedCorrectPct = parseFloat(
-      ((correctGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(1)
+      ((correctGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
     );
     const computedIncorrectPct = parseFloat(
-      ((incorrectGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(1)
+      ((incorrectGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
     );
     setCorrectPct(computedCorrectPct);
     setIncorrectPct(computedIncorrectPct);
@@ -187,18 +187,18 @@ export default function AttackSuccessFailure({
       <div className="flex items-start justify-around">
         <div>
           <div className="flex items-center">
-            <p className="text-[17px] mb-0.5">Attack Success</p>
-            <p className="ml-1 text-sm font-light w-11 text-center">
-              {correctPct}%
+            <p className="text-[15px] mb-0.5">Attack Success</p>
+            <p className="ml-1.5 text-sm font-light w-11 text-center">
+              {correctPct.toFixed(2)}%
             </p>
           </div>
           <svg ref={correctRef}></svg>
         </div>
         <div>
           <div className="flex items-center">
-            <p className="text-[17px] mb-0.5">Attack Failure</p>
-            <p className="ml-1 text-sm font-light w-11 text-center">
-              {incorrectPct}%
+            <p className="text-[15px] mb-0.5">Attack Failure</p>
+            <p className="ml-4 text-sm font-light w-11 text-center">
+              {incorrectPct.toFixed(2)}%
             </p>
           </div>
           <svg ref={incorrectRef}></svg>
