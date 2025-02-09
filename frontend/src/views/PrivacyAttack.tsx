@@ -27,7 +27,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
   return (
     <View
       height={height}
-      className="w-full flex justify-evenly items-start rounded-[6px] px-1.5"
+      className="w-full flex items-center rounded-[6px] px-1.5"
     >
       <AttackConfiguration
         onAttackChange={handleAttackMethodChange}
