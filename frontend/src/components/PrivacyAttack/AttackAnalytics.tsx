@@ -51,6 +51,32 @@ export default function AttackAnalytics({
         if (maxAttackData && maxAttackData.threshold !== threshold) {
           setThreshold(maxAttackData.threshold);
         }
+      } else if (thresholdStrategy === THRESHOLD_STRATEGIES[1].strategy) {
+        const retrainValues: number[] = data.retrainJson?.entropy?.values || [];
+        const ga3Values: number[] = data.ga3Json?.entropy?.values || [];
+        const allValues = [...retrainValues, ...ga3Values];
+        if (allValues.length === 0) return;
+        const candidateSet = new Set<number>();
+        allValues.forEach((v) => {
+          const base = Math.floor(v / 0.05) * 0.05;
+          candidateSet.add(base);
+          candidateSet.add(base + 0.05);
+        });
+        const candidates = Array.from(candidateSet).sort((a, b) => a - b);
+        let bestCandidate = threshold;
+        let bestSuccessCount = -Infinity;
+        candidates.forEach((candidate) => {
+          const successCount =
+            retrainValues.filter((v) => v < candidate).length +
+            ga3Values.filter((v) => v > candidate).length;
+          if (successCount > bestSuccessCount) {
+            bestSuccessCount = successCount;
+            bestCandidate = candidate;
+          }
+        });
+        if (bestCandidate !== threshold) {
+          setThreshold(bestCandidate);
+        }
       } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
         const thresholdGroups: { [key: number]: number } = {};
         data.attackData.forEach((item) => {
