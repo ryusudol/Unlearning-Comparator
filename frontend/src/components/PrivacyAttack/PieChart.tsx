@@ -7,9 +7,9 @@ import { PieDataPoint } from "../../types/privacy-attack";
 const RETRAIN = "Retrain";
 const GA3 = "GA3";
 const CONFIG = {
-  WIDTH: 100,
-  HEIGHT: 100,
-  RADIUS: Math.min(100, 100) / 2.1,
+  WIDTH: 95,
+  HEIGHT: 95,
+  RADIUS: Math.min(95, 95) / 2.1,
 };
 
 interface Props {
