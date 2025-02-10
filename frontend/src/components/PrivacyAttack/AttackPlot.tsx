@@ -25,13 +25,17 @@ const CONFIG = {
   THRESHOLD_LINE_DASH: "5,2",
   THRESHOLD_LINE_WIDTH: 1.2,
   THRESHOLD_STEP: 0.05,
+  BUTTERFLY_CIRCLE_RADIUS: 3,
+  INTERSECTION_CIRCLE_RADIUS: 3,
+  ADDITIONAL_CIRCLE_X_GAP: 0.5,
+  ADDITIONAL_CIRCLE_Y_GAP: 1,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
-  LINE_WIDTH: 2,
-  STROKE_WIDTH: 0.8,
   BUTTERFLY_CHART_WIDTH: 380,
   LINE_CHART_WIDTH: 146,
   HEIGHT: 340,
+  LINE_WIDTH: 2,
+  STROKE_WIDTH: 0.8,
   BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
   LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
@@ -124,9 +128,11 @@ export default function ButterflyPlot({
             CONFIG.BUTTERFLY_MARGIN.top
           })`
         );
+
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
-      const r = 3;
-      const circleDiameter = 2 * r + CONFIG.STROKE_WIDTH;
+      const circleDiameter =
+        2 * CONFIG.BUTTERFLY_CIRCLE_RADIUS + CONFIG.STROKE_WIDTH;
+      const xSpacing = circleDiameter + CONFIG.ADDITIONAL_CIRCLE_X_GAP;
       const binSize = 0.05;
       const createBins = (data: EntropyData[]) => {
         const binsMap: Record<string, EntropyData[]> = {};
@@ -146,17 +152,14 @@ export default function ButterflyPlot({
 
       retrainBins.forEach((bin) => {
         const yPos = yScaleB(bin.bin + binSize / 2);
-        const spacing = circleDiameter;
-
-        const availableWidth = innerW / 2 - r;
-        const maxDisplayCount = Math.floor(availableWidth / spacing) + 1;
+        const availableWidth = innerW / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        const maxDisplayCount = Math.floor(availableWidth / xSpacing) + 1;
         const displayCount = Math.min(maxDisplayCount, bin.values.length);
         const extraCount = bin.values.length - displayCount;
         for (let i = 0; i < displayCount; i++) {
           const j = bin.values.length - displayCount + i;
           const d = bin.values[j];
-          const cx =
-            -circleDiameter / 2 - (displayCount - 1 - i) * circleDiameter;
+          const cx = -xSpacing / 2 - (displayCount - 1 - i) * xSpacing;
           const fillOpacityValue =
             yPos < yScaleB(threshold)
               ? CONFIG.OPACITY_ABOVE_THRESHOLD
@@ -167,7 +170,7 @@ export default function ButterflyPlot({
             .attr("fill", CONFIG.GRAY)
             .attr("cx", cx)
             .attr("cy", yPos)
-            .attr("r", r)
+            .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
             .attr("fill-opacity", fillOpacityValue)
             .attr(
               "stroke",
@@ -177,10 +180,11 @@ export default function ButterflyPlot({
             .attr("stroke-opacity", fillOpacityValue);
         }
         if (extraCount > 0) {
-          const markerCx = -r - displayCount * spacing;
+          const markerCx =
+            -CONFIG.BUTTERFLY_CIRCLE_RADIUS - displayCount * xSpacing;
           gB.append("text")
             .attr("x", markerCx)
-            .attr("y", yPos + r / 2)
+            .attr("y", yPos + CONFIG.BUTTERFLY_CIRCLE_RADIUS / 2)
             .attr("text-anchor", "end")
             .attr("font-size", CONFIG.FONT_SIZE)
             .attr("fill", "black")
@@ -193,7 +197,7 @@ export default function ButterflyPlot({
         const color = isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
 
         bin.values.forEach((d, i) => {
-          const cx = circleDiameter / 2 + i * circleDiameter;
+          const cx = xSpacing / 2 + i * xSpacing;
           const fillOpacityValue =
             yPos < yScaleB(threshold)
               ? CONFIG.OPACITY_ABOVE_THRESHOLD
@@ -204,7 +208,7 @@ export default function ButterflyPlot({
             .attr("fill", color)
             .attr("cx", cx)
             .attr("cy", yPos)
-            .attr("r", r)
+            .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
             .attr("fill-opacity", fillOpacityValue)
             .attr("stroke", d3.color(color)?.darker().toString() ?? color)
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
@@ -212,7 +216,7 @@ export default function ButterflyPlot({
         });
       });
 
-      const maxDisplayCircles = Math.floor(innerW / 2 / circleDiameter);
+      const maxDisplayCircles = Math.floor(innerW / 2 / xSpacing);
 
       const extraRetrain =
         maxCountRetrain > maxDisplayCircles
@@ -221,7 +225,7 @@ export default function ButterflyPlot({
       const extraGa3 =
         maxCountGa3 > maxDisplayCircles ? maxCountGa3 - maxDisplayCircles : 0;
 
-      const halfCircles = innerW / 2 / circleDiameter;
+      const halfCircles = innerW / 2 / xSpacing;
       const xAxisScaleB = d3
         .scaleLinear()
         .domain([-halfCircles, halfCircles])
@@ -602,7 +606,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -663,7 +667,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -681,7 +685,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -772,7 +776,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -838,7 +842,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -856,7 +860,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
