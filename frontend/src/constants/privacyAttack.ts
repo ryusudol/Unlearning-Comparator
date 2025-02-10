@@ -7,7 +7,7 @@ export const ATTACK_METHODS = ["Logit Entropy", "Max Confidence"];
 
 export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
   {
-    strategy: "MAX QUALITY SCORE",
+    strategy: "MAX ATTACK SCORE",
     introduction: "Maximizes a quality score from FPR and FNR",
     explanation:
       "A single threshold is applied to compare models fairly under the same decision boundary. By optimizing their combined measure, we see how each model’s forgetting potential fares without giving either one a customized advantage.",
