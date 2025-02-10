@@ -45,7 +45,7 @@ export default function Attackconfiguration({
             })}
           </SelectContent>
         </Select>
-        <p className="text-xs font-light">
+        <p className="text-xs font-light leading-[14px]">
           Simulate membership inference attack using the model’s output logit
           entropy
         </p>
@@ -70,7 +70,9 @@ export default function Attackconfiguration({
                   <br />
                   {secondChunk}
                 </div>
-                <span className="text-xs font-light">{item.introduction}</span>
+                <span className="text-xs font-light leading-[14px]">
+                  {item.introduction}
+                </span>
               </div>
             );
           })}
