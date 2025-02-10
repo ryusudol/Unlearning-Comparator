@@ -202,12 +202,12 @@ export default function AttackSuccessFailure({
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
-      <div className="flex gap-[30px]">
-        <div className="flex gap-[30px]">
+      <div className="flex gap-[18px]">
+        <div className="flex gap-[18px]">
           <div>
             <div className="flex items-center">
               <span className="text-[15px]">Attack Success</span>
-              <span className="ml-1.5 text-sm font-light w-11 text-center">
+              <span className="ml-1.5 text-[15px] font-light w-11">
                 {computedSuccessPct.toFixed(2)}%
               </span>
             </div>
@@ -223,7 +223,7 @@ export default function AttackSuccessFailure({
           <div>
             <div className="flex items-center">
               <span className="text-[15px] mb-0.5">Attack Failure</span>
-              <span className="ml-4 text-sm font-light w-11 text-center">
+              <span className="ml-4 text-[15px] font-light w-11">
                 {computedFailurePct.toFixed(2)}%
               </span>
             </div>
@@ -237,14 +237,14 @@ export default function AttackSuccessFailure({
             <svg ref={failureRef}></svg>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-2">
           <PieChart
-            variant="success"
+            variant="fpr"
             data={successGroupComputed}
             isBaseline={isBaseline}
           />
           <PieChart
-            variant="failure"
+            variant="fnr"
             data={failureGroupComputed}
             isBaseline={isBaseline}
           />

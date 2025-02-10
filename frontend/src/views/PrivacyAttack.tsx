@@ -34,9 +34,15 @@ export default function PrivacyAttack({ height }: { height: number }) {
         thresholdStrategy={thresholdStrategy}
         onThresholdChange={handleThresholdMethodClick}
       />
-      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-5" />
+      <Separator
+        orientation="vertical"
+        className="h-[612px] w-[1px] ml-[9px] mr-3.5"
+      />
       <AttackAnalytics mode="Baseline" thresholdStrategy={thresholdStrategy} />
-      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-5" />
+      <Separator
+        orientation="vertical"
+        className="h-[612px] w-[1px] ml-3 mr-3.5"
+      />
       <AttackAnalytics
         mode="Comparison"
         thresholdStrategy={thresholdStrategy}

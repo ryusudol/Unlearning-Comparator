@@ -45,7 +45,7 @@ export default function Attackconfiguration({
             })}
           </SelectContent>
         </Select>
-        <p className="text-xs font-light leading-[14px]">
+        <p className="text-xs font-extralight leading-[14px]">
           Simulate a membership inference attack using the model’s output logit
           entropy
         </p>
@@ -70,7 +70,7 @@ export default function Attackconfiguration({
                   <br />
                   {secondChunk}
                 </div>
-                <span className="text-xs font-light leading-[14px]">
+                <span className="text-xs font-extralight leading-[14px]">
                   {item.introduction}
                 </span>
               </div>
@@ -80,7 +80,7 @@ export default function Attackconfiguration({
       </div>
       <div className="text-[#cc0000]">
         <span className="text-sm font-medium">{thresholdStrategy}</span>
-        <p className="text-xs leading-[14px]">
+        <p className="text-xs font-extralight leading-[14px]">
           {
             THRESHOLD_STRATEGIES.find(
               (item) => item.strategy === thresholdStrategy
