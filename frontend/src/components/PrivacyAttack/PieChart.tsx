@@ -66,7 +66,9 @@ export default function PieChart({ variant, data, isBaseline }: Props) {
   return (
     <div className="flex flex-col items-center">
       <span className="text-[15px]">
-        {variant.charAt(0).toUpperCase() + variant.slice(1) + " Ratio"}
+        {variant === "success"
+          ? "False Positive Ratio"
+          : "False Negative Ratio"}
       </span>
       <svg ref={svgRef} width={CONFIG.WIDTH} height={CONFIG.HEIGHT}></svg>
     </div>
