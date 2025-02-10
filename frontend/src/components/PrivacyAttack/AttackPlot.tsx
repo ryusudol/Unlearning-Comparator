@@ -25,14 +25,20 @@ const CONFIG = {
   THRESHOLD_LINE_DASH: "5,2",
   THRESHOLD_LINE_WIDTH: 1.2,
   THRESHOLD_STEP: 0.05,
+  BUTTERFLY_CIRCLE_RADIUS: 3,
+  ADDITIONAL_CIRCLE_X_GAP: 0,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
+  BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING: 12,
+  BUTTERFLY_CHART_LEGEND_TEXT_GAP: 3,
+  BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 10,
+  BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-6, 6],
+  BUTTERFLY_CHART_WIDTH: 400,
+  LINE_CHART_WIDTH: 146,
+  HEIGHT: 360,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_CHART_WIDTH: 380,
-  LINE_CHART_WIDTH: 146,
-  HEIGHT: 340,
-  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 32 },
   LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
@@ -124,9 +130,11 @@ export default function ButterflyPlot({
             CONFIG.BUTTERFLY_MARGIN.top
           })`
         );
+
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
-      const r = 3;
-      const circleDiameter = 2 * r + CONFIG.STROKE_WIDTH;
+      const circleDiameter =
+        2 * CONFIG.BUTTERFLY_CIRCLE_RADIUS + CONFIG.STROKE_WIDTH;
+      const xSpacing = circleDiameter + CONFIG.ADDITIONAL_CIRCLE_X_GAP;
       const binSize = 0.05;
       const createBins = (data: EntropyData[]) => {
         const binsMap: Record<string, EntropyData[]> = {};
@@ -146,17 +154,14 @@ export default function ButterflyPlot({
 
       retrainBins.forEach((bin) => {
         const yPos = yScaleB(bin.bin + binSize / 2);
-        const spacing = circleDiameter;
-
-        const availableWidth = innerW / 2 - r;
-        const maxDisplayCount = Math.floor(availableWidth / spacing) + 1;
+        const availableWidth = innerW / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        const maxDisplayCount = Math.floor(availableWidth / xSpacing) + 1;
         const displayCount = Math.min(maxDisplayCount, bin.values.length);
         const extraCount = bin.values.length - displayCount;
         for (let i = 0; i < displayCount; i++) {
           const j = bin.values.length - displayCount + i;
           const d = bin.values[j];
-          const cx =
-            -circleDiameter / 2 - (displayCount - 1 - i) * circleDiameter;
+          const cx = -xSpacing / 2 - (displayCount - 1 - i) * xSpacing;
           const fillOpacityValue =
             yPos < yScaleB(threshold)
               ? CONFIG.OPACITY_ABOVE_THRESHOLD
@@ -167,7 +172,7 @@ export default function ButterflyPlot({
             .attr("fill", CONFIG.GRAY)
             .attr("cx", cx)
             .attr("cy", yPos)
-            .attr("r", r)
+            .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
             .attr("fill-opacity", fillOpacityValue)
             .attr(
               "stroke",
@@ -177,10 +182,11 @@ export default function ButterflyPlot({
             .attr("stroke-opacity", fillOpacityValue);
         }
         if (extraCount > 0) {
-          const markerCx = -r - displayCount * spacing;
+          const markerCx =
+            -CONFIG.BUTTERFLY_CIRCLE_RADIUS - displayCount * xSpacing;
           gB.append("text")
             .attr("x", markerCx)
-            .attr("y", yPos + r / 2)
+            .attr("y", yPos + CONFIG.BUTTERFLY_CIRCLE_RADIUS / 2)
             .attr("text-anchor", "end")
             .attr("font-size", CONFIG.FONT_SIZE)
             .attr("fill", "black")
@@ -193,7 +199,7 @@ export default function ButterflyPlot({
         const color = isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
 
         bin.values.forEach((d, i) => {
-          const cx = circleDiameter / 2 + i * circleDiameter;
+          const cx = xSpacing / 2 + i * xSpacing;
           const fillOpacityValue =
             yPos < yScaleB(threshold)
               ? CONFIG.OPACITY_ABOVE_THRESHOLD
@@ -204,7 +210,7 @@ export default function ButterflyPlot({
             .attr("fill", color)
             .attr("cx", cx)
             .attr("cy", yPos)
-            .attr("r", r)
+            .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
             .attr("fill-opacity", fillOpacityValue)
             .attr("stroke", d3.color(color)?.darker().toString() ?? color)
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
@@ -212,7 +218,7 @@ export default function ButterflyPlot({
         });
       });
 
-      const maxDisplayCircles = Math.floor(innerW / 2 / circleDiameter);
+      const maxDisplayCircles = Math.floor(innerW / 2 / xSpacing);
 
       const extraRetrain =
         maxCountRetrain > maxDisplayCircles
@@ -221,7 +227,7 @@ export default function ButterflyPlot({
       const extraGa3 =
         maxCountGa3 > maxDisplayCircles ? maxCountGa3 - maxDisplayCircles : 0;
 
-      const halfCircles = innerW / 2 / circleDiameter;
+      const halfCircles = innerW / 2 / xSpacing;
       const xAxisScaleB = d3
         .scaleLinear()
         .domain([-halfCircles, halfCircles])
@@ -271,7 +277,7 @@ export default function ButterflyPlot({
         .attr("class", "axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerH / 2)
-        .attr("y", -190)
+        .attr("y", -203)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")
@@ -296,6 +302,102 @@ export default function ButterflyPlot({
           .attr("fill", "black")
           .text(`+${extraGa3}`);
       }
+
+      const butterflyLegendData = [
+        {
+          label: "From Retrain / Pred. Unlearn",
+          side: "left",
+          color: COLORS.DARK_GRAY,
+        },
+        {
+          label: "From Retrain / Pred. Retrain",
+          side: "left",
+          color: "#D4D4D4", // COLORS.DARK_GRAY with opacity 0.5
+        },
+        {
+          label: "From Unlearn / Pred. Unlearn",
+          side: "right",
+          color: isBaseline ? COLORS.PURPLE : COLORS.EMERALD,
+        },
+        {
+          label: "From Unlearn / Pred. Retrain",
+          side: "right",
+          color: isBaseline ? "#E6D0FD" : "#C8EADB", // COLORS.PURPLE or COLORS.EMERALD with opacity 0.5
+        },
+      ];
+
+      const butterflyLegendGroup = gB
+        .append("g")
+        .attr("class", "butterfly-legend-group")
+        .attr("transform", "translate(-5, 20)");
+
+      butterflyLegendGroup
+        .insert("rect", ":first-child")
+        .attr("x", -130)
+        .attr("y", -16)
+        .attr("width", 270)
+        .attr("height", 31)
+        .attr("fill", "white")
+        .attr("opacity", 0.6)
+        .attr("stroke", "#d6d6d6")
+        .attr("stroke-width", 1.5)
+        .attr("rx", 2)
+        .attr("ry", 2);
+
+      let leftCounter = 0;
+      let rightCounter = 0;
+
+      butterflyLegendData.forEach((item) => {
+        let xPos, yPos;
+        if (item.side === "left") {
+          xPos = CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS[0];
+          yPos =
+            leftCounter === 0
+              ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+              : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          leftCounter++;
+        } else {
+          xPos = CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS[1];
+          yPos =
+            rightCounter === 0
+              ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+              : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          rightCounter++;
+        }
+
+        butterflyLegendGroup
+          .append("rect")
+          .attr("x", xPos)
+          .attr("y", yPos - CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE / 2)
+          .attr("width", CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE)
+          .attr("height", CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE)
+          .attr("fill", item.color);
+
+        if (item.side === "left") {
+          butterflyLegendGroup
+            .append("text")
+            .attr("x", xPos - CONFIG.BUTTERFLY_CHART_LEGEND_TEXT_GAP)
+            .attr("y", yPos)
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", CONFIG.FONT_SIZE)
+            .text(item.label);
+        } else {
+          butterflyLegendGroup
+            .append("text")
+            .attr(
+              "x",
+              xPos +
+                CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE +
+                CONFIG.BUTTERFLY_CHART_LEGEND_TEXT_GAP
+            )
+            .attr("y", yPos)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", CONFIG.FONT_SIZE)
+            .text(item.label);
+        }
+      });
 
       const dragLineB = d3.drag<SVGGElement, unknown>().on("drag", (event) => {
         const [, newY] = d3.pointer(event, gB.node());
@@ -524,11 +626,10 @@ export default function ButterflyPlot({
         attackData[0]
       );
 
-      const legendGroup = gL
+      const lineChartLegendGroup = gL
         .append("g")
-        .attr("class", "legend-group")
         .attr("transform", `translate(${wL - 20}, 4)`);
-      legendGroup
+      lineChartLegendGroup
         .append("rect")
         .attr("x", -98)
         .attr("y", 0)
@@ -542,7 +643,7 @@ export default function ButterflyPlot({
         .attr("ry", 2);
       LINE_GRAPH_LEGEND_DATA.forEach((item, i) => {
         const yPos = 8 + i * 10;
-        const legendItemGroup = legendGroup
+        const legendItemGroup = lineChartLegendGroup
           .append("g")
           .attr("transform", `translate(-90, ${yPos})`);
         legendItemGroup
@@ -602,7 +703,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -663,7 +764,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -681,7 +782,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -772,7 +873,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -838,7 +939,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -856,7 +957,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", 3)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -867,10 +968,10 @@ export default function ButterflyPlot({
     ga3Json,
     isBaseline,
     mode,
+    onUpdateAttackScore,
     retrainJson,
     setThreshold,
     threshold,
-    onUpdateAttackScore,
   ]);
 
   return (

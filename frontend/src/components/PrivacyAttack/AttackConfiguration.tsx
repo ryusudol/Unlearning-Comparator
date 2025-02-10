@@ -24,7 +24,7 @@ export default function Attackconfiguration({
   onThresholdChange,
 }: Props) {
   return (
-    <div className="w-[130px] h-full flex flex-col mx-1">
+    <div className="w-[130px] h-full flex flex-col ml-1.5 mr-1">
       <div className="flex flex-col mb-5">
         <span className="mb-0.5 text-[15px]">Attack Metric</span>
         <Select defaultValue={ATTACK_METHODS[0]} onValueChange={onAttackChange}>
@@ -45,8 +45,8 @@ export default function Attackconfiguration({
             })}
           </SelectContent>
         </Select>
-        <p className="text-xs font-light leading-[14px]">
-          Simulate membership inference attack using the model’s output logit
+        <p className="text-xs font-extralight leading-[14px]">
+          Simulate a membership inference attack using the model’s output logit
           entropy
         </p>
       </div>
@@ -70,7 +70,7 @@ export default function Attackconfiguration({
                   <br />
                   {secondChunk}
                 </div>
-                <span className="text-xs font-light leading-[14px]">
+                <span className="text-xs font-extralight leading-[14px]">
                   {item.introduction}
                 </span>
               </div>
@@ -80,7 +80,7 @@ export default function Attackconfiguration({
       </div>
       <div className="text-[#cc0000]">
         <span className="text-sm font-medium">{thresholdStrategy}</span>
-        <p className="text-xs leading-[14px]">
+        <p className="text-xs font-extralight leading-[14px]">
           {
             THRESHOLD_STRATEGIES.find(
               (item) => item.strategy === thresholdStrategy

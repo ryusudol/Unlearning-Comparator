@@ -7,13 +7,13 @@ import { PieDataPoint } from "../../types/privacy-attack";
 const RETRAIN = "Retrain";
 const GA3 = "GA3";
 const CONFIG = {
-  WIDTH: 100,
-  HEIGHT: 100,
-  RADIUS: Math.min(100, 100) / 2.1,
+  WIDTH: 75,
+  HEIGHT: 75,
+  RADIUS: Math.min(75, 75) / 2.1,
 };
 
 interface Props {
-  variant: "success" | "failure";
+  variant: "fpr" | "fnr";
   data: { type: "retrain" | "ga3"; value: number }[];
   isBaseline: boolean;
 }
@@ -21,10 +21,24 @@ interface Props {
 export default function PieChart({ variant, data, isBaseline }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
+  const processedData: PieDataPoint[] = processData(data, isBaseline);
+  const total = processedData.reduce((acc, d) => acc + d.value, 0);
+  let percentage = 0;
+  if (total > 0) {
+    if (variant === "fpr") {
+      const ga3Value = processedData.find((d) => d.label === GA3)?.value || 0;
+      percentage = (ga3Value / total) * 100;
+    } else {
+      const retrainValue =
+        processedData.find((d) => d.label === RETRAIN)?.value || 0;
+      percentage = (retrainValue / total) * 100;
+    }
+  }
+
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const processedData: PieDataPoint[] = processData(data, isBaseline);
+    const processed = processData(data, isBaseline);
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -47,28 +61,55 @@ export default function PieChart({ variant, data, isBaseline }: Props) {
       .outerRadius(CONFIG.RADIUS);
 
     g.selectAll("path")
-      .data(pie(processedData))
+      .data(pie(processed))
       .enter()
       .append("path")
       .attr("d", arc)
       .attr("fill", (d) => d.data.color)
       .attr("fill-opacity", (d) => {
         if (
-          (variant === "success" && d.data.label === RETRAIN) ||
-          (variant === "failure" && d.data.label === GA3)
+          (variant === "fpr" && d.data.label === RETRAIN) ||
+          (variant === "fnr" && d.data.label === GA3)
         ) {
-          return 0.5;
+          return 0.3;
         }
         return 1;
       });
   }, [data, isBaseline, variant]);
 
+  const pieExplanation =
+    variant === "fpr" ? (
+      <p className="text-xs font-extralight">
+        Members from
+        <br />
+        Unlearn identified
+        <br />
+        as Retrain
+      </p>
+    ) : (
+      <p className="text-xs font-extralight">
+        Non-members from
+        <br />
+        Retrain identified as
+        <br />
+        Unlearn
+      </p>
+    );
+
   return (
-    <div className="flex flex-col items-center">
-      <span className="text-[15px]">
-        {variant.charAt(0).toUpperCase() + variant.slice(1) + " Ratio"}
-      </span>
-      <svg ref={svgRef} width={CONFIG.WIDTH} height={CONFIG.HEIGHT}></svg>
+    <div className="flex flex-col">
+      <div className="flex items-center">
+        <span className="text-[15px]">
+          {variant === "fpr" ? "False Positive Rate" : "False Negative Rate"}
+        </span>
+        <span className="ml-4 text-[15px] font-light w-11">
+          {percentage.toFixed(2)}%
+        </span>
+      </div>
+      <div className="flex gap-2">
+        <svg ref={svgRef} width={CONFIG.WIDTH} height={CONFIG.HEIGHT}></svg>
+        {pieExplanation}
+      </div>
     </div>
   );
 }

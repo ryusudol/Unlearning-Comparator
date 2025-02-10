@@ -14,6 +14,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
   const [thresholdStrategy, setThresholdStrategy] = useState(
     THRESHOLD_STRATEGIES[0].strategy
   );
+  const [strategyClick, setStrategyClick] = useState(0);
 
   const handleAttackMethodChange = (method: string) => {
     setAttackMethod(method);
@@ -22,6 +23,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
   const handleThresholdMethodClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const method = e.currentTarget.id;
     setThresholdStrategy(method);
+    setStrategyClick((prev) => prev + 1);
   };
 
   return (
@@ -34,10 +36,24 @@ export default function PrivacyAttack({ height }: { height: number }) {
         thresholdStrategy={thresholdStrategy}
         onThresholdChange={handleThresholdMethodClick}
       />
-      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
-      <AttackAnalytics mode="Baseline" />
-      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
-      <AttackAnalytics mode="Comparison" />
+      <Separator
+        orientation="vertical"
+        className="h-[612px] w-[1px] ml-[9px] mr-3.5"
+      />
+      <AttackAnalytics
+        mode="Baseline"
+        thresholdStrategy={thresholdStrategy}
+        strategyClick={strategyClick}
+      />
+      <Separator
+        orientation="vertical"
+        className="h-[612px] w-[1px] ml-3 mr-3.5"
+      />
+      <AttackAnalytics
+        mode="Comparison"
+        thresholdStrategy={thresholdStrategy}
+        strategyClick={strategyClick}
+      />
     </View>
   );
 }
