@@ -4,12 +4,14 @@ import * as d3 from "d3";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import { AttackData } from "../../types/privacy-attack";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 
 interface Props {
   mode: "Baseline" | "Comparison";
+  thresholdStrategy: string;
 }
 
-export default function AttackAnalytics({ mode }: Props) {
+export default function AttackAnalytics({ mode, thresholdStrategy }: Props) {
   const [threshold, setThreshold] = useState<number>(1.25);
   const [attackScore, setAttackScore] = useState<number>(0);
 
@@ -29,6 +31,17 @@ export default function AttackAnalytics({ mode }: Props) {
       setData({ retrainJson, ga3Json, attackData });
     });
   }, []);
+
+  useEffect(() => {
+    if (data && thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy) {
+      const maxAttackData = data.attackData.reduce((prev, curr) => {
+        return curr.attack_score > prev.attack_score ? curr : prev;
+      }, data.attackData[0]);
+      if (maxAttackData && maxAttackData.threshold !== threshold) {
+        setThreshold(maxAttackData.threshold);
+      }
+    }
+  }, [data, thresholdStrategy, threshold]);
 
   return (
     <div className="h-full flex flex-col">
