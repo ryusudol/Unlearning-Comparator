@@ -6,8 +6,8 @@ import { COLORS } from "../../constants/colors";
 const CONFIG = {
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
-  CIRCLE_RADIUS: 2.5,
-  CELL_SIZE: 2.5 * 2 + 1,
+  CIRCLE_RADIUS: 3,
+  CELL_SIZE: 3 * 2 + 1,
   MAX_COLUMNS: 20,
   STROKE_WIDTH: 0.8,
   TOTAL_DATA_COUNT: 400,
