@@ -29,3 +29,9 @@ export interface ThresholdStrategy {
   introduction: string;
   explanation: string;
 }
+
+export type PieDataPoint = {
+  label: string;
+  value: number;
+  color: string;
+};
