@@ -25,15 +25,14 @@ const CONFIG = {
   THRESHOLD_LINE_DASH: "5,2",
   THRESHOLD_LINE_WIDTH: 1.2,
   THRESHOLD_STEP: 0.05,
-  BUTTERFLY_CIRCLE_RADIUS: 3,
-  INTERSECTION_CIRCLE_RADIUS: 3,
+  BUTTERFLY_CIRCLE_RADIUS: 2.5,
   ADDITIONAL_CIRCLE_X_GAP: 0.5,
   ADDITIONAL_CIRCLE_Y_GAP: 1,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   BUTTERFLY_CHART_WIDTH: 380,
   LINE_CHART_WIDTH: 146,
-  HEIGHT: 340,
+  HEIGHT: 360,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
   BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
@@ -606,7 +605,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -667,7 +666,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -685,7 +684,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -776,7 +775,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -842,7 +841,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
@@ -860,7 +859,7 @@ export default function ButterflyPlot({
           .append("circle")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
-          .attr("r", CONFIG.INTERSECTION_CIRCLE_RADIUS)
+          .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
           .attr("stroke", "black")
           .attr("stroke-width", 1);
