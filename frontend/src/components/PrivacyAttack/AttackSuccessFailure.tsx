@@ -1,6 +1,6 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import * as d3 from "d3";
-
+import PieChart from "./PieChart"; // PieChart 컴포넌트는 그대로 사용합니다.
 import { COLORS } from "../../constants/colors";
 
 const CONFIG = {
@@ -28,15 +28,13 @@ export default function AttackSuccessFailure({
   ga3Json,
   attackScore,
 }: AttackSuccessFailureProps) {
-  const correctRef = useRef<SVGSVGElement | null>(null);
-  const incorrectRef = useRef<SVGSVGElement | null>(null);
-
-  const [correctPct, setCorrectPct] = useState<number>(0);
-  const [incorrectPct, setIncorrectPct] = useState<number>(0);
+  const successRef = useRef<SVGSVGElement | null>(null);
+  const failureRef = useRef<SVGSVGElement | null>(null);
 
   const isBaseline = mode === "Baseline";
   const forgettingQualityScore = 1 - attackScore;
 
+  // 데이터를 0.05 단위로 그룹화하는 함수
   const groupByBin = (data: number[]) => {
     const bins: Record<number, number[]> = {};
     data.forEach((v) => {
@@ -50,49 +48,72 @@ export default function AttackSuccessFailure({
     return sortedBins.flatMap((bin) => bins[bin]);
   };
 
-  useEffect(() => {
-    if (!retrainJson || !ga3Json) return;
+  // retrainValues와 ga3Values를 useMemo 내부에서 계산하여 불필요한 재계산을 막습니다.
+  const {
+    successGroupComputed,
+    failureGroupComputed,
+    computedSuccessPct,
+    computedFailurePct,
+  } = useMemo(() => {
+    const retrainValues: number[] = retrainJson?.entropy?.values || [];
+    const ga3Values: number[] = ga3Json?.entropy?.values || [];
 
-    const retrainValues: number[] = retrainJson.entropy
-      ? retrainJson.entropy.values
-      : [];
-    const ga3Values: number[] = ga3Json.entropy ? ga3Json.entropy.values : [];
-    const correctRetrain = groupByBin(
+    if (!retrainValues.length && !ga3Values.length) {
+      return {
+        successGroupComputed: [],
+        failureGroupComputed: [],
+        computedSuccessPct: 0,
+        computedFailurePct: 0,
+      };
+    }
+
+    const successRetrain = groupByBin(
       retrainValues.filter((v) => v < threshold)
     );
-    const correctGA3 = groupByBin(ga3Values.filter((v) => v > threshold));
-    const incorrectGA3 = groupByBin(ga3Values.filter((v) => v <= threshold));
-    const incorrectRetrain = groupByBin(
+    const successGA3 = groupByBin(ga3Values.filter((v) => v > threshold));
+    const failureGA3 = groupByBin(ga3Values.filter((v) => v <= threshold));
+    const failureRetrain = groupByBin(
       retrainValues.filter((v) => v >= threshold)
     );
-    const correctGroup = [
-      ...correctRetrain.map((v) => ({ type: "retrain", value: v })),
-      ...correctGA3.map((v) => ({ type: "ga3", value: v })),
+
+    const successGroupComputed = [
+      ...successRetrain.map((v) => ({ type: "retrain" as const, value: v })),
+      ...successGA3.map((v) => ({ type: "ga3" as const, value: v })),
     ];
-    const incorrectGroup = [
-      ...incorrectGA3.map((v) => ({ type: "ga3", value: v })),
-      ...incorrectRetrain.map((v) => ({ type: "retrain", value: v })),
+    const failureGroupComputed = [
+      ...failureGA3.map((v) => ({ type: "ga3" as const, value: v })),
+      ...failureRetrain.map((v) => ({ type: "retrain" as const, value: v })),
     ];
 
-    const computedCorrectPct = parseFloat(
-      ((correctGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
+    const computedSuccessPct = parseFloat(
+      ((successGroupComputed.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
     );
-    const computedIncorrectPct = parseFloat(
-      ((incorrectGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
+    const computedFailurePct = parseFloat(
+      ((failureGroupComputed.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
     );
-    setCorrectPct(computedCorrectPct);
-    setIncorrectPct(computedIncorrectPct);
 
-    const correctSVG = d3.select(correctRef.current);
-    correctSVG.selectAll("*").remove();
-    const correctCols = CONFIG.MAX_COLUMNS;
-    const correctRows = Math.ceil(correctGroup.length / CONFIG.MAX_COLUMNS);
-    const correctSVGWidth = correctCols * CONFIG.CELL_SIZE;
-    const correctSVGHeight = correctRows * CONFIG.CELL_SIZE;
-    correctSVG.attr("width", correctSVGWidth).attr("height", correctSVGHeight);
-    correctSVG
+    return {
+      successGroupComputed,
+      failureGroupComputed,
+      computedSuccessPct,
+      computedFailurePct,
+    };
+  }, [retrainJson, ga3Json, threshold]);
+
+  useEffect(() => {
+    // Attack Success SVG 그리기
+    const successSVG = d3.select(successRef.current);
+    successSVG.selectAll("*").remove();
+    const successCols = CONFIG.MAX_COLUMNS;
+    const successRows = Math.ceil(
+      successGroupComputed.length / CONFIG.MAX_COLUMNS
+    );
+    const successSVGWidth = successCols * CONFIG.CELL_SIZE;
+    const successSVGHeight = successRows * CONFIG.CELL_SIZE;
+    successSVG.attr("width", successSVGWidth).attr("height", successSVGHeight);
+    successSVG
       .selectAll("circle")
-      .data(correctGroup)
+      .data(successGroupComputed)
       .enter()
       .append("circle")
       .attr(
@@ -131,18 +152,19 @@ export default function AttackSuccessFailure({
       )
       .attr("stroke-width", CONFIG.STROKE_WIDTH);
 
-    const incorrectSVG = d3.select(incorrectRef.current);
-    incorrectSVG.selectAll("*").remove();
-    const incorrectCols = CONFIG.MAX_COLUMNS;
-    const incorrectRows = Math.ceil(incorrectGroup.length / CONFIG.MAX_COLUMNS);
-    const incorrectSVGWidth = incorrectCols * CONFIG.CELL_SIZE;
-    const incorrectSVGHeight = incorrectRows * CONFIG.CELL_SIZE;
-    incorrectSVG
-      .attr("width", incorrectSVGWidth)
-      .attr("height", incorrectSVGHeight);
-    incorrectSVG
+    // Attack Failure SVG 그리기
+    const failureSVG = d3.select(failureRef.current);
+    failureSVG.selectAll("*").remove();
+    const failureCols = CONFIG.MAX_COLUMNS;
+    const failureRows = Math.ceil(
+      failureGroupComputed.length / CONFIG.MAX_COLUMNS
+    );
+    const failureSVGWidth = failureCols * CONFIG.CELL_SIZE;
+    const failureSVGHeight = failureRows * CONFIG.CELL_SIZE;
+    failureSVG.attr("width", failureSVGWidth).attr("height", failureSVGHeight);
+    failureSVG
       .selectAll("circle")
-      .data(incorrectGroup)
+      .data(failureGroupComputed)
       .enter()
       .append("circle")
       .attr(
@@ -180,28 +202,56 @@ export default function AttackSuccessFailure({
         d.type === "ga3" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke-width", CONFIG.STROKE_WIDTH);
-  }, [ga3Json, isBaseline, retrainJson, threshold]);
+  }, [successGroupComputed, failureGroupComputed, isBaseline]);
 
   return (
-    <div className="relative h-full flex flex-col mt-5">
-      <div className="flex items-start justify-around">
-        <div>
-          <div className="flex items-center">
-            <p className="text-[15px] mb-0.5">Attack Success</p>
-            <p className="ml-1.5 text-sm font-light w-11 text-center">
-              {correctPct.toFixed(2)}%
+    <div className="relative h-full flex flex-col items-center mt-1">
+      <div className="flex gap-7">
+        <div className="flex gap-7">
+          <div>
+            <div className="flex items-center">
+              <span className="text-[15px]">Attack Success</span>
+              <span className="ml-1.5 text-sm font-light w-11 text-center">
+                {computedSuccessPct.toFixed(2)}%
+              </span>
+            </div>
+            <p className="text-xs font-light leading-[14px] mb-1">
+              Non-members from Retrain
+              <br />
+              identified as Retrain, members
+              <br />
+              from Unlearn identified as Unlearn
             </p>
+            <svg ref={successRef}></svg>
           </div>
-          <svg ref={correctRef}></svg>
+          <div>
+            <div className="flex items-center">
+              <span className="text-[15px] mb-0.5">Attack Failure</span>
+              <span className="ml-4 text-sm font-light w-11 text-center">
+                {computedFailurePct.toFixed(2)}%
+              </span>
+            </div>
+            <p className="text-xs font-light leading-[14px] mb-1">
+              Non-members from Retrain
+              <br />
+              identified as Unlearn, members
+              <br />
+              from Unlearn identified as Retrain
+            </p>
+            <svg ref={failureRef}></svg>
+          </div>
         </div>
-        <div>
-          <div className="flex items-center">
-            <p className="text-[15px] mb-0.5">Attack Failure</p>
-            <p className="ml-4 text-sm font-light w-11 text-center">
-              {incorrectPct.toFixed(2)}%
-            </p>
-          </div>
-          <svg ref={incorrectRef}></svg>
+        <div className="flex flex-col">
+          <PieChart
+            variant="success"
+            data={successGroupComputed}
+            isBaseline={isBaseline}
+          />
+          <PieChart
+            variant="failure"
+            data={failureGroupComputed}
+            isBaseline={isBaseline}
+          />
         </div>
       </div>
       <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-lg font-medium text-center">

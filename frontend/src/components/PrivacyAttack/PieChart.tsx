@@ -4,24 +4,27 @@ import * as d3 from "d3";
 import { COLORS } from "../../constants/colors";
 import { PieDataPoint } from "../../types/privacy-attack";
 
+const RETRAIN = "Retrain";
+const GA3 = "GA3";
 const CONFIG = {
-  WIDTH: 160,
-  HEIGHT: 160,
-  RADIUS: Math.min(160, 160) / 2.5,
+  WIDTH: 100,
+  HEIGHT: 100,
+  RADIUS: Math.min(100, 100) / 2.1,
 };
 
 interface Props {
-  data: any[];
-  threshold: number;
+  variant: "success" | "failure";
+  data: { type: "retrain" | "ga3"; value: number }[];
+  isBaseline: boolean;
 }
 
-export default function PieChartDisplay({ data, threshold }: Props) {
-  const svgRef = useRef(null);
+export default function PieChart({ variant, data, isBaseline }: Props) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const processedData = processData(data, threshold);
+    const processedData: PieDataPoint[] = processData(data, isBaseline);
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -48,37 +51,45 @@ export default function PieChartDisplay({ data, threshold }: Props) {
       .enter()
       .append("path")
       .attr("d", arc)
-      .attr("fill", (d) => d.data.color);
-  }, [data, threshold]);
+      .attr("fill", (d) => d.data.color)
+      .attr("fill-opacity", (d) => {
+        if (
+          (variant === "success" && d.data.label === RETRAIN) ||
+          (variant === "failure" && d.data.label === GA3)
+        ) {
+          return 0.5;
+        }
+        return 1;
+      });
+  }, [data, isBaseline, variant]);
 
-  return <svg ref={svgRef} width={CONFIG.WIDTH} height={CONFIG.HEIGHT}></svg>;
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-[15px]">
+        {variant.charAt(0).toUpperCase() + variant.slice(1) + " Ratio"}
+      </span>
+      <svg ref={svgRef} width={CONFIG.WIDTH} height={CONFIG.HEIGHT}></svg>
+    </div>
+  );
 }
 
-function processData(data: any[], threshold: number) {
+function processData(
+  data: { type: "retrain" | "ga3"; value: number }[],
+  isBaseline: boolean
+): PieDataPoint[] {
+  const retrainCount = data.filter((d) => d.type === "retrain").length;
+  const ga3Count = data.filter((d) => d.type === "ga3").length;
+
   return [
     {
-      label: "",
-      value: data.filter((d) => d.entropy < threshold && d.type === "default")
-        .length,
+      label: RETRAIN,
+      value: retrainCount,
       color: COLORS.DARK_GRAY,
     },
     {
-      label: "",
-      value: data.filter((d) => d.entropy < threshold && d.type === "payback")
-        .length,
-      color: COLORS.DARK_GRAY,
-    },
-    {
-      label: "",
-      value: data.filter((d) => d.entropy >= threshold && d.type === "default")
-        .length,
-      color: COLORS.PURPLE,
-    },
-    {
-      label: "",
-      value: data.filter((d) => d.entropy >= threshold && d.type === "payback")
-        .length,
-      color: COLORS.PURPLE,
+      label: GA3,
+      value: ga3Count,
+      color: isBaseline ? COLORS.PURPLE : COLORS.EMERALD,
     },
   ];
 }
