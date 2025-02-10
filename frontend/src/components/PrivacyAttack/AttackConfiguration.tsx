@@ -46,7 +46,7 @@ export default function Attackconfiguration({
           </SelectContent>
         </Select>
         <p className="text-xs font-light leading-[14px]">
-          Simulate membership inference attack using the model’s output logit
+          Simulate a membership inference attack using the model’s output logit
           entropy
         </p>
       </div>
