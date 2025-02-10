@@ -32,10 +32,10 @@ export default function Attackconfiguration({
             <SelectValue placeholder={ATTACK_METHODS[0]} />
           </SelectTrigger>
           <SelectContent>
-            {ATTACK_METHODS.map((method, idx) => {
+            {ATTACK_METHODS.map((method) => {
               return (
                 <SelectItem
-                  key={idx}
+                  key={method}
                   value={method}
                   className="text-sm font-light"
                 >
@@ -62,7 +62,7 @@ export default function Attackconfiguration({
               <div className="flex flex-col">
                 <div
                   id={item.strategy}
-                  key={idx}
+                  key={item.strategy}
                   onClick={onThresholdChange}
                   className="bg-[#cc0000] hover:bg-[#dd0000] transition text-white text-sm font-semibold mb-0.5 py-1 rounded-lg text-center cursor-pointer"
                 >
