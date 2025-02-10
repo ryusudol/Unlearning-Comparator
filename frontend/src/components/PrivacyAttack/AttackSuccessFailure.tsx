@@ -1,13 +1,13 @@
 import { useRef, useMemo, useEffect } from "react";
 import * as d3 from "d3";
-import PieChart from "./PieChart"; // PieChart 컴포넌트는 그대로 사용합니다.
+import PieChart from "./PieChart";
 import { COLORS } from "../../constants/colors";
 
 const CONFIG = {
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
-  CIRCLE_RADIUS: 3,
-  CELL_SIZE: 3 * 2 + 1,
+  CIRCLE_RADIUS: 2.5,
+  CELL_SIZE: 2.5 * 2 + 1,
   MAX_COLUMNS: 20,
   STROKE_WIDTH: 0.8,
   TOTAL_DATA_COUNT: 400,
@@ -34,7 +34,6 @@ export default function AttackSuccessFailure({
   const isBaseline = mode === "Baseline";
   const forgettingQualityScore = 1 - attackScore;
 
-  // 데이터를 0.05 단위로 그룹화하는 함수
   const groupByBin = (data: number[]) => {
     const bins: Record<number, number[]> = {};
     data.forEach((v) => {
@@ -48,7 +47,6 @@ export default function AttackSuccessFailure({
     return sortedBins.flatMap((bin) => bins[bin]);
   };
 
-  // retrainValues와 ga3Values를 useMemo 내부에서 계산하여 불필요한 재계산을 막습니다.
   const {
     successGroupComputed,
     failureGroupComputed,
@@ -101,7 +99,6 @@ export default function AttackSuccessFailure({
   }, [retrainJson, ga3Json, threshold]);
 
   useEffect(() => {
-    // Attack Success SVG 그리기
     const successSVG = d3.select(successRef.current);
     successSVG.selectAll("*").remove();
     const successCols = CONFIG.MAX_COLUMNS;
@@ -152,7 +149,6 @@ export default function AttackSuccessFailure({
       )
       .attr("stroke-width", CONFIG.STROKE_WIDTH);
 
-    // Attack Failure SVG 그리기
     const failureSVG = d3.select(failureRef.current);
     failureSVG.selectAll("*").remove();
     const failureCols = CONFIG.MAX_COLUMNS;
