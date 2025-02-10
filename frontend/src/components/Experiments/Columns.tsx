@@ -330,7 +330,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
           </Button>
         </HoverCardTrigger>
         <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Forgetting Quality
+          Forgetting Quality Score
         </HoverCardContent>
       </HoverCard>
     ),
