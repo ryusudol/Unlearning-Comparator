@@ -250,7 +250,7 @@ export default function AttackSuccessFailure({
           />
         </div>
       </div>
-      <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-lg font-medium text-center">
+      <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[17px] font-medium text-center">
         Forgetting Quality Score:{" "}
         {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
       </p>
