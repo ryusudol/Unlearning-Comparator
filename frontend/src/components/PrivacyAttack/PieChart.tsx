@@ -71,7 +71,7 @@ export default function PieChart({ variant, data, isBaseline }: Props) {
           (variant === "fpr" && d.data.label === RETRAIN) ||
           (variant === "fnr" && d.data.label === GA3)
         ) {
-          return 0.5;
+          return 0.3;
         }
         return 1;
       });
