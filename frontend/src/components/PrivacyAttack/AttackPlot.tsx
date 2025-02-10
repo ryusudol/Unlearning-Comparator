@@ -34,7 +34,7 @@ const CONFIG = {
   HEIGHT: 360,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 30 },
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 40 },
   LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
@@ -273,7 +273,7 @@ export default function ButterflyPlot({
         .attr("class", "axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerH / 2)
-        .attr("y", -190)
+        .attr("y", -195)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")

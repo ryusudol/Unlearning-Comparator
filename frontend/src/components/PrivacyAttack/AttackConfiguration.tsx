@@ -24,7 +24,7 @@ export default function Attackconfiguration({
   onThresholdChange,
 }: Props) {
   return (
-    <div className="w-[130px] h-full flex flex-col mx-1">
+    <div className="w-[130px] h-full flex flex-col ml-1.5 mr-1">
       <div className="flex flex-col mb-5">
         <span className="mb-0.5 text-[15px]">Attack Metric</span>
         <Select defaultValue={ATTACK_METHODS[0]} onValueChange={onAttackChange}>
