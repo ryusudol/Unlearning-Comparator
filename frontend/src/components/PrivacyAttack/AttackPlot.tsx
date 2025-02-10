@@ -29,6 +29,10 @@ const CONFIG = {
   ADDITIONAL_CIRCLE_X_GAP: 0,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
+  BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING: 12,
+  BUTTERFLY_CHART_LEGEND_TEXT_GAP: 3,
+  BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 10,
+  BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-6, 6],
   BUTTERFLY_CHART_WIDTH: 400,
   LINE_CHART_WIDTH: 146,
   HEIGHT: 360,
@@ -299,6 +303,102 @@ export default function ButterflyPlot({
           .text(`+${extraGa3}`);
       }
 
+      const butterflyLegendData = [
+        {
+          label: "From Retrain / Pred. Unlearn",
+          side: "left",
+          color: COLORS.DARK_GRAY,
+        },
+        {
+          label: "From Retrain / Pred. Retrain",
+          side: "left",
+          color: "#D4D4D4", // COLORS.DARK_GRAY with opacity 0.5
+        },
+        {
+          label: "From Unlearn / Pred. Unlearn",
+          side: "right",
+          color: isBaseline ? COLORS.PURPLE : COLORS.EMERALD,
+        },
+        {
+          label: "From Unlearn / Pred. Retrain",
+          side: "right",
+          color: isBaseline ? "#E6D0FD" : "#C8EADB", // COLORS.PURPLE or COLORS.EMERALD with opacity 0.5
+        },
+      ];
+
+      const butterflyLegendGroup = gB
+        .append("g")
+        .attr("class", "butterfly-legend-group")
+        .attr("transform", "translate(-5, 20)");
+
+      butterflyLegendGroup
+        .insert("rect", ":first-child")
+        .attr("x", -130)
+        .attr("y", -16)
+        .attr("width", 270)
+        .attr("height", 31)
+        .attr("fill", "white")
+        .attr("opacity", 0.6)
+        .attr("stroke", "#d6d6d6")
+        .attr("stroke-width", 1.5)
+        .attr("rx", 2)
+        .attr("ry", 2);
+
+      let leftCounter = 0;
+      let rightCounter = 0;
+
+      butterflyLegendData.forEach((item) => {
+        let xPos, yPos;
+        if (item.side === "left") {
+          xPos = CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS[0];
+          yPos =
+            leftCounter === 0
+              ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+              : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          leftCounter++;
+        } else {
+          xPos = CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS[1];
+          yPos =
+            rightCounter === 0
+              ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+              : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          rightCounter++;
+        }
+
+        butterflyLegendGroup
+          .append("rect")
+          .attr("x", xPos)
+          .attr("y", yPos - CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE / 2)
+          .attr("width", CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE)
+          .attr("height", CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE)
+          .attr("fill", item.color);
+
+        if (item.side === "left") {
+          butterflyLegendGroup
+            .append("text")
+            .attr("x", xPos - CONFIG.BUTTERFLY_CHART_LEGEND_TEXT_GAP)
+            .attr("y", yPos)
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", CONFIG.FONT_SIZE)
+            .text(item.label);
+        } else {
+          butterflyLegendGroup
+            .append("text")
+            .attr(
+              "x",
+              xPos +
+                CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_SIZE +
+                CONFIG.BUTTERFLY_CHART_LEGEND_TEXT_GAP
+            )
+            .attr("y", yPos)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", CONFIG.FONT_SIZE)
+            .text(item.label);
+        }
+      });
+
       const dragLineB = d3.drag<SVGGElement, unknown>().on("drag", (event) => {
         const [, newY] = d3.pointer(event, gB.node());
         const newThresholdRaw = yScaleB.invert(newY);
@@ -526,11 +626,10 @@ export default function ButterflyPlot({
         attackData[0]
       );
 
-      const legendGroup = gL
+      const lineChartLegendGroup = gL
         .append("g")
-        .attr("class", "legend-group")
         .attr("transform", `translate(${wL - 20}, 4)`);
-      legendGroup
+      lineChartLegendGroup
         .append("rect")
         .attr("x", -98)
         .attr("y", 0)
@@ -544,7 +643,7 @@ export default function ButterflyPlot({
         .attr("ry", 2);
       LINE_GRAPH_LEGEND_DATA.forEach((item, i) => {
         const yPos = 8 + i * 10;
-        const legendItemGroup = legendGroup
+        const legendItemGroup = lineChartLegendGroup
           .append("g")
           .attr("transform", `translate(-90, ${yPos})`);
         legendItemGroup
@@ -869,10 +968,10 @@ export default function ButterflyPlot({
     ga3Json,
     isBaseline,
     mode,
+    onUpdateAttackScore,
     retrainJson,
     setThreshold,
     threshold,
-    onUpdateAttackScore,
   ]);
 
   return (
