@@ -36,9 +36,49 @@ export default function Header() {
       <div>
         <div className="flex items-center relative">
           <div className="flex items-center">
-            <span className="text-2xl font-semibold mr-10">
+            <span className="text-2xl font-semibold mr-8">
               Unlearning Comparator
             </span>
+          </div>
+          <div className="w-[188px] flex gap-6 relative top-[5px] text-[13px] mr-5">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-gray-300">Dataset</span>
+              <Select
+                defaultValue={dataset}
+                onValueChange={handleDatasetChange}
+                name="dataset"
+              >
+                <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
+                  <SelectValue placeholder={dataset} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DATASETS.map((dataset, idx) => (
+                    <SelectItem key={idx} value={dataset}>
+                      {dataset}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-gray-300">Model</span>
+              <Select
+                defaultValue={neuralNetworkModel}
+                onValueChange={handleNeuralNetworkModelChange}
+                name="neuralNetworkModel"
+              >
+                <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
+                  <SelectValue placeholder={neuralNetworkModel} />
+                </SelectTrigger>
+                <SelectContent>
+                  {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
+                    <SelectItem key={idx} value={neuralNetworkModel}>
+                      {neuralNetworkModel}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <ForgetClassTabs />
         </div>
@@ -47,46 +87,6 @@ export default function Header() {
         onClick={handleGithubIconClick}
         className="w-7 h-7 cursor-pointer"
       />
-      <div className="flex absolute left-[1312px] top-4 text-[13px]">
-        <div className="flex flex-col mr-10">
-          <span className="text-[10px] text-gray-300">Dataset</span>
-          <Select
-            defaultValue={dataset}
-            onValueChange={handleDatasetChange}
-            name="dataset"
-          >
-            <SelectTrigger className="h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
-              <SelectValue placeholder={dataset} />
-            </SelectTrigger>
-            <SelectContent>
-              {DATASETS.map((dataset, idx) => (
-                <SelectItem key={idx} value={dataset}>
-                  {dataset}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] text-gray-300">Model</span>
-          <Select
-            defaultValue={neuralNetworkModel}
-            onValueChange={handleNeuralNetworkModelChange}
-            name="neuralNetworkModel"
-          >
-            <SelectTrigger className="h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
-              <SelectValue placeholder={neuralNetworkModel} />
-            </SelectTrigger>
-            <SelectContent>
-              {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
-                <SelectItem key={idx} value={neuralNetworkModel}>
-                  {neuralNetworkModel}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
     </div>
   );
 }
