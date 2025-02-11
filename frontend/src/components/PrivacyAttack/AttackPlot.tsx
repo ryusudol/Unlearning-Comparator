@@ -33,12 +33,12 @@ const CONFIG = {
   BUTTERFLY_CHART_LEGEND_TEXT_GAP: 3,
   BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 10,
   BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-6, 6],
-  BUTTERFLY_CHART_WIDTH: 482,
-  LINE_CHART_WIDTH: 146,
+  BUTTERFLY_CHART_WIDTH: 460,
+  LINE_CHART_WIDTH: 168,
   HEIGHT: 360,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 32 },
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 54 },
   LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
@@ -277,7 +277,7 @@ export default function ButterflyPlot({
         .attr("class", "axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerH / 2)
-        .attr("y", -203)
+        .attr("y", -222)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")

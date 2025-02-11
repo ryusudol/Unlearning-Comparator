@@ -202,8 +202,8 @@ export default function AttackSuccessFailure({
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
-      <div className="flex gap-[18px]">
-        <div className="flex gap-[18px]">
+      <div className="flex gap-[38px]">
+        <div className="flex gap-[38px]">
           <div>
             <div className="flex items-center">
               <span className="text-[15px]">Attack Success</span>
