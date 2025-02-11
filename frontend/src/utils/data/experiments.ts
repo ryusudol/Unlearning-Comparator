@@ -10,7 +10,7 @@ type Values = {
   TUA: number[];
   TRA: number[];
   RTE: number[];
-  FQ: number[];
+  FQS: number[];
 };
 
 type BubbleChartData = {
@@ -30,7 +30,7 @@ const baseColors = {
   TUA: RED,
   TRA: GREEN,
   RTE: RED,
-  FQ: RED,
+  FQS: RED,
 };
 
 export function calculatePerformanceMetrics(data: Experiments) {
@@ -42,7 +42,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     RTE: Object.values(data)
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),
-    FQ: Object.values(data)
+    FQS: Object.values(data)
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),
   };
@@ -53,7 +53,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.min(values.TUA.map((v) => Number(v)))!,
     TRA: d3.min(values.TRA)!,
     RTE: d3.min(values.RTE)!,
-    FQ: d3.min(values.RTE)!,
+    FQS: d3.min(values.RTE)!,
   };
 
   const maxs = {
@@ -62,7 +62,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.max(values.TUA.map((v) => Number(v)))!,
     TRA: d3.max(values.TRA)!,
     RTE: d3.max(values.RTE)!,
-    FQ: d3.max(values.RTE)!,
+    FQS: d3.max(values.RTE)!,
   };
 
   return {
@@ -101,7 +101,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
         .range([BRIGHTEST, DARKEST]),
       baseColor: baseColors.RTE,
     },
-    FQ: {
+    FQS: {
       colorScale: d3
         .scaleLinear()
         .domain([mins.RTE, maxs.RTE])

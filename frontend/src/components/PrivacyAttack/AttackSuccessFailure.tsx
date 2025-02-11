@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect } from "react";
 import * as d3 from "d3";
-import PieChart from "./PieChart";
+
 import { COLORS } from "../../constants/colors";
 
 const CONFIG = {
@@ -236,18 +236,6 @@ export default function AttackSuccessFailure({
             </p>
             <svg ref={failureRef}></svg>
           </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <PieChart
-            variant="fpr"
-            data={successGroupComputed}
-            isBaseline={isBaseline}
-          />
-          <PieChart
-            variant="fnr"
-            data={failureGroupComputed}
-            isBaseline={isBaseline}
-          />
         </div>
       </div>
       <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[17px] font-medium text-center">
