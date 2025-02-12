@@ -40,6 +40,7 @@ export default function DataTable({ isExpanded }: Props) {
 
   const tableData = useMemo(() => {
     const experimentsArray = Object.values(experiments);
+
     const pretrainedExp = experimentsArray.find(
       (exp) => exp.id === `000${forgetClass}`
     );
@@ -52,7 +53,7 @@ export default function DataTable({ isExpanded }: Props) {
     const remainingExps = experimentsArray.filter(
       (exp) => exp.id !== pretrainedExp.id && exp.id !== retrainedExp.id
     );
-
+    // running experiments
     const nonTemporaryExps = remainingExps.filter((exp) => exp.id !== "-");
     const temporaryExps = remainingExps.filter((exp) => exp.id === "-");
 
