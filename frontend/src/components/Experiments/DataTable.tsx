@@ -53,7 +53,10 @@ export default function DataTable({ isExpanded }: Props) {
       (exp) => exp.id !== pretrainedExp.id && exp.id !== retrainedExp.id
     );
 
-    return [pretrainedExp, retrainedExp, ...remainingExps];
+    const nonTemporaryExps = remainingExps.filter((exp) => exp.id !== "-");
+    const temporaryExps = remainingExps.filter((exp) => exp.id === "-");
+
+    return [pretrainedExp, retrainedExp, ...nonTemporaryExps, ...temporaryExps];
   }, [experiments, forgetClass]);
 
   const modifiedColumns = columns.map((column) => {
