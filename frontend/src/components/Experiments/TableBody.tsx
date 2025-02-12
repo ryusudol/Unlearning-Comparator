@@ -28,6 +28,7 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { RunningStatusContext } from "../../store/running-status-context";
 
 const TEMPORARY_ROW_BG_COLOR = "#f0f6fa";
 
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
+  const { isRunning } = useContext(RunningStatusContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
   const { saveBaseline, saveComparison } = useContext(
@@ -56,25 +58,28 @@ export default function _TableBody({ table, tableData }: Props) {
     Object.keys(performanceMetrics).forEach((columnId) => {
       if (!performanceMetrics[columnId]) return;
 
-      const values = tableData
+      const experimentData = tableData
         .map((datum) => datum[columnId as keyof Experiment] as number)
         .filter(
-          (value) =>
-            value !== undefined && value !== null && typeof value === "number"
+          (datum) =>
+            datum !== undefined && datum !== null && typeof datum === "number"
         );
 
-      const uniqueValues = Array.from(new Set(values));
+      const uniqueValues = Array.from(new Set(experimentData));
       uniqueValues.sort((a, b) => a - b);
       const numUniqueValues = uniqueValues.length;
       const valueOpacityMap: { [value: number]: number } = {};
 
       if (numUniqueValues === 0) {
+        // When all values are '-'
         uniqueValues.forEach((value) => {
           valueOpacityMap[value] = 0;
         });
       } else if (numUniqueValues === 1) {
+        // When there's only one value in a column
         valueOpacityMap[uniqueValues[0]] = 1;
       } else {
+        // When various values exist
         uniqueValues.forEach((value, index) => {
           const opacity = index / (numUniqueValues - 1);
           valueOpacityMap[value] = opacity;
@@ -176,7 +181,7 @@ export default function _TableBody({ table, tableData }: Props) {
       >
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row, rowIdx) => {
-            const isTemporaryRow = row.id.length < 4;
+            const isTemporaryRow = row.id === "-";
             let isRunningRow = false;
             if (isTemporaryRow) {
               const temporaryExperimentEntries = Object.entries(
@@ -261,19 +266,25 @@ export default function _TableBody({ table, tableData }: Props) {
                     })}
                   </TableRow>
                 </ContextMenuTrigger>
-                <ContextMenuContent className="z-[50]">
-                  {!row.id.startsWith("000") && !row.id.startsWith("a00") && (
-                    <ContextMenuItem onClick={() => handleDeleteRow(row.id)}>
-                      Delete
+                {!isTemporaryRow && (
+                  <ContextMenuContent className="z-[50]">
+                    {!row.id.startsWith("000") &&
+                      !row.id.startsWith("a00") &&
+                      !isRunning && (
+                        <ContextMenuItem
+                          onClick={() => handleDeleteRow(row.id)}
+                        >
+                          Delete
+                        </ContextMenuItem>
+                      )}
+                    <ContextMenuItem onClick={() => handleDownloadJSON(row.id)}>
+                      Download JSON
                     </ContextMenuItem>
-                  )}
-                  <ContextMenuItem onClick={() => handleDownloadJSON(row.id)}>
-                    Download JSON
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => handleDownloadPTH(row.id)}>
-                    Download PTH
-                  </ContextMenuItem>
-                </ContextMenuContent>
+                    <ContextMenuItem onClick={() => handleDownloadPTH(row.id)}>
+                      Download PTH
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                )}
               </ContextMenu>
             );
           })
