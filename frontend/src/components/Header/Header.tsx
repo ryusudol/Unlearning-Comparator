@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
-import { GithubIcon } from "../UI/icons";
+import { LogoIcon, GithubIcon } from "../UI/icons";
 import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
@@ -35,8 +35,9 @@ export default function Header() {
     <div className="w-[1805px] text-white bg-black h-12 flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
-          <div className="flex items-center">
-            <span className="text-2xl font-semibold mr-8">
+          <div className="flex items-center gap-2 mr-8">
+            <LogoIcon className="scale-75" />
+            <span className="text-2xl font-semibold">
               Unlearning Comparator
             </span>
           </div>
