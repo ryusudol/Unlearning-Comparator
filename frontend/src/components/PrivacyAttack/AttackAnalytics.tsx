@@ -3,29 +3,33 @@ import * as d3 from "d3";
 
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
-import { AttackData } from "../../types/privacy-attack";
+import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
+
+export type Data = {
+  retrainJson: ExperimentJsonData;
+  ga3Json: ExperimentJsonData;
+  attackData: AttackData[];
+} | null;
 
 interface Props {
   mode: "Baseline" | "Comparison";
+  thresholdSetting: "Members Above" | "Members Below";
   thresholdStrategy: string;
   strategyCount: number;
 }
 
 export default function AttackAnalytics({
   mode,
+  thresholdSetting,
   thresholdStrategy,
   strategyCount,
 }: Props) {
-  const [threshold, setThreshold] = useState<number>(1.25);
+  const [thresholdValue, setThresholdValue] = useState<number>(1.25);
   const [attackScore, setAttackScore] = useState<number>(0);
   const [userModified, setUserModified] = useState<boolean>(false);
 
-  const [data, setData] = useState<{
-    retrainJson: any;
-    ga3Json: any;
-    attackData: AttackData[];
-  } | null>(null);
+  const [data, setData] = useState<Data>(null);
 
   useEffect(() => {
     Promise.all([
@@ -48,8 +52,8 @@ export default function AttackAnalytics({
         const maxAttackData = data.attackData.reduce((prev, curr) => {
           return curr.attack_score > prev.attack_score ? curr : prev;
         }, data.attackData[0]);
-        if (maxAttackData && maxAttackData.threshold !== threshold) {
-          setThreshold(maxAttackData.threshold);
+        if (maxAttackData && maxAttackData.threshold !== thresholdValue) {
+          setThresholdValue(maxAttackData.threshold);
         }
       } else if (thresholdStrategy === THRESHOLD_STRATEGIES[1].strategy) {
         const retrainValues: number[] = data.retrainJson?.entropy?.values || [];
@@ -63,7 +67,7 @@ export default function AttackAnalytics({
           candidateSet.add(base + 0.05);
         });
         const candidates = Array.from(candidateSet).sort((a, b) => a - b);
-        let bestCandidate = threshold;
+        let bestCandidate = thresholdValue;
         let bestSuccessCount = -Infinity;
         candidates.forEach((candidate) => {
           const successCount =
@@ -74,8 +78,8 @@ export default function AttackAnalytics({
             bestCandidate = candidate;
           }
         });
-        if (bestCandidate !== threshold) {
-          setThreshold(bestCandidate);
+        if (bestCandidate !== thresholdValue) {
+          setThresholdValue(bestCandidate);
         }
       } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
         const thresholdGroups: { [key: number]: number } = {};
@@ -88,17 +92,17 @@ export default function AttackAnalytics({
             const thresholdCandidate = parseFloat(t);
             return sum > best.sum ? { th: thresholdCandidate, sum } : best;
           },
-          { th: threshold, sum: -Infinity }
+          { th: thresholdValue, sum: -Infinity }
         );
-        if (bestThresholdEntry.th !== threshold) {
-          setThreshold(bestThresholdEntry.th);
+        if (bestThresholdEntry.th !== thresholdValue) {
+          setThresholdValue(bestThresholdEntry.th);
         }
       }
     }
-  }, [data, thresholdStrategy, userModified, threshold]);
+  }, [data, thresholdStrategy, userModified, thresholdValue]);
 
-  const handleThresholdChange = (newThreshold: number) => {
-    setThreshold(newThreshold);
+  const handleThresholdValueChange = (newThreshold: number) => {
+    setThresholdValue(newThreshold);
     setUserModified(true);
   };
 
@@ -107,18 +111,17 @@ export default function AttackAnalytics({
       {data && (
         <AttackPlot
           mode={mode}
-          threshold={threshold}
-          setThreshold={handleThresholdChange}
-          retrainJson={data.retrainJson}
-          ga3Json={data.ga3Json}
-          attackData={data.attackData}
+          thresholdValue={thresholdValue}
+          thresholdSetting={thresholdSetting}
+          setThresholdValue={handleThresholdValueChange}
+          data={data}
           onUpdateAttackScore={setAttackScore}
         />
       )}
       {data && (
         <AttackSuccessFailure
           mode={mode}
-          threshold={threshold}
+          thresholdValue={thresholdValue}
           retrainJson={data.retrainJson}
           ga3Json={data.ga3Json}
           attackScore={attackScore}

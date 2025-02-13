@@ -10,6 +10,7 @@ import {
   CONFIDENCE,
   MEMBERS_ABOVE,
   MEMBERS_BELOW,
+  ThresholdSetting,
 } from "../../views/PrivacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Label } from "..//UI/label";
@@ -17,7 +18,7 @@ import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
   onMetricChange: (val: string) => void;
-  onThresholdSettingChange: (val: string) => void;
+  onThresholdSettingChange: (val: ThresholdSetting) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 

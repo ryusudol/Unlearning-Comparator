@@ -15,7 +15,7 @@ const CONFIG = {
 
 interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
-  threshold: number;
+  thresholdValue: number;
   retrainJson: any;
   ga3Json: any;
   attackScore: number;
@@ -23,7 +23,7 @@ interface AttackSuccessFailureProps {
 
 export default function AttackSuccessFailure({
   mode,
-  threshold,
+  thresholdValue,
   retrainJson,
   ga3Json,
   attackScore,
@@ -66,12 +66,12 @@ export default function AttackSuccessFailure({
     }
 
     const successRetrain = groupByBin(
-      retrainValues.filter((v) => v < threshold)
+      retrainValues.filter((v) => v < thresholdValue)
     );
-    const successGA3 = groupByBin(ga3Values.filter((v) => v > threshold));
-    const failureGA3 = groupByBin(ga3Values.filter((v) => v <= threshold));
+    const successGA3 = groupByBin(ga3Values.filter((v) => v > thresholdValue));
+    const failureGA3 = groupByBin(ga3Values.filter((v) => v <= thresholdValue));
     const failureRetrain = groupByBin(
-      retrainValues.filter((v) => v >= threshold)
+      retrainValues.filter((v) => v >= thresholdValue)
     );
 
     const successGroupComputed = [
@@ -96,7 +96,7 @@ export default function AttackSuccessFailure({
       computedSuccessPct,
       computedFailurePct,
     };
-  }, [retrainJson, ga3Json, threshold]);
+  }, [retrainJson, ga3Json, thresholdValue]);
 
   useEffect(() => {
     const successSVG = d3.select(successRef.current);

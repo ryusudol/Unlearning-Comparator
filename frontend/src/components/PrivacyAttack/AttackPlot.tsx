@@ -9,8 +9,10 @@ import {
 import { COLORS } from "../../constants/colors";
 import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
+import { AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { MEMBERS_ABOVE } from "../../views/PrivacyAttack";
+import { Data } from "./AttackAnalytics";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
@@ -47,21 +49,19 @@ type EntropyData = { entropy: number };
 
 interface Props {
   mode: "Baseline" | "Comparison";
-  threshold: number;
-  setThreshold: (value: number) => void;
-  retrainJson: ExperimentJsonData;
-  ga3Json: ExperimentJsonData;
-  attackData: AttackData[];
+  thresholdValue: number;
+  thresholdSetting: string;
+  data: Data;
+  setThresholdValue: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
 }
 
 export default function ButterflyPlot({
   mode,
-  threshold,
-  setThreshold,
-  retrainJson,
-  ga3Json,
-  attackData,
+  thresholdValue,
+  thresholdSetting,
+  data,
+  setThresholdValue,
   onUpdateAttackScore,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -72,6 +72,9 @@ export default function ButterflyPlot({
   const chartInitialized = useRef<boolean>(false);
   const attackDataRef = useRef<AttackData[]>([]);
 
+  const retrainJson = data?.retrainJson;
+  const ga3Json = data?.ga3Json;
+  const attackData = data?.attackData;
   const isBaseline = mode === "Baseline";
 
   const updateThresholdCircles = (
@@ -163,7 +166,7 @@ export default function ButterflyPlot({
           const d = bin.values[j];
           const cx = -xSpacing / 2 - (displayCount - 1 - i) * xSpacing;
           const fillOpacityValue =
-            yPos < yScaleB(threshold)
+            yPos < yScaleB(thresholdValue)
               ? CONFIG.OPACITY_ABOVE_THRESHOLD
               : CONFIG.OPACITY_BELOW_THRESHOLD;
           gB.append("circle")
@@ -201,7 +204,7 @@ export default function ButterflyPlot({
         bin.values.forEach((d, i) => {
           const cx = xSpacing / 2 + i * xSpacing;
           const fillOpacityValue =
-            yPos < yScaleB(threshold)
+            yPos < yScaleB(thresholdValue)
               ? CONFIG.OPACITY_ABOVE_THRESHOLD
               : CONFIG.OPACITY_BELOW_THRESHOLD;
           gB.append("circle")
@@ -406,13 +409,13 @@ export default function ButterflyPlot({
           Math.round(newThresholdRaw / CONFIG.THRESHOLD_STEP) *
           CONFIG.THRESHOLD_STEP;
         if (newThresholdRounded >= 0 && newThresholdRounded <= 2.5) {
-          setThreshold(newThresholdRounded);
+          setThresholdValue(newThresholdRounded);
         }
       });
       const threshGroupB = gB
         .append("g")
         .attr("class", "threshold-group")
-        .attr("transform", `translate(0, ${yScaleB(threshold)})`)
+        .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
         .attr("cursor", "ns-resize")
         .call(dragLineB as any);
       threshGroupB
@@ -425,7 +428,7 @@ export default function ButterflyPlot({
       threshGroupB
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", CONFIG.THRESHOLD_LINE_COLOR)
+        .attr("stroke", "black")
         .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
         .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
         .attr("stroke-linecap", "round")
@@ -462,15 +465,15 @@ export default function ButterflyPlot({
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", wL)
-        .attr("height", lineYScale(threshold));
+        .attr("height", lineYScale(thresholdValue));
       defs
         .append("clipPath")
         .attr("id", `belowThreshold-${mode}`)
         .append("rect")
         .attr("x", 0)
-        .attr("y", lineYScale(threshold))
+        .attr("y", lineYScale(thresholdValue))
         .attr("width", wL)
-        .attr("height", hL - lineYScale(threshold));
+        .attr("height", hL - lineYScale(thresholdValue));
 
       const lineAttack = d3
         .line<AttackData>()
@@ -584,7 +587,7 @@ export default function ButterflyPlot({
           Math.round(newThresholdRaw / CONFIG.THRESHOLD_STEP) *
           CONFIG.THRESHOLD_STEP;
         if (newThresholdRounded >= 0 && newThresholdRounded <= 2.5) {
-          setThreshold(newThresholdRounded);
+          setThresholdValue(newThresholdRounded);
 
           gL.select(".threshold-group").attr(
             "transform",
@@ -595,7 +598,7 @@ export default function ButterflyPlot({
       const threshGroupL = gL
         .append("g")
         .attr("class", "threshold-group")
-        .attr("transform", `translate(0, ${lineYScale(threshold)})`)
+        .attr("transform", `translate(0, ${lineYScale(thresholdValue)})`)
         .attr("cursor", "ns-resize")
         .call(dragLineL as any);
       threshGroupL
@@ -608,7 +611,7 @@ export default function ButterflyPlot({
       threshGroupL
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", CONFIG.THRESHOLD_LINE_COLOR)
+        .attr("stroke", "black")
         .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
         .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
         .attr("stroke-linecap", "round")
@@ -619,8 +622,8 @@ export default function ButterflyPlot({
 
       const currentData = attackData.reduce(
         (prev, curr) =>
-          Math.abs(curr.threshold - threshold) <
-          Math.abs(prev.threshold - threshold)
+          Math.abs(curr.threshold - thresholdValue) <
+          Math.abs(prev.threshold - thresholdValue)
             ? curr
             : prev,
         attackData[0]
@@ -696,7 +699,7 @@ export default function ButterflyPlot({
         (d) => d.attack_score,
         lineXScale,
         lineYScale,
-        threshold
+        thresholdValue
       );
       redInts.forEach((pt) => {
         intGroup
@@ -712,7 +715,7 @@ export default function ButterflyPlot({
       const attackIntersection =
         redInts.length > 0
           ? redInts[0]
-          : { x: lineXScale(0), y: lineYScale(threshold) };
+          : { x: lineXScale(0), y: lineYScale(thresholdValue) };
 
       let infoGroupX = attackIntersection.x;
       if (
@@ -722,7 +725,7 @@ export default function ButterflyPlot({
       }
 
       const infoGroupY =
-        threshold >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+        thresholdValue >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
 
       const infoGroup = gL
         .append("g")
@@ -732,7 +735,7 @@ export default function ButterflyPlot({
         .append("text")
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
-        .text(`Threshold: ${threshold.toFixed(2)}`);
+        .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
@@ -757,7 +760,7 @@ export default function ButterflyPlot({
         (d) => d.fpr,
         lineXScale,
         lineYScale,
-        threshold
+        thresholdValue
       );
       blueInts.forEach((pt) => {
         intGroup
@@ -775,7 +778,7 @@ export default function ButterflyPlot({
         (d) => d.fnr,
         lineXScale,
         lineYScale,
-        threshold
+        thresholdValue
       );
       greenInts.forEach((pt) => {
         intGroup
@@ -799,10 +802,10 @@ export default function ButterflyPlot({
         CONFIG.BUTTERFLY_MARGIN.top -
         CONFIG.BUTTERFLY_MARGIN.bottom;
       const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
-      updateThresholdCircles(gB, yScaleB, threshold);
+      updateThresholdCircles(gB, yScaleB, thresholdValue);
       gB.select(".threshold-group").attr(
         "transform",
-        `translate(0, ${yScaleB(threshold)})`
+        `translate(0, ${yScaleB(thresholdValue)})`
       );
 
       const svgL = d3.select(lineRef.current);
@@ -817,16 +820,16 @@ export default function ButterflyPlot({
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
       gL.select(".threshold-group").attr(
         "transform",
-        `translate(0, ${lineYScale(threshold)})`
+        `translate(0, ${lineYScale(thresholdValue)})`
       );
       const defs = gL.select("defs");
       defs
         .select(`#aboveThreshold-${mode} rect`)
-        .attr("height", lineYScale(threshold));
+        .attr("height", lineYScale(thresholdValue));
       defs
         .select(`#belowThreshold-${mode} rect`)
-        .attr("y", lineYScale(threshold))
-        .attr("height", hL - lineYScale(threshold));
+        .attr("y", lineYScale(thresholdValue))
+        .attr("height", hL - lineYScale(thresholdValue));
 
       let intGroup = gL.select<SVGGElement>(".intersection-group");
       if (intGroup.empty()) {
@@ -866,7 +869,7 @@ export default function ButterflyPlot({
         (d) => d.attack_score,
         d3.scaleLinear().domain([0, 1.05]).range([0, wL]),
         lineYScale,
-        threshold
+        thresholdValue
       );
       redInts.forEach((pt) => {
         intGroup
@@ -883,8 +886,8 @@ export default function ButterflyPlot({
       if (!infoGroup.empty() && attackDataRef.current.length > 0) {
         const currentData = attackDataRef.current.reduce(
           (prev, curr) =>
-            Math.abs(curr.threshold - threshold) <
-            Math.abs(prev.threshold - threshold)
+            Math.abs(curr.threshold - thresholdValue) <
+            Math.abs(prev.threshold - thresholdValue)
               ? curr
               : prev,
           attackDataRef.current[0]
@@ -892,7 +895,7 @@ export default function ButterflyPlot({
         const attackIntersection =
           redInts.length > 0
             ? redInts[0]
-            : { x: lineXScale(0), y: lineYScale(threshold) };
+            : { x: lineXScale(0), y: lineYScale(thresholdValue) };
 
         let infoGroupX = attackIntersection.x;
         if (
@@ -905,7 +908,7 @@ export default function ButterflyPlot({
         }
 
         const infoGroupY =
-          threshold >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+          thresholdValue >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
 
         infoGroup.attr(
           "transform",
@@ -913,7 +916,7 @@ export default function ButterflyPlot({
         );
         infoGroup
           .select("text:nth-child(1)")
-          .text(`Threshold: ${threshold.toFixed(2)}`);
+          .text(`Threshold: ${thresholdValue.toFixed(2)}`);
         infoGroup
           .select("text:nth-child(2)")
           .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
@@ -932,7 +935,7 @@ export default function ButterflyPlot({
         (d) => d.fpr,
         d3.scaleLinear().domain([0, 1.05]).range([0, wL]),
         lineYScale,
-        threshold
+        thresholdValue
       );
       blueInts.forEach((pt) => {
         intGroup
@@ -950,7 +953,7 @@ export default function ButterflyPlot({
         (d) => d.fnr,
         d3.scaleLinear().domain([0, 1.05]).range([0, wL]),
         lineYScale,
-        threshold
+        thresholdValue
       );
       greenInts.forEach((pt) => {
         intGroup
@@ -970,9 +973,24 @@ export default function ButterflyPlot({
     mode,
     onUpdateAttackScore,
     retrainJson,
-    setThreshold,
-    threshold,
+    setThresholdValue,
+    thresholdValue,
   ]);
+
+  useEffect(() => {
+    const thresholdStroke = "#000000";
+    const strokeOpacity = thresholdSetting === MEMBERS_ABOVE ? 1 : 0.3;
+
+    d3.select(butterflyRef.current)
+      .selectAll(".threshold-line")
+      .attr("stroke", thresholdStroke)
+      .attr("stroke-opacity", strokeOpacity);
+
+    d3.select(lineRef.current)
+      .selectAll(".threshold-line")
+      .attr("stroke", thresholdStroke)
+      .attr("stroke-opacity", strokeOpacity);
+  }, [thresholdSetting]);
 
   return (
     <div className="flex flex-col items-center">
