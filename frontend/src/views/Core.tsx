@@ -5,17 +5,9 @@ import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import {
-  ChartScatterIcon,
-  CircleIcon,
-  FatMultiplicationSignIcon,
-  DarkShieldIcon,
-} from "../components/UI/icons";
+import { ChartScatterIcon, UserQuestionIcon } from "../components/UI/icons";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
-import { Separator } from "../components/UI/separator";
-import { CIFAR_10_CLASSES } from "../constants/common";
-import { TABLEAU10 } from "../constants/colors";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
@@ -58,11 +50,11 @@ export default function Core({ width, height }: ViewProps) {
           />
           <Title
             Icon={
-              <DarkShieldIcon
+              <UserQuestionIcon
                 className={`w-4 h-4 ${isEmbeddingMode && "opacity-40"}`}
               />
             }
-            title="Privacy Attack"
+            title="Membership Inference Attack"
             id={ATTACK}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               isEmbeddingMode && "text-gray-400 border-none"
@@ -71,7 +63,6 @@ export default function Core({ width, height }: ViewProps) {
             onClick={handleDisplayModeChange}
           />
         </div>
-        {forgetClassExist && isEmbeddingMode && <EmbeddingLegend />}
       </div>
       {forgetClassExist ? (
         isEmbeddingMode ? (
@@ -90,45 +81,5 @@ export default function Core({ width, height }: ViewProps) {
 function UnderLine() {
   return (
     <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
-  );
-}
-
-function EmbeddingLegend() {
-  const { forgetClass } = useForgetClass();
-
-  return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 relative top-0.5 text-sm z-10">
-      <div className="flex items-center mr-5">
-        <span className="font-medium mr-2.5">Data Type</span>
-        <ul className="flex items-center gap-[9.2px]">
-          <li className="flex items-center">
-            <CircleIcon className="w-[9px] h-[9px] mr-1 text-[#4f5562]" />
-            <span>Remaining Data</span>
-          </li>
-          <li className="flex items-center">
-            <FatMultiplicationSignIcon className="text-[#4f5562] mr-1" />
-            <span>Forgetting Target</span>
-          </li>
-        </ul>
-      </div>
-      <div className="flex items-center">
-        <span className="font-medium mr-2.5">Prediction</span>
-        <ul className="flex items-center gap-[9.2px]">
-          {CIFAR_10_CLASSES.map((name, idx) => (
-            <li key={idx} className="flex items-center">
-              <div
-                style={{ backgroundColor: TABLEAU10[idx] }}
-                className="w-3.5 h-3.5 mr-1"
-              />
-              <span>{forgetClass === idx ? name + " (X)" : name}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <Separator
-        orientation="horizontal"
-        className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"
-      />
-    </div>
   );
 }

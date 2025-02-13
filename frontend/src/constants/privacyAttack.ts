@@ -3,8 +3,6 @@ import {
   LineGraphLegendData,
 } from "../types/privacy-attack";
 
-export const ATTACK_METHODS = ["Logit Entropy", "Max Confidence"];
-
 export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
   {
     strategy: "MAX ATTACK SCORE",
