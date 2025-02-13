@@ -443,7 +443,7 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
-        .text("↑ Pred as Retrain");
+        .text("↑ Pred as Unlearn");
       threshGroupB
         .append("text")
         .attr("x", -195)
@@ -452,7 +452,7 @@ export default function ButterflyPlot({
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
         .attr("opacity", 0.5)
-        .text("↓ Pred as Unelarn");
+        .text("↓ Pred as Retrain");
 
       const svgL = d3
         .select(lineRef.current)
