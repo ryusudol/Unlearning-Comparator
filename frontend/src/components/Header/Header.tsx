@@ -41,7 +41,7 @@ export default function Header() {
               Unlearning Comparator
             </span>
           </div>
-          <div className="w-[188px] flex gap-6 relative top-[5px] text-[13px] mr-5">
+          <div className="w-[140px] flex gap-4 relative top-[5px] text-[13px] mr-5">
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-300">Dataset</span>
               <Select
