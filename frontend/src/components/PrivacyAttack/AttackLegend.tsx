@@ -83,16 +83,9 @@ export default function AttackLegend({
               MAX ATTACK SCORE
             </HoverCardTrigger>
             <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              A single threshold is applied to compare models fairly under the
-              <br />
-              same decision boundary. By optimizing their combined measure,
-              <br />
-              we see how each model's forgetting potential fares without
-              <br />
-              giving either one a customized advantage.
+              Maximizes a quality score from FPR and FNR
             </HoverCardContent>
           </HoverCard>
-
           <HoverCard openDelay={0} closeDelay={100}>
             <HoverCardTrigger
               onClick={onThresholdStrategyChange}
@@ -101,16 +94,9 @@ export default function AttackLegend({
               MAX SUCCESS RATE
             </HoverCardTrigger>
             <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              This approach centers on maximizing correct classification of
-              <br />
-              whether a sample came from the retrain or the unlearned model,
-              <br />
-              highlighting how easily an attacker can identify membership.
-              <br />
-              It underscores the model’s immediate privacy risk.
+              Targets the highest overall attack accuracy
             </HoverCardContent>
           </HoverCard>
-
           <HoverCard openDelay={0} closeDelay={100}>
             <HoverCardTrigger
               onClick={onThresholdStrategyChange}
@@ -119,13 +105,8 @@ export default function AttackLegend({
               COMMON THRESHOLD
             </HoverCardTrigger>
             <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              A single threshold is applied to compare models fairly under the
-              <br />
-              same decision boundary. By optimizing their combined measure,
-              <br />
-              we see how each model’s forgetting potential fares without giving
-              <br />
-              either one a customized advantage.
+              Uses a single threshold for both models, maximizing quality score
+              sum
             </HoverCardContent>
           </HoverCard>
         </div>
