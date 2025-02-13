@@ -30,6 +30,15 @@ export default function Core({ width, height }: ViewProps) {
     }
   };
 
+  let content = <Indicator about="ForgetClass" />;
+  if (forgetClassExist) {
+    if (isEmbeddingMode) {
+      content = <Embeddings height={HEIGHT} />;
+    } else {
+      content = <PrivacyAttack height={HEIGHT} />;
+    }
+  }
+
   return (
     <View width={width} height={height} className="border-l-0">
       <div className="flex justify-between items-center">
@@ -64,20 +73,11 @@ export default function Core({ width, height }: ViewProps) {
           />
         </div>
       </div>
-      {forgetClassExist ? (
-        isEmbeddingMode ? (
-          <Embeddings height={HEIGHT} />
-        ) : (
-          <PrivacyAttack height={HEIGHT} />
-        )
-      ) : (
-        <Indicator about="ForgetClass" />
-      )}
+      {content}
     </View>
   );
 }
 
-// Components
 function UnderLine() {
   return (
     <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />

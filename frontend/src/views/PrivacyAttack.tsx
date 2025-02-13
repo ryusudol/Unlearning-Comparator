@@ -41,7 +41,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
   return (
     <View
       height={height}
-      className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none"
+      className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none relative"
     >
       <AttackLegend
         onMetricChange={handleMetricChange}

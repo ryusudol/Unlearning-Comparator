@@ -28,9 +28,9 @@ export default function AttackLegend({
   onThresholdStrategyChange,
 }: AttackLegendProps) {
   return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
-      <div className="flex items-center mr-4 relative bottom-[1px]">
-        <span className="font-medium mr-2.5">Metric</span>
+    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
+      <div className="flex items-center mr-6 relative bottom-[1px]">
+        <span className="font-medium mr-3">Metric</span>
         <RadioGroup
           className="flex"
           defaultValue={ENTROPY}
@@ -51,7 +51,7 @@ export default function AttackLegend({
         </RadioGroup>
       </div>
       <div className="flex items-center relative bottom-[1px]">
-        <span className="font-medium mr-2.5">Threshold Settings</span>
+        <span className="font-medium mr-3">Threshold Settings</span>
         <RadioGroup
           className="flex"
           defaultValue={MEMBERS_ABOVE}
@@ -72,13 +72,13 @@ export default function AttackLegend({
         </RadioGroup>
         <Separator
           orientation="vertical"
-          className="w-[1.5px] h-3.5 mx-2.5 bg-black"
+          className="w-[1.5px] h-3.5 mx-3 bg-black"
         />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-3">
           <HoverCard openDelay={0} closeDelay={100}>
             <HoverCardTrigger
               onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-3 rounded-md cursor-pointer hover:bg-[#696969] transition"
             >
               MAX ATTACK SCORE
             </HoverCardTrigger>
@@ -96,7 +96,7 @@ export default function AttackLegend({
           <HoverCard openDelay={0} closeDelay={100}>
             <HoverCardTrigger
               onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-3 rounded-md cursor-pointer hover:bg-[#696969] transition"
             >
               MAX SUCCESS RATE
             </HoverCardTrigger>
@@ -114,7 +114,7 @@ export default function AttackLegend({
           <HoverCard openDelay={0} closeDelay={100}>
             <HoverCardTrigger
               onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-3 rounded-md cursor-pointer hover:bg-[#696969] transition"
             >
               COMMON THRESHOLD
             </HoverCardTrigger>
