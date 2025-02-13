@@ -436,6 +436,23 @@ export default function ButterflyPlot({
         .attr("x2", innerW / 2)
         .attr("y1", 0)
         .attr("y2", 0);
+      threshGroupB
+        .append("text")
+        .attr("x", -195)
+        .attr("y", -4)
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("fill", "black")
+        .text("↑ Pred as Retrain");
+      threshGroupB
+        .append("text")
+        .attr("x", -195)
+        .attr("y", 10)
+        .attr("text-anchor", "start")
+        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("fill", "black")
+        .attr("opacity", 0.5)
+        .text("↓ Pred as Unelarn");
 
       const svgL = d3
         .select(lineRef.current)
