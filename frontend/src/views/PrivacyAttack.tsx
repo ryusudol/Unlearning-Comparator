@@ -11,9 +11,12 @@ export const CONFIDENCE = "confidence";
 export const MEMBERS_ABOVE = "Members Above";
 export const MEMBERS_BELOW = "Members Below";
 
+export type ThresholdSetting = "Members Above" | "Members Below";
+
 export default function PrivacyAttack({ height }: { height: number }) {
   const [metric, setMetric] = useState(ENTROPY);
-  const [thresholdSetting, setThresholdSetting] = useState(MEMBERS_ABOVE);
+  const [thresholdSetting, setThresholdSetting] =
+    useState<ThresholdSetting>(MEMBERS_ABOVE);
   const [thresholdStrategy, setThresholdStrategy] = useState(
     THRESHOLD_STRATEGIES[0].strategy
   );
@@ -23,7 +26,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
     setMetric(metric);
   };
 
-  const handleThresholdSettingChange = (threshold: string) => {
+  const handleThresholdSettingChange = (threshold: ThresholdSetting) => {
     setThresholdSetting(threshold);
     setStrategyClick((prev) => prev + 1);
   };
@@ -47,6 +50,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       />
       <AttackAnalytics
         mode="Baseline"
+        thresholdSetting={thresholdSetting}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
       />
@@ -56,6 +60,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       />
       <AttackAnalytics
         mode="Comparison"
+        thresholdSetting={thresholdSetting}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
       />
