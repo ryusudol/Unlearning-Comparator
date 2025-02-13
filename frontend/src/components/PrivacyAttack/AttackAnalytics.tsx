@@ -9,13 +9,13 @@ import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 interface Props {
   mode: "Baseline" | "Comparison";
   thresholdStrategy: string;
-  strategyClick: number;
+  strategyCount: number;
 }
 
 export default function AttackAnalytics({
   mode,
   thresholdStrategy,
-  strategyClick,
+  strategyCount,
 }: Props) {
   const [threshold, setThreshold] = useState<number>(1.25);
   const [attackScore, setAttackScore] = useState<number>(0);
@@ -40,7 +40,7 @@ export default function AttackAnalytics({
 
   useEffect(() => {
     setUserModified(false);
-  }, [thresholdStrategy, strategyClick]);
+  }, [thresholdStrategy, strategyCount]);
 
   useEffect(() => {
     if (data && !userModified) {
