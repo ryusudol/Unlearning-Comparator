@@ -252,13 +252,13 @@ export default function ButterflyPlot({
       xAxisB
         .append("text")
         .attr("class", "axis-label")
-        .attr("x", 0)
+        .attr("x", 1.5)
         .attr("y", 15)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")
         .attr("text-anchor", "middle")
-        .text("Count");
+        .text("← Retrain Samples | Unlearn Samples →");
       xAxisB
         .selectAll(".tick")
         .append("line")
