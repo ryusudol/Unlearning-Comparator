@@ -11,7 +11,7 @@ import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { MEMBERS_ABOVE } from "../../views/PrivacyAttack";
+import { ABOVE_UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { Data } from "./AttackAnalytics";
 
 const CONFIG = {
@@ -49,6 +49,7 @@ type EntropyData = { entropy: number };
 
 interface Props {
   mode: "Baseline" | "Comparison";
+  metric: Metric;
   thresholdValue: number;
   thresholdSetting: string;
   data: Data;
@@ -58,6 +59,7 @@ interface Props {
 
 export default function ButterflyPlot({
   mode,
+  metric,
   thresholdValue,
   thresholdSetting,
   data,
@@ -73,7 +75,7 @@ export default function ButterflyPlot({
   const attackDataRef = useRef<AttackData[]>([]);
 
   const retrainJson = data?.retrainJson;
-  const ga3Json = data?.ga3Json;
+  const ga3Json = data?.unlearnJson;
   const attackData = data?.attackData;
   const isBaseline = mode === "Baseline";
 
@@ -277,7 +279,7 @@ export default function ButterflyPlot({
         .attr("transform", `translate(${-innerW / 2}, 0)`)
         .call(yAxisB);
       gB.append("text")
-        .attr("class", "axis-label")
+        .attr("class", "y-axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerH / 2)
         .attr("y", -222)
@@ -443,7 +445,7 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
-        .text("↑ Pred as Retrain");
+        .text("↑ Pred as Unlearn");
       threshGroupB
         .append("text")
         .attr("x", -195)
@@ -452,7 +454,7 @@ export default function ButterflyPlot({
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
         .attr("opacity", 0.5)
-        .text("↓ Pred as Unelarn");
+        .text("↓ Pred as Retrain");
 
       const svgL = d3
         .select(lineRef.current)
@@ -648,7 +650,7 @@ export default function ButterflyPlot({
 
       const lineChartLegendGroup = gL
         .append("g")
-        .attr("transform", `translate(${wL - 20}, 4)`);
+        .attr("transform", `translate(${wL - 10}, 4)`);
       lineChartLegendGroup
         .append("rect")
         .attr("x", -98)
@@ -665,7 +667,7 @@ export default function ButterflyPlot({
         const yPos = 8 + i * 10;
         const legendItemGroup = lineChartLegendGroup
           .append("g")
-          .attr("transform", `translate(-90, ${yPos})`);
+          .attr("transform", `translate(-91, ${yPos})`);
         legendItemGroup
           .append("line")
           .attr("x1", 0)
@@ -812,6 +814,10 @@ export default function ButterflyPlot({
 
       chartInitialized.current = true;
     } else {
+      if (attackData) {
+        attackDataRef.current = attackData;
+      }
+
       const svgB = d3.select(butterflyRef.current);
       const gB = svgB.select<SVGGElement>("g");
       const innerH =
@@ -825,6 +831,7 @@ export default function ButterflyPlot({
         `translate(0, ${yScaleB(thresholdValue)})`
       );
 
+      // line chart
       const svgL = d3.select(lineRef.current);
       const gL = svgL.select<SVGGElement>("g");
       const wL =
@@ -835,6 +842,34 @@ export default function ButterflyPlot({
         CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
       const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
+
+      const lineAttack = d3
+        .line<AttackData>()
+        .x((d) => lineXScale(d.attack_score))
+        .y((d) => lineYScale(d.threshold));
+      const lineFpr = d3
+        .line<AttackData>()
+        .x((d) => lineXScale(d.fpr))
+        .y((d) => lineYScale(d.threshold));
+      const lineFnr = d3
+        .line<AttackData>()
+        .x((d) => lineXScale(d.fnr))
+        .y((d) => lineYScale(d.threshold));
+
+      const safeAttackData = attackData ?? [];
+      gL.select(".line-attack-above").attr(
+        "d",
+        lineAttack(safeAttackData) || ""
+      );
+      gL.select(".line-attack-below").attr(
+        "d",
+        lineAttack(safeAttackData) || ""
+      );
+      gL.select(".line-fpr-above").attr("d", lineFpr(safeAttackData) || "");
+      gL.select(".line-fpr-below").attr("d", lineFpr(safeAttackData) || "");
+      gL.select(".line-fnr-above").attr("d", lineFnr(safeAttackData) || "");
+      gL.select(".line-fnr-below").attr("d", lineFnr(safeAttackData) || "");
+
       gL.select(".threshold-group").attr(
         "transform",
         `translate(0, ${lineYScale(thresholdValue)})`
@@ -982,6 +1017,9 @@ export default function ButterflyPlot({
           .attr("stroke", "black")
           .attr("stroke-width", 1);
       });
+
+      const newLabel = metric === "entropy" ? "Entropy" : "Logit Confidence";
+      svgB.select("text.y-axis-label").text(newLabel);
     }
   }, [
     attackData,
@@ -992,11 +1030,12 @@ export default function ButterflyPlot({
     retrainJson,
     setThresholdValue,
     thresholdValue,
+    metric,
   ]);
 
   useEffect(() => {
     const thresholdStroke = "#000000";
-    const strokeOpacity = thresholdSetting === MEMBERS_ABOVE ? 1 : 0.3;
+    const strokeOpacity = thresholdSetting === ABOVE_UNLEARN ? 1 : 0.3;
 
     d3.select(butterflyRef.current)
       .selectAll(".threshold-line")
