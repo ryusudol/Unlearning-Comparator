@@ -10,7 +10,7 @@ import { ViewProps } from "../types/common";
 import {
   SettingsIcon,
   ArrowDownIcon,
-  ArrowRightIcon,
+  ArrowUpIcon,
 } from "../components/UI/icons";
 
 export default function Experiments({ width, height }: ViewProps) {
@@ -40,9 +40,9 @@ export default function Experiments({ width, height }: ViewProps) {
             onClick={handleExpandClick}
           >
             {isExpanded ? (
-              <ArrowDownIcon className="scale-[115%]" />
+              <ArrowUpIcon className="scale-[115%]" />
             ) : (
-              <ArrowRightIcon className="scale-[115%]" />
+              <ArrowDownIcon className="scale-[115%]" />
             )}
           </div>
         </div>
