@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { FileText } from "lucide-react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
 import { LogoIcon, GithubIcon } from "../UI/icons";
@@ -84,10 +85,13 @@ export default function Header() {
           <ForgetClassTabs />
         </div>
       </div>
-      <GithubIcon
-        onClick={handleGithubIconClick}
-        className="w-7 h-7 cursor-pointer"
-      />
+      <div className="flex items-center gap-3">
+        <FileText className="w-7 h-7 cursor-pointer" />
+        <GithubIcon
+          onClick={handleGithubIconClick}
+          className="w-7 h-7 cursor-pointer"
+        />
+      </div>
     </div>
   );
 }
