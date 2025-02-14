@@ -1,111 +1,39 @@
-import { useState, useEffect, useContext, useCallback, useRef } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Clock } from "lucide-react";
 
-import {
-  fetchUnlearningStatus,
-  cancelUnlearning,
-} from "../../utils/api/requests";
-import {
-  getCurrentProgress,
-  getCompletedSteps,
-} from "../../utils/data/running-status-context";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { ExperimentsContext } from "../../store/experiments-context";
 import { RunningStatusContext } from "../../store/running-status-context";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { fetchDataFile } from "../../utils/api/unlearning";
+import { RunningIndexContext } from "../../store/running-index-context";
+import { useForgetClass } from "../../hooks/useForgetClass";
 import { Separator } from "../../components/UI/separator";
 
 export default function Timer() {
-  const { addExperiment } = useContext(ExperimentsContext);
-  const { saveComparison } = useContext(BaselineComparisonContext);
-  const { status, isRunning, updateIsRunning, updateStatus, updateActiveStep } =
-    useContext(RunningStatusContext);
+  const { runningIndex } = useContext(RunningIndexContext);
+  const { statuses, isRunning } = useContext(RunningStatusContext);
 
   const { forgetClassNumber } = useForgetClass();
 
   const [runningTime, setRunningTime] = useState(0);
 
-  const runningTimeRef = useRef(runningTime);
-
   useEffect(() => {
-    runningTimeRef.current = runningTime;
-  }, [runningTime]);
-
-  const checkStatus = useCallback(async () => {
-    try {
-      const unlearningStatus = await fetchUnlearningStatus();
-
-      const progress = getCurrentProgress(unlearningStatus);
-      const completedSteps: number[] = getCompletedSteps(
-        progress,
-        unlearningStatus
-      );
-
-      updateStatus({
-        status: unlearningStatus,
-        forgetClass: forgetClassNumber,
-        progress,
-        elapsedTime: runningTimeRef.current,
-        completedSteps,
-      });
-
-      if (progress.includes("Evaluating")) {
-        updateActiveStep(2);
-      } else if (progress.includes("UMAP") || progress.includes("CKA")) {
-        updateActiveStep(3);
-      }
-
-      if (!unlearningStatus.is_unlearning) {
-        updateIsRunning(false);
-        updateActiveStep(0);
-
-        try {
-          const newData = await fetchDataFile(
-            forgetClassNumber,
-            unlearningStatus.recent_id as string
-          );
-          addExperiment(newData);
-          saveComparison(newData.id);
-        } catch (error) {
-          console.error("Failed to fetch data file:", error);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch unlearning status:", error);
-      updateIsRunning(false);
-      await cancelUnlearning();
-    }
-  }, [
-    addExperiment,
-    forgetClassNumber,
-    saveComparison,
-    updateActiveStep,
-    updateIsRunning,
-    updateStatus,
-  ]);
-
-  useEffect(() => {
-    let statusIntervalId: ReturnType<typeof setInterval> | null = null;
     let timerIntervalId: ReturnType<typeof setInterval> | null = null;
+    let startTime: number;
 
     if (isRunning) {
+      startTime = Date.now();
       setRunningTime(0);
-      statusIntervalId = setInterval(checkStatus, 1000);
+
       timerIntervalId = setInterval(() => {
-        setRunningTime((prev) => prev + 0.1);
+        const elapsed = (Date.now() - startTime) / 1000;
+        setRunningTime(elapsed);
       }, 100);
     }
 
     return () => {
-      if (statusIntervalId) {
-        clearInterval(statusIntervalId);
-      }
       if (timerIntervalId) {
         clearInterval(timerIntervalId);
       }
     };
-  }, [checkStatus, isRunning]);
+  }, [isRunning]);
 
   return (
     <>
@@ -116,7 +44,9 @@ export default function Timer() {
           <span className="text-sm">
             {isRunning
               ? runningTime.toFixed(1)
-              : status[forgetClassNumber].elapsed_time.toFixed(1)}
+              : statuses[forgetClassNumber][runningIndex].elapsed_time.toFixed(
+                  1
+                )}
             s
           </span>
         </div>

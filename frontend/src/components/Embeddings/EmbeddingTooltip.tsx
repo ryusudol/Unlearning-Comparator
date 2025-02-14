@@ -17,7 +17,7 @@ const CONFIG = {
   LOW_OPACITY: 0.6,
   HIGH_OPACITY: 1,
   TICK_PADDING: 5,
-  BAR_HEIGHT: 8,
+  BAR_HEIGHT: 9,
   BAR_GAP: 0.5,
   BAR_STROKE_WIDTH: 1,
   SELECT_CHART_FONT_SIZE: "9px",
@@ -31,7 +31,7 @@ const CONFIG = {
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
   ROBOTO_CONDENSED: "Roboto Condensed",
-  MARGIN: { top: 13, right: 22, bottom: 28, left: 66 },
+  MARGIN: { top: 13, right: 22, bottom: 24, left: 66 },
 } as const;
 
 interface Props {
@@ -252,11 +252,7 @@ export default React.memo(function EmbeddingTooltip({
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
-        const y =
-          (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) +
-          CONFIG.BAR_HEIGHT +
-          CONFIG.BAR_GAP +
-          0.5;
+        const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -366,7 +362,7 @@ export default React.memo(function EmbeddingTooltip({
       </div>
       <div>
         <svg ref={svgRef} className="w-full" />
-        <p className="text-xs absolute bottom-1 right-[calc(26%)] translate-x-1/2">
+        <p className="text-xs absolute bottom-0.5 right-[calc(26%)] translate-x-1/2">
           Confidence Score
         </p>
       </div>

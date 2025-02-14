@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
+import MethodFilterHeader from "./MethodFilterHeader";
 import {
   HoverCard,
   HoverCardContent,
@@ -24,21 +25,21 @@ function getValueToDisplay(value: unknown) {
 }
 
 export const COLUMN_WIDTHS = {
-  id: 36,
+  id: 32,
   phase: 78,
-  init: 42,
+  init: 38,
   method: 90,
   epochs: 64,
-  BS: 42,
-  LR: 46,
+  BS: 44,
+  LR: 60,
   UA: 60,
   RA: 60,
   TUA: 60,
   TRA: 60,
   RTE: 60,
-  FQ: 60,
+  FQS: 60,
   baseline: 60,
-  comparison: 60,
+  comparison: 52,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
@@ -77,7 +78,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "method",
-    header: "Method",
+    header: ({ column }) => <MethodFilterHeader column={column} />,
+    filterFn: (row, columnId, filterValue) => {
+      const rowValue = row.getValue(columnId);
+      if (filterValue === "all") return true;
+      return String(rowValue) === filterValue;
+    },
     cell: ({ row }) => {
       const method = row.getValue("method");
       const value = getValueToDisplay(method);
@@ -88,7 +94,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     accessorKey: "epochs",
     header: ({ column }) => (
       <Button
-        className="w-full px-0 h-[34px]"
+        className="w-full px-0 h-[34px] justify-start"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -108,7 +114,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
-            className="w-full px-0 h-[34px]"
+            className="w-full px-0 h-[34px] justify-start"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -133,7 +139,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
           <Button
-            className="w-full px-0 h-[34px]"
+            className="w-full px-0 h-[34px] justify-start"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -173,10 +179,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const ua = row.getValue("UA");
-      const value = getValueToDisplay(ua) as number;
+      const value = getValueToDisplay(ua);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number"
+            ? value === 0 || value === 1
+              ? value
+              : value.toFixed(3)
+            : value}
         </div>
       );
     },
@@ -202,10 +212,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const ra = row.getValue("RA");
-      const value = getValueToDisplay(ra) as number;
+      const value = getValueToDisplay(ra);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number"
+            ? value === 0 || value === 1
+              ? value
+              : value.toFixed(3)
+            : value}
         </div>
       );
     },
@@ -231,10 +245,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const tua = row.getValue("TUA");
-      const value = getValueToDisplay(tua) as number;
+      const value = getValueToDisplay(tua);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number"
+            ? value === 0 || value === 1
+              ? value
+              : value.toFixed(3)
+            : value}
         </div>
       );
     },
@@ -260,10 +278,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
-      const value = getValueToDisplay(tra) as number;
+      const value = getValueToDisplay(tra);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number"
+            ? value === 0 || value === 1
+              ? value
+              : value.toFixed(3)
+            : value}
         </div>
       );
     },
@@ -294,7 +316,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    id: "FQ",
+    id: "FQS",
     header: ({ column }) => (
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
@@ -303,12 +325,12 @@ export const columns: ColumnDef<ExperimentData>[] = [
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            FQ
+            FQS
             <ArrowUpDown className="w-4" />
           </Button>
         </HoverCardTrigger>
         <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Forgetting Quality
+          Forgetting Quality Score
         </HoverCardContent>
       </HoverCard>
     ),

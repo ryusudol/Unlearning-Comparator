@@ -4,5 +4,5 @@ export const VIEW_MODES: ViewModeType[] = [
   "All Instances",
   "Forgetting Target",
   "Forgetting Failed",
-  "Misclassification",
+  "Over-Forgotten",
 ];

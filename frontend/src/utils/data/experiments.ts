@@ -1,8 +1,7 @@
 import * as d3 from "d3";
 
-import { Dist } from "../../types/data";
-import { ExperimentData } from "../../types/data";
-import { Experiments } from "../../types/experiments-context";
+import { Dist, Point } from "../../types/data";
+import { Experiment, Experiments } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
 type Values = {
@@ -11,7 +10,7 @@ type Values = {
   TUA: number[];
   TRA: number[];
   RTE: number[];
-  FQ: number[];
+  FQS: number[];
 };
 
 type BubbleChartData = {
@@ -31,20 +30,19 @@ const baseColors = {
   TUA: RED,
   TRA: GREEN,
   RTE: RED,
-  FQ: RED,
+  FQS: RED,
 };
 
-// TODO: MIA에 있는 RTE 모두 MIA로 변경할 것
 export function calculatePerformanceMetrics(data: Experiments) {
   const values: Values = {
-    UA: Object.values(data).map((d) => d.UA),
-    RA: Object.values(data).map((d) => d.RA),
-    TUA: Object.values(data).map((d) => d.TUA),
-    TRA: Object.values(data).map((d) => d.TRA),
+    UA: Object.values(data).map((d) => Number(d.UA)),
+    RA: Object.values(data).map((d) => Number(d.RA)),
+    TUA: Object.values(data).map((d) => Number(d.TUA)),
+    TRA: Object.values(data).map((d) => Number(d.TRA)),
     RTE: Object.values(data)
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),
-    FQ: Object.values(data)
+    FQS: Object.values(data)
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),
   };
@@ -55,7 +53,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.min(values.TUA.map((v) => Number(v)))!,
     TRA: d3.min(values.TRA)!,
     RTE: d3.min(values.RTE)!,
-    FQ: d3.min(values.RTE)!,
+    FQS: d3.min(values.RTE)!,
   };
 
   const maxs = {
@@ -64,7 +62,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.max(values.TUA.map((v) => Number(v)))!,
     TRA: d3.max(values.TRA)!,
     RTE: d3.max(values.RTE)!,
-    FQ: d3.max(values.RTE)!,
+    FQS: d3.max(values.RTE)!,
   };
 
   return {
@@ -103,7 +101,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
         .range([BRIGHTEST, DARKEST]),
       baseColor: baseColors.RTE,
     },
-    FQ: {
+    FQS: {
       colorScale: d3
         .scaleLinear()
         .domain([mins.RTE, maxs.RTE])
@@ -113,9 +111,9 @@ export function calculatePerformanceMetrics(data: Experiments) {
   };
 }
 
-export function extractSelectedData(data: ExperimentData | undefined) {
-  return data
-    ? data.points.map((point) => [
+export function processPointsData(points: Point[]) {
+  return points
+    ? points.map((point) => [
         point[4], // x coordinate
         point[5], // y coordinate
         point[0], // ground truth
@@ -126,10 +124,7 @@ export function extractSelectedData(data: ExperimentData | undefined) {
     : [];
 }
 
-export function extractBubbleChartData(
-  datasetMode: string,
-  data: ExperimentData
-) {
+export function extractBubbleChartData(datasetMode: string, data: Experiment) {
   let bubbleChartData: {
     label_dist: Dist;
     conf_dist: Dist;

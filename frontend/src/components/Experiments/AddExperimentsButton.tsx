@@ -12,7 +12,7 @@ import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../store/running-status-context";
 
-export default function AddExperimentButton() {
+export default function AddExperimentsButton() {
   const { isRunning } = useContext(RunningStatusContext);
 
   const [open, setOpen] = useState(false);
@@ -43,13 +43,13 @@ export default function AddExperimentButton() {
             className="w-2.5 h-2.5 mr-1.5"
           />
           <span className={isRunning ? "text-gray-300" : ""}>
-            Add Experiment
+            Add Experiments
           </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[400px] p-4">
-        <DialogHeader className="">
-          <DialogTitle>Experiment</DialogTitle>
+      <DialogContent className="w-fit min-w-[340px] p-4">
+        <DialogHeader>
+          <DialogTitle>Experiments</DialogTitle>
         </DialogHeader>
         <UnlearningConfiguration />
       </DialogContent>

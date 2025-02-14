@@ -28,6 +28,8 @@ export interface UnlearningStatus {
   estimated_time_remaining: number;
   elapsed_time: number;
   completed_steps: number[];
+  learning_rate?: number;
+  batch_size?: number;
 }
 
 // others

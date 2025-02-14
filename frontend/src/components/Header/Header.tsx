@@ -2,8 +2,7 @@ import { useContext } from "react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
 import { LogoIcon, GithubIcon } from "../UI/icons";
-import { DatasetContext } from "../../store/dataset-context";
-import { NeuralNetworkModelContext } from "../../store/neural-network-model-context";
+import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
   Select,
@@ -14,10 +13,8 @@ import {
 } from "../UI/select";
 
 export default function Header() {
-  const { dataset, saveDataset } = useContext(DatasetContext);
-  const { neuralNetworkModel, saveNeuralNetworkModel } = useContext(
-    NeuralNetworkModelContext
-  );
+  const { dataset, saveDataset, neuralNetworkModel, saveNeuralNetworkModel } =
+    useContext(DatasetAndModelContext);
 
   const handleGithubIconClick = () => {
     window.open(
@@ -38,11 +35,51 @@ export default function Header() {
     <div className="w-[1805px] text-white bg-black h-12 flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
-          <div className="flex items-center">
-            <LogoIcon className="w-7 h-7" />
-            <span className="text-2xl font-semibold ml-2 mr-10">
-              UnlearningComparator
+          <div className="flex items-center gap-2 mr-8">
+            <LogoIcon className="scale-75" />
+            <span className="text-2xl font-semibold">
+              Unlearning Comparator
             </span>
+          </div>
+          <div className="w-[188px] flex gap-6 relative top-[5px] text-[13px] mr-5">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-gray-300">Dataset</span>
+              <Select
+                defaultValue={dataset}
+                onValueChange={handleDatasetChange}
+                name="dataset"
+              >
+                <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
+                  <SelectValue placeholder={dataset} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DATASETS.map((dataset, idx) => (
+                    <SelectItem key={idx} value={dataset}>
+                      {dataset}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-gray-300">Model</span>
+              <Select
+                defaultValue={neuralNetworkModel}
+                onValueChange={handleNeuralNetworkModelChange}
+                name="neuralNetworkModel"
+              >
+                <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
+                  <SelectValue placeholder={neuralNetworkModel} />
+                </SelectTrigger>
+                <SelectContent>
+                  {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
+                    <SelectItem key={idx} value={neuralNetworkModel}>
+                      {neuralNetworkModel}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <ForgetClassTabs />
         </div>
@@ -51,46 +88,6 @@ export default function Header() {
         onClick={handleGithubIconClick}
         className="w-7 h-7 cursor-pointer"
       />
-      <div className="flex absolute left-[1312px] top-4 text-[13px]">
-        <div className="flex flex-col mr-10">
-          <span className="text-[10px] text-gray-300">Dataset</span>
-          <Select
-            defaultValue={dataset}
-            onValueChange={handleDatasetChange}
-            name="dataset"
-          >
-            <SelectTrigger className="h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
-              <SelectValue placeholder={dataset} />
-            </SelectTrigger>
-            <SelectContent>
-              {DATASETS.map((dataset, idx) => (
-                <SelectItem key={idx} value={dataset}>
-                  {dataset}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] text-gray-300">Model</span>
-          <Select
-            defaultValue={neuralNetworkModel}
-            onValueChange={handleNeuralNetworkModelChange}
-            name="neuralNetworkModel"
-          >
-            <SelectTrigger className="h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
-              <SelectValue placeholder={neuralNetworkModel} />
-            </SelectTrigger>
-            <SelectContent>
-              {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
-                <SelectItem key={idx} value={neuralNetworkModel}>
-                  {neuralNetworkModel}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "../UI/input";
 import { PlusIcon } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
-import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "./Unlearning";
+import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
 
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "list"> {
@@ -15,15 +15,10 @@ interface Props
 
 const CONFIG = {
   EPOCHS_MIN: 1,
-  EPOCHS_MAX: 20,
-  LEARNING_RATE_MIN: 0.00001,
-  LEARNING_RATE_MAX: 0.1,
+  LEARNING_RATE_MIN: 0,
+  LEARNING_RATE_MAX: 1,
   BATCH_SIZE_MIN: 1,
-  BATCH_SIZE_MAX: 512,
 } as const;
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(Math.max(value, min), max);
 
 export default function HyperparameterInput({
   title,
@@ -40,12 +35,12 @@ export default function HyperparameterInput({
   }, [initialValue]);
 
   useEffect(() => {
-    if (paramList.length === 5) {
+    if (paramList.length === 5 || value.trim() === "") {
       setIsDisabled(true);
     } else {
       setIsDisabled(false);
     }
-  }, [paramList.length]);
+  }, [paramList.length, value]);
 
   const processedTitle = title.replace(/\s+/g, "");
   const id = processedTitle.charAt(0).toLowerCase() + processedTitle.slice(1);
@@ -68,29 +63,21 @@ export default function HyperparameterInput({
 
     switch (id) {
       case EPOCHS: {
-        const clamped = clamp(
-          Number(newValue),
-          CONFIG.EPOCHS_MIN,
-          CONFIG.EPOCHS_MAX
-        );
-        setValue(String(clamped));
+        const validValue = Math.max(Number(newValue), CONFIG.EPOCHS_MIN);
+        setValue(String(validValue));
         break;
       }
       case BATCH_SIZE: {
-        const clamped = clamp(
-          Number(newValue),
-          CONFIG.BATCH_SIZE_MIN,
-          CONFIG.BATCH_SIZE_MAX
-        );
-        setValue(String(clamped));
+        const validValue = Math.max(Number(newValue), CONFIG.BATCH_SIZE_MIN);
+        setValue(String(validValue));
         break;
       }
       case LEARNING_RATE: {
         setValue(newValue);
         const numericValue = Number(newValue);
         if (
-          numericValue > CONFIG.LEARNING_RATE_MAX ||
-          numericValue < CONFIG.LEARNING_RATE_MIN
+          numericValue >= CONFIG.LEARNING_RATE_MAX ||
+          numericValue <= CONFIG.LEARNING_RATE_MIN
         ) {
           setIsDisabled(true);
         } else {
@@ -111,18 +98,18 @@ export default function HyperparameterInput({
   };
 
   return (
-    <div className="grid grid-cols-[80px,1fr,auto] gap-y-2">
+    <div className="grid grid-cols-[80px,1fr,auto] gap-x-2 gap-y-2 items-center">
       <span className="text-sm">{title}</span>
       <Input
         type="number"
         step={isIntegerInput ? "1" : "any"}
-        className="w-[194px] h-[25px] px-1.5 mx-2"
+        className="w-full h-[25px] px-1.5"
         value={value}
         onChange={handleValueChange}
         {...props}
       />
       <div
-        className={`flex justify-center items-center border rounded ml-1.5 w-[25px] h-[25px] ${
+        className={`flex justify-center items-center border rounded w-[25px] h-[25px] ${
           isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
         }`}
         onClick={handlePlusClick}

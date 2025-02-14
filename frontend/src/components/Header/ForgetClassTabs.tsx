@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 
 import { CIFAR_10_CLASSES } from "../../constants/common";
-import { Experiments } from "../../types/experiments-context";
+import { Experiment, Experiments } from "../../types/experiments-context";
 import { ForgetClassContext } from "../../store/forget-class-context";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
@@ -22,8 +22,17 @@ export default function ForgetClassTabs() {
     setIsExperimentsLoading(true);
     try {
       const allData: Experiments = await fetchAllExperimentsData(classIndex);
-      if ("detail" in allData) saveExperiments({});
-      else saveExperiments(allData);
+
+      if ("detail" in allData) {
+        saveExperiments({});
+      } else {
+        Object.values(allData).forEach((experiment: Experiment) => {
+          if (experiment && "points" in experiment) {
+            delete experiment.points;
+          }
+        });
+        saveExperiments(allData);
+      }
     } finally {
       setIsExperimentsLoading(false);
     }

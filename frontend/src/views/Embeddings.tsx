@@ -1,38 +1,89 @@
-import { useContext, useMemo, useRef, useCallback } from "react";
+import {
+  useContext,
+  useMemo,
+  useRef,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import View from "../components/View";
 import InformationButton from "../components/Embeddings/InformationButton";
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
 import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
+import { CircleIcon, FatMultiplicationSignIcon } from "../components/UI/icons";
 import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
-import { ExperimentsContext } from "../store/experiments-context";
-import { extractSelectedData } from "../utils/data/experiments";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { processPointsData } from "../utils/data/experiments";
+import { useForgetClass } from "../hooks/useForgetClass";
+import { fetchFileData } from "../utils/api/unlearning";
 import { Separator } from "../components/UI/separator";
+import { CIFAR_10_CLASSES } from "../constants/common";
+import { TABLEAU10 } from "../constants/colors";
+import { Point } from "../types/data";
 
 export default function Embeddings({ height }: { height: number }) {
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
+
+  const { forgetClassNumber } = useForgetClass();
+
+  const [baselinePoints, setBaselinePoints] = useState<Point[]>([]);
+  const [comparisonPoints, setComparisonPoints] = useState<Point[]>([]);
 
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
 
-  const extractedBaselineData = useMemo(
-    () => extractSelectedData(baselineExperiment),
-    [baselineExperiment]
+  useEffect(() => {
+    async function loadBaselineData() {
+      if (!baseline) return;
+      try {
+        const data = await fetchFileData(forgetClassNumber, baseline);
+        setBaselinePoints(data.points);
+      } catch (error) {
+        if (error instanceof Error) {
+          alert(`Failed to fetch an unlearned data file: ${error.message}`);
+        } else {
+          alert(
+            "An unknown error occurred while fetching an unlearned data file . . ."
+          );
+        }
+        setBaselinePoints([]);
+      }
+    }
+    loadBaselineData();
+  }, [baseline, forgetClassNumber]);
+
+  useEffect(() => {
+    async function loadComparisonData() {
+      if (!comparison) return;
+      try {
+        const data = await fetchFileData(forgetClassNumber, comparison);
+        setComparisonPoints(data.points);
+      } catch (error) {
+        console.error("Error fetching comparison file data:", error);
+        setComparisonPoints([]);
+      }
+    }
+    loadComparisonData();
+  }, [comparison, forgetClassNumber]);
+
+  const processedBaselinePoints = useMemo(
+    () => processPointsData(baselinePoints),
+    [baselinePoints]
   );
-  const extractedComparisonData = useMemo(
-    () => extractSelectedData(comparisonExperiment),
-    [comparisonExperiment]
+  const processedComparisonPoints = useMemo(
+    () => processPointsData(comparisonPoints),
+    [comparisonPoints]
   );
 
   const baselineDataMap = useMemo(() => {
-    return new Map(extractedBaselineData.map((d) => [d[4], d]));
-  }, [extractedBaselineData]);
+    return new Map(processedBaselinePoints.map((d) => [d[4], d]));
+  }, [processedBaselinePoints]);
   const comparisonDataMap = useMemo(() => {
-    return new Map(extractedComparisonData.map((d) => [d[4], d]));
-  }, [extractedComparisonData]);
+    return new Map(processedComparisonPoints.map((d) => [d[4], d]));
+  }, [processedComparisonPoints]);
 
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
@@ -96,12 +147,13 @@ export default function Embeddings({ height }: { height: number }) {
       height={height}
       className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none"
     >
+      <EmbeddingsLegend />
       <ConnectionLineWrapper positionRef={positionRef} />
       <InformationButton />
       <ScatterPlot
         mode="Baseline"
         height={height}
-        data={extractedBaselineData}
+        data={processedBaselinePoints}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={baselineRef}
@@ -110,11 +162,51 @@ export default function Embeddings({ height }: { height: number }) {
       <ScatterPlot
         mode="Comparison"
         height={height}
-        data={extractedComparisonData}
+        data={processedComparisonPoints}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={comparisonRef}
       />
     </View>
+  );
+}
+
+function EmbeddingsLegend() {
+  const { forgetClass } = useForgetClass();
+
+  return (
+    <div className="flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
+      <div className="flex items-center mr-4">
+        <span className="font-medium mr-2.5">Data Type</span>
+        <ul className="flex items-center gap-[9.2px]">
+          <li className="flex items-center">
+            <CircleIcon className="w-[9px] h-[9px] text-[#4f5562] mr-[3px]" />
+            <span>Remaining Data</span>
+          </li>
+          <li className="flex items-center">
+            <FatMultiplicationSignIcon className="text-[#4f5562] mr-[3px]" />
+            <span>Forgetting Target</span>
+          </li>
+        </ul>
+      </div>
+      <div className="flex items-center">
+        <span className="font-medium mr-2.5">Prediction</span>
+        <ul className="flex items-center gap-2">
+          {CIFAR_10_CLASSES.map((name, idx) => (
+            <li key={idx} className="flex items-center">
+              <div
+                style={{ backgroundColor: TABLEAU10[idx] }}
+                className="w-3.5 h-3.5 mr-[3px]"
+              />
+              <span>{forgetClass === idx ? name + " (X)" : name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <Separator
+        orientation="horizontal"
+        className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"
+      />
+    </div>
   );
 }

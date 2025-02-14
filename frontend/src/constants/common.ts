@@ -6,6 +6,9 @@ export const NEURAL_NETWORK_MODELS = ["ResNet18", "ViT16/Base"];
 export const TRAIN = "train";
 export const TEST = "test";
 
+export const BASELINE = "baseline";
+export const COMPARISON = "comparison";
+
 export const CIFAR_10_CLASSES = [
   "airplane",
   "automobile",

@@ -1,10 +1,10 @@
-import { ExperimentData } from "../../types/data";
+import { Experiment } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
 export const getCkaData = (
   dataset: string,
-  baselineExperiment: ExperimentData,
-  comparisonExperiment: ExperimentData
+  baselineExperiment: Experiment,
+  comparisonExperiment: Experiment
 ) => {
   const layers = baselineExperiment.cka.layers;
 

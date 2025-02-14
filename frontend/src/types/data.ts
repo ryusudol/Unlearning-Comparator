@@ -14,7 +14,7 @@ type CKA = {
   };
 };
 
-type Point = [
+export type Point = [
   number,
   number,
   number,
@@ -32,13 +32,13 @@ export type ExperimentData = {
   phase: string;
   init: string;
   method: string;
-  epochs: number;
-  BS: number;
-  LR: number;
-  UA: number;
-  RA: number;
-  TUA: number;
-  TRA: number;
+  epochs: number | string;
+  BS: number | string;
+  LR: number | string;
+  UA: number | string;
+  RA: number | string;
+  TUA: number | string;
+  TRA: number | string;
   RTE: number | string;
   accs: number[];
   label_dist: Dist;
