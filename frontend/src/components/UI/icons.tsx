@@ -749,7 +749,7 @@ export const FilterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const ArrowRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const ArrowUpIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
@@ -760,10 +760,10 @@ export const ArrowRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M8.71304 5.30711C8.99329 5.19103 9.31588 5.25519 9.53038 5.46969L15.5303 11.4697C15.8232 11.7626 15.8232 12.2375 15.5303 12.5304L9.53033 18.5304C9.31583 18.7449 8.99324 18.809 8.71299 18.6929C8.43273 18.5768 8.25 18.3034 8.25 18L8.25005 6.00002C8.25005 5.69667 8.43278 5.4232 8.71304 5.30711Z"
-      fill="currentColor"
+      d="M18 15L12 9L6 15"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeMiterlimit="16"
     />
   </svg>
 );
@@ -779,10 +779,12 @@ export const ArrowDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M5.99977 8.25005L17.9998 8.25C18.3031 8.25 18.5766 8.43273 18.6927 8.71298C18.8088 8.99324 18.7446 9.31583 18.5301 9.53033L12.5301 15.5303C12.2373 15.8232 11.7624 15.8232 11.4695 15.5303L5.46944 9.53038C5.25494 9.31588 5.19077 8.9933 5.30686 8.71304C5.42294 8.43278 5.69642 8.25005 5.99977 8.25005Z"
-      fill="currentColor"
+      d="M5.99977 9.00005L11.9998 15L17.9998 9"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeMiterlimit="16"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

@@ -8,17 +8,18 @@ import {
 import {
   ENTROPY,
   CONFIDENCE,
-  MEMBERS_ABOVE,
-  MEMBERS_BELOW,
-  ThresholdSetting,
+  ABOVE_UNLEARN,
+  ABOVE_RETRAIN,
+  Metric,
 } from "../../views/PrivacyAttack";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Label } from "..//UI/label";
 import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
-  onMetricChange: (val: string) => void;
-  onThresholdSettingChange: (val: ThresholdSetting) => void;
+  onMetricChange: (val: Metric) => void;
+  onThresholdSettingChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -28,106 +29,65 @@ export default function AttackLegend({
   onThresholdStrategyChange,
 }: AttackLegendProps) {
   return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
-      <div className="flex items-center mr-4 relative bottom-[1px]">
-        <span className="font-medium mr-2.5">Metric</span>
+    <div className="flex items-center gap-[22px] bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
+      <div className="flex items-center relative bottom-[1px]">
+        <span className="font-medium mr-2">Metric</span>
         <RadioGroup
           className="flex"
           defaultValue={ENTROPY}
           onValueChange={onMetricChange}
         >
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
             <RadioGroupItem value={ENTROPY} id={ENTROPY} />
             <Label className="text-sm" htmlFor={ENTROPY}>
-              Train
+              Entropy
             </Label>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
             <RadioGroupItem value={CONFIDENCE} id={CONFIDENCE} />
             <Label className="text-sm" htmlFor={CONFIDENCE}>
-              Test
+              Confidence
             </Label>
           </div>
         </RadioGroup>
       </div>
       <div className="flex items-center relative bottom-[1px]">
-        <span className="font-medium mr-2.5">Threshold Settings</span>
+        <span className="font-medium mr-2">Above Threshold</span>
         <RadioGroup
           className="flex"
-          defaultValue={MEMBERS_ABOVE}
+          defaultValue={ABOVE_UNLEARN}
           onValueChange={onThresholdSettingChange}
         >
-          <div className="flex items-center space-x-1">
-            <RadioGroupItem value={MEMBERS_ABOVE} id={MEMBERS_ABOVE} />
-            <Label className="text-sm" htmlFor={MEMBERS_ABOVE}>
-              {MEMBERS_ABOVE}
+          <div className="flex items-center space-x-0.5">
+            <RadioGroupItem value={ABOVE_UNLEARN} id={ABOVE_UNLEARN} />
+            <Label className="text-sm" htmlFor={ABOVE_UNLEARN}>
+              Unlearn
             </Label>
           </div>
-          <div className="flex items-center space-x-1">
-            <RadioGroupItem value={MEMBERS_BELOW} id={MEMBERS_BELOW} />
-            <Label className="text-sm" htmlFor={MEMBERS_BELOW}>
-              {MEMBERS_BELOW}
+          <div className="flex items-center space-x-0.5">
+            <RadioGroupItem value={ABOVE_RETRAIN} id={ABOVE_RETRAIN} />
+            <Label className="text-sm" htmlFor={ABOVE_RETRAIN}>
+              Retrain
             </Label>
           </div>
         </RadioGroup>
-        <Separator
-          orientation="vertical"
-          className="w-[1.5px] h-3.5 mx-2.5 bg-black"
-        />
+      </div>
+      <div className="flex items-center relative bottom-[1px]">
+        <span className="font-medium mr-2">Threshold Strategy</span>
         <div className="flex items-center gap-1.5">
-          <HoverCard openDelay={0} closeDelay={100}>
-            <HoverCardTrigger
-              onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
-            >
-              MAX ATTACK SCORE
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              A single threshold is applied to compare models fairly under the
-              <br />
-              same decision boundary. By optimizing their combined measure,
-              <br />
-              we see how each model's forgetting potential fares without
-              <br />
-              giving either one a customized advantage.
-            </HoverCardContent>
-          </HoverCard>
-
-          <HoverCard openDelay={0} closeDelay={100}>
-            <HoverCardTrigger
-              onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
-            >
-              MAX SUCCESS RATE
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              This approach centers on maximizing correct classification of
-              <br />
-              whether a sample came from the retrain or the unlearned model,
-              <br />
-              highlighting how easily an attacker can identify membership.
-              <br />
-              It underscores the model’s immediate privacy risk.
-            </HoverCardContent>
-          </HoverCard>
-
-          <HoverCard openDelay={0} closeDelay={100}>
-            <HoverCardTrigger
-              onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
-            >
-              COMMON THRESHOLD
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              A single threshold is applied to compare models fairly under the
-              <br />
-              same decision boundary. By optimizing their combined measure,
-              <br />
-              we see how each model’s forgetting potential fares without giving
-              <br />
-              either one a customized advantage.
-            </HoverCardContent>
-          </HoverCard>
+          {THRESHOLD_STRATEGIES.map((strategy) => (
+            <HoverCard openDelay={0} closeDelay={100}>
+              <HoverCardTrigger
+                onClick={onThresholdStrategyChange}
+                className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+              >
+                {strategy.strategy}
+              </HoverCardTrigger>
+              <HoverCardContent className="w-auto px-3 py-2" side="top">
+                {strategy.explanation}
+              </HoverCardContent>
+            </HoverCard>
+          ))}
         </div>
       </div>
       <Separator

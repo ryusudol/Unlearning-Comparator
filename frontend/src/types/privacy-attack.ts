@@ -26,7 +26,6 @@ export interface LineGraphLegendData {
 
 export interface ThresholdStrategy {
   strategy: string;
-  introduction: string;
   explanation: string;
 }
 
