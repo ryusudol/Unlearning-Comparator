@@ -9,7 +9,6 @@ backend/data/
 backend/.python-version
 backend/*.json
 backend/*.png
-frontend/
 paper/
 z_dist_exp/
 myenv/
