@@ -130,4 +130,4 @@ async def run_unlearning_FT(request, status, weights_path):
         return updated_status
     finally:
         status.cancel_requested = False
-        status.progress = "Idle"
+        status.progress = "Completed"

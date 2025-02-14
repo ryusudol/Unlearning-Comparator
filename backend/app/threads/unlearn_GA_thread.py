@@ -22,6 +22,7 @@ from app.config.settings import (
 	UMAP_DATASET,
 	UNLEARN_SEED
 )
+from app.utils.attack import process_attack_metrics
 
 class UnlearningGAThread(threading.Thread):
     def __init__(self,
@@ -87,10 +88,19 @@ class UnlearningGAThread(threading.Thread):
         self.status.total_epochs = self.request.epochs
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        targets = torch.tensor(dataset.targets)
+        class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
+        
+        samples_per_class = UMAP_DATA_SIZE // self.num_classes
         generator = torch.Generator()
+
         generator.manual_seed(UNLEARN_SEED)
-        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        selected_indices = []
+        for indices in class_indices:
+            perm = torch.randperm(len(indices), generator=generator)
+            selected_indices.extend(indices[perm[:samples_per_class]].tolist())
+        
+        umap_subset = torch.utils.data.Subset(dataset, selected_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
         )
@@ -157,7 +167,7 @@ class UnlearningGAThread(threading.Thread):
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.request.forget_class
+            # forget_class=self.request.forget_class
         )
         
         unlearn_accuracy = train_class_accuracies[self.request.forget_class]
@@ -191,7 +201,7 @@ class UnlearningGAThread(threading.Thread):
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.request.forget_class
+            # forget_class=self.request.forget_class
         )
 
         # Update test evaluation status for remain classes only
@@ -211,7 +221,6 @@ class UnlearningGAThread(threading.Thread):
         
         # UMAP and activation calculation
         self.status.progress = "Computing UMAP"
-        
         
         print("Computing layer activations")
         (
@@ -234,9 +243,18 @@ class UnlearningGAThread(threading.Thread):
             forget_class=self.request.forget_class,
             forget_labels=forget_labels
         )
-        print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
+        print(f"UMAP embedding computed in {time.time() - start_time:.3f}s")
+        
+        # Add attack metrics processing similar to custom_thread
+        print("Processing attack metrics on UMAP subset")
+        await process_attack_metrics(
+            model=self.model, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class
+        )
 
-         # CKA similarity calculation
+        # Compute CKA similarity
         self.status.progress = "Calculating CKA Similarity"
         print("Calculating CKA similarity")
         cka_results = await calculate_cka_similarity(
@@ -253,8 +271,8 @@ class UnlearningGAThread(threading.Thread):
         self.status.progress = "Preparing Results"
         detailed_results = []
         for i in range(len(umap_subset)):
-            original_index = umap_subset_indices[i].item()
-            ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
+            original_index = selected_indices[i]
+            ground_truth = umap_subset.dataset.targets[original_index]
             is_forget = (ground_truth == self.request.forget_class)
             detailed_results.append([
                 int(ground_truth),                             # gt
@@ -263,7 +281,7 @@ class UnlearningGAThread(threading.Thread):
                 1 if is_forget else 0,                         # forget as binary
                 round(float(umap_embedding[i][0]), 2),         # x coordinate
                 round(float(umap_embedding[i][1]), 2),         # y coordinate
-                compress_prob_array(probs[i].tolist()),                 # compressed probabilities
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
             ])
 
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
