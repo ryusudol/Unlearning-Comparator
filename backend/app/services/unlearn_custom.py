@@ -76,4 +76,5 @@ async def run_unlearning_custom(forget_class, status, weights_path):
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
+        status.progress = "Completed"
         os.remove(weights_path)

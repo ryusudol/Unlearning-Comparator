@@ -111,4 +111,4 @@ async def run_unlearning_GA(request, status, weights_path):
         return updated_status
     finally:
         status.cancel_requested = False
-        status.progress = "Idle"
+        status.progress = "Completed"
