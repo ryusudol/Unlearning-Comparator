@@ -8,17 +8,18 @@ import {
 import {
   ENTROPY,
   CONFIDENCE,
-  MEMBERS_ABOVE,
-  MEMBERS_BELOW,
-  ThresholdSetting,
+  ABOVE_UNLEARN,
+  ABOVE_RETRAIN,
+  Metric,
 } from "../../views/PrivacyAttack";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Label } from "..//UI/label";
 import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
-  onMetricChange: (val: string) => void;
-  onThresholdSettingChange: (val: ThresholdSetting) => void;
+  onMetricChange: (val: Metric) => void;
+  onThresholdSettingChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -28,8 +29,8 @@ export default function AttackLegend({
   onThresholdStrategyChange,
 }: AttackLegendProps) {
   return (
-    <div className="flex items-center border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
-      <div className="flex items-center mr-6 relative bottom-[1px]">
+    <div className="flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
+      <div className="flex items-center mr-4 relative bottom-[1px]">
         <span className="font-medium mr-3">Metric</span>
         <RadioGroup
           className="flex"
@@ -39,13 +40,13 @@ export default function AttackLegend({
           <div className="flex items-center space-x-1">
             <RadioGroupItem value={ENTROPY} id={ENTROPY} />
             <Label className="text-sm" htmlFor={ENTROPY}>
-              Train
+              Entropy
             </Label>
           </div>
           <div className="flex items-center space-x-1">
             <RadioGroupItem value={CONFIDENCE} id={CONFIDENCE} />
             <Label className="text-sm" htmlFor={CONFIDENCE}>
-              Test
+              Confidence
             </Label>
           </div>
         </RadioGroup>
@@ -54,61 +55,40 @@ export default function AttackLegend({
         <span className="font-medium mr-3">Threshold Settings</span>
         <RadioGroup
           className="flex"
-          defaultValue={MEMBERS_ABOVE}
+          defaultValue={ABOVE_UNLEARN}
           onValueChange={onThresholdSettingChange}
         >
           <div className="flex items-center space-x-1">
-            <RadioGroupItem value={MEMBERS_ABOVE} id={MEMBERS_ABOVE} />
-            <Label className="text-sm" htmlFor={MEMBERS_ABOVE}>
-              {MEMBERS_ABOVE}
+            <RadioGroupItem value={ABOVE_UNLEARN} id={ABOVE_UNLEARN} />
+            <Label className="text-sm" htmlFor={ABOVE_UNLEARN}>
+              ≥ thr ⇒ Unlearn
             </Label>
           </div>
           <div className="flex items-center space-x-1">
-            <RadioGroupItem value={MEMBERS_BELOW} id={MEMBERS_BELOW} />
-            <Label className="text-sm" htmlFor={MEMBERS_BELOW}>
-              {MEMBERS_BELOW}
+            <RadioGroupItem value={ABOVE_RETRAIN} id={ABOVE_RETRAIN} />
+            <Label className="text-sm" htmlFor={ABOVE_RETRAIN}>
+              ≥ thr ⇒ Retrain
             </Label>
           </div>
         </RadioGroup>
         <Separator
           orientation="vertical"
-          className="w-[1.5px] h-3.5 mx-3 bg-black"
+          className="w-[1.5px] h-3.5 mx-2.5 bg-black"
         />
-        <div className="flex items-center gap-3">
-          <HoverCard openDelay={0} closeDelay={100}>
-            <HoverCardTrigger
-              onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-3 rounded-md cursor-pointer hover:bg-[#696969] transition"
-            >
-              MAX ATTACK SCORE
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              Maximizes a quality score from FPR and FNR
-            </HoverCardContent>
-          </HoverCard>
-          <HoverCard openDelay={0} closeDelay={100}>
-            <HoverCardTrigger
-              onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-3 rounded-md cursor-pointer hover:bg-[#696969] transition"
-            >
-              MAX SUCCESS RATE
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              Targets the highest overall attack accuracy
-            </HoverCardContent>
-          </HoverCard>
-          <HoverCard openDelay={0} closeDelay={100}>
-            <HoverCardTrigger
-              onClick={onThresholdStrategyChange}
-              className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-3 rounded-md cursor-pointer hover:bg-[#696969] transition"
-            >
-              COMMON THRESHOLD
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto px-3 py-2" side="bottom">
-              Uses a single threshold for both models, maximizing quality score
-              sum
-            </HoverCardContent>
-          </HoverCard>
+        <div className="flex items-center gap-1.5">
+          {THRESHOLD_STRATEGIES.map((strategy) => (
+            <HoverCard openDelay={0} closeDelay={100}>
+              <HoverCardTrigger
+                onClick={onThresholdStrategyChange}
+                className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+              >
+                {strategy.strategy}
+              </HoverCardTrigger>
+              <HoverCardContent className="w-auto px-3 py-2" side="top">
+                {strategy.explanation}
+              </HoverCardContent>
+            </HoverCard>
+          ))}
         </div>
       </div>
       <Separator

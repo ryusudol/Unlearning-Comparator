@@ -8,25 +8,24 @@ import { Separator } from "../components/UI/separator";
 
 export const ENTROPY = "entropy";
 export const CONFIDENCE = "confidence";
-export const MEMBERS_ABOVE = "Members Above";
-export const MEMBERS_BELOW = "Members Below";
+export const ABOVE_UNLEARN = "Above Unlearn";
+export const ABOVE_RETRAIN = "Above Retrain";
 
-export type ThresholdSetting = "Members Above" | "Members Below";
+export type Metric = "entropy" | "confidence";
 
 export default function PrivacyAttack({ height }: { height: number }) {
-  const [metric, setMetric] = useState(ENTROPY);
-  const [thresholdSetting, setThresholdSetting] =
-    useState<ThresholdSetting>(MEMBERS_ABOVE);
+  const [metric, setMetric] = useState<Metric>(ENTROPY);
+  const [thresholdSetting, setThresholdSetting] = useState(ABOVE_UNLEARN);
   const [thresholdStrategy, setThresholdStrategy] = useState(
     THRESHOLD_STRATEGIES[0].strategy
   );
   const [strategyCount, setStrategyClick] = useState(0);
 
-  const handleMetricChange = (metric: string) => {
+  const handleMetricChange = (metric: Metric) => {
     setMetric(metric);
   };
 
-  const handleThresholdSettingChange = (threshold: ThresholdSetting) => {
+  const handleThresholdSettingChange = (threshold: string) => {
     setThresholdSetting(threshold);
     setStrategyClick((prev) => prev + 1);
   };
@@ -50,6 +49,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       />
       <AttackAnalytics
         mode="Baseline"
+        metric={metric}
         thresholdSetting={thresholdSetting}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
@@ -60,6 +60,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       />
       <AttackAnalytics
         mode="Comparison"
+        metric={metric}
         thresholdSetting={thresholdSetting}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
