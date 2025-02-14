@@ -29,21 +29,21 @@ export default function AttackLegend({
   onThresholdStrategyChange,
 }: AttackLegendProps) {
   return (
-    <div className="flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
-      <div className="flex items-center mr-4 relative bottom-[1px]">
-        <span className="font-medium mr-3">Metric</span>
+    <div className="flex items-center gap-[22px] bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
+      <div className="flex items-center relative bottom-[1px]">
+        <span className="font-medium mr-2">Metric</span>
         <RadioGroup
           className="flex"
           defaultValue={ENTROPY}
           onValueChange={onMetricChange}
         >
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
             <RadioGroupItem value={ENTROPY} id={ENTROPY} />
             <Label className="text-sm" htmlFor={ENTROPY}>
               Entropy
             </Label>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
             <RadioGroupItem value={CONFIDENCE} id={CONFIDENCE} />
             <Label className="text-sm" htmlFor={CONFIDENCE}>
               Confidence
@@ -52,29 +52,28 @@ export default function AttackLegend({
         </RadioGroup>
       </div>
       <div className="flex items-center relative bottom-[1px]">
-        <span className="font-medium mr-3">Threshold Settings</span>
+        <span className="font-medium mr-2">Above Threshold</span>
         <RadioGroup
           className="flex"
           defaultValue={ABOVE_UNLEARN}
           onValueChange={onThresholdSettingChange}
         >
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
             <RadioGroupItem value={ABOVE_UNLEARN} id={ABOVE_UNLEARN} />
             <Label className="text-sm" htmlFor={ABOVE_UNLEARN}>
-              ≥ thr ⇒ Unlearn
+              Unlearn
             </Label>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5">
             <RadioGroupItem value={ABOVE_RETRAIN} id={ABOVE_RETRAIN} />
             <Label className="text-sm" htmlFor={ABOVE_RETRAIN}>
-              ≥ thr ⇒ Retrain
+              Retrain
             </Label>
           </div>
         </RadioGroup>
-        <Separator
-          orientation="vertical"
-          className="w-[1.5px] h-3.5 mx-2.5 bg-black"
-        />
+      </div>
+      <div className="flex items-center relative bottom-[1px]">
+        <span className="font-medium mr-2">Threshold Strategy</span>
         <div className="flex items-center gap-1.5">
           {THRESHOLD_STRATEGIES.map((strategy) => (
             <HoverCard openDelay={0} closeDelay={100}>
