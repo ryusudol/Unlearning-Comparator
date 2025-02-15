@@ -35,7 +35,7 @@ export default function Embeddings({ height }: { height: number }) {
 
   useEffect(() => {
     async function loadBaselineData() {
-      if (!baseline || Number(baseline[3]) !== forgetClassNumber) return;
+      if (!baseline) return;
       try {
         const data = await fetchFileData(forgetClassNumber, baseline);
         setBaselinePoints(data.points);
@@ -54,8 +54,9 @@ export default function Embeddings({ height }: { height: number }) {
   }, [baseline, forgetClassNumber]);
 
   useEffect(() => {
+    console.log('Current forget class number:', forgetClassNumber);
     async function loadComparisonData() {
-      if (!comparison || Number(comparison[3]) !== forgetClassNumber) return;
+      if (!comparison) return;
       try {
         const data = await fetchFileData(forgetClassNumber, comparison);
         setComparisonPoints(data.points);
