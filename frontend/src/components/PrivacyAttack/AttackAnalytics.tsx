@@ -33,8 +33,6 @@ export default function AttackAnalytics({
   const [userModified, setUserModified] = useState(false);
   const [data, setData] = useState<Data>(null);
 
-  console.log(thresholdValue);
-
   useEffect(() => {
     Promise.all([
       d3.json<any>("class_1_Retrain.json"),

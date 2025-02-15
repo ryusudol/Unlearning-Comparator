@@ -15,7 +15,7 @@ export type Metric = "entropy" | "confidence";
 
 export default function PrivacyAttack({ height }: { height: number }) {
   const [metric, setMetric] = useState<Metric>(ENTROPY);
-  const [thresholdSetting, setThresholdSetting] = useState(ABOVE_UNLEARN);
+  const [aboveThreshold, setAboveThreshold] = useState(ABOVE_UNLEARN);
   const [thresholdStrategy, setThresholdStrategy] = useState(
     THRESHOLD_STRATEGIES[0].strategy
   );
@@ -26,7 +26,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
   };
 
   const handleThresholdSettingChange = (threshold: string) => {
-    setThresholdSetting(threshold);
+    setAboveThreshold(threshold);
     setStrategyClick((prev) => prev + 1);
   };
 
@@ -50,7 +50,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       <AttackAnalytics
         mode="Baseline"
         metric={metric}
-        thresholdSetting={thresholdSetting}
+        thresholdSetting={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
       />
@@ -61,7 +61,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       <AttackAnalytics
         mode="Comparison"
         metric={metric}
-        thresholdSetting={thresholdSetting}
+        thresholdSetting={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
       />
