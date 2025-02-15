@@ -8,8 +8,8 @@ import {
 import {
   ENTROPY,
   CONFIDENCE,
-  ABOVE_UNLEARN,
-  ABOVE_RETRAIN,
+  UNLEARN,
+  RETRAIN,
   Metric,
 } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
@@ -19,17 +19,17 @@ import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
   onMetricChange: (val: Metric) => void;
-  onThresholdSettingChange: (val: string) => void;
+  onAboveThresholdChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export default function AttackLegend({
   onMetricChange,
-  onThresholdSettingChange,
+  onAboveThresholdChange,
   onThresholdStrategyChange,
 }: AttackLegendProps) {
   return (
-    <div className="flex items-center gap-[22px] bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[30px] -right-[1px] text-sm z-10">
+    <div className="flex items-center gap-[22px] bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
       <div className="flex items-center relative bottom-[1px]">
         <span className="font-medium mr-2">Metric</span>
         <RadioGroup
@@ -55,18 +55,18 @@ export default function AttackLegend({
         <span className="font-medium mr-2">Above Threshold</span>
         <RadioGroup
           className="flex"
-          defaultValue={ABOVE_UNLEARN}
-          onValueChange={onThresholdSettingChange}
+          defaultValue={UNLEARN}
+          onValueChange={onAboveThresholdChange}
         >
           <div className="flex items-center space-x-0.5">
-            <RadioGroupItem value={ABOVE_UNLEARN} id={ABOVE_UNLEARN} />
-            <Label className="text-sm" htmlFor={ABOVE_UNLEARN}>
+            <RadioGroupItem value={UNLEARN} id={UNLEARN} />
+            <Label className="text-sm" htmlFor={UNLEARN}>
               Unlearn
             </Label>
           </div>
           <div className="flex items-center space-x-0.5">
-            <RadioGroupItem value={ABOVE_RETRAIN} id={ABOVE_RETRAIN} />
-            <Label className="text-sm" htmlFor={ABOVE_RETRAIN}>
+            <RadioGroupItem value={RETRAIN} id={RETRAIN} />
+            <Label className="text-sm" htmlFor={RETRAIN}>
               Retrain
             </Label>
           </div>

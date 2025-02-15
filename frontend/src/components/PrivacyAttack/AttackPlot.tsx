@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext } from "react";
+import { useRef, useEffect, useContext, useCallback } from "react";
 import * as d3 from "d3";
 
 import {
@@ -11,7 +11,7 @@ import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { AttackData } from "../../types/privacy-attack";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { ABOVE_UNLEARN, Metric } from "../../views/PrivacyAttack";
+import { UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { Data } from "./AttackAnalytics";
 
 const CONFIG = {
@@ -26,7 +26,12 @@ const CONFIG = {
   THRESHOLD_LINE_COLOR: "#a5a5a5",
   THRESHOLD_LINE_DASH: "5,2",
   THRESHOLD_LINE_WIDTH: 1.2,
-  THRESHOLD_STEP: 0.05,
+  ENTROPY_SCOPE_MIN: 0,
+  ENTROPY_SCOPE_MAX: 2.5,
+  ENTROPY_THRESHOLD_STEP: 0.05,
+  CONFIDENCE_SCOPE_MIN: -2.5,
+  CONFIDENCE_SCOPE_MAX: 10,
+  CONFIDENCE_THRESHOLD_STEP: 0.25,
   BUTTERFLY_CIRCLE_RADIUS: 3,
   ADDITIONAL_CIRCLE_X_GAP: 0,
   OPACITY_ABOVE_THRESHOLD: 1,
@@ -45,13 +50,13 @@ const CONFIG = {
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
 
-type EntropyData = { entropy: number };
+type EntropyData = { value: number };
 
 interface Props {
   mode: "Baseline" | "Comparison";
   metric: Metric;
   thresholdValue: number;
-  thresholdSetting: string;
+  aboveThreshold: string;
   data: Data;
   setThresholdValue: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
@@ -61,7 +66,7 @@ export default function ButterflyPlot({
   mode,
   metric,
   thresholdValue,
-  thresholdSetting,
+  aboveThreshold,
   data,
   setThresholdValue,
   onUpdateAttackScore,
@@ -75,42 +80,79 @@ export default function ButterflyPlot({
   const attackDataRef = useRef<AttackData[]>([]);
 
   const retrainJson = data?.retrainJson;
-  const ga3Json = data?.unlearnJson;
+  const unlearnJson = data?.unlearnJson;
   const attackData = data?.attackData;
+
   const isBaseline = mode === "Baseline";
+  const isMetricEntropy = metric === "entropy";
+  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
 
-  const updateThresholdCircles = (
-    g: d3.Selection<SVGGElement, unknown, null, undefined>,
-    yScale: d3.ScaleLinear<number, number>,
-    th: number
-  ) => {
-    const opacityFunction = function (this: SVGCircleElement) {
-      const cy = +d3.select(this).attr("cy");
-      return cy < yScale(th)
-        ? CONFIG.OPACITY_ABOVE_THRESHOLD
-        : CONFIG.OPACITY_BELOW_THRESHOLD;
-    };
+  const thresholdMin = isMetricEntropy
+    ? CONFIG.ENTROPY_SCOPE_MIN
+    : CONFIG.CONFIDENCE_SCOPE_MIN;
+  const thresholdMax = isMetricEntropy
+    ? CONFIG.ENTROPY_SCOPE_MAX
+    : CONFIG.CONFIDENCE_SCOPE_MAX;
+  const thresholdStep = isMetricEntropy
+    ? CONFIG.ENTROPY_THRESHOLD_STEP
+    : CONFIG.CONFIDENCE_THRESHOLD_STEP;
 
-    g.selectAll<SVGCircleElement, { entropy: number }>(
-      ".circle-retrain, .circle-unlearn"
-    )
-      .attr("fill-opacity", opacityFunction)
-      .attr("stroke-opacity", opacityFunction);
-  };
+  const upperOpacity = isAboveThresholdUnlearn
+    ? CONFIG.OPACITY_ABOVE_THRESHOLD
+    : CONFIG.OPACITY_BELOW_THRESHOLD;
+  const lowerOpacity = isAboveThresholdUnlearn
+    ? CONFIG.OPACITY_BELOW_THRESHOLD
+    : CONFIG.OPACITY_ABOVE_THRESHOLD;
+
+  const getOpacity = useCallback(
+    (y: number, thresholdY: number) => {
+      const isAbove = y < thresholdY;
+      return isAboveThresholdUnlearn
+        ? isAbove
+          ? CONFIG.OPACITY_ABOVE_THRESHOLD
+          : CONFIG.OPACITY_BELOW_THRESHOLD
+        : isAbove
+        ? CONFIG.OPACITY_BELOW_THRESHOLD
+        : CONFIG.OPACITY_ABOVE_THRESHOLD;
+    },
+    [isAboveThresholdUnlearn]
+  );
+
+  const updateThresholdCircles = useCallback(
+    (
+      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      yScale: d3.ScaleLinear<number, number>,
+      th: number
+    ) => {
+      const opacityFunction = function (this: SVGCircleElement) {
+        const cy = +d3.select(this).attr("cy");
+        return getOpacity(cy, yScale(th));
+      };
+
+      g.selectAll<SVGCircleElement, { entropy: number }>(
+        ".circle-retrain, .circle-unlearn"
+      )
+        .attr("fill-opacity", opacityFunction)
+        .attr("stroke-opacity", opacityFunction);
+    },
+    [getOpacity]
+  );
 
   useEffect(() => {
     if (!chartInitialized.current) {
-      if (!retrainJson || !ga3Json || !attackData) return;
+      if (!retrainJson || !unlearnJson || !attackData) return;
 
       attackDataRef.current = attackData;
 
-      const retrainValues: number[] = retrainJson.entropy
-        ? retrainJson.entropy.values
+      const retrainValues: number[] = retrainJson[metric]
+        ? retrainJson[metric].values
         : [];
-      const ga3Values: number[] = ga3Json.entropy ? ga3Json.entropy.values : [];
+      const ga3Values: number[] = unlearnJson[metric]
+        ? unlearnJson[metric].values
+        : [];
 
-      const retrainData = retrainValues.map((v: number) => ({ entropy: v }));
-      const ga3Data = ga3Values.map((v: number) => ({ entropy: v }));
+      const retrainData = retrainValues.map((v: number) => ({ value: v }));
+      const ga3Data = ga3Values.map((v: number) => ({ value: v }));
 
       const svgB = d3
         .select(butterflyRef.current)
@@ -136,7 +178,10 @@ export default function ButterflyPlot({
           })`
         );
 
-      const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
+      const yScaleB = d3
+        .scaleLinear()
+        .domain([thresholdMin, thresholdMax])
+        .range([innerH, 0]);
       const circleDiameter =
         2 * CONFIG.BUTTERFLY_CIRCLE_RADIUS + CONFIG.STROKE_WIDTH;
       const xSpacing = circleDiameter + CONFIG.ADDITIONAL_CIRCLE_X_GAP;
@@ -144,7 +189,7 @@ export default function ButterflyPlot({
       const createBins = (data: EntropyData[]) => {
         const binsMap: Record<string, EntropyData[]> = {};
         data.forEach((d) => {
-          const key = (Math.floor(d.entropy / binSize) * binSize).toFixed(2);
+          const key = (Math.floor(d.value / binSize) * binSize).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
           binsMap[key].push(d);
         });
@@ -167,12 +212,9 @@ export default function ButterflyPlot({
           const j = bin.values.length - displayCount + i;
           const d = bin.values[j];
           const cx = -xSpacing / 2 - (displayCount - 1 - i) * xSpacing;
-          const fillOpacityValue =
-            yPos < yScaleB(thresholdValue)
-              ? CONFIG.OPACITY_ABOVE_THRESHOLD
-              : CONFIG.OPACITY_BELOW_THRESHOLD;
+          const fillOpacityValue = getOpacity(yPos, yScaleB(thresholdValue));
           gB.append("circle")
-            .datum({ entropy: d.entropy })
+            .datum({ value: d.value })
             .attr("class", "circle-retrain")
             .attr("fill", CONFIG.GRAY)
             .attr("cx", cx)
@@ -205,12 +247,9 @@ export default function ButterflyPlot({
 
         bin.values.forEach((d, i) => {
           const cx = xSpacing / 2 + i * xSpacing;
-          const fillOpacityValue =
-            yPos < yScaleB(thresholdValue)
-              ? CONFIG.OPACITY_ABOVE_THRESHOLD
-              : CONFIG.OPACITY_BELOW_THRESHOLD;
+          const fillOpacityValue = getOpacity(yPos, yScaleB(thresholdValue));
           gB.append("circle")
-            .datum({ entropy: d.entropy })
+            .datum({ value: d.value })
             .attr("class", "circle-unlearn")
             .attr("fill", color)
             .attr("cx", cx)
@@ -273,7 +312,9 @@ export default function ButterflyPlot({
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
       xAxisB.lower();
       xAxisB.selectAll("text").attr("dy", "10px");
-      const yAxisB = d3.axisLeft(yScaleB).tickValues(d3.range(0, 2.51, 0.5));
+      const yAxisB = d3
+        .axisLeft(yScaleB)
+        .ticks(metric === "confidence" ? 10 : 5);
       gB.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${-innerW / 2}, 0)`)
@@ -287,7 +328,7 @@ export default function ButterflyPlot({
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")
         .attr("text-anchor", "middle")
-        .text("Entropy");
+        .text(metric === "entropy" ? "Entropy" : "Confidence");
 
       if (extraRetrain > 0) {
         gB.append("text")
@@ -317,7 +358,7 @@ export default function ButterflyPlot({
         {
           label: "From Retrain / Pred. Retrain",
           side: "left",
-          color: "#D4D4D4", // COLORS.DARK_GRAY with opacity 0.5
+          color: "#D4D4D4",
         },
         {
           label: "From Unlearn / Pred. Unlearn",
@@ -327,7 +368,7 @@ export default function ButterflyPlot({
         {
           label: "From Unlearn / Pred. Retrain",
           side: "right",
-          color: isBaseline ? "#E6D0FD" : "#C8EADB", // COLORS.PURPLE or COLORS.EMERALD with opacity 0.5
+          color: isBaseline ? "#E6D0FD" : "#C8EADB",
         },
       ];
 
@@ -408,12 +449,15 @@ export default function ButterflyPlot({
         const [, newY] = d3.pointer(event, gB.node());
         const newThresholdRaw = yScaleB.invert(newY);
         const newThresholdRounded =
-          Math.round(newThresholdRaw / CONFIG.THRESHOLD_STEP) *
-          CONFIG.THRESHOLD_STEP;
-        if (newThresholdRounded >= 0 && newThresholdRounded <= 2.5) {
+          Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
+        if (
+          newThresholdRounded >= thresholdMin &&
+          newThresholdRounded <= thresholdMax
+        ) {
           setThresholdValue(newThresholdRounded);
         }
       });
+
       const threshGroupB = gB
         .append("g")
         .attr("class", "threshold-group")
@@ -440,21 +484,28 @@ export default function ButterflyPlot({
         .attr("y2", 0);
       threshGroupB
         .append("text")
+        .attr("class", "threshold-label-up")
         .attr("x", -195)
         .attr("y", -4)
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
-        .text("↑ Pred as Unlearn");
+        .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
+        .text(
+          isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
+        );
       threshGroupB
         .append("text")
+        .attr("class", "threshold-label-down")
         .attr("x", -195)
         .attr("y", 10)
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
-        .attr("opacity", 0.5)
-        .text("↓ Pred as Retrain");
+        .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
+        .text(
+          isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
+        );
 
       const svgL = d3
         .select(lineRef.current)
@@ -474,7 +525,10 @@ export default function ButterflyPlot({
       const hL =
         CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
-      const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
+      const lineYScale = d3
+        .scaleLinear()
+        .domain([thresholdMin, thresholdMax])
+        .range([hL, 0]);
 
       const defs = gL.append("defs");
       defs
@@ -513,6 +567,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.RED)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
+        .attr("stroke-opacity", upperOpacity)
         .attr("d", lineAttack)
         .attr("clip-path", `url(#aboveThreshold-${mode})`);
       gL.append("path")
@@ -521,7 +576,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.RED)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
-        .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
+        .attr("stroke-opacity", lowerOpacity)
         .attr("d", lineAttack)
         .attr("clip-path", `url(#belowThreshold-${mode})`);
 
@@ -531,6 +586,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.BLUE)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
+        .attr("stroke-opacity", upperOpacity)
         .attr("d", lineFpr)
         .attr("clip-path", `url(#aboveThreshold-${mode})`);
       gL.append("path")
@@ -539,7 +595,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.BLUE)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
-        .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
+        .attr("stroke-opacity", lowerOpacity)
         .attr("d", lineFpr)
         .attr("clip-path", `url(#belowThreshold-${mode})`);
 
@@ -549,6 +605,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.GREEN)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
+        .attr("stroke-opacity", upperOpacity)
         .attr("d", lineFnr)
         .attr("clip-path", `url(#aboveThreshold-${mode})`);
       gL.append("path")
@@ -557,7 +614,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.GREEN)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
-        .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
+        .attr("stroke-opacity", lowerOpacity)
         .attr("d", lineFnr)
         .attr("clip-path", `url(#belowThreshold-${mode})`);
 
@@ -599,21 +656,24 @@ export default function ButterflyPlot({
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
-      const dragLineL = d3.drag<SVGGElement, unknown>().on("drag", (event) => {
-        const [, newY] = d3.pointer(event, gL.node());
-        const newThresholdRaw = lineYScale.invert(newY);
-        const newThresholdRounded =
-          Math.round(newThresholdRaw / CONFIG.THRESHOLD_STEP) *
-          CONFIG.THRESHOLD_STEP;
-        if (newThresholdRounded >= 0 && newThresholdRounded <= 2.5) {
-          setThresholdValue(newThresholdRounded);
-
-          gL.select(".threshold-group").attr(
-            "transform",
-            `translate(0, ${lineYScale(newThresholdRounded)})`
-          );
-        }
-      });
+      const dragLineL = d3
+        .drag<SVGGElement, any>()
+        .subject(() => ({ y: lineYScale(thresholdValue) }))
+        .on("drag", function (event) {
+          const newThresholdRaw = lineYScale.invert(event.y);
+          const newThresholdRounded =
+            Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
+          if (
+            newThresholdRounded >= thresholdMin &&
+            newThresholdRounded <= thresholdMax
+          ) {
+            setThresholdValue(newThresholdRounded);
+            d3.select(this).attr(
+              "transform",
+              `translate(0, ${lineYScale(newThresholdRounded)})`
+            );
+          }
+        });
       const threshGroupL = gL
         .append("g")
         .attr("class", "threshold-group")
@@ -743,8 +803,7 @@ export default function ButterflyPlot({
         infoGroupX = lineXScale(CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP);
       }
 
-      const infoGroupY =
-        thresholdValue >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+      const infoGroupY = lineYScale(thresholdValue);
 
       const infoGroup = gL
         .append("g")
@@ -824,12 +883,34 @@ export default function ButterflyPlot({
         CONFIG.HEIGHT -
         CONFIG.BUTTERFLY_MARGIN.top -
         CONFIG.BUTTERFLY_MARGIN.bottom;
-      const yScaleB = d3.scaleLinear().domain([0, 2.5]).range([innerH, 0]);
+      const yScaleB = d3
+        .scaleLinear()
+        .domain([thresholdMin, thresholdMax])
+        .range([innerH, 0]);
+
       updateThresholdCircles(gB, yScaleB, thresholdValue);
       gB.select(".threshold-group").attr(
         "transform",
         `translate(0, ${yScaleB(thresholdValue)})`
       );
+
+      gB.select(".y-axis")
+        .transition()
+        .duration(500)
+        .call((g: any) =>
+          d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g)
+        );
+
+      gB.select(".threshold-label-up")
+        .text(
+          isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
+        )
+        .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5);
+      gB.select(".threshold-label-down")
+        .text(
+          isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
+        )
+        .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1);
 
       // line chart
       const svgL = d3.select(lineRef.current);
@@ -841,7 +922,10 @@ export default function ButterflyPlot({
       const hL =
         CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
       const lineXScale = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
-      const lineYScale = d3.scaleLinear().domain([0, 2.5]).range([hL, 0]);
+      const lineYScale = d3
+        .scaleLinear()
+        .domain([thresholdMin, thresholdMax])
+        .range([hL, 0]);
 
       const lineAttack = d3
         .line<AttackData>()
@@ -857,18 +941,24 @@ export default function ButterflyPlot({
         .y((d) => lineYScale(d.threshold));
 
       const safeAttackData = attackData ?? [];
-      gL.select(".line-attack-above").attr(
-        "d",
-        lineAttack(safeAttackData) || ""
-      );
-      gL.select(".line-attack-below").attr(
-        "d",
-        lineAttack(safeAttackData) || ""
-      );
-      gL.select(".line-fpr-above").attr("d", lineFpr(safeAttackData) || "");
-      gL.select(".line-fpr-below").attr("d", lineFpr(safeAttackData) || "");
-      gL.select(".line-fnr-above").attr("d", lineFnr(safeAttackData) || "");
-      gL.select(".line-fnr-below").attr("d", lineFnr(safeAttackData) || "");
+      gL.select(".line-attack-above")
+        .attr("d", lineAttack(safeAttackData) || "")
+        .attr("stroke-opacity", upperOpacity);
+      gL.select(".line-attack-below")
+        .attr("d", lineAttack(safeAttackData) || "")
+        .attr("stroke-opacity", lowerOpacity);
+      gL.select(".line-fpr-above")
+        .attr("d", lineFpr(safeAttackData) || "")
+        .attr("stroke-opacity", upperOpacity);
+      gL.select(".line-fpr-below")
+        .attr("d", lineFpr(safeAttackData) || "")
+        .attr("stroke-opacity", lowerOpacity);
+      gL.select(".line-fnr-above")
+        .attr("d", lineFnr(safeAttackData) || "")
+        .attr("stroke-opacity", upperOpacity);
+      gL.select(".line-fnr-below")
+        .attr("d", lineFnr(safeAttackData) || "")
+        .attr("stroke-opacity", lowerOpacity);
 
       gL.select(".threshold-group").attr(
         "transform",
@@ -959,8 +1049,7 @@ export default function ButterflyPlot({
           );
         }
 
-        const infoGroupY =
-          thresholdValue >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+        const infoGroupY = lineYScale(thresholdValue);
 
         infoGroup.attr(
           "transform",
@@ -1018,24 +1107,33 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
-      const newLabel = metric === "entropy" ? "Entropy" : "Logit Confidence";
+      const newLabel = metric === "entropy" ? "Entropy" : "Confidence";
       svgB.select("text.y-axis-label").text(newLabel);
     }
   }, [
     attackData,
-    ga3Json,
+    getOpacity,
+    isAboveThresholdUnlearn,
     isBaseline,
+    isMetricEntropy,
+    lowerOpacity,
+    metric,
     mode,
     onUpdateAttackScore,
     retrainJson,
     setThresholdValue,
+    thresholdMax,
+    thresholdMin,
+    thresholdStep,
     thresholdValue,
-    metric,
+    unlearnJson,
+    updateThresholdCircles,
+    upperOpacity,
   ]);
 
   useEffect(() => {
     const thresholdStroke = "#000000";
-    const strokeOpacity = thresholdSetting === ABOVE_UNLEARN ? 1 : 0.3;
+    const strokeOpacity = isAboveThresholdUnlearn ? 1 : 0.3;
 
     d3.select(butterflyRef.current)
       .selectAll(".threshold-line")
@@ -1046,7 +1144,7 @@ export default function ButterflyPlot({
       .selectAll(".threshold-line")
       .attr("stroke", thresholdStroke)
       .attr("stroke-opacity", strokeOpacity);
-  }, [thresholdSetting]);
+  }, [isAboveThresholdUnlearn]);
 
   return (
     <div className="flex flex-col items-center">

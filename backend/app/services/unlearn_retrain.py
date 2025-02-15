@@ -113,4 +113,4 @@ async def run_unlearning_retrain(request, status):
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
-        status.progress = 100
+        status.progress = "Completed"

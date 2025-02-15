@@ -9,8 +9,9 @@ import uuid
 from app.utils.evaluation import (
 	evaluate_model_with_distributions, 
 	get_layer_activations_and_predictions, 
-	calculate_cka_similarity
+	calculate_cka_similarity,
 )
+from app.utils.attack import process_attack_metrics
 from app.utils.visualization import compute_umap_embedding
 from app.utils.helpers import format_distribution, compress_prob_array
 from app.config import (
@@ -74,30 +75,33 @@ class UnlearningCustomThread(threading.Thread):
                 print(f"    Predicted as {j}: {distribution[i][j]:.3f}")
     
     async def async_run(self):
-        def print_memory_usage(step_name):
-            allocated = torch.cuda.memory_allocated() / 1024**2  # MB 단위로 변환
-            max_allocated = torch.cuda.max_memory_allocated() / 1024**2
-            print(f"\n[{step_name}] GPU Memory Usage:")
-            print(f"  Currently allocated: {allocated:.2f} MB")
-            print(f"  Maximum allocated: {max_allocated:.2f} MB\n")
-
         print(f"Starting custom unlearning inference for class {self.forget_class}...")
         self.status.progress = "Starting Inference"
         self.status.method = "Custom"
         self.status.recent_id = uuid.uuid4().hex[:4]
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        
+        targets = torch.tensor(dataset.targets)
+        class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
+        
+        samples_per_class = UMAP_DATA_SIZE // self.num_classes
         generator = torch.Generator()
         generator.manual_seed(UNLEARN_SEED)
-        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        
+        selected_indices = []
+        for indices in class_indices:
+            perm = torch.randperm(len(indices), generator=generator)
+            selected_indices.extend(indices[perm[:samples_per_class]].tolist())
+        
+        umap_subset = torch.utils.data.Subset(dataset, selected_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
         )
         
         start_time = time.time()
         
-        print(f"Models loaded successfully at{time.time() - start_time:.3f} seconds")
+        print(f"Models loaded successfully at {time.time() - start_time:.3f} seconds")
         
         # Evaluate on train set
         self.status.progress = "Evaluating Train Set"
@@ -119,9 +123,7 @@ class UnlearningCustomThread(threading.Thread):
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.forget_class
         )
-        print_memory_usage("After Train Evaluation")
 
         # Update training evaluation status for remain classes only
         self.status.p_training_loss = train_loss
@@ -162,9 +164,7 @@ class UnlearningCustomThread(threading.Thread):
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.forget_class
         )
-        print_memory_usage("After Test Evaluation")
 
         # Update test evaluation status for remain classes only
         self.status.p_test_loss = test_loss
@@ -201,9 +201,8 @@ class UnlearningCustomThread(threading.Thread):
             data_loader=umap_subset_loader,
             device=self.device,
         )
-        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds") 
-        print_memory_usage("After Computing Activations")
-    
+        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
+
         # UMAP embedding computation
         print("Computing UMAP embedding")
         forget_labels = torch.tensor([label == self.forget_class for _, label in umap_subset])
@@ -214,18 +213,26 @@ class UnlearningCustomThread(threading.Thread):
             forget_labels=forget_labels
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
-        print_memory_usage("After UMAP Computation")
-
+        
+        # Process attack metrics using the same umap_subset_loader (entropy printing removed)
+        print("Processing attack metrics on UMAP subset")
+        await process_attack_metrics(
+            model=self.model_after, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.forget_class, 
+        )
+        
         # Detailed results preparation
         detailed_results = []
         for i in range(len(umap_subset)):
-            original_index = umap_subset_indices[i].item()
-            ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
+            original_index = selected_indices[i]
+            ground_truth = umap_subset.dataset.targets[original_index]
             is_forget = ground_truth == self.forget_class
             detailed_results.append([
                 int(ground_truth),                             # gt
                 int(predicted_labels[i]),                      # pred
-                int(original_index),                           # img
+                int(original_index),                           # img index
                 1 if is_forget else 0,                         # forget as binary
                 round(float(umap_embedding[i][0]), 2),         # x coordinate
                 round(float(umap_embedding[i][1]), 2),         # y coordinate
@@ -267,7 +274,6 @@ class UnlearningCustomThread(threading.Thread):
                 device=self.device
             )
             print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
-            print_memory_usage("After CKA Calculation")
 
         # Prepare results dictionary
         results = {

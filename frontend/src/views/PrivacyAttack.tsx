@@ -8,14 +8,14 @@ import { Separator } from "../components/UI/separator";
 
 export const ENTROPY = "entropy";
 export const CONFIDENCE = "confidence";
-export const ABOVE_UNLEARN = "Above Unlearn";
-export const ABOVE_RETRAIN = "Above Retrain";
+export const UNLEARN = "Unlearn";
+export const RETRAIN = "Retrain";
 
 export type Metric = "entropy" | "confidence";
 
 export default function PrivacyAttack({ height }: { height: number }) {
   const [metric, setMetric] = useState<Metric>(ENTROPY);
-  const [thresholdSetting, setThresholdSetting] = useState(ABOVE_UNLEARN);
+  const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);
   const [thresholdStrategy, setThresholdStrategy] = useState(
     THRESHOLD_STRATEGIES[0].strategy
   );
@@ -25,8 +25,8 @@ export default function PrivacyAttack({ height }: { height: number }) {
     setMetric(metric);
   };
 
-  const handleThresholdSettingChange = (threshold: string) => {
-    setThresholdSetting(threshold);
+  const handleAboveThresholdChange = (threshold: string) => {
+    setAboveThreshold(threshold);
     setStrategyClick((prev) => prev + 1);
   };
 
@@ -44,13 +44,13 @@ export default function PrivacyAttack({ height }: { height: number }) {
     >
       <AttackLegend
         onMetricChange={handleMetricChange}
-        onThresholdSettingChange={handleThresholdSettingChange}
+        onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
       />
       <AttackAnalytics
         mode="Baseline"
         metric={metric}
-        thresholdSetting={thresholdSetting}
+        aboveThreshold={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
       />
@@ -61,7 +61,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       <AttackAnalytics
         mode="Comparison"
         metric={metric}
-        thresholdSetting={thresholdSetting}
+        aboveThreshold={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
       />
