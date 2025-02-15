@@ -50,7 +50,7 @@ const CONFIG = {
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.45,
 } as const;
 
-type EntropyData = { entropy: number };
+type EntropyData = { value: number };
 
 interface Props {
   mode: "Baseline" | "Comparison";
@@ -151,8 +151,8 @@ export default function ButterflyPlot({
         ? unlearnJson[metric].values
         : [];
 
-      const retrainData = retrainValues.map((v: number) => ({ entropy: v }));
-      const ga3Data = ga3Values.map((v: number) => ({ entropy: v }));
+      const retrainData = retrainValues.map((v: number) => ({ value: v }));
+      const ga3Data = ga3Values.map((v: number) => ({ value: v }));
 
       const svgB = d3
         .select(butterflyRef.current)
@@ -189,7 +189,7 @@ export default function ButterflyPlot({
       const createBins = (data: EntropyData[]) => {
         const binsMap: Record<string, EntropyData[]> = {};
         data.forEach((d) => {
-          const key = (Math.floor(d.entropy / binSize) * binSize).toFixed(2);
+          const key = (Math.floor(d.value / binSize) * binSize).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
           binsMap[key].push(d);
         });
@@ -214,7 +214,7 @@ export default function ButterflyPlot({
           const cx = -xSpacing / 2 - (displayCount - 1 - i) * xSpacing;
           const fillOpacityValue = getOpacity(yPos, yScaleB(thresholdValue));
           gB.append("circle")
-            .datum({ entropy: d.entropy })
+            .datum({ value: d.value })
             .attr("class", "circle-retrain")
             .attr("fill", CONFIG.GRAY)
             .attr("cx", cx)
@@ -249,7 +249,7 @@ export default function ButterflyPlot({
           const cx = xSpacing / 2 + i * xSpacing;
           const fillOpacityValue = getOpacity(yPos, yScaleB(thresholdValue));
           gB.append("circle")
-            .datum({ entropy: d.entropy })
+            .datum({ value: d.value })
             .attr("class", "circle-unlearn")
             .attr("fill", color)
             .attr("cx", cx)
@@ -457,6 +457,7 @@ export default function ButterflyPlot({
           setThresholdValue(newThresholdRounded);
         }
       });
+
       const threshGroupB = gB
         .append("g")
         .attr("class", "threshold-group")
@@ -483,21 +484,28 @@ export default function ButterflyPlot({
         .attr("y2", 0);
       threshGroupB
         .append("text")
+        .attr("class", "threshold-label-up")
         .attr("x", -195)
         .attr("y", -4)
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
-        .text("↑ Pred as Unlearn");
+        .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
+        .text(
+          isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
+        );
       threshGroupB
         .append("text")
+        .attr("class", "threshold-label-down")
         .attr("x", -195)
         .attr("y", 10)
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("fill", "black")
-        .attr("opacity", 0.5)
-        .text("↓ Pred as Retrain");
+        .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
+        .text(
+          isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
+        );
 
       const svgL = d3
         .select(lineRef.current)
@@ -648,23 +656,24 @@ export default function ButterflyPlot({
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
-      const dragLineL = d3.drag<SVGGElement, unknown>().on("drag", (event) => {
-        const [, newY] = d3.pointer(event, gL.node());
-        const newThresholdRaw = lineYScale.invert(newY);
-        const newThresholdRounded =
-          Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
-        if (
-          newThresholdRounded >= thresholdMin &&
-          newThresholdRounded <= thresholdMax
-        ) {
-          setThresholdValue(newThresholdRounded);
-
-          gL.select(".threshold-group").attr(
-            "transform",
-            `translate(0, ${lineYScale(newThresholdRounded)})`
-          );
-        }
-      });
+      const dragLineL = d3
+        .drag<SVGGElement, any>()
+        .subject(() => ({ y: lineYScale(thresholdValue) }))
+        .on("drag", function (event) {
+          const newThresholdRaw = lineYScale.invert(event.y);
+          const newThresholdRounded =
+            Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
+          if (
+            newThresholdRounded >= thresholdMin &&
+            newThresholdRounded <= thresholdMax
+          ) {
+            setThresholdValue(newThresholdRounded);
+            d3.select(this).attr(
+              "transform",
+              `translate(0, ${lineYScale(newThresholdRounded)})`
+            );
+          }
+        });
       const threshGroupL = gL
         .append("g")
         .attr("class", "threshold-group")
@@ -794,8 +803,7 @@ export default function ButterflyPlot({
         infoGroupX = lineXScale(CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP);
       }
 
-      const infoGroupY =
-        thresholdValue >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+      const infoGroupY = lineYScale(thresholdValue);
 
       const infoGroup = gL
         .append("g")
@@ -879,11 +887,30 @@ export default function ButterflyPlot({
         .scaleLinear()
         .domain([thresholdMin, thresholdMax])
         .range([innerH, 0]);
+
       updateThresholdCircles(gB, yScaleB, thresholdValue);
       gB.select(".threshold-group").attr(
         "transform",
         `translate(0, ${yScaleB(thresholdValue)})`
       );
+
+      gB.select(".y-axis")
+        .transition()
+        .duration(500)
+        .call((g: any) =>
+          d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g)
+        );
+
+      gB.select(".threshold-label-up")
+        .text(
+          isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
+        )
+        .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5);
+      gB.select(".threshold-label-down")
+        .text(
+          isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
+        )
+        .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1);
 
       // line chart
       const svgL = d3.select(lineRef.current);
@@ -1022,8 +1049,7 @@ export default function ButterflyPlot({
           );
         }
 
-        const infoGroupY =
-          thresholdValue >= 2.1 ? lineYScale(2.1) : attackIntersection.y;
+        const infoGroupY = lineYScale(thresholdValue);
 
         infoGroup.attr(
           "transform",
@@ -1086,9 +1112,10 @@ export default function ButterflyPlot({
     }
   }, [
     attackData,
-    unlearnJson,
     getOpacity,
+    isAboveThresholdUnlearn,
     isBaseline,
+    isMetricEntropy,
     lowerOpacity,
     metric,
     mode,
@@ -1099,6 +1126,7 @@ export default function ButterflyPlot({
     thresholdMin,
     thresholdStep,
     thresholdValue,
+    unlearnJson,
     updateThresholdCircles,
     upperOpacity,
   ]);
