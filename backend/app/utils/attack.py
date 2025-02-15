@@ -6,6 +6,19 @@ from scipy.stats import entropy
 import json
 from datetime import datetime
 
+# Configuration constants for attack scoring
+ENTROPY_CONFIG = {
+    "bins": 51,
+    "range": [0.00, 2.50],
+    "max_display": 25
+}
+
+CONFIDENCE_CONFIG = {
+    "bins": 51,
+    "range": [-2.50, 10.00],
+    "max_display": 25
+}
+
 def prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps):
     values = []
     for idx, entropy, confidence in zip(image_indices, logit_entropies, max_logit_gaps):
@@ -19,70 +32,69 @@ def prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps):
         "values": values
     }
 
-def visualize_distributions(logit_entropies, max_logit_gaps, forget_class, timestamp):
+def calculate_scores(values_unlearn, values_retrain, bins, range_vals, mode='entropy', direction='unlearn'):
     """
-    Visualizes the distributions of logit entropies and max logit gaps.
-    Uses the full set of provided data (assumed to be 200 samples).
+    Calculate attack scores by comparing the unlearn and retrain distributions.
+    Returns a list of dictionaries each containing:
+       - "threshold": the threshold value,
+       - "fpr": false positive rate,
+       - "fnr": false negative rate,
+       - "attack_score": defined as (1 - forgetting_score)
     """
-    def make_break_marks(ax, y_pos):
-        kwargs = dict(transform=ax.transAxes, color='k', clip_on=False)
-        dx, dy = 0.01, 0.01
-        ax.plot((-dx, +dx), (y_pos-dy, y_pos+dy), **kwargs)
-        ax.plot((-dx, +dx), (y_pos-2*dy, y_pos+2*dy), **kwargs)
+    if bins < 2 or range_vals[0] >= range_vals[1]:
+        return []
+    v_un = np.clip(values_unlearn, range_vals[0], range_vals[1])
+    v_re = np.clip(values_retrain, range_vals[0], range_vals[1])
+    thresholds = np.linspace(range_vals[0], range_vals[1], bins)
 
-    plt.figure(figsize=(13, 5))
-    
-    # Left plot (Entropy)
-    plt.subplot(1, 2, 1)
-    ax1 = plt.gca()
-    counts, bin_edges = np.histogram(logit_entropies, bins=50, range=(0.0, 2.5))
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    if len(v_un) == 0 or len(v_re) == 0:
+        return []
 
-    for x, count in zip(bin_centers, counts):
-        if count <= 40:
-            for y in range(count):
-                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
+    scores = []
+    DELTA = 1e-5
+    EPS = 1e-10
+
+    for thr_val in thresholds:
+        # Depending on mode and the chosen direction, assign positives and negatives:
+        if mode == 'entropy':
+            if direction == 'unlearn':
+                pos = v_un
+                neg = v_re
+            else:  # direction == 'retrain'
+                pos = v_re
+                neg = v_un
+        else:  # mode == 'confidence'
+            if direction == 'retrain':
+                pos = v_re
+                neg = v_un
+            else:  # direction == 'unlearn'
+                pos = v_un
+                neg = v_re
+
+        tpr = np.mean(pos >= thr_val)
+        fpr = np.mean(neg >= thr_val)
+        fnr = 1.0 - tpr
+
+        if fpr == 0 and fnr == 0:
+            # When no predictions cross the threshold, set forgetting score fq to 0
+            fq = 0
+        elif fpr >= (1 - DELTA) or fnr >= (1 - DELTA):
+            fq = 1
         else:
-            for y in range(39):
-                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
-            plt.plot(x, 42, 'o', color='gray', alpha=0.7, markersize=5)
-    
-    make_break_marks(ax1, 0.9)
-    plt.title(f'Class {forget_class} Logit Entropy Distribution (200 samples)')
-    plt.xlabel('Entropy')
-    plt.ylabel('Count')
-    plt.gca().yaxis.set_major_locator(plt.MultipleLocator(5))
-    plt.xlim(0.0, 2.5)
-    plt.ylim(-0.5, 43)
-    plt.grid(True, alpha=0.2)
-    
-    # Right plot (Confidence)
-    plt.subplot(1, 2, 2)
-    ax2 = plt.gca()
-    counts, bin_edges = np.histogram(max_logit_gaps, bins=50, range=(-2.5, 10.0))
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-
-    for x, count in zip(bin_centers, counts):
-        if count <= 40:
-            for y in range(count):
-                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
-        else:
-            for y in range(39):
-                plt.plot(x, y, 'o', color='gray', alpha=0.7, markersize=5)
-            plt.plot(x, 42, 'o', color='gray', alpha=0.7, markersize=5)
-    
-    make_break_marks(ax2, 0.9)
-    plt.title(f'Class {forget_class} Max Logit Confidence Distribution (200 samples)')
-    plt.xlabel('Log Confidence Score')
-    plt.ylabel('Count')
-    plt.gca().yaxis.set_major_locator(plt.MultipleLocator(5))
-    plt.xlim([-2.5, 10.0])
-    plt.ylim(-0.5, 43)
-    plt.grid(True, alpha=0.2)
-    
-    plt.tight_layout()
-    plt.savefig(f'attack/{forget_class}/class_{forget_class}_entropy_{timestamp}.png', dpi=300, bbox_inches='tight')
-    plt.close()
+            sfp = np.clip(fpr, EPS, 1 - DELTA - EPS)
+            sfn = np.clip(fnr, EPS, 1 - DELTA - EPS)
+            lg1 = np.log(1 - DELTA - sfp) - np.log(sfn)
+            lg2 = np.log(1 - DELTA - sfn) - np.log(sfp)
+            epsilon = max(0, min(lg1, lg2))
+            fq = 2 ** (-epsilon)
+        attack_score = 1 - fq
+        scores.append({
+            "threshold": round(float(thr_val), 3),
+            "fpr": round(fpr, 3),
+            "fnr": round(fnr, 3),
+            "attack_score": round(attack_score, 3)
+        })
+    return scores
 
 async def process_attack_metrics(
         model, 
@@ -102,28 +114,23 @@ async def process_attack_metrics(
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
             
-            # 배치에서 forget_class에 해당하는 인덱스들을 한 번에 찾기
+            # Select only those outputs for the forget class
             forget_mask = (labels == forget_class)
             if not torch.any(forget_mask):
                 continue
                 
-            # 배치 내의 로컬 인덱스
             local_indices = torch.where(forget_mask)[0]
-            
-            # 원본 데이터셋 인덱스 계산
             batch_start_idx = batch_idx * data_loader.batch_size
             original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
-                              for idx in local_indices]
-            
-            # 해당하는 출력값들만 처리
+                                for idx in local_indices]
             selected_outputs = outputs[forget_mask]
-            
-            # 엔트로피 계산 (배치 처리)
+
+            # Compute entropy scores
             scaled_logits_entropy = selected_outputs / t1
             probs_entropy = F.softmax(scaled_logits_entropy, dim=1)
             entropies = entropy(probs_entropy.cpu().numpy().T)
-            
-            # 신뢰도 계산 (배치 처리)
+
+            # Compute (logit) confidence scores 
             scaled_logits_conf = selected_outputs / t2
             probs_conf = F.softmax(scaled_logits_conf, dim=1).cpu().numpy()
             max_probs = np.max(probs_conf, axis=1)
@@ -135,15 +142,88 @@ async def process_attack_metrics(
             max_logit_gaps.extend(confidence_scores)
     
     distribution_data = prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps)
-    timestamp = datetime.now().strftime("%m%d_%H%M%S")
+    unlearn_data = {
+        "attack": {
+            "values": {
+                "img": [item["img"] for item in distribution_data["values"]],
+                "entropy": [item["entropy"] for item in distribution_data["values"]],
+                "confidence": [item["confidence"] for item in distribution_data["values"]]
+            }
+        }
+    }
+    with open("attack.json", "w") as f:
+        json.dump(unlearn_data, f, indent=4)
+    print("add")
     
-    json_filename = f'attack/{forget_class}/class_{forget_class}_Retrain_{timestamp}.json'
-    with open(json_filename, 'w') as f:
-        json.dump(distribution_data, f, indent=4)
+    # Load the pre-saved retrain distribution from JSON.
+    retrain_file = f"data/{forget_class}/a00{forget_class}.json"
+    with open(retrain_file, "r") as f:
+        retrain_raw = json.load(f)
+        # 수정된 retrain JSON 구조: 'attack' 아래 'values'가 리스트 형태임.
+        retrain_vals = retrain_raw["attack"]["values"]
+        retrain_data = {
+            "values": {
+                "img": [item["img"] for item in retrain_vals],
+                "entropy": [item["entropy"] for item in retrain_vals],
+                "confidence": [item["confidence"] for item in retrain_vals]
+            }
+        }
     
-    visualize_distributions(logit_entropies, max_logit_gaps, forget_class, timestamp)
+    # Compute scores for the four scenarios.
+    scores_ent_unlearn = calculate_scores(
+        np.array(unlearn_data["attack"]["values"]["entropy"]),
+        np.array(retrain_data["values"]["entropy"]),
+        ENTROPY_CONFIG["bins"],
+        ENTROPY_CONFIG["range"],
+        mode="entropy",
+        direction="unlearn"
+    )
+    scores_ent_retrain = calculate_scores(
+        np.array(unlearn_data["attack"]["values"]["entropy"]),
+        np.array(retrain_data["values"]["entropy"]),
+        ENTROPY_CONFIG["bins"],
+        ENTROPY_CONFIG["range"],
+        mode="entropy",
+        direction="retrain"
+    )
+    scores_conf_retrain = calculate_scores(
+        np.array(unlearn_data["attack"]["values"]["confidence"]),
+        np.array(retrain_data["values"]["confidence"]),
+        CONFIDENCE_CONFIG["bins"],
+        CONFIDENCE_CONFIG["range"],
+        mode="confidence",
+        direction="retrain"
+    )
+    scores_conf_unlearn = calculate_scores(
+        np.array(unlearn_data["attack"]["values"]["confidence"]),
+        np.array(retrain_data["values"]["confidence"]),
+        CONFIDENCE_CONFIG["bins"],
+        CONFIDENCE_CONFIG["range"],
+        mode="confidence",
+        direction="unlearn"
+    )
     
-    values = distribution_data["values"]
-    attack_results = 1 # TODO: 공격 결과 추가
-
-    return values, attack_results
+    def get_best_attack(scores):
+        if not scores:
+            return 0
+        best = max(scores, key=lambda s: s["attack_score"])
+        return best["attack_score"]
+    
+    best_attack_ent_unlearn = get_best_attack(scores_ent_unlearn)
+    best_attack_ent_retrain = get_best_attack(scores_ent_retrain)
+    best_attack_conf_retrain = get_best_attack(scores_conf_retrain)
+    best_attack_conf_unlearn = get_best_attack(scores_conf_unlearn)
+    
+    best_attack_entropy = max(best_attack_ent_unlearn, best_attack_ent_retrain)
+    best_attack_confidence = max(best_attack_conf_retrain, best_attack_conf_unlearn)
+    final_fqs = 1 - ((best_attack_entropy + best_attack_confidence) / 2)
+    
+    attack_results = {
+        "entropy_above_unlearn": scores_ent_unlearn,
+        "entropy_above_retrain": scores_ent_retrain,
+        "confidence_above_retrain": scores_conf_retrain,
+        "confidence_above_unlearn": scores_conf_unlearn
+    }
+    
+    # Return the distribution values, attack results, and computed FQS.
+    return distribution_data["values"], attack_results, round(final_fqs, 3)

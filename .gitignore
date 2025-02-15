@@ -5,9 +5,7 @@ backend/trained_models/
 backend/unlearned_models/
 backend/uploaded_models/
 backend/attack/
-backend/data/
 backend/.python-version
-backend/*.json
 backend/*.png
 paper/
 z_dist_exp/

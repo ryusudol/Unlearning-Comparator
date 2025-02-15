@@ -28,15 +28,15 @@ async def unlearning_custom(forget_class, status, weights_path):
                          else "mps" if torch.backends.mps.is_available() 
                          else "cpu")
     model_before = get_resnet18().to(device)
-    model_after = get_resnet18().to(device)
+    model = get_resnet18().to(device)
     model_before.load_state_dict(torch.load("trained_models/0000.pth", map_location=device))
-    model_after.load_state_dict(torch.load(weights_path, map_location=device))
+    model.load_state_dict(torch.load(weights_path, map_location=device))
 
     unlearning_thread = UnlearningCustomThread(
         forget_class=forget_class,
         status=status,
         model_before=model_before,
-        model_after=model_after,
+        model=model,
         train_loader=train_loader,
         test_loader=test_loader,
         train_set=train_set,

@@ -13,7 +13,11 @@ from app.utils.evaluation import (
 )
 from app.utils.attack import process_attack_metrics
 from app.utils.visualization import compute_umap_embedding
-from app.utils.helpers import format_distribution, compress_prob_array
+from app.utils.helpers import (
+	format_distribution, 
+	compress_prob_array, 
+	save_model
+)
 from app.config import (
 	UMAP_DATA_SIZE, 
 	UMAP_DATASET, 
@@ -25,7 +29,7 @@ class UnlearningCustomThread(threading.Thread):
                  forget_class,
                  status,
                  model_before,
-                 model_after,
+                 model,
                  train_loader,
                  test_loader,
                  train_set,
@@ -37,7 +41,7 @@ class UnlearningCustomThread(threading.Thread):
         self.is_training_eval = (forget_class == -1)
         self.status = status
         self.model_before = model_before
-        self.model_after = model_after
+        self.model = model
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.train_set = train_set
@@ -119,7 +123,7 @@ class UnlearningCustomThread(threading.Thread):
             train_label_dist, 
             train_conf_dist
         ) = await evaluate_model_with_distributions (
-            model=self.model_after, 
+            model=self.model, 
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
@@ -160,7 +164,7 @@ class UnlearningCustomThread(threading.Thread):
             test_label_dist, 
             test_conf_dist
         ) = await evaluate_model_with_distributions(
-            model=self.model_after, 
+            model=self.model, 
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
@@ -197,7 +201,7 @@ class UnlearningCustomThread(threading.Thread):
             predicted_labels, 
             probs, 
         ) = await get_layer_activations_and_predictions(
-            model=self.model_after,
+            model=self.model,
             data_loader=umap_subset_loader,
             device=self.device,
         )
@@ -214,13 +218,13 @@ class UnlearningCustomThread(threading.Thread):
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
         
-        # Process attack metrics using the same umap_subset_loader (entropy printing removed)
+        # Process attack metrics using the same umap_subset_loader (no visualization here)
         print("Processing attack metrics on UMAP subset")
-        values, attack_results = await process_attack_metrics(
-            model=self.model_after, 
+        values, attack_results, fqs = await process_attack_metrics(
+            model=self.model, 
             data_loader=umap_subset_loader, 
             device=self.device, 
-            forget_class=self.forget_class, 
+            forget_class=self.forget_class
         )
         
         # Detailed results preparation
@@ -233,7 +237,7 @@ class UnlearningCustomThread(threading.Thread):
                 int(ground_truth),                             # gt
                 int(predicted_labels[i]),                      # pred
                 int(original_index),                           # img index
-                1 if is_forget else 0,                         # forget as binary
+                1 if is_forget else 0,                         # forget flag as binary
                 round(float(umap_embedding[i][0]), 2),         # x coordinate
                 round(float(umap_embedding[i][1]), 2),         # y coordinate
                 compress_prob_array(probs[i].tolist()),        # compressed probabilities
@@ -267,7 +271,7 @@ class UnlearningCustomThread(threading.Thread):
             print("Calculating CKA similarity")
             cka_results = await calculate_cka_similarity(
                 model_before=self.model_before,
-                model_after=self.model_after,
+                model_after=self.model,
                 train_loader=self.train_loader,
                 test_loader=self.test_loader,
                 forget_class=self.forget_class,
@@ -275,16 +279,16 @@ class UnlearningCustomThread(threading.Thread):
             )
             print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
-        # Prepare results dictionary
+        # Prepare results dictionary with computed FQS and attack results
         results = {
             "id": self.status.recent_id,
             "fc": "N/A" if self.is_training_eval else self.forget_class,
             "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
             "init": "N/A",
             "method": "Custom",
-            "epochs": "N/A",
-            "BS": "N/A",
-            "LR": "N/A",
+            "epochs": 200,
+            "BS": 128,
+            "LR": 0.1,
             "UA": "N/A" if self.is_training_eval else round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),
@@ -298,7 +302,7 @@ class UnlearningCustomThread(threading.Thread):
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
             "points": detailed_results,
-            "FQS": "N/A", # TODO: 추가
+            "FQS": fqs,
             "attack": {
                 "values": values,
                 "results": attack_results
@@ -314,6 +318,12 @@ class UnlearningCustomThread(threading.Thread):
         with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
 
+        save_model(
+            model=self.model, 
+            forget_class=self.forget_class,
+            model_name=self.status.recent_id
+        )
+        
         print(f"Results saved to {result_path}")
         print(f"Custom unlearning inference completed at {time.time() - start_time:.3f} seconds")
         self.status.progress = "Completed"
