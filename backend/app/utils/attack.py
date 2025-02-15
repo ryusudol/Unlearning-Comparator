@@ -6,40 +6,20 @@ from scipy.stats import entropy
 import json
 from datetime import datetime
 
-def prepare_distribution_data(logit_entropies, max_logit_gaps):
-    """
-    Converts the logit entropies and max logit gaps into a distribution data format.
-    Assumes that the input lists are already of desired size (e.g., 200 samples).
-    """
-    def convert_to_python_types(data):
-        # Convert numpy arrays, floats, or lists into a list of rounded floats.
-        if isinstance(data, np.ndarray):
-            return [round(float(x), 2) for x in data]
-        elif isinstance(data, (np.float32, np.float64)):
-            return round(float(data), 2)
-        elif isinstance(data, list):
-            return [round(float(x), 2) for x in data]
-        return data
-
-    entropy_values = convert_to_python_types(logit_entropies)
-    confidence_values = convert_to_python_types(max_logit_gaps)
+def prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps):
+    values = []
+    for idx, entropy, confidence in zip(image_indices, logit_entropies, max_logit_gaps):
+        values.append({
+            "img": idx,
+            "entropy": round(float(entropy), 2),
+            "confidence": round(float(confidence), 2)
+        })
 
     return {
-        "entropy": {
-            "values": entropy_values,
-            "bins": 50,
-            "range": [0.00, 2.50],
-            "max_display": 40
-        },
-        "confidence": {
-            "values": confidence_values,
-            "bins": 50,
-            "range": [-2.50, 10.00],
-            "max_display": 40
-        }
+        "values": values
     }
 
-def visualize_distributions(logit_entropies, max_logit_gaps, forget_class, t1, t2, timestamp):
+def visualize_distributions(logit_entropies, max_logit_gaps, forget_class, timestamp):
     """
     Visualizes the distributions of logit entropies and max logit gaps.
     Uses the full set of provided data (assumed to be 200 samples).
@@ -115,38 +95,55 @@ async def process_attack_metrics(
     model.eval()
     logit_entropies = []
     max_logit_gaps = []
+    image_indices = []
     
     with torch.no_grad():
-        for data in data_loader:
+        for batch_idx, data in enumerate(data_loader):
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
-            for i in range(labels.size(0)):
-                if labels[i].item() == forget_class:
-                    logits = outputs[i]
-                    
-                    # For entropy, use scaled logits
-                    scaled_logits_for_entropy = logits / t1
-                    probs_for_entropy = F.softmax(scaled_logits_for_entropy, dim=0).cpu().numpy()
-                    logit_entropy = entropy(probs_for_entropy)
-                    
-                    # For confidence, use scaled logits
-                    scaled_logits_for_confidence = logits / t2
-                    probs_for_confidence = F.softmax(scaled_logits_for_confidence, dim=0).cpu().numpy()
-                    max_prob_idx = np.argmax(probs_for_confidence)
-                    prob_max = probs_for_confidence[max_prob_idx]
-                    prob_others = 1 - prob_max
-                    confidence_score = np.log(prob_max + 1e-45) - np.log(prob_others + 1e-45)
-                    
-                    logit_entropies.append(logit_entropy)
-                    max_logit_gaps.append(confidence_score)
+            
+            # 배치에서 forget_class에 해당하는 인덱스들을 한 번에 찾기
+            forget_mask = (labels == forget_class)
+            if not torch.any(forget_mask):
+                continue
+                
+            # 배치 내의 로컬 인덱스
+            local_indices = torch.where(forget_mask)[0]
+            
+            # 원본 데이터셋 인덱스 계산
+            batch_start_idx = batch_idx * data_loader.batch_size
+            original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
+                              for idx in local_indices]
+            
+            # 해당하는 출력값들만 처리
+            selected_outputs = outputs[forget_mask]
+            
+            # 엔트로피 계산 (배치 처리)
+            scaled_logits_entropy = selected_outputs / t1
+            probs_entropy = F.softmax(scaled_logits_entropy, dim=1)
+            entropies = entropy(probs_entropy.cpu().numpy().T)
+            
+            # 신뢰도 계산 (배치 처리)
+            scaled_logits_conf = selected_outputs / t2
+            probs_conf = F.softmax(scaled_logits_conf, dim=1).cpu().numpy()
+            max_probs = np.max(probs_conf, axis=1)
+            other_probs = 1 - max_probs
+            confidence_scores = np.log(max_probs + 1e-45) - np.log(other_probs + 1e-45)
+            
+            image_indices.extend(original_indices)
+            logit_entropies.extend(entropies)
+            max_logit_gaps.extend(confidence_scores)
     
-    distribution_data = prepare_distribution_data(logit_entropies, max_logit_gaps)
+    distribution_data = prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps)
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
     
-    json_filename = f'attack/{forget_class}/class_{forget_class}_t1_{t1}_t2_{t2}_{timestamp}.json'
+    json_filename = f'attack/{forget_class}/class_{forget_class}_Retrain_{timestamp}.json'
     with open(json_filename, 'w') as f:
         json.dump(distribution_data, f, indent=4)
     
-    visualize_distributions(logit_entropies, max_logit_gaps, forget_class, t1, t2, timestamp)
+    visualize_distributions(logit_entropies, max_logit_gaps, forget_class, timestamp)
     
-    return logit_entropies, max_logit_gaps 
+    values = distribution_data["values"]
+    attack_results = 1 # TODO: 공격 결과 추가
+
+    return values, attack_results

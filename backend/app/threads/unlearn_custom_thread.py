@@ -216,7 +216,7 @@ class UnlearningCustomThread(threading.Thread):
         
         # Process attack metrics using the same umap_subset_loader (entropy printing removed)
         print("Processing attack metrics on UMAP subset")
-        await process_attack_metrics(
+        values, attack_results = await process_attack_metrics(
             model=self.model_after, 
             data_loader=umap_subset_loader, 
             device=self.device, 
@@ -298,6 +298,11 @@ class UnlearningCustomThread(threading.Thread):
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
             "points": detailed_results,
+            "FQS": "N/A", # TODO: 추가
+            "attack": {
+                "values": values,
+                "results": attack_results
+            }
         }
 
         # Save results to JSON file
