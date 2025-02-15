@@ -16,7 +16,7 @@ export type Data = {
 interface Props {
   mode: "Baseline" | "Comparison";
   metric: Metric;
-  thresholdSetting: string;
+  aboveThreshold: string;
   thresholdStrategy: string;
   strategyCount: number;
 }
@@ -24,7 +24,7 @@ interface Props {
 export default function AttackAnalytics({
   mode,
   metric,
-  thresholdSetting,
+  aboveThreshold,
   thresholdStrategy,
   strategyCount,
 }: Props) {
@@ -33,31 +33,34 @@ export default function AttackAnalytics({
   const [userModified, setUserModified] = useState(false);
   const [data, setData] = useState<Data>(null);
 
+  const isMetricEntropy = metric === "entropy";
+
   useEffect(() => {
     Promise.all([
       d3.json<any>("class_1_Retrain.json"),
-      d3.json<any>("Class_1_GA3.json"),
+      d3.json<any>(
+        isMetricEntropy
+          ? "Class_1_GA3.json"
+          : "Attack_Exp_Confidence_Scores.json"
+      ),
       d3.json<any>("class_1_4scenarios.json"),
     ]).then(([retrainJson, unlearnJson, scenarios]) => {
       if (!retrainJson || !unlearnJson || !scenarios) return;
 
-      const normalizedThresholdSetting = thresholdSetting
+      const normalizedAboveThreshold = aboveThreshold
         .toLowerCase()
         .replace(/\s+/g, "_");
-      const key = `${metric.toLowerCase()}_${normalizedThresholdSetting}`;
+      const key = `${metric.toLowerCase()}_above_${normalizedAboveThreshold}`;
 
       const attackData = scenarios[key];
 
       if (!attackData) {
-        console.error(
-          `metric: ${metric} 와 thresholdSetting: ${thresholdSetting} 에 대응하는 attackData가 없습니다.`
-        );
         return;
       }
 
       setData({ retrainJson, unlearnJson, attackData });
     });
-  }, [metric, thresholdSetting]);
+  }, [isMetricEntropy, metric, aboveThreshold]);
 
   useEffect(() => {
     setUserModified(false);
@@ -67,6 +70,7 @@ export default function AttackAnalytics({
     if (!data || userModified) return;
 
     if (thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy) {
+      // MAX ATTACK SCORE
       const maxAttackData = data.attackData.reduce((prev, curr) => {
         return curr.attack_score > prev.attack_score ? curr : prev;
       }, data.attackData[0]);
@@ -74,15 +78,17 @@ export default function AttackAnalytics({
         setThresholdValue(maxAttackData.threshold);
       }
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[1].strategy) {
-      const retrainValues: number[] = data.retrainJson?.entropy?.values || [];
-      const ga3Values: number[] = data.unlearnJson?.entropy?.values || [];
+      // MAX SUCCESS RATE
+      const step = isMetricEntropy ? 0.05 : 0.25;
+      const retrainValues: number[] = data.retrainJson?.[metric]?.values || [];
+      const ga3Values: number[] = data.unlearnJson?.[metric]?.values || [];
       const allValues = [...retrainValues, ...ga3Values];
       if (allValues.length === 0) return;
       const candidateSet = new Set<number>();
       allValues.forEach((v) => {
-        const base = Math.floor(v / 0.05) * 0.05;
+        const base = Math.floor(v / step) * step;
         candidateSet.add(base);
-        candidateSet.add(base + 0.05);
+        candidateSet.add(base + step);
       });
       const candidates = Array.from(candidateSet).sort((a, b) => a - b);
       let bestCandidate = thresholdValue;
@@ -100,6 +106,7 @@ export default function AttackAnalytics({
         setThresholdValue(bestCandidate);
       }
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
+      // COMMON THRESHOLD
       const thresholdGroups: { [key: number]: number } = {};
       data.attackData.forEach((item) => {
         thresholdGroups[item.threshold] =
@@ -116,7 +123,14 @@ export default function AttackAnalytics({
         setThresholdValue(bestThresholdEntry.th);
       }
     }
-  }, [data, thresholdStrategy, userModified, thresholdValue, metric]);
+  }, [
+    data,
+    isMetricEntropy,
+    metric,
+    thresholdStrategy,
+    thresholdValue,
+    userModified,
+  ]);
 
   const handleThresholdValueChange = (newThreshold: number) => {
     setThresholdValue(newThreshold);
@@ -130,7 +144,7 @@ export default function AttackAnalytics({
           mode={mode}
           metric={metric}
           thresholdValue={thresholdValue}
-          thresholdSetting={thresholdSetting}
+          aboveThreshold={aboveThreshold}
           setThresholdValue={handleThresholdValueChange}
           data={data}
           onUpdateAttackScore={setAttackScore}
