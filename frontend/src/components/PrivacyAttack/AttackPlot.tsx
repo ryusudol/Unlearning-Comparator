@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext } from "react";
+import { useRef, useEffect, useContext, useCallback } from "react";
 import * as d3 from "d3";
 
 import {
@@ -79,24 +79,48 @@ export default function ButterflyPlot({
   const attackData = data?.attackData;
   const isBaseline = mode === "Baseline";
 
-  const updateThresholdCircles = (
-    g: d3.Selection<SVGGElement, unknown, null, undefined>,
-    yScale: d3.ScaleLinear<number, number>,
-    th: number
-  ) => {
-    const opacityFunction = function (this: SVGCircleElement) {
-      const cy = +d3.select(this).attr("cy");
-      return cy < yScale(th)
-        ? CONFIG.OPACITY_ABOVE_THRESHOLD
-        : CONFIG.OPACITY_BELOW_THRESHOLD;
-    };
+  const upperOpacity =
+    thresholdSetting === ABOVE_UNLEARN
+      ? CONFIG.OPACITY_ABOVE_THRESHOLD
+      : CONFIG.OPACITY_BELOW_THRESHOLD;
+  const lowerOpacity =
+    thresholdSetting === ABOVE_UNLEARN
+      ? CONFIG.OPACITY_BELOW_THRESHOLD
+      : CONFIG.OPACITY_ABOVE_THRESHOLD;
 
-    g.selectAll<SVGCircleElement, { entropy: number }>(
-      ".circle-retrain, .circle-unlearn"
-    )
-      .attr("fill-opacity", opacityFunction)
-      .attr("stroke-opacity", opacityFunction);
-  };
+  const getOpacity = useCallback(
+    (y: number, thresholdY: number) => {
+      const isAbove = y < thresholdY;
+      return thresholdSetting === ABOVE_UNLEARN
+        ? isAbove
+          ? CONFIG.OPACITY_ABOVE_THRESHOLD
+          : CONFIG.OPACITY_BELOW_THRESHOLD
+        : isAbove
+        ? CONFIG.OPACITY_BELOW_THRESHOLD
+        : CONFIG.OPACITY_ABOVE_THRESHOLD;
+    },
+    [thresholdSetting]
+  );
+
+  const updateThresholdCircles = useCallback(
+    (
+      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      yScale: d3.ScaleLinear<number, number>,
+      th: number
+    ) => {
+      const opacityFunction = function (this: SVGCircleElement) {
+        const cy = +d3.select(this).attr("cy");
+        return getOpacity(cy, yScale(th));
+      };
+
+      g.selectAll<SVGCircleElement, { entropy: number }>(
+        ".circle-retrain, .circle-unlearn"
+      )
+        .attr("fill-opacity", opacityFunction)
+        .attr("stroke-opacity", opacityFunction);
+    },
+    [getOpacity]
+  );
 
   useEffect(() => {
     if (!chartInitialized.current) {
@@ -167,10 +191,7 @@ export default function ButterflyPlot({
           const j = bin.values.length - displayCount + i;
           const d = bin.values[j];
           const cx = -xSpacing / 2 - (displayCount - 1 - i) * xSpacing;
-          const fillOpacityValue =
-            yPos < yScaleB(thresholdValue)
-              ? CONFIG.OPACITY_ABOVE_THRESHOLD
-              : CONFIG.OPACITY_BELOW_THRESHOLD;
+          const fillOpacityValue = getOpacity(yPos, yScaleB(thresholdValue));
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-retrain")
@@ -205,10 +226,7 @@ export default function ButterflyPlot({
 
         bin.values.forEach((d, i) => {
           const cx = xSpacing / 2 + i * xSpacing;
-          const fillOpacityValue =
-            yPos < yScaleB(thresholdValue)
-              ? CONFIG.OPACITY_ABOVE_THRESHOLD
-              : CONFIG.OPACITY_BELOW_THRESHOLD;
+          const fillOpacityValue = getOpacity(yPos, yScaleB(thresholdValue));
           gB.append("circle")
             .datum({ entropy: d.entropy })
             .attr("class", "circle-unlearn")
@@ -287,7 +305,7 @@ export default function ButterflyPlot({
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")
         .attr("text-anchor", "middle")
-        .text("Entropy");
+        .text(metric === "entropy" ? "Entropy" : "Confidence");
 
       if (extraRetrain > 0) {
         gB.append("text")
@@ -513,6 +531,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.RED)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
+        .attr("stroke-opacity", upperOpacity)
         .attr("d", lineAttack)
         .attr("clip-path", `url(#aboveThreshold-${mode})`);
       gL.append("path")
@@ -521,7 +540,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.RED)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
-        .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
+        .attr("stroke-opacity", lowerOpacity)
         .attr("d", lineAttack)
         .attr("clip-path", `url(#belowThreshold-${mode})`);
 
@@ -531,6 +550,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.BLUE)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
+        .attr("stroke-opacity", upperOpacity)
         .attr("d", lineFpr)
         .attr("clip-path", `url(#aboveThreshold-${mode})`);
       gL.append("path")
@@ -539,7 +559,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.BLUE)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
-        .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
+        .attr("stroke-opacity", lowerOpacity)
         .attr("d", lineFpr)
         .attr("clip-path", `url(#belowThreshold-${mode})`);
 
@@ -549,6 +569,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.GREEN)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
+        .attr("stroke-opacity", upperOpacity)
         .attr("d", lineFnr)
         .attr("clip-path", `url(#aboveThreshold-${mode})`);
       gL.append("path")
@@ -557,7 +578,7 @@ export default function ButterflyPlot({
         .attr("fill", "none")
         .attr("stroke", CONFIG.GREEN)
         .attr("stroke-width", CONFIG.LINE_WIDTH)
-        .attr("stroke-opacity", CONFIG.OPACITY_BELOW_THRESHOLD)
+        .attr("stroke-opacity", lowerOpacity)
         .attr("d", lineFnr)
         .attr("clip-path", `url(#belowThreshold-${mode})`);
 
@@ -857,18 +878,24 @@ export default function ButterflyPlot({
         .y((d) => lineYScale(d.threshold));
 
       const safeAttackData = attackData ?? [];
-      gL.select(".line-attack-above").attr(
-        "d",
-        lineAttack(safeAttackData) || ""
-      );
-      gL.select(".line-attack-below").attr(
-        "d",
-        lineAttack(safeAttackData) || ""
-      );
-      gL.select(".line-fpr-above").attr("d", lineFpr(safeAttackData) || "");
-      gL.select(".line-fpr-below").attr("d", lineFpr(safeAttackData) || "");
-      gL.select(".line-fnr-above").attr("d", lineFnr(safeAttackData) || "");
-      gL.select(".line-fnr-below").attr("d", lineFnr(safeAttackData) || "");
+      gL.select(".line-attack-above")
+        .attr("d", lineAttack(safeAttackData) || "")
+        .attr("stroke-opacity", upperOpacity);
+      gL.select(".line-attack-below")
+        .attr("d", lineAttack(safeAttackData) || "")
+        .attr("stroke-opacity", lowerOpacity);
+      gL.select(".line-fpr-above")
+        .attr("d", lineFpr(safeAttackData) || "")
+        .attr("stroke-opacity", upperOpacity);
+      gL.select(".line-fpr-below")
+        .attr("d", lineFpr(safeAttackData) || "")
+        .attr("stroke-opacity", lowerOpacity);
+      gL.select(".line-fnr-above")
+        .attr("d", lineFnr(safeAttackData) || "")
+        .attr("stroke-opacity", upperOpacity);
+      gL.select(".line-fnr-below")
+        .attr("d", lineFnr(safeAttackData) || "")
+        .attr("stroke-opacity", lowerOpacity);
 
       gL.select(".threshold-group").attr(
         "transform",
@@ -1018,19 +1045,23 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
-      const newLabel = metric === "entropy" ? "Entropy" : "Logit Confidence";
+      const newLabel = metric === "entropy" ? "Entropy" : "Confidence";
       svgB.select("text.y-axis-label").text(newLabel);
     }
   }, [
     attackData,
     ga3Json,
+    getOpacity,
     isBaseline,
+    lowerOpacity,
+    metric,
     mode,
     onUpdateAttackScore,
     retrainJson,
     setThresholdValue,
     thresholdValue,
-    metric,
+    updateThresholdCircles,
+    upperOpacity,
   ]);
 
   useEffect(() => {
