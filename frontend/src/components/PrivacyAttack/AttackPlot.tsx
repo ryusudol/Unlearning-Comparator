@@ -420,17 +420,31 @@ export default function ButterflyPlot({
         let xPos, yPos;
         if (item.side === "left") {
           xPos = CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS[0];
-          yPos =
-            leftCounter === 0
-              ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
-              : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          if (isAboveThresholdUnlearn) {
+            yPos =
+              leftCounter === 0
+                ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+                : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          } else {
+            yPos =
+              leftCounter === 0
+                ? CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+                : -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          }
           leftCounter++;
         } else {
           xPos = CONFIG.BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS[1];
-          yPos =
-            rightCounter === 0
-              ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
-              : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          if (isAboveThresholdUnlearn) {
+            yPos =
+              rightCounter === 0
+                ? -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+                : CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          } else {
+            yPos =
+              rightCounter === 0
+                ? CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2
+                : -CONFIG.BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING / 2;
+          }
           rightCounter++;
         }
 
@@ -1251,7 +1265,7 @@ export default function ButterflyPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric, baseline, comparison]);
+  }, [metric, aboveThreshold, baseline, comparison]);
 
   useEffect(() => {
     const thresholdStroke = "#000000";
