@@ -40,7 +40,6 @@ const CONFIG = {
   BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 10,
   BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-6, 6],
   BUTTERFLY_CHART_WIDTH: 460,
-  BIN_SIZE: 0.05,
   LINE_CHART_WIDTH: 168,
   HEIGHT: 360,
   LINE_WIDTH: 2,
@@ -117,6 +116,9 @@ export default function ButterflyPlot({
     CONFIG.LINE_MARGIN.right;
   const hL = CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
 
+  const binSize = isMetricEntropy
+    ? CONFIG.ENTROPY_THRESHOLD_STEP
+    : CONFIG.CONFIDENCE_THRESHOLD_STEP;
   const circleDiameter =
     2 * CONFIG.BUTTERFLY_CIRCLE_RADIUS + CONFIG.STROKE_WIDTH;
 
@@ -146,9 +148,7 @@ export default function ButterflyPlot({
       const createBins = (bins: Bin[]) => {
         const binsMap: Record<string, number[]> = {};
         bins.forEach((bin) => {
-          const key = (
-            Math.floor(bin.value / CONFIG.BIN_SIZE) * CONFIG.BIN_SIZE
-          ).toFixed(2);
+          const key = (Math.floor(bin.value / binSize) * binSize).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
           binsMap[key].push(bin.value);
         });
@@ -214,7 +214,7 @@ export default function ButterflyPlot({
 
       // Draw circles for the retrain data on the y-axis corresponding to the threshold value
       retrainBins.forEach((bin) => {
-        const yPos = yScaleB(bin.threshold + CONFIG.BIN_SIZE / 2);
+        const yPos = yScaleB(bin.threshold + binSize / 2);
         const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
           Math.floor(displayingWidth / circleDiameter) + 1;
@@ -262,11 +262,18 @@ export default function ButterflyPlot({
 
       // Draw circles for the unlearn data on the y-axis corresponding to the threshold value
       unlearnBins.forEach((bin) => {
-        const yPos = yScaleB(bin.threshold + CONFIG.BIN_SIZE / 2);
+        const yPos = yScaleB(bin.threshold + binSize / 2);
         const color = isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
 
-        bin.values.forEach((d, idx) => {
-          const cx = circleDiameter / 2 + idx * circleDiameter;
+        const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        const maxDisplayCount =
+          Math.floor(displayingWidth / circleDiameter) + 1;
+        const displayCount = Math.min(maxDisplayCount, bin.values.length);
+        const extraCount = bin.values.length - displayCount;
+
+        for (let i = 0; i < displayCount; i++) {
+          const d = bin.values[i];
+          const cx = circleDiameter / 2 + i * circleDiameter;
           const opacity = getCircleOpacity(yPos, yScaleB(thresholdValue));
 
           gB.append("circle")
@@ -280,7 +287,21 @@ export default function ButterflyPlot({
             .attr("stroke", d3.color(color)?.darker().toString() ?? color)
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
             .attr("stroke-opacity", opacity);
-        });
+        }
+
+        if (extraCount > 0) {
+          const markerCx =
+            circleDiameter / 2 +
+            displayCount * circleDiameter +
+            CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+          gB.append("text")
+            .attr("x", markerCx - 6)
+            .attr("y", yPos)
+            .attr("text-anchor", "start")
+            .attr("font-size", CONFIG.FONT_SIZE)
+            .attr("fill", "black")
+            .text(`+${extraCount}`);
+        }
       });
 
       // draw the x-axis for a butterfly chart
@@ -1178,6 +1199,7 @@ export default function ButterflyPlot({
     }
   }, [
     attackData,
+    binSize,
     circleDiameter,
     data,
     getCircleOpacity,
@@ -1201,6 +1223,10 @@ export default function ButterflyPlot({
     wB,
     wL,
   ]);
+
+  useEffect(() => {
+    chartInitialized.current = false;
+  }, [metric]);
 
   useEffect(() => {
     const thresholdStroke = "#000000";
