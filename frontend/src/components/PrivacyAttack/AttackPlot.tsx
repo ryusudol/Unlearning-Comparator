@@ -345,7 +345,7 @@ export default function ButterflyPlot({
         .attr("class", "y-axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -hB / 2)
-        .attr("y", -222)
+        .attr("y", -226)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")
@@ -553,7 +553,23 @@ export default function ButterflyPlot({
         .range([hL, 0]);
 
       // Separate a line chart into two parts: above threshold and below threshold
-      const defs = gL.append("defs");
+      const defs = svgL.append("defs");
+      const glowFilter = defs
+        .append("filter")
+        .attr("id", "glow")
+        .attr("filterUnits", "userSpaceOnUse")
+        .attr("x", "-50%")
+        .attr("y", "-50%")
+        .attr("width", "200%")
+        .attr("height", "200%")
+        .append("feGaussianBlur")
+        .attr("in", "SourceGraphic")
+        .attr("stdDeviation", "3")
+        .attr("result", "coloredBlur");
+
+      const feMerge = glowFilter.append("feMerge");
+      feMerge.append("feMergeNode").attr("in", "coloredBlur");
+      feMerge.append("feMergeNode").attr("in", "SourceGraphic");
       defs
         .append("clipPath")
         .attr("id", `aboveThreshold-${mode}`)
@@ -585,7 +601,8 @@ export default function ButterflyPlot({
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", attackLine)
-        .attr("clip-path", `url(#aboveThreshold-${mode})`);
+        .attr("clip-path", `url(#aboveThreshold-${mode})`)
+        .attr("filter", "url(#glow)");
       gL.append("path")
         .datum(attackData)
         .attr("class", "line-attack-below")
@@ -594,7 +611,8 @@ export default function ButterflyPlot({
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", attackLine)
-        .attr("clip-path", `url(#belowThreshold-${mode})`);
+        .attr("clip-path", `url(#belowThreshold-${mode})`)
+        .attr("filter", "url(#glow)");
 
       // Draw FPR lines
       const fprLine = d3
@@ -734,7 +752,7 @@ export default function ButterflyPlot({
       // Draw a legend for a line chart
       const lineChartLegendGroup = gL
         .append("g")
-        .attr("transform", `translate(${wL - 10}, 4)`);
+        .attr("transform", `translate(${wL - 37}, 4)`);
       lineChartLegendGroup
         .append("rect")
         .attr("x", -98)
@@ -752,7 +770,7 @@ export default function ButterflyPlot({
         const legendItemGroup = lineChartLegendGroup
           .append("g")
           .attr("transform", `translate(-91, ${yPos})`);
-        legendItemGroup
+        const lineElement = legendItemGroup
           .append("line")
           .attr("x1", 0)
           .attr("y1", 0)
@@ -760,6 +778,11 @@ export default function ButterflyPlot({
           .attr("y2", 0)
           .attr("stroke", item.color)
           .attr("stroke-width", 2);
+
+        if (item.color === CONFIG.RED) {
+          lineElement.attr("filter", "url(#glow)");
+        }
+
         legendItemGroup
           .append("text")
           .attr("x", 20)
@@ -1004,7 +1027,6 @@ export default function ButterflyPlot({
       // Draw a new y-axis for a butterfly chart based on the metric value
       gB.select(".y-axis")
         .transition()
-        .duration(500)
         .call((g: any) =>
           d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g)
         );
@@ -1196,6 +1218,9 @@ export default function ButterflyPlot({
 
         onUpdateAttackScore(currentData.attack_score);
       }
+
+      gL.select(".line-attack-above").raise();
+      gL.select(".line-attack-below").raise();
     }
   }, [
     attackData,
@@ -1226,7 +1251,7 @@ export default function ButterflyPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric]);
+  }, [metric, baseline, comparison]);
 
   useEffect(() => {
     const thresholdStroke = "#000000";

@@ -43,8 +43,8 @@ export function calculatePerformanceMetrics(data: Experiments) {
       .filter((d) => typeof d.RTE === "number")
       .map((d) => d.RTE as number),
     FQS: Object.values(data)
-      .filter((d) => typeof d.RTE === "number")
-      .map((d) => d.RTE as number),
+      .filter((d) => typeof d.FQS === "number")
+      .map((d) => d.FQS as number),
   };
 
   const mins = {
@@ -53,7 +53,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.min(values.TUA.map((v) => Number(v)))!,
     TRA: d3.min(values.TRA)!,
     RTE: d3.min(values.RTE)!,
-    FQS: d3.min(values.RTE)!,
+    FQS: d3.min(values.FQS)!,
   };
 
   const maxs = {
@@ -62,7 +62,7 @@ export function calculatePerformanceMetrics(data: Experiments) {
     TUA: d3.max(values.TUA.map((v) => Number(v)))!,
     TRA: d3.max(values.TRA)!,
     RTE: d3.max(values.RTE)!,
-    FQS: d3.max(values.RTE)!,
+    FQS: d3.max(values.FQS)!,
   };
 
   return {
@@ -104,9 +104,9 @@ export function calculatePerformanceMetrics(data: Experiments) {
     FQS: {
       colorScale: d3
         .scaleLinear()
-        .domain([mins.RTE, maxs.RTE])
+        .domain([mins.FQS, maxs.FQS])
         .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RTE,
+      baseColor: baseColors.FQS,
     },
   };
 }
