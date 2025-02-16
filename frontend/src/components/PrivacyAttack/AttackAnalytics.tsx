@@ -1,16 +1,19 @@
-import { useState, useEffect } from "react";
-import * as d3 from "d3";
+import { useState, useEffect, useContext } from "react";
 
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
+import { useForgetClass } from "../../hooks/useForgetClass";
 import { Metric } from "../../views/PrivacyAttack";
-import { ExperimentJsonData, AttackData } from "../../types/privacy-attack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
+import { ExperimentsContext } from "../../store/experiments-context";
+import { AttackResult, AttackResults } from "../../types/data";
+import { fetchFileData } from "../../utils/api/unlearning";
 
+export type Bin = { img: number; value: number };
 export type Data = {
-  retrainJson: ExperimentJsonData;
-  unlearnJson: ExperimentJsonData;
-  attackData: AttackData[];
+  retrainData: Bin[];
+  unlearnData: Bin[];
+  lineChartData: AttackResult[];
 } | null;
 
 interface Props {
@@ -28,35 +31,80 @@ export default function AttackAnalytics({
   thresholdStrategy,
   strategyCount,
 }: Props) {
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
+
+  const { forgetClassNumber } = useForgetClass();
+
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [attackScore, setAttackScore] = useState(0);
   const [userModified, setUserModified] = useState(false);
   const [data, setData] = useState<Data>(null);
 
+  const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === "entropy";
 
   useEffect(() => {
-    Promise.all([
-      d3.json<any>("class_1_Retrain.json"),
-      d3.json<any>("Class_1_GA3.json"),
-      d3.json<any>("class_1_4scenarios.json"),
-    ]).then(([retrainJson, unlearnJson, scenarios]) => {
-      if (!retrainJson || !unlearnJson || !scenarios) return;
+    const getAttackData = async () => {
+      const retrainExperiment = await fetchFileData(
+        forgetClassNumber,
+        `a00${forgetClassNumber}`
+      );
+      const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
+
+      if (!retrainExperiment || !experiment) {
+        setData({
+          retrainData: [],
+          unlearnData: [],
+          lineChartData: [],
+        });
+        return;
+      }
+
+      let retrainExperimentValues: Bin[] = [];
+      let experimentValues: Bin[] = [];
+
+      const retrainAttackValues = retrainExperiment.attack.values;
+      const experimentAttackValues = experiment.attack.values;
+
+      retrainAttackValues.forEach((item) => {
+        retrainExperimentValues.push({
+          img: item.img,
+          value: isMetricEntropy ? item.entropy : item.confidence,
+        });
+      });
+      experimentAttackValues.forEach((item) => {
+        experimentValues.push({
+          img: item.img,
+          value: isMetricEntropy ? item.entropy : item.confidence,
+        });
+      });
 
       const normalizedAboveThreshold = aboveThreshold
         .toLowerCase()
         .replace(/\s+/g, "_");
-      const key = `${metric.toLowerCase()}_above_${normalizedAboveThreshold}`;
+      const key =
+        `${metric.toLowerCase()}_above_${normalizedAboveThreshold}` as keyof AttackResults;
+      const lineChartData = experiment.attack.results[key];
 
-      const attackData = scenarios[key];
+      if (!lineChartData) return;
 
-      if (!attackData) {
-        return;
-      }
-
-      setData({ retrainJson, unlearnJson, attackData });
-    });
-  }, [isMetricEntropy, metric, aboveThreshold]);
+      setData({
+        retrainData: retrainExperimentValues,
+        unlearnData: experimentValues,
+        lineChartData,
+      });
+    };
+    getAttackData();
+  }, [
+    aboveThreshold,
+    baselineExperiment,
+    comparisonExperiment,
+    forgetClassNumber,
+    isBaseline,
+    isMetricEntropy,
+    metric,
+  ]);
 
   useEffect(() => {
     setUserModified(false);
@@ -67,32 +115,33 @@ export default function AttackAnalytics({
 
     if (thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy) {
       // MAX ATTACK SCORE
-      const maxAttackData = data.attackData.reduce((prev, curr) => {
+      const maxAttackData = data.lineChartData.reduce((prev, curr) => {
         return curr.attack_score > prev.attack_score ? curr : prev;
-      }, data.attackData[0]);
+      }, data.lineChartData[0]);
       if (maxAttackData && maxAttackData.threshold !== thresholdValue) {
         setThresholdValue(maxAttackData.threshold);
       }
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[1].strategy) {
       // MAX SUCCESS RATE
-      const step = isMetricEntropy ? 0.05 : 0.25;
-      const retrainValues: number[] = data.retrainJson?.[metric]?.values || [];
-      const ga3Values: number[] = data.unlearnJson?.[metric]?.values || [];
-      const allValues = [...retrainValues, ...ga3Values];
+      const allValues = [...data.retrainData, ...data.unlearnData];
+
       if (allValues.length === 0) return;
+
+      const step = isMetricEntropy ? 0.05 : 0.25;
       const candidateSet = new Set<number>();
-      allValues.forEach((v) => {
-        const base = Math.floor(v / step) * step;
+      allValues.forEach((datum) => {
+        const base = Math.floor(datum.value / step) * step;
         candidateSet.add(base);
         candidateSet.add(base + step);
       });
+
       const candidates = Array.from(candidateSet).sort((a, b) => a - b);
       let bestCandidate = thresholdValue;
       let bestSuccessCount = -Infinity;
       candidates.forEach((candidate) => {
         const successCount =
-          retrainValues.filter((v) => v < candidate).length +
-          ga3Values.filter((v) => v > candidate).length;
+          data.retrainData.filter((datum) => datum.value < candidate).length +
+          data.unlearnData.filter((datum) => datum.value > candidate).length;
         if (successCount > bestSuccessCount) {
           bestSuccessCount = successCount;
           bestCandidate = candidate;
@@ -104,7 +153,7 @@ export default function AttackAnalytics({
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
       // COMMON THRESHOLD
       const thresholdGroups: { [key: number]: number } = {};
-      data.attackData.forEach((item) => {
+      data.lineChartData.forEach((item) => {
         thresholdGroups[item.threshold] =
           (thresholdGroups[item.threshold] || 0) + item.attack_score;
       });
@@ -151,8 +200,7 @@ export default function AttackAnalytics({
           mode={mode}
           metric={metric}
           thresholdValue={thresholdValue}
-          retrainJson={data.retrainJson}
-          unlearnJson={data.unlearnJson}
+          data={data}
           attackScore={attackScore}
         />
       )}

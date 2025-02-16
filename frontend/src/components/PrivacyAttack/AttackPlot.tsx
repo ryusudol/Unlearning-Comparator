@@ -9,10 +9,10 @@ import {
 import { COLORS } from "../../constants/colors";
 import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { AttackData } from "../../types/privacy-attack";
+import { AttackResult } from "../../types/data";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { UNLEARN, Metric } from "../../views/PrivacyAttack";
-import { Data } from "./AttackAnalytics";
+import { Bin, Data } from "./AttackAnalytics";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
@@ -75,11 +75,11 @@ export default function ButterflyPlot({
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
   const chartInitialized = useRef<boolean>(false);
-  const attackDataRef = useRef<AttackData[]>([]);
+  const attackDataRef = useRef<AttackResult[]>([]);
 
-  const retrainJson = data?.retrainJson;
-  const unlearnJson = data?.unlearnJson;
-  const attackData = data?.attackData;
+  const retrainJson = data?.retrainData;
+  const unlearnJson = data?.unlearnData;
+  const attackData = data?.lineChartData;
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === "entropy";
@@ -135,35 +135,30 @@ export default function ButterflyPlot({
   );
 
   useEffect(() => {
+    if (!data) return;
+
     if (!chartInitialized.current) {
       if (!retrainJson || !unlearnJson || !attackData) return;
 
       // get data ready
       attackDataRef.current = attackData;
 
-      const retrainValues = retrainJson[metric]
-        ? retrainJson[metric].values
-        : [];
-      const unlearnValues = unlearnJson[metric]
-        ? unlearnJson[metric].values
-        : [];
-
-      const createBins = (bins: number[]) => {
+      const createBins = (bins: Bin[]) => {
         const binsMap: Record<string, number[]> = {};
-        bins.forEach((d) => {
+        bins.forEach((bin) => {
           const key = (
-            Math.floor(d / CONFIG.BIN_SIZE) * CONFIG.BIN_SIZE
+            Math.floor(bin.value / CONFIG.BIN_SIZE) * CONFIG.BIN_SIZE
           ).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
-          binsMap[key].push(d);
+          binsMap[key].push(bin.value);
         });
         return Object.keys(binsMap)
           .map((key) => ({ threshold: +key, values: binsMap[key] }))
           .sort((a, b) => a.threshold - b.threshold);
       };
 
-      const retrainBins = createBins(retrainValues);
-      const unlearnBins = createBins(unlearnValues);
+      const retrainBins = createBins(data.retrainData);
+      const unlearnBins = createBins(data.unlearnData);
       const maxCountRetrain = d3.max(retrainBins, (d) => d.values.length) || 0;
       const maxCountUnlearn = d3.max(unlearnBins, (d) => d.values.length) || 0;
       const maxDisplayCircles = Math.floor(wB / 2 / circleDiameter);
@@ -557,7 +552,7 @@ export default function ButterflyPlot({
 
       // Draw attack lines
       const attackLine = d3
-        .line<AttackData>()
+        .line<AttackResult>()
         .x((d) => xScaleL(d.attack_score))
         .y((d) => yScaleL(d.threshold));
 
@@ -582,7 +577,7 @@ export default function ButterflyPlot({
 
       // Draw FPR lines
       const fprLine = d3
-        .line<AttackData>()
+        .line<AttackResult>()
         .x((d) => xScaleL(d.fpr))
         .y((d) => yScaleL(d.threshold));
 
@@ -607,7 +602,7 @@ export default function ButterflyPlot({
 
       // Draw FNR lines
       const fnrLine = d3
-        .line<AttackData>()
+        .line<AttackResult>()
         .x((d) => xScaleL(d.fnr))
         .y((d) => yScaleL(d.threshold));
 
@@ -765,8 +760,8 @@ export default function ButterflyPlot({
       const intGroup = gL.append("g").attr("class", "intersection-group");
 
       const getIntersections = (
-        data: AttackData[],
-        xAccessor: (d: AttackData) => number,
+        data: AttackResult[],
+        xAccessor: (d: AttackResult) => number,
         th: number
       ) => {
         const intersections: { x: number; y: number }[] = [];
@@ -1001,15 +996,15 @@ export default function ButterflyPlot({
         .range([hL, 0]);
 
       const attackLine = d3
-        .line<AttackData>()
+        .line<AttackResult>()
         .x((d) => xScaleL(d.attack_score))
         .y((d) => yScaleL(d.threshold));
       const fprLine = d3
-        .line<AttackData>()
+        .line<AttackResult>()
         .x((d) => xScaleL(d.fpr))
         .y((d) => yScaleL(d.threshold));
       const fnrLine = d3
-        .line<AttackData>()
+        .line<AttackResult>()
         .x((d) => xScaleL(d.fnr))
         .y((d) => yScaleL(d.threshold));
 
@@ -1055,8 +1050,8 @@ export default function ButterflyPlot({
       intGroup.selectAll("circle").remove();
 
       const getIntersections = (
-        data: AttackData[],
-        xAccessor: (d: AttackData) => number,
+        data: AttackResult[],
+        xAccessor: (d: AttackResult) => number,
         th: number
       ) => {
         const intersections: { x: number; y: number }[] = [];
@@ -1178,6 +1173,7 @@ export default function ButterflyPlot({
   }, [
     attackData,
     circleDiameter,
+    data,
     getCircleOpacity,
     hB,
     hL,

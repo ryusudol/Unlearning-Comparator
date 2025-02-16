@@ -3,7 +3,7 @@ import * as d3 from "d3";
 
 import { Metric } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
-import { ExperimentJsonData } from "../../types/privacy-attack";
+import { Bin, Data } from "./AttackAnalytics";
 
 const CONFIG = {
   HIGH_OPACITY: 1,
@@ -21,8 +21,7 @@ interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
   metric: Metric;
   thresholdValue: number;
-  retrainJson: ExperimentJsonData;
-  unlearnJson: ExperimentJsonData;
+  data: Data;
   attackScore: number;
 }
 
@@ -30,8 +29,7 @@ export default function AttackSuccessFailure({
   mode,
   metric,
   thresholdValue,
-  retrainJson,
-  unlearnJson,
+  data,
   attackScore,
 }: AttackSuccessFailureProps) {
   const successRef = useRef<SVGSVGElement | null>(null);
@@ -46,12 +44,12 @@ export default function AttackSuccessFailure({
     : CONFIG.CONFIDENCE_THRESHOLD_STEP;
 
   const groupByBin = useCallback(
-    (data: number[]) => {
+    (data: Bin[]) => {
       const bins: Record<number, number[]> = {};
-      data.forEach((v) => {
-        const bin = Math.floor(v / thresholdStep) * thresholdStep;
+      data.forEach((datum) => {
+        const bin = Math.floor(datum.value / thresholdStep) * thresholdStep;
         if (!bins[bin]) bins[bin] = [];
-        bins[bin].push(v);
+        bins[bin].push(datum.value);
       });
       const sortedBins = Object.keys(bins)
         .map((k) => parseFloat(k))
@@ -67,10 +65,7 @@ export default function AttackSuccessFailure({
     computedSuccessPct,
     computedFailurePct,
   } = useMemo(() => {
-    const retrainValues: number[] = retrainJson?.[metric]?.values || [];
-    const ga3Values: number[] = unlearnJson?.[metric]?.values || [];
-
-    if (!retrainValues.length && !ga3Values.length) {
+    if (!data || (!data.retrainData.length && !data.unlearnData.length)) {
       return {
         successGroupComputed: [],
         failureGroupComputed: [],
@@ -82,21 +77,29 @@ export default function AttackSuccessFailure({
     let successRetrain, successGA3, failureRetrain, failureGA3;
     if (isMetricEntropy) {
       successRetrain = groupByBin(
-        retrainValues.filter((v) => v < thresholdValue)
+        data.retrainData.filter((item) => item.value < thresholdValue)
       );
-      successGA3 = groupByBin(ga3Values.filter((v) => v > thresholdValue));
-      failureGA3 = groupByBin(ga3Values.filter((v) => v <= thresholdValue));
+      successGA3 = groupByBin(
+        data.unlearnData.filter((item) => item.value > thresholdValue)
+      );
+      failureGA3 = groupByBin(
+        data.unlearnData.filter((item) => item.value <= thresholdValue)
+      );
       failureRetrain = groupByBin(
-        retrainValues.filter((v) => v >= thresholdValue)
+        data.retrainData.filter((item) => item.value >= thresholdValue)
       );
     } else {
       successRetrain = groupByBin(
-        retrainValues.filter((v) => v < thresholdValue)
+        data.retrainData.filter((item) => item.value < thresholdValue)
       );
-      successGA3 = groupByBin(ga3Values.filter((v) => v > thresholdValue));
-      failureGA3 = groupByBin(ga3Values.filter((v) => v <= thresholdValue));
+      successGA3 = groupByBin(
+        data.unlearnData.filter((item) => item.value > thresholdValue)
+      );
+      failureGA3 = groupByBin(
+        data.unlearnData.filter((item) => item.value <= thresholdValue)
+      );
       failureRetrain = groupByBin(
-        retrainValues.filter((v) => v >= thresholdValue)
+        data.retrainData.filter((item) => item.value >= thresholdValue)
       );
     }
 
@@ -122,14 +125,7 @@ export default function AttackSuccessFailure({
       computedSuccessPct,
       computedFailurePct,
     };
-  }, [
-    groupByBin,
-    isMetricEntropy,
-    metric,
-    retrainJson,
-    thresholdValue,
-    unlearnJson,
-  ]);
+  }, [data, groupByBin, isMetricEntropy, thresholdValue]);
 
   useEffect(() => {
     const successSVG = d3.select(successRef.current);
