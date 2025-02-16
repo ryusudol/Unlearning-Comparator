@@ -345,7 +345,7 @@ export default function ButterflyPlot({
         .attr("class", "y-axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -hB / 2)
-        .attr("y", -222)
+        .attr("y", -226)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", "black")
@@ -1004,7 +1004,6 @@ export default function ButterflyPlot({
       // Draw a new y-axis for a butterfly chart based on the metric value
       gB.select(".y-axis")
         .transition()
-        .duration(500)
         .call((g: any) =>
           d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g)
         );
