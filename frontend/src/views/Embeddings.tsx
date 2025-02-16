@@ -54,7 +54,6 @@ export default function Embeddings({ height }: { height: number }) {
   }, [baseline, forgetClassNumber]);
 
   useEffect(() => {
-    console.log('Current forget class number:', forgetClassNumber);
     async function loadComparisonData() {
       if (!comparison) return;
       try {

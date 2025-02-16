@@ -1,15 +1,13 @@
-interface Confidence {
+interface BinData {
   values: number[];
   range: number[];
   bins: number;
   max_display: number;
 }
 
-type Entropy = Confidence;
-
 export interface ExperimentJsonData {
-  confidence: Confidence;
-  entropy: Entropy;
+  confidence: BinData;
+  entropy: BinData;
 }
 
 export interface AttackData {
