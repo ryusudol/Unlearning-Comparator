@@ -26,6 +26,31 @@ export type Point = [
   }
 ];
 
+export type AttackValue = {
+  img: number;
+  entropy: number;
+  confidence: number;
+};
+
+export type AttackResult = {
+  threshold: number;
+  fpr: number;
+  fnr: number;
+  attack_score: number;
+};
+
+export type AttackResults = {
+  entropy_above_unlearn: AttackResult[];
+  entropy_above_retrain: AttackResult[];
+  confidence_above_unlearn: AttackResult[];
+  confidence_above_retrain: AttackResult[];
+};
+
+export type AttackData = {
+  values: AttackValue[];
+  results: AttackResults;
+};
+
 export type ExperimentData = {
   id: string;
   fc: number;
@@ -40,6 +65,7 @@ export type ExperimentData = {
   TUA: number | string;
   TRA: number | string;
   RTE: number | string;
+  FQS: number | string;
   accs: number[];
   label_dist: Dist;
   conf_dist: Dist;
@@ -48,4 +74,5 @@ export type ExperimentData = {
   t_conf_dist: Dist;
   cka: CKA;
   points: Point[];
+  attack: AttackData;
 };

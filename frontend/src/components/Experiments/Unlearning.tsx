@@ -52,6 +52,7 @@ let initialExperiment: ExperimentData = {
   TUA: "-",
   TRA: "-",
   RTE: "-",
+  FQS: "-",
   accs: [],
   label_dist: {},
   conf_dist: {},
@@ -70,6 +71,15 @@ let initialExperiment: ExperimentData = {
     },
   },
   points: [],
+  attack: {
+    values: [],
+    results: {
+      entropy_above_unlearn: [],
+      entropy_above_retrain: [],
+      confidence_above_unlearn: [],
+      confidence_above_retrain: [],
+    },
+  },
 };
 
 type Combination = {
