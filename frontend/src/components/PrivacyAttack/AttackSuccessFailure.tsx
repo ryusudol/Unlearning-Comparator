@@ -6,6 +6,8 @@ import { COLORS } from "../../constants/colors";
 import { Bin, Data } from "./AttackAnalytics";
 
 const CONFIG = {
+  RETRAIN: "retrain",
+  UNLEARN: "unlearn",
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
   CIRCLE_RADIUS: 3,
@@ -21,6 +23,7 @@ interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
   metric: Metric;
   thresholdValue: number;
+  aboveThreshold: string;
   data: Data;
   attackScore: number;
 }
@@ -29,6 +32,7 @@ export default function AttackSuccessFailure({
   mode,
   metric,
   thresholdValue,
+  aboveThreshold,
   data,
   attackScore,
 }: AttackSuccessFailureProps) {
@@ -36,8 +40,8 @@ export default function AttackSuccessFailure({
   const failureRef = useRef<SVGSVGElement | null>(null);
 
   const isBaseline = mode === "Baseline";
+  const isAboveThresholdUnlearn = aboveThreshold === "unlearn";
   const forgettingQualityScore = 1 - attackScore;
-
   const isMetricEntropy = metric === "entropy";
   const thresholdStep = isMetricEntropy
     ? CONFIG.ENTROPY_THRESHOLD_STEP
@@ -59,87 +63,83 @@ export default function AttackSuccessFailure({
     [thresholdStep]
   );
 
-  const {
-    successGroupComputed,
-    failureGroupComputed,
-    computedSuccessPct,
-    computedFailurePct,
-  } = useMemo(() => {
+  const { successGroup, failureGroup, successPct, failurePct } = useMemo(() => {
     if (!data || (!data.retrainData.length && !data.unlearnData.length)) {
       return {
-        successGroupComputed: [],
-        failureGroupComputed: [],
-        computedSuccessPct: 0,
-        computedFailurePct: 0,
+        successGroup: [],
+        failureGroup: [],
+        successPct: 0,
+        failurePct: 0,
       };
     }
 
-    let successRetrain, successGA3, failureRetrain, failureGA3;
-    if (isMetricEntropy) {
-      successRetrain = groupByBin(
-        data.retrainData.filter((item) => item.value < thresholdValue)
-      );
-      successGA3 = groupByBin(
-        data.unlearnData.filter((item) => item.value > thresholdValue)
-      );
-      failureGA3 = groupByBin(
-        data.unlearnData.filter((item) => item.value <= thresholdValue)
-      );
-      failureRetrain = groupByBin(
-        data.retrainData.filter((item) => item.value >= thresholdValue)
-      );
-    } else {
-      successRetrain = groupByBin(
-        data.retrainData.filter((item) => item.value < thresholdValue)
-      );
-      successGA3 = groupByBin(
-        data.unlearnData.filter((item) => item.value > thresholdValue)
-      );
-      failureGA3 = groupByBin(
-        data.unlearnData.filter((item) => item.value <= thresholdValue)
-      );
-      failureRetrain = groupByBin(
-        data.retrainData.filter((item) => item.value >= thresholdValue)
-      );
-    }
-
-    const successGroupComputed = [
-      ...successRetrain.map((v) => ({ type: "retrain" as const, value: v })),
-      ...successGA3.map((v) => ({ type: "unlearn" as const, value: v })),
-    ];
-    const failureGroupComputed = [
-      ...failureGA3.map((v) => ({ type: "unlearn" as const, value: v })),
-      ...failureRetrain.map((v) => ({ type: "retrain" as const, value: v })),
-    ];
-
-    const computedSuccessPct = parseFloat(
-      ((successGroupComputed.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
+    const successRetrain = groupByBin(
+      data.retrainData.filter((item) =>
+        isAboveThresholdUnlearn
+          ? item.value < thresholdValue
+          : item.value > thresholdValue
+      )
     );
-    const computedFailurePct = parseFloat(
-      ((failureGroupComputed.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
+    const successUnlearn = groupByBin(
+      data.unlearnData.filter((item) =>
+        isAboveThresholdUnlearn
+          ? item.value > thresholdValue
+          : item.value < thresholdValue
+      )
+    );
+    const failureUnlearn = groupByBin(
+      data.unlearnData.filter((item) =>
+        isAboveThresholdUnlearn
+          ? item.value <= thresholdValue
+          : item.value >= thresholdValue
+      )
+    );
+    const failureRetrain = groupByBin(
+      data.retrainData.filter((item) =>
+        isAboveThresholdUnlearn
+          ? item.value >= thresholdValue
+          : item.value <= thresholdValue
+      )
+    );
+
+    const successGroup = [
+      ...successRetrain.map((v) => ({ type: CONFIG.RETRAIN, value: v })),
+      ...successUnlearn.map((v) => ({ type: CONFIG.UNLEARN, value: v })),
+    ];
+    const failureGroup = [
+      ...failureUnlearn.map((v) => ({ type: CONFIG.UNLEARN, value: v })),
+      ...failureRetrain.map((v) => ({ type: CONFIG.RETRAIN, value: v })),
+    ];
+
+    const successPct = parseFloat(
+      ((successGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
+    );
+    const failurePct = parseFloat(
+      ((failureGroup.length / CONFIG.TOTAL_DATA_COUNT) * 100).toFixed(2)
     );
 
     return {
-      successGroupComputed,
-      failureGroupComputed,
-      computedSuccessPct,
-      computedFailurePct,
+      successGroup,
+      failureGroup,
+      successPct,
+      failurePct,
     };
-  }, [data, groupByBin, isMetricEntropy, thresholdValue]);
+  }, [data, groupByBin, isAboveThresholdUnlearn, thresholdValue]);
 
   useEffect(() => {
     const successSVG = d3.select(successRef.current);
+
     successSVG.selectAll("*").remove();
+
     const successCols = CONFIG.MAX_COLUMNS;
-    const successRows = Math.ceil(
-      successGroupComputed.length / CONFIG.MAX_COLUMNS
-    );
+    const successRows = Math.ceil(successGroup.length / CONFIG.MAX_COLUMNS);
     const successSVGWidth = successCols * CONFIG.CELL_SIZE;
     const successSVGHeight = successRows * CONFIG.CELL_SIZE;
+
     successSVG.attr("width", successSVGWidth).attr("height", successSVGHeight);
     successSVG
       .selectAll("circle")
-      .data(successGroupComputed)
+      .data(successGroup)
       .enter()
       .append("circle")
       .attr(
@@ -155,18 +155,18 @@ export default function AttackSuccessFailure({
       )
       .attr("r", CONFIG.CIRCLE_RADIUS)
       .attr("fill", (d) =>
-        d.type === "retrain"
+        d.type === CONFIG.RETRAIN
           ? COLORS.DARK_GRAY
           : isBaseline
           ? COLORS.PURPLE
           : COLORS.EMERALD
       )
       .attr("fill-opacity", (d) =>
-        d.type === "retrain" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+        d.type === CONFIG.RETRAIN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke", (d) => {
         const fillColor =
-          d.type === "retrain"
+          d.type === CONFIG.RETRAIN
             ? COLORS.DARK_GRAY
             : isBaseline
             ? COLORS.PURPLE
@@ -174,22 +174,20 @@ export default function AttackSuccessFailure({
         return d3.color(fillColor)?.darker().toString() ?? fillColor;
       })
       .attr("stroke-opacity", (d) =>
-        d.type === "retrain" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+        d.type === CONFIG.RETRAIN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke-width", CONFIG.STROKE_WIDTH);
 
     const failureSVG = d3.select(failureRef.current);
     failureSVG.selectAll("*").remove();
     const failureCols = CONFIG.MAX_COLUMNS;
-    const failureRows = Math.ceil(
-      failureGroupComputed.length / CONFIG.MAX_COLUMNS
-    );
+    const failureRows = Math.ceil(failureGroup.length / CONFIG.MAX_COLUMNS);
     const failureSVGWidth = failureCols * CONFIG.CELL_SIZE;
     const failureSVGHeight = failureRows * CONFIG.CELL_SIZE;
     failureSVG.attr("width", failureSVGWidth).attr("height", failureSVGHeight);
     failureSVG
       .selectAll("circle")
-      .data(failureGroupComputed)
+      .data(failureGroup)
       .enter()
       .append("circle")
       .attr(
@@ -205,18 +203,18 @@ export default function AttackSuccessFailure({
       )
       .attr("r", CONFIG.CIRCLE_RADIUS)
       .attr("fill", (d) =>
-        d.type === "unlearn"
+        d.type === CONFIG.UNLEARN
           ? isBaseline
             ? COLORS.PURPLE
             : COLORS.EMERALD
           : COLORS.DARK_GRAY
       )
       .attr("fill-opacity", (d) =>
-        d.type === "unlearn" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+        d.type === CONFIG.UNLEARN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke", (d) => {
         const fillColor =
-          d.type === "unlearn"
+          d.type === CONFIG.UNLEARN
             ? isBaseline
               ? COLORS.PURPLE
               : COLORS.EMERALD
@@ -224,10 +222,10 @@ export default function AttackSuccessFailure({
         return d3.color(fillColor)?.darker().toString() ?? fillColor;
       })
       .attr("stroke-opacity", (d) =>
-        d.type === "unlearn" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+        d.type === CONFIG.UNLEARN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke-width", CONFIG.STROKE_WIDTH);
-  }, [successGroupComputed, failureGroupComputed, isBaseline]);
+  }, [successGroup, failureGroup, isBaseline]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
@@ -237,7 +235,7 @@ export default function AttackSuccessFailure({
             <div className="flex items-center">
               <span className="text-[15px]">Attack Success</span>
               <span className="ml-1.5 text-[15px] font-light w-11">
-                {computedSuccessPct.toFixed(2)}%
+                {successPct.toFixed(2)}%
               </span>
             </div>
             <p className="text-xs font-light leading-[14px] mb-1">
@@ -253,7 +251,7 @@ export default function AttackSuccessFailure({
             <div className="flex items-center">
               <span className="text-[15px] mb-0.5">Attack Failure</span>
               <span className="ml-4 text-[15px] font-light w-11">
-                {computedFailurePct.toFixed(2)}%
+                {failurePct.toFixed(2)}%
               </span>
             </div>
             <p className="text-xs font-light leading-[14px] mb-1">
