@@ -552,16 +552,14 @@ export default function ButterflyPlot({
         .domain([thresholdMin, thresholdMax])
         .range([hL, 0]);
 
-      // Separate a line chart into two parts: above threshold and below threshold
-      const defs = svgL.append("defs");
+      // create a function for the glare effect
+      const defs = gL.append("defs");
       const glowFilter = defs
         .append("filter")
         .attr("id", "glow")
-        .attr("filterUnits", "userSpaceOnUse")
-        .attr("x", "-50%")
-        .attr("y", "-50%")
-        .attr("width", "200%")
-        .attr("height", "200%")
+        .attr("width", "300%")
+        .attr("height", "300%");
+      glowFilter
         .append("feGaussianBlur")
         .attr("in", "SourceGraphic")
         .attr("stdDeviation", "3")
@@ -570,6 +568,8 @@ export default function ButterflyPlot({
       const feMerge = glowFilter.append("feMerge");
       feMerge.append("feMergeNode").attr("in", "coloredBlur");
       feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+      // Separate a line chart into two parts: above threshold and below threshold
       defs
         .append("clipPath")
         .attr("id", `aboveThreshold-${mode}`)
