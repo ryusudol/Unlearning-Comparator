@@ -38,11 +38,7 @@ export default function AttackAnalytics({
   useEffect(() => {
     Promise.all([
       d3.json<any>("class_1_Retrain.json"),
-      d3.json<any>(
-        isMetricEntropy
-          ? "Class_1_GA3.json"
-          : "Attack_Exp_Confidence_Scores.json"
-      ),
+      d3.json<any>("Class_1_GA3.json"),
       d3.json<any>("class_1_4scenarios.json"),
     ]).then(([retrainJson, unlearnJson, scenarios]) => {
       if (!retrainJson || !unlearnJson || !scenarios) return;
@@ -153,9 +149,10 @@ export default function AttackAnalytics({
       {data && (
         <AttackSuccessFailure
           mode={mode}
+          metric={metric}
           thresholdValue={thresholdValue}
           retrainJson={data.retrainJson}
-          ga3Json={data.unlearnJson}
+          unlearnJson={data.unlearnJson}
           attackScore={attackScore}
         />
       )}

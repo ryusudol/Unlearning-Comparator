@@ -1,7 +1,9 @@
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 
+import { Metric } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
+import { ExperimentJsonData } from "../../types/privacy-attack";
 
 const CONFIG = {
   HIGH_OPACITY: 1,
@@ -11,21 +13,25 @@ const CONFIG = {
   MAX_COLUMNS: 20,
   STROKE_WIDTH: 0.8,
   TOTAL_DATA_COUNT: 400,
+  ENTROPY_THRESHOLD_STEP: 0.05,
+  CONFIDENCE_THRESHOLD_STEP: 0.25,
 } as const;
 
 interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
+  metric: Metric;
   thresholdValue: number;
-  retrainJson: any;
-  ga3Json: any;
+  retrainJson: ExperimentJsonData;
+  unlearnJson: ExperimentJsonData;
   attackScore: number;
 }
 
 export default function AttackSuccessFailure({
   mode,
+  metric,
   thresholdValue,
   retrainJson,
-  ga3Json,
+  unlearnJson,
   attackScore,
 }: AttackSuccessFailureProps) {
   const successRef = useRef<SVGSVGElement | null>(null);
@@ -34,18 +40,26 @@ export default function AttackSuccessFailure({
   const isBaseline = mode === "Baseline";
   const forgettingQualityScore = 1 - attackScore;
 
-  const groupByBin = (data: number[]) => {
-    const bins: Record<number, number[]> = {};
-    data.forEach((v) => {
-      const bin = Math.floor(v / 0.05) * 0.05;
-      if (!bins[bin]) bins[bin] = [];
-      bins[bin].push(v);
-    });
-    const sortedBins = Object.keys(bins)
-      .map((k) => parseFloat(k))
-      .sort((a, b) => a - b);
-    return sortedBins.flatMap((bin) => bins[bin]);
-  };
+  const isMetricEntropy = metric === "entropy";
+  const thresholdStep = isMetricEntropy
+    ? CONFIG.ENTROPY_THRESHOLD_STEP
+    : CONFIG.CONFIDENCE_THRESHOLD_STEP;
+
+  const groupByBin = useCallback(
+    (data: number[]) => {
+      const bins: Record<number, number[]> = {};
+      data.forEach((v) => {
+        const bin = Math.floor(v / thresholdStep) * thresholdStep;
+        if (!bins[bin]) bins[bin] = [];
+        bins[bin].push(v);
+      });
+      const sortedBins = Object.keys(bins)
+        .map((k) => parseFloat(k))
+        .sort((a, b) => a - b);
+      return sortedBins.flatMap((bin) => bins[bin]);
+    },
+    [thresholdStep]
+  );
 
   const {
     successGroupComputed,
@@ -53,8 +67,8 @@ export default function AttackSuccessFailure({
     computedSuccessPct,
     computedFailurePct,
   } = useMemo(() => {
-    const retrainValues: number[] = retrainJson?.entropy?.values || [];
-    const ga3Values: number[] = ga3Json?.entropy?.values || [];
+    const retrainValues: number[] = retrainJson?.[metric]?.values || [];
+    const ga3Values: number[] = unlearnJson?.[metric]?.values || [];
 
     if (!retrainValues.length && !ga3Values.length) {
       return {
@@ -65,21 +79,33 @@ export default function AttackSuccessFailure({
       };
     }
 
-    const successRetrain = groupByBin(
-      retrainValues.filter((v) => v < thresholdValue)
-    );
-    const successGA3 = groupByBin(ga3Values.filter((v) => v > thresholdValue));
-    const failureGA3 = groupByBin(ga3Values.filter((v) => v <= thresholdValue));
-    const failureRetrain = groupByBin(
-      retrainValues.filter((v) => v >= thresholdValue)
-    );
+    let successRetrain, successGA3, failureRetrain, failureGA3;
+    if (isMetricEntropy) {
+      successRetrain = groupByBin(
+        retrainValues.filter((v) => v < thresholdValue)
+      );
+      successGA3 = groupByBin(ga3Values.filter((v) => v > thresholdValue));
+      failureGA3 = groupByBin(ga3Values.filter((v) => v <= thresholdValue));
+      failureRetrain = groupByBin(
+        retrainValues.filter((v) => v >= thresholdValue)
+      );
+    } else {
+      successRetrain = groupByBin(
+        retrainValues.filter((v) => v < thresholdValue)
+      );
+      successGA3 = groupByBin(ga3Values.filter((v) => v > thresholdValue));
+      failureGA3 = groupByBin(ga3Values.filter((v) => v <= thresholdValue));
+      failureRetrain = groupByBin(
+        retrainValues.filter((v) => v >= thresholdValue)
+      );
+    }
 
     const successGroupComputed = [
       ...successRetrain.map((v) => ({ type: "retrain" as const, value: v })),
-      ...successGA3.map((v) => ({ type: "ga3" as const, value: v })),
+      ...successGA3.map((v) => ({ type: "unlearn" as const, value: v })),
     ];
     const failureGroupComputed = [
-      ...failureGA3.map((v) => ({ type: "ga3" as const, value: v })),
+      ...failureGA3.map((v) => ({ type: "unlearn" as const, value: v })),
       ...failureRetrain.map((v) => ({ type: "retrain" as const, value: v })),
     ];
 
@@ -96,7 +122,14 @@ export default function AttackSuccessFailure({
       computedSuccessPct,
       computedFailurePct,
     };
-  }, [retrainJson, ga3Json, thresholdValue]);
+  }, [
+    groupByBin,
+    isMetricEntropy,
+    metric,
+    retrainJson,
+    thresholdValue,
+    unlearnJson,
+  ]);
 
   useEffect(() => {
     const successSVG = d3.select(successRef.current);
@@ -176,18 +209,18 @@ export default function AttackSuccessFailure({
       )
       .attr("r", CONFIG.CIRCLE_RADIUS)
       .attr("fill", (d) =>
-        d.type === "ga3"
+        d.type === "unlearn"
           ? isBaseline
             ? COLORS.PURPLE
             : COLORS.EMERALD
           : COLORS.DARK_GRAY
       )
       .attr("fill-opacity", (d) =>
-        d.type === "ga3" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+        d.type === "unlearn" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke", (d) => {
         const fillColor =
-          d.type === "ga3"
+          d.type === "unlearn"
             ? isBaseline
               ? COLORS.PURPLE
               : COLORS.EMERALD
@@ -195,7 +228,7 @@ export default function AttackSuccessFailure({
         return d3.color(fillColor)?.darker().toString() ?? fillColor;
       })
       .attr("stroke-opacity", (d) =>
-        d.type === "ga3" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+        d.type === "unlearn" ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
       )
       .attr("stroke-width", CONFIG.STROKE_WIDTH);
   }, [successGroupComputed, failureGroupComputed, isBaseline]);
