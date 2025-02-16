@@ -793,6 +793,7 @@ export default function ButterflyPlot({
       redInts.forEach((pt) => {
         intGroup
           .append("circle")
+          .attr("class", "intersection-red")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
           .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
@@ -834,6 +835,8 @@ export default function ButterflyPlot({
           .attr("stroke", "black")
           .attr("stroke-width", 1);
       });
+
+      intGroup.selectAll(".intersection-red").raise();
 
       // create a info group
       const attackIntersectPos =
@@ -1082,6 +1085,7 @@ export default function ButterflyPlot({
       redInts.forEach((pt) => {
         intGroup
           .append("circle")
+          .attr("class", "intersection-red")
           .attr("cx", pt.x)
           .attr("cy", pt.y)
           .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
@@ -1122,7 +1126,9 @@ export default function ButterflyPlot({
           .attr("stroke-width", 1);
       });
 
-      const newLabel = metric === "entropy" ? "Entropy" : "Confidence";
+      intGroup.selectAll(".intersection-red").raise();
+
+      const newLabel = isMetricEntropy ? "Entropy" : "Confidence";
       svgB.select("text.y-axis-label").text(newLabel);
 
       const infoGroup = gL.select(".info-group");
