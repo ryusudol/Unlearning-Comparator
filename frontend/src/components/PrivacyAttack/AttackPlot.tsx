@@ -734,7 +734,7 @@ export default function ButterflyPlot({
       // Draw a legend for a line chart
       const lineChartLegendGroup = gL
         .append("g")
-        .attr("transform", `translate(${wL - 10}, 4)`);
+        .attr("transform", `translate(${wL - 37}, 4)`);
       lineChartLegendGroup
         .append("rect")
         .attr("x", -98)
