@@ -18,12 +18,14 @@ import { Label } from "..//UI/label";
 import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
+  thresholdStrategy: string;
   onMetricChange: (val: Metric) => void;
   onAboveThresholdChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export default function AttackLegend({
+  thresholdStrategy,
   onMetricChange,
   onAboveThresholdChange,
   onThresholdStrategyChange,
@@ -79,7 +81,10 @@ export default function AttackLegend({
             <HoverCard openDelay={0} closeDelay={100}>
               <HoverCardTrigger
                 onClick={onThresholdStrategyChange}
-                className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+                className={`h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition ${
+                  thresholdStrategy === strategy.strategy &&
+                  "bg-[#e2e8f0] hover:bg-[#e2e8f0] text-red-500"
+                }`}
               >
                 {strategy.strategy}
               </HoverCardTrigger>

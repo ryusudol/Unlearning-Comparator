@@ -43,6 +43,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
       className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none relative"
     >
       <AttackLegend
+        thresholdStrategy={thresholdStrategy}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
