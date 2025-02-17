@@ -144,11 +144,7 @@ async def process_attack_metrics(
     distribution_data = prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps)
     unlearn_data = {
         "attack": {
-            "values": {
-                "img": [item["img"] for item in distribution_data["values"]],
-                "entropy": [item["entropy"] for item in distribution_data["values"]],
-                "confidence": [item["confidence"] for item in distribution_data["values"]]
-            }
+            "values": distribution_data["values"]
         }
     }
     with open("attack.json", "w") as f:
@@ -159,7 +155,7 @@ async def process_attack_metrics(
     retrain_file = f"data/{forget_class}/a00{forget_class}.json"
     with open(retrain_file, "r") as f:
         retrain_raw = json.load(f)
-        # 수정된 retrain JSON 구조: 'attack' 아래 'values'가 리스트 형태임.
+        # Modified retrain JSON structure: 'attack' below 'values' is a list.
         retrain_vals = retrain_raw["attack"]["values"]
         retrain_data = {
             "values": {
@@ -169,9 +165,17 @@ async def process_attack_metrics(
             }
         }
     
-    # Compute scores for the four scenarios.
+    # unlearn_data["attack"]["values"] is a list, so convert it to a dictionary for calculation.
+    unlearn_vals_list = unlearn_data["attack"]["values"]
+    unlearn_data_dict = {
+        "img": [item["img"] for item in unlearn_vals_list],
+        "entropy": [item["entropy"] for item in unlearn_vals_list],
+        "confidence": [item["confidence"] for item in unlearn_vals_list]
+    }
+    
+    # Use unlearn_data_dict for calculation.
     scores_ent_unlearn = calculate_scores(
-        np.array(unlearn_data["attack"]["values"]["entropy"]),
+        np.array(unlearn_data_dict["entropy"]),
         np.array(retrain_data["values"]["entropy"]),
         ENTROPY_CONFIG["bins"],
         ENTROPY_CONFIG["range"],
@@ -179,7 +183,7 @@ async def process_attack_metrics(
         direction="unlearn"
     )
     scores_ent_retrain = calculate_scores(
-        np.array(unlearn_data["attack"]["values"]["entropy"]),
+        np.array(unlearn_data_dict["entropy"]),
         np.array(retrain_data["values"]["entropy"]),
         ENTROPY_CONFIG["bins"],
         ENTROPY_CONFIG["range"],
@@ -187,7 +191,7 @@ async def process_attack_metrics(
         direction="retrain"
     )
     scores_conf_retrain = calculate_scores(
-        np.array(unlearn_data["attack"]["values"]["confidence"]),
+        np.array(unlearn_data_dict["confidence"]),
         np.array(retrain_data["values"]["confidence"]),
         CONFIDENCE_CONFIG["bins"],
         CONFIDENCE_CONFIG["range"],
@@ -195,7 +199,7 @@ async def process_attack_metrics(
         direction="retrain"
     )
     scores_conf_unlearn = calculate_scores(
-        np.array(unlearn_data["attack"]["values"]["confidence"]),
+        np.array(unlearn_data_dict["confidence"]),
         np.array(retrain_data["values"]["confidence"]),
         CONFIDENCE_CONFIG["bins"],
         CONFIDENCE_CONFIG["range"],

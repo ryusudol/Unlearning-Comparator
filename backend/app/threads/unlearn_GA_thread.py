@@ -93,7 +93,6 @@ class UnlearningGAThread(threading.Thread):
         
         samples_per_class = UMAP_DATA_SIZE // self.num_classes
         generator = torch.Generator()
-
         generator.manual_seed(UNLEARN_SEED)
         selected_indices = []
         for indices in class_indices:
@@ -167,7 +166,6 @@ class UnlearningGAThread(threading.Thread):
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
-            # forget_class=self.request.forget_class
         )
         
         unlearn_accuracy = train_class_accuracies[self.request.forget_class]
@@ -201,7 +199,6 @@ class UnlearningGAThread(threading.Thread):
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
-            # forget_class=self.request.forget_class
         )
 
         # Update test evaluation status for remain classes only
@@ -247,7 +244,7 @@ class UnlearningGAThread(threading.Thread):
         
         # Add attack metrics processing similar to custom_thread
         print("Processing attack metrics on UMAP subset")
-        await process_attack_metrics(
+        values, attack_results, fqs = await process_attack_metrics(
             model=self.model, 
             data_loader=umap_subset_loader, 
             device=self.device, 
@@ -289,7 +286,7 @@ class UnlearningGAThread(threading.Thread):
            sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
         )
         
-        # Prepare results dictionary
+        # Prepare results dictionary with attack metrics added
         results = {
             "id": self.status.recent_id,
             "fc": self.request.forget_class,
@@ -312,12 +309,17 @@ class UnlearningGAThread(threading.Thread):
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": cka_results["similarity"],
             "points": detailed_results,
+            "FQS": fqs,
+            "attack": {
+                "values": values,
+                "results": attack_results
+            }
         }
 
         # Save results to JSON file
         os.makedirs('data', exist_ok=True)
-
         forget_class_dir = os.path.join('data', str(self.request.forget_class))
+        
         os.makedirs(forget_class_dir, exist_ok=True)
         result_path = os.path.join(forget_class_dir, f'{results["id"]}.json')
         with open(result_path, 'w') as f:
