@@ -566,7 +566,8 @@ export default function ButterflyPlot({
       const yScaleL = d3
         .scaleLinear()
         .domain([thresholdMin, thresholdMax])
-        .range([hL, 0]);
+        .range([hL, 0])
+        .clamp(true);
 
       // create a function for the glare effect
       const defs = gL.append("defs");
@@ -1062,7 +1063,8 @@ export default function ButterflyPlot({
     const yScaleL = d3
       .scaleLinear()
       .domain([thresholdMin, thresholdMax])
-      .range([hL, 0]);
+      .range([hL, 0])
+      .clamp(true);
 
     const attackLine = d3
       .line<AttackResult>()
