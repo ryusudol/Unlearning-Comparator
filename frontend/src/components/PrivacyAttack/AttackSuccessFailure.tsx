@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 
-import { Metric } from "../../views/PrivacyAttack";
+import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
 import { Bin, Data } from "./AttackAnalytics";
 
@@ -40,9 +40,9 @@ export default function AttackSuccessFailure({
   const failureRef = useRef<SVGSVGElement | null>(null);
 
   const isBaseline = mode === "Baseline";
-  const isAboveThresholdUnlearn = aboveThreshold === "unlearn";
+  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
-  const isMetricEntropy = metric === "entropy";
+  const isMetricEntropy = metric === ENTROPY;
   const thresholdStep = isMetricEntropy
     ? CONFIG.ENTROPY_THRESHOLD_STEP
     : CONFIG.CONFIDENCE_THRESHOLD_STEP;
