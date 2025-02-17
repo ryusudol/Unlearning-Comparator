@@ -29,8 +29,10 @@ interface AttackSuccessFailureProps {
   thresholdValue: number;
   aboveThreshold: string;
   thresholdStrategy: string;
+  hoveredId: number | null;
   data: Data;
   attackScore: number;
+  setHoveredId: (val: number | null) => void;
 }
 
 export default function AttackSuccessFailure({
@@ -39,8 +41,10 @@ export default function AttackSuccessFailure({
   thresholdValue,
   aboveThreshold,
   thresholdStrategy,
+  hoveredId,
   data,
   attackScore,
+  setHoveredId,
 }: AttackSuccessFailureProps) {
   const { forgetClassNumber } = useForgetClass();
 
@@ -152,24 +156,38 @@ export default function AttackSuccessFailure({
             ? COLORS.PURPLE
             : COLORS.EMERALD
           : COLORS.DARK_GRAY;
-      const colorWithOpacity = d3.color(strokeColor);
-      if (groupItem.type === CONFIG.RETRAIN) {
-        colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
-      }
+      const defaultBorderOpacity =
+        groupItem.type === CONFIG.RETRAIN
+          ? CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
+      const imageOpacity =
+        hoveredId !== null ? (groupItem.img_idx === hoveredId ? 1 : 0.3) : 1;
+      const borderOpacity =
+        hoveredId !== null
+          ? groupItem.img_idx === hoveredId
+            ? 1
+            : 0.3
+          : defaultBorderOpacity;
+      const borderColor = d3.color(strokeColor);
+      borderColor!.opacity = borderOpacity;
       return (
         <img
           key={`success-${idx}`}
           src={`data:image/png;base64,${imgData.base64}`}
           alt="img"
+          onMouseEnter={() => setHoveredId(groupItem.img_idx)}
+          onMouseLeave={() => setHoveredId(null)}
           style={{
             width: "12px",
             height: "12px",
-            border: `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`,
+            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            opacity: imageOpacity,
+            cursor: "pointer",
           }}
         />
       );
     });
-  }, [imageMap, isBaseline, successGroup]);
+  }, [hoveredId, imageMap, isBaseline, setHoveredId, successGroup]);
 
   const failureImages = useMemo(() => {
     return failureGroup.map((groupItem, idx) => {
@@ -181,24 +199,38 @@ export default function AttackSuccessFailure({
             ? COLORS.PURPLE
             : COLORS.EMERALD
           : COLORS.DARK_GRAY;
-      const colorWithOpacity = d3.color(strokeColor);
-      if (groupItem.type === CONFIG.UNLEARN) {
-        colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
-      }
+      const defaultBorderOpacity =
+        groupItem.type === CONFIG.UNLEARN
+          ? CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
+      const imageOpacity =
+        hoveredId !== null ? (groupItem.img_idx === hoveredId ? 1 : 0.3) : 1;
+      const borderOpacity =
+        hoveredId !== null
+          ? groupItem.img_idx === hoveredId
+            ? 1
+            : 0.3
+          : defaultBorderOpacity;
+      const borderColor = d3.color(strokeColor);
+      borderColor!.opacity = borderOpacity;
       return (
         <img
-          key={`failure-${idx}`}
+          key={`success-${idx}`}
           src={`data:image/png;base64,${imgData.base64}`}
           alt="img"
+          onMouseEnter={() => setHoveredId(groupItem.img_idx)}
+          onMouseLeave={() => setHoveredId(null)}
           style={{
             width: "12px",
             height: "12px",
-            border: `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`,
+            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            opacity: imageOpacity,
+            cursor: "pointer",
           }}
         />
       );
     });
-  }, [failureGroup, imageMap, isBaseline]);
+  }, [failureGroup, hoveredId, imageMap, isBaseline, setHoveredId]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">

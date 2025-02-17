@@ -58,8 +58,10 @@ interface Props {
   thresholdValue: number;
   aboveThreshold: string;
   thresholdStrategy: string;
+  hoveredId: number | null;
   data: Data;
   setThresholdValue: (value: number) => void;
+  setHoveredId: (val: number | null) => void;
   onUpdateAttackScore: (score: number) => void;
 }
 
@@ -69,8 +71,10 @@ export default function ButterflyPlot({
   thresholdValue,
   aboveThreshold,
   thresholdStrategy,
+  hoveredId,
   data,
   setThresholdValue,
+  setHoveredId,
   onUpdateAttackScore,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -151,21 +155,21 @@ export default function ButterflyPlot({
       attackDataRef.current = attackData;
 
       const createBins = (bins: Bin[]) => {
-        const binsMap: Record<string, number[]> = {};
+        const binsMap: Record<string, Bin[]> = {};
         bins.forEach((bin) => {
           const key = (Math.floor(bin.value / binSize) * binSize).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
-          binsMap[key].push(bin.value);
+          binsMap[key].push(bin);
         });
         return Object.keys(binsMap)
-          .map((key) => ({ threshold: +key, values: binsMap[key] }))
+          .map((key) => ({ threshold: +key, bins: binsMap[key] }))
           .sort((a, b) => a.threshold - b.threshold);
       };
 
       const retrainBins = createBins(data.retrainData);
       const unlearnBins = createBins(data.unlearnData);
-      const maxCountRetrain = d3.max(retrainBins, (d) => d.values.length) || 0;
-      const maxCountUnlearn = d3.max(unlearnBins, (d) => d.values.length) || 0;
+      const maxCountRetrain = d3.max(retrainBins, (d) => d.bins.length) || 0;
+      const maxCountUnlearn = d3.max(unlearnBins, (d) => d.bins.length) || 0;
       const maxDisplayCircles = Math.floor(wB / 2 / circleDiameter);
 
       const extraRetrain =
@@ -223,18 +227,22 @@ export default function ButterflyPlot({
         const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
           Math.floor(displayingWidth / circleDiameter) + 1;
-        const displayCount = Math.min(maxDisplayCount, bin.values.length);
-        const extraCount = bin.values.length - displayCount;
+        const displayCount = Math.min(maxDisplayCount, bin.bins.length);
+        const extraCount = bin.bins.length - displayCount;
 
         for (let i = 0; i < displayCount; i++) {
-          const j = bin.values.length - displayCount + i;
-          const d = bin.values[j];
+          const currentBin = bin.bins[i];
+          const opacity =
+            hoveredId !== null
+              ? currentBin.img_idx === hoveredId
+                ? 1
+                : 0.3
+              : getCircleOpacity(yPos, yScaleB(thresholdValue));
           const cx =
             -circleDiameter / 2 - (displayCount - 1 - i) * circleDiameter;
-          const opacity = getCircleOpacity(yPos, yScaleB(thresholdValue));
 
           gB.append("circle")
-            .datum({ value: d })
+            .datum(currentBin)
             .attr("class", "retrain-circle")
             .attr("fill", COLORS.DARK_GRAY)
             .attr("cx", cx)
@@ -247,7 +255,10 @@ export default function ButterflyPlot({
                 COLORS.DARK_GRAY
             )
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
-            .attr("stroke-opacity", opacity);
+            .attr("stroke-opacity", opacity)
+            .attr("cursor", "pointer")
+            .on("mouseover", (_, d) => setHoveredId(d.img_idx))
+            .on("mouseout", () => setHoveredId(null));
         }
 
         // mark the number of extra circles that extend beyond the x-axis
@@ -273,16 +284,21 @@ export default function ButterflyPlot({
         const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
           Math.floor(displayingWidth / circleDiameter) + 1;
-        const displayCount = Math.min(maxDisplayCount, bin.values.length);
-        const extraCount = bin.values.length - displayCount;
+        const displayCount = Math.min(maxDisplayCount, bin.bins.length);
+        const extraCount = bin.bins.length - displayCount;
 
         for (let i = 0; i < displayCount; i++) {
-          const d = bin.values[i];
+          const currentBin = bin.bins[i];
+          const opacity =
+            hoveredId !== null
+              ? currentBin.img_idx === hoveredId
+                ? 1
+                : 0.3
+              : getCircleOpacity(yPos, yScaleB(thresholdValue));
           const cx = circleDiameter / 2 + i * circleDiameter;
-          const opacity = getCircleOpacity(yPos, yScaleB(thresholdValue));
 
           gB.append("circle")
-            .datum({ value: d })
+            .datum(currentBin)
             .attr("class", "unlearn-circle")
             .attr("fill", color)
             .attr("cx", cx)
@@ -291,7 +307,10 @@ export default function ButterflyPlot({
             .attr("fill-opacity", opacity)
             .attr("stroke", d3.color(color)?.darker().toString() ?? color)
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
-            .attr("stroke-opacity", opacity);
+            .attr("stroke-opacity", opacity)
+            .attr("cursor", "pointer")
+            .on("mouseover", (_, d) => setHoveredId(d.img_idx))
+            .on("mouseout", () => setHoveredId(null));
         }
 
         if (extraCount > 0) {
@@ -512,7 +531,7 @@ export default function ButterflyPlot({
         .attr("x", -wB / 2)
         .attr("y", -5)
         .attr("width", wB)
-        .attr("height", 20)
+        .attr("height", 10)
         .attr("fill", "transparent");
       threshGroupB
         .append("line")
@@ -973,22 +992,26 @@ export default function ButterflyPlot({
       .domain([thresholdMin, thresholdMax])
       .range([hB, 0]);
 
-    const updateCircles = (
-      g: d3.Selection<SVGGElement, unknown, null, undefined>,
-      yScale: d3.ScaleLinear<number, number>,
-      th: number
-    ) => {
-      const opacityFunction = function (this: SVGCircleElement) {
-        const cy = +d3.select(this).attr("cy");
-        return getCircleOpacity(cy, yScale(th));
-      };
-
-      g.selectAll<SVGCircleElement, unknown>(".retrain-circle, .unlearn-circle")
-        .attr("fill-opacity", opacityFunction)
-        .attr("stroke-opacity", opacityFunction);
-    };
-
-    updateCircles(gB, yScaleB, thresholdValue);
+    // update circles
+    gB.selectAll<SVGCircleElement, Bin>(".retrain-circle, .unlearn-circle")
+      .attr("fill-opacity", function (d) {
+        if (hoveredId !== null) {
+          return d.img_idx === hoveredId ? 1 : 0.3;
+        }
+        return getCircleOpacity(
+          +d3.select(this).attr("cy"),
+          yScaleB(thresholdValue)
+        );
+      })
+      .attr("stroke-opacity", function (d) {
+        if (hoveredId !== null) {
+          return d.img_idx === hoveredId ? 1 : 0.3;
+        }
+        return getCircleOpacity(
+          +d3.select(this).attr("cy"),
+          yScaleB(thresholdValue)
+        );
+      });
 
     gB.select(".threshold-group").remove();
 
@@ -1017,7 +1040,7 @@ export default function ButterflyPlot({
       .attr("x", -wB / 2)
       .attr("y", -5)
       .attr("width", wB)
-      .attr("height", 20)
+      .attr("height", 10)
       .attr("fill", "transparent");
     newThreshGroupB
       .append("line")
@@ -1272,6 +1295,7 @@ export default function ButterflyPlot({
     getCircleOpacity,
     hB,
     hL,
+    hoveredId,
     isAboveThresholdUnlearn,
     isBaseline,
     isMetricEntropy,
@@ -1280,6 +1304,7 @@ export default function ButterflyPlot({
     mode,
     onUpdateAttackScore,
     retrainJson,
+    setHoveredId,
     setThresholdValue,
     thresholdMax,
     thresholdMin,

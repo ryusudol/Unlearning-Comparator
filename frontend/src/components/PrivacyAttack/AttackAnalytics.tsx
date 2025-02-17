@@ -41,6 +41,7 @@ export default function AttackAnalytics({
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [attackScore, setAttackScore] = useState(0);
   const [data, setData] = useState<Data>(null);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
@@ -196,8 +197,10 @@ export default function AttackAnalytics({
             thresholdValue={thresholdValue}
             aboveThreshold={aboveThreshold}
             thresholdStrategy={thresholdStrategy}
+            hoveredId={hoveredId}
             data={data}
             setThresholdValue={handleThresholdValueChange}
+            setHoveredId={setHoveredId}
             onUpdateAttackScore={setAttackScore}
           />
           <AttackSuccessFailure
@@ -206,8 +209,10 @@ export default function AttackAnalytics({
             thresholdValue={thresholdValue}
             aboveThreshold={aboveThreshold}
             thresholdStrategy={thresholdStrategy}
+            hoveredId={hoveredId}
             data={data}
             attackScore={attackScore}
+            setHoveredId={setHoveredId}
           />
         </>
       )}
