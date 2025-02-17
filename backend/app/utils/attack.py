@@ -147,7 +147,7 @@ async def process_attack_metrics(
             "values": distribution_data["values"]
         }
     }
-    with open("attack.json", "w") as f:
+    with open(f"attack{forget_class}.json", "w") as f:
         json.dump(unlearn_data, f, indent=4)
     print("add")
     

@@ -3,7 +3,7 @@
   "fc": 1,
   "phase": "Pretrained",
   "init": "N/A",
-  "method": "Custom",
+  "method": "N/A",
   "epochs": 200,
   "BS": 128,
   "LR": 0.1,
