@@ -1,4 +1,5 @@
-import { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState } from "react";
+import * as d3 from "d3";
 
 import { ScrollArea } from "../UI/scroll-area";
 import { useForgetClass } from "../../hooks/useForgetClass";
@@ -141,21 +142,20 @@ export default function AttackSuccessFailure({
     return map;
   }, [images]);
 
-  const getBorderColor = useCallback(
-    (type: string) => {
-      if (type === CONFIG.UNLEARN) {
-        return isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
-      } else {
-        return `rgba(31, 41, 55, ${CONFIG.LOW_OPACITY})`;
-      }
-    },
-    [isBaseline]
-  );
-
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
       if (!imgData) return null;
+      const strokeColor =
+        groupItem.type === CONFIG.UNLEARN
+          ? isBaseline
+            ? COLORS.PURPLE
+            : COLORS.EMERALD
+          : COLORS.DARK_GRAY;
+      const colorWithOpacity = d3.color(strokeColor);
+      if (groupItem.type === CONFIG.RETRAIN) {
+        colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
+      }
       return (
         <img
           key={`success-${idx}`}
@@ -164,19 +164,27 @@ export default function AttackSuccessFailure({
           style={{
             width: "12px",
             height: "12px",
-            border: `${CONFIG.STROKE_WIDTH} solid ${getBorderColor(
-              groupItem.type
-            )}`,
+            border: `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`,
           }}
         />
       );
     });
-  }, [getBorderColor, imageMap, successGroup]);
+  }, [imageMap, isBaseline, successGroup]);
 
   const failureImages = useMemo(() => {
     return failureGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
       if (!imgData) return null;
+      const strokeColor =
+        groupItem.type === CONFIG.UNLEARN
+          ? isBaseline
+            ? COLORS.PURPLE
+            : COLORS.EMERALD
+          : COLORS.DARK_GRAY;
+      const colorWithOpacity = d3.color(strokeColor);
+      if (groupItem.type === CONFIG.UNLEARN) {
+        colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
+      }
       return (
         <img
           key={`failure-${idx}`}
@@ -185,14 +193,12 @@ export default function AttackSuccessFailure({
           style={{
             width: "12px",
             height: "12px",
-            border: `${CONFIG.STROKE_WIDTH} solid ${getBorderColor(
-              groupItem.type
-            )}`,
+            border: `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`,
           }}
         />
       );
     });
-  }, [failureGroup, getBorderColor, imageMap]);
+  }, [failureGroup, imageMap, isBaseline]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
