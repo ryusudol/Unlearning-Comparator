@@ -77,8 +77,8 @@ export default function AttackLegend({
       <div className="flex items-center relative bottom-[1px]">
         <span className="font-medium mr-2">Threshold Strategy</span>
         <div className="flex items-center gap-1.5">
-          {THRESHOLD_STRATEGIES.map((strategy) => (
-            <HoverCard openDelay={0} closeDelay={100}>
+          {THRESHOLD_STRATEGIES.map((strategy, idx) => (
+            <HoverCard key={idx} openDelay={0} closeDelay={100}>
               <HoverCardTrigger
                 onClick={onThresholdStrategyChange}
                 className={`h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition ${
