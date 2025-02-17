@@ -53,6 +53,7 @@ export default function AttackSuccessFailure({
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
+  const isStrategyMaxSuccessRate = thresholdStrategy === "MAX SUCCESS RATE";
 
   useEffect(() => {
     const init = async () => {
@@ -239,12 +240,16 @@ export default function AttackSuccessFailure({
           <div className="flex items-center">
             <span
               className={`text-[15px] font-medium ${
-                thresholdStrategy === "MAX SUCCESS RATE" && "text-red-500"
+                isStrategyMaxSuccessRate && "text-red-500"
               }`}
             >
               Attack Success
             </span>
-            <span className="ml-1.5 text-[15px] font-light w-11">
+            <span
+              className={`ml-1.5 text-[15px] font-light w-11 ${
+                isStrategyMaxSuccessRate && "text-red-500"
+              }`}
+            >
               {successPct.toFixed(2)}%
             </span>
           </div>
