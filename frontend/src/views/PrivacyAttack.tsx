@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import View from "../components/View";
 import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
-import { THRESHOLD_STRATEGIES } from "../constants/privacyAttack";
 import { Separator } from "../components/UI/separator";
 
 export const ENTROPY = "entropy";
@@ -16,10 +15,16 @@ export type Metric = "entropy" | "confidence";
 export default function PrivacyAttack({ height }: { height: number }) {
   const [metric, setMetric] = useState<Metric>(ENTROPY);
   const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);
-  const [thresholdStrategy, setThresholdStrategy] = useState(
-    THRESHOLD_STRATEGIES[0].strategy
-  );
+  const [thresholdStrategy, setThresholdStrategy] = useState("");
+  const [baselineUserModified, setBaselineUserModified] = useState(false);
+  const [comparisonUserModified, setComparisonUserModified] = useState(false);
   const [strategyCount, setStrategyClick] = useState(0);
+
+  useEffect(() => {
+    if (baselineUserModified || comparisonUserModified) {
+      setThresholdStrategy("");
+    }
+  }, [baselineUserModified, comparisonUserModified]);
 
   const handleMetricChange = (metric: Metric) => {
     setMetric(metric);
@@ -44,6 +49,7 @@ export default function PrivacyAttack({ height }: { height: number }) {
     >
       <AttackLegend
         thresholdStrategy={thresholdStrategy}
+        userModifiedArr={[baselineUserModified, comparisonUserModified]}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
@@ -54,6 +60,8 @@ export default function PrivacyAttack({ height }: { height: number }) {
         aboveThreshold={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
+        userModified={baselineUserModified}
+        setUserModified={setBaselineUserModified}
       />
       <Separator
         orientation="vertical"
@@ -65,6 +73,8 @@ export default function PrivacyAttack({ height }: { height: number }) {
         aboveThreshold={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
+        userModified={comparisonUserModified}
+        setUserModified={setComparisonUserModified}
       />
     </View>
   );

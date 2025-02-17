@@ -55,6 +55,7 @@ interface Props {
   thresholdValue: number;
   aboveThreshold: string;
   thresholdStrategy: string;
+  userModified: boolean;
   data: Data;
   setThresholdValue: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
@@ -66,6 +67,7 @@ export default function ButterflyPlot({
   thresholdValue,
   aboveThreshold,
   thresholdStrategy,
+  userModified,
   data,
   setThresholdValue,
   onUpdateAttackScore,
@@ -566,7 +568,8 @@ export default function ButterflyPlot({
       const yScaleL = d3
         .scaleLinear()
         .domain([thresholdMin, thresholdMax])
-        .range([hL, 0]);
+        .range([hL, 0])
+        .clamp(true);
 
       // create a function for the glare effect
       const defs = gL.append("defs");
@@ -724,31 +727,29 @@ export default function ButterflyPlot({
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
-      // Threshold line's drag event handler
-      const dragLineL = d3
-        .drag<SVGGElement, any>()
-        .subject(() => ({ y: yScaleL(thresholdValue) }))
-        .on("drag", function (event) {
-          const newThresholdRaw = yScaleL.invert(event.y);
-          const newThresholdRounded =
-            Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
-          if (
-            newThresholdRounded >= thresholdMin &&
-            newThresholdRounded <= thresholdMax
-          ) {
-            setThresholdValue(newThresholdRounded);
-            d3.select(this).attr(
-              "transform",
-              `translate(0, ${yScaleL(newThresholdRounded)})`
-            );
-          }
-        });
+      // Threshold line's drag event
       const threshGroupL = gL
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleL(thresholdValue)})`)
         .attr("cursor", "ns-resize")
-        .call(dragLineL as any);
+        .call(
+          d3
+            .drag<SVGGElement, any>()
+            .subject(() => ({ y: yScaleL(thresholdValue) }))
+            .on("drag", function (event) {
+              const [, newY] = d3.pointer(event, gL.node());
+              const newThresholdRaw = yScaleL.invert(newY);
+              const newThresholdRounded =
+                Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
+              if (
+                newThresholdRounded >= thresholdMin &&
+                newThresholdRounded <= thresholdMax
+              ) {
+                setThresholdValue(newThresholdRounded);
+              }
+            })
+        );
       threshGroupL
         .append("rect")
         .attr("x", -3)
@@ -798,7 +799,7 @@ export default function ButterflyPlot({
           .attr("stroke", item.color)
           .attr("stroke-width", 2);
 
-        if (item.color === "red") {
+        if (!userModified && item.color === "red") {
           lineElement.attr("filter", "url(#glow)");
         }
 
@@ -937,7 +938,9 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr(
           "fill",
-          thresholdStrategy === "MAX ATTACK SCORE" ? "red" : "black"
+          !userModified && thresholdStrategy === "MAX ATTACK SCORE"
+            ? "red"
+            : "black"
         )
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("dy", "1.2em")
@@ -1064,7 +1067,8 @@ export default function ButterflyPlot({
     const yScaleL = d3
       .scaleLinear()
       .domain([thresholdMin, thresholdMax])
-      .range([hL, 0]);
+      .range([hL, 0])
+      .clamp(true);
 
     const attackLine = d3
       .line<AttackResult>()
@@ -1118,7 +1122,9 @@ export default function ButterflyPlot({
     // change the text color of attack score based on the threshold strategy
     gL.select(".line-legend-red").attr(
       "fill",
-      thresholdStrategy === "MAX ATTACK SCORE" ? "red" : "black"
+      !userModified && thresholdStrategy === "MAX ATTACK SCORE"
+        ? "red"
+        : "black"
     );
 
     // intersection group
@@ -1242,7 +1248,9 @@ export default function ButterflyPlot({
         .select("text:nth-child(2)")
         .attr(
           "fill",
-          thresholdStrategy === "MAX ATTACK SCORE" ? "red" : "black"
+          !userModified && thresholdStrategy === "MAX ATTACK SCORE"
+            ? "red"
+            : "black"
         )
         .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
       infoGroup
@@ -1281,6 +1289,7 @@ export default function ButterflyPlot({
     thresholdValue,
     unlearnJson,
     upperOpacity,
+    userModified,
     wB,
     wL,
   ]);
