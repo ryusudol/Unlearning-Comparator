@@ -404,7 +404,7 @@ export default function ButterflyPlot({
       const butterflyLegendGroup = gB
         .append("g")
         .attr("class", "butterfly-legend-group")
-        .attr("transform", "translate(-5, 20)");
+        .attr("transform", "translate(-5, 12)");
 
       butterflyLegendGroup
         .insert("rect", ":first-child")
@@ -773,7 +773,7 @@ export default function ButterflyPlot({
       // Draw a legend for a line chart
       const lineChartLegendGroup = gL
         .append("g")
-        .attr("transform", `translate(${wL - 37}, 4)`);
+        .attr("transform", `translate(${wL - 37}, -5)`);
       lineChartLegendGroup
         .append("rect")
         .attr("x", -98)
