@@ -1,3 +1,4 @@
+// export const API_URL = "http://115.145.171.130:8000";
 export const API_URL = "http://localhost:8000";
 
 export const DATASETS = ["CIFAR-10", "Fashion-MNIST"];
