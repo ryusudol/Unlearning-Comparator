@@ -1056,9 +1056,9 @@ export default function ButterflyPlot({
       );
 
     // Draw a new y-axis for a butterfly chart based on the metric value
-    gB.select(".y-axis")
-      .transition()
-      .call((g: any) => d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g));
+    gB.select(".y-axis").call((g: any) =>
+      d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g)
+    );
 
     // line chart
     const svgL = d3.select(lineRef.current);
