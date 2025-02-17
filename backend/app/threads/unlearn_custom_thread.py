@@ -285,7 +285,7 @@ class UnlearningCustomThread(threading.Thread):
             "fc": "N/A" if self.is_training_eval else self.forget_class,
             "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
             "init": "N/A",
-            "method": "N/A",
+            "method": "Custom",
             "epochs": "N/A",
             "BS": "N/A",
             "LR": "N/A",
