@@ -19,6 +19,7 @@ import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
   thresholdStrategy: string;
+  userModifiedArr: boolean[];
   onMetricChange: (val: Metric) => void;
   onAboveThresholdChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -26,6 +27,7 @@ interface AttackLegendProps {
 
 export default function AttackLegend({
   thresholdStrategy,
+  userModifiedArr,
   onMetricChange,
   onAboveThresholdChange,
   onThresholdStrategyChange,
@@ -77,22 +79,29 @@ export default function AttackLegend({
       <div className="flex items-center relative bottom-[1px]">
         <span className="font-medium mr-2">Threshold Strategy</span>
         <div className="flex items-center gap-1.5">
-          {THRESHOLD_STRATEGIES.map((strategy) => (
-            <HoverCard openDelay={0} closeDelay={100}>
-              <HoverCardTrigger
-                onClick={onThresholdStrategyChange}
-                className={`h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition ${
-                  thresholdStrategy === strategy.strategy &&
-                  "bg-[#e2e8f0] hover:bg-[#e2e8f0] text-red-500"
-                }`}
-              >
-                {strategy.strategy}
-              </HoverCardTrigger>
-              <HoverCardContent className="w-auto px-3 py-2" side="top">
-                {strategy.explanation}
-              </HoverCardContent>
-            </HoverCard>
-          ))}
+          {THRESHOLD_STRATEGIES.map((strategy) => {
+            const [baselineUserModified, comparisonUserModified] =
+              userModifiedArr;
+
+            return (
+              <HoverCard openDelay={0} closeDelay={100}>
+                <HoverCardTrigger
+                  onClick={onThresholdStrategyChange}
+                  className={`h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition ${
+                    thresholdStrategy === strategy.strategy &&
+                    !baselineUserModified &&
+                    !comparisonUserModified &&
+                    "bg-[#e2e8f0] hover:bg-[#e2e8f0] text-red-500"
+                  }`}
+                >
+                  {strategy.strategy}
+                </HoverCardTrigger>
+                <HoverCardContent className="w-auto px-3 py-2" side="top">
+                  {strategy.explanation}
+                </HoverCardContent>
+              </HoverCard>
+            );
+          })}
         </div>
       </div>
       <Separator

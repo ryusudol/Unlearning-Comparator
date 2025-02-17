@@ -3,7 +3,12 @@ import { useState, useEffect, useContext } from "react";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
+import {
+  ENTROPY,
+  CONFIDENCE,
+  UNLEARN,
+  Metric,
+} from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { AttackResult, AttackResults } from "../../types/data";
@@ -22,6 +27,8 @@ interface Props {
   aboveThreshold: string;
   thresholdStrategy: string;
   strategyCount: number;
+  userModified: boolean;
+  setUserModified: (val: boolean) => void;
 }
 
 export default function AttackAnalytics({
@@ -30,6 +37,8 @@ export default function AttackAnalytics({
   aboveThreshold,
   thresholdStrategy,
   strategyCount,
+  userModified,
+  setUserModified,
 }: Props) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
@@ -38,7 +47,6 @@ export default function AttackAnalytics({
 
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [attackScore, setAttackScore] = useState(0);
-  const [userModified, setUserModified] = useState(false);
   const [data, setData] = useState<Data>(null);
 
   const isBaseline = mode === "Baseline";
@@ -107,9 +115,18 @@ export default function AttackAnalytics({
     metric,
   ]);
 
+  // TODO:
+  // useEffect(() => {
+  //   if (metric === CONFIDENCE) {
+  //     setThresholdValue(3.75);
+  //   } else {
+  //     setThresholdValue(1.25);
+  //   }
+  // }, [metric]);
+
   useEffect(() => {
     setUserModified(false);
-  }, [thresholdStrategy, strategyCount]);
+  }, [thresholdStrategy, strategyCount, setUserModified]);
 
   useEffect(() => {
     if (!data || userModified) return;
@@ -195,6 +212,7 @@ export default function AttackAnalytics({
           thresholdValue={thresholdValue}
           aboveThreshold={aboveThreshold}
           thresholdStrategy={thresholdStrategy}
+          userModified={userModified}
           data={data}
           setThresholdValue={handleThresholdValueChange}
           onUpdateAttackScore={setAttackScore}
