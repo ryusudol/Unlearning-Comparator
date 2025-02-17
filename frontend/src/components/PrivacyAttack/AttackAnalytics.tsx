@@ -3,12 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import {
-  ENTROPY,
-  CONFIDENCE,
-  UNLEARN,
-  Metric,
-} from "../../views/PrivacyAttack";
+import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { AttackResult, AttackResults } from "../../types/data";
@@ -113,15 +108,6 @@ export default function AttackAnalytics({
     metric,
   ]);
 
-  // TODO:
-  // useEffect(() => {
-  //   if (metric === CONFIDENCE) {
-  //     setThresholdValue(3.75);
-  //   } else {
-  //     setThresholdValue(1.25);
-  //   }
-  // }, [metric]);
-
   useEffect(() => {
     setUserModified(false);
   }, [thresholdStrategy, strategyCount, setUserModified]);
@@ -203,27 +189,27 @@ export default function AttackAnalytics({
   return (
     <div className="h-full flex flex-col">
       {data && (
-        <AttackPlot
-          mode={mode}
-          metric={metric}
-          thresholdValue={thresholdValue}
-          aboveThreshold={aboveThreshold}
-          thresholdStrategy={thresholdStrategy}
-          data={data}
-          setThresholdValue={handleThresholdValueChange}
-          onUpdateAttackScore={setAttackScore}
-        />
-      )}
-      {data && (
-        <AttackSuccessFailure
-          mode={mode}
-          metric={metric}
-          thresholdValue={thresholdValue}
-          aboveThreshold={aboveThreshold}
-          thresholdStrategy={thresholdStrategy}
-          data={data}
-          attackScore={attackScore}
-        />
+        <>
+          <AttackPlot
+            mode={mode}
+            metric={metric}
+            thresholdValue={thresholdValue}
+            aboveThreshold={aboveThreshold}
+            thresholdStrategy={thresholdStrategy}
+            data={data}
+            setThresholdValue={handleThresholdValueChange}
+            onUpdateAttackScore={setAttackScore}
+          />
+          <AttackSuccessFailure
+            mode={mode}
+            metric={metric}
+            thresholdValue={thresholdValue}
+            aboveThreshold={aboveThreshold}
+            thresholdStrategy={thresholdStrategy}
+            data={data}
+            attackScore={attackScore}
+          />
+        </>
       )}
     </div>
   );
