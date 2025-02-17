@@ -41,6 +41,7 @@ export default function AttackAnalytics({
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [attackScore, setAttackScore] = useState(0);
   const [data, setData] = useState<Data>(null);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
@@ -157,8 +158,25 @@ export default function AttackAnalytics({
       }
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
       // COMMON THRESHOLD
+      const normalizedAboveThreshold = aboveThreshold.toLowerCase();
+      const key =
+        `${metric.toLowerCase()}_above_${normalizedAboveThreshold}` as keyof AttackResults;
+
+      const baselineLineChartData = baselineExperiment
+        ? baselineExperiment.attack.results[key] || []
+        : [];
+      const comparisonLineChartData = comparisonExperiment
+        ? comparisonExperiment.attack.results[key] || []
+        : [];
+      const combinedLineChartData = [
+        ...baselineLineChartData,
+        ...comparisonLineChartData,
+      ];
+
+      if (combinedLineChartData.length === 0) return;
+
       const thresholdGroups: { [key: number]: number } = {};
-      data.lineChartData.forEach((item) => {
+      combinedLineChartData.forEach((item) => {
         thresholdGroups[item.threshold] =
           (thresholdGroups[item.threshold] || 0) + item.attack_score;
       });
@@ -174,9 +192,13 @@ export default function AttackAnalytics({
       }
     }
   }, [
+    aboveThreshold,
+    baselineExperiment,
+    comparisonExperiment,
     data,
     isAboveThresholdUnlearn,
     isMetricEntropy,
+    metric,
     thresholdStrategy,
     thresholdValue,
   ]);
@@ -196,8 +218,10 @@ export default function AttackAnalytics({
             thresholdValue={thresholdValue}
             aboveThreshold={aboveThreshold}
             thresholdStrategy={thresholdStrategy}
+            hoveredId={hoveredId}
             data={data}
             setThresholdValue={handleThresholdValueChange}
+            setHoveredId={setHoveredId}
             onUpdateAttackScore={setAttackScore}
           />
           <AttackSuccessFailure
@@ -206,8 +230,10 @@ export default function AttackAnalytics({
             thresholdValue={thresholdValue}
             aboveThreshold={aboveThreshold}
             thresholdStrategy={thresholdStrategy}
+            hoveredId={hoveredId}
             data={data}
             attackScore={attackScore}
+            setHoveredId={setHoveredId}
           />
         </>
       )}

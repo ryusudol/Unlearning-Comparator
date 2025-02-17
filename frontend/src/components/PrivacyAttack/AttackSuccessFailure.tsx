@@ -1,4 +1,5 @@
-import { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState } from "react";
+import * as d3 from "d3";
 
 import { ScrollArea } from "../UI/scroll-area";
 import { useForgetClass } from "../../hooks/useForgetClass";
@@ -28,8 +29,10 @@ interface AttackSuccessFailureProps {
   thresholdValue: number;
   aboveThreshold: string;
   thresholdStrategy: string;
+  hoveredId: number | null;
   data: Data;
   attackScore: number;
+  setHoveredId: (val: number | null) => void;
 }
 
 export default function AttackSuccessFailure({
@@ -38,8 +41,10 @@ export default function AttackSuccessFailure({
   thresholdValue,
   aboveThreshold,
   thresholdStrategy,
+  hoveredId,
   data,
   attackScore,
+  setHoveredId,
 }: AttackSuccessFailureProps) {
   const { forgetClassNumber } = useForgetClass();
 
@@ -48,6 +53,7 @@ export default function AttackSuccessFailure({
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
+  const isStrategyMaxSuccessRate = thresholdStrategy === "MAX SUCCESS RATE";
 
   useEffect(() => {
     const init = async () => {
@@ -141,58 +147,91 @@ export default function AttackSuccessFailure({
     return map;
   }, [images]);
 
-  const getBorderColor = useCallback(
-    (type: string) => {
-      if (type === CONFIG.UNLEARN) {
-        return isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
-      } else {
-        return `rgba(31, 41, 55, ${CONFIG.LOW_OPACITY})`;
-      }
-    },
-    [isBaseline]
-  );
-
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
       if (!imgData) return null;
+      const strokeColor =
+        groupItem.type === CONFIG.UNLEARN
+          ? isBaseline
+            ? COLORS.PURPLE
+            : COLORS.EMERALD
+          : COLORS.DARK_GRAY;
+      const defaultBorderOpacity =
+        groupItem.type === CONFIG.RETRAIN
+          ? CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
+      const imageOpacity =
+        hoveredId !== null ? (groupItem.img_idx === hoveredId ? 1 : 0.3) : 1;
+      const borderOpacity =
+        hoveredId !== null
+          ? groupItem.img_idx === hoveredId
+            ? 1
+            : 0.3
+          : defaultBorderOpacity;
+      const borderColor = d3.color(strokeColor);
+      borderColor!.opacity = borderOpacity;
       return (
         <img
           key={`success-${idx}`}
           src={`data:image/png;base64,${imgData.base64}`}
           alt="img"
+          onMouseEnter={() => setHoveredId(groupItem.img_idx)}
+          onMouseLeave={() => setHoveredId(null)}
           style={{
             width: "12px",
             height: "12px",
-            border: `${CONFIG.STROKE_WIDTH} solid ${getBorderColor(
-              groupItem.type
-            )}`,
+            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            opacity: imageOpacity,
+            cursor: "pointer",
           }}
         />
       );
     });
-  }, [getBorderColor, imageMap, successGroup]);
+  }, [hoveredId, imageMap, isBaseline, setHoveredId, successGroup]);
 
   const failureImages = useMemo(() => {
     return failureGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
       if (!imgData) return null;
+      const strokeColor =
+        groupItem.type === CONFIG.UNLEARN
+          ? isBaseline
+            ? COLORS.PURPLE
+            : COLORS.EMERALD
+          : COLORS.DARK_GRAY;
+      const defaultBorderOpacity =
+        groupItem.type === CONFIG.UNLEARN
+          ? CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
+      const imageOpacity =
+        hoveredId !== null ? (groupItem.img_idx === hoveredId ? 1 : 0.3) : 1;
+      const borderOpacity =
+        hoveredId !== null
+          ? groupItem.img_idx === hoveredId
+            ? 1
+            : 0.3
+          : defaultBorderOpacity;
+      const borderColor = d3.color(strokeColor);
+      borderColor!.opacity = borderOpacity;
       return (
         <img
-          key={`failure-${idx}`}
+          key={`success-${idx}`}
           src={`data:image/png;base64,${imgData.base64}`}
           alt="img"
+          onMouseEnter={() => setHoveredId(groupItem.img_idx)}
+          onMouseLeave={() => setHoveredId(null)}
           style={{
             width: "12px",
             height: "12px",
-            border: `${CONFIG.STROKE_WIDTH} solid ${getBorderColor(
-              groupItem.type
-            )}`,
+            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            opacity: imageOpacity,
+            cursor: "pointer",
           }}
         />
       );
     });
-  }, [failureGroup, getBorderColor, imageMap]);
+  }, [failureGroup, hoveredId, imageMap, isBaseline, setHoveredId]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
@@ -201,12 +240,16 @@ export default function AttackSuccessFailure({
           <div className="flex items-center">
             <span
               className={`text-[15px] font-medium ${
-                thresholdStrategy === "MAX SUCCESS RATE" && "text-red-500"
+                isStrategyMaxSuccessRate && "text-red-500"
               }`}
             >
               Attack Success
             </span>
-            <span className="ml-1.5 text-[15px] font-light w-11">
+            <span
+              className={`ml-1.5 text-[15px] font-light w-11 ${
+                isStrategyMaxSuccessRate && "text-red-500"
+              }`}
+            >
               {successPct.toFixed(2)}%
             </span>
           </div>
