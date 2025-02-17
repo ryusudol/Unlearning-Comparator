@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { Metric } from "../../views/PrivacyAttack";
+import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { AttackResult, AttackResults } from "../../types/data";
@@ -42,7 +42,8 @@ export default function AttackAnalytics({
   const [data, setData] = useState<Data>(null);
 
   const isBaseline = mode === "Baseline";
-  const isMetricEntropy = metric === "entropy";
+  const isMetricEntropy = metric === ENTROPY;
+  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
 
   useEffect(() => {
     const getAttackData = async () => {
@@ -139,9 +140,12 @@ export default function AttackAnalytics({
       let bestCandidate = thresholdValue;
       let bestSuccessCount = -Infinity;
       candidates.forEach((candidate) => {
-        const successCount =
-          data.retrainData.filter((datum) => datum.value < candidate).length +
-          data.unlearnData.filter((datum) => datum.value > candidate).length;
+        const successCount = isAboveThresholdUnlearn
+          ? data.retrainData.filter((datum) => datum.value < candidate).length +
+            data.unlearnData.filter((datum) => datum.value > candidate).length
+          : data.retrainData.filter((datum) => datum.value > candidate).length +
+            data.unlearnData.filter((datum) => datum.value < candidate).length;
+
         if (successCount > bestSuccessCount) {
           bestSuccessCount = successCount;
           bestCandidate = candidate;
@@ -170,8 +174,8 @@ export default function AttackAnalytics({
     }
   }, [
     data,
+    isAboveThresholdUnlearn,
     isMetricEntropy,
-    metric,
     thresholdStrategy,
     thresholdValue,
     userModified,
