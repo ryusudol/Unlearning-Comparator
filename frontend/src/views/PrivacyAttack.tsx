@@ -49,7 +49,6 @@ export default function PrivacyAttack({ height }: { height: number }) {
     >
       <AttackLegend
         thresholdStrategy={thresholdStrategy}
-        userModifiedArr={[baselineUserModified, comparisonUserModified]}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
@@ -60,7 +59,6 @@ export default function PrivacyAttack({ height }: { height: number }) {
         aboveThreshold={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
-        userModified={baselineUserModified}
         setUserModified={setBaselineUserModified}
       />
       <Separator
@@ -73,7 +71,6 @@ export default function PrivacyAttack({ height }: { height: number }) {
         aboveThreshold={aboveThreshold}
         thresholdStrategy={thresholdStrategy}
         strategyCount={strategyCount}
-        userModified={comparisonUserModified}
         setUserModified={setComparisonUserModified}
       />
     </View>

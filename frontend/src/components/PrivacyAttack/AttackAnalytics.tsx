@@ -27,7 +27,6 @@ interface Props {
   aboveThreshold: string;
   thresholdStrategy: string;
   strategyCount: number;
-  userModified: boolean;
   setUserModified: (val: boolean) => void;
 }
 
@@ -37,7 +36,6 @@ export default function AttackAnalytics({
   aboveThreshold,
   thresholdStrategy,
   strategyCount,
-  userModified,
   setUserModified,
 }: Props) {
   const { baselineExperiment, comparisonExperiment } =
@@ -129,7 +127,7 @@ export default function AttackAnalytics({
   }, [thresholdStrategy, strategyCount, setUserModified]);
 
   useEffect(() => {
-    if (!data || userModified) return;
+    if (!data) return;
 
     if (thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy) {
       // MAX ATTACK SCORE
@@ -195,7 +193,6 @@ export default function AttackAnalytics({
     isMetricEntropy,
     thresholdStrategy,
     thresholdValue,
-    userModified,
   ]);
 
   const handleThresholdValueChange = (newThreshold: number) => {
@@ -212,7 +209,6 @@ export default function AttackAnalytics({
           thresholdValue={thresholdValue}
           aboveThreshold={aboveThreshold}
           thresholdStrategy={thresholdStrategy}
-          userModified={userModified}
           data={data}
           setThresholdValue={handleThresholdValueChange}
           onUpdateAttackScore={setAttackScore}
