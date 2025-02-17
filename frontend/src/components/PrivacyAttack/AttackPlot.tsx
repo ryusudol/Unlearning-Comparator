@@ -724,31 +724,29 @@ export default function ButterflyPlot({
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
-      // Threshold line's drag event handler
-      const dragLineL = d3
-        .drag<SVGGElement, any>()
-        .subject(() => ({ y: yScaleL(thresholdValue) }))
-        .on("drag", function (event) {
-          const newThresholdRaw = yScaleL.invert(event.y);
-          const newThresholdRounded =
-            Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
-          if (
-            newThresholdRounded >= thresholdMin &&
-            newThresholdRounded <= thresholdMax
-          ) {
-            setThresholdValue(newThresholdRounded);
-            d3.select(this).attr(
-              "transform",
-              `translate(0, ${yScaleL(newThresholdRounded)})`
-            );
-          }
-        });
+      // Threshold line's drag event
       const threshGroupL = gL
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleL(thresholdValue)})`)
         .attr("cursor", "ns-resize")
-        .call(dragLineL as any);
+        .call(
+          d3
+            .drag<SVGGElement, any>()
+            .subject(() => ({ y: yScaleL(thresholdValue) }))
+            .on("drag", function (event) {
+              const [, newY] = d3.pointer(event, gL.node());
+              const newThresholdRaw = yScaleL.invert(newY);
+              const newThresholdRounded =
+                Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
+              if (
+                newThresholdRounded >= thresholdMin &&
+                newThresholdRounded <= thresholdMax
+              ) {
+                setThresholdValue(newThresholdRounded);
+              }
+            })
+        );
       threshGroupL
         .append("rect")
         .attr("x", -3)
