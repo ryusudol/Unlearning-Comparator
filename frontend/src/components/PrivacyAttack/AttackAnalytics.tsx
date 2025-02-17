@@ -190,8 +190,9 @@ export default function AttackAnalytics({
           metric={metric}
           thresholdValue={thresholdValue}
           aboveThreshold={aboveThreshold}
-          setThresholdValue={handleThresholdValueChange}
+          thresholdStrategy={thresholdStrategy}
           data={data}
+          setThresholdValue={handleThresholdValueChange}
           onUpdateAttackScore={setAttackScore}
         />
       )}
