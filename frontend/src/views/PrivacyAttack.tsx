@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import View from "../components/View";
+import Indicator from "../components/Indicator";
 import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Separator } from "../components/UI/separator";
+import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 export const ENTROPY = "entropy";
 export const CONFIDENCE = "confidence";
@@ -13,6 +15,8 @@ export const RETRAIN = "Retrain";
 export type Metric = "entropy" | "confidence";
 
 export default function PrivacyAttack({ height }: { height: number }) {
+  const { baseline, comparison } = useContext(BaselineComparisonContext);
+
   const [metric, setMetric] = useState<Metric>(ENTROPY);
   const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);
   const [thresholdStrategy, setThresholdStrategy] = useState("");
@@ -25,6 +29,9 @@ export default function PrivacyAttack({ height }: { height: number }) {
       setThresholdStrategy("");
     }
   }, [baselineUserModified, comparisonUserModified]);
+
+  const isBaselinePretrained = baseline.startsWith("000");
+  const isComparisonPretrained = comparison.startsWith("000");
 
   const handleMetricChange = (metric: Metric) => {
     setMetric(metric);
@@ -53,26 +60,34 @@ export default function PrivacyAttack({ height }: { height: number }) {
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
       />
-      <AttackAnalytics
-        mode="Baseline"
-        metric={metric}
-        aboveThreshold={aboveThreshold}
-        thresholdStrategy={thresholdStrategy}
-        strategyCount={strategyCount}
-        setUserModified={setBaselineUserModified}
-      />
+      {isBaselinePretrained ? (
+        <Indicator text="Please select unlearned models to compare attack results" />
+      ) : (
+        <AttackAnalytics
+          mode="Baseline"
+          metric={metric}
+          aboveThreshold={aboveThreshold}
+          thresholdStrategy={thresholdStrategy}
+          strategyCount={strategyCount}
+          setUserModified={setBaselineUserModified}
+        />
+      )}
       <Separator
         orientation="vertical"
         className="h-[612px] w-[1px] ml-3.5 mr-2"
       />
-      <AttackAnalytics
-        mode="Comparison"
-        metric={metric}
-        aboveThreshold={aboveThreshold}
-        thresholdStrategy={thresholdStrategy}
-        strategyCount={strategyCount}
-        setUserModified={setComparisonUserModified}
-      />
+      {isComparisonPretrained ? (
+        <Indicator text="Please select unlearned models to compare attack results" />
+      ) : (
+        <AttackAnalytics
+          mode="Comparison"
+          metric={metric}
+          aboveThreshold={aboveThreshold}
+          thresholdStrategy={thresholdStrategy}
+          strategyCount={strategyCount}
+          setUserModified={setComparisonUserModified}
+        />
+      )}
     </View>
   );
 }

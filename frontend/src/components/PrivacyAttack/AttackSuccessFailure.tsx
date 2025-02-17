@@ -1,6 +1,6 @@
-import { useRef, useMemo, useEffect, useState } from "react";
-import * as d3 from "d3";
+import { useMemo, useEffect, useState, useCallback } from "react";
 
+import { ScrollArea } from "../UI/scroll-area";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
@@ -44,9 +44,6 @@ export default function AttackSuccessFailure({
   const { forgetClassNumber } = useForgetClass();
 
   const [images, setImages] = useState<Image[]>();
-
-  const successContainerRef = useRef<HTMLDivElement>(null);
-  const failureContainerRef = useRef<HTMLDivElement>(null);
 
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
@@ -137,82 +134,65 @@ export default function AttackSuccessFailure({
     };
   }, [data, isAboveThresholdUnlearn, thresholdValue]);
 
-  useEffect(() => {
-    if (!images) return;
+  const imageMap = useMemo(() => {
+    if (!images) return new Map<number, Image>();
+    const map = new Map<number, Image>();
+    images.forEach((img) => map.set(img.index, img));
+    return map;
+  }, [images]);
 
-    const imageMap = new Map<number, Image>();
-    images.forEach((img) => imageMap.set(img.index, img));
+  const getBorderColor = useCallback(
+    (type: string) => {
+      if (type === CONFIG.UNLEARN) {
+        return isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
+      } else {
+        return `rgba(31, 41, 55, ${CONFIG.LOW_OPACITY})`;
+      }
+    },
+    [isBaseline]
+  );
 
-    // render attack success images
-    if (successContainerRef.current) {
-      const container = d3
-        .select(successContainerRef.current)
-        .style("display", "grid")
-        .style("grid-template-columns", `repeat(${CONFIG.MAX_COLUMNS}, 12px)`)
-        .style("gap", "1px");
-      container.selectAll("*").remove();
+  const successImages = useMemo(() => {
+    return successGroup.map((groupItem, idx) => {
+      const imgData = imageMap.get(groupItem.img_idx);
+      if (!imgData) return null;
+      return (
+        <img
+          key={`success-${idx}`}
+          src={`data:image/png;base64,${imgData.base64}`}
+          alt="img"
+          style={{
+            width: "12px",
+            height: "12px",
+            border: `${CONFIG.STROKE_WIDTH} solid ${getBorderColor(
+              groupItem.type
+            )}`,
+          }}
+        />
+      );
+    });
+  }, [getBorderColor, imageMap, successGroup]);
 
-      successGroup.forEach((groupItem) => {
-        const imgData = imageMap.get(groupItem.img_idx);
-
-        if (!imgData) return;
-
-        const strokeColor =
-          groupItem.type === CONFIG.UNLEARN
-            ? isBaseline
-              ? COLORS.PURPLE
-              : COLORS.EMERALD
-            : COLORS.DARK_GRAY;
-        const colorWithOpacity = d3.color(strokeColor);
-        if (groupItem.type === CONFIG.RETRAIN) {
-          colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
-        }
-
-        container
-          .append("img")
-          .attr("src", `data:image/png;base64,${imgData.base64}`)
-          .style("width", "12px")
-          .style("height", "12px")
-          .style("display", "inline-block")
-          .style("border", `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`);
-      });
-    }
-
-    // render attack failure images
-    if (failureContainerRef.current) {
-      const container = d3
-        .select(failureContainerRef.current)
-        .style("display", "grid")
-        .style("grid-template-columns", `repeat(${CONFIG.MAX_COLUMNS}, 12px)`)
-        .style("gap", "1px");
-      container.selectAll("*").remove();
-
-      failureGroup.forEach((groupItem) => {
-        const imgData = imageMap.get(groupItem.img_idx);
-
-        if (!imgData) return;
-
-        const strokeColor =
-          groupItem.type === CONFIG.UNLEARN
-            ? isBaseline
-              ? COLORS.PURPLE
-              : COLORS.EMERALD
-            : COLORS.DARK_GRAY;
-        const colorWithOpacity = d3.color(strokeColor);
-        if (groupItem.type === CONFIG.UNLEARN) {
-          colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
-        }
-
-        container
-          .append("img")
-          .attr("src", `data:image/png;base64,${imgData.base64}`)
-          .style("width", "12px")
-          .style("height", "12px")
-          .style("display", "inline-block")
-          .style("border", `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`);
-      });
-    }
-  }, [failureGroup, images, isBaseline, successGroup]);
+  const failureImages = useMemo(() => {
+    return failureGroup.map((groupItem, idx) => {
+      const imgData = imageMap.get(groupItem.img_idx);
+      if (!imgData) return null;
+      return (
+        <img
+          key={`failure-${idx}`}
+          src={`data:image/png;base64,${imgData.base64}`}
+          alt="img"
+          style={{
+            width: "12px",
+            height: "12px",
+            border: `${CONFIG.STROKE_WIDTH} solid ${getBorderColor(
+              groupItem.type
+            )}`,
+          }}
+        />
+      );
+    });
+  }, [failureGroup, getBorderColor, imageMap]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
@@ -230,9 +210,12 @@ export default function AttackSuccessFailure({
               {successPct.toFixed(2)}%
             </span>
           </div>
-          <div ref={successContainerRef} style={{ textAlign: "left" }}></div>
+          <ScrollArea style={{ height: "188px" }}>
+            <div className="grid grid-cols-[repeat(20,12px)] gap-[1px]">
+              {successImages}
+            </div>
+          </ScrollArea>
         </div>
-
         <div>
           <div className="flex items-center">
             <span className="text-[15px] font-medium mb-0.5">
@@ -242,7 +225,11 @@ export default function AttackSuccessFailure({
               {failurePct.toFixed(2)}%
             </span>
           </div>
-          <div ref={failureContainerRef} style={{ textAlign: "left" }}></div>
+          <ScrollArea style={{ height: "188px" }}>
+            <div className="grid grid-cols-[repeat(20,12px)] gap-[1px]">
+              {failureImages}
+            </div>
+          </ScrollArea>
         </div>
       </div>
       <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[17px] font-medium text-center">

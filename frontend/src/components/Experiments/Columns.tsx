@@ -17,7 +17,7 @@ import { ExperimentData } from "../../types/data";
 import { getPhaseColors } from "../../utils/data/colors";
 
 function getValueToDisplay(value: unknown) {
-  return value === "N/A"
+  return value === "N/A" || value === "NaN"
     ? "-"
     : typeof value === "string"
     ? value
@@ -316,7 +316,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    id: "FQS",
+    accessorKey: "FQS",
     header: ({ column }) => (
       <HoverCard openDelay={0} closeDelay={100}>
         <HoverCardTrigger>
@@ -334,6 +334,11 @@ export const columns: ColumnDef<ExperimentData>[] = [
         </HoverCardContent>
       </HoverCard>
     ),
+    cell: ({ row }) => {
+      const fqs = row.getValue("FQS");
+      const value = getValueToDisplay(fqs);
+      return <div className="text-center">{value}</div>;
+    },
   },
   {
     id: "baseline",
