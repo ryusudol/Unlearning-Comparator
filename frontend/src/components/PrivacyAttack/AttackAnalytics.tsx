@@ -202,6 +202,7 @@ export default function AttackAnalytics({
           metric={metric}
           thresholdValue={thresholdValue}
           aboveThreshold={aboveThreshold}
+          thresholdStrategy={thresholdStrategy}
           data={data}
           attackScore={attackScore}
         />

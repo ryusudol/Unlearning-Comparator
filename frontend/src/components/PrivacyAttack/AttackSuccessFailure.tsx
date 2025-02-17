@@ -24,6 +24,7 @@ interface AttackSuccessFailureProps {
   metric: Metric;
   thresholdValue: number;
   aboveThreshold: string;
+  thresholdStrategy: string;
   data: Data;
   attackScore: number;
 }
@@ -33,6 +34,7 @@ export default function AttackSuccessFailure({
   metric,
   thresholdValue,
   aboveThreshold,
+  thresholdStrategy,
   data,
   attackScore,
 }: AttackSuccessFailureProps) {
@@ -233,7 +235,13 @@ export default function AttackSuccessFailure({
         <div className="flex gap-[38px]">
           <div>
             <div className="flex items-center">
-              <span className="text-[15px]">Attack Success</span>
+              <span
+                className={`text-[15px] font-medium ${
+                  thresholdStrategy === "MAX SUCCESS RATE" && "text-red-500"
+                }`}
+              >
+                Attack Success
+              </span>
               <span className="ml-1.5 text-[15px] font-light w-11">
                 {successPct.toFixed(2)}%
               </span>
@@ -249,7 +257,9 @@ export default function AttackSuccessFailure({
           </div>
           <div>
             <div className="flex items-center">
-              <span className="text-[15px] mb-0.5">Attack Failure</span>
+              <span className="text-[15px] font-medium mb-0.5">
+                Attack Failure
+              </span>
               <span className="ml-4 text-[15px] font-light w-11">
                 {failurePct.toFixed(2)}%
               </span>
