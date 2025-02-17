@@ -3,18 +3,13 @@ import { useState, useEffect, useContext } from "react";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import {
-  ENTROPY,
-  CONFIDENCE,
-  UNLEARN,
-  Metric,
-} from "../../views/PrivacyAttack";
+import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { AttackResult, AttackResults } from "../../types/data";
 import { fetchFileData } from "../../utils/api/unlearning";
 
-export type Bin = { img: number; value: number };
+export type Bin = { img_idx: number; value: number };
 export type Data = {
   retrainData: Bin[];
   unlearnData: Bin[];
@@ -76,13 +71,13 @@ export default function AttackAnalytics({
 
       retrainAttackValues.forEach((item) => {
         retrainExperimentValues.push({
-          img: item.img,
+          img_idx: item.img,
           value: isMetricEntropy ? item.entropy : item.confidence,
         });
       });
       experimentAttackValues.forEach((item) => {
         experimentValues.push({
-          img: item.img,
+          img_idx: item.img,
           value: isMetricEntropy ? item.entropy : item.confidence,
         });
       });
@@ -112,15 +107,6 @@ export default function AttackAnalytics({
     isMetricEntropy,
     metric,
   ]);
-
-  // TODO:
-  // useEffect(() => {
-  //   if (metric === CONFIDENCE) {
-  //     setThresholdValue(3.75);
-  //   } else {
-  //     setThresholdValue(1.25);
-  //   }
-  // }, [metric]);
 
   useEffect(() => {
     setUserModified(false);
@@ -203,27 +189,27 @@ export default function AttackAnalytics({
   return (
     <div className="h-full flex flex-col">
       {data && (
-        <AttackPlot
-          mode={mode}
-          metric={metric}
-          thresholdValue={thresholdValue}
-          aboveThreshold={aboveThreshold}
-          thresholdStrategy={thresholdStrategy}
-          data={data}
-          setThresholdValue={handleThresholdValueChange}
-          onUpdateAttackScore={setAttackScore}
-        />
-      )}
-      {data && (
-        <AttackSuccessFailure
-          mode={mode}
-          metric={metric}
-          thresholdValue={thresholdValue}
-          aboveThreshold={aboveThreshold}
-          thresholdStrategy={thresholdStrategy}
-          data={data}
-          attackScore={attackScore}
-        />
+        <>
+          <AttackPlot
+            mode={mode}
+            metric={metric}
+            thresholdValue={thresholdValue}
+            aboveThreshold={aboveThreshold}
+            thresholdStrategy={thresholdStrategy}
+            data={data}
+            setThresholdValue={handleThresholdValueChange}
+            onUpdateAttackScore={setAttackScore}
+          />
+          <AttackSuccessFailure
+            mode={mode}
+            metric={metric}
+            thresholdValue={thresholdValue}
+            aboveThreshold={aboveThreshold}
+            thresholdStrategy={thresholdStrategy}
+            data={data}
+            attackScore={attackScore}
+          />
+        </>
       )}
     </div>
   );
