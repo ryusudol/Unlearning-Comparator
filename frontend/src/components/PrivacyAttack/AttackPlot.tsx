@@ -7,7 +7,10 @@ import {
   ComparisonNeuralNetworkIcon,
 } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
-import { LINE_GRAPH_LEGEND_DATA } from "../../constants/privacyAttack";
+import {
+  LINE_GRAPH_LEGEND_DATA,
+  THRESHOLD_STRATEGIES,
+} from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { AttackResult } from "../../types/data";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
@@ -55,7 +58,6 @@ interface Props {
   thresholdValue: number;
   aboveThreshold: string;
   thresholdStrategy: string;
-  userModified: boolean;
   data: Data;
   setThresholdValue: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
@@ -67,7 +69,6 @@ export default function ButterflyPlot({
   thresholdValue,
   aboveThreshold,
   thresholdStrategy,
-  userModified,
   data,
   setThresholdValue,
   onUpdateAttackScore,
@@ -799,7 +800,7 @@ export default function ButterflyPlot({
           .attr("stroke", item.color)
           .attr("stroke-width", 2);
 
-        if (!userModified && item.color === "red") {
+        if (item.color === "red") {
           lineElement.attr("filter", "url(#glow)");
         }
 
@@ -809,12 +810,6 @@ export default function ButterflyPlot({
           .attr("x", 20)
           .attr("y", 3)
           .attr("font-size", CONFIG.FONT_SIZE)
-          .attr(
-            "fill",
-            thresholdStrategy === "MAX ATTACK SCORE" && i === 0
-              ? item.color
-              : "black"
-          )
           .text(item.label);
       });
 
@@ -931,6 +926,12 @@ export default function ButterflyPlot({
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
+        .attr(
+          "fill",
+          thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
+            ? "red"
+            : "black"
+        )
         .attr("font-size", CONFIG.FONT_SIZE)
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
@@ -938,7 +939,7 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr(
           "fill",
-          !userModified && thresholdStrategy === "MAX ATTACK SCORE"
+          thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
             ? "red"
             : "black"
         )
@@ -1119,14 +1120,6 @@ export default function ButterflyPlot({
       .attr("y", yScaleL(thresholdValue))
       .attr("height", hL - yScaleL(thresholdValue));
 
-    // change the text color of attack score based on the threshold strategy
-    gL.select(".line-legend-red").attr(
-      "fill",
-      !userModified && thresholdStrategy === "MAX ATTACK SCORE"
-        ? "red"
-        : "black"
-    );
-
     // intersection group
     let intGroup = gL.select<SVGGElement>(".intersection-group");
     if (intGroup.empty()) {
@@ -1243,12 +1236,18 @@ export default function ButterflyPlot({
       );
       infoGroup
         .select("text:nth-child(1)")
+        .attr(
+          "fill",
+          thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
+            ? "red"
+            : "black"
+        )
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
         .select("text:nth-child(2)")
         .attr(
           "fill",
-          !userModified && thresholdStrategy === "MAX ATTACK SCORE"
+          thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
             ? "red"
             : "black"
         )
@@ -1289,7 +1288,6 @@ export default function ButterflyPlot({
     thresholdValue,
     unlearnJson,
     upperOpacity,
-    userModified,
     wB,
     wL,
   ]);
