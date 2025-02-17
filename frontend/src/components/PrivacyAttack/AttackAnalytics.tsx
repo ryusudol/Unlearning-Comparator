@@ -9,7 +9,7 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { AttackResult, AttackResults } from "../../types/data";
 import { fetchFileData } from "../../utils/api/unlearning";
 
-export type Bin = { img: number; value: number };
+export type Bin = { img_idx: number; value: number };
 export type Data = {
   retrainData: Bin[];
   unlearnData: Bin[];
@@ -71,13 +71,13 @@ export default function AttackAnalytics({
 
       retrainAttackValues.forEach((item) => {
         retrainExperimentValues.push({
-          img: item.img,
+          img_idx: item.img,
           value: isMetricEntropy ? item.entropy : item.confidence,
         });
       });
       experimentAttackValues.forEach((item) => {
         experimentValues.push({
-          img: item.img,
+          img_idx: item.img,
           value: isMetricEntropy ? item.entropy : item.confidence,
         });
       });

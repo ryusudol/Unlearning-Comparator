@@ -13,3 +13,8 @@ export type PieDataPoint = {
   value: number;
   color: string;
 };
+
+export type Image = {
+  index: number;
+  base64: string;
+};

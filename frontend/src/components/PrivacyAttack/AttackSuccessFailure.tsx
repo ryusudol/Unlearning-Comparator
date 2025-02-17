@@ -1,9 +1,12 @@
-import { useRef, useMemo, useEffect, useCallback } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import * as d3 from "d3";
 
-import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
+import { useForgetClass } from "../../hooks/useForgetClass";
+import { UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
-import { Bin, Data } from "./AttackAnalytics";
+import { Data } from "./AttackAnalytics";
+import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
+import { Image } from "../../types/privacy-attack";
 
 const CONFIG = {
   RETRAIN: "retrain",
@@ -13,7 +16,7 @@ const CONFIG = {
   CIRCLE_RADIUS: 3,
   CELL_SIZE: 3 * 2 + 1,
   MAX_COLUMNS: 20,
-  STROKE_WIDTH: 0.8,
+  STROKE_WIDTH: "2px",
   TOTAL_DATA_COUNT: 400,
   ENTROPY_THRESHOLD_STEP: 0.05,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
@@ -38,32 +41,34 @@ export default function AttackSuccessFailure({
   data,
   attackScore,
 }: AttackSuccessFailureProps) {
-  const successRef = useRef<SVGSVGElement | null>(null);
-  const failureRef = useRef<SVGSVGElement | null>(null);
+  const { forgetClassNumber } = useForgetClass();
+
+  const [images, setImages] = useState<Image[]>();
+
+  const successContainerRef = useRef<HTMLDivElement>(null);
+  const failureContainerRef = useRef<HTMLDivElement>(null);
 
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
-  const isMetricEntropy = metric === ENTROPY;
-  const thresholdStep = isMetricEntropy
-    ? CONFIG.ENTROPY_THRESHOLD_STEP
-    : CONFIG.CONFIDENCE_THRESHOLD_STEP;
 
-  const groupByBin = useCallback(
-    (data: Bin[]) => {
-      const bins: Record<number, number[]> = {};
-      data.forEach((datum) => {
-        const bin = Math.floor(datum.value / thresholdStep) * thresholdStep;
-        if (!bins[bin]) bins[bin] = [];
-        bins[bin].push(datum.value);
-      });
-      const sortedBins = Object.keys(bins)
-        .map((k) => parseFloat(k))
-        .sort((a, b) => a - b);
-      return sortedBins.flatMap((bin) => bins[bin]);
-    },
-    [thresholdStep]
-  );
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const res: { images: Image[] } = await fetchAllSubsetImages(
+          forgetClassNumber
+        );
+        setImages(res.images);
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(`Error fetching subset images: ${e.message}`);
+        } else {
+          console.error("Error fetching subset images: Unknown error");
+        }
+      }
+    };
+    init();
+  }, [forgetClassNumber]);
 
   const { successGroup, failureGroup, successPct, failurePct } = useMemo(() => {
     if (!data || (!data.retrainData.length && !data.unlearnData.length)) {
@@ -75,42 +80,46 @@ export default function AttackSuccessFailure({
       };
     }
 
-    const successRetrain = groupByBin(
-      data.retrainData.filter((item) =>
-        isAboveThresholdUnlearn
-          ? item.value < thresholdValue
-          : item.value > thresholdValue
-      )
+    const successRetrain = data.retrainData.filter((item) =>
+      isAboveThresholdUnlearn
+        ? item.value < thresholdValue
+        : item.value > thresholdValue
     );
-    const successUnlearn = groupByBin(
-      data.unlearnData.filter((item) =>
-        isAboveThresholdUnlearn
-          ? item.value > thresholdValue
-          : item.value < thresholdValue
-      )
+    const successUnlearn = data.unlearnData.filter((item) =>
+      isAboveThresholdUnlearn
+        ? item.value > thresholdValue
+        : item.value < thresholdValue
     );
-    const failureUnlearn = groupByBin(
-      data.unlearnData.filter((item) =>
-        isAboveThresholdUnlearn
-          ? item.value <= thresholdValue
-          : item.value >= thresholdValue
-      )
-    );
-    const failureRetrain = groupByBin(
-      data.retrainData.filter((item) =>
-        isAboveThresholdUnlearn
-          ? item.value >= thresholdValue
-          : item.value <= thresholdValue
-      )
-    );
-
     const successGroup = [
-      ...successRetrain.map((v) => ({ type: CONFIG.RETRAIN, value: v })),
-      ...successUnlearn.map((v) => ({ type: CONFIG.UNLEARN, value: v })),
+      ...successRetrain.map((item) => ({
+        type: CONFIG.RETRAIN,
+        img_idx: item.img_idx,
+      })),
+      ...successUnlearn.map((item) => ({
+        type: CONFIG.UNLEARN,
+        img_idx: item.img_idx,
+      })),
     ];
+
+    const failureUnlearn = data.unlearnData.filter((item) =>
+      isAboveThresholdUnlearn
+        ? item.value <= thresholdValue
+        : item.value >= thresholdValue
+    );
+    const failureRetrain = data.retrainData.filter((item) =>
+      isAboveThresholdUnlearn
+        ? item.value >= thresholdValue
+        : item.value <= thresholdValue
+    );
     const failureGroup = [
-      ...failureUnlearn.map((v) => ({ type: CONFIG.UNLEARN, value: v })),
-      ...failureRetrain.map((v) => ({ type: CONFIG.RETRAIN, value: v })),
+      ...failureUnlearn.map((item) => ({
+        type: CONFIG.UNLEARN,
+        img_idx: item.img_idx,
+      })),
+      ...failureRetrain.map((item) => ({
+        type: CONFIG.RETRAIN,
+        img_idx: item.img_idx,
+      })),
     ];
 
     const successPct = parseFloat(
@@ -126,153 +135,114 @@ export default function AttackSuccessFailure({
       successPct,
       failurePct,
     };
-  }, [data, groupByBin, isAboveThresholdUnlearn, thresholdValue]);
+  }, [data, isAboveThresholdUnlearn, thresholdValue]);
 
   useEffect(() => {
-    const successSVG = d3.select(successRef.current);
+    if (!images) return;
 
-    successSVG.selectAll("*").remove();
+    const imageMap = new Map<number, Image>();
+    images.forEach((img) => imageMap.set(img.index, img));
 
-    const successCols = CONFIG.MAX_COLUMNS;
-    const successRows = Math.ceil(successGroup.length / CONFIG.MAX_COLUMNS);
-    const successSVGWidth = successCols * CONFIG.CELL_SIZE;
-    const successSVGHeight = successRows * CONFIG.CELL_SIZE;
+    // render attack success images
+    if (successContainerRef.current) {
+      const container = d3
+        .select(successContainerRef.current)
+        .style("display", "grid")
+        .style("grid-template-columns", `repeat(${CONFIG.MAX_COLUMNS}, 12px)`)
+        .style("gap", "1px");
+      container.selectAll("*").remove();
 
-    successSVG.attr("width", successSVGWidth).attr("height", successSVGHeight);
-    successSVG
-      .selectAll("circle")
-      .data(successGroup)
-      .enter()
-      .append("circle")
-      .attr(
-        "cx",
-        (_, i) =>
-          (i % CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE + CONFIG.CIRCLE_RADIUS
-      )
-      .attr(
-        "cy",
-        (_, i) =>
-          Math.floor(i / CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE +
-          CONFIG.CIRCLE_RADIUS
-      )
-      .attr("r", CONFIG.CIRCLE_RADIUS)
-      .attr("fill", (d) =>
-        d.type === CONFIG.RETRAIN
-          ? COLORS.DARK_GRAY
-          : isBaseline
-          ? COLORS.PURPLE
-          : COLORS.EMERALD
-      )
-      .attr("fill-opacity", (d) =>
-        d.type === CONFIG.RETRAIN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
-      )
-      .attr("stroke", (d) => {
-        const fillColor =
-          d.type === CONFIG.RETRAIN
-            ? COLORS.DARK_GRAY
-            : isBaseline
-            ? COLORS.PURPLE
-            : COLORS.EMERALD;
-        return d3.color(fillColor)?.darker().toString() ?? fillColor;
-      })
-      .attr("stroke-opacity", (d) =>
-        d.type === CONFIG.RETRAIN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
-      )
-      .attr("stroke-width", CONFIG.STROKE_WIDTH);
+      successGroup.forEach((groupItem) => {
+        const imgData = imageMap.get(groupItem.img_idx);
 
-    const failureSVG = d3.select(failureRef.current);
-    failureSVG.selectAll("*").remove();
-    const failureCols = CONFIG.MAX_COLUMNS;
-    const failureRows = Math.ceil(failureGroup.length / CONFIG.MAX_COLUMNS);
-    const failureSVGWidth = failureCols * CONFIG.CELL_SIZE;
-    const failureSVGHeight = failureRows * CONFIG.CELL_SIZE;
-    failureSVG.attr("width", failureSVGWidth).attr("height", failureSVGHeight);
-    failureSVG
-      .selectAll("circle")
-      .data(failureGroup)
-      .enter()
-      .append("circle")
-      .attr(
-        "cx",
-        (_, i) =>
-          (i % CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE + CONFIG.CIRCLE_RADIUS
-      )
-      .attr(
-        "cy",
-        (_, i) =>
-          Math.floor(i / CONFIG.MAX_COLUMNS) * CONFIG.CELL_SIZE +
-          CONFIG.CIRCLE_RADIUS
-      )
-      .attr("r", CONFIG.CIRCLE_RADIUS)
-      .attr("fill", (d) =>
-        d.type === CONFIG.UNLEARN
-          ? isBaseline
-            ? COLORS.PURPLE
-            : COLORS.EMERALD
-          : COLORS.DARK_GRAY
-      )
-      .attr("fill-opacity", (d) =>
-        d.type === CONFIG.UNLEARN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
-      )
-      .attr("stroke", (d) => {
-        const fillColor =
-          d.type === CONFIG.UNLEARN
+        if (!imgData) return;
+
+        const strokeColor =
+          groupItem.type === CONFIG.UNLEARN
             ? isBaseline
               ? COLORS.PURPLE
               : COLORS.EMERALD
             : COLORS.DARK_GRAY;
-        return d3.color(fillColor)?.darker().toString() ?? fillColor;
-      })
-      .attr("stroke-opacity", (d) =>
-        d.type === CONFIG.UNLEARN ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
-      )
-      .attr("stroke-width", CONFIG.STROKE_WIDTH);
-  }, [successGroup, failureGroup, isBaseline]);
+        const colorWithOpacity = d3.color(strokeColor);
+        if (groupItem.type === CONFIG.RETRAIN) {
+          colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
+        }
+
+        container
+          .append("img")
+          .attr("src", `data:image/png;base64,${imgData.base64}`)
+          .style("width", "12px")
+          .style("height", "12px")
+          .style("display", "inline-block")
+          .style("border", `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`);
+      });
+    }
+
+    // render attack failure images
+    if (failureContainerRef.current) {
+      const container = d3
+        .select(failureContainerRef.current)
+        .style("display", "grid")
+        .style("grid-template-columns", `repeat(${CONFIG.MAX_COLUMNS}, 12px)`)
+        .style("gap", "1px");
+      container.selectAll("*").remove();
+
+      failureGroup.forEach((groupItem) => {
+        const imgData = imageMap.get(groupItem.img_idx);
+
+        if (!imgData) return;
+
+        const strokeColor =
+          groupItem.type === CONFIG.UNLEARN
+            ? isBaseline
+              ? COLORS.PURPLE
+              : COLORS.EMERALD
+            : COLORS.DARK_GRAY;
+        const colorWithOpacity = d3.color(strokeColor);
+        if (groupItem.type === CONFIG.UNLEARN) {
+          colorWithOpacity!.opacity = CONFIG.LOW_OPACITY;
+        }
+
+        container
+          .append("img")
+          .attr("src", `data:image/png;base64,${imgData.base64}`)
+          .style("width", "12px")
+          .style("height", "12px")
+          .style("display", "inline-block")
+          .style("border", `${CONFIG.STROKE_WIDTH} solid ${colorWithOpacity}`);
+      });
+    }
+  }, [failureGroup, images, isBaseline, successGroup]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">
       <div className="flex gap-[38px]">
-        <div className="flex gap-[38px]">
-          <div>
-            <div className="flex items-center">
-              <span
-                className={`text-[15px] font-medium ${
-                  thresholdStrategy === "MAX SUCCESS RATE" && "text-red-500"
-                }`}
-              >
-                Attack Success
-              </span>
-              <span className="ml-1.5 text-[15px] font-light w-11">
-                {successPct.toFixed(2)}%
-              </span>
-            </div>
-            <p className="text-xs font-light leading-[14px] mb-1">
-              Non-members from Retrain
-              <br />
-              identified as Retrain, members
-              <br />
-              from Unlearn identified as Unlearn
-            </p>
-            <svg ref={successRef}></svg>
+        <div>
+          <div className="flex items-center">
+            <span
+              className={`text-[15px] font-medium ${
+                thresholdStrategy === "MAX SUCCESS RATE" && "text-red-500"
+              }`}
+            >
+              Attack Success
+            </span>
+            <span className="ml-1.5 text-[15px] font-light w-11">
+              {successPct.toFixed(2)}%
+            </span>
           </div>
-          <div>
-            <div className="flex items-center">
-              <span className="text-[15px] font-medium mb-0.5">
-                Attack Failure
-              </span>
-              <span className="ml-4 text-[15px] font-light w-11">
-                {failurePct.toFixed(2)}%
-              </span>
-            </div>
-            <p className="text-xs font-light leading-[14px] mb-1">
-              Non-members from Retrain
-              <br />
-              identified as Unlearn, members
-              <br />
-              from Unlearn identified as Retrain
-            </p>
-            <svg ref={failureRef}></svg>
+          <div ref={successContainerRef} style={{ textAlign: "left" }}></div>
+        </div>
+
+        <div>
+          <div className="flex items-center">
+            <span className="text-[15px] font-medium mb-0.5">
+              Attack Failure
+            </span>
+            <span className="ml-4 text-[15px] font-light w-11">
+              {failurePct.toFixed(2)}%
+            </span>
           </div>
+          <div ref={failureContainerRef} style={{ textAlign: "left" }}></div>
         </div>
       </div>
       <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[17px] font-medium text-center">
