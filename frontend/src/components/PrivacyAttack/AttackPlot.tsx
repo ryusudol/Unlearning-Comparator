@@ -576,7 +576,8 @@ export default function ButterflyPlot({
         .attr("x", "-50%")
         .attr("y", "-50%")
         .attr("width", "200%")
-        .attr("height", "200%");
+        .attr("height", "200%")
+        .attr("filterUnits", "userSpaceOnUse");
       glowFilter
         .append("feGaussianBlur")
         .attr("in", "SourceGraphic")
