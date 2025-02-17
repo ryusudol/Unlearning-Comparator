@@ -30,7 +30,7 @@ const baseColors = {
   TUA: RED,
   TRA: GREEN,
   RTE: RED,
-  FQS: RED,
+  FQS: GREEN,
 };
 
 export function calculatePerformanceMetrics(data: Experiments) {
