@@ -1287,6 +1287,8 @@ export default function ButterflyPlot({
 
     gL.select(".line-attack-above").raise();
     gL.select(".line-attack-below").raise();
+
+    infoGroup.raise();
   }, [
     attackData,
     binSize,
