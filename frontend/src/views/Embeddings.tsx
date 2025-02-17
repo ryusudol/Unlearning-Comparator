@@ -37,11 +37,16 @@ export default function Embeddings({ height }: { height: number }) {
     async function loadBaselineData() {
       if (!baseline) return;
       try {
-        const data = await fetchFileData(forgetClassNumber, baseline);
+        const data = await fetchFileData(
+          forgetClassNumber,
+          `000${forgetClassNumber}`
+        );
         setBaselinePoints(data.points);
       } catch (error) {
         if (error instanceof Error) {
-          alert(`Failed to fetch an unlearned data file: ${error.message}`);
+          console.error(
+            `Failed to fetch an unlearned data file: ${error.message}`
+          );
         } else {
           alert(
             "An unknown error occurred while fetching an unlearned data file . . ."
@@ -57,10 +62,19 @@ export default function Embeddings({ height }: { height: number }) {
     async function loadComparisonData() {
       if (!comparison) return;
       try {
-        const data = await fetchFileData(forgetClassNumber, comparison);
+        const data = await fetchFileData(
+          forgetClassNumber,
+          `a00${forgetClassNumber}`
+        );
         setComparisonPoints(data.points);
       } catch (error) {
-        console.error("Error fetching comparison file data:", error);
+        if (error instanceof Error) {
+          console.error(`Error fetching comparison file data: ${error}`);
+        } else {
+          alert(
+            "An unknown error occurred while fetching an unlearned data file . . ."
+          );
+        }
         setComparisonPoints([]);
       }
     }

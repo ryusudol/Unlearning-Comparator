@@ -79,10 +79,20 @@ export async function fetchFileData(
   try {
     const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`);
 
+    if (!response.ok) {
+      throw new Error(
+        `Server error: ${response.status} ${response.statusText}`
+      );
+    }
+
     return await response.json();
   } catch (error) {
     console.error("Failed to fetch an unlearned data file:", error);
-    throw error;
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred.";
+
+    throw new Error(`Failed to fetch an unlearned data file: ${errorMessage}`);
   }
 }
 
