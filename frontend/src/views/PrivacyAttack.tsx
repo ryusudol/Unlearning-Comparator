@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 
 import View from "../components/View";
 import Indicator from "../components/Indicator";
@@ -20,15 +20,8 @@ export default function PrivacyAttack({ height }: { height: number }) {
   const [metric, setMetric] = useState<Metric>(ENTROPY);
   const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);
   const [thresholdStrategy, setThresholdStrategy] = useState("");
-  const [baselineUserModified, setBaselineUserModified] = useState(false);
-  const [comparisonUserModified, setComparisonUserModified] = useState(false);
+  const [userModified, setUserModified] = useState(false);
   const [strategyCount, setStrategyClick] = useState(0);
-
-  useEffect(() => {
-    if (baselineUserModified || comparisonUserModified) {
-      setThresholdStrategy("");
-    }
-  }, [baselineUserModified, comparisonUserModified]);
 
   const isBaselinePretrained = baseline.startsWith("000");
   const isComparisonPretrained = comparison.startsWith("000");
@@ -55,7 +48,6 @@ export default function PrivacyAttack({ height }: { height: number }) {
       className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none relative"
     >
       <AttackLegend
-        thresholdStrategy={thresholdStrategy}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
@@ -69,7 +61,9 @@ export default function PrivacyAttack({ height }: { height: number }) {
           aboveThreshold={aboveThreshold}
           thresholdStrategy={thresholdStrategy}
           strategyCount={strategyCount}
-          setUserModified={setBaselineUserModified}
+          userModified={userModified}
+          setThresholdStrategy={setThresholdStrategy}
+          setUserModified={setUserModified}
         />
       )}
       <Separator
@@ -85,7 +79,9 @@ export default function PrivacyAttack({ height }: { height: number }) {
           aboveThreshold={aboveThreshold}
           thresholdStrategy={thresholdStrategy}
           strategyCount={strategyCount}
-          setUserModified={setComparisonUserModified}
+          userModified={userModified}
+          setThresholdStrategy={setThresholdStrategy}
+          setUserModified={setUserModified}
         />
       )}
     </View>
