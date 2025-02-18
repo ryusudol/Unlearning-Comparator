@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
@@ -47,6 +47,8 @@ export default function AttackAnalytics({
   const [attackScore, setAttackScore] = useState(0);
   const [data, setData] = useState<Data>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+
+  const prevMetricRef = useRef(metric);
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
@@ -97,6 +99,11 @@ export default function AttackAnalytics({
 
       if (!lineChartData) return;
 
+      if (prevMetricRef.current !== metric) {
+        setThresholdValue(isMetricEntropy ? 1.25 : 3.75);
+        prevMetricRef.current = metric;
+      }
+
       setData({
         retrainData: retrainExperimentValues,
         unlearnData: experimentValues,
@@ -120,6 +127,7 @@ export default function AttackAnalytics({
 
   useEffect(() => {
     if (!data || thresholdStrategy === "") return;
+
     if (thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy) {
       const maxAttackData = data.lineChartData.reduce(
         (prev, curr) => (curr.attack_score > prev.attack_score ? curr : prev),
