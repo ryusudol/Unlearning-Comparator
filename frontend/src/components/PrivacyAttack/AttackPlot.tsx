@@ -1034,7 +1034,7 @@ export default function ButterflyPlot({
             .attr("x", labelX)
             .attr("y", labelY)
             .attr("text-anchor", textAnchor)
-            .attr("font-size", "10px")
+            .attr("font-size", "11px")
             .attr("fill", "black")
             .text(`${metric}: ${d.value}`);
         });
