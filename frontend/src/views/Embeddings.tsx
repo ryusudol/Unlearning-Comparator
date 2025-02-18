@@ -16,7 +16,7 @@ import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { processPointsData } from "../utils/data/experiments";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { fetchFileData } from "../utils/api/unlearning";
+import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
 import { Separator } from "../components/UI/separator";
 import { Point } from "../types/data";
 
@@ -35,12 +35,15 @@ export default function Embeddings({ height }: { height: number }) {
 
   useEffect(() => {
     async function loadBaselineData() {
-      if (!baseline) return;
+      const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
+      const slicedIds = ids.map((id) => id.slice(0, -4));
+
+      if (!baseline || !slicedIds.includes(baseline)) {
+        return;
+      }
+
       try {
-        const data = await fetchFileData(
-          forgetClassNumber,
-          `000${forgetClassNumber}`
-        );
+        const data = await fetchFileData(forgetClassNumber, baseline);
         setBaselinePoints(data.points);
       } catch (error) {
         if (error instanceof Error) {
@@ -60,12 +63,15 @@ export default function Embeddings({ height }: { height: number }) {
 
   useEffect(() => {
     async function loadComparisonData() {
-      if (!comparison) return;
+      const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
+      const slicedIds = ids.map((id) => id.slice(0, -4));
+
+      if (!comparison || !slicedIds.includes(comparison)) {
+        return;
+      }
+
       try {
-        const data = await fetchFileData(
-          forgetClassNumber,
-          `a00${forgetClassNumber}`
-        );
+        const data = await fetchFileData(forgetClassNumber, comparison);
         setComparisonPoints(data.points);
       } catch (error) {
         if (error instanceof Error) {

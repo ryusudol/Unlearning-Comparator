@@ -60,9 +60,9 @@ interface Props {
   thresholdStrategy: string;
   hoveredId: number | null;
   data: Data;
-  setThresholdValue: (value: number) => void;
-  setHoveredId: (val: number | null) => void;
+  onThresholdLineDrag: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
+  setHoveredId: (val: number | null) => void;
 }
 
 export default function ButterflyPlot({
@@ -73,9 +73,9 @@ export default function ButterflyPlot({
   thresholdStrategy,
   hoveredId,
   data,
-  setThresholdValue,
-  setHoveredId,
+  onThresholdLineDrag,
   onUpdateAttackScore,
+  setHoveredId,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
@@ -522,7 +522,7 @@ export default function ButterflyPlot({
               newThresholdRounded >= thresholdMin &&
               newThresholdRounded <= thresholdMax
             ) {
-              setThresholdValue(newThresholdRounded);
+              onThresholdLineDrag(newThresholdRounded);
             }
           }) as any
         );
@@ -766,7 +766,7 @@ export default function ButterflyPlot({
                 newThresholdRounded >= thresholdMin &&
                 newThresholdRounded <= thresholdMax
               ) {
-                setThresholdValue(newThresholdRounded);
+                onThresholdLineDrag(newThresholdRounded);
               }
             })
         );
@@ -993,7 +993,7 @@ export default function ButterflyPlot({
       .range([hB, 0]);
 
     // update circles
-    gB.selectAll<SVGCircleElement, Bin>(".retrain-circle, .unlearn-circle")
+    gB.selectAll<SVGCircleElement, Bin>("circle")
       .attr("fill-opacity", function (d) {
         if (hoveredId !== null) {
           return d.img_idx === hoveredId ? 1 : 0.3;
@@ -1013,9 +1013,35 @@ export default function ButterflyPlot({
         );
       });
 
-    gB.select(".threshold-group").remove();
+    // Render the values of hovered circles
+    gB.selectAll(".hovered-label").remove();
+    if (hoveredId !== null) {
+      gB.selectAll<SVGCircleElement, Bin>("circle")
+        .filter(function (d) {
+          return d.img_idx === hoveredId;
+        })
+        .each(function (d: Bin) {
+          const cx = d3.select(this).attr("cx");
+          const cy = d3.select(this).attr("cy");
+          const cxNum = parseFloat(cx);
+          const offset = 4;
+          const textAnchor = cxNum < 0 ? "end" : "start";
+          const labelX = cxNum < 0 ? cxNum - offset : cxNum + offset;
+          const labelY = Number(cy) - offset;
+
+          gB.append("text")
+            .attr("class", "hovered-label")
+            .attr("x", labelX)
+            .attr("y", labelY)
+            .attr("text-anchor", textAnchor)
+            .attr("font-size", "10px")
+            .attr("fill", "black")
+            .text(`${metric}: ${d.value}`);
+        });
+    }
 
     // Draw a new threshold line based on the threshold value
+    gB.select(".threshold-group").remove();
     const newThreshGroupB = gB
       .append("g")
       .attr("class", "threshold-group")
@@ -1031,7 +1057,7 @@ export default function ButterflyPlot({
             newThresholdRounded >= thresholdMin &&
             newThresholdRounded <= thresholdMax
           ) {
-            setThresholdValue(newThresholdRounded);
+            onThresholdLineDrag(newThresholdRounded);
           }
         })
       );
@@ -1307,7 +1333,7 @@ export default function ButterflyPlot({
     onUpdateAttackScore,
     retrainJson,
     setHoveredId,
-    setThresholdValue,
+    onThresholdLineDrag,
     thresholdMax,
     thresholdMin,
     thresholdStep,
