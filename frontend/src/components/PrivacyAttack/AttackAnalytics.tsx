@@ -202,7 +202,7 @@ export default function AttackAnalytics({
     thresholdValue,
   ]);
 
-  const handleThresholdValueChange = (newThreshold: number) => {
+  const handleThresholdLineDrag = (newThreshold: number) => {
     setThresholdValue(newThreshold);
     setUserModified(true);
   };
@@ -219,9 +219,9 @@ export default function AttackAnalytics({
             thresholdStrategy={userModified ? "" : lastThresholdStrategy}
             hoveredId={hoveredId}
             data={data}
-            setThresholdValue={handleThresholdValueChange}
-            setHoveredId={setHoveredId}
+            onThresholdLineDrag={handleThresholdLineDrag}
             onUpdateAttackScore={setAttackScore}
+            setHoveredId={setHoveredId}
           />
           <AttackSuccessFailure
             mode={mode}

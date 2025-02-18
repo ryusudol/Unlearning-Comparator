@@ -60,9 +60,9 @@ interface Props {
   thresholdStrategy: string;
   hoveredId: number | null;
   data: Data;
-  setThresholdValue: (value: number) => void;
-  setHoveredId: (val: number | null) => void;
+  onThresholdLineDrag: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
+  setHoveredId: (val: number | null) => void;
 }
 
 export default function ButterflyPlot({
@@ -73,9 +73,9 @@ export default function ButterflyPlot({
   thresholdStrategy,
   hoveredId,
   data,
-  setThresholdValue,
-  setHoveredId,
+  onThresholdLineDrag,
   onUpdateAttackScore,
+  setHoveredId,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
@@ -522,7 +522,7 @@ export default function ButterflyPlot({
               newThresholdRounded >= thresholdMin &&
               newThresholdRounded <= thresholdMax
             ) {
-              setThresholdValue(newThresholdRounded);
+              onThresholdLineDrag(newThresholdRounded);
             }
           }) as any
         );
@@ -766,7 +766,7 @@ export default function ButterflyPlot({
                 newThresholdRounded >= thresholdMin &&
                 newThresholdRounded <= thresholdMax
               ) {
-                setThresholdValue(newThresholdRounded);
+                onThresholdLineDrag(newThresholdRounded);
               }
             })
         );
@@ -1057,7 +1057,7 @@ export default function ButterflyPlot({
             newThresholdRounded >= thresholdMin &&
             newThresholdRounded <= thresholdMax
           ) {
-            setThresholdValue(newThresholdRounded);
+            onThresholdLineDrag(newThresholdRounded);
           }
         })
       );
@@ -1333,7 +1333,7 @@ export default function ButterflyPlot({
     onUpdateAttackScore,
     retrainJson,
     setHoveredId,
-    setThresholdValue,
+    onThresholdLineDrag,
     thresholdMax,
     thresholdMin,
     thresholdStep,
