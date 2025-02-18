@@ -993,7 +993,7 @@ export default function ButterflyPlot({
       .range([hB, 0]);
 
     // update circles
-    gB.selectAll<SVGCircleElement, Bin>(".retrain-circle, .unlearn-circle")
+    gB.selectAll<SVGCircleElement, Bin>("circle")
       .attr("fill-opacity", function (d) {
         if (hoveredId !== null) {
           return d.img_idx === hoveredId ? 1 : 0.3;
@@ -1013,9 +1013,35 @@ export default function ButterflyPlot({
         );
       });
 
-    gB.select(".threshold-group").remove();
+    // Render the values of hovered circles
+    gB.selectAll(".hovered-label").remove();
+    if (hoveredId !== null) {
+      gB.selectAll<SVGCircleElement, Bin>("circle")
+        .filter(function (d) {
+          return d.img_idx === hoveredId;
+        })
+        .each(function (d: Bin) {
+          const cx = d3.select(this).attr("cx");
+          const cy = d3.select(this).attr("cy");
+          const cxNum = parseFloat(cx);
+          const offset = 4;
+          const textAnchor = cxNum < 0 ? "end" : "start";
+          const labelX = cxNum < 0 ? cxNum - offset : cxNum + offset;
+          const labelY = Number(cy) - offset;
+
+          gB.append("text")
+            .attr("class", "hovered-label")
+            .attr("x", labelX)
+            .attr("y", labelY)
+            .attr("text-anchor", textAnchor)
+            .attr("font-size", "10px")
+            .attr("fill", "black")
+            .text(`${metric}: ${d.value}`);
+        });
+    }
 
     // Draw a new threshold line based on the threshold value
+    gB.select(".threshold-group").remove();
     const newThreshGroupB = gB
       .append("g")
       .attr("class", "threshold-group")
