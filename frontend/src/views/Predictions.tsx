@@ -9,7 +9,7 @@ import Indicator from "../components/Indicator";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { useModelSelection } from "../hooks/useModelSelection";
 import { ViewProps } from "../types/common";
-import { Target02Icon, ShortArrow, LongArrow } from "../components/UI/icons";
+import { ShortArrow, LongArrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
 
 export default function Predictions({ width, height }: ViewProps) {
@@ -22,11 +22,7 @@ export default function Predictions({ width, height }: ViewProps) {
   return (
     <View width={width} height={height}>
       <div className="flex justify-between">
-        <Title
-          Icon={<Target02Icon />}
-          title="Predictions"
-          customClass="bottom-[2px] right-[1px]"
-        />
+        <Title title="Prediction View" customClass="bottom-[2px] right-[1px]" />
         {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDatasetMode} />
         )}

@@ -1,7 +1,6 @@
 import React from "react";
 
 interface Props {
-  Icon: JSX.Element;
   title: string;
   id?: string;
   customClass?: string;
@@ -10,7 +9,6 @@ interface Props {
 }
 
 export default function Title({
-  Icon,
   title,
   id,
   customClass,
@@ -22,14 +20,12 @@ export default function Title({
       id={id}
       onClick={onClick}
       className={
-        "flex items-center gap-1 ml-1 relative bottom-[1px] " + customClass
+        "flex items-center gap-1 ml-1 relative bottom-[1px] font-semibold text-[17px] leading-7 " +
+        customClass
       }
     >
-      {Icon}
-      <div className="flex items-center font-semibold text-[17px] leading-7">
-        <span>{title}</span>
-        {AdditionalContent}
-      </div>
+      <span>{title}</span>
+      {AdditionalContent}
     </div>
   );
 }

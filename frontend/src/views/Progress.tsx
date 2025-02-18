@@ -9,7 +9,6 @@ import Pagination from "../components/Progress/Pagination";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 import { Step } from "../types/progress";
-import { VitalIcon } from "../components/UI/icons";
 import { RunningStatusContext } from "../store/running-status-context";
 import { RunningIndexContext } from "../store/running-index-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
@@ -99,8 +98,7 @@ export default function Progress({ width, height }: ViewProps) {
     <View width={width} height={height} className="border-t-0">
       <div className="flex justify-between">
         <Title
-          Icon={<VitalIcon />}
-          title="Progress"
+          title="Progress View"
           AdditionalContent={
             (forgetClassExist &&
               (isRunning ||

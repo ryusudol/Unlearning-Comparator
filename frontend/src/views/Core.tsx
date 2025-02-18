@@ -5,7 +5,6 @@ import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
-import { ChartScatterIcon, UserQuestionIcon } from "../components/UI/icons";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
 
@@ -44,12 +43,7 @@ export default function Core({ width, height }: ViewProps) {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1 mb-0.5 relative right-1">
           <Title
-            Icon={
-              <ChartScatterIcon
-                className={!isEmbeddingMode ? "opacity-40" : ""}
-              />
-            }
-            title="Embeddings"
+            title="Embedding View"
             id={EMBEDDINGS}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               !isEmbeddingMode && "text-gray-400 border-none"
@@ -58,12 +52,7 @@ export default function Core({ width, height }: ViewProps) {
             onClick={handleDisplayModeChange}
           />
           <Title
-            Icon={
-              <UserQuestionIcon
-                className={`w-4 h-4 ${isEmbeddingMode && "opacity-40"}`}
-              />
-            }
-            title="Membership Inference Attack"
+            title="Attack View"
             id={ATTACK}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               isEmbeddingMode && "text-gray-400 border-none"
