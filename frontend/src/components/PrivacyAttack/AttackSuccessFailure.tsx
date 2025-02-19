@@ -1,13 +1,12 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo } from "react";
 import * as d3 from "d3";
 
 import { ScrollArea } from "../UI/scroll-area";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { UNLEARN, Metric } from "../../views/PrivacyAttack";
+import { UNLEARN, RETRAIN } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
 import { Data } from "./AttackAnalytics";
-import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { Image } from "../../types/privacy-attack";
+import { Bin, CategoryType } from "./AttackAnalytics";
 
 const CONFIG = {
   RETRAIN: "retrain",
@@ -25,53 +24,36 @@ const CONFIG = {
 
 interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
-  metric: Metric;
   thresholdValue: number;
   aboveThreshold: string;
   thresholdStrategy: string;
   hoveredId: number | null;
   data: Data;
+  imageMap: Map<number, Image>;
   attackScore: number;
   setHoveredId: (val: number | null) => void;
+  onElementClick: (
+    event: React.MouseEvent,
+    elementData: Bin & { type: CategoryType }
+  ) => void;
 }
 
 export default function AttackSuccessFailure({
   mode,
-  metric,
   thresholdValue,
   aboveThreshold,
   thresholdStrategy,
   hoveredId,
   data,
+  imageMap,
   attackScore,
   setHoveredId,
+  onElementClick,
 }: AttackSuccessFailureProps) {
-  const { forgetClassNumber } = useForgetClass();
-
-  const [images, setImages] = useState<Image[]>();
-
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
   const isStrategyMaxSuccessRate = thresholdStrategy === "MAX SUCCESS RATE";
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const res: { images: Image[] } = await fetchAllSubsetImages(
-          forgetClassNumber
-        );
-        setImages(res.images);
-      } catch (e) {
-        if (e instanceof Error) {
-          console.error(`Error fetching subset images: ${e.message}`);
-        } else {
-          console.error("Error fetching subset images: Unknown error");
-        }
-      }
-    };
-    init();
-  }, [forgetClassNumber]);
 
   const { successGroup, failureGroup, successPct, failurePct } = useMemo(() => {
     if (!data || (!data.retrainData.length && !data.unlearnData.length)) {
@@ -95,11 +77,11 @@ export default function AttackSuccessFailure({
     );
     const successGroup = [
       ...successRetrain.map((item) => ({
-        type: CONFIG.RETRAIN,
+        type: RETRAIN,
         img_idx: item.img_idx,
       })),
       ...successUnlearn.map((item) => ({
-        type: CONFIG.UNLEARN,
+        type: UNLEARN,
         img_idx: item.img_idx,
       })),
     ];
@@ -116,11 +98,11 @@ export default function AttackSuccessFailure({
     );
     const failureGroup = [
       ...failureUnlearn.map((item) => ({
-        type: CONFIG.UNLEARN,
+        type: UNLEARN,
         img_idx: item.img_idx,
       })),
       ...failureRetrain.map((item) => ({
-        type: CONFIG.RETRAIN,
+        type: RETRAIN,
         img_idx: item.img_idx,
       })),
     ];
@@ -139,13 +121,6 @@ export default function AttackSuccessFailure({
       failurePct,
     };
   }, [data, isAboveThresholdUnlearn, thresholdValue]);
-
-  const imageMap = useMemo(() => {
-    if (!images) return new Map<number, Image>();
-    const map = new Map<number, Image>();
-    images.forEach((img) => map.set(img.index, img));
-    return map;
-  }, [images]);
 
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
@@ -178,17 +153,36 @@ export default function AttackSuccessFailure({
           alt="img"
           onMouseEnter={() => setHoveredId(groupItem.img_idx)}
           onMouseLeave={() => setHoveredId(null)}
+          onClick={(event) => {
+            const value =
+              data!.retrainData.find((d) => d.img_idx === groupItem.img_idx)
+                ?.value ||
+              data!.unlearnData.find((d) => d.img_idx === groupItem.img_idx)
+                ?.value ||
+              0;
+            onElementClick(event, {
+              img_idx: groupItem.img_idx,
+              value,
+              type: groupItem.type as CategoryType,
+            });
+          }}
+          className="w-3 h-3 cursor-pointer"
           style={{
-            width: "12px",
-            height: "12px",
             border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
-            cursor: "pointer",
           }}
         />
       );
     });
-  }, [hoveredId, imageMap, isBaseline, setHoveredId, successGroup]);
+  }, [
+    data,
+    hoveredId,
+    imageMap,
+    isBaseline,
+    onElementClick,
+    setHoveredId,
+    successGroup,
+  ]);
 
   const failureImages = useMemo(() => {
     return failureGroup.map((groupItem, idx) => {
@@ -221,17 +215,36 @@ export default function AttackSuccessFailure({
           alt="img"
           onMouseEnter={() => setHoveredId(groupItem.img_idx)}
           onMouseLeave={() => setHoveredId(null)}
+          onClick={(event) => {
+            const value =
+              data!.retrainData.find((d) => d.img_idx === groupItem.img_idx)
+                ?.value ||
+              data!.unlearnData.find((d) => d.img_idx === groupItem.img_idx)
+                ?.value ||
+              0;
+            onElementClick(event, {
+              img_idx: groupItem.img_idx,
+              value,
+              type: groupItem.type as CategoryType,
+            });
+          }}
+          className="w-3 h-3 cursor-pointer"
           style={{
-            width: "12px",
-            height: "12px",
             border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
-            cursor: "pointer",
           }}
         />
       );
     });
-  }, [failureGroup, hoveredId, imageMap, isBaseline, setHoveredId]);
+  }, [
+    data,
+    failureGroup,
+    hoveredId,
+    imageMap,
+    isBaseline,
+    onElementClick,
+    setHoveredId,
+  ]);
 
   return (
     <div className="relative h-full flex flex-col items-center mt-1">

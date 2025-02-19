@@ -1,5 +1,6 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useMemo } from "react";
 
+import Tooltip from "./Tooltip";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import { useForgetClass } from "../../hooks/useForgetClass";
@@ -7,7 +8,9 @@ import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { AttackResult, AttackResults } from "../../types/data";
+import { Image } from "../../types/privacy-attack";
 import { fetchFileData } from "../../utils/api/unlearning";
+import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 
 export type Bin = { img_idx: number; value: number };
 export type Data = {
@@ -15,6 +18,13 @@ export type Data = {
   unlearnData: Bin[];
   lineChartData: AttackResult[];
 } | null;
+export type CategoryType = "unlearn" | "retrain";
+export type TooltipData = {
+  img_idx: number;
+  value: number;
+  type: CategoryType;
+};
+export type TooltipPosition = { x: number; y: number };
 
 interface Props {
   mode: "Baseline" | "Comparison";
@@ -46,13 +56,38 @@ export default function AttackAnalytics({
   const [lastThresholdStrategy, setLastThresholdStrategy] = useState("");
   const [attackScore, setAttackScore] = useState(0);
   const [data, setData] = useState<Data>(null);
+  const [images, setImages] = useState<Image[]>();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<TooltipPosition | null>(null);
 
   const prevMetricRef = useRef(metric);
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        type Response = { images: Image[] };
+        const res: Response = await fetchAllSubsetImages(forgetClassNumber);
+        setImages(res.images);
+      } catch (error) {
+        console.error(`Error fetching subset images: ${error}`);
+      }
+    };
+    fetchImage();
+  }, [forgetClassNumber]);
+
+  const imageMap = useMemo(() => {
+    if (!images) return new Map<number, Image>();
+    const map = new Map<number, Image>();
+    images.forEach((img) => map.set(img.index, img));
+    return map;
+  }, [images]);
 
   useEffect(() => {
     const getAttackData = async () => {
@@ -89,12 +124,8 @@ export default function AttackAnalytics({
           value: isMetricEntropy ? item.entropy : item.confidence,
         });
       });
-
-      const normalizedAboveThreshold = aboveThreshold
-        .toLowerCase()
-        .replace(/\s+/g, "_");
       const key =
-        `${metric.toLowerCase()}_above_${normalizedAboveThreshold}` as keyof AttackResults;
+        `${metric.toLowerCase()}_above_${aboveThreshold}` as keyof AttackResults;
       const lineChartData = experiment.attack.results[key];
 
       if (!lineChartData) return;
@@ -165,9 +196,8 @@ export default function AttackAnalytics({
         setThresholdValue(bestCandidate);
       }
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
-      const normalizedAboveThreshold = aboveThreshold.toLowerCase();
       const key =
-        `${metric.toLowerCase()}_above_${normalizedAboveThreshold}` as keyof AttackResults;
+        `${metric.toLowerCase()}_above_${aboveThreshold}` as keyof AttackResults;
       const baselineLineChartData = baselineExperiment
         ? baselineExperiment.attack.results[key] || []
         : [];
@@ -215,8 +245,29 @@ export default function AttackAnalytics({
     setUserModified(true);
   };
 
+  const handleElementClick = (
+    event: React.MouseEvent,
+    elementData: Bin & { type: CategoryType }
+  ) => {
+    event.stopPropagation();
+    if (!containerRef.current) return;
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const relativeX = event.clientX - containerRect.left;
+    const relativeY = event.clientY - containerRect.top;
+    const offset = 10;
+
+    setTooltipData(elementData);
+    setTooltipPos({ x: relativeX + offset, y: relativeY + offset });
+  };
+
+  const closeTooltip = () => {
+    setTooltipData(null);
+    setTooltipPos(null);
+  };
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="relative h-full flex flex-col" ref={containerRef}>
       {data && (
         <>
           <AttackPlot
@@ -230,19 +281,34 @@ export default function AttackAnalytics({
             onThresholdLineDrag={handleThresholdLineDrag}
             onUpdateAttackScore={setAttackScore}
             setHoveredId={setHoveredId}
+            onElementClick={handleElementClick}
           />
           <AttackSuccessFailure
             mode={mode}
-            metric={metric}
             thresholdValue={thresholdValue}
             aboveThreshold={aboveThreshold}
             thresholdStrategy={userModified ? "" : lastThresholdStrategy}
             hoveredId={hoveredId}
             data={data}
+            imageMap={imageMap}
             attackScore={attackScore}
             setHoveredId={setHoveredId}
+            onElementClick={handleElementClick}
           />
         </>
+      )}
+      {tooltipData && tooltipPos && (
+        <Tooltip
+          tooltipData={tooltipData}
+          thresholdValue={thresholdValue}
+          isAboveThresholdUnlearn={aboveThreshold === UNLEARN}
+          metric={metric}
+          position={tooltipPos}
+          imageData={imageMap.get(tooltipData.img_idx)}
+          retrainData={data ? data.retrainData : []}
+          unlearnData={data ? data.unlearnData : []}
+          onClose={closeTooltip}
+        />
       )}
     </div>
   );
