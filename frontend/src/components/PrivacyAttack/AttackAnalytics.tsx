@@ -1,8 +1,18 @@
-import { useState, useEffect, useContext, useRef, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+import { createRoot } from "react-dom/client";
 
-import Tooltip from "./Tooltip";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
+import Tooltip from "../Tooltip";
+import { Prob } from "../../types/embeddings";
+import { API_URL } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
@@ -11,6 +21,12 @@ import { AttackResult, AttackResults } from "../../types/data";
 import { Image } from "../../types/privacy-attack";
 import { fetchFileData } from "../../utils/api/unlearning";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
+import { calculateZoom } from "../../utils/util";
+
+const CONFIG = {
+  TOOLTIP_WIDTH: 450,
+  TOOLTIP_HEIGHT: 274,
+} as const;
 
 export type Bin = { img_idx: number; value: number };
 export type Data = {
@@ -33,6 +49,8 @@ interface Props {
   thresholdStrategy: string;
   strategyCount: number;
   userModified: boolean;
+  baselinePoints: (number | Prob)[][];
+  comparisonPoints: (number | Prob)[][];
   setThresholdStrategy: (val: string) => void;
   setUserModified: (val: boolean) => void;
 }
@@ -44,13 +62,15 @@ export default function AttackAnalytics({
   thresholdStrategy,
   strategyCount,
   userModified,
+  baselinePoints,
+  comparisonPoints,
   setThresholdStrategy,
   setUserModified,
 }: Props) {
+  const { forgetClassNumber } = useForgetClass();
+
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
-
-  const { forgetClassNumber } = useForgetClass();
 
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [lastThresholdStrategy, setLastThresholdStrategy] = useState("");
@@ -58,16 +78,164 @@ export default function AttackAnalytics({
   const [data, setData] = useState<Data>(null);
   const [images, setImages] = useState<Image[]>();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<TooltipPosition | null>(null);
 
   const prevMetricRef = useRef(metric);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<any>(null);
+  const fetchControllerRef = useRef<AbortController | null>(null);
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const imageMap = useMemo(() => {
+    if (!images) return new Map<number, Image>();
+    const map = new Map<number, Image>();
+    images.forEach((img) => map.set(img.index, img));
+    return map;
+  }, [images]);
+
+  const handleThresholdLineDrag = (newThreshold: number) => {
+    setThresholdValue(newThreshold);
+    setUserModified(true);
+  };
+
+  const showTooltip = (event: MouseEvent, content: JSX.Element) => {
+    if (!containerRef.current) return;
+
+    if (tooltipRef.current) {
+      rootRef.current?.unmount();
+      tooltipRef.current.remove();
+    }
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const zoom = calculateZoom();
+
+    let xPos = (event.clientX - containerRect.left) / zoom + 10;
+    let yPos = (event.clientY - containerRect.top) / zoom + 10;
+
+    if (yPos + CONFIG.TOOLTIP_HEIGHT > containerRect.height / zoom) {
+      yPos =
+        (event.clientY - containerRect.top) / zoom - CONFIG.TOOLTIP_HEIGHT - 10;
+      if (yPos < 0) {
+        yPos = 0;
+      }
+    }
+
+    const tooltipDiv = document.createElement("div");
+    tooltipDiv.style.position = "absolute";
+    tooltipDiv.style.left = `${xPos}px`;
+    tooltipDiv.style.top = `${yPos}px`;
+    tooltipDiv.style.pointerEvents = "none";
+    tooltipDiv.style.backgroundColor = "white";
+    tooltipDiv.style.padding = "5px";
+    tooltipDiv.style.border = "1px solid rgba(0, 0, 0, 0.25)";
+    tooltipDiv.style.borderRadius = "4px";
+    tooltipDiv.style.zIndex = "30";
+    tooltipDiv.className = "shadow-xl";
+
+    containerRef.current.appendChild(tooltipDiv);
+    tooltipRef.current = tooltipDiv;
+
+    rootRef.current = createRoot(tooltipDiv);
+    rootRef.current.render(content);
+  };
+
+  const hideTooltip = useCallback(() => {
+    if (tooltipRef.current) {
+      rootRef.current?.unmount();
+      tooltipRef.current.remove();
+      tooltipRef.current = null;
+      rootRef.current = null;
+    }
+  }, []);
+
+  const handleElementClick = async (
+    event: React.MouseEvent,
+    elementData: Bin & { type: CategoryType }
+  ) => {
+    event.stopPropagation();
+
+    if (!containerRef.current) return;
+
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    try {
+      const response = await fetch(
+        `${API_URL}/image/cifar10/${elementData.img_idx}`,
+        {
+          signal: controller.signal,
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch tooltip data");
+      if (controller.signal.aborted) return;
+
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+
+      const baselinePoint = baselinePoints.find((point) => {
+        return typeof point[4] === "number" && point[4] === elementData.img_idx;
+      }) as (number | Prob)[];
+      const comparisonPoint = comparisonPoints.find((point) => {
+        return typeof point[4] === "number" && point[4] === elementData.img_idx;
+      }) as (number | Prob)[];
+
+      let current: Prob, opposite: Prob;
+      current = (isBaseline ? baselinePoint![5] : comparisonPoint![5]) as Prob;
+      opposite = (isBaseline ? comparisonPoint![5] : baselinePoint![5]) as Prob;
+
+      const barChartData = isBaseline
+        ? {
+            baseline: Array.from({ length: 10 }, (_, idx) => ({
+              class: idx,
+              value: Number(current[idx] || 0),
+            })),
+            comparison: Array.from({ length: 10 }, (_, idx) => ({
+              class: idx,
+              value: Number(opposite[idx] || 0),
+            })),
+          }
+        : {
+            baseline: Array.from({ length: 10 }, (_, idx) => ({
+              class: idx,
+              value: Number(opposite[idx] || 0),
+            })),
+            comparison: Array.from({ length: 10 }, (_, idx) => ({
+              class: idx,
+              value: Number(current[idx] || 0),
+            })),
+          };
+
+      const tooltipContent = (
+        <Tooltip
+          width={CONFIG.TOOLTIP_WIDTH}
+          height={CONFIG.TOOLTIP_HEIGHT}
+          imageUrl={imageUrl}
+          data={isBaseline ? baselinePoint : comparisonPoint}
+          barChartData={barChartData}
+          forgetClass={forgetClassNumber}
+          isBaseline={isBaseline}
+        />
+      );
+
+      showTooltip((event as any).nativeEvent || event, tooltipContent);
+
+      return () => {
+        URL.revokeObjectURL(imageUrl);
+      };
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      console.error("Failed to fetch tooltip data:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -81,13 +249,6 @@ export default function AttackAnalytics({
     };
     fetchImage();
   }, [forgetClassNumber]);
-
-  const imageMap = useMemo(() => {
-    if (!images) return new Map<number, Image>();
-    const map = new Map<number, Image>();
-    images.forEach((img) => map.set(img.index, img));
-    return map;
-  }, [images]);
 
   useEffect(() => {
     const getAttackData = async () => {
@@ -240,31 +401,16 @@ export default function AttackAnalytics({
     thresholdValue,
   ]);
 
-  const handleThresholdLineDrag = (newThreshold: number) => {
-    setThresholdValue(newThreshold);
-    setUserModified(true);
-  };
+  useEffect(() => {
+    const handleClickOutside = () => {
+      hideTooltip();
+    };
 
-  const handleElementClick = (
-    event: React.MouseEvent,
-    elementData: Bin & { type: CategoryType }
-  ) => {
-    event.stopPropagation();
-    if (!containerRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const relativeX = event.clientX - containerRect.left;
-    const relativeY = event.clientY - containerRect.top;
-    const offset = 10;
-
-    setTooltipData(elementData);
-    setTooltipPos({ x: relativeX + offset, y: relativeY + offset });
-  };
-
-  const closeTooltip = () => {
-    setTooltipData(null);
-    setTooltipPos(null);
-  };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [hideTooltip]);
 
   return (
     <div className="relative h-full flex flex-col" ref={containerRef}>
@@ -296,19 +442,6 @@ export default function AttackAnalytics({
             onElementClick={handleElementClick}
           />
         </>
-      )}
-      {tooltipData && tooltipPos && (
-        <Tooltip
-          tooltipData={tooltipData}
-          thresholdValue={thresholdValue}
-          isAboveThresholdUnlearn={aboveThreshold === UNLEARN}
-          metric={metric}
-          position={tooltipPos}
-          imageData={imageMap.get(tooltipData.img_idx)}
-          retrainData={data ? data.retrainData : []}
-          unlearnData={data ? data.unlearnData : []}
-          onClose={closeTooltip}
-        />
       )}
     </div>
   );

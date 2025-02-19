@@ -311,12 +311,12 @@ const ScatterPlot = forwardRef(
           });
 
           if (!response.ok) throw new Error("Failed to fetch image");
-
-          const blob = await response.blob();
           if (controller.signal.aborted) return;
 
-          const prob = d[5] as Prob;
+          const blob = await response.blob();
           const imageUrl = URL.createObjectURL(blob);
+
+          const prob = d[5] as Prob;
 
           const currentHoveredInstance = hoveredInstanceRef.current;
 
@@ -440,9 +440,9 @@ const ScatterPlot = forwardRef(
     );
 
     const transformedData = useMemo(() => {
-      const forgetClassData = data.filter((d) => d[2] === forgetClass);
-      const normalData = data.filter((d) => d[2] !== forgetClass);
-      return { forgetClassData, normalData };
+      const forgettingData = data.filter((d) => d[2] === forgetClass);
+      const remainData = data.filter((d) => d[2] !== forgetClass);
+      return { forgettingData, remainData };
     }, [data, forgetClass]);
 
     const initializeSvg = useCallback(() => {
@@ -486,7 +486,7 @@ const ScatterPlot = forwardRef(
 
       svgElements.current.circles = gDot
         .selectAll<SVGCircleElement, (number | Prob)[]>("circle")
-        .data(transformedData.normalData)
+        .data(transformedData.remainData)
         .join("circle")
         .attr("cx", (d) => x(d[0] as number))
         .attr("cy", (d) => y(d[1] as number))
@@ -507,7 +507,7 @@ const ScatterPlot = forwardRef(
 
       svgElements.current.crosses = gDot
         .selectAll<SVGPathElement, (number | Prob)[]>("path")
-        .data(transformedData.forgetClassData)
+        .data(transformedData.forgettingData)
         .join("path")
         .attr("transform", (d) => {
           const xPos = x(d[0] as number);
@@ -553,8 +553,8 @@ const ScatterPlot = forwardRef(
       handleMouseEnter,
       handleMouseLeave,
       shouldLowerOpacity,
-      transformedData.forgetClassData,
-      transformedData.normalData,
+      transformedData.forgettingData,
+      transformedData.remainData,
       viewMode,
       x,
       y,
