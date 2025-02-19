@@ -1,5 +1,4 @@
 import { useState } from "react";
-import * as d3 from "d3";
 
 import View from "../components/View";
 import Title from "../components/Title";
@@ -11,6 +10,7 @@ import { useModelSelection } from "../hooks/useModelSelection";
 import { ViewProps } from "../types/common";
 import { ShortArrow, LongArrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
+import { bubbleColorScale } from "../constants/colors";
 
 export default function Predictions({ width, height }: ViewProps) {
   const { areAllModelsSelected } = useModelSelection();
@@ -87,14 +87,7 @@ function BubbleChartLegend() {
 }
 
 function ColorBar() {
-  const steps = 10;
-  const colors = Array.from({ length: steps }, (_, i) => {
-    const percent = (i / (steps - 1)) * 100;
-    const color = d3.interpolateWarm(i / (steps - 1));
-    return `${color} ${percent}%`;
-  });
-
-  const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
+  const gradient = `linear-gradient(to right, ${bubbleColorScale.join(", ")})`;
 
   return (
     <div className="relative w-[110px] h-3">
@@ -103,10 +96,10 @@ function ColorBar() {
         style={{ background: gradient }}
       />
       <div className="absolute -bottom-[4.5px] left-0.5">
-        <span className="text-[10px] text-white">0</span>
+        <span className="text-[10px] text-black">0</span>
       </div>
       <div className="absolute -bottom-[4.5px] right-0.5">
-        <span className="text-[10px] text-[#666666]">1</span>
+        <span className="text-[10px] text-white">1</span>
       </div>
     </div>
   );
