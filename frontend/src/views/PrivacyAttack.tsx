@@ -4,17 +4,28 @@ import View from "../components/View";
 import Indicator from "../components/Indicator";
 import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
+import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 
 export const ENTROPY = "entropy";
 export const CONFIDENCE = "confidence";
-export const UNLEARN = "Unlearn";
-export const RETRAIN = "Retrain";
+export const UNLEARN = "unlearn";
+export const RETRAIN = "retrain";
 
 export type Metric = "entropy" | "confidence";
 
-export default function PrivacyAttack({ height }: { height: number }) {
+interface Props {
+  height: number;
+  baselinePoints: (number | Prob)[][];
+  comparisonPoints: (number | Prob)[][];
+}
+
+export default function PrivacyAttack({
+  height,
+  baselinePoints,
+  comparisonPoints,
+}: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
 
   const [metric, setMetric] = useState<Metric>(ENTROPY);
@@ -62,6 +73,8 @@ export default function PrivacyAttack({ height }: { height: number }) {
           thresholdStrategy={thresholdStrategy}
           strategyCount={strategyCount}
           userModified={userModified}
+          baselinePoints={baselinePoints}
+          comparisonPoints={comparisonPoints}
           setThresholdStrategy={setThresholdStrategy}
           setUserModified={setUserModified}
         />
@@ -80,6 +93,8 @@ export default function PrivacyAttack({ height }: { height: number }) {
           thresholdStrategy={thresholdStrategy}
           strategyCount={strategyCount}
           userModified={userModified}
+          baselinePoints={baselinePoints}
+          comparisonPoints={comparisonPoints}
           setThresholdStrategy={setThresholdStrategy}
           setUserModified={setUserModified}
         />

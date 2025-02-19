@@ -53,7 +53,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "phase",
-    header: "Phase",
+    header: "Type",
     cell: ({ row }) => {
       const method = row.getValue("method") as string;
       const phase = row.getValue("phase") as string;
@@ -98,7 +98,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Epochs
+        Epoch
         <ArrowUpDown className="w-4" />
       </Button>
     ),

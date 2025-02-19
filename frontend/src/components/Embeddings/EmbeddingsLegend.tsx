@@ -16,11 +16,11 @@ export default function EmbeddingsLegend() {
         <ul className="flex items-center gap-[9.2px]">
           <li className="flex items-center">
             <CircleIcon className="w-[9px] h-[9px] text-[#4f5562] mr-[3px]" />
-            <span>Remaining Data</span>
+            <span>Remain</span>
           </li>
           <li className="flex items-center">
             <FatMultiplicationSignIcon className="text-[#4f5562] mr-[3px]" />
-            <span>Forgetting Target</span>
+            <span>Forget</span>
           </li>
         </ul>
       </div>

@@ -16,7 +16,7 @@ import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
 import { ExperimentsContext } from "../../store/experiments-context";
 import { extractBubbleChartData } from "../../utils/data/experiments";
-import { COLORS } from "../../constants/colors";
+import { COLORS, bubbleColorScale } from "../../constants/colors";
 
 const CONFIG = {
   TOTAL_SIZE: 255,
@@ -112,9 +112,9 @@ export default function BubbleChart({
     const yScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, height]);
 
     const colorScale = d3
-      .scaleSequential()
+      .scaleQuantize<string>()
       .domain([0, 1])
-      .interpolator(d3.interpolateWarm);
+      .range(bubbleColorScale);
 
     const sizeScale = d3
       .scaleLinear()

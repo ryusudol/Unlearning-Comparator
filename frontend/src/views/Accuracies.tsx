@@ -7,11 +7,10 @@ import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { useModelSelection } from "../hooks/useModelSelection";
 import { ViewProps } from "../types/common";
-import { Chart01Icon } from "../components/UI/icons";
 import { ExperimentsContext } from "../store/experiments-context";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
-export default function Accuracies({ width, height }: ViewProps) {
+export default function Accuracy({ width, height }: ViewProps) {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
@@ -43,12 +42,8 @@ export default function Accuracies({ width, height }: ViewProps) {
   return (
     <View width={width} height={height} className="border-t-0">
       <Title
-        Icon={<Chart01Icon />}
-        title="Accuracies"
+        title="Accuracy Comparison"
         customClass="bottom-[2px] right-[1px]"
-        AdditionalContent={
-          <span className="ml-1">(Comparison - Baseline)</span>
-        }
       />
       {forgetClassExist ? (
         areAllModelsSelected ? (

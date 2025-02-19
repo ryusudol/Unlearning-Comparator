@@ -7,11 +7,7 @@ import DataTable from "../components/Experiments/DataTable";
 import AddExperimentsButton from "../components/Experiments/AddExperimentsButton";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
-import {
-  SettingsIcon,
-  ArrowDownIcon,
-  ArrowUpIcon,
-} from "../components/UI/icons";
+import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
 
 export default function Experiments({ width, height }: ViewProps) {
   const { forgetClassExist } = useForgetClass();
@@ -30,11 +26,7 @@ export default function Experiments({ width, height }: ViewProps) {
     >
       <div className="flex justify-between items-center mb-[3px]">
         <div className="grid grid-flow-col grid-x-2 items-center">
-          <Title
-            Icon={<SettingsIcon />}
-            title="Experiments"
-            customClass="right-[1px]"
-          />
+          <Title title="Model Screening" customClass="right-[1px]" />
           <div
             className="w-5 h-5 flex justify-center items-center cursor-pointer ml-0 bg-white hover:bg-[#f8f9fb] transition"
             onClick={handleExpandClick}
