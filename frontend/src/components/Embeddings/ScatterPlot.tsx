@@ -13,7 +13,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import ViewModeSelector from "./ViewModeSelector";
-import EmbeddingTooltip from "./EmbeddingTooltip";
+import Tooltip from "./EmbeddingTooltip";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
@@ -347,7 +347,7 @@ const ScatterPlot = forwardRef(
               };
 
           const tooltipContent = (
-            <EmbeddingTooltip
+            <Tooltip
               width={CONFIG.TOOLTIP_X_SIZE}
               height={CONFIG.TOOLTIP_Y_SIZE}
               imageUrl={imageUrl}
