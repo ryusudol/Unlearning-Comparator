@@ -4,14 +4,14 @@ import * as d3 from "d3";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+} from "./UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
-} from "../../constants/common";
-import { COLORS } from "../../constants/colors";
-import { Prob } from "../../types/embeddings";
+} from "../constants/common";
+import { COLORS } from "../constants/colors";
+import { Prob } from "../types/embeddings";
 
 const CONFIG = {
   LOW_OPACITY: 0.6,
@@ -47,7 +47,7 @@ interface Props {
   isBaseline: boolean;
 }
 
-export default React.memo(function EmbeddingTooltip({
+export default React.memo(function Tooltip({
   width,
   height,
   imageUrl,
