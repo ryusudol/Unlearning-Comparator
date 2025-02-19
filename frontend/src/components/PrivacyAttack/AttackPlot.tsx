@@ -14,13 +14,14 @@ import {
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { AttackResult } from "../../types/data";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { UNLEARN, Metric } from "../../views/PrivacyAttack";
-import { Bin, Data } from "./AttackAnalytics";
+import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
+import { Bin, Data, CategoryType } from "./AttackAnalytics";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
   FONT_SIZE: "10",
   LABEL_FONT_SIZE: "12",
+  BLACK: "black",
   RED: "#e41a1c",
   BLUE: "#377eb8",
   GREEN: "#4daf4a",
@@ -63,6 +64,10 @@ interface Props {
   onThresholdLineDrag: (value: number) => void;
   onUpdateAttackScore: (score: number) => void;
   setHoveredId: (val: number | null) => void;
+  onElementClick: (
+    event: React.MouseEvent,
+    elementData: Bin & { type: CategoryType }
+  ) => void;
 }
 
 export default function ButterflyPlot({
@@ -76,6 +81,7 @@ export default function ButterflyPlot({
   onThresholdLineDrag,
   onUpdateAttackScore,
   setHoveredId,
+  onElementClick,
 }: Props) {
   const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
@@ -90,7 +96,7 @@ export default function ButterflyPlot({
   const attackData = data?.lineChartData;
 
   const isBaseline = mode === "Baseline";
-  const isMetricEntropy = metric === "entropy";
+  const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
 
   const thresholdMin = isMetricEntropy
@@ -258,7 +264,10 @@ export default function ButterflyPlot({
             .attr("stroke-opacity", opacity)
             .attr("cursor", "pointer")
             .on("mouseover", (_, d) => setHoveredId(d.img_idx))
-            .on("mouseout", () => setHoveredId(null));
+            .on("mouseout", () => setHoveredId(null))
+            .on("click", (event, d) => {
+              onElementClick(event, { ...d, type: RETRAIN });
+            });
         }
 
         // mark the number of extra circles that extend beyond the x-axis
@@ -271,7 +280,7 @@ export default function ButterflyPlot({
             .attr("y", yPos)
             .attr("text-anchor", "end")
             .attr("font-size", CONFIG.FONT_SIZE)
-            .attr("fill", "black")
+            .attr("fill", CONFIG.BLACK)
             .text(`+${extraCount}`);
         }
       });
@@ -310,7 +319,10 @@ export default function ButterflyPlot({
             .attr("stroke-opacity", opacity)
             .attr("cursor", "pointer")
             .on("mouseover", (_, d) => setHoveredId(d.img_idx))
-            .on("mouseout", () => setHoveredId(null));
+            .on("mouseout", () => setHoveredId(null))
+            .on("click", (event, d) => {
+              onElementClick(event, { ...d, type: UNLEARN });
+            });
         }
 
         if (extraCount > 0) {
@@ -323,7 +335,7 @@ export default function ButterflyPlot({
             .attr("y", yPos)
             .attr("text-anchor", "start")
             .attr("font-size", CONFIG.FONT_SIZE)
-            .attr("fill", "black")
+            .attr("fill", CONFIG.BLACK)
             .text(`+${extraCount}`);
         }
       });
@@ -347,7 +359,7 @@ export default function ButterflyPlot({
         .attr("y", 15)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
-        .attr("fill", "black")
+        .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
         .text("← Retrain Samples | Unlearn Samples →");
       xAxisB
@@ -372,9 +384,9 @@ export default function ButterflyPlot({
         .attr("y", -226)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
-        .attr("fill", "black")
+        .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
-        .text(metric === "entropy" ? "Entropy" : "Confidence");
+        .text(isMetricEntropy ? "Entropy" : "Confidence");
 
       // mark the total number of extra bins
       if (extraRetrain > 0) {
@@ -383,7 +395,7 @@ export default function ButterflyPlot({
           .attr("y", hB + +CONFIG.FONT_SIZE)
           .attr("text-anchor", "end")
           .attr("font-size", CONFIG.FONT_SIZE)
-          .attr("fill", "black")
+          .attr("fill", CONFIG.BLACK)
           .text(`+${extraRetrain}`);
       }
       if (extraUnlearn > 0) {
@@ -392,7 +404,7 @@ export default function ButterflyPlot({
           .attr("y", hB + +CONFIG.FONT_SIZE)
           .attr("text-anchor", "start")
           .attr("font-size", CONFIG.FONT_SIZE)
-          .attr("fill", "black")
+          .attr("fill", CONFIG.BLACK)
           .text(`+${extraUnlearn}`);
       }
 
@@ -536,7 +548,7 @@ export default function ButterflyPlot({
       threshGroupB
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", "black")
+        .attr("stroke", CONFIG.BLACK)
         .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
         .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
         .attr("stroke-linecap", "round")
@@ -551,7 +563,7 @@ export default function ButterflyPlot({
         .attr("y", -4)
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("fill", "black")
+        .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
         .text(
           isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
@@ -563,7 +575,7 @@ export default function ButterflyPlot({
         .attr("y", 10)
         .attr("text-anchor", "start")
         .attr("font-size", CONFIG.FONT_SIZE)
-        .attr("fill", "black")
+        .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
         .text(
           isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
@@ -725,7 +737,7 @@ export default function ButterflyPlot({
         .attr("y", 15)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
-        .attr("fill", "black")
+        .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
         .text("Value");
       xAxisL
@@ -744,7 +756,7 @@ export default function ButterflyPlot({
         .attr("y1", 0)
         .attr("x2", 0)
         .attr("y2", hL)
-        .attr("stroke", "black")
+        .attr("stroke", CONFIG.BLACK)
         .attr("stroke-width", 1);
 
       // Threshold line's drag event
@@ -780,7 +792,7 @@ export default function ButterflyPlot({
       threshGroupL
         .append("line")
         .attr("class", "threshold-line")
-        .attr("stroke", "black")
+        .attr("stroke", CONFIG.BLACK)
         .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
         .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
         .attr("stroke-linecap", "round")
@@ -883,7 +895,7 @@ export default function ButterflyPlot({
           .attr("cy", pt.y)
           .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.RED)
-          .attr("stroke", "black")
+          .attr("stroke", CONFIG.BLACK)
           .attr("stroke-width", 1);
       });
 
@@ -900,7 +912,7 @@ export default function ButterflyPlot({
           .attr("cy", pt.y)
           .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.BLUE)
-          .attr("stroke", "black")
+          .attr("stroke", CONFIG.BLACK)
           .attr("stroke-width", 1);
       });
 
@@ -917,7 +929,7 @@ export default function ButterflyPlot({
           .attr("cy", pt.y)
           .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
           .attr("fill", CONFIG.GREEN)
-          .attr("stroke", "black")
+          .attr("stroke", CONFIG.BLACK)
           .attr("stroke-width", 1);
       });
 
@@ -949,7 +961,7 @@ export default function ButterflyPlot({
           "fill",
           thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
             ? "red"
-            : "black"
+            : CONFIG.BLACK
         )
         .attr("font-size", CONFIG.FONT_SIZE)
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
@@ -960,7 +972,7 @@ export default function ButterflyPlot({
           "fill",
           thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
             ? "red"
-            : "black"
+            : CONFIG.BLACK
         )
         .attr("font-size", CONFIG.FONT_SIZE)
         .attr("dy", "1.2em")
@@ -1035,7 +1047,7 @@ export default function ButterflyPlot({
             .attr("y", labelY)
             .attr("text-anchor", textAnchor)
             .attr("font-size", "11px")
-            .attr("fill", "black")
+            .attr("fill", CONFIG.BLACK)
             .text(`${metric}: ${d.value}`);
         });
     }
@@ -1071,7 +1083,7 @@ export default function ButterflyPlot({
     newThreshGroupB
       .append("line")
       .attr("class", "threshold-line")
-      .attr("stroke", "black")
+      .attr("stroke", CONFIG.BLACK)
       .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
       .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
       .attr("stroke-linecap", "round")
@@ -1086,7 +1098,7 @@ export default function ButterflyPlot({
       .attr("y", -4)
       .attr("text-anchor", "start")
       .attr("font-size", CONFIG.FONT_SIZE)
-      .attr("fill", "black")
+      .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
       .text(
         isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
@@ -1098,7 +1110,7 @@ export default function ButterflyPlot({
       .attr("y", 10)
       .attr("text-anchor", "start")
       .attr("font-size", CONFIG.FONT_SIZE)
-      .attr("fill", "black")
+      .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
       .text(
         isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
@@ -1214,7 +1226,7 @@ export default function ButterflyPlot({
         .attr("cy", pt.y)
         .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
         .attr("fill", CONFIG.RED)
-        .attr("stroke", "black")
+        .attr("stroke", CONFIG.BLACK)
         .attr("stroke-width", 1);
     });
 
@@ -1230,7 +1242,7 @@ export default function ButterflyPlot({
         .attr("cy", pt.y)
         .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
         .attr("fill", CONFIG.BLUE)
-        .attr("stroke", "black")
+        .attr("stroke", CONFIG.BLACK)
         .attr("stroke-width", 1);
     });
 
@@ -1246,7 +1258,7 @@ export default function ButterflyPlot({
         .attr("cy", pt.y)
         .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
         .attr("fill", CONFIG.GREEN)
-        .attr("stroke", "black")
+        .attr("stroke", CONFIG.BLACK)
         .attr("stroke-width", 1);
     });
 
@@ -1289,7 +1301,7 @@ export default function ButterflyPlot({
           "fill",
           thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
             ? "red"
-            : "black"
+            : CONFIG.BLACK
         )
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
@@ -1298,7 +1310,7 @@ export default function ButterflyPlot({
           "fill",
           thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
             ? "red"
-            : "black"
+            : CONFIG.BLACK
         )
         .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
       infoGroup
@@ -1330,10 +1342,11 @@ export default function ButterflyPlot({
     lowerOpacity,
     metric,
     mode,
+    onElementClick,
+    onThresholdLineDrag,
     onUpdateAttackScore,
     retrainJson,
     setHoveredId,
-    onThresholdLineDrag,
     thresholdMax,
     thresholdMin,
     thresholdStep,
@@ -1350,17 +1363,16 @@ export default function ButterflyPlot({
   }, [metric, aboveThreshold, baseline, comparison]);
 
   useEffect(() => {
-    const thresholdStroke = "#000000";
     const strokeOpacity = isAboveThresholdUnlearn ? 1 : 0.3;
 
     d3.select(butterflyRef.current)
       .selectAll(".threshold-line")
-      .attr("stroke", thresholdStroke)
+      .attr("stroke", CONFIG.BLACK)
       .attr("stroke-opacity", strokeOpacity);
 
     d3.select(lineRef.current)
       .selectAll(".threshold-line")
-      .attr("stroke", thresholdStroke)
+      .attr("stroke", CONFIG.BLACK)
       .attr("stroke-opacity", strokeOpacity);
   }, [isAboveThresholdUnlearn]);
 

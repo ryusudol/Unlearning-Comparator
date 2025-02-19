@@ -9,8 +9,8 @@ import { BaselineComparisonContext } from "../store/baseline-comparison-context"
 
 export const ENTROPY = "entropy";
 export const CONFIDENCE = "confidence";
-export const UNLEARN = "Unlearn";
-export const RETRAIN = "Retrain";
+export const UNLEARN = "unlearn";
+export const RETRAIN = "retrain";
 
 export type Metric = "entropy" | "confidence";
 
