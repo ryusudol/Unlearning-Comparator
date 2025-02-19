@@ -62,7 +62,7 @@ interface Props {
 
 const ScatterPlot = forwardRef(
   ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
-    const { forgetClass } = useForgetClass();
+    const { forgetClass, forgetClassNumber } = useForgetClass();
     const { baseline, comparison } = useModelSelection();
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
@@ -353,7 +353,7 @@ const ScatterPlot = forwardRef(
               imageUrl={imageUrl}
               data={d}
               barChartData={barChartData}
-              forgetClass={forgetClass!}
+              forgetClass={forgetClassNumber}
               isBaseline={isBaseline}
             />
           );
@@ -368,7 +368,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [forgetClass, isBaseline, mode, onHover]
+      [forgetClassNumber, isBaseline, mode, onHover]
     );
 
     const handleMouseEnter = useCallback(
