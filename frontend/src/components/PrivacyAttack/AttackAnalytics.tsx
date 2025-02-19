@@ -10,7 +10,7 @@ import { createRoot } from "react-dom/client";
 
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
-import Tooltip from "../Tooltip";
+import Tooltip from "./Tooltip";
 import { Prob } from "../../types/embeddings";
 import { API_URL } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
@@ -49,8 +49,8 @@ interface Props {
   thresholdStrategy: string;
   strategyCount: number;
   userModified: boolean;
-  baselinePoints: (number | Prob)[][];
-  comparisonPoints: (number | Prob)[][];
+  retrainPoints: (number | Prob)[][];
+  unlearnPoints: (number | Prob)[][];
   setThresholdStrategy: (val: string) => void;
   setUserModified: (val: boolean) => void;
 }
@@ -62,8 +62,8 @@ export default function AttackAnalytics({
   thresholdStrategy,
   strategyCount,
   userModified,
-  baselinePoints,
-  comparisonPoints,
+  retrainPoints,
+  unlearnPoints,
   setThresholdStrategy,
   setUserModified,
 }: Props) {
@@ -181,36 +181,35 @@ export default function AttackAnalytics({
       const blob = await response.blob();
       const imageUrl = URL.createObjectURL(blob);
 
-      const baselinePoint = baselinePoints.find((point) => {
-        return typeof point[4] === "number" && point[4] === elementData.img_idx;
+      const retrainPoint = retrainPoints.find((point) => {
+        return point[4] === elementData.img_idx;
       }) as (number | Prob)[];
-      const comparisonPoint = comparisonPoints.find((point) => {
-        return typeof point[4] === "number" && point[4] === elementData.img_idx;
+      const unlearnPoint = unlearnPoints.find((point) => {
+        return point[4] === elementData.img_idx;
       }) as (number | Prob)[];
 
-      let current: Prob, opposite: Prob;
-      current = (isBaseline ? baselinePoint![5] : comparisonPoint![5]) as Prob;
-      opposite = (isBaseline ? comparisonPoint![5] : baselinePoint![5]) as Prob;
+      const retrainProb = retrainPoint![5] as Prob;
+      const unlearnProb = unlearnPoint![5] as Prob;
 
       const barChartData = isBaseline
         ? {
             baseline: Array.from({ length: 10 }, (_, idx) => ({
               class: idx,
-              value: Number(current[idx] || 0),
+              value: Number(retrainProb[idx] || 0),
             })),
             comparison: Array.from({ length: 10 }, (_, idx) => ({
               class: idx,
-              value: Number(opposite[idx] || 0),
+              value: Number(unlearnProb[idx] || 0),
             })),
           }
         : {
             baseline: Array.from({ length: 10 }, (_, idx) => ({
               class: idx,
-              value: Number(opposite[idx] || 0),
+              value: Number(unlearnProb[idx] || 0),
             })),
             comparison: Array.from({ length: 10 }, (_, idx) => ({
               class: idx,
-              value: Number(current[idx] || 0),
+              value: Number(retrainProb[idx] || 0),
             })),
           };
 
@@ -219,7 +218,7 @@ export default function AttackAnalytics({
           width={CONFIG.TOOLTIP_WIDTH}
           height={CONFIG.TOOLTIP_HEIGHT}
           imageUrl={imageUrl}
-          data={isBaseline ? baselinePoint : comparisonPoint}
+          data={unlearnPoint}
           barChartData={barChartData}
           forgetClass={forgetClassNumber}
           isBaseline={isBaseline}
@@ -231,9 +230,8 @@ export default function AttackAnalytics({
       return () => {
         URL.revokeObjectURL(imageUrl);
       };
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      console.error("Failed to fetch tooltip data:", err);
+    } catch (error) {
+      console.error(`Failed to fetch tooltip data: ${error}`);
     }
   };
 

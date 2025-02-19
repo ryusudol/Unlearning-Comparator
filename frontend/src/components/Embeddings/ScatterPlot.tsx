@@ -13,7 +13,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import ViewModeSelector from "./ViewModeSelector";
-import Tooltip from "../Tooltip";
+import Tooltip from "./Tooltip";
 import {
   BaselineNeuralNetworkIcon,
   ComparisonNeuralNetworkIcon,

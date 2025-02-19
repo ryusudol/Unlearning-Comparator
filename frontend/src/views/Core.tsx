@@ -39,6 +39,8 @@ export default function Core({ width, height }: ViewProps) {
 
   useEffect(() => {
     async function loadBaselineData() {
+      if (!forgetClassExist) return;
+
       const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
@@ -53,10 +55,12 @@ export default function Core({ width, height }: ViewProps) {
       }
     }
     loadBaselineData();
-  }, [baseline, forgetClassNumber]);
+  }, [baseline, forgetClassExist, forgetClassNumber]);
 
   useEffect(() => {
     async function loadComparisonData() {
+      if (!forgetClassExist) return;
+
       const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
@@ -71,7 +75,7 @@ export default function Core({ width, height }: ViewProps) {
       }
     }
     loadComparisonData();
-  }, [comparison, forgetClassNumber]);
+  }, [comparison, forgetClassExist, forgetClassNumber]);
 
   const processedBaselinePoints = useMemo(
     () => processPointsData(baselinePoints),
