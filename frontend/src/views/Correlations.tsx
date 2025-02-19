@@ -4,7 +4,7 @@ import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import LineChart from "../components/Correlations/LineChart";
-import DatasetModeSelector from "../components/DatasetModeSelector";
+// import DatasetModeSelector from "../components/DatasetModeSelector";
 import { useModelSelection } from "../hooks/useModelSelection";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
@@ -20,9 +20,9 @@ export default function Correlations({ width, height }: ViewProps) {
     <View width={width} height={height}>
       <div className="flex justify-between">
         <Title title="Layer-Wise Correlation" customClass="bottom-[2px]" />
-        {forgetClassExist && areAllModelsSelected && (
+        {/* {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDataset} />
-        )}
+        )} */}
       </div>
       {forgetClassExist ? (
         areAllModelsSelected ? (

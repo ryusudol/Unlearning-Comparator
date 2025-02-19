@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import View from "../components/View";
 import Title from "../components/Title";
-import DatasetModeSelector from "../components/DatasetModeSelector";
+// import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
 import { useForgetClass } from "../hooks/useForgetClass";
@@ -23,9 +23,9 @@ export default function Predictions({ width, height }: ViewProps) {
     <View width={width} height={height}>
       <div className="flex justify-between">
         <Title title="Prediction" customClass="bottom-[2px] right-[1px]" />
-        {forgetClassExist && areAllModelsSelected && (
+        {/* {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDatasetMode} />
-        )}
+        )} */}
       </div>
       {forgetClassExist ? (
         !areAllModelsSelected ? (
