@@ -26,7 +26,7 @@ export default function Experiments({ width, height }: ViewProps) {
     >
       <div className="flex justify-between items-center mb-[3px]">
         <div className="grid grid-flow-col grid-x-2 items-center">
-          <Title title="Model View" customClass="right-[1px]" />
+          <Title title="Model Screening" customClass="right-[1px]" />
           <div
             className="w-5 h-5 flex justify-center items-center cursor-pointer ml-0 bg-white hover:bg-[#f8f9fb] transition"
             onClick={handleExpandClick}

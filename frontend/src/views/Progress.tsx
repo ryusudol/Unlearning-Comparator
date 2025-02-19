@@ -98,7 +98,7 @@ export default function Progress({ width, height }: ViewProps) {
     <View width={width} height={height} className="border-t-0">
       <div className="flex justify-between">
         <Title
-          title="Progress View"
+          title="Progress"
           AdditionalContent={
             (forgetClassExist &&
               (isRunning ||

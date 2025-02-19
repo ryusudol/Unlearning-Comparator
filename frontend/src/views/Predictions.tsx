@@ -22,7 +22,7 @@ export default function Predictions({ width, height }: ViewProps) {
   return (
     <View width={width} height={height}>
       <div className="flex justify-between">
-        <Title title="Prediction View" customClass="bottom-[2px] right-[1px]" />
+        <Title title="Prediction" customClass="bottom-[2px] right-[1px]" />
         {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDatasetMode} />
         )}

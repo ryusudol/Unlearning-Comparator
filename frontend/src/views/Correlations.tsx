@@ -19,7 +19,7 @@ export default function Correlations({ width, height }: ViewProps) {
   return (
     <View width={width} height={height}>
       <div className="flex justify-between">
-        <Title title="Layer-Wise Correlation View" customClass="bottom-[2px]" />
+        <Title title="Layer-Wise Correlation" customClass="bottom-[2px]" />
         {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector onValueChange={setDataset} />
         )}

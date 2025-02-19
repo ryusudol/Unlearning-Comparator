@@ -41,7 +41,10 @@ export default function Accuracy({ width, height }: ViewProps) {
 
   return (
     <View width={width} height={height} className="border-t-0">
-      <Title title="Accuracy View" customClass="bottom-[2px] right-[1px]" />
+      <Title
+        title="Accuracy Comparison"
+        customClass="bottom-[2px] right-[1px]"
+      />
       {forgetClassExist ? (
         areAllModelsSelected ? (
           <div className="w-full flex items-center relative bottom-0.5">

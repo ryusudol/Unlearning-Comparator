@@ -114,7 +114,7 @@ export default function Core({ width, height }: ViewProps) {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1 mb-0.5 relative right-1">
           <Title
-            title="Embedding View"
+            title="Embedding"
             id={EMBEDDINGS}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               !isEmbeddingMode && "text-gray-400 border-none"
@@ -123,7 +123,7 @@ export default function Core({ width, height }: ViewProps) {
             onClick={handleDisplayModeChange}
           />
           <Title
-            title="Attack View"
+            title="Privacy Attack"
             id={ATTACK}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               isEmbeddingMode && "text-gray-400 border-none"
