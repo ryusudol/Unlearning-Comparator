@@ -52,12 +52,13 @@ export type AttackData = {
 };
 
 export type ExperimentData = {
-  id: string;
-  fc: number;
-  phase: string;
-  init: string;
-  method: string;
-  epochs: number | string;
+  CreateAt: string;
+  ID: string;
+  FC: number;
+  Type: string;
+  Base: string;
+  Method: string;
+  Epoch: number | string;
   BS: number | string;
   LR: number | string;
   UA: number | string;

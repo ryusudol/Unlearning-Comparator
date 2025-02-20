@@ -42,30 +42,30 @@ export default function DataTable({ isExpanded }: Props) {
     const experimentsArray = Object.values(experiments);
 
     const pretrainedExp = experimentsArray.find(
-      (exp) => exp.id === `000${forgetClass}`
+      (exp) => exp.ID === `000${forgetClass}`
     );
     const retrainedExp = experimentsArray.find(
-      (exp) => exp.id === `a00${forgetClass}`
+      (exp) => exp.ID === `a00${forgetClass}`
     );
 
     if (!pretrainedExp || !retrainedExp) return [];
 
     const remainingExps = experimentsArray.filter(
-      (exp) => exp.id !== pretrainedExp.id && exp.id !== retrainedExp.id
+      (exp) => exp.ID !== pretrainedExp.ID && exp.ID !== retrainedExp.ID
     );
     // running experiments
-    const nonTemporaryExps = remainingExps.filter((exp) => exp.id !== "-");
-    const temporaryExps = remainingExps.filter((exp) => exp.id === "-");
+    const nonTemporaryExps = remainingExps.filter((exp) => exp.ID !== "-");
+    const temporaryExps = remainingExps.filter((exp) => exp.ID === "-");
 
     return [pretrainedExp, retrainedExp, ...nonTemporaryExps, ...temporaryExps];
   }, [experiments, forgetClass]);
 
   const modifiedColumns = columns.map((column) => {
-    if (column.id !== "a" && column.id !== "b") {
+    if (column.id !== "A" && column.id !== "B") {
       return column;
     }
 
-    const isModelAColumn = column.id === "a";
+    const isModelAColumn = column.id === "A";
     const currentSelection = isModelAColumn ? baseline : comparison;
     const saveFunction = isModelAColumn ? saveBaseline : saveComparison;
     const disabledValue = isModelAColumn ? comparison : baseline;
@@ -94,7 +94,7 @@ export default function DataTable({ isExpanded }: Props) {
   });
 
   const table = useReactTable({
-    getRowId: (row: ExperimentData) => row.id,
+    getRowId: (row: ExperimentData) => row.ID,
     data: tableData as ExperimentData[],
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
@@ -106,12 +106,12 @@ export default function DataTable({ isExpanded }: Props) {
 
   useEffect(() => {
     const baselineExists = Object.values(experiments).some(
-      (experiment) => experiment.id === baseline
+      (experiment) => experiment.ID === baseline
     );
     if (!baselineExists) {
       if (tableData.length > 0) {
-        saveBaseline(tableData[0].id);
-        saveComparison(tableData[1].id);
+        saveBaseline(tableData[0].ID);
+        saveComparison(tableData[1].ID);
       } else {
         saveBaseline("");
         saveComparison("");
@@ -127,7 +127,7 @@ export default function DataTable({ isExpanded }: Props) {
   ]);
 
   return (
-    <div className="relative right-1 w-[calc(100%+8px)] overflow-visible">
+    <div className="w-full overflow-visible">
       <TableHeader table={table} />
       {isExpanded ? (
         <div
@@ -137,7 +137,7 @@ export default function DataTable({ isExpanded }: Props) {
           <TableBody table={table} tableData={tableData} />
         </div>
       ) : (
-        <ScrollArea className="w-full h-[161px]">
+        <ScrollArea className="w-full h-[155px]">
           <TableBody table={table} tableData={tableData} />
         </ScrollArea>
       )}

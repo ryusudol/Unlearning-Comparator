@@ -23,11 +23,11 @@ function getValueToDisplay(value: unknown) {
 }
 
 export const COLUMN_WIDTHS = {
-  id: 32,
-  phase: 78,
-  init: 38,
-  method: 90,
-  epochs: 64,
+  ID: 32,
+  Type: 79,
+  Base: 38,
+  Method: 90,
+  Epoch: 64,
   BS: 44,
   LR: 60,
   UA: 60,
@@ -37,25 +37,25 @@ export const COLUMN_WIDTHS = {
   PA: 60,
   RTE: 60,
   FQS: 60,
-  a: 42,
-  b: 42,
+  A: 42,
+  B: 42,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "ID",
     header: "ID",
     cell: ({ row }) => {
-      const value = row.getValue("id") as string;
+      const value = row.getValue("ID") as string;
       return <div className="w-7">{value}</div>;
     },
   },
   {
-    accessorKey: "phase",
+    accessorKey: "Type",
     header: "Type",
     cell: ({ row }) => {
-      const method = row.getValue("method") as string;
-      const phase = row.getValue("phase") as string;
+      const method = row.getValue("Method") as string;
+      const phase = row.getValue("Type") as string;
       const value =
         method === "Retrain"
           ? "Retrained"
@@ -67,16 +67,16 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    accessorKey: "init",
+    accessorKey: "Base",
     header: "Base",
     cell: ({ row }) => {
-      const init = row.getValue("init");
+      const init = row.getValue("Base");
       const value = getValueToDisplay(init);
       return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "method",
+    accessorKey: "Method",
     header: ({ column }) => <MethodFilterHeader column={column} />,
     filterFn: (row, columnId, filterValue) => {
       const rowValue = row.getValue(columnId);
@@ -84,13 +84,13 @@ export const columns: ColumnDef<ExperimentData>[] = [
       return String(rowValue) === filterValue;
     },
     cell: ({ row }) => {
-      const method = row.getValue("method");
+      const method = row.getValue("Method");
       const value = getValueToDisplay(method) as string;
       return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "epochs",
+    accessorKey: "Epoch",
     header: ({ column }) => (
       <Button
         className="w-full px-0 h-[34px] justify-start"
@@ -102,8 +102,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const epochs = row.getValue("epochs");
-      const value = getValueToDisplay(epochs);
+      const epoch = row.getValue("Epoch");
+      const value = getValueToDisplay(epoch);
       return <div>{value}</div>;
     },
   },
@@ -293,11 +293,11 @@ export const columns: ColumnDef<ExperimentData>[] = [
       </HoverCard>
     ),
     cell: ({ row }) => {
-      // const pa = row.getValue("PA");
-      // const value = getValueToDisplay(pa);
+      const pa = row.getValue("PA");
+      const value = getValueToDisplay(pa);
       return (
         <div className="text-center">
-          -{/* {typeof value === "number" ? value.toFixed(3) : value} */}
+          {typeof value === "number" ? value.toFixed(3) : value}
         </div>
       );
     },
@@ -357,7 +357,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    id: "a",
+    id: "A",
     header: () => (
       <div className="w-full flex items-center justify-center">
         <ModelAIcon className="mr-1" />
@@ -366,7 +366,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     ),
   },
   {
-    id: "b",
+    id: "B",
     header: () => (
       <div className="w-full flex items-center justify-center">
         <ModelBIcon className="mr-1" />

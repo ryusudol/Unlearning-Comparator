@@ -39,12 +39,13 @@ import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const CUSTOM = "custom";
 let initialExperiment: ExperimentData = {
-  id: "",
-  fc: -1,
-  phase: "Unlearned",
-  init: "",
-  method: "",
-  epochs: "N/A",
+  CreateAt: "",
+  ID: "",
+  FC: -1,
+  Type: "Unlearned",
+  Base: "",
+  Method: "",
+  Epoch: "N/A",
   BS: "N/A",
   LR: "N/A",
   UA: "-",
@@ -228,7 +229,7 @@ export default function UnlearningConfiguration() {
           unlearningStatus.recent_id as string
         );
         updateExperiment(newData, experimentIndex);
-        saveComparison(newData.id);
+        saveComparison(newData.ID);
         break;
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -256,10 +257,10 @@ export default function UnlearningConfiguration() {
 
       initialExperiment = {
         ...initialExperiment,
-        id: "-",
-        fc: forgetClassNumber,
-        init: initModel.split(".")[0],
-        method: methodFullName,
+        ID: "-",
+        FC: forgetClassNumber,
+        Base: initModel.split(".")[0],
+        Method: methodFullName,
       };
 
       addExperiment(initialExperiment, 0);
@@ -273,11 +274,11 @@ export default function UnlearningConfiguration() {
           for (const bs of batchSizeList) {
             initialExperiment = {
               ...initialExperiment,
-              id: "-",
-              fc: forgetClassNumber,
-              init: initModel.split(".")[0],
-              method: methodFullName,
-              epochs: Number(epoch),
+              ID: "-",
+              FC: forgetClassNumber,
+              Base: initModel.split(".")[0],
+              Method: methodFullName,
+              Epoch: Number(epoch),
               BS: Number(bs),
               LR: Number(lr),
             };

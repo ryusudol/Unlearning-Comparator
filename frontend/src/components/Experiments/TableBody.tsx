@@ -125,8 +125,8 @@ export default function _TableBody({ table, tableData }: Props) {
           } else {
             const nextBaselineExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.id !== comparison);
-            saveBaseline(nextBaselineExperiment!.id);
+            ).find((experiment) => experiment.ID !== comparison);
+            saveBaseline(nextBaselineExperiment!.ID);
           }
         } else if (id === comparison) {
           if (!baseline.startsWith("000")) {
@@ -136,8 +136,8 @@ export default function _TableBody({ table, tableData }: Props) {
           } else {
             const nextComparisonExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.id !== baseline);
-            saveComparison(nextComparisonExperiment!.id);
+            ).find((experiment) => experiment.ID !== baseline);
+            saveComparison(nextComparisonExperiment!.ID);
           }
         }
       }
@@ -232,8 +232,7 @@ export default function _TableBody({ table, tableData }: Props) {
                           ...cellStyle,
                           borderLeft: columnId === "UA" ? borderStyle : "none",
                           borderRight: borderStyle,
-                          backgroundColor:
-                            columnId === "PA" ? "white" : backgroundColor, // TODO: PA 데이터 생기면 white 제거
+                          backgroundColor,
                           color: textColor,
                         };
                       } else if (columnId === "RTE" || columnId === "FQS") {
