@@ -19,6 +19,7 @@ import { BaselineComparisonContext } from "../../store/baseline-comparison-conte
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { cn } from "../../utils/util";
 import { columns } from "./Columns";
+import { COLORS } from "../../constants/colors";
 
 const TABLE_HEADER_HEIGHT = 35;
 
@@ -64,10 +65,10 @@ export default function DataTable({ isExpanded }: Props) {
       return column;
     }
 
-    const isBaselineColumn = column.id === "a";
-    const currentSelection = isBaselineColumn ? baseline : comparison;
-    const saveFunction = isBaselineColumn ? saveBaseline : saveComparison;
-    const disabledValue = isBaselineColumn ? comparison : baseline;
+    const isModelAColumn = column.id === "a";
+    const currentSelection = isModelAColumn ? baseline : comparison;
+    const saveFunction = isModelAColumn ? saveBaseline : saveComparison;
+    const disabledValue = isModelAColumn ? comparison : baseline;
 
     return {
       ...column,
@@ -84,6 +85,7 @@ export default function DataTable({ isExpanded }: Props) {
               checked={isSelected}
               onClick={() => saveFunction(isSelected ? "" : row.id)}
               disabled={disabledValue === row.id}
+              color={isModelAColumn ? COLORS.EMERALD : COLORS.PURPLE}
             />
           </RadioGroup>
         );
