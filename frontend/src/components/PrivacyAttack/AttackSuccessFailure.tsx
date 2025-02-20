@@ -129,8 +129,8 @@ export default function AttackSuccessFailure({
       const strokeColor =
         groupItem.type === CONFIG.UNLEARN
           ? isBaseline
-            ? COLORS.PURPLE
-            : COLORS.EMERALD
+            ? COLORS.EMERALD
+            : COLORS.PURPLE
           : COLORS.DARK_GRAY;
       const defaultBorderOpacity =
         groupItem.type === CONFIG.RETRAIN
@@ -191,8 +191,8 @@ export default function AttackSuccessFailure({
       const strokeColor =
         groupItem.type === CONFIG.UNLEARN
           ? isBaseline
-            ? COLORS.PURPLE
-            : COLORS.EMERALD
+            ? COLORS.EMERALD
+            : COLORS.PURPLE
           : COLORS.DARK_GRAY;
       const defaultBorderOpacity =
         groupItem.type === CONFIG.UNLEARN

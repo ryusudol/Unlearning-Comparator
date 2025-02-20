@@ -284,7 +284,7 @@ export default function ButterflyPlot({
       // Draw circles for the unlearn data on the y-axis corresponding to the threshold value
       unlearnBins.forEach((bin) => {
         const yPos = yScaleB(bin.threshold + binSize / 2);
-        const color = isBaseline ? COLORS.PURPLE : COLORS.EMERALD;
+        const color = isBaseline ? COLORS.EMERALD : COLORS.PURPLE;
 
         const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
@@ -419,12 +419,12 @@ export default function ButterflyPlot({
         {
           label: "From Unlearn / Pred. Unlearn",
           side: "right",
-          color: isBaseline ? COLORS.PURPLE : COLORS.EMERALD,
+          color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE,
         },
         {
           label: "From Unlearn / Pred. Retrain",
           side: "right",
-          color: isBaseline ? "#E6D0FD" : "#C8EADB",
+          color: isBaseline ? "#C8EADB" : "#E6D0FD",
         },
       ];
 

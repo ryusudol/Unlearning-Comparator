@@ -21,18 +21,18 @@ export const LINE_CHART_CONFIG = {
   },
   baselineForgetCka: {
     label: "Baseline (Forget Class)",
-    color: COLORS.PURPLE,
+    color: COLORS.EMERALD,
   },
   baselineOtherCka: {
     label: "Baseline (Remain Classes)",
-    color: COLORS.PURPLE,
+    color: COLORS.EMERALD,
   },
   comparisonForgetCka: {
     label: "Comparison (Forget Class)",
-    color: COLORS.EMERALD,
+    color: COLORS.PURPLE,
   },
   comparisonOtherCka: {
     label: "Comparison (Remain Classes)",
-    color: COLORS.EMERALD,
+    color: COLORS.PURPLE,
   },
 } satisfies ChartConfig;
