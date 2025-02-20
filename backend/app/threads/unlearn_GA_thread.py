@@ -288,19 +288,22 @@ class UnlearningGAThread(threading.Thread):
         
         # Prepare results dictionary with attack metrics added
         results = {
-            "id": self.status.recent_id,
-            "fc": self.request.forget_class,
-            "phase": "Unlearned",
-            "init": f"000{self.request.forget_class}",
-            "method": "Gradient-Ascent",
-            "epochs": self.request.epochs,
+            "CreatedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            "ID": self.status.recent_id,
+            "FC": self.request.forget_class,
+            "Type": "Unlearned",
+            "Base": f"000{self.request.forget_class}",
+            "Method": "Gradient-Ascent",
+            "Epoch": self.request.epochs,
             "BS": self.request.batch_size,
             "LR": self.request.learning_rate,
             "UA": round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
+            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
+            "FQS": fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
@@ -309,7 +312,6 @@ class UnlearningGAThread(threading.Thread):
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": cka_results["similarity"],
             "points": detailed_results,
-            "FQS": fqs,
             "attack": {
                 "values": values,
                 "results": attack_results

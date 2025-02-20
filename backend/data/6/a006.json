@@ -1,17 +1,20 @@
 {
-  "id": "a006",
-  "fc": 6,
-  "phase": "Retrained",
-  "init": "N/A",
-  "method": "N/A",
-  "epochs": 200,
+  "CreatedAt": "1970-01-01 00:00:01",
+  "ID": "a006",
+  "FC": 6,
+  "Type": "Retrained",
+  "Base": "N/A",
+  "Method": "N/A",
+  "Epoch": 200,
   "BS": 128,
   "LR": 0.1,
   "UA": 0.0,
   "RA": 1.0,
   "TUA": 0.0,
   "TRA": 0.952,
+  "PA": 0.988,
   "RTE": 3517.8,
+  "FQS": 1.0,
   "accs": [
     1.0,
     1.0,
@@ -41032,7 +41035,6 @@
       }
     ]
   ],
-  "FQS": 1.0,
   "attack": {
     "values": [
       {

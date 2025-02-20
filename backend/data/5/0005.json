@@ -1,17 +1,20 @@
 {
-  "id": "0005",
-  "fc": 5,
-  "phase": "Pretrained",
-  "init": "N/A",
-  "method": "N/A",
-  "epochs": 200,
+  "CreatedAt": "1970-01-01 00:00:00",
+  "ID": "0005",
+  "FC": 5,
+  "Type": "Original",
+  "Base": "N/A",
+  "Method": "N/A",
+  "Epoch": 200,
   "BS": 128,
   "LR": 0.1,
   "UA": 1.0,
   "RA": 1.0,
   "TUA": 0.931,
   "TRA": 0.956,
+  "PA": 0.506,
   "RTE": "N/A",
+  "FQS": "N/A",
   "accs": [
     1.0,
     1.0,
@@ -41032,7 +41035,6 @@
       }
     ]
   ],
-  "FQS": "N/A",
   "attack": {
     "values": [
       {
