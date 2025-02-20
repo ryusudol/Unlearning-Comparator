@@ -14,10 +14,7 @@ import * as d3 from "d3";
 
 import ViewModeSelector from "./ViewModeSelector";
 import Tooltip from "./Tooltip";
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   Mode,
   SelectedData,
@@ -815,9 +812,9 @@ const ScatterPlot = forwardRef(
         )}
         <div className="text-[15px] mt-1 flex items-center">
           {isBaseline ? (
-            <BaselineNeuralNetworkIcon className="mr-1" />
+            <ModelAIcon className="mr-1" />
           ) : (
-            <ComparisonNeuralNetworkIcon className="mr-1" />
+            <ModelBIcon className="mr-1" />
           )}
           <span>
             {mode} {idExist ? `(${id})` : ""}

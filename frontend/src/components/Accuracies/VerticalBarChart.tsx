@@ -10,10 +10,7 @@ import {
   TooltipProps,
 } from "recharts";
 
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
@@ -176,7 +173,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
         <div className="flex items-center">
-          <BaselineNeuralNetworkIcon className="mr-1" />
+          <ModelAIcon className="mr-1" />
           <p>
             Baseline:{" "}
             <span className="font-semibold">
@@ -185,7 +182,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           </p>
         </div>
         <div className="flex items-center">
-          <ComparisonNeuralNetworkIcon className="mr-1" />
+          <ModelBIcon className="mr-1" />
           <p>
             Comparison:{" "}
             <span className="font-semibold">

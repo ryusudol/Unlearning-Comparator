@@ -1,11 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import {
-  NeuralNetworkIcon,
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import { NeuralNetworkIcon, ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
@@ -360,9 +356,9 @@ export default React.memo(function Tooltip({
             </p>
             <p className="flex items-center text-nowrap">
               {isBaseline ? (
-                <BaselineNeuralNetworkIcon className="mr-1" />
+                <ModelAIcon className="mr-1" />
               ) : (
-                <ComparisonNeuralNetworkIcon className="mr-1" />
+                <ModelBIcon className="mr-1" />
               )}
               <span className="mr-0.5">
                 {isBaseline ? "Baseline" : "Comparison"}:

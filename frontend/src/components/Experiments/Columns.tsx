@@ -7,10 +7,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "../UI/hover-card";
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import { Badge } from "../UI/badge";
 import { Button } from "../UI/button";
 import { ExperimentData } from "../../types/data";
@@ -38,8 +35,8 @@ export const COLUMN_WIDTHS = {
   TRA: 60,
   RTE: 60,
   FQS: 60,
-  baseline: 60,
-  comparison: 52,
+  a: 42,
+  b: 42,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
@@ -86,7 +83,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
     cell: ({ row }) => {
       const method = row.getValue("method");
-      const value = getValueToDisplay(method);
+      const value = getValueToDisplay(method) as string;
       return <div>{value}</div>;
     },
   },
@@ -341,31 +338,21 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    id: "baseline",
+    id: "a",
     header: () => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger className="w-full text-center flex items-center">
-          <BaselineNeuralNetworkIcon className="mr-1" />
-          <span>Base</span>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Baseline Model
-        </HoverCardContent>
-      </HoverCard>
+      <div className="w-full flex items-center justify-center">
+        <ModelAIcon className="mr-1" />
+        <span>A</span>
+      </div>
     ),
   },
   {
-    id: "comparison",
+    id: "b",
     header: () => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger className="w-full text-center flex items-center">
-          <ComparisonNeuralNetworkIcon className="mr-1" />
-          <span>Comp</span>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Comparison Model
-        </HoverCardContent>
-      </HoverCard>
+      <div className="w-full flex items-center justify-center">
+        <ModelBIcon className="mr-1" />
+        <span>B</span>
+      </div>
     ),
   },
 ];

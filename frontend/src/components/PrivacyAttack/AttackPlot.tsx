@@ -1,11 +1,7 @@
 import { useRef, useEffect, useContext, useCallback } from "react";
 import * as d3 from "d3";
 
-import {
-  NeuralNetworkIcon,
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import { NeuralNetworkIcon, ModelAIcon, ModelBIcon } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
 import {
   LINE_GRAPH_LEGEND_DATA,
@@ -1386,9 +1382,9 @@ export default function ButterflyPlot({
         <span className="mx-1.5">vs</span>
         <div className="flex items-center">
           {isBaseline ? (
-            <BaselineNeuralNetworkIcon className="mr-1" />
+            <ModelAIcon className="mr-1" />
           ) : (
-            <ComparisonNeuralNetworkIcon className="mr-1" />
+            <ModelBIcon className="mr-1" />
           )}
           <span>
             {mode} ({isBaseline ? baseline : comparison})
