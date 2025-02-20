@@ -151,7 +151,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           />
           {CKA_DATA_KEYS.map((key, idx) => {
             const isBaselineLine = key.includes("baseline");
-            const dotColor = isBaselineLine ? COLORS.PURPLE : COLORS.EMERALD;
+            const dotColor = isBaselineLine ? COLORS.EMERALD : COLORS.PURPLE;
             const isForgetLine = key.includes("Forget");
             const dotSize = isForgetLine ? CONFIG.CROSS_SIZE : CONFIG.DOT_SIZE;
             const activeDotStyle = {
@@ -233,7 +233,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <div className="flex items-center leading-[18px]">
           <CircleIcon
             className="w-3 h-3 mr-1"
-            style={{ color: COLORS.PURPLE }}
+            style={{ color: COLORS.EMERALD }}
           />
           <p>
             Base. (Remain):{" "}
@@ -241,7 +241,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
-          <CircleIcon className="w-3 h-3 mr-1" color={COLORS.EMERALD} />
+          <CircleIcon className="w-3 h-3 mr-1" color={COLORS.PURPLE} />
           <p>
             Comp. (Remain):{" "}
             <span className="font-semibold">{payload[3].value}</span>
@@ -250,7 +250,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <div className="flex items-center leading-[18px]">
           <MultiplicationSignIcon
             className="w-4 h-4 -ml-0.5 mr-0.5"
-            style={{ color: COLORS.PURPLE }}
+            style={{ color: COLORS.EMERALD }}
           />
           <p>
             Base. (Forget):{" "}
@@ -260,7 +260,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <div className="flex items-center leading-[18px]">
           <MultiplicationSignIcon
             className="w-4 h-4 -ml-0.5 mr-0.5"
-            color={COLORS.EMERALD}
+            color={COLORS.PURPLE}
           />
           <p>
             Comp. (Forget):{" "}
@@ -281,7 +281,7 @@ function CustomLegend() {
           <CircleIcon
             className={`mr-2 relative right-[1px]`}
             style={{
-              color: COLORS.PURPLE,
+              color: COLORS.EMERALD,
               width: CONFIG.DOT_SIZE,
               height: CONFIG.DOT_SIZE,
             }}
@@ -289,7 +289,7 @@ function CustomLegend() {
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
             style={{
-              backgroundColor: COLORS.PURPLE,
+              backgroundColor: COLORS.EMERALD,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -301,7 +301,7 @@ function CustomLegend() {
           <CircleIcon
             className={`mr-2 relative right-[1px]`}
             style={{
-              color: COLORS.EMERALD,
+              color: COLORS.PURPLE,
               width: CONFIG.DOT_SIZE,
               height: CONFIG.DOT_SIZE,
             }}
@@ -309,7 +309,7 @@ function CustomLegend() {
           <div
             className="absolute top-1/2 w-[18px]"
             style={{
-              borderTop: `1px dashed ${COLORS.EMERALD}`,
+              borderTop: `1px dashed ${COLORS.PURPLE}`,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -321,13 +321,13 @@ function CustomLegend() {
           <MultiplicationSignIcon
             width={CONFIG.CROSS_SIZE}
             height={CONFIG.CROSS_SIZE}
-            color={COLORS.PURPLE}
+            color={COLORS.EMERALD}
             className="relative right-[5px]"
           />
           <div
             className="absolute top-1/2 w-[18px] h-[1px]"
             style={{
-              backgroundColor: COLORS.PURPLE,
+              backgroundColor: COLORS.EMERALD,
               transform: "translate(-4px, -50%)",
             }}
           />
@@ -339,13 +339,13 @@ function CustomLegend() {
           <MultiplicationSignIcon
             width={CONFIG.CROSS_SIZE}
             height={CONFIG.CROSS_SIZE}
-            color={COLORS.EMERALD}
+            color={COLORS.PURPLE}
             className="relative right-[5px]"
           />
           <div
             className="absolute top-1/2 w-[18px]"
             style={{
-              borderTop: `1px dashed ${COLORS.EMERALD}`,
+              borderTop: `1px dashed ${COLORS.PURPLE}`,
               transform: "translate(-4px, -50%)",
             }}
           />
