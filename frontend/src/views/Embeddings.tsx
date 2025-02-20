@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useMemo } from "react";
 
 import View from "../components/View";
 import InformationButton from "../components/Embeddings/InformationButton";
@@ -12,21 +12,24 @@ interface Props {
   height: number;
   baselinePoints: (number | Prob)[][];
   comparisonPoints: (number | Prob)[][];
-  baselineDataMap: Map<number | Prob, (number | Prob)[]>;
-  comparisonDataMap: Map<number | Prob, (number | Prob)[]>;
 }
 
 export default function Embeddings({
   height,
   baselinePoints,
   comparisonPoints,
-  baselineDataMap,
-  comparisonDataMap,
 }: Props) {
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
   const baselineRef = useRef<any>(null);
   const comparisonRef = useRef<any>(null);
+
+  const baselineDataMap = useMemo(() => {
+    return new Map(baselinePoints.map((point) => [point[2], point]));
+  }, [baselinePoints]);
+  const comparisonDataMap = useMemo(() => {
+    return new Map(comparisonPoints.map((point) => [point[2], point]));
+  }, [comparisonPoints]);
 
   const handleHover = useCallback(
     (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
@@ -51,7 +54,7 @@ export default function Embeddings({
 
       if (!oppositeInstance) return;
 
-      const oppositeProb = oppositeInstance[5] as Prob;
+      const oppositeProb = oppositeInstance[6] as Prob;
 
       hoveredInstanceRef.current = {
         imgIdx: imgIdxOrNull,

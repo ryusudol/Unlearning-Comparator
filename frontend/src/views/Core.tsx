@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import View from "../components/View";
 import Title from "../components/Title";
@@ -6,7 +6,6 @@ import Indicator from "../components/Indicator";
 import Embeddings from "./Embeddings";
 import PrivacyAttack from "./PrivacyAttack";
 import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
-import { processPointsData } from "../utils/data/experiments";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ViewProps } from "../types/common";
@@ -77,36 +76,18 @@ export default function Core({ width, height }: ViewProps) {
     loadComparisonData();
   }, [comparison, forgetClassExist, forgetClassNumber]);
 
-  const processedBaselinePoints = useMemo(
-    () => processPointsData(baselinePoints),
-    [baselinePoints]
-  );
-  const processedComparisonPoints = useMemo(
-    () => processPointsData(comparisonPoints),
-    [comparisonPoints]
-  );
-
-  const baselineDataMap = useMemo(() => {
-    return new Map(processedBaselinePoints.map((d) => [d[4], d]));
-  }, [processedBaselinePoints]);
-  const comparisonDataMap = useMemo(() => {
-    return new Map(processedComparisonPoints.map((d) => [d[4], d]));
-  }, [processedComparisonPoints]);
-
   const content = forgetClassExist ? (
     isEmbeddingMode ? (
       <Embeddings
         height={HEIGHT}
-        baselinePoints={processedBaselinePoints}
-        comparisonPoints={processedComparisonPoints}
-        baselineDataMap={baselineDataMap}
-        comparisonDataMap={comparisonDataMap}
+        baselinePoints={baselinePoints}
+        comparisonPoints={comparisonPoints}
       />
     ) : (
       <PrivacyAttack
         height={HEIGHT}
-        baselinePoints={processedBaselinePoints}
-        comparisonPoints={processedComparisonPoints}
+        baselinePoints={baselinePoints}
+        comparisonPoints={comparisonPoints}
       />
     )
   ) : (

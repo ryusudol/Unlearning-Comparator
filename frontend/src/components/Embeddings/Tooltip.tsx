@@ -57,7 +57,7 @@ export default React.memo(function Tooltip({
 
   const legendRectColor = d3.schemeTableau10[9];
 
-  const groundTruthIdx = Number(data[2]);
+  const groundTruthIdx = Number(data[0]);
   const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;

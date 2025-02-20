@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-import { Dist, Point } from "../../types/data";
+import { Dist } from "../../types/data";
 import { Experiment, Experiments } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
@@ -9,8 +9,7 @@ type Values = {
   RA: number[];
   TUA: number[];
   TRA: number[];
-  RTE: number[];
-  FQS: number[];
+  PA: number[];
 };
 
 type BubbleChartData = {
@@ -26,43 +25,35 @@ const RED = "#bb151a";
 const GREEN = "#157f3b";
 const baseColors = {
   UA: RED,
-  RA: GREEN,
   TUA: RED,
+  RA: GREEN,
   TRA: GREEN,
-  RTE: RED,
-  FQS: GREEN,
+  PA: GREEN,
 };
 
 export function calculatePerformanceMetrics(data: Experiments) {
   const values: Values = {
     UA: Object.values(data).map((d) => Number(d.UA)),
-    RA: Object.values(data).map((d) => Number(d.RA)),
     TUA: Object.values(data).map((d) => Number(d.TUA)),
+    RA: Object.values(data).map((d) => Number(d.RA)),
     TRA: Object.values(data).map((d) => Number(d.TRA)),
-    RTE: Object.values(data)
-      .filter((d) => typeof d.RTE === "number")
-      .map((d) => d.RTE as number),
-    FQS: Object.values(data)
-      .filter((d) => typeof d.FQS === "number")
-      .map((d) => d.FQS as number),
+    PA: Object.values(data).map((d) => Number(d.PA)),
   };
 
   const mins = {
-    UA: d3.min(values.UA.map((v) => Number(v)))!,
+    UA: d3.min(values.UA)!,
+    TUA: d3.min(values.TUA)!,
     RA: d3.min(values.RA)!,
-    TUA: d3.min(values.TUA.map((v) => Number(v)))!,
     TRA: d3.min(values.TRA)!,
-    RTE: d3.min(values.RTE)!,
-    FQS: d3.min(values.FQS)!,
+    PA: d3.min(values.TRA)!,
   };
 
   const maxs = {
-    UA: d3.max(values.UA.map((v) => Number(v)))!,
+    UA: d3.max(values.UA)!,
+    TUA: d3.max(values.TUA)!,
     RA: d3.max(values.RA)!,
-    TUA: d3.max(values.TUA.map((v) => Number(v)))!,
     TRA: d3.max(values.TRA)!,
-    RTE: d3.max(values.RTE)!,
-    FQS: d3.max(values.FQS)!,
+    PA: d3.max(values.PA)!,
   };
 
   return {
@@ -73,19 +64,19 @@ export function calculatePerformanceMetrics(data: Experiments) {
         .range([BRIGHTEST, DARKEST]),
       baseColor: baseColors.UA,
     },
-    RA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.RA, maxs.RA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RA,
-    },
     TUA: {
       colorScale: d3
         .scaleLinear()
         .domain([mins.TUA, maxs.TUA])
         .range([BRIGHTEST, DARKEST]),
       baseColor: baseColors.TUA,
+    },
+    RA: {
+      colorScale: d3
+        .scaleLinear()
+        .domain([mins.RA, maxs.RA])
+        .range([BRIGHTEST, DARKEST]),
+      baseColor: baseColors.RA,
     },
     TRA: {
       colorScale: d3
@@ -94,34 +85,14 @@ export function calculatePerformanceMetrics(data: Experiments) {
         .range([BRIGHTEST, DARKEST]),
       baseColor: baseColors.TRA,
     },
-    RTE: {
+    PA: {
       colorScale: d3
         .scaleLinear()
-        .domain([mins.RTE, maxs.RTE])
+        .domain([mins.PA, maxs.PA])
         .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RTE,
-    },
-    FQS: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.FQS, maxs.FQS])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.FQS,
+      baseColor: baseColors.PA,
     },
   };
-}
-
-export function processPointsData(points: Point[]) {
-  return points
-    ? points.map((point) => [
-        point[4], // x coordinate
-        point[5], // y coordinate
-        point[0], // ground truth
-        point[1], // prediction
-        point[2], // img
-        point[6], // prob
-      ])
-    : [];
 }
 
 export function extractBubbleChartData(datasetMode: string, data: Experiment) {

@@ -1,16 +1,15 @@
-import React, { useState, useContext, useEffect, useMemo } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 import View from "../components/View";
 import Indicator from "../components/Indicator";
 import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../types/embeddings";
-import { processPointsData } from "../utils/data/experiments";
 import { Separator } from "../components/UI/separator";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { fetchFileData } from "../utils/api/unlearning";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { Point } from "../types/data";
+import { ExperimentData } from "../types/data";
 
 export const ENTROPY = "entropy";
 export const CONFIDENCE = "confidence";
@@ -39,7 +38,7 @@ export default function PrivacyAttack({
   const [thresholdStrategy, setThresholdStrategy] = useState("");
   const [userModified, setUserModified] = useState(false);
   const [strategyCount, setStrategyClick] = useState(0);
-  const [retrainPoints, setRetrainPoints] = useState<Point[]>([]);
+  const [retrainData, setRetrainData] = useState<ExperimentData>();
 
   const isBaselinePretrained = baseline.startsWith("000");
   const isComparisonPretrained = comparison.startsWith("000");
@@ -51,19 +50,13 @@ export default function PrivacyAttack({
           forgetClassNumber,
           `a00${forgetClassNumber}`
         );
-        setRetrainPoints(data.points);
+        setRetrainData(data);
       } catch (error) {
         console.error(`Failed to fetch an retrained data file: ${error}`);
-        setRetrainPoints([]);
       }
     }
     loadRetrainData();
   }, [forgetClassNumber]);
-
-  const processedRetrainPoints = useMemo(
-    () => processPointsData(retrainPoints),
-    [retrainPoints]
-  );
 
   const handleMetricChange = (metric: Metric) => {
     setMetric(metric);
@@ -91,7 +84,9 @@ export default function PrivacyAttack({
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
       />
-      {isBaselinePretrained ? (
+      {!retrainData ? (
+        <Indicator text="Failed to fetch retrain data" />
+      ) : isBaselinePretrained ? (
         <Indicator text="Please select unlearned models to compare attack results" />
       ) : (
         <AttackAnalytics
@@ -101,8 +96,9 @@ export default function PrivacyAttack({
           thresholdStrategy={thresholdStrategy}
           strategyCount={strategyCount}
           userModified={userModified}
-          retrainPoints={processedRetrainPoints}
+          retrainPoints={retrainData.points}
           unlearnPoints={baselinePoints}
+          retrainAttackData={retrainData.attack}
           setThresholdStrategy={setThresholdStrategy}
           setUserModified={setUserModified}
         />
@@ -111,7 +107,9 @@ export default function PrivacyAttack({
         orientation="vertical"
         className="h-[612px] w-[1px] ml-3.5 mr-2"
       />
-      {isComparisonPretrained ? (
+      {!retrainData ? (
+        <Indicator text="Failed to fetch retrain data" />
+      ) : isComparisonPretrained ? (
         <Indicator text="Please select unlearned models to compare attack results" />
       ) : (
         <AttackAnalytics
@@ -121,8 +119,9 @@ export default function PrivacyAttack({
           thresholdStrategy={thresholdStrategy}
           strategyCount={strategyCount}
           userModified={userModified}
-          retrainPoints={processedRetrainPoints}
+          retrainPoints={retrainData.points}
           unlearnPoints={comparisonPoints}
+          retrainAttackData={retrainData.attack}
           setThresholdStrategy={setThresholdStrategy}
           setUserModified={setUserModified}
         />
