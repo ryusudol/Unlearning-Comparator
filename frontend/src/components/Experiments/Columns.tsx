@@ -12,6 +12,7 @@ import { Badge } from "../UI/badge";
 import { Button } from "../UI/button";
 import { ExperimentData } from "../../types/data";
 import { getPhaseColors } from "../../utils/data/colors";
+import { COLORS } from "../../constants/colors";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A" || value === "NaN"
@@ -30,8 +31,8 @@ export const COLUMN_WIDTHS = {
   BS: 44,
   LR: 60,
   UA: 60,
-  TUA: 60,
   RA: 60,
+  TUA: 60,
   TRA: 60,
   PA: 60,
   RTE: 60,
@@ -180,44 +181,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       const value = getValueToDisplay(ua);
       return (
         <div className="text-center">
-          {typeof value === "number"
-            ? value === 0 || value === 1
-              ? value
-              : value.toFixed(3)
-            : value}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "TUA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            TUA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Test Unlearning Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
-    cell: ({ row }) => {
-      const tua = row.getValue("TUA");
-      const value = getValueToDisplay(tua);
-      return (
-        <div className="text-center">
-          {typeof value === "number"
-            ? value === 0 || value === 1
-              ? value
-              : value.toFixed(3)
-            : value}
+          {typeof value === "number" ? value.toFixed(3) : value}
         </div>
       );
     },
@@ -246,11 +210,36 @@ export const columns: ColumnDef<ExperimentData>[] = [
       const value = getValueToDisplay(ra);
       return (
         <div className="text-center">
-          {typeof value === "number"
-            ? value === 0 || value === 1
-              ? value
-              : value.toFixed(3)
-            : value}
+          {typeof value === "number" ? value.toFixed(3) : value}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "TUA",
+    header: ({ column }) => (
+      <HoverCard openDelay={0} closeDelay={100}>
+        <HoverCardTrigger>
+          <Button
+            className="w-full px-0 h-[34px]"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            TUA
+            <ArrowUpDown className="w-4" />
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-auto px-3 py-2" side="top">
+          Test Unlearning Accuracy
+        </HoverCardContent>
+      </HoverCard>
+    ),
+    cell: ({ row }) => {
+      const tua = row.getValue("TUA");
+      const value = getValueToDisplay(tua);
+      return (
+        <div className="text-center">
+          {typeof value === "number" ? value.toFixed(3) : value}
         </div>
       );
     },
@@ -279,11 +268,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       const value = getValueToDisplay(tra);
       return (
         <div className="text-center">
-          {typeof value === "number"
-            ? value === 0 || value === 1
-              ? value
-              : value.toFixed(3)
-            : value}
+          {typeof value === "number" ? value.toFixed(3) : value}
         </div>
       );
     },
@@ -312,12 +297,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
       // const value = getValueToDisplay(pa);
       return (
         <div className="text-center">
-          -
-          {/* {typeof value === "number"
-            ? value === 0 || value === 1
-              ? value
-              : value.toFixed(3)
-            : value} */}
+          -{/* {typeof value === "number" ? value.toFixed(3) : value} */}
         </div>
       );
     },
@@ -369,7 +349,11 @@ export const columns: ColumnDef<ExperimentData>[] = [
     cell: ({ row }) => {
       const fqs = row.getValue("FQS");
       const value = getValueToDisplay(fqs);
-      return <div className="text-center">{value}</div>;
+      return (
+        <div className="text-center">
+          {typeof value === "number" ? value.toFixed(3) : value}
+        </div>
+      );
     },
   },
   {
@@ -377,7 +361,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     header: () => (
       <div className="w-full flex items-center justify-center">
         <ModelAIcon className="mr-1" />
-        <span>A</span>
+        <span style={{ color: COLORS.EMERALD }}>A</span>
       </div>
     ),
   },
@@ -386,7 +370,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
     header: () => (
       <div className="w-full flex items-center justify-center">
         <ModelBIcon className="mr-1" />
-        <span>B</span>
+        <span style={{ color: COLORS.PURPLE }}>B</span>
       </div>
     ),
   },
