@@ -1,17 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "./UI/icons";
+import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
-} from "../constants/common";
-import { COLORS } from "../constants/colors";
-import { Prob } from "../types/embeddings";
+} from "../../constants/common";
+import { COLORS } from "../../constants/colors";
+import { Prob } from "../../types/embeddings";
 
 const CONFIG = {
   LOW_OPACITY: 0.6,
@@ -60,7 +57,7 @@ export default React.memo(function Tooltip({
 
   const legendRectColor = d3.schemeTableau10[9];
 
-  const groundTruthIdx = Number(data[2]);
+  const groundTruthIdx = Number(data[0]);
   const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
@@ -348,12 +345,12 @@ export default React.memo(function Tooltip({
           <div className="flex flex-col">
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
-              <BaselineNeuralNetworkIcon className="mr-1" />
+              <ModelAIcon className="mr-1" />
               <span className="mr-0.5">Baseline:</span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
-              <ComparisonNeuralNetworkIcon className="mr-1" />
+              <ModelBIcon className="mr-1" />
               <span className="mr-0.5">Comparison:</span>
               <span className="font-semibold">{comparisonPrediction}</span>
             </p>

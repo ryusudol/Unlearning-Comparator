@@ -13,11 +13,8 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import ViewModeSelector from "./ViewModeSelector";
-import Tooltip from "../Tooltip";
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import Tooltip from "./Tooltip";
+import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   Mode,
   SelectedData,
@@ -32,6 +29,16 @@ import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
+
+/**
+ * 0 -> ground thruth
+ * 1 -> prediction
+ * 2 -> img
+ * 3 -> ?
+ * 4 -> x
+ * 5 -> y
+ * 6 -> prob
+ */
 
 const CONFIG = {
   WIDTH: 630,
@@ -143,7 +150,7 @@ const ScatterPlot = forwardRef(
 
       return d3
         .scaleLinear()
-        .domain(d3.extent(data, (d) => d[0] as number) as [number, number])
+        .domain(d3.extent(data, (d) => d[4] as number) as [number, number])
         .nice()
         .range([0, CONFIG.WIDTH]);
     }, [data]);
@@ -153,7 +160,7 @@ const ScatterPlot = forwardRef(
         return d3.scaleLinear().domain([0, 1]).range([CONFIG.HEIGHT, 0]);
       }
 
-      const [min, max] = d3.extent(data, (d) => d[1] as number) as [
+      const [min, max] = d3.extent(data, (d) => d[5] as number) as [
         number,
         number
       ];
@@ -187,8 +194,8 @@ const ScatterPlot = forwardRef(
 
         if (svgElements.current.crosses) {
           svgElements.current.crosses.attr("transform", (d) => {
-            const xPos = x(d[0] as number);
-            const yPos = y(d[1] as number);
+            const xPos = x(d[4] as number);
+            const yPos = y(d[5] as number);
             const scale = 1 / transform.k;
             return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
           });
@@ -295,8 +302,10 @@ const ScatterPlot = forwardRef(
       async (event: MouseEvent, d: (number | Prob)[]) => {
         event.stopPropagation();
 
-        const imgIdx = d[4] as number;
-        onHover(imgIdx, mode, d[5] as Prob);
+        const imgIdx = d[2] as number;
+        const prob = d[6] as Prob;
+
+        onHover(imgIdx, mode, prob);
 
         if (fetchControllerRef.current) {
           fetchControllerRef.current.abort();
@@ -306,7 +315,7 @@ const ScatterPlot = forwardRef(
         fetchControllerRef.current = controller;
 
         try {
-          const response = await fetch(`${API_URL}/image/cifar10/${d[4]}`, {
+          const response = await fetch(`${API_URL}/image/cifar10/${d[2]}`, {
             signal: controller.signal,
           });
 
@@ -315,8 +324,6 @@ const ScatterPlot = forwardRef(
 
           const blob = await response.blob();
           const imageUrl = URL.createObjectURL(blob);
-
-          const prob = d[5] as Prob;
 
           const currentHoveredInstance = hoveredInstanceRef.current;
 
@@ -373,7 +380,10 @@ const ScatterPlot = forwardRef(
 
     const handleMouseEnter = useCallback(
       (event: MouseEvent, d: (number | Prob)[]) => {
-        onHover(d[4] as number, mode, d[5] as Prob);
+        const imgIdx = d[2] as number;
+        const prob = d[6] as Prob;
+
+        onHover(imgIdx, mode, prob);
 
         const element = event.currentTarget as Element;
         d3.select(element)
@@ -386,16 +396,16 @@ const ScatterPlot = forwardRef(
 
     const shouldLowerOpacity = useCallback(
       (d: (number | Prob)[]) => {
-        const isForgettingData = d[2] === forgetClass;
+        const isForgettingData = d[0] === forgetClass;
         const isRemainData = !isForgettingData;
 
         if (viewMode === VIEW_MODES[1] /* Forgetting Target */) {
           return isRemainData;
         } else if (viewMode === VIEW_MODES[2] /* Forgetting Failed */) {
-          const isForgettingSuccess = isForgettingData && d[3] !== forgetClass;
+          const isForgettingSuccess = isForgettingData && d[1] !== forgetClass;
           return isRemainData || isForgettingSuccess;
         } else if (viewMode === VIEW_MODES[3] /* Misclassification */) {
-          const isMisclassified = isRemainData && d[2] !== d[3];
+          const isMisclassified = isRemainData && d[0] !== d[1];
           return !isMisclassified;
         }
       },
@@ -423,7 +433,7 @@ const ScatterPlot = forwardRef(
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
         } else {
-          const colorStr = z(d[3] as number);
+          const colorStr = z(d[1] as number);
           const color = d3.color(colorStr);
           selection
             .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
@@ -440,9 +450,9 @@ const ScatterPlot = forwardRef(
     );
 
     const transformedData = useMemo(() => {
-      const forgettingData = data.filter((d) => d[2] === forgetClass);
-      const remainData = data.filter((d) => d[2] !== forgetClass);
-      return { forgettingData, remainData };
+      const forgetData = data.filter((d) => d[0] === forgetClass);
+      const remainData = data.filter((d) => d[0] !== forgetClass);
+      return { forgetData, remainData };
     }, [data, forgetClass]);
 
     const initializeSvg = useCallback(() => {
@@ -488,10 +498,10 @@ const ScatterPlot = forwardRef(
         .selectAll<SVGCircleElement, (number | Prob)[]>("circle")
         .data(transformedData.remainData)
         .join("circle")
-        .attr("cx", (d) => x(d[0] as number))
-        .attr("cy", (d) => y(d[1] as number))
+        .attr("cx", (d) => x(d[4] as number))
+        .attr("cy", (d) => y(d[5] as number))
         .attr("r", CONFIG.DOT_SIZE / currentTransform.k)
-        .attr("fill", (d) => z(d[3] as number))
+        .attr("fill", (d) => z(d[1] as number))
         .style("cursor", "pointer")
         .style("opacity", (d) =>
           shouldLowerOpacity(d)
@@ -502,16 +512,16 @@ const ScatterPlot = forwardRef(
         )
         .style("vector-effect", "non-scaling-stroke")
         .each(function (d) {
-          elementMapRef.current.set(d[4] as number, this);
+          elementMapRef.current.set(d[2] as number, this);
         });
 
       svgElements.current.crosses = gDot
         .selectAll<SVGPathElement, (number | Prob)[]>("path")
-        .data(transformedData.forgettingData)
+        .data(transformedData.forgetData)
         .join("path")
         .attr("transform", (d) => {
-          const xPos = x(d[0] as number);
-          const yPos = y(d[1] as number);
+          const xPos = x(d[4] as number);
+          const yPos = y(d[5] as number);
           const scale = 1 / currentTransform.k;
 
           return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
@@ -523,16 +533,16 @@ const ScatterPlot = forwardRef(
             .type(d3.symbolCross)
             .size(Math.pow(CONFIG.CROSS__SIZE / CONFIG.X_SIZE_DIVIDER, 2))
         )
-        .attr("fill", (d) => z(d[3] as number))
+        .attr("fill", (d) => z(d[1] as number))
         .attr("stroke", (d) => {
-          const color = d3.color(z(d[3] as number));
+          const color = d3.color(z(d[1] as number));
           return color ? color.darker().darker().toString() : "black";
         })
         .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
         .style("cursor", "pointer")
         .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY)
         .each(function (d) {
-          elementMapRef.current.set(d[4] as number, this);
+          elementMapRef.current.set(d[2] as number, this);
         });
 
       if (svgElements.current.circles) {
@@ -553,7 +563,7 @@ const ScatterPlot = forwardRef(
       handleMouseEnter,
       handleMouseLeave,
       shouldLowerOpacity,
-      transformedData.forgettingData,
+      transformedData.forgetData,
       transformedData.remainData,
       viewMode,
       x,
@@ -644,7 +654,7 @@ const ScatterPlot = forwardRef(
         const isCircle = selection.node()?.tagName === "circle";
 
         selection
-          .style("opacity", (d: any) =>
+          .style("opacity", (d) =>
             shouldLowerOpacity(d)
               ? CONFIG.LOWERED_OPACITY
               : isCircle
@@ -653,16 +663,16 @@ const ScatterPlot = forwardRef(
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
               : CONFIG.DEFAULT_CROSS_OPACITY
           )
-          .style("pointer-events", (d: any) =>
+          .style("pointer-events", (d) =>
             shouldLowerOpacity(d) ? "none" : "auto"
           );
 
         if (isCircle) {
           selection.attr("r", CONFIG.DOT_SIZE / currentTransform.k);
         } else {
-          selection.attr("transform", (d: any) => {
-            const xPos = x(d[0] as number);
-            const yPos = y(d[1] as number);
+          selection.attr("transform", (d) => {
+            const xPos = x(d[4] as number);
+            const yPos = y(d[5] as number);
             const scale = 1 / currentTransform.k;
             return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
           });
@@ -704,7 +714,7 @@ const ScatterPlot = forwardRef(
                 .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY);
             } else {
               const d = selection.datum() as (number | Prob)[];
-              const colorStr = z(d[3] as number);
+              const colorStr = z(d[1] as number);
               const color = d3.color(colorStr);
               selection
                 .attr(
@@ -726,13 +736,13 @@ const ScatterPlot = forwardRef(
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
       getInstancePosition: (imgIdx: number) => {
-        const datum = data.find((d) => d[4] === imgIdx);
+        const datum = data.find((d) => d[2] === imgIdx);
         if (datum && svgRef.current) {
           const svgElement = svgRef.current;
           const point = svgElement.createSVGPoint();
 
-          const svgX = x(datum[0] as number);
-          const svgY = y(datum[1] as number);
+          const svgX = x(datum[4] as number);
+          const svgY = y(datum[5] as number);
 
           const transform = d3.zoomTransform(svgElement);
 
@@ -785,7 +795,7 @@ const ScatterPlot = forwardRef(
               .attr("stroke-width", null)
               .style("opacity", opacityValue);
           } else {
-            const colorStr = z(d[3] as number);
+            const colorStr = z(d[1] as number);
             const color = d3.color(colorStr);
             selection
               .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
@@ -815,9 +825,9 @@ const ScatterPlot = forwardRef(
         )}
         <div className="text-[15px] mt-1 flex items-center">
           {isBaseline ? (
-            <BaselineNeuralNetworkIcon className="mr-1" />
+            <ModelAIcon className="mr-1" />
           ) : (
-            <ComparisonNeuralNetworkIcon className="mr-1" />
+            <ModelBIcon className="mr-1" />
           )}
           <span>
             {mode} {idExist ? `(${id})` : ""}

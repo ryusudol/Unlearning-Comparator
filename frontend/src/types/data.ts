@@ -61,9 +61,10 @@ export type ExperimentData = {
   BS: number | string;
   LR: number | string;
   UA: number | string;
-  RA: number | string;
   TUA: number | string;
+  RA: number | string;
   TRA: number | string;
+  PA: number | string;
   RTE: number | string;
   FQS: number | string;
   accs: number[];

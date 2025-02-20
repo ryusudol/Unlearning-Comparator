@@ -18,7 +18,6 @@ import { ExperimentsContext } from "../../store/experiments-context";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { cn } from "../../utils/util";
-import { BASELINE, COMPARISON } from "../../constants/common";
 import { columns } from "./Columns";
 
 const TABLE_HEADER_HEIGHT = 35;
@@ -61,11 +60,11 @@ export default function DataTable({ isExpanded }: Props) {
   }, [experiments, forgetClass]);
 
   const modifiedColumns = columns.map((column) => {
-    if (column.id !== BASELINE && column.id !== COMPARISON) {
+    if (column.id !== "a" && column.id !== "b") {
       return column;
     }
 
-    const isBaselineColumn = column.id === BASELINE;
+    const isBaselineColumn = column.id === "a";
     const currentSelection = isBaselineColumn ? baseline : comparison;
     const saveFunction = isBaselineColumn ? saveBaseline : saveComparison;
     const disabledValue = isBaselineColumn ? comparison : baseline;

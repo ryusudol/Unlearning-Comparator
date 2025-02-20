@@ -8,18 +8,15 @@ export function hexToRgba(hex: string, opacity: number) {
 }
 
 export function getPhaseColors(
-  phase: string,
+  type: string,
   colorOpacity: number,
   backgroundColorOpacity: number
 ) {
   let color, backgroundColor;
-  if (phase === "Unlearned") {
+  if (type === "Unlearned") {
     color = `rgba(255, 140, 0, ${colorOpacity})`;
     backgroundColor = `rgba(255, 140, 0, ${backgroundColorOpacity})`;
-  } else if (phase === "Defended") {
-    color = `rgba(34, 139, 34, ${colorOpacity})`;
-    backgroundColor = `rgba(34, 139, 34, ${backgroundColorOpacity})`;
-  } else if (phase === "Pretrained") {
+  } else if (type === "Original") {
     color = `#dd151a`;
     backgroundColor = `rgba(255, 0, 0, 0.25)`;
   } else {

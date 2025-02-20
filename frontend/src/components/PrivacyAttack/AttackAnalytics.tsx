@@ -10,16 +10,15 @@ import { createRoot } from "react-dom/client";
 
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
-import Tooltip from "../Tooltip";
+import Tooltip from "./Tooltip";
 import { Prob } from "../../types/embeddings";
 import { API_URL } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { ExperimentsContext } from "../../store/experiments-context";
-import { AttackResult, AttackResults } from "../../types/data";
+import { AttackResult, AttackResults, AttackData } from "../../types/data";
 import { Image } from "../../types/privacy-attack";
-import { fetchFileData } from "../../utils/api/unlearning";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
 
@@ -49,8 +48,9 @@ interface Props {
   thresholdStrategy: string;
   strategyCount: number;
   userModified: boolean;
-  baselinePoints: (number | Prob)[][];
-  comparisonPoints: (number | Prob)[][];
+  retrainPoints: (number | Prob)[][];
+  unlearnPoints: (number | Prob)[][];
+  retrainAttackData: AttackData;
   setThresholdStrategy: (val: string) => void;
   setUserModified: (val: boolean) => void;
 }
@@ -62,13 +62,13 @@ export default function AttackAnalytics({
   thresholdStrategy,
   strategyCount,
   userModified,
-  baselinePoints,
-  comparisonPoints,
+  retrainPoints,
+  unlearnPoints,
+  retrainAttackData,
   setThresholdStrategy,
   setUserModified,
 }: Props) {
   const { forgetClassNumber } = useForgetClass();
-
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
@@ -152,90 +152,97 @@ export default function AttackAnalytics({
     }
   }, []);
 
-  const handleElementClick = async (
-    event: React.MouseEvent,
-    elementData: Bin & { type: CategoryType }
-  ) => {
-    event.stopPropagation();
+  const handleElementClick = useCallback(
+    async (
+      event: React.MouseEvent,
+      elementData: Bin & { type: CategoryType }
+    ) => {
+      event.stopPropagation();
 
-    if (!containerRef.current) return;
+      if (
+        !containerRef.current ||
+        retrainPoints.length === 0 ||
+        unlearnPoints.length === 0
+      ) {
+        return;
+      }
 
-    if (fetchControllerRef.current) {
-      fetchControllerRef.current.abort();
-    }
+      if (fetchControllerRef.current) {
+        fetchControllerRef.current.abort();
+      }
 
-    const controller = new AbortController();
-    fetchControllerRef.current = controller;
+      const controller = new AbortController();
+      fetchControllerRef.current = controller;
 
-    try {
-      const response = await fetch(
-        `${API_URL}/image/cifar10/${elementData.img_idx}`,
-        {
-          signal: controller.signal,
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch tooltip data");
-      if (controller.signal.aborted) return;
-
-      const blob = await response.blob();
-      const imageUrl = URL.createObjectURL(blob);
-
-      const baselinePoint = baselinePoints.find((point) => {
-        return typeof point[4] === "number" && point[4] === elementData.img_idx;
-      }) as (number | Prob)[];
-      const comparisonPoint = comparisonPoints.find((point) => {
-        return typeof point[4] === "number" && point[4] === elementData.img_idx;
-      }) as (number | Prob)[];
-
-      let current: Prob, opposite: Prob;
-      current = (isBaseline ? baselinePoint![5] : comparisonPoint![5]) as Prob;
-      opposite = (isBaseline ? comparisonPoint![5] : baselinePoint![5]) as Prob;
-
-      const barChartData = isBaseline
-        ? {
-            baseline: Array.from({ length: 10 }, (_, idx) => ({
-              class: idx,
-              value: Number(current[idx] || 0),
-            })),
-            comparison: Array.from({ length: 10 }, (_, idx) => ({
-              class: idx,
-              value: Number(opposite[idx] || 0),
-            })),
+      try {
+        const response = await fetch(
+          `${API_URL}/image/cifar10/${elementData.img_idx}`,
+          {
+            signal: controller.signal,
           }
-        : {
-            baseline: Array.from({ length: 10 }, (_, idx) => ({
-              class: idx,
-              value: Number(opposite[idx] || 0),
-            })),
-            comparison: Array.from({ length: 10 }, (_, idx) => ({
-              class: idx,
-              value: Number(current[idx] || 0),
-            })),
-          };
+        );
 
-      const tooltipContent = (
-        <Tooltip
-          width={CONFIG.TOOLTIP_WIDTH}
-          height={CONFIG.TOOLTIP_HEIGHT}
-          imageUrl={imageUrl}
-          data={isBaseline ? baselinePoint : comparisonPoint}
-          barChartData={barChartData}
-          forgetClass={forgetClassNumber}
-          isBaseline={isBaseline}
-        />
-      );
+        if (!response.ok) throw new Error("Failed to fetch tooltip data");
+        if (controller.signal.aborted) return;
 
-      showTooltip((event as any).nativeEvent || event, tooltipContent);
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
 
-      return () => {
-        URL.revokeObjectURL(imageUrl);
-      };
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      console.error("Failed to fetch tooltip data:", err);
-    }
-  };
+        const retrainPoint = retrainPoints.find((point) => {
+          return point[2] === elementData.img_idx;
+        }) as (number | Prob)[];
+        const unlearnPoint = unlearnPoints.find((point) => {
+          return point[2] === elementData.img_idx;
+        }) as (number | Prob)[];
+
+        const retrainProb = retrainPoint![6] as Prob;
+        const unlearnProb = unlearnPoint![6] as Prob;
+
+        const barChartData = isBaseline
+          ? {
+              baseline: Array.from({ length: 10 }, (_, idx) => ({
+                class: idx,
+                value: Number(retrainProb[idx] || 0),
+              })),
+              comparison: Array.from({ length: 10 }, (_, idx) => ({
+                class: idx,
+                value: Number(unlearnProb[idx] || 0),
+              })),
+            }
+          : {
+              baseline: Array.from({ length: 10 }, (_, idx) => ({
+                class: idx,
+                value: Number(unlearnProb[idx] || 0),
+              })),
+              comparison: Array.from({ length: 10 }, (_, idx) => ({
+                class: idx,
+                value: Number(retrainProb[idx] || 0),
+              })),
+            };
+
+        const tooltipContent = (
+          <Tooltip
+            width={CONFIG.TOOLTIP_WIDTH}
+            height={CONFIG.TOOLTIP_HEIGHT}
+            imageUrl={imageUrl}
+            data={unlearnPoint}
+            barChartData={barChartData}
+            forgetClass={forgetClassNumber}
+            isBaseline={isBaseline}
+          />
+        );
+
+        showTooltip((event as any).nativeEvent || event, tooltipContent);
+
+        return () => {
+          URL.revokeObjectURL(imageUrl);
+        };
+      } catch (error) {
+        console.error(`Failed to fetch tooltip data: ${error}`);
+      }
+    },
+    [forgetClassNumber, isBaseline, retrainPoints, unlearnPoints]
+  );
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -252,13 +259,9 @@ export default function AttackAnalytics({
 
   useEffect(() => {
     const getAttackData = async () => {
-      const retrainExperiment = await fetchFileData(
-        forgetClassNumber,
-        `a00${forgetClassNumber}`
-      );
       const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
 
-      if (!retrainExperiment || !experiment) {
+      if (!retrainAttackData || !experiment) {
         setData({
           retrainData: [],
           unlearnData: [],
@@ -270,7 +273,7 @@ export default function AttackAnalytics({
       let retrainExperimentValues: Bin[] = [];
       let experimentValues: Bin[] = [];
 
-      const retrainAttackValues = retrainExperiment.attack.values;
+      const retrainAttackValues = retrainAttackData.values;
       const experimentAttackValues = experiment.attack.values;
 
       retrainAttackValues.forEach((item) => {
@@ -307,10 +310,10 @@ export default function AttackAnalytics({
     aboveThreshold,
     baselineExperiment,
     comparisonExperiment,
-    forgetClassNumber,
     isBaseline,
     isMetricEntropy,
     metric,
+    retrainAttackData,
   ]);
 
   useEffect(() => {

@@ -2,10 +2,7 @@ import { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   STROKE_CONFIG,
@@ -303,9 +300,9 @@ export default function BubbleChart({
         className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[22%]`}
       >
         {isBaseline ? (
-          <BaselineNeuralNetworkIcon className="mr-1" />
+          <ModelAIcon className="mr-1" />
         ) : (
-          <ComparisonNeuralNetworkIcon className="mr-1" />
+          <ModelBIcon className="mr-1" />
         )}
         <span>
           {mode} ({id})
