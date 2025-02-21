@@ -30,7 +30,8 @@ import { BaselineComparisonContext } from "../../store/baseline-comparison-conte
 import { RunningStatusContext } from "../../store/running-status-context";
 
 const CONFIG = {
-  GREEN: "#157f3b",
+  // GREEN: "#157f3b",
+  BLUE: "#265599",
   TEMPORARY_ROW_BG_COLOR: "#f0f6fa",
   COLOR_MAPPING_THRESHOLD: 0.75,
   TEXT_OPACITY_THRESHOLD: 0.5,
@@ -111,7 +112,7 @@ export default function _TableBody({ table, tableData }: Props) {
       } else {
         const opacity = opacityMapping[columnId]?.[value] ?? 0;
         backgroundColor =
-          opacity < 0.1 ? "#f8f8f8" : hexToRgba(CONFIG.GREEN, opacity);
+          opacity < 0.1 ? "#f8f8f8" : hexToRgba(CONFIG.BLUE, opacity);
         textColor =
           opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
             ? COLORS.WHITE
