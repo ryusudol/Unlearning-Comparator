@@ -257,7 +257,7 @@ export default function _TableBody({ table, tableData }: Props) {
                       const cellStyle = getCellStyle(cell, isTemporaryRow);
 
                       const cellContent =
-                        isRunningRow && columnId === "id" ? (
+                        isRunningRow && columnId === "ID" ? (
                           <Loader2 className="size-4 animate-spin" />
                         ) : (
                           flexRender(
