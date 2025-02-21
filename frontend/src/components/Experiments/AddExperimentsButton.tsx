@@ -40,10 +40,10 @@ export default function AddExperimentsButton() {
         >
           <PlusIcon
             color={isRunning ? "#d1d5db" : "white"}
-            className="w-2.5 h-2.5 mr-1.5"
+            className="w-4 h-4 mr-1.5"
           />
-          <span className={isRunning ? "text-gray-300" : ""}>
-            Add Experiments
+          <span className={`text-[17px] ${isRunning && "text-gray-300"}`}>
+            Generate Models
           </span>
         </Button>
       </DialogTrigger>

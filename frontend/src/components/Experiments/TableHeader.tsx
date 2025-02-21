@@ -3,7 +3,6 @@ import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Table, TableHead, TableHeader, TableRow } from "../UI/table";
 import { COLUMN_WIDTHS } from "./Columns";
 import { ExperimentData } from "../../types/data";
-import { BASELINE, COMPARISON } from "../../constants/common";
 
 interface Props {
   table: TableType<ExperimentData>;
@@ -24,8 +23,8 @@ export default function _TableHeader({ table }: Props) {
                   style={{
                     width: `${columnWidth}px`,
                     minWidth: `${columnWidth}px`,
-                    ...(header.column.id === BASELINE && { paddingRight: 0 }),
-                    ...(header.column.id === COMPARISON && {
+                    ...(header.column.id === "A" && { paddingRight: 0 }),
+                    ...(header.column.id === "B" && {
                       paddingLeft: 0,
                     }),
                   }}

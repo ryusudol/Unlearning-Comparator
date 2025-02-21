@@ -1,25 +1,29 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 
 import Header from "../components/Header/Header";
-import Experiments from "../views/Experiments";
-import Progress from "../views/Progress";
-import Accuracies from "../views/Accuracies";
+import ModelScreening from "../views/ModelScreening";
 import Core from "../views/Core";
-import Predictions from "../views/Predictions";
-import Correlations from "../views/Correlations";
+import QuantitativeAnalysis from "../views/QuantitativeAnalysis";
 import { ExperimentsContext } from "../store/experiments-context";
 import { calculateZoom } from "../utils/util";
-import {
-  CORE_WIDTH,
-  EXPERIMENTS_WIDTH,
-  ANALYSIS_VIEW_WIDTH,
-  PROGRESS_WIDTH,
-  CORE_HEIGHT,
-  EXPERIMENTS_PROGRESS_HEIGHT,
-  ACCURACIES_HEIGHT,
-  PREDICTIONS_HEIGHT,
-  CORRELATIONS_HEIGHT,
-} from "../constants/layout";
+
+export const CONFIG = {
+  TOTAL_WIDTH: 1805,
+  EXPERIMENTS_WIDTH: 1032,
+  CORE_WIDTH: 1312,
+  get PROGRESS_WIDTH() {
+    return this.CORE_WIDTH - this.EXPERIMENTS_WIDTH - 1;
+  },
+  get ANALYSIS_VIEW_WIDTH() {
+    return this.TOTAL_WIDTH - this.CORE_WIDTH;
+  },
+
+  EXPERIMENTS_PROGRESS_HEIGHT: 245,
+  CORE_HEIGHT: 720,
+  get TOTAL_HEIGHT() {
+    return this.CORE_HEIGHT + this.EXPERIMENTS_PROGRESS_HEIGHT;
+  },
+} as const;
 
 export default function App() {
   const { isExperimentLoading } = useContext(ExperimentsContext);
@@ -48,32 +52,10 @@ export default function App() {
       {!isExperimentLoading && (
         <div className="flex items-center">
           <div>
-            <div className="flex items-center">
-              <Experiments
-                width={EXPERIMENTS_WIDTH}
-                height={EXPERIMENTS_PROGRESS_HEIGHT}
-              />
-              <Progress
-                width={PROGRESS_WIDTH}
-                height={EXPERIMENTS_PROGRESS_HEIGHT}
-              />
-            </div>
-            <Core width={CORE_WIDTH} height={CORE_HEIGHT} />
+            <ModelScreening />
+            <Core />
           </div>
-          <div>
-            <Accuracies
-              width={ANALYSIS_VIEW_WIDTH}
-              height={ACCURACIES_HEIGHT}
-            />
-            <Predictions
-              width={ANALYSIS_VIEW_WIDTH}
-              height={PREDICTIONS_HEIGHT}
-            />
-            <Correlations
-              width={ANALYSIS_VIEW_WIDTH}
-              height={CORRELATIONS_HEIGHT}
-            />
-          </div>
+          <QuantitativeAnalysis />
         </div>
       )}
     </section>

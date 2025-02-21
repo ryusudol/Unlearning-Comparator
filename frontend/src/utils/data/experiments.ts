@@ -4,15 +4,7 @@ import { Dist } from "../../types/data";
 import { Experiment, Experiments } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
-type BubbleChartData = {
-  x: number;
-  y: number;
-  label: number;
-  conf: number;
-}[];
-
-const metrics = ["UA", "TUA", "RA", "TRA", "PA"] as const;
-
+const metrics = ["UA", "TUA", "RA", "TRA", "PA", "RTE", "FQS"] as const;
 export function calculatePerformanceMetrics(data: Experiments) {
   const values = metrics.reduce((acc, key) => {
     acc[key] = Object.values(data).map((d) => Number(d[key]));
@@ -34,6 +26,13 @@ export function calculatePerformanceMetrics(data: Experiments) {
     return acc;
   }, {} as Record<(typeof metrics)[number], d3.ScaleLinear<number, number>>);
 }
+
+type BubbleChartData = {
+  x: number;
+  y: number;
+  label: number;
+  conf: number;
+}[];
 
 export function extractBubbleChartData(datasetMode: string, data: Experiment) {
   let bubbleChartData: {

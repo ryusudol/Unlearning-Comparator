@@ -1,10 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import {
-  CORE_HEIGHT,
-  EXPERIMENTS_PROGRESS_HEIGHT,
-  APP_WIDTH,
-} from "../constants/layout";
+import { CONFIG } from "../app/App";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -13,9 +9,10 @@ export function cn(...inputs: ClassValue[]) {
 export function calculateZoom() {
   const screenWidth = window.innerWidth;
 
-  const totalHeight = 48 + EXPERIMENTS_PROGRESS_HEIGHT + CORE_HEIGHT;
+  const totalHeight =
+    48 + CONFIG.EXPERIMENTS_PROGRESS_HEIGHT + CONFIG.CORE_HEIGHT;
 
-  const expectedZoom = screenWidth / APP_WIDTH;
+  const expectedZoom = screenWidth / CONFIG.TOTAL_WIDTH;
   const scaledHeight = totalHeight * expectedZoom;
 
   if (scaledHeight > window.innerHeight) {
@@ -30,7 +27,7 @@ export function calculateZoom() {
     const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
     outer.parentNode?.removeChild(outer);
 
-    return (screenWidth - scrollbarWidth) / APP_WIDTH;
+    return (screenWidth - scrollbarWidth) / CONFIG.TOTAL_WIDTH;
   }
 
   return expectedZoom;

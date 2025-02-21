@@ -1,16 +1,14 @@
 import { useMemo, useContext, useState } from "react";
 
-import View from "../components/View";
-import Title from "../components/Title";
+import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { useModelSelection } from "../hooks/useModelSelection";
-import { ViewProps } from "../types/common";
 import { ExperimentsContext } from "../store/experiments-context";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
-export default function Accuracy({ width, height }: ViewProps) {
+export default function ClassWiseAnalysis() {
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
@@ -40,14 +38,11 @@ export default function Accuracy({ width, height }: ViewProps) {
   }, [baselineExperiment, comparisonExperiment]);
 
   return (
-    <View width={width} height={height} className="border-t-0">
-      <Title
-        title="Accuracy Comparison"
-        customClass="bottom-[2px] right-[1px]"
-      />
+    <div className="mb-2">
+      <Subtitle title="Class-wise Accuracy" />
       {forgetClassExist ? (
         areAllModelsSelected ? (
-          <div className="w-full flex items-center relative bottom-0.5">
+          <div className="flex items-center py-1 relative border rounded-md">
             <VerticalBarChart
               mode="Training"
               gapData={accuracyData.trainAccuracyGap}
@@ -70,6 +65,6 @@ export default function Accuracy({ width, height }: ViewProps) {
       ) : (
         <Indicator about="ForgetClass" />
       )}
-    </View>
+    </div>
   );
 }

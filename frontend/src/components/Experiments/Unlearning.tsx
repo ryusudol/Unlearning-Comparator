@@ -39,7 +39,7 @@ import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const CUSTOM = "custom";
 let initialExperiment: ExperimentData = {
-  CreateAt: "",
+  CreatedAt: "",
   ID: "",
   FC: -1,
   Type: "Unlearned",

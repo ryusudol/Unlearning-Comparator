@@ -1,24 +1,25 @@
-import { useRef, useCallback, useMemo } from "react";
+import { useContext, useRef, useCallback, useMemo } from "react";
 
-import View from "../components/View";
 import InformationButton from "../components/Embeddings/InformationButton";
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
 import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
 import EmbeddingsLegend from "../components/Embeddings/EmbeddingsLegend";
 import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
+import { ExperimentsContext } from "../store/experiments-context";
 
 interface Props {
-  height: number;
   baselinePoints: (number | Prob)[][];
   comparisonPoints: (number | Prob)[][];
 }
 
 export default function Embeddings({
-  height,
   baselinePoints,
   comparisonPoints,
 }: Props) {
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
+
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
   const baselineRef = useRef<any>(null);
@@ -89,30 +90,27 @@ export default function Embeddings({
   );
 
   return (
-    <View
-      height={height}
-      className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none relative"
-    >
+    <div className="h-[665px] flex items-center border rounded-md px-1.5 rounded-tr-none relative">
       <EmbeddingsLegend />
       <ConnectionLineWrapper positionRef={positionRef} />
       <InformationButton />
       <ScatterPlot
         mode="Baseline"
-        height={height}
+        modelType={baselineExperiment!.Type}
         data={baselinePoints}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={baselineRef}
       />
-      <Separator orientation="vertical" className="h-[612px] w-[1px] mx-1.5" />
+      <Separator orientation="vertical" className="h-[641px] w-[1px] mx-1" />
       <ScatterPlot
         mode="Comparison"
-        height={height}
+        modelType={comparisonExperiment!.Type}
         data={comparisonPoints}
         onHover={handleHover}
         hoveredInstance={hoveredInstanceRef.current}
         ref={comparisonRef}
       />
-    </View>
+    </div>
   );
 }

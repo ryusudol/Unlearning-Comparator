@@ -52,7 +52,7 @@ export type AttackData = {
 };
 
 export type ExperimentData = {
-  CreateAt: string;
+  CreatedAt: string;
   ID: string;
   FC: number;
   Type: string;

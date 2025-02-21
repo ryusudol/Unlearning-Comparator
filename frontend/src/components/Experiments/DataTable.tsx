@@ -10,7 +10,7 @@ import {
 
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-import { useForgetClass } from "../../hooks/useForgetClass";
+// import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { ExperimentData } from "../../types/data";
 import { ScrollArea } from "../UI/scroll-area";
@@ -20,6 +20,7 @@ import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { cn } from "../../utils/util";
 import { columns } from "./Columns";
 import { COLORS } from "../../constants/colors";
+import { Experiment } from "../../types/experiments-context";
 
 const TABLE_HEADER_HEIGHT = 35;
 
@@ -33,7 +34,7 @@ export default function DataTable({ isExpanded }: Props) {
     BaselineComparisonContext
   );
 
-  const { forgetClass } = useForgetClass();
+  // const { forgetClass } = useForgetClass();
   const { baseline, comparison } = useModelSelection();
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -41,24 +42,24 @@ export default function DataTable({ isExpanded }: Props) {
   const tableData = useMemo(() => {
     const experimentsArray = Object.values(experiments);
 
-    const pretrainedExp = experimentsArray.find(
-      (exp) => exp.ID === `000${forgetClass}`
-    );
-    const retrainedExp = experimentsArray.find(
-      (exp) => exp.ID === `a00${forgetClass}`
+    if (experimentsArray.length === 0) return [];
+
+    const temporaryExps: Experiment[] = [];
+    const nonTemporaryExps: Experiment[] = [];
+    experimentsArray.forEach((exp) => {
+      if (exp.ID !== "-") {
+        nonTemporaryExps.push(exp);
+      } else {
+        temporaryExps.push(exp);
+      }
+    });
+    nonTemporaryExps.sort(
+      (a, b) =>
+        new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime()
     );
 
-    if (!pretrainedExp || !retrainedExp) return [];
-
-    const remainingExps = experimentsArray.filter(
-      (exp) => exp.ID !== pretrainedExp.ID && exp.ID !== retrainedExp.ID
-    );
-    // running experiments
-    const nonTemporaryExps = remainingExps.filter((exp) => exp.ID !== "-");
-    const temporaryExps = remainingExps.filter((exp) => exp.ID === "-");
-
-    return [pretrainedExp, retrainedExp, ...nonTemporaryExps, ...temporaryExps];
-  }, [experiments, forgetClass]);
+    return [...nonTemporaryExps, ...temporaryExps];
+  }, [experiments]);
 
   const modifiedColumns = columns.map((column) => {
     if (column.id !== "A" && column.id !== "B") {
@@ -75,7 +76,7 @@ export default function DataTable({ isExpanded }: Props) {
       cell: ({ row }: CellContext<ExperimentData, unknown>) => {
         const isSelected = currentSelection === row.id;
         return (
-          <RadioGroup className="flex justify-center items-center ml-[0px]">
+          <RadioGroup className="flex justify-center items-center">
             <RadioGroupItem
               value={row.id}
               className={cn(

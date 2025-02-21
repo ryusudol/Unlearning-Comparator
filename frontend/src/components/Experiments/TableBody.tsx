@@ -93,6 +93,54 @@ export default function _TableBody({ table, tableData }: Props) {
     return mapping;
   }, [performanceMetrics, tableData]);
 
+  const getCellStyle = (
+    cell: any,
+    isTemporaryRow: boolean
+  ): React.CSSProperties => {
+    const columnId = cell.column.id;
+    const columnWidth = COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
+    let style: React.CSSProperties = { width: `${columnWidth}px` };
+
+    if (columnId in performanceMetrics) {
+      const value = cell.getValue() as "N/A" | number;
+      const borderStyle = "1px solid rgb(229 231 235)";
+      let backgroundColor: string, textColor: string | undefined;
+
+      if (value === "N/A") {
+        backgroundColor = "white";
+      } else {
+        const opacity = opacityMapping[columnId]?.[value] ?? 0;
+        backgroundColor =
+          opacity < 0.1 ? "#f8f8f8" : hexToRgba(CONFIG.GREEN, opacity);
+        textColor =
+          opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
+            ? COLORS.WHITE
+            : COLORS.BLACK;
+      }
+
+      style = {
+        ...style,
+        borderLeft: columnId === "UA" ? borderStyle : "none",
+        borderRight: borderStyle,
+        backgroundColor,
+        color: textColor,
+      };
+    }
+
+    if (columnId === "A") {
+      style.paddingRight = 0;
+      style.paddingLeft = 14;
+    } else if (columnId === "B") {
+      style.paddingLeft = 6;
+    }
+
+    if (isTemporaryRow) {
+      style.backgroundColor = CONFIG.TEMPORARY_ROW_BG_COLOR;
+    }
+
+    return style;
+  };
+
   const handleDeleteRow = async (id: string) => {
     try {
       await deleteRow(forgetClassNumber, id);
@@ -205,47 +253,7 @@ export default function _TableBody({ table, tableData }: Props) {
                   >
                     {row.getVisibleCells().map((cell) => {
                       const columnId = cell.column.id;
-                      const columnWidth =
-                        COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
-                      const isPerformanceMetric =
-                        columnId in performanceMetrics;
-                      const borderStyle = "1px solid rgb(229 231 235)";
-                      const value = cell.getValue() as number;
-                      const opacity = opacityMapping[columnId]?.[value] ?? 0;
-                      let cellStyle: React.CSSProperties = {
-                        width: `${columnWidth}px`,
-                      };
-
-                      if (isPerformanceMetric) {
-                        let backgroundColor, textColor;
-                        if (opacity < 0.1) {
-                          backgroundColor = "#f7f7f7";
-                          textColor = COLORS.BLACK;
-                        } else {
-                          backgroundColor = hexToRgba(CONFIG.GREEN, opacity);
-                          textColor =
-                            opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
-                              ? COLORS.WHITE
-                              : COLORS.BLACK;
-                        }
-                        cellStyle = {
-                          ...cellStyle,
-                          borderLeft: columnId === "UA" ? borderStyle : "none",
-                          borderRight: borderStyle,
-                          backgroundColor,
-                          color: textColor,
-                        };
-                      } else if (columnId === "RTE" || columnId === "FQS") {
-                        cellStyle = {
-                          ...cellStyle,
-                          borderRight: borderStyle,
-                        };
-                      }
-
-                      if (isTemporaryRow) {
-                        cellStyle.backgroundColor =
-                          CONFIG.TEMPORARY_ROW_BG_COLOR;
-                      }
+                      const cellStyle = getCellStyle(cell, isTemporaryRow);
 
                       const cellContent =
                         isRunningRow && columnId === "id" ? (

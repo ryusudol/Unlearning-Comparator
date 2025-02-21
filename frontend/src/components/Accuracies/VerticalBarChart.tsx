@@ -1,4 +1,4 @@
-import { useMemo, useCallback, memo } from "react";
+import { useContext, useMemo, useCallback, memo } from "react";
 import {
   Bar,
   BarChart,
@@ -10,17 +10,18 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
+import { useModelSelection } from "../../hooks/useModelSelection";
 import { COLORS } from "../../constants/colors";
 import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ChartContainer } from "../UI/chart";
 import { GapDataItem } from "../../types/accuracies";
+import { ExperimentsContext } from "../../store/experiments-context";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
@@ -45,6 +46,10 @@ export default function VerticalBarChart({
   onHoverChange,
 }: Props) {
   const { forgetClassNumber } = useForgetClass();
+  const { baseline, comparison } = useModelSelection();
+
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
   const renderTick = useCallback(
     (props: any) => (
@@ -85,17 +90,17 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={VERTICAL_BAR_CHART_CONFIG}
-        className={`${showYAxis ? "w-[265px]" : "w-[205px]"} h-[233px]`}
+        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[245px]`}
       >
         <BarChart
           accessibilityLayer
           data={gapData}
           layout="vertical"
           margin={{
-            left: 8,
+            left: 4,
             right: 8,
             top: 12,
-            bottom: 2,
+            bottom: 18,
           }}
           onMouseMove={(state: any) => {
             if (state?.activePayload) {
@@ -137,11 +142,49 @@ export default function VerticalBarChart({
             ticks={[-maxGap, 0, maxGap]}
           >
             <Label
-              fill={COLORS.BLACK}
-              className="-translate-y-2 text-xs"
-              value={`← Baseline High | Comparison High →`}
-              offset={-1}
-              dx={8.5}
+              content={(props) => {
+                const {
+                  x = 0,
+                  y = 0,
+                  width = 0,
+                } = (
+                  props as {
+                    viewBox?: { x?: number; y?: number; width?: number };
+                  }
+                ).viewBox || {};
+
+                return (
+                  <g className="flex flex-col items-center justify-center">
+                    <text
+                      x={x + width / 2}
+                      y={y + 28}
+                      textAnchor="middle"
+                      fill={COLORS.BLACK}
+                      className="text-xs"
+                    >
+                      {"← "}
+                      <tspan fill={COLORS.EMERALD}>Model A</tspan>
+                      {" High | "}
+                      <tspan fill={COLORS.PURPLE}>Model B</tspan>
+                      {" High →"}
+                    </text>
+                    <text
+                      x={x + width / 2}
+                      y={y + 42}
+                      textAnchor="middle"
+                      fill={COLORS.BLACK}
+                      className="text-xs"
+                    >
+                      <tspan fill={COLORS.EMERALD}>
+                        ({baselineExperiment?.Type}, {baseline})
+                      </tspan>
+                      <tspan fill={COLORS.PURPLE} dx="10">
+                        ({comparisonExperiment?.Type}, {comparison})
+                      </tspan>
+                    </text>
+                  </g>
+                );
+              }}
               position="bottom"
             />
           </XAxis>
@@ -172,24 +215,18 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
-        <div className="flex items-center">
-          <ModelAIcon className="mr-1" />
-          <p>
-            Baseline:{" "}
-            <span className="font-semibold">
-              {data.baselineAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
-            </span>
-          </p>
-        </div>
-        <div className="flex items-center">
-          <ModelBIcon className="mr-1" />
-          <p>
-            Comparison:{" "}
-            <span className="font-semibold">
-              {data.comparisonAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
-            </span>
-          </p>
-        </div>
+        <p>
+          <span style={{ color: COLORS.EMERALD }}>Model A: </span>
+          <span className="font-semibold">
+            {data.baselineAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
+          </span>
+        </p>
+        <p>
+          <span style={{ color: COLORS.PURPLE }}>Model B: </span>
+          <span className="font-semibold">
+            {data.comparisonAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
+          </span>
+        </p>
         <p>
           Difference:{" "}
           <span className="font-semibold">

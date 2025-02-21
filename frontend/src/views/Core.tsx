@@ -3,19 +3,18 @@ import React, { useState, useEffect, useContext } from "react";
 import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
-import Embeddings from "./Embeddings";
+import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
+import { CONFIG } from "../app/App";
 import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
 import { BaselineComparisonContext } from "../store/baseline-comparison-context";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { ViewProps } from "../types/common";
 import { Point } from "../types/data";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
-const HEIGHT = 635;
 
-export default function Core({ width, height }: ViewProps) {
+export default function Core() {
   const { forgetClassExist, forgetClassNumber } = useForgetClass();
 
   const { baseline, comparison } = useContext(BaselineComparisonContext);
@@ -78,14 +77,12 @@ export default function Core({ width, height }: ViewProps) {
 
   const content = forgetClassExist ? (
     isEmbeddingMode ? (
-      <Embeddings
-        height={HEIGHT}
+      <Embedding
         baselinePoints={baselinePoints}
         comparisonPoints={comparisonPoints}
       />
     ) : (
       <PrivacyAttack
-        height={HEIGHT}
         baselinePoints={baselinePoints}
         comparisonPoints={comparisonPoints}
       />
@@ -95,9 +92,13 @@ export default function Core({ width, height }: ViewProps) {
   );
 
   return (
-    <View width={width} height={height} className="border-l-0">
+    <View
+      width={CONFIG.CORE_WIDTH}
+      height={CONFIG.CORE_HEIGHT}
+      className="border-l-0"
+    >
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-1 mb-0.5 relative right-1">
+        <div className="flex items-center gap-1 mb-0.5 ml-1 relative right-1">
           <Title
             title="Embedding"
             id={EMBEDDINGS}
