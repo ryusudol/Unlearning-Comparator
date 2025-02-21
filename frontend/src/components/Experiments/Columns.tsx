@@ -1,15 +1,20 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
 
-import MethodFilterHeader from "./MethodFilterHeader";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../UI/hover-card";
+  EpochHeader,
+  BSHeader,
+  LRHeader,
+  UAHeader,
+  RAHeader,
+  TUAHeader,
+  TRAHeader,
+  PAHeader,
+  RTEHeader,
+  FQSHeader,
+} from "./ColumnHeaders";
+import MethodFilterHeader from "./MethodFilterHeader";
 import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import { Badge } from "../UI/badge";
-import { Button } from "../UI/button";
 import { ExperimentData } from "../../types/data";
 import { getPhaseColors } from "../../utils/data/colors";
 import { COLORS } from "../../constants/colors";
@@ -22,6 +27,7 @@ function getValueToDisplay(value: unknown) {
     : Number(value);
 }
 
+const DECIMAL_POINT = 3;
 export const COLUMN_WIDTHS = {
   ID: 32,
   Type: 79,
@@ -91,16 +97,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "Epoch",
-    header: ({ column }) => (
-      <Button
-        className="w-full px-0 h-[34px] justify-start"
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Epoch
-        <ArrowUpDown className="w-4" />
-      </Button>
-    ),
+    header: ({ column }) => <EpochHeader column={column} />,
     cell: ({ row }) => {
       const epoch = row.getValue("Epoch");
       const value = getValueToDisplay(epoch);
@@ -109,23 +106,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "BS",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px] justify-start"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            BS
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Batch Size
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <BSHeader column={column} />,
     cell: ({ row }) => {
       const batchSize = row.getValue("BS");
       const value = getValueToDisplay(batchSize);
@@ -134,23 +115,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "LR",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px] justify-start"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            LR
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Learning Rate
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <LRHeader column={column} />,
     cell: ({ row }) => {
       const learningRate = row.getValue("LR");
       const value = getValueToDisplay(learningRate);
@@ -159,168 +124,72 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "UA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            UA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Unlearning Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <UAHeader column={column} />,
     cell: ({ row }) => {
       const ua = row.getValue("UA");
       const value = getValueToDisplay(ua);
       return (
         <div className="text-center">
-          {typeof value === "number" ? value.toFixed(3) : value}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "RA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            RA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Remaining Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <RAHeader column={column} />,
     cell: ({ row }) => {
       const ra = row.getValue("RA");
       const value = getValueToDisplay(ra);
       return (
         <div className="text-center">
-          {typeof value === "number" ? value.toFixed(3) : value}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "TUA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            TUA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Test Unlearning Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <TUAHeader column={column} />,
     cell: ({ row }) => {
       const tua = row.getValue("TUA");
       const value = getValueToDisplay(tua);
       return (
         <div className="text-center">
-          {typeof value === "number" ? value.toFixed(3) : value}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "TRA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            TRA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Test Remaining Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <TRAHeader column={column} />,
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
       const value = getValueToDisplay(tra);
       return (
         <div className="text-center">
-          {typeof value === "number" ? value.toFixed(3) : value}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "PA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            PA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Pulled Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <PAHeader column={column} />,
     cell: ({ row }) => {
       const pa = row.getValue("PA");
       const value = getValueToDisplay(pa);
       return (
         <div className="text-center">
-          {typeof value === "number" ? value.toFixed(3) : value}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "RTE",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            RTE(s)
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Run-Time Efficiency
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <RTEHeader column={column} />,
     cell: ({ row }) => {
       const rte = row.getValue("RTE");
       const value = getValueToDisplay(rte);
@@ -329,29 +198,13 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "FQS",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            FQS
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Forgetting Quality Score
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <FQSHeader column={column} />,
     cell: ({ row }) => {
       const fqs = row.getValue("FQS");
       const value = getValueToDisplay(fqs);
       return (
         <div className="text-center">
-          {typeof value === "number" ? value.toFixed(3) : value}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
