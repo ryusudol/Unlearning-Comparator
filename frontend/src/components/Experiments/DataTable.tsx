@@ -64,7 +64,7 @@ export default function DataTable({ isExpanded }: Props) {
 
     const isModelAColumn = column.id === "A";
     const currentSelection = isModelAColumn ? baseline : comparison;
-    const saveFunction = isModelAColumn ? saveBaseline : saveComparison;
+    const saveModel = isModelAColumn ? saveBaseline : saveComparison;
     const disabledValue = isModelAColumn ? comparison : baseline;
 
     return {
@@ -80,7 +80,7 @@ export default function DataTable({ isExpanded }: Props) {
                 isSelected && "[&_svg]:h-3 [&_svg]:w-3"
               )}
               checked={isSelected}
-              onClick={() => saveFunction(isSelected ? "" : row.id)}
+              onClick={() => saveModel(row.id)}
               disabled={disabledValue === row.id}
               color={isModelAColumn ? COLORS.EMERALD : COLORS.PURPLE}
             />
