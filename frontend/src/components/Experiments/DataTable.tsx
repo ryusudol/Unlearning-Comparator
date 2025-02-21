@@ -10,7 +10,6 @@ import {
 
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-// import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { ExperimentData } from "../../types/data";
 import { ScrollArea } from "../UI/scroll-area";
@@ -22,8 +21,6 @@ import { columns } from "./Columns";
 import { COLORS } from "../../constants/colors";
 import { Experiment } from "../../types/experiments-context";
 
-const TABLE_HEADER_HEIGHT = 35;
-
 interface Props {
   isExpanded: boolean;
 }
@@ -34,7 +31,6 @@ export default function DataTable({ isExpanded }: Props) {
     BaselineComparisonContext
   );
 
-  // const { forgetClass } = useForgetClass();
   const { baseline, comparison } = useModelSelection();
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -131,10 +127,7 @@ export default function DataTable({ isExpanded }: Props) {
     <div className="w-full overflow-visible">
       <TableHeader table={table} />
       {isExpanded ? (
-        <div
-          className="absolute z-[49] bg-white shadow-xl rounded-b-md"
-          style={{ top: TABLE_HEADER_HEIGHT + 1 }}
-        >
+        <div className="w-[1008px] absolute top-[78px] z-[49] bg-white shadow-xl rounded-b-md">
           <TableBody table={table} tableData={tableData} />
         </div>
       ) : (
