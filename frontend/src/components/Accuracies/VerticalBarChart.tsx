@@ -21,7 +21,7 @@ import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ChartContainer } from "../UI/chart";
 import { GapDataItem } from "../../types/accuracies";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,

@@ -16,7 +16,7 @@ import { API_URL } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 import { AttackResult, AttackResults, AttackData } from "../../types/data";
 import { Image } from "../../types/privacy-attack";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";

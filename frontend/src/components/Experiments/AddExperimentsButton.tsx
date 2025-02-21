@@ -10,7 +10,7 @@ import {
 import UnlearningConfiguration from "./UnlearningConfiguration";
 import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { RunningStatusContext } from "../../stores/running-status-context";
 
 export default function AddExperimentsButton() {
   const { isRunning } = useContext(RunningStatusContext);

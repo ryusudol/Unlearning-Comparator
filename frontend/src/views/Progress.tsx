@@ -9,8 +9,8 @@ import Pagination from "../components/Progress/Pagination";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { Step } from "../types/progress";
 import { CONFIG } from "../app/App";
-import { RunningStatusContext } from "../store/running-status-context";
-import { RunningIndexContext } from "../store/running-index-context";
+import { RunningStatusContext } from "../stores/running-status-context";
+import { RunningIndexContext } from "../stores/running-index-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
 export const PREV = "prev";

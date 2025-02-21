@@ -9,7 +9,7 @@ import {
 } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { AttackResult } from "../../types/data";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
+import { BaselineComparisonContext } from "../../stores/baseline-comparison-context";
 import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
 import { Bin, Data, CategoryType } from "./AttackAnalytics";
 

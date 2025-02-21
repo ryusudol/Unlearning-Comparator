@@ -8,7 +8,7 @@ import {
   PaginationPrevious,
 } from "../UI/pagination";
 import { PREV, NEXT } from "../../views/Progress";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { RunningStatusContext } from "../../stores/running-status-context";
 
 interface Props extends React.LiHTMLAttributes<HTMLLIElement> {
   currentPage: number;

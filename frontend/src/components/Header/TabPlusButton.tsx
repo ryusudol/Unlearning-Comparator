@@ -21,8 +21,8 @@ import {
   DATASETS,
   NEURAL_NETWORK_MODELS,
 } from "../../constants/common";
-import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
+import { DatasetAndModelContext } from "../../stores/dataset-and-model-context";
+import { ForgetClassContext } from "../../stores/forget-class-context";
 import { Label } from "../UI/label";
 import { PlusIcon } from "../UI/icons";
 import Button from "../CustomButton";

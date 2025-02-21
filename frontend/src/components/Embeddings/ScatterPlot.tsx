@@ -29,7 +29,7 @@ import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 
 /**
  * 0 -> ground thruth

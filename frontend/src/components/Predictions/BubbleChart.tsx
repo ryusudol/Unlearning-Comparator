@@ -10,7 +10,7 @@ import {
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { calculateZoom } from "../../utils/util";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 

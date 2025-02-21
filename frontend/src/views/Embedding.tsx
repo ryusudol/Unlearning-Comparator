@@ -6,7 +6,7 @@ import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrappe
 import EmbeddingsLegend from "../components/Embeddings/EmbeddingsLegend";
 import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
-import { ExperimentsContext } from "../store/experiments-context";
+import { ExperimentsContext } from "../stores/experiments-context";
 
 interface Props {
   baselinePoints: (number | Prob)[][];

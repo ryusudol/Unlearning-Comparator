@@ -5,7 +5,7 @@ import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { useModelSelection } from "../hooks/useModelSelection";
-import { ExperimentsContext } from "../store/experiments-context";
+import { ExperimentsContext } from "../stores/experiments-context";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
 export default function ClassWiseAnalysis() {

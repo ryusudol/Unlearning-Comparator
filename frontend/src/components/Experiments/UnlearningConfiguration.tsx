@@ -29,10 +29,10 @@ import {
 import { Label } from "../UI/label";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../store/running-status-context";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { ExperimentsContext } from "../../store/experiments-context";
-import { RunningIndexContext } from "../../store/running-index-context";
+import { RunningStatusContext } from "../../stores/running-status-context";
+import { BaselineComparisonContext } from "../../stores/baseline-comparison-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
+import { RunningIndexContext } from "../../stores/running-index-context";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";

@@ -23,11 +23,11 @@ import { PerformanceMetrics } from "../../types/experiments";
 import { Experiment, Experiments } from "../../types/experiments-context";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { BaselineComparisonContext } from "../../stores/baseline-comparison-context";
+import { RunningStatusContext } from "../../stores/running-status-context";
 
 const CONFIG = {
   // GREEN: "#157f3b",

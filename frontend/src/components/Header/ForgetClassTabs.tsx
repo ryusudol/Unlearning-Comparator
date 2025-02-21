@@ -2,8 +2,8 @@ import { useContext, useState } from "react";
 
 import { CIFAR_10_CLASSES } from "../../constants/common";
 import { Experiment, Experiments } from "../../types/experiments-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ForgetClassContext } from "../../stores/forget-class-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import ForgetClassTab from "./Tab";
 import ForgetClassTabPlusButton from "./TabPlusButton";

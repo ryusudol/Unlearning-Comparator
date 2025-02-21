@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { BaselineComparisonContext } from "../stores/baseline-comparison-context";
 
 export const useModelSelection = () => {
   const { baseline, comparison } = useContext(BaselineComparisonContext);

@@ -21,7 +21,7 @@ import {
 } from "../../constants/common";
 import { COLORS } from "../../constants/colors";
 import { getCkaData } from "../../utils/data/getCkaData";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { ExperimentsContext } from "../../stores/experiments-context";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { ChartContainer } from "../UI/chart";
 

@@ -5,7 +5,7 @@ import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { BaselineComparisonContext } from "../stores/baseline-comparison-context";
 import { fetchFileData } from "../utils/api/unlearning";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ExperimentData } from "../types/data";

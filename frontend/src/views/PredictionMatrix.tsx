@@ -9,7 +9,7 @@ import { useModelSelection } from "../hooks/useModelSelection";
 import { Arrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
 import { bubbleColorScale } from "../constants/colors";
-import { ExperimentsContext } from "../store/experiments-context";
+import { ExperimentsContext } from "../stores/experiments-context";
 
 export default function PredictionMatrix() {
   const { areAllModelsSelected } = useModelSelection();

@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
 import { GithubIcon } from "../UI/icons";
-import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
+import { DatasetAndModelContext } from "../../stores/dataset-and-model-context";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
   Select,

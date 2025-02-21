@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { MultiplicationSignIcon } from "../UI/icons";
 import { CIFAR_10_CLASSES } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { ForgetClassContext } from "../../store/forget-class-context";
+import { ForgetClassContext } from "../../stores/forget-class-context";
 
 interface Props {
   setOpen: (open: boolean) => void;

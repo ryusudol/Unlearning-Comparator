@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { ForgetClassContext } from "../store/forget-class-context";
+import { ForgetClassContext } from "../stores/forget-class-context";
 
 export const useForgetClass = () => {
   const { forgetClass } = useContext(ForgetClassContext);

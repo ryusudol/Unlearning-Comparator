@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { Clock } from "lucide-react";
 
-import { RunningStatusContext } from "../../store/running-status-context";
-import { RunningIndexContext } from "../../store/running-index-context";
+import { RunningStatusContext } from "../../stores/running-status-context";
+import { RunningIndexContext } from "../../stores/running-index-context";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { Separator } from "../../components/UI/separator";
 

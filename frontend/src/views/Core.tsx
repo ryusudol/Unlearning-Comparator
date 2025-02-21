@@ -7,7 +7,7 @@ import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../app/App";
 import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
+import { BaselineComparisonContext } from "../stores/baseline-comparison-context";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { Point } from "../types/data";
 
