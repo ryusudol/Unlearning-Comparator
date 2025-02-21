@@ -3,14 +3,13 @@ import {
   createContext,
   useReducer,
   useCallback,
-  useContext,
   useMemo,
 } from "react";
 
 import { EXPERIMENTS } from "../constants/storageKeys";
 import { EXPERIMENTS_ACTIONS } from "../constants/actions";
 import { ExperimentData } from "../types/data";
-import { BaselineComparisonContext } from "./baseline-comparison-context";
+import { useModelDataStore } from "./modelDataStore";
 import {
   Action,
   Context,
@@ -115,7 +114,7 @@ export default function ExperimentsContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { modelA, modelB } = useModelDataStore();
 
   const [experimentsContext, dispatch] = useReducer(ExperimentsReducer, {
     experiments: {},
@@ -125,12 +124,12 @@ export default function ExperimentsContextProvider({
   });
 
   const baselineExperiment = useMemo(() => {
-    return experimentsContext.experiments[baseline];
-  }, [baseline, experimentsContext.experiments]);
+    return experimentsContext.experiments[modelA];
+  }, [experimentsContext.experiments, modelA]);
 
   const comparisonExperiment = useMemo(() => {
-    return experimentsContext.experiments[comparison];
-  }, [comparison, experimentsContext.experiments]);
+    return experimentsContext.experiments[modelB];
+  }, [experimentsContext.experiments, modelB]);
 
   const handleAddExperiment = useCallback(
     (experiment: ExperimentData, tempIdx?: number) => {

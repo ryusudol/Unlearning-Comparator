@@ -30,12 +30,12 @@ import { Label } from "../UI/label";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../stores/running-status-context";
-import { BaselineComparisonContext } from "../../stores/baseline-comparison-context";
 import { ExperimentsContext } from "../../stores/experiments-context";
 import { RunningIndexContext } from "../../stores/running-index-context";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
+import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CUSTOM = "custom";
 let initialExperiment: ExperimentData = {
@@ -91,13 +91,13 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
+  const { forgetClassNumber } = useForgetClass();
+  const { saveModelB } = useModelDataStore();
+
   const { updateRunningIndex } = useContext(RunningIndexContext);
-  const { saveComparison } = useContext(BaselineComparisonContext);
   const { addExperiment, updateExperiment } = useContext(ExperimentsContext);
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useContext(RunningStatusContext);
-
-  const { forgetClassNumber } = useForgetClass();
 
   const [initModel, setInitialModel] = useState(`000${forgetClassNumber}`);
   const [weightNames, setWeightNames] = useState<string[]>([]);
@@ -229,7 +229,7 @@ export default function UnlearningConfiguration() {
           unlearningStatus.recent_id as string
         );
         updateExperiment(newData, experimentIndex);
-        saveComparison(newData.ID);
+        saveModelB(newData.ID);
         break;
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));

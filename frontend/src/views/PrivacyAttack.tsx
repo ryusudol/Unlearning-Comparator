@@ -1,11 +1,11 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import Indicator from "../components/Indicator";
 import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
-import { BaselineComparisonContext } from "../stores/baseline-comparison-context";
+import { useModelDataStore } from "../stores/modelDataStore";
 import { fetchFileData } from "../utils/api/unlearning";
 import { useForgetClass } from "../hooks/useForgetClass";
 import { ExperimentData } from "../types/data";
@@ -27,8 +27,7 @@ export default function PrivacyAttack({
   comparisonPoints,
 }: Props) {
   const { forgetClassNumber } = useForgetClass();
-
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { modelA, modelB } = useModelDataStore();
 
   const [metric, setMetric] = useState<Metric>(ENTROPY);
   const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);
@@ -37,8 +36,8 @@ export default function PrivacyAttack({
   const [strategyCount, setStrategyClick] = useState(0);
   const [retrainData, setRetrainData] = useState<ExperimentData>();
 
-  const isBaselinePretrained = baseline.startsWith("000");
-  const isComparisonPretrained = comparison.startsWith("000");
+  const isModelAOriginal = modelA.startsWith("000");
+  const isModelBOriginal = modelB.startsWith("000");
 
   useEffect(() => {
     async function loadRetrainData() {
@@ -80,7 +79,7 @@ export default function PrivacyAttack({
       />
       {!retrainData ? (
         <Indicator text="Failed to fetch retrain data" />
-      ) : isBaselinePretrained ? (
+      ) : isModelAOriginal ? (
         <Indicator text="Please select unlearned models to compare attack results" />
       ) : (
         <AttackAnalytics
@@ -103,7 +102,7 @@ export default function PrivacyAttack({
       />
       {!retrainData ? (
         <Indicator text="Failed to fetch retrain data" />
-      ) : isComparisonPretrained ? (
+      ) : isModelBOriginal ? (
         <Indicator text="Please select unlearned models to compare attack results" />
       ) : (
         <AttackAnalytics

@@ -21,13 +21,12 @@ import { hexToRgba } from "../../utils/data/colors";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { PerformanceMetrics } from "../../types/experiments";
 import { Experiment, Experiments } from "../../types/experiments-context";
-import { useModelSelection } from "../../hooks/useModelSelection";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
 import { ExperimentsContext } from "../../stores/experiments-context";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
-import { BaselineComparisonContext } from "../../stores/baseline-comparison-context";
 import { RunningStatusContext } from "../../stores/running-status-context";
+import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CONFIG = {
   // GREEN: "#157f3b",
@@ -43,15 +42,12 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
+  const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
+  const { forgetClass, forgetClassNumber } = useForgetClass();
+
   const { isRunning } = useContext(RunningStatusContext);
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useContext(ExperimentsContext);
-  const { saveBaseline, saveComparison } = useContext(
-    BaselineComparisonContext
-  );
-
-  const { baseline, comparison } = useModelSelection();
-  const { forgetClass, forgetClassNumber } = useForgetClass();
 
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
@@ -166,27 +162,27 @@ export default function _TableBody({ table, tableData }: Props) {
 
         saveExperiments(sortedExperiments);
 
-        if (id === baseline) {
-          if (!comparison.startsWith("000")) {
-            saveBaseline(`000${forgetClass}`);
-          } else if (!comparison.startsWith("a00")) {
-            saveBaseline(`a00${forgetClass}`);
+        if (id === modelA) {
+          if (!modelB.startsWith("000")) {
+            saveModelA(`000${forgetClass}`);
+          } else if (!modelB.startsWith("a00")) {
+            saveModelA(`a00${forgetClass}`);
           } else {
             const nextBaselineExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.ID !== comparison);
-            saveBaseline(nextBaselineExperiment!.ID);
+            ).find((experiment) => experiment.ID !== modelB);
+            saveModelA(nextBaselineExperiment!.ID);
           }
-        } else if (id === comparison) {
-          if (!baseline.startsWith("000")) {
-            saveComparison(`000${forgetClass}`);
-          } else if (!baseline.startsWith("a00")) {
-            saveComparison(`a00${forgetClass}`);
+        } else if (id === modelB) {
+          if (!modelA.startsWith("000")) {
+            saveModelB(`000${forgetClass}`);
+          } else if (!modelA.startsWith("a00")) {
+            saveModelB(`a00${forgetClass}`);
           } else {
             const nextComparisonExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.ID !== baseline);
-            saveComparison(nextComparisonExperiment!.ID);
+            ).find((experiment) => experiment.ID !== modelA);
+            saveModelB(nextComparisonExperiment!.ID);
           }
         }
       }

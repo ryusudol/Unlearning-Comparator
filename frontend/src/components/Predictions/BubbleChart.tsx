@@ -8,7 +8,7 @@ import {
   FONT_CONFIG,
 } from "../../constants/common";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { ExperimentsContext } from "../../stores/experiments-context";
 import { extractBubbleChartData } from "../../utils/data/experiments";
@@ -46,7 +46,7 @@ export default function BubbleChart({
   showYAxis = true,
 }: Props) {
   const { forgetClass } = useForgetClass();
-  const { baseline, comparison } = useModelSelection();
+  const { modelA, modelB } = useModelDataStore();
 
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
@@ -355,7 +355,7 @@ export default function BubbleChart({
               Prediction
             </span>
             <span style={{ color: COLORS.EMERALD }}>
-              ({modelType}, {baseline})
+              ({modelType}, {modelA})
             </span>
           </>
         ) : (
@@ -365,7 +365,7 @@ export default function BubbleChart({
               Prediction
             </span>
             <span style={{ color: COLORS.PURPLE }}>
-              ({modelType}, {comparison})
+              ({modelType}, {modelB})
             </span>
           </>
         )}

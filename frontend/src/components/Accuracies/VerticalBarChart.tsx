@@ -15,7 +15,7 @@ import {
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { COLORS } from "../../constants/colors";
 import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
 import { useForgetClass } from "../../hooks/useForgetClass";
@@ -46,7 +46,7 @@ export default function VerticalBarChart({
   onHoverChange,
 }: Props) {
   const { forgetClassNumber } = useForgetClass();
-  const { baseline, comparison } = useModelSelection();
+  const { modelA, modelB } = useModelDataStore();
 
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
@@ -176,10 +176,10 @@ export default function VerticalBarChart({
                       className="text-xs"
                     >
                       <tspan fill={COLORS.EMERALD}>
-                        ({baselineExperiment?.Type}, {baseline})
+                        ({baselineExperiment?.Type}, {modelA})
                       </tspan>
                       <tspan fill={COLORS.PURPLE} dx="10">
-                        ({comparisonExperiment?.Type}, {comparison})
+                        ({comparisonExperiment?.Type}, {modelB})
                       </tspan>
                     </text>
                   </g>

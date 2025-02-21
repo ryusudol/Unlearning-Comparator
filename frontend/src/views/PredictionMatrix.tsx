@@ -5,21 +5,23 @@ import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { useModelSelection } from "../hooks/useModelSelection";
+import { useModelDataStore } from "../stores/modelDataStore";
 import { Arrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
 import { bubbleColorScale } from "../constants/colors";
 import { ExperimentsContext } from "../stores/experiments-context";
 
 export default function PredictionMatrix() {
-  const { areAllModelsSelected } = useModelSelection();
   const { forgetClassExist } = useForgetClass();
+  const { modelA, modelB } = useModelDataStore();
 
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
 
   const [datasetMode, setDatasetMode] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
+
+  const areAllModelsSelected = modelA !== "" && modelB !== "";
 
   return (
     <div className="mb-2">

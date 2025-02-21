@@ -24,7 +24,7 @@ import {
   SvgElementsRefType,
 } from "../../types/embeddings";
 import { useForgetClass } from "../../hooks/useForgetClass";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
@@ -71,7 +71,7 @@ interface Props {
 const ScatterPlot = forwardRef(
   ({ mode, modelType, data, onHover, hoveredInstance }: Props, ref) => {
     const { forgetClass, forgetClassNumber } = useForgetClass();
-    const { baseline, comparison } = useModelSelection();
+    const { modelA, modelB } = useModelDataStore();
 
     const { baselineExperiment, comparisonExperiment } =
       useContext(ExperimentsContext);
@@ -144,7 +144,7 @@ const ScatterPlot = forwardRef(
     }, [ref]);
 
     const isBaseline = mode === "Baseline";
-    const id = isBaseline ? baseline : comparison;
+    const id = isBaseline ? modelA : modelB;
     const idExist = id !== "";
 
     const x = useMemo(() => {
@@ -362,8 +362,8 @@ const ScatterPlot = forwardRef(
               <></>
             ) : (
               <Tooltip
-                baseline={baseline}
-                comparison={comparison}
+                baseline={modelA}
+                comparison={modelB}
                 imageUrl={imageUrl}
                 data={d}
                 barChartData={barChartData}
@@ -385,13 +385,13 @@ const ScatterPlot = forwardRef(
         }
       },
       [
-        baseline,
         baselineExperiment,
-        comparison,
         comparisonExperiment,
         forgetClassNumber,
         isBaseline,
         mode,
+        modelA,
+        modelB,
         onHover,
       ]
     );
@@ -849,7 +849,7 @@ const ScatterPlot = forwardRef(
             >
               <span>Model A</span>
               <span>
-                ({modelType}, {baseline})
+                ({modelType}, {modelA})
               </span>
             </div>
           ) : (
@@ -859,7 +859,7 @@ const ScatterPlot = forwardRef(
             >
               <span>Model B</span>
               <span>
-                ({modelType}, {comparison})
+                ({modelType}, {modelB})
               </span>
             </div>
           )}

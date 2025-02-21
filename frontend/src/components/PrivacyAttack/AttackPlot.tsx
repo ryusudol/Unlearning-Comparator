@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 
 import { NeuralNetworkIcon, ModelAIcon, ModelBIcon } from "../UI/icons";
@@ -9,7 +9,7 @@ import {
 } from "../../constants/privacyAttack";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { AttackResult } from "../../types/data";
-import { BaselineComparisonContext } from "../../stores/baseline-comparison-context";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
 import { Bin, Data, CategoryType } from "./AttackAnalytics";
 
@@ -79,8 +79,8 @@ export default function ButterflyPlot({
   setHoveredId,
   onElementClick,
 }: Props) {
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
   const { forgetClassNumber } = useForgetClass();
+  const { modelA, modelB } = useModelDataStore();
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -1356,7 +1356,7 @@ export default function ButterflyPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric, aboveThreshold, baseline, comparison]);
+  }, [metric, aboveThreshold, modelA, modelB]);
 
   useEffect(() => {
     const strokeOpacity = isAboveThresholdUnlearn ? 1 : 0.3;
@@ -1387,7 +1387,7 @@ export default function ButterflyPlot({
             <ModelBIcon className="mr-1" />
           )}
           <span>
-            {mode} ({isBaseline ? baseline : comparison})
+            {mode} ({isBaseline ? modelA : modelB})
           </span>
         </div>
       </div>

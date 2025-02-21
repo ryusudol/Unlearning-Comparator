@@ -4,16 +4,16 @@ import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { useModelSelection } from "../hooks/useModelSelection";
+import { useModelDataStore } from "../stores/modelDataStore";
 import { ExperimentsContext } from "../stores/experiments-context";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
 export default function ClassWiseAnalysis() {
+  const { forgetClassExist } = useForgetClass();
+  const { modelA, modelB } = useModelDataStore();
+
   const { baselineExperiment, comparisonExperiment } =
     useContext(ExperimentsContext);
-
-  const { areAllModelsSelected } = useModelSelection();
-  const { forgetClassExist } = useForgetClass();
 
   const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
@@ -41,7 +41,7 @@ export default function ClassWiseAnalysis() {
     <div className="mb-2">
       <Subtitle title="Class-wise Accuracy" />
       {forgetClassExist ? (
-        areAllModelsSelected ? (
+        modelA !== "" && modelB !== "" ? (
           <div className="flex items-center py-1 relative border rounded-md">
             <VerticalBarChart
               mode="Training"
