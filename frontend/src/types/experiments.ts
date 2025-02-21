@@ -39,8 +39,5 @@ export interface Action {
 }
 
 export type PerformanceMetrics = {
-  [key: string]: {
-    colorScale: d3.ScaleLinear<number, number, never>;
-    baseColor: string;
-  };
+  [key: string]: d3.ScaleLinear<number, number, never>;
 };

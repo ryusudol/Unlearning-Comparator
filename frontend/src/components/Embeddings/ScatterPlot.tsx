@@ -14,7 +14,6 @@ import * as d3 from "d3";
 
 import ViewModeSelector from "./ViewModeSelector";
 import Tooltip from "./Tooltip";
-import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   Mode,
   SelectedData,
@@ -41,8 +40,8 @@ import { VIEW_MODES } from "../../constants/embeddings";
  */
 
 const CONFIG = {
-  WIDTH: 630,
-  HEIGHT: 630,
+  WIDTH: 580,
+  HEIGHT: 640,
   DOT_SIZE: 4,
   CROSS__SIZE: 4,
   MIN_ZOOM: 0.6,
@@ -61,14 +60,14 @@ const CONFIG = {
 
 interface Props {
   mode: Mode;
-  height: number;
+  modelType: string;
   data: SelectedData;
   onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
   hoveredInstance: HoverInstance | null;
 }
 
 const ScatterPlot = forwardRef(
-  ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
+  ({ mode, modelType, data, onHover, hoveredInstance }: Props, ref) => {
     const { forgetClass, forgetClassNumber } = useForgetClass();
     const { baseline, comparison } = useModelSelection();
 
@@ -808,7 +807,7 @@ const ScatterPlot = forwardRef(
 
     return (
       <div
-        style={{ height }}
+        style={{ height: "660px" }}
         className="flex flex-col justify-start items-center relative"
       >
         {idExist && (
@@ -818,22 +817,35 @@ const ScatterPlot = forwardRef(
               onClick={resetZoom}
             />
             <div className="flex items-center absolute z-10 right-0 top-6">
-              <span className="mr-1.5 text-sm">View:</span>
+              <span className="mr-1.5 text-sm">Show:</span>
               <ViewModeSelector viewMode={viewMode} setViewMode={setViewMode} />
             </div>
           </div>
         )}
         <div className="text-[15px] mt-1 flex items-center">
           {isBaseline ? (
-            <ModelAIcon className="mr-1" />
+            <div
+              style={{ color: COLORS.EMERALD }}
+              className="flex flex-col items-center leading-4"
+            >
+              <span>Model A</span>
+              <span>
+                ({modelType}, {baseline})
+              </span>
+            </div>
           ) : (
-            <ModelBIcon className="mr-1" />
+            <div
+              style={{ color: COLORS.PURPLE }}
+              className="flex flex-col items-center leading-4"
+            >
+              <span>Model B</span>
+              <span>
+                ({modelType}, {comparison})
+              </span>
+            </div>
           )}
-          <span>
-            {mode} {idExist ? `(${id})` : ""}
-          </span>
         </div>
-        <div className="w-[638px] h-[607px] flex flex-col justify-center items-center">
+        <div className="w-[632px] h-[620px] flex flex-col justify-center items-center">
           <div
             ref={containerRef}
             style={{

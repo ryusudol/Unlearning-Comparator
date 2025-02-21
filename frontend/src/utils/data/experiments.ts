@@ -4,13 +4,28 @@ import { Dist } from "../../types/data";
 import { Experiment, Experiments } from "../../types/experiments-context";
 import { TRAIN } from "../../constants/common";
 
-type Values = {
-  UA: number[];
-  RA: number[];
-  TUA: number[];
-  TRA: number[];
-  PA: number[];
-};
+const metrics = ["UA", "TUA", "RA", "TRA", "PA", "RTE", "FQS"] as const;
+export function calculatePerformanceMetrics(data: Experiments) {
+  const values = metrics.reduce((acc, key) => {
+    acc[key] = Object.values(data).map((d) => Number(d[key]));
+    return acc;
+  }, {} as Record<(typeof metrics)[number], number[]>);
+
+  const mins = metrics.reduce((acc, key) => {
+    acc[key] = d3.min(values[key])!;
+    return acc;
+  }, {} as Record<(typeof metrics)[number], number>);
+
+  const maxes = metrics.reduce((acc, key) => {
+    acc[key] = d3.max(values[key])!;
+    return acc;
+  }, {} as Record<(typeof metrics)[number], number>);
+
+  return metrics.reduce((acc, key) => {
+    acc[key] = d3.scaleLinear().domain([mins[key], maxes[key]]).range([0, 1]);
+    return acc;
+  }, {} as Record<(typeof metrics)[number], d3.ScaleLinear<number, number>>);
+}
 
 type BubbleChartData = {
   x: number;
@@ -18,82 +33,6 @@ type BubbleChartData = {
   label: number;
   conf: number;
 }[];
-
-const BRIGHTEST = 0;
-const DARKEST = 1;
-const RED = "#bb151a";
-const GREEN = "#157f3b";
-const baseColors = {
-  UA: RED,
-  TUA: RED,
-  RA: GREEN,
-  TRA: GREEN,
-  PA: GREEN,
-};
-
-export function calculatePerformanceMetrics(data: Experiments) {
-  const values: Values = {
-    UA: Object.values(data).map((d) => Number(d.UA)),
-    TUA: Object.values(data).map((d) => Number(d.TUA)),
-    RA: Object.values(data).map((d) => Number(d.RA)),
-    TRA: Object.values(data).map((d) => Number(d.TRA)),
-    PA: Object.values(data).map((d) => Number(d.PA)),
-  };
-
-  const mins = {
-    UA: d3.min(values.UA)!,
-    TUA: d3.min(values.TUA)!,
-    RA: d3.min(values.RA)!,
-    TRA: d3.min(values.TRA)!,
-    PA: d3.min(values.TRA)!,
-  };
-
-  const maxs = {
-    UA: d3.max(values.UA)!,
-    TUA: d3.max(values.TUA)!,
-    RA: d3.max(values.RA)!,
-    TRA: d3.max(values.TRA)!,
-    PA: d3.max(values.PA)!,
-  };
-
-  return {
-    UA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.UA, maxs.UA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.UA,
-    },
-    TUA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.TUA, maxs.TUA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.TUA,
-    },
-    RA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.RA, maxs.RA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RA,
-    },
-    TRA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.TRA, maxs.TRA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.TRA,
-    },
-    PA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.PA, maxs.PA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.PA,
-    },
-  };
-}
 
 export function extractBubbleChartData(datasetMode: string, data: Experiment) {
   let bubbleChartData: {

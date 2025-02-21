@@ -2,7 +2,6 @@ import { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
-import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   STROKE_CONFIG,
@@ -16,7 +15,8 @@ import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 
 const CONFIG = {
-  TOTAL_SIZE: 255,
+  WIDTH: 252,
+  HEIGHT: 230,
   MIN_BUBBLE_SIZE: 1,
   MAX_BUBBLE_SIZE: 90,
   MIN_VALUE_TO_DISPLAY: 0.002,
@@ -28,6 +28,7 @@ type ModeType = "Baseline" | "Comparison";
 
 interface Props {
   mode: ModeType;
+  modelType: string;
   datasetMode: string;
   hoveredY: number | null;
   onHover: (y: number) => void;
@@ -37,17 +38,18 @@ interface Props {
 
 export default function BubbleChart({
   mode,
+  modelType,
   datasetMode,
   hoveredY,
   onHover,
   onHoverEnd,
   showYAxis = true,
 }: Props) {
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
-
   const { forgetClass } = useForgetClass();
   const { baseline, comparison } = useModelSelection();
+
+  const { baselineExperiment, comparisonExperiment } =
+    useContext(ExperimentsContext);
 
   const [tooltip, setTooltip] = useState({
     display: false,
@@ -66,7 +68,6 @@ export default function BubbleChart({
 
   const zoom = calculateZoom();
   const isBaseline = mode === "Baseline";
-  const id = isBaseline ? baseline : comparison;
   const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
 
   const handleMouseOut = useCallback(
@@ -87,20 +88,20 @@ export default function BubbleChart({
     const data = extractBubbleChartData(datasetMode, experiment);
 
     const margin = {
-      top: 22,
-      right: 0,
-      bottom: 44,
+      top: 8,
+      right: 4,
+      bottom: 38,
       left: 64,
     };
-    const width = CONFIG.TOTAL_SIZE - margin.left - margin.right;
-    const height = CONFIG.TOTAL_SIZE - margin.top - margin.bottom;
+    const width = CONFIG.WIDTH - margin.left - margin.right;
+    const height = CONFIG.HEIGHT - margin.top - margin.bottom;
 
     d3.select(svgRef.current).selectAll("*").remove();
 
     const svg = d3
       .select(svgRef.current)
-      .attr("width", CONFIG.TOTAL_SIZE)
-      .attr("height", CONFIG.TOTAL_SIZE)
+      .attr("width", CONFIG.WIDTH)
+      .attr("height", CONFIG.HEIGHT)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -293,21 +294,9 @@ export default function BubbleChart({
   return (
     <div
       className={`flex flex-col items-center relative ${
-        showYAxis ? "z-10" : "right-[48px] z-0"
+        showYAxis ? "z-10" : "right-[56px] z-0"
       }`}
     >
-      <div
-        className={`flex items-center text-[15px] text-nowrap absolute left-1/2 -translate-x-[22%]`}
-      >
-        {isBaseline ? (
-          <ModelAIcon className="mr-1" />
-        ) : (
-          <ModelBIcon className="mr-1" />
-        )}
-        <span>
-          {mode} ({id})
-        </span>
-      </div>
       {showYAxis && (
         <span className="absolute top-[42%] left-1 -rotate-90 text-nowrap -mx-7 text-xs">
           Ground Truth
@@ -358,9 +347,29 @@ export default function BubbleChart({
           </div>,
           document.body
         )}
-      <span className="absolute -bottom-0.5 left-[calc(50%+5px)] text-xs">
-        Prediction
-      </span>
+      <div className="flex flex-col items-center absolute -bottom-3.5 translate-x-[calc(50%-12px)] text-xs leading-3">
+        {isBaseline ? (
+          <>
+            <span>
+              <span style={{ color: COLORS.EMERALD }}>Model A </span>
+              Prediction
+            </span>
+            <span style={{ color: COLORS.EMERALD }}>
+              ({modelType}, {baseline})
+            </span>
+          </>
+        ) : (
+          <>
+            <span>
+              <span style={{ color: COLORS.PURPLE }}>Model B </span>
+              Prediction
+            </span>
+            <span style={{ color: COLORS.PURPLE }}>
+              ({modelType}, {comparison})
+            </span>
+          </>
+        )}
+      </div>
     </div>
   );
 }

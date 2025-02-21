@@ -21,7 +21,6 @@ import { hexToRgba } from "../../utils/data/colors";
 import { useForgetClass } from "../../hooks/useForgetClass";
 import { PerformanceMetrics } from "../../types/experiments";
 import { Experiment, Experiments } from "../../types/experiments-context";
-import { BASELINE, COMPARISON } from "../../constants/common";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
 import { ExperimentsContext } from "../../store/experiments-context";
@@ -30,7 +29,13 @@ import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { RunningStatusContext } from "../../store/running-status-context";
 
-const TEMPORARY_ROW_BG_COLOR = "#f0f6fa";
+const CONFIG = {
+  // GREEN: "#157f3b",
+  BLUE: "#265599",
+  TEMPORARY_ROW_BG_COLOR: "#f0f6fa",
+  COLOR_MAPPING_THRESHOLD: 0.75,
+  TEXT_OPACITY_THRESHOLD: 0.5,
+};
 
 interface Props {
   table: TableType<ExperimentData>;
@@ -58,38 +63,84 @@ export default function _TableBody({ table, tableData }: Props) {
     Object.keys(performanceMetrics).forEach((columnId) => {
       if (!performanceMetrics[columnId]) return;
 
-      const experimentData = tableData
+      const columnValues = tableData
         .map((datum) => datum[columnId as keyof Experiment] as number)
         .filter(
           (datum) =>
             datum !== undefined && datum !== null && typeof datum === "number"
         );
 
-      const uniqueValues = Array.from(new Set(experimentData));
-      uniqueValues.sort((a, b) => a - b);
-      const numUniqueValues = uniqueValues.length;
       const valueOpacityMap: { [value: number]: number } = {};
 
-      if (numUniqueValues === 0) {
-        // When all values are '-'
-        uniqueValues.forEach((value) => {
-          valueOpacityMap[value] = 0;
-        });
-      } else if (numUniqueValues === 1) {
-        // When there's only one value in a column
-        valueOpacityMap[uniqueValues[0]] = 1;
-      } else {
-        // When various values exist
-        uniqueValues.forEach((value, index) => {
-          const opacity = index / (numUniqueValues - 1);
-          valueOpacityMap[value] = opacity;
-        });
-      }
+      columnValues.forEach((value) => {
+        let opacity = 0;
+        if (columnId === "UA" || columnId === "TUA") {
+          opacity = 1 - value / 0.3;
+        } else if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
+          opacity =
+            (value - CONFIG.COLOR_MAPPING_THRESHOLD) /
+            (1 - CONFIG.COLOR_MAPPING_THRESHOLD);
+        }
+
+        if (opacity > 1) opacity = 1;
+        if (opacity < 0) opacity = 0;
+
+        valueOpacityMap[value] = opacity;
+      });
+
       mapping[columnId] = valueOpacityMap;
     });
 
     return mapping;
-  }, [tableData, performanceMetrics]);
+  }, [performanceMetrics, tableData]);
+
+  const getCellStyle = (
+    cell: any,
+    isTemporaryRow: boolean
+  ): React.CSSProperties => {
+    const columnId = cell.column.id;
+    const columnWidth = COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
+    let style: React.CSSProperties = { width: `${columnWidth}px` };
+
+    if (columnId in performanceMetrics) {
+      const value = cell.getValue() as "N/A" | number;
+      const borderStyle = "1px solid rgb(229 231 235)";
+      let backgroundColor: string, textColor: string | undefined;
+
+      if (value === "N/A") {
+        backgroundColor = "white";
+      } else {
+        const opacity = opacityMapping[columnId]?.[value] ?? 0;
+        backgroundColor =
+          opacity < 0.1 ? "#f8f8f8" : hexToRgba(CONFIG.BLUE, opacity);
+        textColor =
+          opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
+            ? COLORS.WHITE
+            : COLORS.BLACK;
+      }
+
+      style = {
+        ...style,
+        borderLeft: columnId === "UA" ? borderStyle : "none",
+        borderRight: borderStyle,
+        backgroundColor,
+        color: textColor,
+      };
+    }
+
+    if (columnId === "A") {
+      style.paddingRight = 0;
+      style.paddingLeft = 14;
+    } else if (columnId === "B") {
+      style.paddingLeft = 6;
+    }
+
+    if (isTemporaryRow) {
+      style.backgroundColor = CONFIG.TEMPORARY_ROW_BG_COLOR;
+    }
+
+    return style;
+  };
 
   const handleDeleteRow = async (id: string) => {
     try {
@@ -123,8 +174,8 @@ export default function _TableBody({ table, tableData }: Props) {
           } else {
             const nextBaselineExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.id !== comparison);
-            saveBaseline(nextBaselineExperiment!.id);
+            ).find((experiment) => experiment.ID !== comparison);
+            saveBaseline(nextBaselineExperiment!.ID);
           }
         } else if (id === comparison) {
           if (!baseline.startsWith("000")) {
@@ -134,8 +185,8 @@ export default function _TableBody({ table, tableData }: Props) {
           } else {
             const nextComparisonExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.id !== baseline);
-            saveComparison(nextComparisonExperiment!.id);
+            ).find((experiment) => experiment.ID !== baseline);
+            saveComparison(nextComparisonExperiment!.ID);
           }
         }
       }
@@ -201,52 +252,9 @@ export default function _TableBody({ table, tableData }: Props) {
                     className="!border-b"
                     data-state={row.getIsSelected() && "selected"}
                   >
-                    {row.getVisibleCells().map((cell, cellIdx) => {
+                    {row.getVisibleCells().map((cell) => {
                       const columnId = cell.column.id;
-                      const columnWidth =
-                        COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
-                      const isPerformanceMetric =
-                        columnId in performanceMetrics;
-                      let cellStyle: React.CSSProperties = {
-                        width: `${columnWidth}px`,
-                        minWidth: `${columnWidth}px`,
-                        ...(columnId === BASELINE && { paddingRight: 0 }),
-                        ...(columnId === COMPARISON && { paddingLeft: 0 }),
-                      };
-
-                      if (isPerformanceMetric) {
-                        const { baseColor } = performanceMetrics[columnId];
-                        const value = cell.getValue() as number;
-                        const opacity = opacityMapping[columnId]?.[value] ?? 0;
-                        if (baseColor) {
-                          let color, textColor;
-                          if (tableData.length === 1 && value === 0) {
-                            color = COLORS.WHITE;
-                            textColor = COLORS.BLACK;
-                          } else {
-                            color = hexToRgba(baseColor, opacity);
-                            textColor =
-                              opacity >= 0.8 ? COLORS.WHITE : COLORS.BLACK;
-                          }
-                          cellStyle = {
-                            ...cellStyle,
-                            borderLeft:
-                              columnId === "UA"
-                                ? "1px solid rgb(229 231 235)"
-                                : "none",
-                            borderRight:
-                              cellIdx === row.getVisibleCells().length - 1
-                                ? "none"
-                                : "1px solid rgb(229 231 235)",
-                            backgroundColor: color,
-                            color: textColor,
-                          };
-                        }
-                      }
-
-                      if (isTemporaryRow) {
-                        cellStyle.backgroundColor = TEMPORARY_ROW_BG_COLOR;
-                      }
+                      const cellStyle = getCellStyle(cell, isTemporaryRow);
 
                       const cellContent =
                         isRunningRow && columnId === "id" ? (

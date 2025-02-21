@@ -4,13 +4,16 @@ import HyperparameterInput from "./HyperparameterInput";
 import { Badge } from "../UI/badge";
 import { getDefaultUnlearningConfig } from "../../utils/config/unlearning";
 import { HyperparametersIcon } from "../UI/icons";
-import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
+import { EPOCH, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   method: string;
   epochsList: string[];
   learningRateList: string[];
   batchSizeList: string[];
+  setEpoch: (epoch: string[]) => void;
+  setLearningRate: (lr: string[]) => void;
+  setBatchSize: (bs: string[]) => void;
   onPlusClick: (id: string, value: string) => void;
   onBadgeClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -20,6 +23,9 @@ export default function MethodUnlearning({
   epochsList,
   learningRateList,
   batchSizeList,
+  setEpoch,
+  setLearningRate,
+  setBatchSize,
   onPlusClick,
   onBadgeClick,
   ...props
@@ -27,11 +33,14 @@ export default function MethodUnlearning({
   const [initialValues, setInitialValues] = useState(["10", "0.01", "64"]);
 
   useEffect(() => {
-    const { epochs, learning_rate, batch_size } =
+    const { epoch, learning_rate, batch_size } =
       getDefaultUnlearningConfig(method);
 
-    setInitialValues([epochs, learning_rate, batch_size]);
-  }, [method]);
+    setInitialValues([epoch, learning_rate, batch_size]);
+    setEpoch([epoch]);
+    setLearningRate([learning_rate]);
+    setBatchSize([batch_size]);
+  }, [method, setBatchSize, setEpoch, setLearningRate]);
 
   return (
     <div className="w-full">
@@ -42,7 +51,7 @@ export default function MethodUnlearning({
       <div className="w-full pl-8 grid gap-y-2.5">
         <div className="grid gap-y-2.5">
           <HyperparameterInput
-            title="Epochs"
+            title="Epoch"
             initialValue={initialValues[0]}
             paramList={epochsList}
             onPlusClick={onPlusClick}
@@ -52,7 +61,7 @@ export default function MethodUnlearning({
             <div className="flex gap-x-2">
               {epochsList.map((epoch, idx) => (
                 <Badge
-                  id={EPOCHS}
+                  id={EPOCH}
                   key={idx}
                   onClick={onBadgeClick}
                   className="px-2 py-1 text-xs cursor-pointer bg-[#E2E8F0] hover:bg-[#d1d7ef] text-black"

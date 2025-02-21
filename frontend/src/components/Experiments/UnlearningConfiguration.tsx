@@ -22,7 +22,7 @@ import {
 } from "../../utils/data/running-status-context";
 import {
   UNLEARNING_METHODS,
-  EPOCHS,
+  EPOCH,
   BATCH_SIZE,
   LEARNING_RATE,
 } from "../../constants/experiments";
@@ -39,12 +39,13 @@ import { fetchUnlearningStatus } from "../../utils/api/requests";
 
 const CUSTOM = "custom";
 let initialExperiment: ExperimentData = {
-  id: "",
-  fc: -1,
-  phase: "Unlearned",
-  init: "",
-  method: "",
-  epochs: "N/A",
+  CreatedAt: "",
+  ID: "",
+  FC: -1,
+  Type: "Unlearned",
+  Base: "",
+  Method: "",
+  Epoch: "N/A",
   BS: "N/A",
   LR: "N/A",
   UA: "-",
@@ -158,7 +159,7 @@ export default function UnlearningConfiguration() {
   };
 
   const handlePlusClick = (id: string, value: string) => {
-    if (id === EPOCHS) {
+    if (id === EPOCH) {
       setEpochList((prev) =>
         prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
       );
@@ -176,7 +177,7 @@ export default function UnlearningConfiguration() {
   const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const { id, innerHTML: target } = event.currentTarget;
 
-    if (id === EPOCHS) {
+    if (id === EPOCH) {
       setEpochList((prev) => prev.filter((item) => item !== target));
     } else if (id === LEARNING_RATE) {
       setLearningRateList((prev) => prev.filter((item) => item !== target));
@@ -228,7 +229,7 @@ export default function UnlearningConfiguration() {
           unlearningStatus.recent_id as string
         );
         updateExperiment(newData, experimentIndex);
-        saveComparison(newData.id);
+        saveComparison(newData.ID);
         break;
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -256,10 +257,10 @@ export default function UnlearningConfiguration() {
 
       initialExperiment = {
         ...initialExperiment,
-        id: "-",
-        fc: forgetClassNumber,
-        init: initModel.split(".")[0],
-        method: methodFullName,
+        ID: "-",
+        FC: forgetClassNumber,
+        Base: initModel.split(".")[0],
+        Method: methodFullName,
       };
 
       addExperiment(initialExperiment, 0);
@@ -273,11 +274,11 @@ export default function UnlearningConfiguration() {
           for (const bs of batchSizeList) {
             initialExperiment = {
               ...initialExperiment,
-              id: "-",
-              fc: forgetClassNumber,
-              init: initModel.split(".")[0],
-              method: methodFullName,
-              epochs: Number(epoch),
+              ID: "-",
+              FC: forgetClassNumber,
+              Base: initModel.split(".")[0],
+              Method: methodFullName,
+              Epoch: Number(epoch),
               BS: Number(bs),
               LR: Number(lr),
             };
@@ -320,22 +321,6 @@ export default function UnlearningConfiguration() {
 
     updateIsRunning(false);
   };
-
-  let configurationContent = isCustom ? (
-    <CustomUnlearning
-      fileName={selectedFile ? selectedFile.name : ""}
-      onChange={handleFileChange}
-    />
-  ) : (
-    <MethodUnlearning
-      method={method}
-      epochsList={epochList}
-      learningRateList={learningRateList}
-      batchSizeList={batchSizeList}
-      onPlusClick={handlePlusClick}
-      onBadgeClick={handleBadgeClick}
-    />
-  );
 
   return (
     <form
@@ -392,7 +377,24 @@ export default function UnlearningConfiguration() {
           </SelectContent>
         </Select>
       </div>
-      {configurationContent}
+      {isCustom ? (
+        <CustomUnlearning
+          fileName={selectedFile ? selectedFile.name : ""}
+          onChange={handleFileChange}
+        />
+      ) : (
+        <MethodUnlearning
+          method={method}
+          epochsList={epochList}
+          learningRateList={learningRateList}
+          batchSizeList={batchSizeList}
+          setEpoch={setEpochList}
+          setLearningRate={setLearningRateList}
+          setBatchSize={setBatchSizeList}
+          onPlusClick={handlePlusClick}
+          onBadgeClick={handleBadgeClick}
+        />
+      )}
       {!isCustom && (
         <span
           className={`mb-1 w-full text-center ${

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "../UI/input";
 import { PlusIcon } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
-import { EPOCHS, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
+import { EPOCH, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
 
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "list"> {
@@ -44,7 +44,7 @@ export default function HyperparameterInput({
 
   const processedTitle = title.replace(/\s+/g, "");
   const id = processedTitle.charAt(0).toLowerCase() + processedTitle.slice(1);
-  const isIntegerInput = id === EPOCHS || id === BATCH_SIZE;
+  const isIntegerInput = id === EPOCH || id === BATCH_SIZE;
 
   const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value;
@@ -62,7 +62,7 @@ export default function HyperparameterInput({
     }
 
     switch (id) {
-      case EPOCHS: {
+      case EPOCH: {
         const validValue = Math.max(Number(newValue), CONFIG.EPOCHS_MIN);
         setValue(String(validValue));
         break;

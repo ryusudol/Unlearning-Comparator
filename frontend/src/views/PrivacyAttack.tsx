@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
 
-import View from "../components/View";
 import Indicator from "../components/Indicator";
 import AttackLegend from "../components/PrivacyAttack/AttackLegend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
@@ -19,13 +18,11 @@ export const RETRAIN = "retrain";
 export type Metric = "entropy" | "confidence";
 
 interface Props {
-  height: number;
   baselinePoints: (number | Prob)[][];
   comparisonPoints: (number | Prob)[][];
 }
 
 export default function PrivacyAttack({
-  height,
   baselinePoints,
   comparisonPoints,
 }: Props) {
@@ -75,10 +72,7 @@ export default function PrivacyAttack({
   };
 
   return (
-    <View
-      height={height}
-      className="w-full flex items-center rounded-[6px] px-1.5 rounded-tr-none relative"
-    >
+    <div className="h-[665px] flex items-center border rounded-md px-1.5 rounded-tr-none relative">
       <AttackLegend
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
@@ -126,6 +120,6 @@ export default function PrivacyAttack({
           setUserModified={setUserModified}
         />
       )}
-    </View>
+    </div>
   );
 }

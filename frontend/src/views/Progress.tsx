@@ -2,13 +2,13 @@ import { useState, useEffect, useContext, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
-import Title from "../components/Title";
+import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
 import Timer from "../components/Progress/Timer";
 import Pagination from "../components/Progress/Pagination";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { ViewProps } from "../types/common";
 import { Step } from "../types/progress";
+import { CONFIG } from "../app/App";
 import { RunningStatusContext } from "../store/running-status-context";
 import { RunningIndexContext } from "../store/running-index-context";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
@@ -16,7 +16,7 @@ import { getProgressSteps } from "../utils/data/getProgressSteps";
 export const PREV = "prev";
 export const NEXT = "next";
 
-export default function Progress({ width, height }: ViewProps) {
+export default function Progress() {
   const { isRunning, statuses, activeStep, totalExperimentsCount } =
     useContext(RunningStatusContext);
   const { runningIndex } = useContext(RunningIndexContext);
@@ -95,9 +95,13 @@ export default function Progress({ width, height }: ViewProps) {
   };
 
   return (
-    <View width={width} height={height} className="border-t-0">
+    <View
+      width={CONFIG.PROGRESS_WIDTH}
+      height={CONFIG.EXPERIMENTS_PROGRESS_HEIGHT}
+      className="border-t-0 border-l-0"
+    >
       <div className="flex justify-between">
-        <Title
+        <Subtitle
           title="Progress"
           AdditionalContent={
             (forgetClassExist &&

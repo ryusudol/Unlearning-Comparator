@@ -45,7 +45,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
             }
           : {
               ...state.experiments,
-              [experiment.id]: experimentWithoutPoints,
+              [experiment.ID]: experimentWithoutPoints,
             };
       const result = { ...state, experiments: newExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));
@@ -58,7 +58,7 @@ function ExperimentsReducer(state: Context, action: Action): Context {
         state.experiments;
       const updatedExperiments = {
         ...remainingExperiments,
-        [experiment.id]: experiment,
+        [experiment.ID]: experiment,
       };
       const result = { ...state, experiments: updatedExperiments };
       sessionStorage.setItem(EXPERIMENTS, JSON.stringify(result));

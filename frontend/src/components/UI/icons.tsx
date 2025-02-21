@@ -224,7 +224,6 @@ export const FatMultiplicationSignIcon = (
       fill="currentColor"
       stroke="currentColor"
       strokeWidth="0.5"
-      style={{ filter: "brightness(0.85)" }}
     />
   </svg>
 );
@@ -417,24 +416,9 @@ export const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const ShortArrow = (props: React.SVGProps<SVGSVGElement>) => (
+export const Arrow = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    width="25"
-    height="8"
-    viewBox="0 0 25 8"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
-    <path
-      d="M24.3536 4.35355C24.5488 4.15829 24.5488 3.84171 24.3536 3.64645L21.1716 0.464466C20.9763 0.269204 20.6597 0.269204 20.4645 0.464466C20.2692 0.659728 20.2692 0.976311 20.4645 1.17157L23.2929 4L20.4645 6.82843C20.2692 7.02369 20.2692 7.34027 20.4645 7.53553C20.6597 7.7308 20.9763 7.7308 21.1716 7.53553L24.3536 4.35355ZM0 4.5H24V3.5H0V4.5Z"
-      fill={props.color ?? "#666666"}
-    />
-  </svg>
-);
-
-export const LongArrow = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    width="57"
+    width="38"
     height="8"
     viewBox="0 0 57 8"
     xmlns="http://www.w3.org/2000/svg"
@@ -634,6 +618,37 @@ export const UploadIcon = (props: React.SVGProps<SVGSVGElement>) => (
       clipRule="evenodd"
       d="M3.83576 15.7637C4.38053 15.6729 4.89575 16.0409 4.98655 16.5857L5.20802 17.9145C5.28838 18.3967 5.70557 18.7501 6.19441 18.7501H17.8059C18.2947 18.7501 18.7119 18.3967 18.7923 17.9145L19.0138 16.5857C19.1046 16.0409 19.6198 15.6729 20.1646 15.7637C20.7093 15.8545 21.0773 16.3697 20.9865 16.9145L20.7651 18.2433C20.524 19.6898 19.2724 20.7501 17.8059 20.7501H6.19441C4.72789 20.7501 3.47632 19.6898 3.23523 18.2433L3.01376 16.9145C2.92297 16.3697 3.29099 15.8545 3.83576 15.7637Z"
       fill="currentColor"
+    />
+  </svg>
+);
+
+interface UnfoldMoreIconProps extends React.SVGProps<SVGSVGElement> {
+  sortOrder?: "asc" | "desc" | null;
+}
+export const UnfoldMoreIcon = ({
+  sortOrder,
+  ...props
+}: UnfoldMoreIconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width="16"
+    height="16"
+    color="currentColor"
+    fill="none"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.64084 10.2719C6.73054 10.5601 6.95259 10.75 7.20002 10.75L16.8 10.75C17.0474 10.75 17.2695 10.5601 17.3592 10.2719C17.4489 9.9836 17.3878 9.65609 17.2054 9.44709L12.4054 3.94713C12.1761 3.68429 11.824 3.68429 11.5946 3.94713L6.79459 9.44713C6.61219 9.65613 6.55114 9.98364 6.64084 10.2719Z"
+      fill={sortOrder === "asc" ? "black" : "currentColor"}
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.64084 13.7281C6.73054 13.4399 6.95259 13.25 7.20002 13.25L16.8 13.25C17.0474 13.25 17.2695 13.4399 17.3592 13.7281C17.4489 14.0164 17.3878 14.3439 17.2054 14.5529L12.4054 20.0529C12.1761 20.3157 11.824 20.3157 11.5946 20.0529L6.79459 14.5529C6.61219 14.3439 6.55114 14.0164 6.64084 13.7281Z"
+      fill={sortOrder === "desc" ? "black" : "currentColor"}
     />
   </svg>
 );

@@ -20,7 +20,7 @@ export default function Title({
       id={id}
       onClick={onClick}
       className={
-        "flex items-center gap-1 ml-1 relative bottom-[1px] font-semibold text-[17px] leading-7 " +
+        "flex items-center gap-1 relative bottom-[1px] font-semibold text-xl leading-7 " +
         customClass
       }
     >

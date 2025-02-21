@@ -22,12 +22,12 @@ import {
 import { COLORS } from "../../constants/colors";
 import { getCkaData } from "../../utils/data/getCkaData";
 import { ExperimentsContext } from "../../store/experiments-context";
-import { CircleIcon, MultiplicationSignIcon } from "../UI/icons";
+import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { ChartContainer } from "../UI/chart";
 
 const CONFIG = {
-  DOT_SIZE: 12,
-  CROSS_SIZE: 20,
+  DOT_SIZE: 10,
+  CROSS_SIZE: 12,
   ACTIVE_DOT_STROKE_WIDTH: 3,
   ACTIVE_CROSS_STROKE_WIDTH: 2,
   zIndex: 9999,
@@ -73,25 +73,21 @@ export default function _LineChart({ dataset }: { dataset: string }) {
   const layers = ckaData.map((data) => data.layer);
 
   return (
-    <div className="relative bottom-1.5 right-3.5">
+    <div className="relative">
       <style>{LINE_CHART_TICK_STYLE}</style>
       <CustomLegend />
-      <p className="text-[15px] text-center relative top-1 mb-1.5 ml-12">
-        Per-layer Similarity Before/After Unlearning
-      </p>
       <ChartContainer
-        className="w-[492px] h-[251px]"
+        className="w-[454px] h-[228px] relative"
         config={LINE_CHART_CONFIG}
-        style={{ position: "relative" }}
       >
         <LineChart
           accessibilityLayer
           data={ckaData}
           margin={{
-            top: 7,
-            right: 20,
-            bottom: 34,
-            left: 0,
+            top: 20,
+            right: 7,
+            bottom: 14,
+            left: -14,
           }}
           onMouseMove={(state: any) => {
             if (state?.activePayload) {
@@ -109,17 +105,6 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             angle={-45}
             tick={renderTick}
             ticks={layers}
-            label={{
-              value: "ResNet18 Layers",
-              position: "center",
-              dx: 34,
-              dy: 30,
-              style: {
-                fontSize: 12,
-                textAnchor: "end",
-                fill: COLORS.BLACK,
-              },
-            }}
           />
           <YAxis
             tickLine={false}
@@ -133,13 +118,11 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
             tickMargin={-2}
             label={{
-              value: "CKA Similarity",
+              value: "CKA (Before vs. After Unlearning)",
               angle: -90,
               position: "center",
-              dx: -4,
               style: {
                 fontSize: 12,
-                textAnchor: "middle",
                 fill: COLORS.BLACK,
               },
             }}
@@ -176,7 +159,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
                 animationDuration={ANIMATION_DURATION}
                 dot={({ cx, cy }) =>
                   isForgetLine ? (
-                    <MultiplicationSignIcon
+                    <FatMultiplicationSignIcon
                       x={cx - dotSize / 2}
                       y={cy - dotSize / 2}
                       width={dotSize}
@@ -195,7 +178,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
                 }
                 activeDot={(props: any) =>
                   isForgetLine ? (
-                    <MultiplicationSignIcon
+                    <FatMultiplicationSignIcon
                       x={props.cx - dotSize / 2}
                       y={props.cy - dotSize / 2}
                       width={dotSize}
@@ -236,34 +219,34 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
             style={{ color: COLORS.EMERALD }}
           />
           <p>
-            Base. (Remain):{" "}
+            <span style={{ color: COLORS.EMERALD }}>Model A </span>(Remain):{" "}
             <span className="font-semibold">{payload[1].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
           <CircleIcon className="w-3 h-3 mr-1" color={COLORS.PURPLE} />
           <p>
-            Comp. (Remain):{" "}
+            <span style={{ color: COLORS.PURPLE }}>Model B </span>(Remain):{" "}
             <span className="font-semibold">{payload[3].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
-          <MultiplicationSignIcon
+          <FatMultiplicationSignIcon
             className="w-4 h-4 -ml-0.5 mr-0.5"
             style={{ color: COLORS.EMERALD }}
           />
           <p>
-            Base. (Forget):{" "}
+            <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
             <span className="font-semibold">{payload[0].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
-          <MultiplicationSignIcon
+          <FatMultiplicationSignIcon
             className="w-4 h-4 -ml-0.5 mr-0.5"
             color={COLORS.PURPLE}
           />
           <p>
-            Comp. (Forget):{" "}
+            <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
             <span className="font-semibold">{payload[2].value}</span>
           </p>
         </div>
@@ -274,84 +257,75 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 }
 
 function CustomLegend() {
+  const CIRCLE = "circle";
+  const CROSS = "cross";
+
   return (
-    <div className="absolute top-[130px] left-[72px] text-xs leading-4 z-10">
-      <div className="flex items-center py-0.5">
-        <div className="relative">
-          <CircleIcon
-            className={`mr-2 relative right-[1px]`}
-            style={{
-              color: COLORS.EMERALD,
-              width: CONFIG.DOT_SIZE,
-              height: CONFIG.DOT_SIZE,
-            }}
-          />
-          <div
-            className="absolute top-1/2 w-[18px] h-[1px]"
-            style={{
-              backgroundColor: COLORS.EMERALD,
-              transform: "translate(-4px, -50%)",
-            }}
-          />
-        </div>
-        <span>Baseline (Remain Classes)</span>
-      </div>
-      <div className="flex items-center py-0.5">
-        <div className="relative">
-          <CircleIcon
-            className={`mr-2 relative right-[1px]`}
-            style={{
-              color: COLORS.PURPLE,
-              width: CONFIG.DOT_SIZE,
-              height: CONFIG.DOT_SIZE,
-            }}
-          />
-          <div
-            className="absolute top-1/2 w-[18px]"
-            style={{
-              borderTop: `1px dashed ${COLORS.PURPLE}`,
-              transform: "translate(-4px, -50%)",
-            }}
-          />
-        </div>
-        <span>Comparison (Remain Classes)</span>
-      </div>
-      <div className="flex items-center">
-        <div className="relative">
-          <MultiplicationSignIcon
-            width={CONFIG.CROSS_SIZE}
-            height={CONFIG.CROSS_SIZE}
-            color={COLORS.EMERALD}
-            className="relative right-[5px]"
-          />
-          <div
-            className="absolute top-1/2 w-[18px] h-[1px]"
-            style={{
-              backgroundColor: COLORS.EMERALD,
-              transform: "translate(-4px, -50%)",
-            }}
-          />
-        </div>
-        <span>Baseline (Forget Class)</span>
-      </div>
-      <div className="mb-1 flex items-center">
-        <div className="relative">
-          <MultiplicationSignIcon
-            width={CONFIG.CROSS_SIZE}
-            height={CONFIG.CROSS_SIZE}
-            color={COLORS.PURPLE}
-            className="relative right-[5px]"
-          />
-          <div
-            className="absolute top-1/2 w-[18px]"
-            style={{
-              borderTop: `1px dashed ${COLORS.PURPLE}`,
-              transform: "translate(-4px, -50%)",
-            }}
-          />
-        </div>
-        <span>Comparison (Forget Class)</span>
-      </div>
+    <div className="absolute bottom-[52px] left-[60px] text-xs leading-4 z-10">
+      {[
+        {
+          type: CIRCLE,
+          color: COLORS.EMERALD,
+          label: "Model A",
+          text: "(Remain Classes)",
+          spacing: "py-0.5",
+        },
+        {
+          type: CIRCLE,
+          color: COLORS.PURPLE,
+          label: "Model B",
+          text: "(Remain Classes)",
+          spacing: "py-0.5",
+        },
+        {
+          type: CROSS,
+          color: COLORS.EMERALD,
+          label: "Model A",
+          text: "(Forget Class)",
+          spacing: "py-0.5",
+        },
+        {
+          type: CROSS,
+          color: COLORS.PURPLE,
+          label: "Model B",
+          text: "(Forget Class)",
+          spacing: "py-0.5",
+        },
+      ].map((item, i) => {
+        const Icon =
+          item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
+        return (
+          <div key={i} className={`flex items-center ${item.spacing}`}>
+            <div className="relative">
+              <Icon
+                className={`z-10 ${
+                  item.type === CIRCLE ? "mr-2" : "relative right-[1px]"
+                }`}
+                style={{
+                  color: item.color,
+                  width:
+                    item.type === CIRCLE ? CONFIG.DOT_SIZE : CONFIG.CROSS_SIZE,
+                  height:
+                    item.type === CIRCLE ? CONFIG.DOT_SIZE : CONFIG.CROSS_SIZE,
+                }}
+              />
+              <div
+                className="absolute top-1/2 w-[18px] h-[1px]"
+                style={{
+                  transform: "translate(-4px, -50%)",
+                  ...(i % 2 === 1
+                    ? { borderTop: `1px dashed ${COLORS.PURPLE}` }
+                    : { backgroundColor: item.color }),
+                }}
+              />
+            </div>
+            <span style={i > 1 ? { marginLeft: "6px" } : undefined}>
+              <span style={{ color: item.color }}>{item.label}</span>{" "}
+              {item.text}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -10,7 +10,6 @@ import {
 
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-import { useForgetClass } from "../../hooks/useForgetClass";
 import { useModelSelection } from "../../hooks/useModelSelection";
 import { ExperimentData } from "../../types/data";
 import { ScrollArea } from "../UI/scroll-area";
@@ -19,8 +18,8 @@ import { BaselineComparisonContext } from "../../store/baseline-comparison-conte
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { cn } from "../../utils/util";
 import { columns } from "./Columns";
-
-const TABLE_HEADER_HEIGHT = 35;
+import { COLORS } from "../../constants/colors";
+import { Experiment } from "../../types/experiments-context";
 
 interface Props {
   isExpanded: boolean;
@@ -32,7 +31,6 @@ export default function DataTable({ isExpanded }: Props) {
     BaselineComparisonContext
   );
 
-  const { forgetClass } = useForgetClass();
   const { baseline, comparison } = useModelSelection();
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -40,41 +38,41 @@ export default function DataTable({ isExpanded }: Props) {
   const tableData = useMemo(() => {
     const experimentsArray = Object.values(experiments);
 
-    const pretrainedExp = experimentsArray.find(
-      (exp) => exp.id === `000${forgetClass}`
-    );
-    const retrainedExp = experimentsArray.find(
-      (exp) => exp.id === `a00${forgetClass}`
+    if (experimentsArray.length === 0) return [];
+
+    const temporaryExps: Experiment[] = [];
+    const nonTemporaryExps: Experiment[] = [];
+    experimentsArray.forEach((exp) => {
+      if (exp.ID !== "-") {
+        nonTemporaryExps.push(exp);
+      } else {
+        temporaryExps.push(exp);
+      }
+    });
+    nonTemporaryExps.sort(
+      (a, b) =>
+        new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime()
     );
 
-    if (!pretrainedExp || !retrainedExp) return [];
-
-    const remainingExps = experimentsArray.filter(
-      (exp) => exp.id !== pretrainedExp.id && exp.id !== retrainedExp.id
-    );
-    // running experiments
-    const nonTemporaryExps = remainingExps.filter((exp) => exp.id !== "-");
-    const temporaryExps = remainingExps.filter((exp) => exp.id === "-");
-
-    return [pretrainedExp, retrainedExp, ...nonTemporaryExps, ...temporaryExps];
-  }, [experiments, forgetClass]);
+    return [...nonTemporaryExps, ...temporaryExps];
+  }, [experiments]);
 
   const modifiedColumns = columns.map((column) => {
-    if (column.id !== "a" && column.id !== "b") {
+    if (column.id !== "A" && column.id !== "B") {
       return column;
     }
 
-    const isBaselineColumn = column.id === "a";
-    const currentSelection = isBaselineColumn ? baseline : comparison;
-    const saveFunction = isBaselineColumn ? saveBaseline : saveComparison;
-    const disabledValue = isBaselineColumn ? comparison : baseline;
+    const isModelAColumn = column.id === "A";
+    const currentSelection = isModelAColumn ? baseline : comparison;
+    const saveFunction = isModelAColumn ? saveBaseline : saveComparison;
+    const disabledValue = isModelAColumn ? comparison : baseline;
 
     return {
       ...column,
       cell: ({ row }: CellContext<ExperimentData, unknown>) => {
         const isSelected = currentSelection === row.id;
         return (
-          <RadioGroup className="flex justify-center items-center ml-[0px]">
+          <RadioGroup className="flex justify-center items-center">
             <RadioGroupItem
               value={row.id}
               className={cn(
@@ -84,6 +82,7 @@ export default function DataTable({ isExpanded }: Props) {
               checked={isSelected}
               onClick={() => saveFunction(isSelected ? "" : row.id)}
               disabled={disabledValue === row.id}
+              color={isModelAColumn ? COLORS.EMERALD : COLORS.PURPLE}
             />
           </RadioGroup>
         );
@@ -92,7 +91,7 @@ export default function DataTable({ isExpanded }: Props) {
   });
 
   const table = useReactTable({
-    getRowId: (row: ExperimentData) => row.id,
+    getRowId: (row: ExperimentData) => row.ID,
     data: tableData as ExperimentData[],
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
@@ -104,12 +103,12 @@ export default function DataTable({ isExpanded }: Props) {
 
   useEffect(() => {
     const baselineExists = Object.values(experiments).some(
-      (experiment) => experiment.id === baseline
+      (experiment) => experiment.ID === baseline
     );
     if (!baselineExists) {
       if (tableData.length > 0) {
-        saveBaseline(tableData[0].id);
-        saveComparison(tableData[1].id);
+        saveBaseline(tableData[0].ID);
+        saveComparison(tableData[1].ID);
       } else {
         saveBaseline("");
         saveComparison("");
@@ -125,17 +124,14 @@ export default function DataTable({ isExpanded }: Props) {
   ]);
 
   return (
-    <div className="relative right-1 w-[calc(100%+8px)] overflow-visible">
+    <div className="w-full overflow-visible">
       <TableHeader table={table} />
       {isExpanded ? (
-        <div
-          className="absolute z-[49] bg-white shadow-xl rounded-b-md"
-          style={{ top: TABLE_HEADER_HEIGHT + 1 }}
-        >
+        <div className="w-[1008px] absolute top-[78px] z-[49] bg-white shadow-xl rounded-b-md">
           <TableBody table={table} tableData={tableData} />
         </div>
       ) : (
-        <ScrollArea className="w-full h-[161px]">
+        <ScrollArea className="w-full h-[155px]">
           <TableBody table={table} tableData={tableData} />
         </ScrollArea>
       )}

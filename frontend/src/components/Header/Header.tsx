@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { FileText } from "lucide-react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
-import { LogoIcon, GithubIcon } from "../UI/icons";
+import { GithubIcon } from "../UI/icons";
 import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
@@ -37,8 +37,7 @@ export default function Header() {
       <div>
         <div className="flex items-center relative">
           <div className="flex items-center gap-2 mr-8">
-            <LogoIcon className="scale-75" />
-            <span className="text-2xl font-semibold">
+            <span className="text-[28px] font-semibold">
               Unlearning Comparator
             </span>
           </div>

@@ -6,10 +6,10 @@ import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
 import AddExperimentsButton from "../components/Experiments/AddExperimentsButton";
 import { useForgetClass } from "../hooks/useForgetClass";
-import { ViewProps } from "../types/common";
 import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
+import { CONFIG } from "../app/App";
 
-export default function Experiments({ width, height }: ViewProps) {
+export default function Experiments() {
   const { forgetClassExist } = useForgetClass();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -20,9 +20,9 @@ export default function Experiments({ width, height }: ViewProps) {
 
   return (
     <View
-      width={width}
-      height={height}
-      className="border-t-0 border-l-0 overflow-visible"
+      width={CONFIG.EXPERIMENTS_WIDTH}
+      height={CONFIG.EXPERIMENTS_PROGRESS_HEIGHT}
+      className="border-0 border-b overflow-visible"
     >
       <div className="flex justify-between items-center mb-[3px]">
         <div className="grid grid-flow-col grid-x-2 items-center">
