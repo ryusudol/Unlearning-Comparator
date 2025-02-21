@@ -94,23 +94,27 @@ export default function Embeddings({
       <EmbeddingsLegend />
       <ConnectionLineWrapper positionRef={positionRef} />
       <InformationButton />
-      <ScatterPlot
-        mode="Baseline"
-        modelType={baselineExperiment!.Type}
-        data={baselinePoints}
-        onHover={handleHover}
-        hoveredInstance={hoveredInstanceRef.current}
-        ref={baselineRef}
-      />
+      {baselineExperiment && (
+        <ScatterPlot
+          mode="Baseline"
+          modelType={baselineExperiment.Type}
+          data={baselinePoints}
+          onHover={handleHover}
+          hoveredInstance={hoveredInstanceRef.current}
+          ref={baselineRef}
+        />
+      )}
       <Separator orientation="vertical" className="h-[641px] w-[1px] mx-1" />
-      <ScatterPlot
-        mode="Comparison"
-        modelType={comparisonExperiment!.Type}
-        data={comparisonPoints}
-        onHover={handleHover}
-        hoveredInstance={hoveredInstanceRef.current}
-        ref={comparisonRef}
-      />
+      {comparisonExperiment && (
+        <ScatterPlot
+          mode="Comparison"
+          modelType={comparisonExperiment.Type}
+          data={comparisonPoints}
+          onHover={handleHover}
+          hoveredInstance={hoveredInstanceRef.current}
+          ref={comparisonRef}
+        />
+      )}
     </div>
   );
 }

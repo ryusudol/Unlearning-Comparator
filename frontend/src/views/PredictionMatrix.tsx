@@ -36,23 +36,27 @@ export default function PredictionMatrix() {
           <div className="flex flex-col pt-2 pb-6 border rounded-md">
             <BubbleChartLegend />
             <div className="flex items-center relative left-2">
-              <BubbleChart
-                mode="Baseline"
-                modelType={baselineExperiment!.Type}
-                datasetMode={datasetMode}
-                hoveredY={hoveredY}
-                onHover={(y) => setHoveredY(y)}
-                onHoverEnd={() => setHoveredY(null)}
-              />
-              <BubbleChart
-                mode="Comparison"
-                modelType={comparisonExperiment!.Type}
-                datasetMode={datasetMode}
-                showYAxis={false}
-                hoveredY={hoveredY}
-                onHover={(y) => setHoveredY(y)}
-                onHoverEnd={() => setHoveredY(null)}
-              />
+              {baselineExperiment && (
+                <BubbleChart
+                  mode="Baseline"
+                  modelType={baselineExperiment.Type}
+                  datasetMode={datasetMode}
+                  hoveredY={hoveredY}
+                  onHover={(y) => setHoveredY(y)}
+                  onHoverEnd={() => setHoveredY(null)}
+                />
+              )}
+              {comparisonExperiment && (
+                <BubbleChart
+                  mode="Comparison"
+                  modelType={comparisonExperiment.Type}
+                  datasetMode={datasetMode}
+                  showYAxis={false}
+                  hoveredY={hoveredY}
+                  onHover={(y) => setHoveredY(y)}
+                  onHoverEnd={() => setHoveredY(null)}
+                />
+              )}
             </div>
           </div>
         )
