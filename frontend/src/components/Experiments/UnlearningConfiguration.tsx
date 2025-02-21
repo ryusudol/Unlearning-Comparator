@@ -22,7 +22,7 @@ import {
 } from "../../utils/data/running-status-context";
 import {
   UNLEARNING_METHODS,
-  EPOCHS,
+  EPOCH,
   BATCH_SIZE,
   LEARNING_RATE,
 } from "../../constants/experiments";
@@ -159,7 +159,7 @@ export default function UnlearningConfiguration() {
   };
 
   const handlePlusClick = (id: string, value: string) => {
-    if (id === EPOCHS) {
+    if (id === EPOCH) {
       setEpochList((prev) =>
         prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
       );
@@ -177,7 +177,7 @@ export default function UnlearningConfiguration() {
   const handleBadgeClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const { id, innerHTML: target } = event.currentTarget;
 
-    if (id === EPOCHS) {
+    if (id === EPOCH) {
       setEpochList((prev) => prev.filter((item) => item !== target));
     } else if (id === LEARNING_RATE) {
       setLearningRateList((prev) => prev.filter((item) => item !== target));
@@ -322,22 +322,6 @@ export default function UnlearningConfiguration() {
     updateIsRunning(false);
   };
 
-  let configurationContent = isCustom ? (
-    <CustomUnlearning
-      fileName={selectedFile ? selectedFile.name : ""}
-      onChange={handleFileChange}
-    />
-  ) : (
-    <MethodUnlearning
-      method={method}
-      epochsList={epochList}
-      learningRateList={learningRateList}
-      batchSizeList={batchSizeList}
-      onPlusClick={handlePlusClick}
-      onBadgeClick={handleBadgeClick}
-    />
-  );
-
   return (
     <form
       className="w-full h-full flex flex-col items-start justify-between"
@@ -393,7 +377,24 @@ export default function UnlearningConfiguration() {
           </SelectContent>
         </Select>
       </div>
-      {configurationContent}
+      {isCustom ? (
+        <CustomUnlearning
+          fileName={selectedFile ? selectedFile.name : ""}
+          onChange={handleFileChange}
+        />
+      ) : (
+        <MethodUnlearning
+          method={method}
+          epochsList={epochList}
+          learningRateList={learningRateList}
+          batchSizeList={batchSizeList}
+          setEpoch={setEpochList}
+          setLearningRate={setLearningRateList}
+          setBatchSize={setBatchSizeList}
+          onPlusClick={handlePlusClick}
+          onBadgeClick={handleBadgeClick}
+        />
+      )}
       {!isCustom && (
         <span
           className={`mb-1 w-full text-center ${
