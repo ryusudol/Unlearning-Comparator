@@ -1,9 +1,8 @@
-import { useContext } from "react";
 import { FileText } from "lucide-react";
 
 import ForgetClassTabs from "./ForgetClassTabs";
 import { GithubIcon } from "../UI/icons";
-import { DatasetAndModelContext } from "../../stores/dataset-and-model-context";
+import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
   Select,
@@ -15,7 +14,7 @@ import {
 
 export default function Header() {
   const { dataset, saveDataset, neuralNetworkModel, saveNeuralNetworkModel } =
-    useContext(DatasetAndModelContext);
+    useBaseConfigStore();
 
   const handleGithubIconClick = () => {
     window.open(

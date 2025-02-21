@@ -6,7 +6,6 @@ import App from "./app/App";
 import RunningStatusContextProvider from "./stores/running-status-context";
 import ForgetClassContextProvider from "./stores/forget-class-context";
 import ExperimentsContextProvider from "./stores/experiments-context";
-import DatasetAndModelContextProvider from "./stores/dataset-and-model-context";
 import RunningIndexContextProvider from "./stores/running-index-context";
 
 const root = ReactDOM.createRoot(
@@ -17,11 +16,9 @@ root.render(
     <RunningStatusContextProvider>
       <ForgetClassContextProvider>
         <ExperimentsContextProvider>
-          <DatasetAndModelContextProvider>
-            <RunningIndexContextProvider>
-              <App />
-            </RunningIndexContextProvider>
-          </DatasetAndModelContextProvider>
+          <RunningIndexContextProvider>
+            <App />
+          </RunningIndexContextProvider>
         </ExperimentsContextProvider>
       </ForgetClassContextProvider>
     </RunningStatusContextProvider>

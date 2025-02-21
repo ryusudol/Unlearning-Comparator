@@ -21,7 +21,7 @@ import {
   DATASETS,
   NEURAL_NETWORK_MODELS,
 } from "../../constants/common";
-import { DatasetAndModelContext } from "../../stores/dataset-and-model-context";
+import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import { ForgetClassContext } from "../../stores/forget-class-context";
 import { Label } from "../UI/label";
 import { PlusIcon } from "../UI/icons";
@@ -42,9 +42,7 @@ export default function ForgetClassTabPlusButton({
 }: Props) {
   const { addSelectedForgetClass, saveForgetClass, selectedForgetClasses } =
     useContext(ForgetClassContext);
-  const { saveDataset, saveNeuralNetworkModel } = useContext(
-    DatasetAndModelContext
-  );
+  const { saveDataset, saveNeuralNetworkModel } = useBaseConfigStore();
 
   const unselectForgetClasses = useMemo(
     () =>
