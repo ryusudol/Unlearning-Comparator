@@ -22,8 +22,10 @@ const CONFIG = {
   PATTERN_SIZE: 3,
   LEGEND_X: 11,
   LEGEND_Y: 7,
-  LEGEND_X_OFFSET: 113,
-  LEGEND_GAP: 55,
+  LEGEND_ORIGINAL_X_OFFSET: 99,
+  LEGEND_RETRAINED_X_OFFSET: 106,
+  LEGEND_UNLEARNED_X_OFFSET: 108,
+  LEGEND_GAP: 58,
   LEGEND_FONT_SIZE: "10px",
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
@@ -32,8 +34,8 @@ const CONFIG = {
 } as const;
 
 interface Props {
-  width: number;
-  height: number;
+  baseline: string;
+  comparison: string;
   imageUrl: string;
   data: (number | Prob)[];
   barChartData: {
@@ -42,26 +44,28 @@ interface Props {
   };
   forgetClass: number;
   isBaseline: boolean;
+  modelAType: string;
+  modelBType: string;
 }
 
 export default React.memo(function Tooltip({
-  width,
-  height,
+  baseline,
+  comparison,
   imageUrl,
   data,
   barChartData,
   forgetClass,
   isBaseline,
+  modelAType,
+  modelBType,
 }: Props) {
   const svgRef = useRef(null);
 
   const legendRectColor = d3.schemeTableau10[9];
-
   const groundTruthIdx = Number(data[0]);
   const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-
   const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
   const baselinePrediction = CIFAR_10_CLASSES[predictionIdx];
   const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
@@ -125,12 +129,18 @@ export default React.memo(function Tooltip({
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH);
 
+    const baselineXOffset =
+      modelBType === "Original"
+        ? CONFIG.LEGEND_ORIGINAL_X_OFFSET
+        : modelBType === "Retrained"
+        ? CONFIG.LEGEND_RETRAINED_X_OFFSET
+        : CONFIG.LEGEND_UNLEARNED_X_OFFSET;
     const basleineLegend = svg
       .append("g")
       .attr("class", "legend")
       .attr(
         "transform",
-        `translate(${width - CONFIG.MARGIN.right - CONFIG.LEGEND_X_OFFSET}, 1)`
+        `translate(${width - CONFIG.MARGIN.right - baselineXOffset}, 1)`
       );
 
     basleineLegend
@@ -144,7 +154,8 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text("Baseline")
+      .text(modelAType)
+      .style("fill", COLORS.EMERALD)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -169,7 +180,8 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text("Comparison")
+      .text(modelBType)
+      .style("fill", COLORS.PURPLE)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -322,11 +334,19 @@ export default React.memo(function Tooltip({
         const classIndex = CIFAR_10_CLASSES.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
-  }, [barChartData, forgetClass, isBaseline, legendRectColor]);
+  }, [
+    barChartData.baseline,
+    barChartData.comparison,
+    forgetClass,
+    isBaseline,
+    legendRectColor,
+    modelAType,
+    modelBType,
+  ]);
 
   return (
     <div
-      style={{ width, height }}
+      style={{ width: 450, height: 274 }}
       className="flex justify-center items-center z-100"
     >
       <div className="text-sm">
@@ -346,12 +366,16 @@ export default React.memo(function Tooltip({
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
               <ModelAIcon className="mr-1" />
-              <span className="mr-0.5">Baseline:</span>
+              <span style={{ color: COLORS.EMERALD }} className="mr-0.5">
+                {modelAType} ({baseline}):
+              </span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
               <ModelBIcon className="mr-1" />
-              <span className="mr-0.5">Comparison:</span>
+              <span style={{ color: COLORS.PURPLE }} className="mr-0.5">
+                {modelBType} ({comparison}):
+              </span>
               <span className="font-semibold">{comparisonPrediction}</span>
             </p>
           </div>

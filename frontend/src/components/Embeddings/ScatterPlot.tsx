@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useCallback,
   useReducer,
+  useContext,
 } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
@@ -28,6 +29,7 @@ import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
+import { ExperimentsContext } from "../../store/experiments-context";
 
 /**
  * 0 -> ground thruth
@@ -70,6 +72,9 @@ const ScatterPlot = forwardRef(
   ({ mode, modelType, data, onHover, hoveredInstance }: Props, ref) => {
     const { forgetClass, forgetClassNumber } = useForgetClass();
     const { baseline, comparison } = useModelSelection();
+
+    const { baselineExperiment, comparisonExperiment } =
+      useContext(ExperimentsContext);
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
@@ -352,17 +357,22 @@ const ScatterPlot = forwardRef(
                 })),
               };
 
-          const tooltipContent = (
-            <Tooltip
-              width={CONFIG.TOOLTIP_X_SIZE}
-              height={CONFIG.TOOLTIP_Y_SIZE}
-              imageUrl={imageUrl}
-              data={d}
-              barChartData={barChartData}
-              forgetClass={forgetClassNumber}
-              isBaseline={isBaseline}
-            />
-          );
+          const tooltipContent =
+            !baselineExperiment || !comparisonExperiment ? (
+              <></>
+            ) : (
+              <Tooltip
+                baseline={baseline}
+                comparison={comparison}
+                imageUrl={imageUrl}
+                data={d}
+                barChartData={barChartData}
+                forgetClass={forgetClassNumber}
+                isBaseline={isBaseline}
+                modelAType={baselineExperiment?.Type}
+                modelBType={comparisonExperiment?.Type}
+              />
+            );
 
           showTooltip(event, tooltipContent);
 
@@ -374,7 +384,16 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [forgetClassNumber, isBaseline, mode, onHover]
+      [
+        baseline,
+        baselineExperiment,
+        comparison,
+        comparisonExperiment,
+        forgetClassNumber,
+        isBaseline,
+        mode,
+        onHover,
+      ]
     );
 
     const handleMouseEnter = useCallback(
