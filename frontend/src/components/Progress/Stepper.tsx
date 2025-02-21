@@ -24,7 +24,7 @@ const _Stepper = memo(function _Stepper({
   isRunning: boolean;
 }) {
   return (
-    <Stepper className="mx-auto mt-0.5 flex w-full flex-col justify-start gap-1.5">
+    <Stepper className="mt-0.5 flex flex-col justify-start gap-1.5">
       {steps.map((step, idx) => {
         const isNotLastStep = idx !== steps.length - 1;
 
@@ -40,7 +40,7 @@ const _Stepper = memo(function _Stepper({
         return (
           <StepperItem
             key={idx}
-            className="relative flex w-full items-start gap-2"
+            className="relative flex w-full items-start gap-1.5"
           >
             {isNotLastStep && (
               <StepperSeparator className="absolute left-[15px] top-6 block h-[calc(100%)] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary">
