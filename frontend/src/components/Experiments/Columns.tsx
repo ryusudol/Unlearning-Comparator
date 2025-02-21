@@ -60,16 +60,19 @@ export const columns: ColumnDef<ExperimentData>[] = [
     accessorKey: "Type",
     header: "Type",
     cell: ({ row }) => {
-      const method = row.getValue("Method") as string;
-      const phase = row.getValue("Type") as string;
-      const value =
-        method === "Retrain"
-          ? "Retrained"
-          : phase === "Training"
-          ? "Pretrained"
-          : phase;
-      const { color, backgroundColor } = getPhaseColors(value, 1, 0.15);
-      return <Badge style={{ backgroundColor, color }}>{value}</Badge>;
+      const value = row.getValue("Type") as string;
+      const { color, backgroundColor } = getPhaseColors(value);
+      return (
+        <Badge
+          style={{
+            backgroundColor,
+            color,
+            borderColor: value === "Original" ? "#222222" : undefined,
+          }}
+        >
+          {value}
+        </Badge>
+      );
     },
   },
   {
