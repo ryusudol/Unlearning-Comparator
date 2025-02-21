@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type ModelData = {
+type Models = {
   modelA: string;
   modelB: string;
 };
@@ -11,7 +11,7 @@ type Actions = {
   saveModelB: (modelB: string) => void;
 };
 
-export const useModelDataStore = create<ModelData & Actions>()(
+export const useModelDataStore = create<Models & Actions>()(
   persist(
     (set) => ({
       modelA: "",
@@ -20,7 +20,7 @@ export const useModelDataStore = create<ModelData & Actions>()(
       saveModelB: (modelB) => set({ modelB }),
     }),
     {
-      name: "model-data",
+      name: "models",
       storage: {
         getItem: (key) => {
           const value = sessionStorage.getItem(key);
