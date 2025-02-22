@@ -8,22 +8,22 @@ export default function EmbeddingsLegend() {
   const { forgetClass } = useForgetClassStore();
 
   return (
-    <div className="flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
+    <div className="h-9 flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-9 -right-[1px] text-sm z-10">
       <div className="flex items-center mr-4">
-        <span className="font-medium mr-2.5">Data Type</span>
+        <span className="font-medium mr-2.5">True Class</span>
         <ul className="flex items-center gap-[9.2px]">
           <li className="flex items-center">
-            <CircleIcon className="w-[9px] h-[9px] text-[#4f5562] mr-[3px]" />
-            <span>Remain</span>
+            <CircleIcon className="w-[9px] h-[9px] mr-[3px]" />
+            <span>Retain</span>
           </li>
           <li className="flex items-center">
-            <FatMultiplicationSignIcon className="text-[#4f5562] mr-[3px]" />
+            <FatMultiplicationSignIcon className="mr-[3px]" />
             <span>Forget</span>
           </li>
         </ul>
       </div>
       <div className="flex items-center">
-        <span className="font-medium mr-2.5">Prediction</span>
+        <span className="font-medium mr-2.5">Predicted Class</span>
         <ul className="flex items-center gap-2">
           {CIFAR_10_CLASSES.map((name, idx) => (
             <li key={idx} className="flex items-center">
