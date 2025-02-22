@@ -5,10 +5,6 @@ import {
   LINE_GRAPH_LEGEND_DATA,
   THRESHOLD_STRATEGIES,
 } from "../../constants/privacyAttack";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
 import { COLORS } from "../../constants/colors";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { AttackResult } from "../../types/data";
@@ -39,7 +35,7 @@ const CONFIG = {
   OPACITY_BELOW_THRESHOLD: 0.3,
   BUTTERFLY_CHART_X_AXIS_TICK_STEP: 10,
   BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING: 12,
-  BUTTERFLY_CHART_LEGEND_TEXT_GAP: 3,
+  BUTTERFLY_CHART_LEGEND_TEXT_GAP: 4,
   BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 10,
   BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-6, 6],
   BUTTERFLY_CHART_WIDTH: 460,
@@ -85,8 +81,6 @@ export default function ButterflyPlot({
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
-  const modelAExperiment = useModelAExperiment();
-  const modelBExperiment = useModelBExperiment();
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -357,13 +351,37 @@ export default function ButterflyPlot({
       xAxisB
         .append("text")
         .attr("class", "x-axis-label-b")
-        .attr("x", 1.5)
+        .attr("x", -45.5)
         .attr("y", 15)
         .attr("font-size", CONFIG.LABEL_FONT_SIZE)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
-        .text("← Retrain Samples | Unlearn Samples →");
+        .text("← Retrain Samples | ");
+
+      xAxisB
+        .append("text")
+        .attr("class", "x-axis-label-b")
+        .attr("x", -38.5)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", isBaseline ? COLORS.EMERALD : COLORS.PURPLE)
+        .attr("text-anchor", "middle")
+        .attr("dx", "5.2em")
+        .text(`${isBaseline ? "Model A" : "Model B"}`);
+
+      xAxisB
+        .append("text")
+        .attr("class", "x-axis-label-b")
+        .attr("x", -30)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", CONFIG.BLACK)
+        .attr("text-anchor", "middle")
+        .attr("dx", "8.5em")
+        .text(" Samples →");
       xAxisB
         .selectAll(".tick")
         .append("line")
@@ -413,7 +431,7 @@ export default function ButterflyPlot({
       // create a legend for butterfly charts
       const butterflyLegendData = [
         {
-          label: "From Retrain / Pred. Unlearn",
+          label: `From Retrain / Pred. ${isBaseline ? "Model A" : "Model B"}`,
           side: "left",
           color: COLORS.DARK_GRAY,
         },
@@ -423,12 +441,14 @@ export default function ButterflyPlot({
           color: "#D4D4D4",
         },
         {
-          label: "From Unlearn / Pred. Unlearn",
+          label: `From ${isBaseline ? "Model A" : "Model B"} / Pred. ${
+            isBaseline ? "Model A" : "Model B"
+          }`,
           side: "right",
           color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE,
         },
         {
-          label: "From Unlearn / Pred. Retrain",
+          label: `From ${isBaseline ? "Model A" : "Model B"} / Pred. Retrain`,
           side: "right",
           color: isBaseline ? "#C8EADB" : "#E6D0FD",
         },
@@ -437,13 +457,13 @@ export default function ButterflyPlot({
       const butterflyLegendGroup = gB
         .append("g")
         .attr("class", "butterfly-legend-group")
-        .attr("transform", "translate(-5, 12)");
+        .attr("transform", "translate(-6.5, 12)");
 
       butterflyLegendGroup
         .insert("rect", ":first-child")
-        .attr("x", -130)
+        .attr("x", -129)
         .attr("y", -16)
-        .attr("width", 270)
+        .attr("width", 272)
         .attr("height", 31)
         .attr("fill", "white")
         .attr("opacity", 0.6)
@@ -1386,8 +1406,7 @@ export default function ButterflyPlot({
         </span>
         <span className="mx-1.5">vs</span>
         <span style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}>
-          {isBaseline ? modelAExperiment.Type : modelBExperiment.Type} Model (
-          {isBaseline ? modelA : modelB})
+          {isBaseline ? "Model A" : "Model B"} ({isBaseline ? modelA : modelB})
         </span>
       </div>
       <div className="flex">
