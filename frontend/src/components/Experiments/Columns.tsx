@@ -16,7 +16,7 @@ import MethodFilterHeader from "./MethodFilterHeader";
 import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import { Badge } from "../UI/badge";
 import { ExperimentData } from "../../types/data";
-import { getPhaseColors } from "../../utils/data/colors";
+import { getTypeColors } from "../../utils/data/colors";
 import { COLORS } from "../../constants/colors";
 
 function getValueToDisplay(value: unknown) {
@@ -61,18 +61,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
     header: "Type",
     cell: ({ row }) => {
       const value = row.getValue("Type") as string;
-      const { color, backgroundColor } = getPhaseColors(value);
-      return (
-        <Badge
-          style={{
-            backgroundColor,
-            color,
-            borderColor: value === "Original" ? "#222222" : undefined,
-          }}
-        >
-          {value}
-        </Badge>
-      );
+      const { color, backgroundColor } = getTypeColors(value);
+      return <Badge style={{ backgroundColor, color }}>{value}</Badge>;
     },
   },
   {

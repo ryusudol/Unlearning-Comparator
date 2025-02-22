@@ -1,3 +1,5 @@
+import { COLORS } from "../../constants/colors";
+
 export function hexToRgba(hex: string, opacity: number) {
   const bigint = parseInt(hex.slice(1), 16);
   const r = (bigint >> 16) & 255;
@@ -7,12 +9,12 @@ export function hexToRgba(hex: string, opacity: number) {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
-export function getPhaseColors(type: string) {
+export function getTypeColors(type: string) {
   let backgroundColor;
   if (type === "Original") {
-    backgroundColor = "#FDFDFD";
+    backgroundColor = "#f2f2f2";
   } else if (type === "Retrained") {
-    backgroundColor = "#505050";
+    backgroundColor = COLORS.DARK_GRAY;
   } else if (type === "Unlearned") {
     backgroundColor = "#FF8C00";
   }
