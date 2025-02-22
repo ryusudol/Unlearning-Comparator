@@ -33,7 +33,7 @@ export default function Header() {
   };
 
   return (
-    <div className="w-[1805px] text-white bg-black h-12 flex justify-between items-center px-4 relative">
+    <div className="w-[1805px] text-white bg-black h-[52px] flex justify-between items-center px-4 relative">
       <div>
         <div className="flex items-center relative">
           <div className="flex items-center gap-2 mr-8">
@@ -41,7 +41,7 @@ export default function Header() {
               Unlearning Comparator
             </span>
           </div>
-          <div className="w-[140px] flex gap-4 relative top-[5px] text-[13px] mr-5">
+          <div className="w-[140px] flex gap-4 relative top-2 text-[13px] mr-5">
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-300">Dataset</span>
               <Select

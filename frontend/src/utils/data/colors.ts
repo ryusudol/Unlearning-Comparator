@@ -7,21 +7,15 @@ export function hexToRgba(hex: string, opacity: number) {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
-export function getPhaseColors(
-  type: string,
-  colorOpacity: number,
-  backgroundColorOpacity: number
-) {
-  let color, backgroundColor;
-  if (type === "Unlearned") {
-    color = `rgba(255, 140, 0, ${colorOpacity})`;
-    backgroundColor = `rgba(255, 140, 0, ${backgroundColorOpacity})`;
-  } else if (type === "Original") {
-    color = `#dd151a`;
-    backgroundColor = `rgba(255, 0, 0, 0.25)`;
-  } else {
-    color = `rgba(80,80,80, ${colorOpacity})`;
-    backgroundColor = `rgba(80,80,80, ${backgroundColorOpacity})`;
+export function getPhaseColors(type: string) {
+  let backgroundColor;
+  if (type === "Original") {
+    backgroundColor = "#FDFDFD";
+  } else if (type === "Retrained") {
+    backgroundColor = "#505050";
+  } else if (type === "Unlearned") {
+    backgroundColor = "#FF8C00";
   }
+  const color = type === "Original" ? "#222222" : "#FFFFFF";
   return { color, backgroundColor };
 }
