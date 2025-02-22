@@ -123,13 +123,6 @@ export default function _TableBody({ table, tableData }: Props) {
       };
     }
 
-    if (columnId === "A") {
-      style.paddingRight = 0;
-      style.paddingLeft = 14;
-    } else if (columnId === "B") {
-      style.paddingLeft = 6;
-    }
-
     if (isTemporaryRow) {
       style.backgroundColor = CONFIG.TEMPORARY_ROW_BG_COLOR;
     }

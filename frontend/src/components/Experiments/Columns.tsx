@@ -8,12 +8,10 @@ import {
   RAHeader,
   TUAHeader,
   TRAHeader,
-  PAHeader,
   RTEHeader,
   FQSHeader,
 } from "./ColumnHeaders";
 import MethodFilterHeader from "./MethodFilterHeader";
-import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import { Badge } from "../UI/badge";
 import { ExperimentData } from "../../types/data";
 import { getTypeColors } from "../../utils/data/colors";
@@ -29,22 +27,21 @@ function getValueToDisplay(value: unknown) {
 
 const DECIMAL_POINT = 3;
 export const COLUMN_WIDTHS = {
-  ID: 32,
-  Type: 79,
-  Base: 38,
+  ID: 35,
+  Type: 78,
+  Base: 40,
   Method: 90,
-  Epoch: 64,
+  Epoch: 60,
   BS: 44,
   LR: 60,
   UA: 60,
   RA: 60,
   TUA: 60,
   TRA: 60,
-  PA: 60,
   RTE: 60,
   FQS: 60,
-  A: 42,
-  B: 42,
+  A: 46,
+  B: 46,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
@@ -168,19 +165,6 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    accessorKey: "PA",
-    header: ({ column }) => <PAHeader column={column} />,
-    cell: ({ row }) => {
-      const pa = row.getValue("PA");
-      const value = getValueToDisplay(pa);
-      return (
-        <div className="text-center">
-          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
-        </div>
-      );
-    },
-  },
-  {
     accessorKey: "RTE",
     header: ({ column }) => <RTEHeader column={column} />,
     cell: ({ row }) => {
@@ -204,20 +188,10 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     id: "A",
-    header: () => (
-      <div className="w-full flex items-center justify-center">
-        <ModelAIcon className="mr-1" />
-        <span style={{ color: COLORS.EMERALD }}>A</span>
-      </div>
-    ),
+    header: () => <span style={{ color: COLORS.EMERALD }}>Model A</span>,
   },
   {
     id: "B",
-    header: () => (
-      <div className="w-full flex items-center justify-center">
-        <ModelBIcon className="mr-1" />
-        <span style={{ color: COLORS.PURPLE }}>B</span>
-      </div>
-    ),
+    header: () => <span style={{ color: COLORS.PURPLE }}>Model B</span>,
   },
 ];

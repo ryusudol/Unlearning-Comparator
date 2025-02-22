@@ -23,10 +23,6 @@ export default function _TableHeader({ table }: Props) {
                   style={{
                     width: `${columnWidth}px`,
                     minWidth: `${columnWidth}px`,
-                    ...(header.column.id === "A" && { paddingRight: 0 }),
-                    ...(header.column.id === "B" && {
-                      paddingLeft: 0,
-                    }),
                   }}
                 >
                   {header.isPlaceholder
