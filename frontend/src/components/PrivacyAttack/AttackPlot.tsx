@@ -1,12 +1,15 @@
 import { useRef, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 
-import { NeuralNetworkIcon, ModelAIcon, ModelBIcon } from "../UI/icons";
-import { COLORS } from "../../constants/colors";
 import {
   LINE_GRAPH_LEGEND_DATA,
   THRESHOLD_STRATEGIES,
 } from "../../constants/privacyAttack";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
+import { COLORS } from "../../constants/colors";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { AttackResult } from "../../types/data";
 import { useModelDataStore } from "../../stores/modelDataStore";
@@ -79,8 +82,11 @@ export default function ButterflyPlot({
   setHoveredId,
   onElementClick,
 }: Props) {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -1375,21 +1381,14 @@ export default function ButterflyPlot({
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center text-[15px]">
-        <div className="flex items-center">
-          <NeuralNetworkIcon color={COLORS.DARK_GRAY} className="mr-1" />
-          <span>Retrain (a00{forgetClass})</span>
-        </div>
+        <span style={{ color: COLORS.DARK_GRAY }} className="font-medium">
+          Retrained Model (a00{forgetClass})
+        </span>
         <span className="mx-1.5">vs</span>
-        <div className="flex items-center">
-          {isBaseline ? (
-            <ModelAIcon className="mr-1" />
-          ) : (
-            <ModelBIcon className="mr-1" />
-          )}
-          <span>
-            {mode} ({isBaseline ? modelA : modelB})
-          </span>
-        </div>
+        <span style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}>
+          {isBaseline ? modelAExperiment.Type : modelBExperiment.Type} Model (
+          {isBaseline ? modelA : modelB})
+        </span>
       </div>
       <div className="flex">
         <svg ref={butterflyRef}></svg>

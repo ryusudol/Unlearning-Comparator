@@ -1,12 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import { NeuralNetworkIcon, ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
 
@@ -41,7 +45,6 @@ interface Props {
     baseline: { class: number; value: number }[];
     comparison: { class: number; value: number }[];
   };
-  forgetClass: number;
   isBaseline: boolean;
 }
 
@@ -51,14 +54,17 @@ export default React.memo(function Tooltip({
   imageUrl,
   data,
   barChartData,
-  forgetClass,
   isBaseline,
 }: Props) {
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
+
   const svgRef = useRef(null);
 
   const legendRectColor = d3.schemeTableau10[9];
 
-  const groundTruthIdx = Number(data[2]);
+  const groundTruthIdx = Number(data[0]);
   const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
@@ -344,24 +350,24 @@ export default React.memo(function Tooltip({
         />
         <div>
           <div className="mt-1">
-            <span>Ground Truth:</span>{" "}
+            <span>True Class:</span>{" "}
             <span className="font-semibold">{groundTruth}</span>
           </div>
           <div className="flex flex-col">
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
-              <NeuralNetworkIcon color={COLORS.DARK_GRAY} className="mr-1" />
-              <span className="mr-0.5">Retrain:</span>
+              <span style={{ color: COLORS.DARK_GRAY }} className="mr-0.5">
+                Retrained Model:
+              </span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
-              {isBaseline ? (
-                <ModelAIcon className="mr-1" />
-              ) : (
-                <ModelBIcon className="mr-1" />
-              )}
-              <span className="mr-0.5">
-                {isBaseline ? "Baseline" : "Comparison"}:
+              <span
+                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                className="mr-0.5"
+              >
+                {isBaseline ? modelAExperiment.Type : modelBExperiment.Type}{" "}
+                Model:
               </span>
               <span className="font-semibold">{comparisonPrediction}</span>
             </p>

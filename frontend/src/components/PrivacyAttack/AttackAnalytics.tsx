@@ -73,7 +73,7 @@ export default function AttackAnalytics({
   setThresholdStrategy,
   setUserModified,
 }: Props) {
-  const { forgetClass } = useForgetClassStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -232,7 +232,6 @@ export default function AttackAnalytics({
             imageUrl={imageUrl}
             data={unlearnPoint}
             barChartData={barChartData}
-            forgetClass={forgetClass}
             isBaseline={isBaseline}
           />
         );
@@ -246,7 +245,7 @@ export default function AttackAnalytics({
         console.error(`Failed to fetch tooltip data: ${error}`);
       }
     },
-    [forgetClass, isBaseline, retrainPoints, unlearnPoints]
+    [isBaseline, retrainPoints, unlearnPoints]
   );
 
   useEffect(() => {
