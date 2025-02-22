@@ -39,7 +39,7 @@ export default function ForgetClassTabs() {
   };
 
   return (
-    <div className="flex items-center gap-1 relative -bottom-2.5">
+    <div className="flex items-center gap-1 relative -bottom-[11px]">
       <ForgetClassTab
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
