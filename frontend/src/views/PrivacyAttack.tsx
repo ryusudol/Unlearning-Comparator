@@ -36,8 +36,10 @@ export default function PrivacyAttack({
   const [strategyCount, setStrategyClick] = useState(0);
   const [retrainData, setRetrainData] = useState<ExperimentData>();
 
-  const isModelAOriginal = modelA.startsWith("000");
-  const isModelBOriginal = modelB.startsWith("000");
+  const isModelAUnlearned =
+    !modelA.startsWith("000") && !modelA.startsWith("a00");
+  const isModelBUnlearned =
+    !modelB.startsWith("000") && !modelB.startsWith("a00");
 
   useEffect(() => {
     async function loadRetrainData() {
@@ -77,9 +79,7 @@ export default function PrivacyAttack({
       />
       {!retrainData ? (
         <Indicator text="Failed to fetch retrain data" />
-      ) : isModelAOriginal ? (
-        <Indicator text="Please select unlearned models to compare attack results" />
-      ) : (
+      ) : isModelAUnlearned ? (
         <AttackAnalytics
           mode="Baseline"
           metric={metric}
@@ -93,6 +93,8 @@ export default function PrivacyAttack({
           setThresholdStrategy={setThresholdStrategy}
           setUserModified={setUserModified}
         />
+      ) : (
+        <Indicator text="Please select an unlearned model to compare the attack results" />
       )}
       <Separator
         orientation="vertical"
@@ -100,9 +102,7 @@ export default function PrivacyAttack({
       />
       {!retrainData ? (
         <Indicator text="Failed to fetch retrain data" />
-      ) : isModelBOriginal ? (
-        <Indicator text="Please select unlearned models to compare attack results" />
-      ) : (
+      ) : isModelBUnlearned ? (
         <AttackAnalytics
           mode="Comparison"
           metric={metric}
@@ -116,6 +116,8 @@ export default function PrivacyAttack({
           setThresholdStrategy={setThresholdStrategy}
           setUserModified={setUserModified}
         />
+      ) : (
+        <Indicator text="Please select an unlearned model to compare the attack results" />
       )}
     </div>
   );
