@@ -1,30 +1,32 @@
-import { useMemo, useContext, useState } from "react";
+import { useMemo, useState } from "react";
 
 import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
 import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
-import { useForgetClass } from "../hooks/useForgetClass";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../stores/experimentsStore";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { useModelDataStore } from "../stores/modelDataStore";
-import { ExperimentsContext } from "../stores/experiments-context";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
 export default function ClassWiseAnalysis() {
-  const { forgetClassExist } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
-
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
   const accuracyData = useMemo(() => {
     const trainAccuracyGap = getAccuracyGap(
-      baselineExperiment?.accs,
-      comparisonExperiment?.accs
+      modelAExperiment?.accs,
+      modelBExperiment?.accs
     );
     const testAccuracyGap = getAccuracyGap(
-      baselineExperiment?.t_accs,
-      comparisonExperiment?.t_accs
+      modelAExperiment?.t_accs,
+      modelBExperiment?.t_accs
     );
     const trainMaxGap = getMaxGap(trainAccuracyGap);
     const testMaxGap = getMaxGap(testAccuracyGap);
@@ -35,12 +37,12 @@ export default function ClassWiseAnalysis() {
       testAccuracyGap,
       maxGap,
     };
-  }, [baselineExperiment, comparisonExperiment]);
+  }, [modelAExperiment, modelBExperiment]);
 
   return (
     <div className="mb-2">
       <Subtitle title="Class-wise Accuracy" />
-      {forgetClassExist ? (
+      {forgetClass !== undefined ? (
         modelA !== "" && modelB !== "" ? (
           <div className="flex items-center py-1 relative border rounded-md">
             <VerticalBarChart

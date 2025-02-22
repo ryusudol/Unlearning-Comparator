@@ -27,10 +27,10 @@ import {
   LEARNING_RATE,
 } from "../../constants/experiments";
 import { Label } from "../UI/label";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../stores/running-status-context";
-import { ExperimentsContext } from "../../stores/experiments-context";
+import { useExperimentsStore } from "../../stores/experimentsStore";
 import { RunningIndexContext } from "../../stores/running-index-context";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { ExperimentData } from "../../types/data";
@@ -91,15 +91,15 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
-  const { forgetClassNumber } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { saveModelB } = useModelDataStore();
+  const { addExperiment, updateExperiment } = useExperimentsStore();
 
   const { updateRunningIndex } = useContext(RunningIndexContext);
-  const { addExperiment, updateExperiment } = useContext(ExperimentsContext);
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useContext(RunningStatusContext);
 
-  const [initModel, setInitialModel] = useState(`000${forgetClassNumber}`);
+  const [initModel, setInitialModel] = useState(`000${forgetClass}`);
   const [weightNames, setWeightNames] = useState<string[]>([]);
   const [method, setMethod] = useState("ft");
   const [epochList, setEpochList] = useState<string[]>([]);
@@ -118,14 +118,14 @@ export default function UnlearningConfiguration() {
   useEffect(() => {
     async function fetchWeights() {
       try {
-        const names = await fetchAllWeightNames(forgetClassNumber);
+        const names = await fetchAllWeightNames(forgetClass);
         setWeightNames(names);
       } catch (error) {
         console.error("Failed to fetch all weights names: ", error);
       }
     }
     fetchWeights();
-  }, [forgetClassNumber]);
+  }, [forgetClass]);
 
   useEffect(() => {
     if (
@@ -206,7 +206,7 @@ export default function UnlearningConfiguration() {
       updateRunningIndex(experimentIndex);
       updateStatus({
         status: unlearningStatus,
-        forgetClass: forgetClassNumber,
+        forgetClass,
         experimentIndex,
         progress,
         elapsedTime: Math.round(((Date.now() - startTime) / 1000) * 10) / 10,
@@ -225,7 +225,7 @@ export default function UnlearningConfiguration() {
         updateActiveStep(0);
 
         const newData = await fetchFileData(
-          forgetClassNumber,
+          forgetClass,
           unlearningStatus.recent_id as string
         );
         updateExperiment(newData, experimentIndex);
@@ -240,7 +240,7 @@ export default function UnlearningConfiguration() {
     e.preventDefault();
 
     updateIsRunning(true);
-    initStatus(forgetClassNumber, totalExperimentsCount);
+    initStatus(forgetClass, totalExperimentsCount);
     updateActiveStep(1);
 
     const methodFullName =
@@ -258,14 +258,14 @@ export default function UnlearningConfiguration() {
       initialExperiment = {
         ...initialExperiment,
         ID: "-",
-        FC: forgetClassNumber,
+        FC: forgetClass,
         Base: initModel.split(".")[0],
         Method: methodFullName,
       };
 
       addExperiment(initialExperiment, 0);
 
-      await executeCustomUnlearning(selectedFile, forgetClassNumber);
+      await executeCustomUnlearning(selectedFile, forgetClass);
       await pollStatus(0);
     } else {
       const combinations: Combination[] = [];
@@ -275,7 +275,7 @@ export default function UnlearningConfiguration() {
             initialExperiment = {
               ...initialExperiment,
               ID: "-",
-              FC: forgetClassNumber,
+              FC: forgetClass,
               Base: initModel.split(".")[0],
               Method: methodFullName,
               Epoch: Number(epoch),
@@ -299,7 +299,7 @@ export default function UnlearningConfiguration() {
 
         const runningConfig: UnlearningConfigurationData = {
           method,
-          forget_class: forgetClassNumber,
+          forget_class: forgetClass,
           epochs: combination.epochs,
           learning_rate: combination.learning_rate,
           batch_size: combination.batch_size,

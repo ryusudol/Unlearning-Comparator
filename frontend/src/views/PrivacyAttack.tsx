@@ -7,7 +7,7 @@ import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
 import { useModelDataStore } from "../stores/modelDataStore";
 import { fetchFileData } from "../utils/api/unlearning";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ExperimentData } from "../types/data";
 
 export const ENTROPY = "entropy";
@@ -26,7 +26,7 @@ export default function PrivacyAttack({
   baselinePoints,
   comparisonPoints,
 }: Props) {
-  const { forgetClassNumber } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
 
   const [metric, setMetric] = useState<Metric>(ENTROPY);
@@ -41,18 +41,16 @@ export default function PrivacyAttack({
 
   useEffect(() => {
     async function loadRetrainData() {
+      if (forgetClass === -1) return;
       try {
-        const data = await fetchFileData(
-          forgetClassNumber,
-          `a00${forgetClassNumber}`
-        );
+        const data = await fetchFileData(forgetClass, `a00${forgetClass}`);
         setRetrainData(data);
       } catch (error) {
         console.error(`Failed to fetch an retrained data file: ${error}`);
       }
     }
     loadRetrainData();
-  }, [forgetClassNumber]);
+  }, [forgetClass]);
 
   const handleMetricChange = (metric: Metric) => {
     setMetric(metric);

@@ -1,13 +1,11 @@
-import React from "react";
-
 import { Separator } from "../UI/separator";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { CIFAR_10_CLASSES } from "../../constants/common";
 import { TABLEAU10 } from "../../constants/colors";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 
 export default function EmbeddingsLegend() {
-  const { forgetClass } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
 
   return (
     <div className="flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">

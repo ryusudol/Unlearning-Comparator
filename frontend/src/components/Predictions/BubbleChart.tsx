@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
@@ -7,10 +7,13 @@ import {
   STROKE_CONFIG,
   FONT_CONFIG,
 } from "../../constants/common";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
-import { ExperimentsContext } from "../../stores/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 
@@ -45,11 +48,10 @@ export default function BubbleChart({
   onHoverEnd,
   showYAxis = true,
 }: Props) {
-  const { forgetClass } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
-
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const [tooltip, setTooltip] = useState({
     display: false,
@@ -68,7 +70,7 @@ export default function BubbleChart({
 
   const zoom = calculateZoom();
   const isBaseline = mode === "Baseline";
-  const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
+  const experiment = isBaseline ? modelAExperiment : modelBExperiment;
 
   const handleMouseOut = useCallback(
     (event: MouseEvent) => {

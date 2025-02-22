@@ -1,4 +1,4 @@
-import { useContext, useState, memo, useCallback } from "react";
+import { useState, memo, useCallback } from "react";
 import {
   CartesianGrid,
   Line,
@@ -21,7 +21,10 @@ import {
 } from "../../constants/common";
 import { COLORS } from "../../constants/colors";
 import { getCkaData } from "../../utils/data/getCkaData";
-import { ExperimentsContext } from "../../stores/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { ChartContainer } from "../UI/chart";
 
@@ -57,8 +60,8 @@ type TickProps = {
 };
 
 export default function _LineChart({ dataset }: { dataset: string }) {
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const [hoveredLayer, setHoveredLayer] = useState<string | null>(null);
 
@@ -67,9 +70,9 @@ export default function _LineChart({ dataset }: { dataset: string }) {
     [hoveredLayer]
   );
 
-  if (!baselineExperiment || !comparisonExperiment) return null;
+  if (!modelAExperiment || !modelBExperiment) return null;
 
-  const ckaData = getCkaData(dataset, baselineExperiment, comparisonExperiment);
+  const ckaData = getCkaData(dataset, modelAExperiment, modelBExperiment);
   const layers = ckaData.map((data) => data.layer);
 
   return (

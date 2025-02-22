@@ -1,10 +1,10 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import Header from "../components/Header/Header";
 import ModelScreening from "../views/ModelScreening";
 import Core from "../views/Core";
 import QuantitativeAnalysis from "../views/QuantitativeAnalysis";
-import { ExperimentsContext } from "../stores/experiments-context";
+import { useExperimentsStore } from "../stores/experimentsStore";
 import { calculateZoom } from "../utils/util";
 
 export const CONFIG = {
@@ -26,7 +26,7 @@ export const CONFIG = {
 } as const;
 
 export default function App() {
-  const { isExperimentLoading } = useContext(ExperimentsContext);
+  const { isExperimentLoading } = useExperimentsStore();
 
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [zoom, setZoom] = useState(1);

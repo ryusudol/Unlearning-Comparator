@@ -5,16 +5,17 @@ import Indicator from "../components/Indicator";
 import LineChart from "../components/Correlations/LineChart";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import { useModelDataStore } from "../stores/modelDataStore";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { TRAIN } from "../constants/common";
 
 export default function LayerWiseSimilarity() {
-  const { forgetClassExist } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
 
   const [dataset, setDataset] = useState(TRAIN);
 
   const areAllModelsSelected = modelA !== "" && modelB !== "";
+  const forgetClassExist = forgetClass !== -1;
 
   return (
     <>

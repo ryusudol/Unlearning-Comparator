@@ -7,7 +7,6 @@ import React, {
   useMemo,
   useCallback,
   useReducer,
-  useContext,
 } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
@@ -23,13 +22,16 @@ import {
   ViewModeType,
   SvgElementsRefType,
 } from "../../types/embeddings";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
-import { ExperimentsContext } from "../../stores/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 
 /**
  * 0 -> ground thruth
@@ -70,11 +72,10 @@ interface Props {
 
 const ScatterPlot = forwardRef(
   ({ mode, modelType, data, onHover, hoveredInstance }: Props, ref) => {
-    const { forgetClass, forgetClassNumber } = useForgetClass();
+    const { forgetClass } = useForgetClassStore();
     const { modelA, modelB } = useModelDataStore();
-
-    const { baselineExperiment, comparisonExperiment } =
-      useContext(ExperimentsContext);
+    const modelAExperiment = useModelAExperiment();
+    const modelBExperiment = useModelBExperiment();
 
     const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
@@ -358,7 +359,7 @@ const ScatterPlot = forwardRef(
               };
 
           const tooltipContent =
-            !baselineExperiment || !comparisonExperiment ? (
+            !modelAExperiment || !modelBExperiment ? (
               <></>
             ) : (
               <Tooltip
@@ -367,10 +368,10 @@ const ScatterPlot = forwardRef(
                 imageUrl={imageUrl}
                 data={d}
                 barChartData={barChartData}
-                forgetClass={forgetClassNumber}
+                forgetClass={forgetClass}
                 isBaseline={isBaseline}
-                modelAType={baselineExperiment?.Type}
-                modelBType={comparisonExperiment?.Type}
+                modelAType={modelAExperiment?.Type}
+                modelBType={modelBExperiment?.Type}
               />
             );
 
@@ -385,13 +386,13 @@ const ScatterPlot = forwardRef(
         }
       },
       [
-        baselineExperiment,
-        comparisonExperiment,
-        forgetClassNumber,
+        forgetClass,
         isBaseline,
         mode,
         modelA,
+        modelAExperiment,
         modelB,
+        modelBExperiment,
         onHover,
       ]
     );

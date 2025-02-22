@@ -7,7 +7,7 @@ import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../app/App";
 import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { useModelDataStore } from "../stores/modelDataStore";
 import { Point } from "../types/data";
 
@@ -15,7 +15,7 @@ const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 
 export default function Core() {
-  const { forgetClassExist, forgetClassNumber } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
@@ -23,6 +23,7 @@ export default function Core() {
   const [comparisonPoints, setComparisonPoints] = useState<Point[]>([]);
 
   const isEmbeddingMode = displayMode === EMBEDDINGS;
+  const forgetClassExist = forgetClass !== -1;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -38,13 +39,13 @@ export default function Core() {
     async function loadBaselineData() {
       if (!forgetClassExist) return;
 
-      const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
+      const ids: string[] = await fetchAllWeightNames(forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
       if (!modelA || !slicedIds.includes(modelA)) return;
 
       try {
-        const data = await fetchFileData(forgetClassNumber, modelA);
+        const data = await fetchFileData(forgetClass, modelA);
         setBaselinePoints(data.points);
       } catch (error) {
         console.error(`Failed to fetch an unlearned data file: ${error}`);
@@ -52,19 +53,19 @@ export default function Core() {
       }
     }
     loadBaselineData();
-  }, [modelA, forgetClassExist, forgetClassNumber]);
+  }, [forgetClass, forgetClassExist, modelA]);
 
   useEffect(() => {
     async function loadComparisonData() {
       if (!forgetClassExist) return;
 
-      const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
+      const ids: string[] = await fetchAllWeightNames(forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
       if (!modelB || !slicedIds.includes(modelB)) return;
 
       try {
-        const data = await fetchFileData(forgetClassNumber, modelB);
+        const data = await fetchFileData(forgetClass, modelB);
         setComparisonPoints(data.points);
       } catch (error) {
         console.error(`Error fetching comparison file data: ${error}`);
@@ -72,7 +73,7 @@ export default function Core() {
       }
     }
     loadComparisonData();
-  }, [modelB, forgetClassExist, forgetClassNumber]);
+  }, [forgetClass, forgetClassExist, modelB]);
 
   const content = forgetClassExist ? (
     isEmbeddingMode ? (

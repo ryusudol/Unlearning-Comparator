@@ -18,11 +18,11 @@ import { COLUMN_WIDTHS } from "./Columns";
 import { COLORS } from "../../constants/colors";
 import { ExperimentData } from "../../types/data";
 import { hexToRgba } from "../../utils/data/colors";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { PerformanceMetrics } from "../../types/experiments";
-import { Experiment, Experiments } from "../../types/experiments-context";
+import { Experiment, Experiments } from "../../types/data";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
-import { ExperimentsContext } from "../../stores/experiments-context";
+import { useExperimentsStore } from "../../stores/experimentsStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { RunningStatusContext } from "../../stores/running-status-context";
@@ -42,12 +42,12 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
-  const { forgetClass, forgetClassNumber } = useForgetClass();
+  const { experiments, saveExperiments, setIsExperimentsLoading } =
+    useExperimentsStore();
 
   const { isRunning } = useContext(RunningStatusContext);
-  const { experiments, saveExperiments, setIsExperimentsLoading } =
-    useContext(ExperimentsContext);
 
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
@@ -140,10 +140,10 @@ export default function _TableBody({ table, tableData }: Props) {
 
   const handleDeleteRow = async (id: string) => {
     try {
-      await deleteRow(forgetClassNumber, id);
+      await deleteRow(forgetClass, id);
       setIsExperimentsLoading(true);
       const allExperiments: Experiments = await fetchAllExperimentsData(
-        forgetClassNumber
+        forgetClass
       );
       if ("detail" in allExperiments) {
         saveExperiments({});
@@ -195,7 +195,7 @@ export default function _TableBody({ table, tableData }: Props) {
 
   const handleDownloadJSON = async (id: string) => {
     try {
-      const json = await downloadJSON(forgetClassNumber, id);
+      const json = await downloadJSON(forgetClass, id);
       const jsonString = JSON.stringify(json, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -213,7 +213,7 @@ export default function _TableBody({ table, tableData }: Props) {
 
   const handleDownloadPTH = async (id: string) => {
     try {
-      await downloadPTH(forgetClassNumber, id);
+      await downloadPTH(forgetClass, id);
     } catch (error) {
       console.error("Failed to download the PTH file:", error);
     }

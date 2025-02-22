@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   SortingState,
   getCoreRowModel,
@@ -12,13 +12,13 @@ import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
 import { ExperimentData } from "../../types/data";
 import { ScrollArea } from "../UI/scroll-area";
-import { ExperimentsContext } from "../../stores/experiments-context";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { cn } from "../../utils/util";
 import { columns } from "./Columns";
 import { COLORS } from "../../constants/colors";
-import { Experiment } from "../../types/experiments-context";
+import { Experiment } from "../../types/data";
 import { useModelDataStore } from "../../stores/modelDataStore";
+import { useExperimentsStore } from "../../stores/experimentsStore";
 
 interface Props {
   isExpanded: boolean;
@@ -26,8 +26,7 @@ interface Props {
 
 export default function DataTable({ isExpanded }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
-
-  const { experiments } = useContext(ExperimentsContext);
+  const { experiments } = useExperimentsStore();
 
   const [sorting, setSorting] = useState<SortingState>([]);
 

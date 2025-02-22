@@ -1,27 +1,30 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 
 import Subtitle from "../components/Subtitle";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { useModelDataStore } from "../stores/modelDataStore";
 import { Arrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
 import { bubbleColorScale } from "../constants/colors";
-import { ExperimentsContext } from "../stores/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../stores/experimentsStore";
 
 export default function PredictionMatrix() {
-  const { forgetClassExist } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
-
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const [datasetMode, setDatasetMode] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
 
   const areAllModelsSelected = modelA !== "" && modelB !== "";
+  const forgetClassExist = forgetClass !== -1;
 
   return (
     <div className="mb-2">
@@ -38,20 +41,20 @@ export default function PredictionMatrix() {
           <div className="flex flex-col pt-2 pb-6 border rounded-md">
             <BubbleChartLegend />
             <div className="flex items-center relative left-2">
-              {baselineExperiment && (
+              {modelAExperiment && (
                 <BubbleChart
                   mode="Baseline"
-                  modelType={baselineExperiment.Type}
+                  modelType={modelAExperiment.Type}
                   datasetMode={datasetMode}
                   hoveredY={hoveredY}
                   onHover={(y) => setHoveredY(y)}
                   onHoverEnd={() => setHoveredY(null)}
                 />
               )}
-              {comparisonExperiment && (
+              {modelBExperiment && (
                 <BubbleChart
                   mode="Comparison"
-                  modelType={comparisonExperiment.Type}
+                  modelType={modelBExperiment.Type}
                   datasetMode={datasetMode}
                   showYAxis={false}
                   hoveredY={hoveredY}

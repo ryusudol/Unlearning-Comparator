@@ -6,7 +6,7 @@ import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
 import Timer from "../components/Progress/Timer";
 import Pagination from "../components/Progress/Pagination";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { Step } from "../types/progress";
 import { CONFIG } from "../app/App";
 import { RunningStatusContext } from "../stores/running-status-context";
@@ -21,11 +21,14 @@ export default function Progress() {
     useContext(RunningStatusContext);
   const { runningIndex } = useContext(RunningIndexContext);
 
-  const { forgetClassNumber, forgetClassExist } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(runningIndex + 1);
+
+  const displayedPageIdx = currentPage - 1;
+  const forgetClassExist = forgetClass !== -1;
 
   useEffect(() => {
     if (isRunning) {
@@ -37,11 +40,9 @@ export default function Progress() {
     setCurrentPage(runningIndex + 1);
   }, [runningIndex]);
 
-  const displayedPageIdx = currentPage - 1;
-
   const currentStatus =
-    forgetClassExist && statuses[forgetClassNumber].length > displayedPageIdx
-      ? statuses[forgetClassNumber][displayedPageIdx]
+    forgetClassExist && statuses[forgetClass].length > displayedPageIdx
+      ? statuses[forgetClass][displayedPageIdx]
       : null;
 
   const progress = currentStatus ? currentStatus.progress : "";
@@ -115,13 +116,12 @@ export default function Progress() {
             undefined
           }
         />
-        {totalExperimentsCount > 0 &&
-          statuses[forgetClassNumber].length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              onClick={handlePaginationClick}
-            />
-          )}
+        {totalExperimentsCount > 0 && statuses[forgetClass].length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            onClick={handlePaginationClick}
+          />
+        )}
       </div>
       {forgetClassExist ? (
         <Stepper

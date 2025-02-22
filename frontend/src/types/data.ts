@@ -78,3 +78,7 @@ export type ExperimentData = {
   points: Point[];
   attack: AttackData;
 };
+
+export type Experiment = Omit<ExperimentData, "points">;
+
+export type Experiments = { [key: string]: Experiment };

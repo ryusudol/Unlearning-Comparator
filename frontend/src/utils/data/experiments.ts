@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 
 import { Dist } from "../../types/data";
-import { Experiment, Experiments } from "../../types/experiments-context";
+import { Experiment, Experiments } from "../../types/data";
 import { TRAIN } from "../../constants/common";
 
 const metrics = ["UA", "TUA", "RA", "TRA", "PA", "RTE", "FQS"] as const;

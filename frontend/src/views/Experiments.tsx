@@ -5,14 +5,16 @@ import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
 import AddExperimentsButton from "../components/Experiments/AddExperimentsButton";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
 import { CONFIG } from "../app/App";
 
 export default function Experiments() {
-  const { forgetClassExist } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const forgetClassExist = forgetClass !== -1;
 
   const handleExpandClick = () => {
     setIsExpanded((prevState) => !prevState);

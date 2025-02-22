@@ -7,7 +7,7 @@ import {
   LINE_GRAPH_LEGEND_DATA,
   THRESHOLD_STRATEGIES,
 } from "../../constants/privacyAttack";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { AttackResult } from "../../types/data";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
@@ -79,7 +79,7 @@ export default function ButterflyPlot({
   setHoveredId,
   onElementClick,
 }: Props) {
-  const { forgetClassNumber } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB } = useModelDataStore();
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
@@ -1377,7 +1377,7 @@ export default function ButterflyPlot({
       <div className="flex items-center text-[15px]">
         <div className="flex items-center">
           <NeuralNetworkIcon color={COLORS.DARK_GRAY} className="mr-1" />
-          <span>Retrain (a00{forgetClassNumber})</span>
+          <span>Retrain (a00{forgetClass})</span>
         </div>
         <span className="mx-1.5">vs</span>
         <div className="flex items-center">

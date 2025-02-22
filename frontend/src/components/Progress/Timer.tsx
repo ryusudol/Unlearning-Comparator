@@ -3,14 +3,14 @@ import { Clock } from "lucide-react";
 
 import { RunningStatusContext } from "../../stores/running-status-context";
 import { RunningIndexContext } from "../../stores/running-index-context";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { Separator } from "../../components/UI/separator";
 
 export default function Timer() {
+  const { forgetClass } = useForgetClassStore();
+
   const { runningIndex } = useContext(RunningIndexContext);
   const { statuses, isRunning } = useContext(RunningStatusContext);
-
-  const { forgetClassNumber } = useForgetClass();
 
   const [runningTime, setRunningTime] = useState(0);
 
@@ -44,9 +44,7 @@ export default function Timer() {
           <span className="text-sm">
             {isRunning
               ? runningTime.toFixed(1)
-              : statuses[forgetClassNumber][runningIndex].elapsed_time.toFixed(
-                  1
-                )}
+              : statuses[forgetClass][runningIndex].elapsed_time.toFixed(1)}
             s
           </span>
         </div>
