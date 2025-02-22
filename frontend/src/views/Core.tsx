@@ -100,7 +100,7 @@ export default function Core() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1 mb-0.5 ml-1 relative right-1">
           <Title
-            title="Embedding"
+            title="Embedding Space"
             id={EMBEDDINGS}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               !isEmbeddingMode && "text-gray-400 border-none"
@@ -109,7 +109,7 @@ export default function Core() {
             onClick={handleDisplayModeChange}
           />
           <Title
-            title="Privacy Attack"
+            title="Attack Simulation"
             id={ATTACK}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               isEmbeddingMode && "text-gray-400 border-none"
