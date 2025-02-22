@@ -24,12 +24,20 @@ import { useModelDataStore } from "../../stores/modelDataStore";
 import { COLORS } from "../../constants/colors";
 import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
 import { ChartContainer } from "../UI/chart";
-import { GapDataItem } from "../../types/accuracies";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
   BAR_HEIGHT: 12,
 } as const;
+
+export interface GapDataItem {
+  category: string;
+  classLabel: string;
+  gap: number;
+  fill: string;
+  baselineAccuracy: number;
+  comparisonAccuracy: number;
+}
 
 interface Props {
   mode: "Training" | "Test";

@@ -14,7 +14,6 @@ import {
   useModelBExperiment,
 } from "../../stores/experimentsStore";
 import { AttackResult, AttackResults, AttackData } from "../../types/data";
-import { Image } from "../../types/privacy-attack";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
 
@@ -23,19 +22,29 @@ const CONFIG = {
   TOOLTIP_HEIGHT: 274,
 } as const;
 
-export type Bin = { img_idx: number; value: number };
+export interface Bin {
+  img_idx: number;
+  value: number;
+}
 export type Data = {
   retrainData: Bin[];
   unlearnData: Bin[];
   lineChartData: AttackResult[];
 } | null;
 export type CategoryType = "unlearn" | "retrain";
-export type TooltipData = {
+export interface Image {
+  index: number;
+  base64: string;
+}
+export interface TooltipData {
   img_idx: number;
   value: number;
   type: CategoryType;
-};
-export type TooltipPosition = { x: number; y: number };
+}
+export interface TooltipPosition {
+  x: number;
+  y: number;
+}
 
 interface Props {
   mode: "Baseline" | "Comparison";

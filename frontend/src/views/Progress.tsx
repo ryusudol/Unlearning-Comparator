@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
@@ -7,19 +7,24 @@ import Indicator from "../components/Indicator";
 import Timer from "../components/Progress/Timer";
 import Pagination from "../components/Progress/Pagination";
 import { useForgetClassStore } from "../stores/forgetClassStore";
-import { Step } from "../types/progress";
 import { CONFIG } from "../app/App";
-import { RunningStatusContext } from "../stores/running-status-context";
 import { useRunningIndexStore } from "../stores/runningIndexStore";
+import { useRunningStatusStore } from "../stores/runningStatusStore";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
+
+export type Step = {
+  step: number;
+  title: string;
+  description: string;
+};
 
 export const PREV = "prev";
 export const NEXT = "next";
 
 export default function Progress() {
-  const { isRunning, statuses, activeStep, totalExperimentsCount } =
-    useContext(RunningStatusContext);
   const { runningIndex } = useRunningIndexStore();
+  const { isRunning, statuses, activeStep, totalExperimentsCount } =
+    useRunningStatusStore();
 
   const { forgetClass } = useForgetClassStore();
 

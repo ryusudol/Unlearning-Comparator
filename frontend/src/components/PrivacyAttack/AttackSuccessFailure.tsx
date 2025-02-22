@@ -5,8 +5,7 @@ import { ScrollArea } from "../UI/scroll-area";
 import { UNLEARN, RETRAIN } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
 import { Data } from "./AttackAnalytics";
-import { Image } from "../../types/privacy-attack";
-import { Bin, CategoryType } from "./AttackAnalytics";
+import { Bin, CategoryType, Image } from "./AttackAnalytics";
 
 const CONFIG = {
   RETRAIN: "retrain",

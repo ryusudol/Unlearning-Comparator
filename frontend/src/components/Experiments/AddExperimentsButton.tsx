@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import {
   Dialog,
@@ -10,10 +10,10 @@ import {
 import UnlearningConfiguration from "./UnlearningConfiguration";
 import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../stores/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 
 export default function AddExperimentsButton() {
-  const { isRunning } = useContext(RunningStatusContext);
+  const { isRunning } = useRunningStatusStore();
 
   const [open, setOpen] = useState(false);
 

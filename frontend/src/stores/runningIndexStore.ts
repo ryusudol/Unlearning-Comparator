@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { RunningIndex } from "../types/running-index-context";
+
+type RunningIndex = {
+  runningIndex: number;
+};
 
 type Actions = {
   updateRunningIndex: (runningIndex: number) => void;

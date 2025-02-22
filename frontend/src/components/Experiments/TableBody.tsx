@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from "react";
+import React, { useMemo } from "react";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 
@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableRow } from "../UI/table";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
-import { RunningStatusContext } from "../../stores/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CONFIG = {
@@ -42,12 +42,11 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
-  const { forgetClass } = useForgetClassStore();
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
+  const { forgetClass } = useForgetClassStore();
+  const { isRunning } = useRunningStatusStore();
   const { experiments, saveExperiments, setIsExperimentsLoading } =
     useExperimentsStore();
-
-  const { isRunning } = useContext(RunningStatusContext);
 
   const performanceMetrics = calculatePerformanceMetrics(
     experiments

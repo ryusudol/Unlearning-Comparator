@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import CustomUnlearning from "./CustomUnlearning";
 import MethodUnlearning from "./MethodUnlearning";
@@ -29,7 +29,7 @@ import {
 import { Label } from "../UI/label";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../stores/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useRunningIndexStore } from "../../stores/runningIndexStore";
 import { UnlearningConfigurationData } from "../../types/experiments";
@@ -91,13 +91,12 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
-  const { forgetClass } = useForgetClassStore();
   const { saveModelB } = useModelDataStore();
-  const { addExperiment, updateExperiment } = useExperimentsStore();
+  const { forgetClass } = useForgetClassStore();
   const { updateRunningIndex } = useRunningIndexStore();
-
+  const { addExperiment, updateExperiment } = useExperimentsStore();
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
-    useContext(RunningStatusContext);
+    useRunningStatusStore();
 
   const [initModel, setInitialModel] = useState(`000${forgetClass}`);
   const [weightNames, setWeightNames] = useState<string[]>([]);

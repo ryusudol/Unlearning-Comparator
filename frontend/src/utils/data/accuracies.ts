@@ -1,5 +1,5 @@
 import { TABLEAU10 } from "../../constants/colors";
-import { GapDataItem } from "../../types/accuracies";
+import { GapDataItem } from "../../components/Accuracies/VerticalBarChart";
 
 const GAP_FIX_LENGTH = 3;
 

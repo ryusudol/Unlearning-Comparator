@@ -1,16 +1,15 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 
-import { RunningStatusContext } from "../../stores/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useRunningIndexStore } from "../../stores/runningIndexStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { Separator } from "../../components/UI/separator";
 
 export default function Timer() {
   const { forgetClass } = useForgetClassStore();
-
   const { runningIndex } = useRunningIndexStore();
-  const { statuses, isRunning } = useContext(RunningStatusContext);
+  const { statuses, isRunning } = useRunningStatusStore();
 
   const [runningTime, setRunningTime] = useState(0);
 
