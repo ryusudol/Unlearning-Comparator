@@ -63,7 +63,7 @@ export const useExperimentsStore = create<ExperimentsState & Actions>()(
       storage: {
         getItem: (key) => {
           const value = sessionStorage.getItem(key);
-          return value ? JSON.parse(value) : undefined;
+          return value ? JSON.parse(value) : null;
         },
         setItem: (key, value) =>
           sessionStorage.setItem(key, JSON.stringify(value)),

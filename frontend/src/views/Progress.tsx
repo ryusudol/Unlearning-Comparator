@@ -10,7 +10,7 @@ import { useForgetClassStore } from "../stores/forgetClassStore";
 import { Step } from "../types/progress";
 import { CONFIG } from "../app/App";
 import { RunningStatusContext } from "../stores/running-status-context";
-import { RunningIndexContext } from "../stores/running-index-context";
+import { useRunningIndexStore } from "../stores/runningIndexStore";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
 export const PREV = "prev";
@@ -19,7 +19,7 @@ export const NEXT = "next";
 export default function Progress() {
   const { isRunning, statuses, activeStep, totalExperimentsCount } =
     useContext(RunningStatusContext);
-  const { runningIndex } = useContext(RunningIndexContext);
+  const { runningIndex } = useRunningIndexStore();
 
   const { forgetClass } = useForgetClassStore();
 

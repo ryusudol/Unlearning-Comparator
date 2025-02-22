@@ -31,7 +31,7 @@ import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
 import { RunningStatusContext } from "../../stores/running-status-context";
 import { useExperimentsStore } from "../../stores/experimentsStore";
-import { RunningIndexContext } from "../../stores/running-index-context";
+import { useRunningIndexStore } from "../../stores/runningIndexStore";
 import { UnlearningConfigurationData } from "../../types/experiments";
 import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
@@ -94,8 +94,8 @@ export default function UnlearningConfiguration() {
   const { forgetClass } = useForgetClassStore();
   const { saveModelB } = useModelDataStore();
   const { addExperiment, updateExperiment } = useExperimentsStore();
+  const { updateRunningIndex } = useRunningIndexStore();
 
-  const { updateRunningIndex } = useContext(RunningIndexContext);
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useContext(RunningStatusContext);
 
