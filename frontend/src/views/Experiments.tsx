@@ -4,7 +4,7 @@ import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
-import AddExperimentsButton from "../components/Experiments/AddExperimentsButton";
+import AddModelsButton from "../components/Experiments/AddModelsButton";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
 import { CONFIG } from "../app/App";
@@ -40,7 +40,7 @@ export default function Experiments() {
             )}
           </div>
         </div>
-        {forgetClassExist && <AddExperimentsButton />}
+        {forgetClassExist && <AddModelsButton />}
       </div>
       {forgetClassExist ? (
         <DataTable isExpanded={isExpanded} />
