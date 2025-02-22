@@ -588,7 +588,9 @@ export default function ButterflyPlot({
         .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
         .text(
-          isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
+          isAboveThresholdUnlearn
+            ? `↑ Pred as ${isBaseline ? "Model A" : "Model B"}`
+            : "↑ Pred as Retrain"
         );
       threshGroupB
         .append("text")
@@ -600,7 +602,9 @@ export default function ButterflyPlot({
         .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
         .text(
-          isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
+          isAboveThresholdUnlearn
+            ? "↓ Pred as Retrain"
+            : `↓ Pred as ${isBaseline ? "Model A" : "Model B"}`
         );
 
       // create a svg for a line chart
@@ -1123,7 +1127,9 @@ export default function ButterflyPlot({
       .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
       .text(
-        isAboveThresholdUnlearn ? "↑ Pred as Unlearn" : "↑ Pred as Retrain"
+        isAboveThresholdUnlearn
+          ? `↑ Pred as ${isBaseline ? "Model A" : "Model B"}`
+          : "↑ Pred as Retrain"
       );
     newThreshGroupB
       .append("text")
@@ -1135,7 +1141,9 @@ export default function ButterflyPlot({
       .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
       .text(
-        isAboveThresholdUnlearn ? "↓ Pred as Retrain" : "↓ Pred as Unlearn"
+        isAboveThresholdUnlearn
+          ? "↓ Pred as Retrain"
+          : `↓ Pred as ${isBaseline ? "Model A" : "Model B"}`
       );
 
     // Draw a new y-axis for a butterfly chart based on the metric value
