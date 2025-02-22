@@ -4,6 +4,7 @@ import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
+import DualMetricsLegend from "../components/Experiments/DualMetricsLegend";
 import AddModelsButton from "../components/Experiments/AddModelsButton";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
@@ -30,7 +31,7 @@ export default function Experiments() {
         <div className="grid grid-flow-col grid-x-2 items-center">
           <Title title="Model Screening" customClass="right-[1px]" />
           <div
-            className="w-5 h-5 flex justify-center items-center cursor-pointer ml-0 bg-white hover:bg-[#f8f9fb] transition"
+            className="w-5 h-5 flex justify-center items-center cursor-pointer bg-white hover:bg-[#f8f9fb] transition"
             onClick={handleExpandClick}
           >
             {isExpanded ? (
@@ -40,7 +41,10 @@ export default function Experiments() {
             )}
           </div>
         </div>
-        {forgetClassExist && <AddModelsButton />}
+        <div className="flex items-center">
+          <DualMetricsLegend />
+          {forgetClassExist && <AddModelsButton />}
+        </div>
       </div>
       {forgetClassExist ? (
         <DataTable isExpanded={isExpanded} />

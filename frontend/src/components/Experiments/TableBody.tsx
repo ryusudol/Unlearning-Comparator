@@ -29,9 +29,9 @@ import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CONFIG = {
-  // GREEN: "#157f3b",
-  BLUE: "#265599",
-  TEMPORARY_ROW_BG_COLOR: "#f0f6fa",
+  GREEN: "#00441B", // #157F3C
+  BLUE: "#08306b", // #265599
+  TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
   COLOR_MAPPING_THRESHOLD: 0.75,
   TEXT_OPACITY_THRESHOLD: 0.5,
 };
@@ -107,7 +107,11 @@ export default function _TableBody({ table, tableData }: Props) {
       } else {
         const opacity = opacityMapping[columnId]?.[value] ?? 0;
         backgroundColor =
-          opacity < 0.1 ? "#f8f8f8" : hexToRgba(CONFIG.BLUE, opacity);
+          opacity < 0.1
+            ? "#f8f8f8"
+            : columnId === "RTE" || columnId === "FQS"
+            ? hexToRgba(CONFIG.BLUE, opacity)
+            : hexToRgba(CONFIG.GREEN, opacity);
         textColor =
           opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
             ? COLORS.WHITE
