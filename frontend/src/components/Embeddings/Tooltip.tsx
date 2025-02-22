@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import { ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
@@ -365,14 +364,12 @@ export default React.memo(function Tooltip({
           <div className="flex flex-col">
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
-              <ModelAIcon className="mr-1" />
               <span style={{ color: COLORS.EMERALD }} className="mr-0.5">
                 {modelAType} ({baseline}):
               </span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
-              <ModelBIcon className="mr-1" />
               <span style={{ color: COLORS.PURPLE }} className="mr-0.5">
                 {modelBType} ({comparison}):
               </span>
