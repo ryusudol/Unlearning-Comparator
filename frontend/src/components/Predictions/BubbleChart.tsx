@@ -300,8 +300,8 @@ export default function BubbleChart({
       }`}
     >
       {showYAxis && (
-        <span className="absolute top-[42%] left-1 -rotate-90 text-nowrap -mx-7 text-xs">
-          Ground Truth
+        <span className="absolute top-[42%] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
+          True Class
         </span>
       )}
       <svg ref={svgRef}></svg>
@@ -323,7 +323,7 @@ export default function BubbleChart({
             }}
           >
             <div>
-              <span>Ground Truth</span>:{" "}
+              <span>True Class</span>:{" "}
               <span className="font-semibold">
                 {CIFAR_10_CLASSES[tooltip.content.groundTruth]}
               </span>
