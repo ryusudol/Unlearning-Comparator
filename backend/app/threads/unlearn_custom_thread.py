@@ -316,7 +316,7 @@ class UnlearningCustomThread(threading.Thread):
         forget_class_dir = os.path.join('data', str(self.forget_class))
         os.makedirs(forget_class_dir, exist_ok=True)
 
-        result_path = os.path.join(forget_class_dir, f'{results["id"]}.json')
+        result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')
         with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
 
