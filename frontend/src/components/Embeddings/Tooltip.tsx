@@ -33,8 +33,6 @@ const CONFIG = {
 } as const;
 
 interface Props {
-  baseline: string;
-  comparison: string;
   imageUrl: string;
   data: (number | Prob)[];
   barChartData: {
@@ -48,8 +46,6 @@ interface Props {
 }
 
 export default React.memo(function Tooltip({
-  baseline,
-  comparison,
   imageUrl,
   data,
   barChartData,
@@ -358,20 +354,20 @@ export default React.memo(function Tooltip({
         />
         <div>
           <div className="mt-1">
-            <span>Ground Truth:</span>{" "}
+            <span>True Class:</span>{" "}
             <span className="font-semibold">{groundTruth}</span>
           </div>
           <div className="flex flex-col">
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
               <span style={{ color: COLORS.EMERALD }} className="mr-0.5">
-                {modelAType} ({baseline}):
+                {modelAType} Model:
               </span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
               <span style={{ color: COLORS.PURPLE }} className="mr-0.5">
-                {modelBType} ({comparison}):
+                {modelBType} Model:
               </span>
               <span className="font-semibold">{comparisonPrediction}</span>
             </p>

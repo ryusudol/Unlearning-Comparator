@@ -363,8 +363,6 @@ const ScatterPlot = forwardRef(
               <></>
             ) : (
               <Tooltip
-                baseline={modelA}
-                comparison={modelB}
                 imageUrl={imageUrl}
                 data={d}
                 barChartData={barChartData}
@@ -389,9 +387,7 @@ const ScatterPlot = forwardRef(
         forgetClass,
         isBaseline,
         mode,
-        modelA,
         modelAExperiment,
-        modelB,
         modelBExperiment,
         onHover,
       ]
