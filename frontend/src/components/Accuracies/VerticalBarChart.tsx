@@ -205,7 +205,7 @@ export default function VerticalBarChart({
             stroke={COLORS.GRAY}
             strokeDasharray={STROKE_CONFIG.STROKE_DASHARRAY}
             label={{
-              value: `avg (remain): ${remainGapAvg}`,
+              value: `avg (retain): ${remainGapAvg}`,
               position: "top",
               fontSize: FONT_CONFIG.FONT_SIZE_10,
               fill: COLORS.BLACK,

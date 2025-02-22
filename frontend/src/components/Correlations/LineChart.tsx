@@ -157,7 +157,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
                 }
                 strokeWidth={STROKE_CONFIG.DEFAULT_STROKE_WIDTH}
                 strokeDasharray={
-                  isBaselineLine ? undefined : STROKE_CONFIG.STROKE_DASHARRAY
+                  isForgetLine ? STROKE_CONFIG.STROKE_DASHARRAY : undefined
                 }
                 animationDuration={ANIMATION_DURATION}
                 dot={({ cx, cy }) =>
@@ -222,14 +222,14 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
             style={{ color: COLORS.EMERALD }}
           />
           <p>
-            <span style={{ color: COLORS.EMERALD }}>Model A </span>(Remain):{" "}
+            <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
             <span className="font-semibold">{payload[1].value}</span>
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
           <CircleIcon className="w-3 h-3 mr-1" color={COLORS.PURPLE} />
           <p>
-            <span style={{ color: COLORS.PURPLE }}>Model B </span>(Remain):{" "}
+            <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
             <span className="font-semibold">{payload[3].value}</span>
           </p>
         </div>
@@ -270,14 +270,14 @@ function CustomLegend() {
           type: CIRCLE,
           color: COLORS.EMERALD,
           label: "Model A",
-          text: "(Remain Classes)",
+          text: "(Retain Classes)",
           spacing: "py-0.5",
         },
         {
           type: CIRCLE,
           color: COLORS.PURPLE,
           label: "Model B",
-          text: "(Remain Classes)",
+          text: "(Retain Classes)",
           spacing: "py-0.5",
         },
         {
