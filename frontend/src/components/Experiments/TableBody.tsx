@@ -32,7 +32,8 @@ const CONFIG = {
   GREEN: "#00441B", // #157F3C
   BLUE: "#08306b", // #265599
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
-  COLOR_MAPPING_THRESHOLD: 0.75,
+  COLOR_MAPPING_THRESHOLD: 0.8,
+  COLOR_MAPPING_RTE_THRESHOLD: 200,
   TEXT_OPACITY_THRESHOLD: 0.5,
 };
 
@@ -70,7 +71,13 @@ export default function _TableBody({ table, tableData }: Props) {
       columnValues.forEach((value) => {
         let opacity = 0;
         if (columnId === "UA" || columnId === "TUA") {
-          opacity = 1 - value / 0.3;
+          opacity = 1 - value / (1 - CONFIG.COLOR_MAPPING_THRESHOLD);
+        } else if (columnId === "RTE") {
+          opacity =
+            value >= CONFIG.COLOR_MAPPING_RTE_THRESHOLD
+              ? 0
+              : (CONFIG.COLOR_MAPPING_RTE_THRESHOLD - value) /
+                CONFIG.COLOR_MAPPING_RTE_THRESHOLD;
         } else if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
           opacity =
             (value - CONFIG.COLOR_MAPPING_THRESHOLD) /
