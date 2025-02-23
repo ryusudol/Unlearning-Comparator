@@ -485,23 +485,29 @@ export const FlagIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const FilterIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    width={16}
-    height={16}
-    color={"#64758B"}
-    fill={"#64758B"}
-    {...props}
-  >
-    <path
-      d="M3.00073 3.10253V6.98276L9.00802 11.9828L9.9627 20.908C9.97018 20.9779 10.0454 21.0185 10.1078 20.9864L13.9732 18.996L15.0151 11.9828L20.9993 6.9692V3.10252C20.9993 3.04725 20.9545 3.00244 20.8993 3.00244L3.10069 3.00245C3.04548 3.00245 3.00073 3.04726 3.00073 3.10253Z"
-      stroke="currentColor"
-      strokeWidth="1"
-    />
-  </svg>
-);
+interface FilterIconProps extends React.SVGProps<SVGSVGElement> {
+  filterValue?: string;
+}
+export const FilterIcon = ({ filterValue, ...props }: FilterIconProps) => {
+  const color = filterValue === "all" ? "#cacaca" : "black";
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      color={color}
+      fill={color}
+      {...props}
+    >
+      <path
+        d="M3.00073 3.10253V6.98276L9.00802 11.9828L9.9627 20.908C9.97018 20.9779 10.0454 21.0185 10.1078 20.9864L13.9732 18.996L15.0151 11.9828L20.9993 6.9692V3.10252C20.9993 3.04725 20.9545 3.00244 20.8993 3.00244L3.10069 3.00245C3.04548 3.00245 3.00073 3.04726 3.00073 3.10253Z"
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+    </svg>
+  );
+};
 
 export const ArrowUpIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -588,13 +594,13 @@ export const UnfoldMoreIcon = ({
       fillRule="evenodd"
       clipRule="evenodd"
       d="M6.64084 10.2719C6.73054 10.5601 6.95259 10.75 7.20002 10.75L16.8 10.75C17.0474 10.75 17.2695 10.5601 17.3592 10.2719C17.4489 9.9836 17.3878 9.65609 17.2054 9.44709L12.4054 3.94713C12.1761 3.68429 11.824 3.68429 11.5946 3.94713L6.79459 9.44713C6.61219 9.65613 6.55114 9.98364 6.64084 10.2719Z"
-      fill={sortOrder === "asc" ? "black" : "currentColor"}
+      fill={sortOrder === "asc" ? "black" : "#cacaca"}
     />
     <path
       fillRule="evenodd"
       clipRule="evenodd"
       d="M6.64084 13.7281C6.73054 13.4399 6.95259 13.25 7.20002 13.25L16.8 13.25C17.0474 13.25 17.2695 13.4399 17.3592 13.7281C17.4489 14.0164 17.3878 14.3439 17.2054 14.5529L12.4054 20.0529C12.1761 20.3157 11.824 20.3157 11.5946 20.0529L6.79459 14.5529C6.61219 14.3439 6.55114 14.0164 6.64084 13.7281Z"
-      fill={sortOrder === "desc" ? "black" : "currentColor"}
+      fill={sortOrder === "desc" ? "black" : "#cacaca"}
     />
   </svg>
 );
