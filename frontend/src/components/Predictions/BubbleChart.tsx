@@ -19,7 +19,7 @@ import { COLORS, bubbleColorScale } from "../../constants/colors";
 
 const CONFIG = {
   WIDTH: 252,
-  HEIGHT: 230,
+  HEIGHT: 240,
   MIN_BUBBLE_SIZE: 1,
   MAX_BUBBLE_SIZE: 90,
   MIN_VALUE_TO_DISPLAY: 0.002,
@@ -92,7 +92,7 @@ export default function BubbleChart({
     const margin = {
       top: 8,
       right: 4,
-      bottom: 38,
+      bottom: 48,
       left: 64,
     };
     const width = CONFIG.WIDTH - margin.left - margin.right;
@@ -125,7 +125,11 @@ export default function BubbleChart({
       .axisBottom(xScale)
       .tickValues(d3.range(0, 10))
       .tickSize(0)
-      .tickFormat((d) => CIFAR_10_CLASSES[d as number]);
+      .tickFormat((d) =>
+        d === forgetClass
+          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          : CIFAR_10_CLASSES[d as number]
+      );
 
     const yAxis = d3
       .axisLeft(yScale)
