@@ -2,7 +2,7 @@ export default function DualMetricsLegend() {
   return (
     <div className="w-[408px] flex items-center gap-1 relative bottom-0.5 mr-3">
       <div className="w-full px-2">
-        <h3 className="text-xs text-gray-800 font-medium">Acc Metrics</h3>
+        <h3 className="text-xs text-gray-800 font-medium">Accuracy Metrics</h3>
         <div className="relative h-[15px]">
           <div
             className="w-full h-full relative"
@@ -21,7 +21,7 @@ export default function DualMetricsLegend() {
         </div>
       </div>
       <div className="w-full px-2">
-        <h3 className="text-xs text-gray-800 font-medium">Util Metrics</h3>
+        <h3 className="text-xs text-gray-800 font-medium">Utility Metrics</h3>
         <div className="relative h-[15px]">
           <div
             className="w-full h-full relative"
