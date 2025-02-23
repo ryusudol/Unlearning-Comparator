@@ -13,6 +13,7 @@ import {
   CKA_DATA_KEYS,
   LINE_CHART_TICK_STYLE,
   LINE_CHART_CONFIG,
+  LINE_CHART_LEGEND_DATA,
 } from "../../constants/correlations";
 import {
   STROKE_CONFIG,
@@ -30,7 +31,7 @@ import { ChartContainer } from "../UI/chart";
 
 const CONFIG = {
   DOT_SIZE: 10,
-  CROSS_SIZE: 12,
+  CROSS_SIZE: 13,
   ACTIVE_DOT_STROKE_WIDTH: 3,
   ACTIVE_CROSS_STROKE_WIDTH: 2,
   zIndex: 9999,
@@ -136,7 +137,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             wrapperStyle={{ zIndex: CONFIG.zIndex }}
           />
           {CKA_DATA_KEYS.map((key, idx) => {
-            const isBaselineLine = key.includes("baseline");
+            const isBaselineLine = key.startsWith("baseline");
             const dotColor = isBaselineLine ? COLORS.EMERALD : COLORS.PURPLE;
             const isForgetLine = key.includes("Forget");
             const dotSize = isForgetLine ? CONFIG.CROSS_SIZE : CONFIG.DOT_SIZE;
@@ -218,8 +219,8 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
       >
         <div className="flex items-center leading-[18px]">
           <CircleIcon
-            className="w-3 h-3 mr-1"
-            style={{ color: COLORS.EMERALD }}
+            className="mr-1"
+            style={{ width: CONFIG.DOT_SIZE, color: COLORS.EMERALD }}
           />
           <p>
             <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
@@ -227,7 +228,10 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
           </p>
         </div>
         <div className="flex items-center leading-[18px]">
-          <CircleIcon className="w-3 h-3 mr-1" color={COLORS.PURPLE} />
+          <CircleIcon
+            className="mr-1"
+            style={{ width: CONFIG.DOT_SIZE, color: COLORS.PURPLE }}
+          />
           <p>
             <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
             <span className="font-semibold">{payload[3].value}</span>
@@ -235,8 +239,8 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         </div>
         <div className="flex items-center leading-[18px]">
           <FatMultiplicationSignIcon
-            className="w-4 h-4 -ml-0.5 mr-0.5"
-            style={{ color: COLORS.EMERALD }}
+            className="mr-1"
+            style={{ width: CONFIG.CROSS_SIZE, color: COLORS.EMERALD }}
           />
           <p>
             <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
@@ -245,8 +249,8 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         </div>
         <div className="flex items-center leading-[18px]">
           <FatMultiplicationSignIcon
-            className="w-4 h-4 -ml-0.5 mr-0.5"
-            color={COLORS.PURPLE}
+            className="mr-1"
+            style={{ width: CONFIG.CROSS_SIZE, color: COLORS.PURPLE }}
           />
           <p>
             <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
@@ -260,71 +264,42 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 }
 
 function CustomLegend() {
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
+
   const CIRCLE = "circle";
-  const CROSS = "cross";
 
   return (
-    <div className="absolute bottom-[52px] left-[60px] text-xs leading-4 z-10">
-      {[
-        {
-          type: CIRCLE,
-          color: COLORS.EMERALD,
-          label: "Model A",
-          text: "(Retain Classes)",
-          spacing: "py-0.5",
-        },
-        {
-          type: CIRCLE,
-          color: COLORS.PURPLE,
-          label: "Model B",
-          text: "(Retain Classes)",
-          spacing: "py-0.5",
-        },
-        {
-          type: CROSS,
-          color: COLORS.EMERALD,
-          label: "Model A",
-          text: "(Forget Class)",
-          spacing: "py-0.5",
-        },
-        {
-          type: CROSS,
-          color: COLORS.PURPLE,
-          label: "Model B",
-          text: "(Forget Class)",
-          spacing: "py-0.5",
-        },
-      ].map((item, i) => {
+    <div className="absolute bottom-[52px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] roudned-md pl-2.5 pr-1.5 py-0.5">
+      {LINE_CHART_LEGEND_DATA.map((item, i) => {
         const Icon =
           item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
+        const experiment = i % 2 === 0 ? modelAExperiment : modelBExperiment;
+
         return (
           <div key={i} className={`flex items-center ${item.spacing}`}>
             <div className="relative">
               <Icon
-                className={`z-10 ${
-                  item.type === CIRCLE ? "mr-2" : "relative right-[1px]"
-                }`}
+                className={`z-10 ${item.type === CIRCLE ? "mr-2" : "mr-0.5"}`}
                 style={{
                   color: item.color,
                   width:
-                    item.type === CIRCLE ? CONFIG.DOT_SIZE : CONFIG.CROSS_SIZE,
-                  height:
                     item.type === CIRCLE ? CONFIG.DOT_SIZE : CONFIG.CROSS_SIZE,
                 }}
               />
               <div
                 className="absolute top-1/2 w-[18px] h-[1px]"
                 style={{
-                  transform: "translate(-4px, -50%)",
-                  ...(i % 2 === 1
-                    ? { borderTop: `1px dashed ${COLORS.PURPLE}` }
+                  transform: `translate(${i > 1 ? "-3.8px" : "-4px"}, -50%)`,
+                  ...(i > 1
+                    ? { borderTop: `2px dashed ${item.color}` }
                     : { backgroundColor: item.color }),
                 }}
               />
             </div>
             <span style={i > 1 ? { marginLeft: "6px" } : undefined}>
-              <span style={{ color: item.color }}>{item.label}</span>{" "}
-              {item.text}
+              <span style={{ color: item.color }}>{item.label}</span> (
+              {experiment.Type}, {experiment.ID})
             </span>
           </div>
         );
