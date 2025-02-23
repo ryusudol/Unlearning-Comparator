@@ -20,7 +20,7 @@ export default function PredictionMatrix() {
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
-  const [datasetMode, setDatasetMode] = useState(TRAIN);
+  const [selectedDataset, setSelectedDataset] = useState(TRAIN);
   const [hoveredY, setHoveredY] = useState<number | null>(null);
 
   const areAllModelsSelected = modelA !== "" && modelB !== "";
@@ -31,7 +31,10 @@ export default function PredictionMatrix() {
       <div className="flex justify-between">
         <Subtitle title="Prediction Matrix" />
         {forgetClassExist && areAllModelsSelected && (
-          <DatasetModeSelector onValueChange={setDatasetMode} />
+          <DatasetModeSelector
+            dataset={selectedDataset}
+            onValueChange={setSelectedDataset}
+          />
         )}
       </div>
       {forgetClassExist ? (
@@ -45,7 +48,7 @@ export default function PredictionMatrix() {
                 <BubbleChart
                   mode="Baseline"
                   modelType={modelAExperiment.Type}
-                  datasetMode={datasetMode}
+                  datasetMode={selectedDataset}
                   hoveredY={hoveredY}
                   onHover={(y) => setHoveredY(y)}
                   onHoverEnd={() => setHoveredY(null)}
@@ -55,7 +58,7 @@ export default function PredictionMatrix() {
                 <BubbleChart
                   mode="Comparison"
                   modelType={modelBExperiment.Type}
-                  datasetMode={datasetMode}
+                  datasetMode={selectedDataset}
                   showYAxis={false}
                   hoveredY={hoveredY}
                   onHover={(y) => setHoveredY(y)}

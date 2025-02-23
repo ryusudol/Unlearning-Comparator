@@ -9,10 +9,11 @@ import { useForgetClassStore } from "../stores/forgetClassStore";
 import { TRAIN } from "../constants/common";
 
 export default function LayerWiseSimilarity() {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
 
-  const [dataset, setDataset] = useState(TRAIN);
+  const [selectedDataset, setSelectedDataset] = useState(TRAIN);
 
   const areAllModelsSelected = modelA !== "" && modelB !== "";
   const forgetClassExist = forgetClass !== -1;
@@ -22,13 +23,16 @@ export default function LayerWiseSimilarity() {
       <div className="flex justify-between">
         <Subtitle title="Layer-Wise Similarity" />
         {forgetClassExist && areAllModelsSelected && (
-          <DatasetModeSelector onValueChange={setDataset} />
+          <DatasetModeSelector
+            dataset={selectedDataset}
+            onValueChange={setSelectedDataset}
+          />
         )}
       </div>
       {forgetClassExist ? (
         areAllModelsSelected ? (
           <div className="border rounded-md">
-            <LineChart dataset={dataset} />
+            <LineChart dataset={selectedDataset} />
           </div>
         ) : (
           <Indicator about="BaselineComparison" />

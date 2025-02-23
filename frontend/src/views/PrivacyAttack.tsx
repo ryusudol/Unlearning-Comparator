@@ -71,6 +71,8 @@ export default function PrivacyAttack({
   return (
     <div className="h-[665px] flex items-center border rounded-md px-1.5 rounded-tr-none relative">
       <AttackLegend
+        metric={metric}
+        aboveThreshold={aboveThreshold}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
