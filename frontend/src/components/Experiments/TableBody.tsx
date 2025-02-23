@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
+import * as d3 from "d3";
 
 import {
   ContextMenu,
@@ -17,7 +18,6 @@ import { columns } from "./Columns";
 import { COLUMN_WIDTHS } from "./Columns";
 import { COLORS } from "../../constants/colors";
 import { ExperimentData } from "../../types/data";
-import { hexToRgba } from "../../utils/data/colors";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { PerformanceMetrics } from "../../types/experiments";
 import { Experiment, Experiments } from "../../types/data";
@@ -29,12 +29,9 @@ import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CONFIG = {
-  GREEN: "#00441B", // #157F3C
-  BLUE: "#08306b", // #265599
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
   COLOR_MAPPING_THRESHOLD: 0.8,
   COLOR_MAPPING_RTE_THRESHOLD: 200,
-  TEXT_OPACITY_THRESHOLD: 0.5,
 };
 
 interface Props {
@@ -53,48 +50,30 @@ export default function _TableBody({ table, tableData }: Props) {
     experiments
   ) as PerformanceMetrics;
 
-  const opacityMapping = useMemo(() => {
-    const mapping: { [key: string]: { [value: number]: number } } = {};
-
-    Object.keys(performanceMetrics).forEach((columnId) => {
-      if (!performanceMetrics[columnId]) return;
-
-      const columnValues = tableData
-        .map((datum) => datum[columnId as keyof Experiment] as number)
-        .filter(
-          (datum) =>
-            datum !== undefined && datum !== null && typeof datum === "number"
-        );
-
-      const valueOpacityMap: { [value: number]: number } = {};
-
-      columnValues.forEach((value) => {
-        let opacity = 0;
-        if (columnId === "UA" || columnId === "TUA") {
-          opacity = 1 - value / (1 - CONFIG.COLOR_MAPPING_THRESHOLD);
-        } else if (columnId === "RTE") {
-          opacity =
-            value >= CONFIG.COLOR_MAPPING_RTE_THRESHOLD
-              ? 0
-              : (CONFIG.COLOR_MAPPING_RTE_THRESHOLD - value) /
-                CONFIG.COLOR_MAPPING_RTE_THRESHOLD;
-        } else if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
-          opacity =
-            (value - CONFIG.COLOR_MAPPING_THRESHOLD) /
-            (1 - CONFIG.COLOR_MAPPING_THRESHOLD);
-        }
-
-        if (opacity > 1) opacity = 1;
-        if (opacity < 0) opacity = 0;
-
-        valueOpacityMap[value] = opacity;
-      });
-
-      mapping[columnId] = valueOpacityMap;
-    });
-
-    return mapping;
-  }, [performanceMetrics, tableData]);
+  const greenScaleLower = useMemo(
+    () =>
+      d3
+        .scaleSequential(d3.interpolateGreens)
+        .domain([1 - CONFIG.COLOR_MAPPING_THRESHOLD, 0])
+        .clamp(true),
+    []
+  );
+  const greenScaleHigher = useMemo(
+    () =>
+      d3
+        .scaleSequential(d3.interpolateGreens)
+        .domain([CONFIG.COLOR_MAPPING_THRESHOLD, 1])
+        .clamp(true),
+    []
+  );
+  const blueScale = useMemo(
+    () =>
+      d3
+        .scaleSequential(d3.interpolateBlues)
+        .domain([CONFIG.COLOR_MAPPING_RTE_THRESHOLD, 0])
+        .clamp(true),
+    []
+  );
 
   const getCellStyle = (
     cell: any,
@@ -112,17 +91,36 @@ export default function _TableBody({ table, tableData }: Props) {
       if (value === "N/A") {
         backgroundColor = "white";
       } else {
-        const opacity = opacityMapping[columnId]?.[value] ?? 0;
-        backgroundColor =
-          opacity < 0.1
-            ? "#f8f8f8"
-            : columnId === "RTE" || columnId === "FQS"
-            ? hexToRgba(CONFIG.BLUE, opacity)
-            : hexToRgba(CONFIG.GREEN, opacity);
-        textColor =
-          opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
-            ? COLORS.WHITE
-            : COLORS.BLACK;
+        if (columnId === "RTE" || columnId === "FQS") {
+          if (value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD) {
+            backgroundColor = blueScale(value);
+            textColor =
+              value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD / 2
+                ? COLORS.WHITE
+                : COLORS.BLACK;
+          } else {
+            backgroundColor = "#f8f8f8";
+            textColor = COLORS.BLACK;
+          }
+        } else {
+          if (columnId === "UA" || columnId === "TUA") {
+            if (value <= 1 - CONFIG.COLOR_MAPPING_THRESHOLD) {
+              backgroundColor = greenScaleLower(value);
+              textColor = value <= 0.1 ? COLORS.WHITE : COLORS.BLACK;
+            } else {
+              backgroundColor = "#f8f8f8";
+              textColor = COLORS.BLACK;
+            }
+          } else {
+            if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
+              backgroundColor = greenScaleHigher(value);
+              textColor = value >= 0.9 ? COLORS.WHITE : COLORS.BLACK;
+            } else {
+              backgroundColor = "#f8f8f8";
+              textColor = COLORS.BLACK;
+            }
+          }
+        }
       }
 
       style = {
