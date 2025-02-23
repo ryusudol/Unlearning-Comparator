@@ -79,7 +79,7 @@ function BubbleChartLegend() {
   const gradient = `linear-gradient(to right, ${bubbleColorScale.join(", ")})`;
 
   return (
-    <div className="flex justify-center items-center gap-11 text-[#666666]">
+    <div className="flex justify-center items-center gap-11 text-[#666666] relative left-5">
       <div className="grid grid-cols-3 gap-y-1.5 place-items-center relative left-4 text-[10px] grid-rows-[18px_14px]">
         <div className="w-1.5 h-1.5 rounded-full bg-[#666666]" />
         <div className="w-4 h-4 rounded-full bg-[#666666]" />
@@ -88,7 +88,7 @@ function BubbleChartLegend() {
         <Arrow className="mx-1.5" />
         <span>More Frequent</span>
       </div>
-      <div className="flex flex-col items-center gap-y-1.5 relative top-0.5 left-1">
+      <div className="flex flex-col items-center gap-y-1.5 relative top-0.5 right-0.5">
         <div className="relative w-[148px] h-3.5">
           <div
             className="absolute w-full h-full"
