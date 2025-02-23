@@ -1,4 +1,4 @@
-import { useContext, useRef, useCallback, useMemo } from "react";
+import { useRef, useCallback, useMemo } from "react";
 
 import InformationButton from "../components/Embeddings/InformationButton";
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
@@ -6,7 +6,10 @@ import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrappe
 import EmbeddingsLegend from "../components/Embeddings/EmbeddingsLegend";
 import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
-import { ExperimentsContext } from "../store/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../stores/experimentsStore";
 
 interface Props {
   baselinePoints: (number | Prob)[][];
@@ -17,8 +20,8 @@ export default function Embeddings({
   baselinePoints,
   comparisonPoints,
 }: Props) {
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
@@ -94,10 +97,10 @@ export default function Embeddings({
       <EmbeddingsLegend />
       <ConnectionLineWrapper positionRef={positionRef} />
       <InformationButton />
-      {baselineExperiment && (
+      {modelAExperiment && (
         <ScatterPlot
           mode="Baseline"
-          modelType={baselineExperiment.Type}
+          modelType={modelAExperiment.Type}
           data={baselinePoints}
           onHover={handleHover}
           hoveredInstance={hoveredInstanceRef.current}
@@ -105,10 +108,10 @@ export default function Embeddings({
         />
       )}
       <Separator orientation="vertical" className="h-[641px] w-[1px] mx-1" />
-      {comparisonExperiment && (
+      {modelBExperiment && (
         <ScatterPlot
           mode="Comparison"
-          modelType={comparisonExperiment.Type}
+          modelType={modelBExperiment.Type}
           data={comparisonPoints}
           onHover={handleHover}
           hoveredInstance={hoveredInstanceRef.current}

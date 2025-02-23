@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from "react";
+import React, { useMemo } from "react";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 
@@ -18,22 +18,22 @@ import { COLUMN_WIDTHS } from "./Columns";
 import { COLORS } from "../../constants/colors";
 import { ExperimentData } from "../../types/data";
 import { hexToRgba } from "../../utils/data/colors";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { PerformanceMetrics } from "../../types/experiments";
-import { Experiment, Experiments } from "../../types/experiments-context";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import { Experiment, Experiments } from "../../types/data";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
-import { ExperimentsContext } from "../../store/experiments-context";
+import { useExperimentsStore } from "../../stores/experimentsStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CONFIG = {
-  // GREEN: "#157f3b",
-  BLUE: "#265599",
-  TEMPORARY_ROW_BG_COLOR: "#f0f6fa",
-  COLOR_MAPPING_THRESHOLD: 0.75,
+  GREEN: "#00441B", // #157F3C
+  BLUE: "#08306b", // #265599
+  TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
+  COLOR_MAPPING_THRESHOLD: 0.8,
+  COLOR_MAPPING_RTE_THRESHOLD: 200,
   TEXT_OPACITY_THRESHOLD: 0.5,
 };
 
@@ -43,15 +43,11 @@ interface Props {
 }
 
 export default function _TableBody({ table, tableData }: Props) {
-  const { isRunning } = useContext(RunningStatusContext);
+  const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
+  const { forgetClass } = useForgetClassStore();
+  const { isRunning } = useRunningStatusStore();
   const { experiments, saveExperiments, setIsExperimentsLoading } =
-    useContext(ExperimentsContext);
-  const { saveBaseline, saveComparison } = useContext(
-    BaselineComparisonContext
-  );
-
-  const { baseline, comparison } = useModelSelection();
-  const { forgetClass, forgetClassNumber } = useForgetClass();
+    useExperimentsStore();
 
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
@@ -75,7 +71,13 @@ export default function _TableBody({ table, tableData }: Props) {
       columnValues.forEach((value) => {
         let opacity = 0;
         if (columnId === "UA" || columnId === "TUA") {
-          opacity = 1 - value / 0.3;
+          opacity = 1 - value / (1 - CONFIG.COLOR_MAPPING_THRESHOLD);
+        } else if (columnId === "RTE") {
+          opacity =
+            value >= CONFIG.COLOR_MAPPING_RTE_THRESHOLD
+              ? 0
+              : (CONFIG.COLOR_MAPPING_RTE_THRESHOLD - value) /
+                CONFIG.COLOR_MAPPING_RTE_THRESHOLD;
         } else if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
           opacity =
             (value - CONFIG.COLOR_MAPPING_THRESHOLD) /
@@ -112,7 +114,11 @@ export default function _TableBody({ table, tableData }: Props) {
       } else {
         const opacity = opacityMapping[columnId]?.[value] ?? 0;
         backgroundColor =
-          opacity < 0.1 ? "#f8f8f8" : hexToRgba(CONFIG.BLUE, opacity);
+          opacity < 0.1
+            ? "#f8f8f8"
+            : columnId === "RTE" || columnId === "FQS"
+            ? hexToRgba(CONFIG.BLUE, opacity)
+            : hexToRgba(CONFIG.GREEN, opacity);
         textColor =
           opacity >= CONFIG.TEXT_OPACITY_THRESHOLD
             ? COLORS.WHITE
@@ -128,13 +134,6 @@ export default function _TableBody({ table, tableData }: Props) {
       };
     }
 
-    if (columnId === "A") {
-      style.paddingRight = 0;
-      style.paddingLeft = 14;
-    } else if (columnId === "B") {
-      style.paddingLeft = 6;
-    }
-
     if (isTemporaryRow) {
       style.backgroundColor = CONFIG.TEMPORARY_ROW_BG_COLOR;
     }
@@ -144,10 +143,10 @@ export default function _TableBody({ table, tableData }: Props) {
 
   const handleDeleteRow = async (id: string) => {
     try {
-      await deleteRow(forgetClassNumber, id);
+      await deleteRow(forgetClass, id);
       setIsExperimentsLoading(true);
       const allExperiments: Experiments = await fetchAllExperimentsData(
-        forgetClassNumber
+        forgetClass
       );
       if ("detail" in allExperiments) {
         saveExperiments({});
@@ -166,27 +165,27 @@ export default function _TableBody({ table, tableData }: Props) {
 
         saveExperiments(sortedExperiments);
 
-        if (id === baseline) {
-          if (!comparison.startsWith("000")) {
-            saveBaseline(`000${forgetClass}`);
-          } else if (!comparison.startsWith("a00")) {
-            saveBaseline(`a00${forgetClass}`);
+        if (id === modelA) {
+          if (!modelB.startsWith("000")) {
+            saveModelA(`000${forgetClass}`);
+          } else if (!modelB.startsWith("a00")) {
+            saveModelA(`a00${forgetClass}`);
           } else {
             const nextBaselineExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.ID !== comparison);
-            saveBaseline(nextBaselineExperiment!.ID);
+            ).find((experiment) => experiment.ID !== modelB);
+            saveModelA(nextBaselineExperiment!.ID);
           }
-        } else if (id === comparison) {
-          if (!baseline.startsWith("000")) {
-            saveComparison(`000${forgetClass}`);
-          } else if (!baseline.startsWith("a00")) {
-            saveComparison(`a00${forgetClass}`);
+        } else if (id === modelB) {
+          if (!modelA.startsWith("000")) {
+            saveModelB(`000${forgetClass}`);
+          } else if (!modelA.startsWith("a00")) {
+            saveModelB(`a00${forgetClass}`);
           } else {
             const nextComparisonExperiment = Object.values(
               sortedExperiments
-            ).find((experiment) => experiment.ID !== baseline);
-            saveComparison(nextComparisonExperiment!.ID);
+            ).find((experiment) => experiment.ID !== modelA);
+            saveModelB(nextComparisonExperiment!.ID);
           }
         }
       }
@@ -199,7 +198,7 @@ export default function _TableBody({ table, tableData }: Props) {
 
   const handleDownloadJSON = async (id: string) => {
     try {
-      const json = await downloadJSON(forgetClassNumber, id);
+      const json = await downloadJSON(forgetClass, id);
       const jsonString = JSON.stringify(json, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -217,7 +216,7 @@ export default function _TableBody({ table, tableData }: Props) {
 
   const handleDownloadPTH = async (id: string) => {
     try {
-      await downloadPTH(forgetClassNumber, id);
+      await downloadPTH(forgetClass, id);
     } catch (error) {
       console.error("Failed to download the PTH file:", error);
     }

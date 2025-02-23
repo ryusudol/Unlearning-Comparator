@@ -36,3 +36,30 @@ export const LINE_CHART_CONFIG = {
     color: COLORS.PURPLE,
   },
 } satisfies ChartConfig;
+
+export const LINE_CHART_LEGEND_DATA = [
+  {
+    type: "circle",
+    color: COLORS.EMERALD,
+    label: "Model A Retain",
+    spacing: "py-0.5",
+  },
+  {
+    type: "circle",
+    color: COLORS.PURPLE,
+    label: "Model B Retain",
+    spacing: "py-0.5",
+  },
+  {
+    type: "cross",
+    color: COLORS.EMERALD,
+    label: "Model A Forget",
+    spacing: "py-0.5",
+  },
+  {
+    type: "cross",
+    color: COLORS.PURPLE,
+    label: "Model B Forget",
+    spacing: "py-0.5",
+  },
+] as const;

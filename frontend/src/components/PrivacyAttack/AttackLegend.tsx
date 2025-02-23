@@ -18,16 +18,23 @@ import { Label } from "..//UI/label";
 import { Separator } from "../UI/separator";
 
 interface AttackLegendProps {
+  metric: Metric;
+  aboveThreshold: string;
   onMetricChange: (val: Metric) => void;
   onAboveThresholdChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export default function AttackLegend({
+  metric,
+  aboveThreshold,
   onMetricChange,
   onAboveThresholdChange,
   onThresholdStrategyChange,
 }: AttackLegendProps) {
+  const isEntropyChecked = metric === ENTROPY;
+  const isUnlearnChecked = aboveThreshold === UNLEARN;
+
   return (
     <div className="flex items-center gap-[22px] bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
       <div className="flex items-center relative bottom-[1px]">
@@ -38,14 +45,24 @@ export default function AttackLegend({
           onValueChange={onMetricChange}
         >
           <div className="flex items-center space-x-0.5">
-            <RadioGroupItem value={ENTROPY} id={ENTROPY} />
-            <Label className="text-sm" htmlFor={ENTROPY}>
+            <RadioGroupItem
+              value={ENTROPY}
+              id={ENTROPY}
+              color="#4d4d4d"
+              checked={isEntropyChecked}
+            />
+            <Label className="text-sm text-[#4d4d4d]" htmlFor={ENTROPY}>
               Entropy
             </Label>
           </div>
           <div className="flex items-center space-x-0.5">
-            <RadioGroupItem value={CONFIDENCE} id={CONFIDENCE} />
-            <Label className="text-sm" htmlFor={CONFIDENCE}>
+            <RadioGroupItem
+              value={CONFIDENCE}
+              id={CONFIDENCE}
+              color="#4d4d4d"
+              checked={!isEntropyChecked}
+            />
+            <Label className="text-sm text-[#4d4d4d]" htmlFor={CONFIDENCE}>
               Confidence
             </Label>
           </div>
@@ -59,14 +76,24 @@ export default function AttackLegend({
           onValueChange={onAboveThresholdChange}
         >
           <div className="flex items-center space-x-0.5">
-            <RadioGroupItem value={UNLEARN} id={UNLEARN} />
-            <Label className="text-sm" htmlFor={UNLEARN}>
+            <RadioGroupItem
+              value={UNLEARN}
+              id={UNLEARN}
+              color="#4d4d4d"
+              checked={isUnlearnChecked}
+            />
+            <Label className="text-sm text-[#4d4d4d]" htmlFor={UNLEARN}>
               Unlearn
             </Label>
           </div>
           <div className="flex items-center space-x-0.5">
-            <RadioGroupItem value={RETRAIN} id={RETRAIN} />
-            <Label className="text-sm" htmlFor={RETRAIN}>
+            <RadioGroupItem
+              value={RETRAIN}
+              id={RETRAIN}
+              color="#4d4d4d"
+              checked={!isUnlearnChecked}
+            />
+            <Label className="text-sm text-[#4d4d4d]" htmlFor={RETRAIN}>
               Retrain
             </Label>
           </div>

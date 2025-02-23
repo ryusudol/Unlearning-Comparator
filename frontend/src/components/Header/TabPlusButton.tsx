@@ -1,4 +1,4 @@
-import { useContext, useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 import {
   Dialog,
@@ -21,8 +21,8 @@ import {
   DATASETS,
   NEURAL_NETWORK_MODELS,
 } from "../../constants/common";
-import { DatasetAndModelContext } from "../../store/dataset-and-model-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
+import { useBaseConfigStore } from "../../stores/baseConfigStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { Label } from "../UI/label";
 import { PlusIcon } from "../UI/icons";
 import Button from "../CustomButton";
@@ -40,11 +40,9 @@ export default function ForgetClassTabPlusButton({
   fetchAndSaveExperiments,
   hasNoSelectedForgetClass,
 }: Props) {
+  const { saveDataset, saveNeuralNetworkModel } = useBaseConfigStore();
   const { addSelectedForgetClass, saveForgetClass, selectedForgetClasses } =
-    useContext(ForgetClassContext);
-  const { saveDataset, saveNeuralNetworkModel } = useContext(
-    DatasetAndModelContext
-  );
+    useForgetClassStore();
 
   const unselectForgetClasses = useMemo(
     () =>

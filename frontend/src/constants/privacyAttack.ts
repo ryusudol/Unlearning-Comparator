@@ -1,7 +1,12 @@
-import {
-  ThresholdStrategy,
-  LineGraphLegendData,
-} from "../types/privacy-attack";
+interface LineGraphLegendData {
+  color: string;
+  label: string;
+}
+
+interface ThresholdStrategy {
+  strategy: string;
+  explanation: string;
+}
 
 export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
   {

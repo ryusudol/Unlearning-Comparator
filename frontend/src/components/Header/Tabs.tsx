@@ -1,17 +1,16 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 
-import { CIFAR_10_CLASSES } from "../../constants/common";
-import { Experiment, Experiments } from "../../types/experiments-context";
-import { ForgetClassContext } from "../../store/forget-class-context";
-import { ExperimentsContext } from "../../store/experiments-context";
-import { fetchAllExperimentsData } from "../../utils/api/unlearning";
-import ForgetClassTab from "./Tab";
+import Tab from "./Tab";
 import ForgetClassTabPlusButton from "./TabPlusButton";
+import { CIFAR_10_CLASSES } from "../../constants/common";
+import { Experiment, Experiments } from "../../types/data";
+import { useExperimentsStore } from "../../stores/experimentsStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 
-export default function ForgetClassTabs() {
-  const { selectedForgetClasses } = useContext(ForgetClassContext);
-  const { saveExperiments, setIsExperimentsLoading } =
-    useContext(ExperimentsContext);
+export default function Tabs() {
+  const { selectedForgetClasses } = useForgetClassStore();
+  const { saveExperiments, setIsExperimentsLoading } = useExperimentsStore();
 
   const hasNoSelectedForgetClass = selectedForgetClasses.length === 0;
 
@@ -39,8 +38,8 @@ export default function ForgetClassTabs() {
   };
 
   return (
-    <div className="flex items-center gap-1 relative -bottom-[11px]">
-      <ForgetClassTab
+    <div className="flex items-center gap-1 relative -bottom-2.5">
+      <Tab
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
       />

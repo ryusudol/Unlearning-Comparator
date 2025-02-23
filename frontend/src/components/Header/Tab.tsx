@@ -1,23 +1,19 @@
-import { useContext } from "react";
-
 import { MultiplicationSignIcon } from "../UI/icons";
 import { CIFAR_10_CLASSES } from "../../constants/common";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { ForgetClassContext } from "../../store/forget-class-context";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 
 interface Props {
   setOpen: (open: boolean) => void;
   fetchAndSaveExperiments: (forgetClass: string) => Promise<void>;
 }
 
-export default function ForgetClassTab({
-  setOpen,
-  fetchAndSaveExperiments,
-}: Props) {
-  const { selectedForgetClasses, saveForgetClass, deleteSelectedForgetClass } =
-    useContext(ForgetClassContext);
-
-  const { forgetClass, forgetClassNumber } = useForgetClass();
+export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
+  const {
+    forgetClass,
+    selectedForgetClasses,
+    saveForgetClass,
+    deleteSelectedForgetClass,
+  } = useForgetClassStore();
 
   const handleForgetClassChange = async (value: string) => {
     saveForgetClass(value);
@@ -33,9 +29,9 @@ export default function ForgetClassTab({
 
     deleteSelectedForgetClass(targetClass);
 
-    if (targetClass === CIFAR_10_CLASSES[forgetClassNumber]) {
+    if (targetClass === CIFAR_10_CLASSES[forgetClass]) {
       if (selectedForgetClasses.length === 1) {
-        saveForgetClass(undefined);
+        saveForgetClass(-1);
         setOpen(true);
       } else {
         const autoSelectedForgetClass =

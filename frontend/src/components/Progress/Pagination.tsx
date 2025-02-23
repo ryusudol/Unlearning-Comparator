@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 
 import {
   Pagination,
@@ -8,14 +8,14 @@ import {
   PaginationPrevious,
 } from "../UI/pagination";
 import { PREV, NEXT } from "../../views/Progress";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 
 interface Props extends React.LiHTMLAttributes<HTMLLIElement> {
   currentPage: number;
 }
 
 export default function ProgressPagination({ currentPage, ...props }: Props) {
-  const { totalExperimentsCount } = useContext(RunningStatusContext);
+  const { totalExperimentsCount } = useRunningStatusStore();
 
   return (
     <Pagination className="w-fit mx-0">

@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
@@ -7,16 +7,19 @@ import {
   STROKE_CONFIG,
   FONT_CONFIG,
 } from "../../constants/common";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
-import { ExperimentsContext } from "../../store/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 
 const CONFIG = {
   WIDTH: 252,
-  HEIGHT: 230,
+  HEIGHT: 240,
   MIN_BUBBLE_SIZE: 1,
   MAX_BUBBLE_SIZE: 90,
   MIN_VALUE_TO_DISPLAY: 0.002,
@@ -45,11 +48,10 @@ export default function BubbleChart({
   onHoverEnd,
   showYAxis = true,
 }: Props) {
-  const { forgetClass } = useForgetClass();
-  const { baseline, comparison } = useModelSelection();
-
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const { forgetClass } = useForgetClassStore();
+  const { modelA, modelB } = useModelDataStore();
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const [tooltip, setTooltip] = useState({
     display: false,
@@ -68,7 +70,7 @@ export default function BubbleChart({
 
   const zoom = calculateZoom();
   const isBaseline = mode === "Baseline";
-  const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
+  const experiment = isBaseline ? modelAExperiment : modelBExperiment;
 
   const handleMouseOut = useCallback(
     (event: MouseEvent) => {
@@ -90,7 +92,7 @@ export default function BubbleChart({
     const margin = {
       top: 8,
       right: 4,
-      bottom: 38,
+      bottom: 48,
       left: 64,
     };
     const width = CONFIG.WIDTH - margin.left - margin.right;
@@ -123,7 +125,11 @@ export default function BubbleChart({
       .axisBottom(xScale)
       .tickValues(d3.range(0, 10))
       .tickSize(0)
-      .tickFormat((d) => CIFAR_10_CLASSES[d as number]);
+      .tickFormat((d) =>
+        d === forgetClass
+          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          : CIFAR_10_CLASSES[d as number]
+      );
 
     const yAxis = d3
       .axisLeft(yScale)
@@ -298,8 +304,8 @@ export default function BubbleChart({
       }`}
     >
       {showYAxis && (
-        <span className="absolute top-[42%] left-1 -rotate-90 text-nowrap -mx-7 text-xs">
-          Ground Truth
+        <span className="absolute top-[42%] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
+          True Class
         </span>
       )}
       <svg ref={svgRef}></svg>
@@ -321,7 +327,7 @@ export default function BubbleChart({
             }}
           >
             <div>
-              <span>Ground Truth</span>:{" "}
+              <span>True Class</span>:{" "}
               <span className="font-semibold">
                 {CIFAR_10_CLASSES[tooltip.content.groundTruth]}
               </span>
@@ -355,7 +361,7 @@ export default function BubbleChart({
               Prediction
             </span>
             <span style={{ color: COLORS.EMERALD }}>
-              ({modelType}, {baseline})
+              ({modelType}, {modelA})
             </span>
           </>
         ) : (
@@ -365,7 +371,7 @@ export default function BubbleChart({
               Prediction
             </span>
             <span style={{ color: COLORS.PURPLE }}>
-              ({modelType}, {comparison})
+              ({modelType}, {modelB})
             </span>
           </>
         )}

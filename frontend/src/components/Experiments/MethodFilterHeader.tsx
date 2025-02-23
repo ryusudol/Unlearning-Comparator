@@ -7,6 +7,7 @@ import { UNLEARNING_METHODS } from "../../constants/experiments";
 const MOUSEDOWN = "mousedown";
 
 export default function MethodFilterHeader({ column }: { column: any }) {
+  const [filterValue, setFilterValue] = useState("all");
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0 });
 
@@ -23,8 +24,9 @@ export default function MethodFilterHeader({ column }: { column: any }) {
     }
   }, [showDropdown]);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: string) => () => {
     column.setFilterValue(value);
+    setFilterValue(value);
     setShowDropdown(false);
   };
 
@@ -54,6 +56,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
     <div ref={containerRef} className="flex items-center relative">
       <span>Method</span>
       <FilterIcon
+        filterValue={filterValue}
         className="ml-1 cursor-pointer w-3.5"
         onClick={() => setShowDropdown(true)}
       />
@@ -68,7 +71,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
             }}
           >
             <div
-              onClick={() => handleSelect("all")}
+              onClick={handleSelect("all")}
               className="px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer"
             >
               All
@@ -76,14 +79,14 @@ export default function MethodFilterHeader({ column }: { column: any }) {
             {UNLEARNING_METHODS.map((method) => (
               <div
                 key={method}
-                onClick={() => handleSelect(method)}
+                onClick={handleSelect(method)}
                 className="px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer"
               >
                 {method}
               </div>
             ))}
           </div>,
-          document.body,
+          document.body
         )}
     </div>
   );

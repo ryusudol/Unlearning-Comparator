@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 
 import View from "../components/View";
 import Title from "../components/Title";
@@ -7,23 +7,23 @@ import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../app/App";
 import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
-import { BaselineComparisonContext } from "../store/baseline-comparison-context";
-import { useForgetClass } from "../hooks/useForgetClass";
+import { useForgetClassStore } from "../stores/forgetClassStore";
+import { useModelDataStore } from "../stores/modelDataStore";
 import { Point } from "../types/data";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 
 export default function Core() {
-  const { forgetClassExist, forgetClassNumber } = useForgetClass();
-
-  const { baseline, comparison } = useContext(BaselineComparisonContext);
+  const { forgetClass } = useForgetClassStore();
+  const { modelA, modelB } = useModelDataStore();
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
   const [baselinePoints, setBaselinePoints] = useState<Point[]>([]);
   const [comparisonPoints, setComparisonPoints] = useState<Point[]>([]);
 
   const isEmbeddingMode = displayMode === EMBEDDINGS;
+  const forgetClassExist = forgetClass !== -1;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
@@ -39,13 +39,13 @@ export default function Core() {
     async function loadBaselineData() {
       if (!forgetClassExist) return;
 
-      const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
+      const ids: string[] = await fetchAllWeightNames(forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
-      if (!baseline || !slicedIds.includes(baseline)) return;
+      if (!modelA || !slicedIds.includes(modelA)) return;
 
       try {
-        const data = await fetchFileData(forgetClassNumber, baseline);
+        const data = await fetchFileData(forgetClass, modelA);
         setBaselinePoints(data.points);
       } catch (error) {
         console.error(`Failed to fetch an unlearned data file: ${error}`);
@@ -53,19 +53,19 @@ export default function Core() {
       }
     }
     loadBaselineData();
-  }, [baseline, forgetClassExist, forgetClassNumber]);
+  }, [forgetClass, forgetClassExist, modelA]);
 
   useEffect(() => {
     async function loadComparisonData() {
       if (!forgetClassExist) return;
 
-      const ids: string[] = await fetchAllWeightNames(forgetClassNumber);
+      const ids: string[] = await fetchAllWeightNames(forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
-      if (!comparison || !slicedIds.includes(comparison)) return;
+      if (!modelB || !slicedIds.includes(modelB)) return;
 
       try {
-        const data = await fetchFileData(forgetClassNumber, comparison);
+        const data = await fetchFileData(forgetClass, modelB);
         setComparisonPoints(data.points);
       } catch (error) {
         console.error(`Error fetching comparison file data: ${error}`);
@@ -73,7 +73,7 @@ export default function Core() {
       }
     }
     loadComparisonData();
-  }, [comparison, forgetClassExist, forgetClassNumber]);
+  }, [forgetClass, forgetClassExist, modelB]);
 
   const content = forgetClassExist ? (
     isEmbeddingMode ? (
@@ -100,7 +100,7 @@ export default function Core() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1 mb-0.5 ml-1 relative right-1">
           <Title
-            title="Embedding"
+            title="Embedding Space"
             id={EMBEDDINGS}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               !isEmbeddingMode && "text-gray-400 border-none"
@@ -109,7 +109,7 @@ export default function Core() {
             onClick={handleDisplayModeChange}
           />
           <Title
-            title="Privacy Attack"
+            title="Attack Simulation"
             id={ATTACK}
             customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               isEmbeddingMode && "text-gray-400 border-none"

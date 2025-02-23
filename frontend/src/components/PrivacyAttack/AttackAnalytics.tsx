@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useContext,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 
 import AttackPlot from "./AttackPlot";
@@ -13,12 +6,14 @@ import AttackSuccessFailure from "./AttackSuccessFailure";
 import Tooltip from "./Tooltip";
 import { Prob } from "../../types/embeddings";
 import { API_URL } from "../../constants/common";
-import { useForgetClass } from "../../hooks/useForgetClass";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
-import { ExperimentsContext } from "../../store/experiments-context";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { AttackResult, AttackResults, AttackData } from "../../types/data";
-import { Image } from "../../types/privacy-attack";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
 
@@ -27,19 +22,29 @@ const CONFIG = {
   TOOLTIP_HEIGHT: 274,
 } as const;
 
-export type Bin = { img_idx: number; value: number };
+export interface Bin {
+  img_idx: number;
+  value: number;
+}
 export type Data = {
   retrainData: Bin[];
   unlearnData: Bin[];
   lineChartData: AttackResult[];
 } | null;
 export type CategoryType = "unlearn" | "retrain";
-export type TooltipData = {
+export interface Image {
+  index: number;
+  base64: string;
+}
+export interface TooltipData {
   img_idx: number;
   value: number;
   type: CategoryType;
-};
-export type TooltipPosition = { x: number; y: number };
+}
+export interface TooltipPosition {
+  x: number;
+  y: number;
+}
 
 interface Props {
   mode: "Baseline" | "Comparison";
@@ -68,9 +73,9 @@ export default function AttackAnalytics({
   setThresholdStrategy,
   setUserModified,
 }: Props) {
-  const { forgetClassNumber } = useForgetClass();
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [lastThresholdStrategy, setLastThresholdStrategy] = useState("");
@@ -227,7 +232,6 @@ export default function AttackAnalytics({
             imageUrl={imageUrl}
             data={unlearnPoint}
             barChartData={barChartData}
-            forgetClass={forgetClassNumber}
             isBaseline={isBaseline}
           />
         );
@@ -241,25 +245,25 @@ export default function AttackAnalytics({
         console.error(`Failed to fetch tooltip data: ${error}`);
       }
     },
-    [forgetClassNumber, isBaseline, retrainPoints, unlearnPoints]
+    [isBaseline, retrainPoints, unlearnPoints]
   );
 
   useEffect(() => {
     const fetchImage = async () => {
       try {
         type Response = { images: Image[] };
-        const res: Response = await fetchAllSubsetImages(forgetClassNumber);
+        const res: Response = await fetchAllSubsetImages(forgetClass);
         setImages(res.images);
       } catch (error) {
         console.error(`Error fetching subset images: ${error}`);
       }
     };
     fetchImage();
-  }, [forgetClassNumber]);
+  }, [forgetClass]);
 
   useEffect(() => {
     const getAttackData = async () => {
-      const experiment = isBaseline ? baselineExperiment : comparisonExperiment;
+      const experiment = isBaseline ? modelAExperiment : modelBExperiment;
 
       if (!retrainAttackData || !experiment) {
         setData({
@@ -308,11 +312,11 @@ export default function AttackAnalytics({
     getAttackData();
   }, [
     aboveThreshold,
-    baselineExperiment,
-    comparisonExperiment,
     isBaseline,
     isMetricEntropy,
     metric,
+    modelAExperiment,
+    modelBExperiment,
     retrainAttackData,
   ]);
 
@@ -362,11 +366,11 @@ export default function AttackAnalytics({
     } else if (thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy) {
       const key =
         `${metric.toLowerCase()}_above_${aboveThreshold}` as keyof AttackResults;
-      const baselineLineChartData = baselineExperiment
-        ? baselineExperiment.attack.results[key] || []
+      const baselineLineChartData = modelAExperiment
+        ? modelAExperiment.attack.results[key] || []
         : [];
-      const comparisonLineChartData = comparisonExperiment
-        ? comparisonExperiment.attack.results[key] || []
+      const comparisonLineChartData = modelBExperiment
+        ? modelBExperiment.attack.results[key] || []
         : [];
       const combinedLineChartData = [
         ...baselineLineChartData,
@@ -393,12 +397,12 @@ export default function AttackAnalytics({
     setThresholdStrategy("");
   }, [
     aboveThreshold,
-    baselineExperiment,
-    comparisonExperiment,
     data,
     isAboveThresholdUnlearn,
     isMetricEntropy,
     metric,
+    modelAExperiment,
+    modelBExperiment,
     setThresholdStrategy,
     thresholdStrategy,
     thresholdValue,

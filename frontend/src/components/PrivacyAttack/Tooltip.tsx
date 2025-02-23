@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import { NeuralNetworkIcon, ModelAIcon, ModelBIcon } from "../UI/icons";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
 
@@ -20,8 +20,7 @@ const CONFIG = {
   SELECT_CHART_FONT_SIZE: "9px",
   UNSELECT_CHART_FONT_SIZE: "8.5px",
   PATTERN_SIZE: 3,
-  BASELINE_LEGEND_X_OFFSET: 92,
-  COMPARISON_LEGEND_X_OFFSET: 106,
+  LEGEND_X_OFFSET: 98,
   LEGEND_X: 11,
   LEGEND_Y: 7,
   LEGEND_GAP: 48,
@@ -41,7 +40,6 @@ interface Props {
     baseline: { class: number; value: number }[];
     comparison: { class: number; value: number }[];
   };
-  forgetClass: number;
   isBaseline: boolean;
 }
 
@@ -51,18 +49,18 @@ export default React.memo(function Tooltip({
   imageUrl,
   data,
   barChartData,
-  forgetClass,
   isBaseline,
 }: Props) {
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+
   const svgRef = useRef(null);
 
   const legendRectColor = d3.schemeTableau10[9];
 
-  const groundTruthIdx = Number(data[2]);
+  const groundTruthIdx = Number(data[0]);
   const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-
   const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
   const baselinePrediction = CIFAR_10_CLASSES[predictionIdx];
   const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
@@ -126,16 +124,12 @@ export default React.memo(function Tooltip({
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH);
 
-    const lengedXOffset = isBaseline
-      ? CONFIG.BASELINE_LEGEND_X_OFFSET
-      : CONFIG.COMPARISON_LEGEND_X_OFFSET;
-
     const basleineLegend = svg
       .append("g")
       .attr("class", "legend")
       .attr(
         "transform",
-        `translate(${width - CONFIG.MARGIN.right - lengedXOffset}, 1)`
+        `translate(${width - CONFIG.MARGIN.right - CONFIG.LEGEND_X_OFFSET}, 1)`
       );
 
     basleineLegend
@@ -174,7 +168,7 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text(isBaseline ? "Baseline" : "Comparison")
+      .text("Unlearned")
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -344,24 +338,23 @@ export default React.memo(function Tooltip({
         />
         <div>
           <div className="mt-1">
-            <span>Ground Truth:</span>{" "}
+            <span>True Class:</span>{" "}
             <span className="font-semibold">{groundTruth}</span>
           </div>
           <div className="flex flex-col">
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
-              <NeuralNetworkIcon color={COLORS.DARK_GRAY} className="mr-1" />
-              <span className="mr-0.5">Retrain:</span>
+              <span style={{ color: COLORS.DARK_GRAY }} className="mr-0.5">
+                Retrained Model:
+              </span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
-              {isBaseline ? (
-                <ModelAIcon className="mr-1" />
-              ) : (
-                <ModelBIcon className="mr-1" />
-              )}
-              <span className="mr-0.5">
-                {isBaseline ? "Baseline" : "Comparison"}:
+              <span
+                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                className="mr-0.5"
+              >
+                {isBaseline ? "Model A" : "Model B"}:
               </span>
               <span className="font-semibold">{comparisonPrediction}</span>
             </p>

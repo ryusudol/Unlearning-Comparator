@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import {
   Dialog,
@@ -10,10 +10,10 @@ import {
 import UnlearningConfiguration from "./UnlearningConfiguration";
 import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
-import { RunningStatusContext } from "../../store/running-status-context";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 
 export default function AddExperimentsButton() {
-  const { isRunning } = useContext(RunningStatusContext);
+  const { isRunning } = useRunningStatusStore();
 
   const [open, setOpen] = useState(false);
 
@@ -40,10 +40,10 @@ export default function AddExperimentsButton() {
         >
           <PlusIcon
             color={isRunning ? "#d1d5db" : "white"}
-            className="w-4 h-4 mr-1.5"
+            className="w-3 h-3 mr-1.5"
           />
           <span className={`text-[17px] ${isRunning && "text-gray-300"}`}>
-            Generate Models
+            Add Models
           </span>
         </Button>
       </DialogTrigger>

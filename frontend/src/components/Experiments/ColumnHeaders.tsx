@@ -1,4 +1,3 @@
-import React from "react";
 import { Column } from "@tanstack/react-table";
 
 import {
@@ -18,7 +17,7 @@ export const EpochHeader = ({
   const sortOrder = column.getIsSorted() || null;
   return (
     <Button
-      className="w-full px-0 h-[34px]"
+      className="w-full px-0 h-[34px] flex justify-start"
       variant="ghost"
       onClick={() => {
         const currentSort = column.getIsSorted();
@@ -50,7 +49,7 @@ export const BSHeader = ({
     <HoverCard openDelay={0} closeDelay={100}>
       <HoverCardTrigger>
         <Button
-          className="w-full px-0 h-[34px]"
+          className="w-full px-0 h-[34px] flex justify-start"
           variant="ghost"
           onClick={() => {
             const currentSort = column.getIsSorted();
@@ -87,7 +86,7 @@ export const LRHeader = ({
     <HoverCard openDelay={0} closeDelay={100}>
       <HoverCardTrigger>
         <Button
-          className="w-full px-0 h-[34px]"
+          className="w-full px-0 h-[34px] flex justify-start"
           variant="ghost"
           onClick={() => {
             const currentSort = column.getIsSorted();
@@ -182,7 +181,7 @@ export const RAHeader = ({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto px-3 py-2" side="top">
-        Remaining Accuracy
+        Retaining Accuracy
       </HoverCardContent>
     </HoverCard>
   );
@@ -256,44 +255,7 @@ export const TRAHeader = ({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto px-3 py-2" side="top">
-        Test Remaining Accuracy
-      </HoverCardContent>
-    </HoverCard>
-  );
-};
-
-export const PAHeader = ({
-  column,
-}: {
-  column: Column<ExperimentData, unknown>;
-}) => {
-  const sortOrder = column.getIsSorted() || null;
-  return (
-    <HoverCard openDelay={0} closeDelay={100}>
-      <HoverCardTrigger>
-        <Button
-          className="w-full px-0 h-[34px]"
-          variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
-        >
-          PA
-          <UnfoldMoreIcon
-            className="w-4 text-muted-foreground"
-            sortOrder={sortOrder}
-          />
-        </Button>
-      </HoverCardTrigger>
-      <HoverCardContent className="w-auto px-3 py-2" side="top">
-        Pulled Accuracy
+        Test Retaining Accuracy
       </HoverCardContent>
     </HoverCard>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
@@ -6,26 +6,34 @@ import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
 import Timer from "../components/Progress/Timer";
 import Pagination from "../components/Progress/Pagination";
-import { useForgetClass } from "../hooks/useForgetClass";
-import { Step } from "../types/progress";
+import { useForgetClassStore } from "../stores/forgetClassStore";
 import { CONFIG } from "../app/App";
-import { RunningStatusContext } from "../store/running-status-context";
-import { RunningIndexContext } from "../store/running-index-context";
+import { useRunningIndexStore } from "../stores/runningIndexStore";
+import { useRunningStatusStore } from "../stores/runningStatusStore";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
+
+export type Step = {
+  step: number;
+  title: string;
+  description: string;
+};
 
 export const PREV = "prev";
 export const NEXT = "next";
 
 export default function Progress() {
+  const { runningIndex } = useRunningIndexStore();
   const { isRunning, statuses, activeStep, totalExperimentsCount } =
-    useContext(RunningStatusContext);
-  const { runningIndex } = useContext(RunningIndexContext);
+    useRunningStatusStore();
 
-  const { forgetClassNumber, forgetClassExist } = useForgetClass();
+  const { forgetClass } = useForgetClassStore();
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(runningIndex + 1);
+
+  const displayedPageIdx = currentPage - 1;
+  const forgetClassExist = forgetClass !== -1;
 
   useEffect(() => {
     if (isRunning) {
@@ -37,11 +45,9 @@ export default function Progress() {
     setCurrentPage(runningIndex + 1);
   }, [runningIndex]);
 
-  const displayedPageIdx = currentPage - 1;
-
   const currentStatus =
-    forgetClassExist && statuses[forgetClassNumber].length > displayedPageIdx
-      ? statuses[forgetClassNumber][displayedPageIdx]
+    forgetClassExist && statuses[forgetClass].length > displayedPageIdx
+      ? statuses[forgetClass][displayedPageIdx]
       : null;
 
   const progress = currentStatus ? currentStatus.progress : "";
@@ -115,13 +121,12 @@ export default function Progress() {
             undefined
           }
         />
-        {totalExperimentsCount > 0 &&
-          statuses[forgetClassNumber].length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              onClick={handlePaginationClick}
-            />
-          )}
+        {totalExperimentsCount > 0 && statuses[forgetClass].length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            onClick={handlePaginationClick}
+          />
+        )}
       </div>
       {forgetClassExist ? (
         <Stepper

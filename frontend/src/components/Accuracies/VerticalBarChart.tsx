@@ -1,4 +1,4 @@
-import { useContext, useMemo, useCallback, memo } from "react";
+import { useMemo, useCallback, memo } from "react";
 import {
   Bar,
   BarChart,
@@ -15,18 +15,29 @@ import {
   FONT_CONFIG,
   STROKE_CONFIG,
 } from "../../constants/common";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { COLORS } from "../../constants/colors";
 import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
-import { useForgetClass } from "../../hooks/useForgetClass";
 import { ChartContainer } from "../UI/chart";
-import { GapDataItem } from "../../types/accuracies";
-import { ExperimentsContext } from "../../store/experiments-context";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
   BAR_HEIGHT: 12,
 } as const;
+
+export interface GapDataItem {
+  category: string;
+  classLabel: string;
+  gap: number;
+  fill: string;
+  baselineAccuracy: number;
+  comparisonAccuracy: number;
+}
 
 interface Props {
   mode: "Training" | "Test";
@@ -45,35 +56,34 @@ export default function VerticalBarChart({
   hoveredClass,
   onHoverChange,
 }: Props) {
-  const { forgetClassNumber } = useForgetClass();
-  const { baseline, comparison } = useModelSelection();
+  const { forgetClass } = useForgetClassStore();
+  const { modelA, modelB } = useModelDataStore();
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
-  const { baselineExperiment, comparisonExperiment } =
-    useContext(ExperimentsContext);
+  const forgettingCIFAR10Class = CIFAR_10_CLASSES[forgetClass];
 
   const renderTick = useCallback(
     (props: any) => (
       <AxisTick
         {...props}
         hoveredClass={hoveredClass}
-        forgetClass={forgetClassNumber}
+        forgetClass={forgetClass}
       />
     ),
-    [forgetClassNumber, hoveredClass]
+    [forgetClass, hoveredClass]
   );
 
   const remainGapAvgValue = useMemo(() => {
     const remainingData = gapData.filter(
-      (datum) =>
-        CIFAR_10_CLASSES[+datum.classLabel] !==
-        CIFAR_10_CLASSES[forgetClassNumber]
+      (datum) => CIFAR_10_CLASSES[+datum.classLabel] !== forgettingCIFAR10Class
     );
 
     return remainingData.length
       ? remainingData.reduce((sum, datum) => sum + datum.gap, 0) /
           remainingData.length
       : 0;
-  }, [forgetClassNumber, gapData]);
+  }, [forgettingCIFAR10Class, gapData]);
 
   const remainGapAvg = remainGapAvgValue.toFixed(
     CONFIG.TOOLTIP_TO_FIXED_LENGTH
@@ -126,8 +136,7 @@ export default function VerticalBarChart({
                 VERTICAL_BAR_CHART_CONFIG[
                   value as keyof typeof VERTICAL_BAR_CHART_CONFIG
                 ]?.label;
-              const isForgetClass =
-                label === CIFAR_10_CLASSES[forgetClassNumber];
+              const isForgetClass = label === forgettingCIFAR10Class;
               return isForgetClass ? `${label}\u00A0(X)` : label;
             }}
             style={{ whiteSpace: "nowrap" }}
@@ -176,10 +185,10 @@ export default function VerticalBarChart({
                       className="text-xs"
                     >
                       <tspan fill={COLORS.EMERALD}>
-                        ({baselineExperiment?.Type}, {baseline})
+                        ({modelAExperiment?.Type}, {modelA})
                       </tspan>
                       <tspan fill={COLORS.PURPLE} dx="10">
-                        ({comparisonExperiment?.Type}, {comparison})
+                        ({modelBExperiment?.Type}, {modelB})
                       </tspan>
                     </text>
                   </g>
@@ -196,7 +205,7 @@ export default function VerticalBarChart({
             stroke={COLORS.GRAY}
             strokeDasharray={STROKE_CONFIG.STROKE_DASHARRAY}
             label={{
-              value: `avg (remain): ${remainGapAvg}`,
+              value: `avg (retain): ${remainGapAvg}`,
               position: "top",
               fontSize: FONT_CONFIG.FONT_SIZE_10,
               fill: COLORS.BLACK,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   SortingState,
   getCoreRowModel,
@@ -10,28 +10,23 @@ import {
 
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-import { useModelSelection } from "../../hooks/useModelSelection";
 import { ExperimentData } from "../../types/data";
 import { ScrollArea } from "../UI/scroll-area";
-import { ExperimentsContext } from "../../store/experiments-context";
-import { BaselineComparisonContext } from "../../store/baseline-comparison-context";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { cn } from "../../utils/util";
 import { columns } from "./Columns";
 import { COLORS } from "../../constants/colors";
-import { Experiment } from "../../types/experiments-context";
+import { Experiment } from "../../types/data";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { useExperimentsStore } from "../../stores/experimentsStore";
 
 interface Props {
   isExpanded: boolean;
 }
 
 export default function DataTable({ isExpanded }: Props) {
-  const { experiments } = useContext(ExperimentsContext);
-  const { saveBaseline, saveComparison } = useContext(
-    BaselineComparisonContext
-  );
-
-  const { baseline, comparison } = useModelSelection();
+  const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
+  const { experiments } = useExperimentsStore();
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -63,9 +58,9 @@ export default function DataTable({ isExpanded }: Props) {
     }
 
     const isModelAColumn = column.id === "A";
-    const currentSelection = isModelAColumn ? baseline : comparison;
-    const saveModel = isModelAColumn ? saveBaseline : saveComparison;
-    const disabledValue = isModelAColumn ? comparison : baseline;
+    const currentSelection = isModelAColumn ? modelA : modelB;
+    const saveModel = isModelAColumn ? saveModelA : saveModelB;
+    const disabledValue = isModelAColumn ? modelB : modelA;
 
     return {
       ...column,
@@ -103,25 +98,18 @@ export default function DataTable({ isExpanded }: Props) {
 
   useEffect(() => {
     const baselineExists = Object.values(experiments).some(
-      (experiment) => experiment.ID === baseline
+      (experiment) => experiment.ID === modelA
     );
     if (!baselineExists) {
       if (tableData.length > 0) {
-        saveBaseline(tableData[0].ID);
-        saveComparison(tableData[1].ID);
+        saveModelA(tableData[0].ID);
+        saveModelB(tableData[1].ID);
       } else {
-        saveBaseline("");
-        saveComparison("");
+        saveModelA("");
+        saveModelB("");
       }
     }
-  }, [
-    baseline,
-    comparison,
-    experiments,
-    saveBaseline,
-    saveComparison,
-    tableData,
-  ]);
+  }, [experiments, modelA, saveModelA, saveModelB, tableData]);
 
   return (
     <div className="w-full overflow-visible">

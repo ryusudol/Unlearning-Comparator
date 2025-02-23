@@ -1,4 +1,4 @@
-import { Experiment } from "../../types/experiments-context";
+import { Experiment } from "../../types/data";
 import { TRAIN } from "../../constants/common";
 
 export const getCkaData = (
