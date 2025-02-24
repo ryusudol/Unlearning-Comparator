@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Header from "../components/Header/Header";
 import ModelScreening from "../views/ModelScreening";
 import Core from "../views/Core";
-import QuantitativeAnalysis from "../views/QuantitativeAnalysis";
+import QuantitativeAnalysis from "../views/ForgettingAndRetention";
 import { useExperimentsStore } from "../stores/experimentsStore";
 import { calculateZoom } from "../utils/util";
 
