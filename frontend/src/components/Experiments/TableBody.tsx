@@ -66,11 +66,19 @@ export default function _TableBody({ table, tableData }: Props) {
         .clamp(true),
     []
   );
-  const blueScale = useMemo(
+  const blueScaleRTE = useMemo(
     () =>
       d3
         .scaleSequential(d3.interpolateBlues)
         .domain([CONFIG.COLOR_MAPPING_RTE_THRESHOLD, 0])
+        .clamp(true),
+    []
+  );
+  const blueScaleFQS = useMemo(
+    () =>
+      d3
+        .scaleSequential(d3.interpolateBlues)
+        .domain([CONFIG.COLOR_MAPPING_THRESHOLD, 1])
         .clamp(true),
     []
   );
@@ -91,9 +99,9 @@ export default function _TableBody({ table, tableData }: Props) {
       if (value === "N/A") {
         backgroundColor = "white";
       } else {
-        if (columnId === "RTE" || columnId === "FQS") {
+        if (columnId === "RTE") {
           if (value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD) {
-            backgroundColor = blueScale(value);
+            backgroundColor = blueScaleRTE(value);
             textColor =
               value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD / 2
                 ? COLORS.WHITE
@@ -113,7 +121,10 @@ export default function _TableBody({ table, tableData }: Props) {
             }
           } else {
             if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
-              backgroundColor = greenScaleHigher(value);
+              backgroundColor =
+                columnId === "FQS"
+                  ? blueScaleFQS(value)
+                  : greenScaleHigher(value);
               textColor = value >= 0.9 ? COLORS.WHITE : COLORS.BLACK;
             } else {
               backgroundColor = "#f8f8f8";
