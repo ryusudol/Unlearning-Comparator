@@ -20,7 +20,7 @@ import { COLORS } from "../../constants/colors";
 import { ExperimentData } from "../../types/data";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { PerformanceMetrics } from "../../types/experiments";
-import { Experiment, Experiments } from "../../types/data";
+import { Experiments } from "../../types/data";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
@@ -36,10 +36,9 @@ const CONFIG = {
 
 interface Props {
   table: TableType<ExperimentData>;
-  tableData: Experiment[];
 }
 
-export default function _TableBody({ table, tableData }: Props) {
+export default function _TableBody({ table }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
   const { forgetClass } = useForgetClassStore();
   const { isRunning } = useRunningStatusStore();

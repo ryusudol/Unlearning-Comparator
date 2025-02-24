@@ -6,7 +6,7 @@ export default function ModelScreening() {
   return (
     <div className="flex items-center">
       <Experiments />
-      <Separator orientation="vertical" className="h-[220px] w-[1px]" />
+      <Separator orientation="vertical" className="h-[205px] w-[1px]" />
       <Progress />
     </div>
   );
