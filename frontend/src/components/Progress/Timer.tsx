@@ -7,9 +7,10 @@ import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { Separator } from "../../components/UI/separator";
 
 export default function Timer() {
-  const { forgetClass } = useForgetClassStore();
-  const { runningIndex } = useRunningIndexStore();
-  const { statuses, isRunning } = useRunningStatusStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const runningIndex = useRunningIndexStore((state) => state.runningIndex);
+  const statuses = useRunningStatusStore((state) => state.statuses);
+  const isRunning = useRunningStatusStore((state) => state.isRunning);
 
   const [runningTime, setRunningTime] = useState(0);
 
@@ -37,10 +38,14 @@ export default function Timer() {
   return (
     <>
       <Separator orientation="vertical" className="h-4" />
+      <span className="text-xs">
+        ID: {statuses[forgetClass][runningIndex].recent_id}
+      </span>
+      <Separator orientation="vertical" className="h-4" />
       <div>
-        <div className="flex items-center gap-1 relative top-0.5">
+        <div className="flex items-center gap-1">
           <Clock className="text-muted-foreground w-3 h-3" />
-          <span className="text-sm">
+          <span className="text-xs">
             {isRunning
               ? runningTime.toFixed(1)
               : statuses[forgetClass][runningIndex].elapsed_time.toFixed(1)}
