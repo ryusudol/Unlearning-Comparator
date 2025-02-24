@@ -23,7 +23,7 @@ interface AttackLegendProps {
   aboveThreshold: string;
   onMetricChange: (val: Metric) => void;
   onAboveThresholdChange: (val: string) => void;
-  onThresholdStrategyChange: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onThresholdStrategyChange: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function AttackLegend({
@@ -105,11 +105,10 @@ export default function AttackLegend({
         <div className="flex items-center gap-1.5">
           {THRESHOLD_STRATEGIES.map((strategy, idx) => (
             <HoverCard key={idx} openDelay={0} closeDelay={100}>
-              <HoverCardTrigger
-                onClick={onThresholdStrategyChange}
-                className="rounded-md"
-              >
-                <Button className="">{strategy.strategy}</Button>
+              <HoverCardTrigger className="rounded-md">
+                <Button onClick={onThresholdStrategyChange}>
+                  {strategy.strategy}
+                </Button>
               </HoverCardTrigger>
               <HoverCardContent className="w-auto px-3 py-2" side="top">
                 {strategy.explanation}
