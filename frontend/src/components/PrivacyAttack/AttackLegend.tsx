@@ -1,5 +1,6 @@
 import React from "react";
 
+import Button from "../CustomButton";
 import {
   HoverCard,
   HoverCardContent,
@@ -36,7 +37,7 @@ export default function AttackLegend({
   const isUnlearnChecked = aboveThreshold === UNLEARN;
 
   return (
-    <div className="flex items-center gap-[22px] bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
+    <div className="h-9 flex items-center gap-[22px] bg-white border border-b-white rounded-t-md px-2 py-1 absolute -top-[29px] -right-[1px] text-sm z-10">
       <div className="flex items-center relative bottom-[1px]">
         <span className="font-medium mr-2">Metric</span>
         <RadioGroup
@@ -106,9 +107,9 @@ export default function AttackLegend({
             <HoverCard key={idx} openDelay={0} closeDelay={100}>
               <HoverCardTrigger
                 onClick={onThresholdStrategyChange}
-                className="h-5 flex items-center bg-[#585858] text-white text-xs font-medium px-2 rounded-md cursor-pointer hover:bg-[#696969] transition"
+                className="rounded-md"
               >
-                {strategy.strategy}
+                <Button className="">{strategy.strategy}</Button>
               </HoverCardTrigger>
               <HoverCardContent className="w-auto px-3 py-2" side="top">
                 {strategy.explanation}
