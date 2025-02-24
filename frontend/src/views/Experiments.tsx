@@ -41,10 +41,12 @@ export default function Experiments() {
             )}
           </div>
         </div>
-        <div className="flex items-center">
-          <DualMetricsLegend />
-          {forgetClassExist && <AddModelsButton />}
-        </div>
+        {forgetClassExist && (
+          <div className="flex items-center relative bottom-0.5">
+            <DualMetricsLegend />
+            <AddModelsButton />
+          </div>
+        )}
       </div>
       {forgetClassExist ? (
         <DataTable isExpanded={isExpanded} />
