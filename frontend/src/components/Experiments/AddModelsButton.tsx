@@ -34,7 +34,7 @@ export default function AddExperimentsButton() {
       <DialogTrigger disabled={isRunning}>
         <Button
           onClick={handleAddExpClick}
-          className={`px-2.5 mr-0.5 ${
+          className={`relative bottom-[1px] ${
             isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
           }`}
         >
@@ -42,7 +42,7 @@ export default function AddExperimentsButton() {
             color={isRunning ? "#d1d5db" : "white"}
             className="w-3 h-3 mr-1.5"
           />
-          <span className={`text-[17px] ${isRunning && "text-gray-300"}`}>
+          <span className={`text-base ${isRunning && "text-gray-300"}`}>
             Add Models
           </span>
         </Button>

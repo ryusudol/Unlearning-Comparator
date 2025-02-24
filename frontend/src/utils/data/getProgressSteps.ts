@@ -94,11 +94,6 @@ export const getProgressSteps = (
               progress === IDLE || progress === UNLEARNING ? "100" : ckaProgress
             }%**`
           : "Calculating CKA Similarity"
-      }\n${
-        completedSteps.includes(3) &&
-        (progress === IDLE || progress === UNLEARNING)
-          ? `Done! Experiment ID: **${status.recent_id}**`
-          : ""
       }`,
     },
   ];

@@ -22,11 +22,10 @@ export const PREV = "prev";
 export const NEXT = "next";
 
 export default function Progress() {
-  const { runningIndex } = useRunningIndexStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const runningIndex = useRunningIndexStore((state) => state.runningIndex);
   const { isRunning, statuses, activeStep, totalExperimentsCount } =
     useRunningStatusStore();
-
-  const { forgetClass } = useForgetClassStore();
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);

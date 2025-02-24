@@ -86,7 +86,7 @@ export default function ForgetClassTabPlusButton({
             }
       }
     >
-      <DialogTrigger className="w-8 h-[30px] flex justify-center items-center mb-0.5 transition hover:bg-gray-800 rounded-t">
+      <DialogTrigger className="w-8 h-[30px] flex justify-center items-center transition hover:bg-gray-800 rounded-t">
         <PlusIcon className="w-3.5 h-3.5" color="#64758B" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[320px] p-4">
