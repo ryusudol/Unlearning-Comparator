@@ -41,7 +41,7 @@ export default function PredictionMatrix() {
         !areAllModelsSelected ? (
           <Indicator about="BaselineComparison" />
         ) : (
-          <div className="flex flex-col pt-2 pb-6 border rounded-md">
+          <div className="flex flex-col pt-2 pb-6">
             <BubbleChartLegend />
             <div className="flex items-center relative left-2">
               {modelAExperiment && (

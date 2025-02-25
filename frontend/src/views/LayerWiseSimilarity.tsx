@@ -31,9 +31,7 @@ export default function LayerWiseSimilarity() {
       </div>
       {forgetClassExist ? (
         areAllModelsSelected ? (
-          <div className="border rounded-md">
-            <LineChart dataset={selectedDataset} />
-          </div>
+          <LineChart dataset={selectedDataset} />
         ) : (
           <Indicator about="BaselineComparison" />
         )
