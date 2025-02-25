@@ -28,7 +28,7 @@ import {
 } from "../../constants/experiments";
 import { Label } from "../UI/label";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { EraserIcon, PlusIcon, FlagIcon } from "../UI/icons";
+import { PlusIcon } from "../UI/icons";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useRunningIndexStore } from "../../stores/runningIndexStore";
@@ -327,10 +327,7 @@ export default function UnlearningConfiguration() {
       onSubmit={handleSubmit}
     >
       <div className="w-full grid grid-cols-2 gap-y-2">
-        <div className="flex items-center mb-1">
-          <FlagIcon className="w-[15px] h-[15px] mr-1.5" />
-          <Label className="text-base text-nowrap">Initial Model</Label>
-        </div>
+        <span className="text-base text-nowrap mb-1">Initial Model</span>
         <Select
           defaultValue={weightNames ? weightNames[0] : initModel}
           onValueChange={handleInitialModelChange}
@@ -352,10 +349,7 @@ export default function UnlearningConfiguration() {
         </Select>
       </div>
       <div className="w-full grid grid-cols-2 gap-y-2">
-        <div className="flex items-center mb-1">
-          <EraserIcon className="w-4 h-4 mr-1.5 scale-[115%]" />
-          <Label className="text-base text-nowrap">Unlearning Method</Label>
-        </div>
+        <Label className="text-base text-nowrap mb-1">Unlearning Method</Label>
         <Select defaultValue="ft" onValueChange={handleMethodChange}>
           <SelectTrigger className="h-[25px] text-base">
             <SelectValue placeholder={UNLEARNING_METHODS[0]} />
