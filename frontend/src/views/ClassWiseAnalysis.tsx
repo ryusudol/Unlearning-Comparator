@@ -12,8 +12,9 @@ import { useModelDataStore } from "../stores/modelDataStore";
 import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
 export default function ClassWiseAnalysis() {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -44,7 +45,7 @@ export default function ClassWiseAnalysis() {
       <Subtitle title="Class-wise Accuracy" />
       {forgetClass !== undefined ? (
         modelA !== "" && modelB !== "" ? (
-          <div className="flex items-center py-1 relative border rounded-md">
+          <div className="flex items-center py-1 border rounded-md relative left-2">
             <VerticalBarChart
               mode="Training"
               gapData={accuracyData.trainAccuracyGap}
