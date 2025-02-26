@@ -62,7 +62,7 @@ export default function PrivacyAttack({
   };
 
   const handleThresholdStrategyChange = (
-    e: React.MouseEvent<HTMLAnchorElement>
+    e: React.MouseEvent<HTMLButtonElement>
   ) => {
     const strategy = e.currentTarget.innerHTML;
     setThresholdStrategy(strategy);

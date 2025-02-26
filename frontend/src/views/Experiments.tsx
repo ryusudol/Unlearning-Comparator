@@ -11,7 +11,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
 import { CONFIG } from "../app/App";
 
 export default function Experiments() {
-  const { forgetClass } = useForgetClassStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -29,7 +29,7 @@ export default function Experiments() {
     >
       <div className="flex justify-between items-center mb-[3px]">
         <div className="grid grid-flow-col grid-x-2 items-center">
-          <Title title="Model Screening" customClass="right-[1px]" />
+          <Title title="Model Screening" className="left-0.5" />
           <div
             className="w-5 h-5 flex justify-center items-center cursor-pointer bg-white hover:bg-[#f8f9fb] transition"
             onClick={handleExpandClick}
@@ -41,10 +41,12 @@ export default function Experiments() {
             )}
           </div>
         </div>
-        <div className="flex items-center">
-          <DualMetricsLegend />
-          {forgetClassExist && <AddModelsButton />}
-        </div>
+        {forgetClassExist && (
+          <div className="flex items-center relative bottom-0.5">
+            <DualMetricsLegend />
+            <AddModelsButton />
+          </div>
+        )}
       </div>
       {forgetClassExist ? (
         <DataTable isExpanded={isExpanded} />

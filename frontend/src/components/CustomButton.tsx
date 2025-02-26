@@ -11,7 +11,7 @@ interface Props
 export default function CustomButton({ children, className, ...props }: Props) {
   return (
     <Button
-      className={`bg-[#585858] hover:bg-[#696969] h-[30px] px-3 ${className}`}
+      className={`bg-[#585858] hover:bg-[#696969] h-[30px] text-base px-3 ${className}`}
       {...props}
     >
       {children}

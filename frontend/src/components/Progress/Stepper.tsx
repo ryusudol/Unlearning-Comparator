@@ -24,7 +24,7 @@ const _Stepper = memo(function _Stepper({
   isRunning: boolean;
 }) {
   return (
-    <Stepper className="mt-1 flex flex-col justify-start gap-3">
+    <Stepper className="mt-0.5 flex flex-col justify-start gap-2">
       {steps.map((step, idx) => {
         const isNotLastStep = idx !== steps.length - 1;
 

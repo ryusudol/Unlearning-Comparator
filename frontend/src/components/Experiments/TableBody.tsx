@@ -20,7 +20,7 @@ import { COLORS } from "../../constants/colors";
 import { ExperimentData } from "../../types/data";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { PerformanceMetrics } from "../../types/experiments";
-import { Experiment, Experiments } from "../../types/data";
+import { Experiments } from "../../types/data";
 import { Table, TableBody, TableCell, TableRow } from "../UI/table";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
@@ -36,10 +36,9 @@ const CONFIG = {
 
 interface Props {
   table: TableType<ExperimentData>;
-  tableData: Experiment[];
 }
 
-export default function _TableBody({ table, tableData }: Props) {
+export default function _TableBody({ table }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
   const { forgetClass } = useForgetClassStore();
   const { isRunning } = useRunningStatusStore();
@@ -107,7 +106,7 @@ export default function _TableBody({ table, tableData }: Props) {
                 ? COLORS.WHITE
                 : COLORS.BLACK;
           } else {
-            backgroundColor = "#f8f8f8";
+            backgroundColor = blueScaleRTE(CONFIG.COLOR_MAPPING_RTE_THRESHOLD);
             textColor = COLORS.BLACK;
           }
         } else {
@@ -116,7 +115,9 @@ export default function _TableBody({ table, tableData }: Props) {
               backgroundColor = greenScaleLower(value);
               textColor = value <= 0.1 ? COLORS.WHITE : COLORS.BLACK;
             } else {
-              backgroundColor = "#f8f8f8";
+              backgroundColor = greenScaleLower(
+                1 - CONFIG.COLOR_MAPPING_THRESHOLD
+              );
               textColor = COLORS.BLACK;
             }
           } else {
@@ -127,7 +128,10 @@ export default function _TableBody({ table, tableData }: Props) {
                   : greenScaleHigher(value);
               textColor = value >= 0.9 ? COLORS.WHITE : COLORS.BLACK;
             } else {
-              backgroundColor = "#f8f8f8";
+              backgroundColor =
+                columnId === "FQS"
+                  ? blueScaleFQS(CONFIG.COLOR_MAPPING_THRESHOLD)
+                  : greenScaleHigher(CONFIG.COLOR_MAPPING_THRESHOLD);
               textColor = COLORS.BLACK;
             }
           }

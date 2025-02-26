@@ -20,23 +20,25 @@ export default function DatasetModeSelector({ dataset, onValueChange }: Props) {
       >
         <div className="flex items-center space-x-0.5">
           <RadioGroupItem
+            className="w-3 h-3"
             value={TRAIN}
             id={TRAIN}
             color="#4d4d4d"
             checked={isTrainChecked}
           />
-          <Label className="text-xs font-light text-[#4d4d4d]" htmlFor={TRAIN}>
+          <Label className="text-sm font-light text-[#4d4d4d]" htmlFor={TRAIN}>
             Train
           </Label>
         </div>
         <div className="flex items-center space-x-0.5">
           <RadioGroupItem
+            className="w-3 h-3"
             value={TEST}
             id={TEST}
             color="#4d4d4d"
             checked={isTestChecked}
           />
-          <Label className="text-xs font-light text-[#4d4d4d]" htmlFor={TEST}>
+          <Label className="text-sm font-light text-[#4d4d4d]" htmlFor={TEST}>
             Test
           </Label>
         </div>

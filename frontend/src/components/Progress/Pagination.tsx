@@ -19,15 +19,15 @@ export default function ProgressPagination({ currentPage, ...props }: Props) {
 
   return (
     <Pagination className="w-fit mx-0">
-      <PaginationContent className="h-7">
-        <PaginationItem id={PREV} className="h-7" {...props}>
-          <PaginationPrevious href="#" className="px-0.5 py-0 h-7" />
+      <PaginationContent className="h-6">
+        <PaginationItem id={PREV} className="h-6" {...props}>
+          <PaginationPrevious href="#" className="p-0 h-6" />
         </PaginationItem>
         <span className="text-sm">
           {currentPage} / {totalExperimentsCount}
         </span>
-        <PaginationItem id={NEXT} className="h-7" {...props}>
-          <PaginationNext href="#" className="px-0.5 py-0 h-7" />
+        <PaginationItem id={NEXT} className="h-6" {...props}>
+          <PaginationNext href="#" className="p-0 h-6" />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

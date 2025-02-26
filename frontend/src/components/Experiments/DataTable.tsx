@@ -26,7 +26,7 @@ interface Props {
 
 export default function DataTable({ isExpanded }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
-  const { experiments } = useExperimentsStore();
+  const experiments = useExperimentsStore((state) => state.experiments);
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -71,7 +71,9 @@ export default function DataTable({ isExpanded }: Props) {
             <RadioGroupItem
               value={row.id}
               className={cn(
-                "w-[18px] h-[18px] rounded-full",
+                `w-[18px] h-[18px] rounded-full relative ${
+                  isModelAColumn ? "left-1" : ""
+                }`,
                 isSelected && "[&_svg]:h-3 [&_svg]:w-3"
               )}
               checked={isSelected}
@@ -116,11 +118,11 @@ export default function DataTable({ isExpanded }: Props) {
       <TableHeader table={table} />
       {isExpanded ? (
         <div className="w-[1008px] absolute top-[78px] z-[49] bg-white shadow-xl rounded-b-md">
-          <TableBody table={table} tableData={tableData} />
+          <TableBody table={table} />
         </div>
       ) : (
-        <ScrollArea className="w-full h-[155px]">
-          <TableBody table={table} tableData={tableData} />
+        <ScrollArea className="w-full h-[166px]">
+          <TableBody table={table} />
         </ScrollArea>
       )}
     </div>

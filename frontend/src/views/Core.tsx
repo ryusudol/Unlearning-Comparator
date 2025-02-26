@@ -15,8 +15,9 @@ const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
 
 export default function Core() {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
   const [baselinePoints, setBaselinePoints] = useState<Point[]>([]);
@@ -102,7 +103,7 @@ export default function Core() {
           <Title
             title="Embedding Space"
             id={EMBEDDINGS}
-            customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
+            className={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               !isEmbeddingMode && "text-gray-400 border-none"
             }`}
             AdditionalContent={isEmbeddingMode && <UnderLine />}
@@ -111,7 +112,7 @@ export default function Core() {
           <Title
             title="Attack Simulation"
             id={ATTACK}
-            customClass={`relative z-10 cursor-pointer pb-0.5 px-1 ${
+            className={`relative z-10 cursor-pointer pb-0.5 px-1 ${
               isEmbeddingMode && "text-gray-400 border-none"
             }`}
             AdditionalContent={!isEmbeddingMode && <UnderLine />}
