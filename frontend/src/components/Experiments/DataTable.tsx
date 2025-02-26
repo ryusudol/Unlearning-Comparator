@@ -26,7 +26,7 @@ interface Props {
 
 export default function DataTable({ isExpanded }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
-  const { experiments } = useExperimentsStore();
+  const experiments = useExperimentsStore((state) => state.experiments);
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -121,7 +121,7 @@ export default function DataTable({ isExpanded }: Props) {
           <TableBody table={table} />
         </div>
       ) : (
-        <ScrollArea className="w-full h-[140px]">
+        <ScrollArea className="w-full h-[166px]">
           <TableBody table={table} />
         </ScrollArea>
       )}
