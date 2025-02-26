@@ -28,7 +28,7 @@ export default function PredictionMatrix() {
   const forgetClassExist = forgetClass !== -1;
 
   return (
-    <div className="mb-2">
+    <div>
       <div className="flex justify-between">
         <Subtitle title="Prediction Matrix" />
         {forgetClassExist && areAllModelsSelected && (
