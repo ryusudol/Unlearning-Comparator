@@ -7,15 +7,13 @@ import { CONFIG } from "../app/App";
 
 export default function ForgettingAndRetention() {
   return (
-    <View
-      width={CONFIG.ANALYSIS_VIEW_WIDTH}
-      height={CONFIG.TOTAL_HEIGHT}
-      className="flex flex-col"
-    >
+    <View width={CONFIG.ANALYSIS_VIEW_WIDTH} height={CONFIG.TOTAL_HEIGHT}>
       <Title title="Forgetting and Retention" />
-      <ClassWiseAnalysis />
-      <PredictionMatrix />
-      <LayerWiseSimilarity />
+      <div className="flex flex-col gap-3">
+        <ClassWiseAnalysis />
+        <PredictionMatrix />
+        <LayerWiseSimilarity />
+      </div>
     </View>
   );
 }
