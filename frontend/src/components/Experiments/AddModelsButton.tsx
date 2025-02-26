@@ -34,7 +34,7 @@ export default function AddExperimentsButton() {
       <DialogTrigger disabled={isRunning}>
         <Button
           onClick={handleAddExpClick}
-          className={`px-3.5 py-4 relative bottom-0.5 ${
+          className={`px-3.5 relative bottom-0.5 ${
             isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
           }`}
         >
