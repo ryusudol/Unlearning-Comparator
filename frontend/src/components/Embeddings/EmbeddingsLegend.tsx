@@ -5,7 +5,7 @@ import { TABLEAU10 } from "../../constants/colors";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 
 export default function EmbeddingsLegend() {
-  const { forgetClass } = useForgetClassStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
   return (
     <div className="h-9 flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-9 -right-[1px] text-sm z-10">
