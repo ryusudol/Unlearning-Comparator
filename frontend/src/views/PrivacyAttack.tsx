@@ -26,8 +26,9 @@ export default function PrivacyAttack({
   baselinePoints,
   comparisonPoints,
 }: Props) {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
 
   const [metric, setMetric] = useState<Metric>(ENTROPY);
   const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);

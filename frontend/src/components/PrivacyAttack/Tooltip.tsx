@@ -20,7 +20,8 @@ const CONFIG = {
   SELECT_CHART_FONT_SIZE: "9px",
   UNSELECT_CHART_FONT_SIZE: "8.5px",
   PATTERN_SIZE: 3,
-  LEGEND_X_OFFSET: 98,
+  LEGEND_X_MODEL_A_OFFSET: 92,
+  LEGEND_X_MODEL_B_OFFSET: 91,
   LEGEND_X: 11,
   LEGEND_Y: 7,
   LEGEND_GAP: 48,
@@ -124,12 +125,15 @@ export default React.memo(function Tooltip({
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH);
 
+    const legendXOffset = isBaseline
+      ? CONFIG.LEGEND_X_MODEL_A_OFFSET
+      : CONFIG.LEGEND_X_MODEL_B_OFFSET;
     const basleineLegend = svg
       .append("g")
       .attr("class", "legend")
       .attr(
         "transform",
-        `translate(${width - CONFIG.MARGIN.right - CONFIG.LEGEND_X_OFFSET}, 1)`
+        `translate(${width - CONFIG.MARGIN.right - legendXOffset}, 1)`
       );
 
     basleineLegend
@@ -168,7 +172,8 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text("Unlearned")
+      .text(isBaseline ? "Model A" : "Model B")
+      .style("fill", isBaseline ? COLORS.EMERALD : COLORS.PURPLE)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -209,7 +214,9 @@ export default React.memo(function Tooltip({
       .attr("class", "bar-baseline-group")
       .each(function (d, i) {
         const g = d3.select(this);
-        const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
+        const barWidth = isBaseline
+          ? xScale(d.value) - CONFIG.MARGIN.left - CONFIG.BAR_STROKE_WIDTH
+          : xScale(d.value) - CONFIG.MARGIN.left;
         const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
 
         g.append("rect")
@@ -247,7 +254,9 @@ export default React.memo(function Tooltip({
       .attr("class", "bar-comparison-group")
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
-        const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
+        const barWidth = !isBaseline
+          ? xScale(d.value) - CONFIG.MARGIN.left - CONFIG.BAR_STROKE_WIDTH
+          : xScale(d.value) - CONFIG.MARGIN.left;
         const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
 
         g.append("rect")
