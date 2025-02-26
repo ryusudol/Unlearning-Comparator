@@ -31,7 +31,7 @@ export default function Experiments() {
         <div className="grid grid-flow-col grid-x-2 items-center">
           <Title title="Model Screening" className="left-0.5" />
           <div
-            className="w-5 h-5 flex justify-center items-center cursor-pointer bg-white hover:bg-[#f8f9fb] transition"
+            className="w-5 h-5 flex justify-center items-center cursor-pointer bg-white hover:bg-[#f8f9fb] transition ml-1"
             onClick={handleExpandClick}
           >
             {isExpanded ? (
