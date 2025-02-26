@@ -40,10 +40,13 @@ interface Props {
 
 export default function _TableBody({ table }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
-  const { forgetClass } = useForgetClassStore();
-  const { isRunning } = useRunningStatusStore();
-  const { experiments, saveExperiments, setIsExperimentsLoading } =
-    useExperimentsStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const isRunning = useRunningStatusStore((state) => state.isRunning);
+  const experiments = useExperimentsStore((state) => state.experiments);
+  const saveExperiments = useExperimentsStore((state) => state.saveExperiments);
+  const setIsExperimentsLoading = useExperimentsStore(
+    (state) => state.setIsExperimentsLoading
+  );
 
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
@@ -74,11 +77,7 @@ export default function _TableBody({ table }: Props) {
     []
   );
   const blueScaleFQS = useMemo(
-    () =>
-      d3
-        .scaleSequential(d3.interpolateBlues)
-        .domain([CONFIG.COLOR_MAPPING_THRESHOLD, 1])
-        .clamp(true),
+    () => d3.scaleSequential(d3.interpolateBlues).domain([0, 1]).clamp(true),
     []
   );
 
@@ -120,18 +119,17 @@ export default function _TableBody({ table }: Props) {
               );
               textColor = COLORS.BLACK;
             }
+          } else if (columnId === "FQS") {
+            backgroundColor = blueScaleFQS(value);
+            textColor = value >= 0.5 ? COLORS.WHITE : COLORS.BLACK;
           } else {
             if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
-              backgroundColor =
-                columnId === "FQS"
-                  ? blueScaleFQS(value)
-                  : greenScaleHigher(value);
+              backgroundColor = greenScaleHigher(value);
               textColor = value >= 0.9 ? COLORS.WHITE : COLORS.BLACK;
             } else {
-              backgroundColor =
-                columnId === "FQS"
-                  ? blueScaleFQS(CONFIG.COLOR_MAPPING_THRESHOLD)
-                  : greenScaleHigher(CONFIG.COLOR_MAPPING_THRESHOLD);
+              backgroundColor = greenScaleHigher(
+                CONFIG.COLOR_MAPPING_THRESHOLD
+              );
               textColor = COLORS.BLACK;
             }
           }
