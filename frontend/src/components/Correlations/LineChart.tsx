@@ -81,7 +81,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
       <style>{LINE_CHART_TICK_STYLE}</style>
       <CustomLegend />
       <ChartContainer
-        className="w-[454px] h-[220px] relative"
+        className="w-[454px] h-[270px] relative"
         config={LINE_CHART_CONFIG}
       >
         <LineChart
@@ -90,7 +90,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           margin={{
             top: 20,
             right: 7,
-            bottom: 14,
+            bottom: 30,
             left: -14,
           }}
           onMouseMove={(state: any) => {
@@ -109,6 +109,15 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             angle={-45}
             tick={renderTick}
             ticks={layers}
+            label={{
+              value: "ResNet18 Layers",
+              position: "center",
+              dy: 38,
+              style: {
+                fontSize: 12,
+                fill: COLORS.BLACK,
+              },
+            }}
           />
           <YAxis
             tickLine={false}

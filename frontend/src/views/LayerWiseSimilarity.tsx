@@ -19,7 +19,7 @@ export default function LayerWiseSimilarity() {
   const forgetClassExist = forgetClass !== -1;
 
   return (
-    <div>
+    <div className="relative top-4">
       <div className="flex justify-between">
         <Subtitle title="Layer-Wise Similarity" />
         {forgetClassExist && areAllModelsSelected && (
