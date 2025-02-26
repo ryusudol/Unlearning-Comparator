@@ -7,13 +7,13 @@ import {
   STROKE_CONFIG,
   FONT_CONFIG,
 } from "../../constants/common";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
-import { calculateZoom } from "../../utils/util";
 import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { calculateZoom } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 
@@ -48,8 +48,9 @@ export default function BubbleChart({
   onHoverEnd,
   showYAxis = true,
 }: Props) {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -333,19 +334,35 @@ export default function BubbleChart({
               </span>
             </div>
             <div>
-              <span>Prediction</span>:{" "}
+              <span>Predicted Class</span>:{" "}
               <span className="font-semibold">
                 {CIFAR_10_CLASSES[tooltip.content.prediction]}
               </span>
             </div>
             <div>
-              <span>Proportion</span>:{" "}
+              <span>
+                <span
+                  style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                >
+                  {isBaseline ? "Model A" : "Model B"}
+                </span>{" "}
+                Proportion
+              </span>
+              :{" "}
               <span className="font-semibold">
                 {tooltip.content.label.toFixed(3)}
               </span>
             </div>
             <div>
-              <span>Confidence</span>:{" "}
+              <span>
+                <span
+                  style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                >
+                  {isBaseline ? "Model A" : "Model B"}
+                </span>{" "}
+                Confidence
+              </span>
+              :{" "}
               <span className="font-semibold">
                 {tooltip.content.conf.toFixed(3)}
               </span>
