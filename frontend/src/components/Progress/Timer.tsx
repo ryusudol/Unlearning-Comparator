@@ -39,7 +39,7 @@ export default function Timer() {
     <>
       <Separator orientation="vertical" className="h-4" />
       <span className="text-xs">
-        ID: {statuses[forgetClass][runningIndex].recent_id}
+        ID: {statuses[forgetClass][runningIndex].recent_id ?? "-"}
       </span>
       <Separator orientation="vertical" className="h-4" />
       <div>

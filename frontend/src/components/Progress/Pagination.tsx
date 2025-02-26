@@ -18,7 +18,7 @@ export default function ProgressPagination({ currentPage, ...props }: Props) {
   const { totalExperimentsCount } = useRunningStatusStore();
 
   return (
-    <Pagination className="w-fit mx-0">
+    <Pagination className="w-fit mx-0 relative top-0.5">
       <PaginationContent className="h-6">
         <PaginationItem id={PREV} className="h-6" {...props}>
           <PaginationPrevious href="#" className="p-0 h-6" />

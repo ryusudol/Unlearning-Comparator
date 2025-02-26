@@ -56,8 +56,9 @@ export default function VerticalBarChart({
   hoveredClass,
   onHoverChange,
 }: Props) {
-  const { forgetClass } = useForgetClassStore();
-  const { modelA, modelB } = useModelDataStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -90,7 +91,7 @@ export default function VerticalBarChart({
   );
 
   return (
-    <div className="flex flex-col justify-center items-center relative">
+    <div className="flex flex-col justify-center items-center relative bottom-1.5">
       <span
         className={`text-[15px] relative ${
           mode === "Training" ? "left-[30px]" : "left-0"
@@ -100,7 +101,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={VERTICAL_BAR_CHART_CONFIG}
-        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[245px]`}
+        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[272px]`}
       >
         <BarChart
           accessibilityLayer
@@ -207,7 +208,7 @@ export default function VerticalBarChart({
             label={{
               value: `avg (retain): ${remainGapAvg}`,
               position: "top",
-              fontSize: FONT_CONFIG.FONT_SIZE_10,
+              fontSize: FONT_CONFIG.FONT_SIZE_12,
               fill: COLORS.BLACK,
               offset: 3.5,
             }}

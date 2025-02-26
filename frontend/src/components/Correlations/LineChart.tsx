@@ -81,16 +81,16 @@ export default function _LineChart({ dataset }: { dataset: string }) {
       <style>{LINE_CHART_TICK_STYLE}</style>
       <CustomLegend />
       <ChartContainer
-        className="w-[454px] h-[220px] relative"
+        className="w-[454px] h-[250px] relative"
         config={LINE_CHART_CONFIG}
       >
         <LineChart
           accessibilityLayer
           data={ckaData}
           margin={{
-            top: 20,
+            top: 8,
             right: 7,
-            bottom: 14,
+            bottom: 30,
             left: -14,
           }}
           onMouseMove={(state: any) => {
@@ -109,6 +109,15 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             angle={-45}
             tick={renderTick}
             ticks={layers}
+            label={{
+              value: "ResNet18 Layers",
+              position: "center",
+              dy: 38,
+              style: {
+                fontSize: 12,
+                fill: COLORS.BLACK,
+              },
+            }}
           />
           <YAxis
             tickLine={false}
@@ -122,7 +131,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
             tickMargin={-2}
             label={{
-              value: "CKA (Before vs. After Unlearning)",
+              value: "CKA value",
               angle: -90,
               position: "center",
               style: {
@@ -270,7 +279,7 @@ function CustomLegend() {
   const CIRCLE = "circle";
 
   return (
-    <div className="absolute bottom-[52px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] roudned-md pl-2.5 pr-1.5 py-0.5">
+    <div className="absolute bottom-[70px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[2px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
       {LINE_CHART_LEGEND_DATA.map((item, i) => {
         const Icon =
           item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
@@ -298,8 +307,10 @@ function CustomLegend() {
               />
             </div>
             <span style={i > 1 ? { marginLeft: "6px" } : undefined}>
-              <span style={{ color: item.color }}>{item.label}</span> (
-              {experiment.Type}, {experiment.ID})
+              <span style={{ color: item.color }}>
+                {item.label} ({experiment.Type}, {experiment.ID}){" "}
+                {i < 2 ? "Retrain" : "Forget"}
+              </span>
             </span>
           </div>
         );

@@ -19,7 +19,7 @@ export default function LayerWiseSimilarity() {
   const forgetClassExist = forgetClass !== -1;
 
   return (
-    <>
+    <div className="relative top-4">
       <div className="flex justify-between">
         <Subtitle title="Layer-Wise Similarity" />
         {forgetClassExist && areAllModelsSelected && (
@@ -31,13 +31,18 @@ export default function LayerWiseSimilarity() {
       </div>
       {forgetClassExist ? (
         areAllModelsSelected ? (
-          <LineChart dataset={selectedDataset} />
+          <div className="relative bottom-[3px]">
+            <p className="text-center">
+              CKA Similarity (Before vs. After Unlearning)
+            </p>
+            <LineChart dataset={selectedDataset} />
+          </div>
         ) : (
           <Indicator about="BaselineComparison" />
         )
       ) : (
         <Indicator about="ForgetClass" />
       )}
-    </>
+    </div>
   );
 }

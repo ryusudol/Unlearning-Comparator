@@ -41,25 +41,25 @@ export const LINE_CHART_LEGEND_DATA = [
   {
     type: "circle",
     color: COLORS.EMERALD,
-    label: "Model A Retain",
+    label: "Model A",
     spacing: "py-0.5",
   },
   {
     type: "circle",
     color: COLORS.PURPLE,
-    label: "Model B Retain",
+    label: "Model B",
     spacing: "py-0.5",
   },
   {
     type: "cross",
     color: COLORS.EMERALD,
-    label: "Model A Forget",
+    label: "Model A",
     spacing: "py-0.5",
   },
   {
     type: "cross",
     color: COLORS.PURPLE,
-    label: "Model B Forget",
+    label: "Model B",
     spacing: "py-0.5",
   },
 ] as const;

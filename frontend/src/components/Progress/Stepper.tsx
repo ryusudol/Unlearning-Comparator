@@ -24,7 +24,7 @@ const _Stepper = memo(function _Stepper({
   isRunning: boolean;
 }) {
   return (
-    <Stepper className="mt-0.5 flex flex-col justify-start gap-2">
+    <Stepper className="mt-0.5 flex flex-col justify-start gap-2.5">
       {steps.map((step, idx) => {
         const isNotLastStep = idx !== steps.length - 1;
 
@@ -68,7 +68,7 @@ const _Stepper = memo(function _Stepper({
               </StepperTitle>
               <StepperDescription className="text-muted-foreground whitespace-pre-line transition text-sm leading-[17px]">
                 {step.description.split("\n").map((el, idx) => (
-                  <p key={idx} className="text-black">
+                  <p key={idx} className="text-black mb-0.5">
                     {el
                       .split("**")
                       .map((part, partIdx) =>

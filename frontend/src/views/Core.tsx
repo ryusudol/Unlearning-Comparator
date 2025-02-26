@@ -98,27 +98,25 @@ export default function Core() {
       height={CONFIG.CORE_HEIGHT}
       className="border-l-0"
     >
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-1 mb-0.5 ml-1 relative right-1">
-          <Title
-            title="Embedding Space"
-            id={EMBEDDINGS}
-            className={`relative z-10 cursor-pointer pb-0.5 px-1 ${
-              !isEmbeddingMode && "text-gray-400 border-none"
-            }`}
-            AdditionalContent={isEmbeddingMode && <UnderLine />}
-            onClick={handleDisplayModeChange}
-          />
-          <Title
-            title="Attack Simulation"
-            id={ATTACK}
-            className={`relative z-10 cursor-pointer pb-0.5 px-1 ${
-              isEmbeddingMode && "text-gray-400 border-none"
-            }`}
-            AdditionalContent={!isEmbeddingMode && <UnderLine />}
-            onClick={handleDisplayModeChange}
-          />
-        </div>
+      <div className="flex items-center gap-1 mb-1.5 ml-1 relative right-1">
+        <Title
+          title="Embedding Space"
+          id={EMBEDDINGS}
+          className={`relative z-10 cursor-pointer px-1 ${
+            !isEmbeddingMode && "text-gray-400 border-none"
+          }`}
+          AdditionalContent={isEmbeddingMode && <UnderLine />}
+          onClick={handleDisplayModeChange}
+        />
+        <Title
+          title="Attack Simulation"
+          id={ATTACK}
+          className={`relative z-10 cursor-pointer px-1 ${
+            isEmbeddingMode && "text-gray-400 border-none"
+          }`}
+          AdditionalContent={!isEmbeddingMode && <UnderLine />}
+          onClick={handleDisplayModeChange}
+        />
       </div>
       {content}
     </View>
@@ -126,7 +124,5 @@ export default function Core() {
 }
 
 function UnderLine() {
-  return (
-    <div className="absolute w-full h-0.5 bg-black right-0 bottom-[3px]" />
-  );
+  return <div className="absolute w-full h-0.5 bg-black right-0 -bottom-0.5" />;
 }

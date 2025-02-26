@@ -4,15 +4,15 @@ import Subtitle from "../components/Subtitle";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleChart from "../components/Predictions/BubbleChart";
 import Indicator from "../components/Indicator";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../stores/experimentsStore";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { useModelDataStore } from "../stores/modelDataStore";
 import { Arrow } from "../components/UI/icons";
 import { TRAIN } from "../constants/common";
 import { bubbleColorScale } from "../constants/colors";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../stores/experimentsStore";
 
 export default function PredictionMatrix() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
@@ -28,7 +28,7 @@ export default function PredictionMatrix() {
   const forgetClassExist = forgetClass !== -1;
 
   return (
-    <div className="mb-2">
+    <div>
       <div className="flex justify-between">
         <Subtitle title="Prediction Matrix" />
         {forgetClassExist && areAllModelsSelected && (
@@ -42,7 +42,7 @@ export default function PredictionMatrix() {
         !areAllModelsSelected ? (
           <Indicator about="BaselineComparison" />
         ) : (
-          <div className="flex flex-col pt-2 pb-6">
+          <div className="flex flex-col relative bottom-2.5">
             <BubbleChartLegend />
             <div className="flex items-center relative left-2">
               {modelAExperiment && (
@@ -80,17 +80,23 @@ function BubbleChartLegend() {
   const gradient = `linear-gradient(to right, ${bubbleColorScale.join(", ")})`;
 
   return (
-    <div className="flex justify-center items-center gap-11 text-[#666666] relative left-5">
-      <div className="grid grid-cols-[1fr,auto,1fr] gap-y-1.5 place-items-center relative left-8 text-[11px] grid-rows-[18px_14px]">
+    <div className="flex justify-center items-center gap-11 text-[#666666] mb-1">
+      <div className="grid grid-cols-[1fr,auto,1fr] gap-y-1.5 place-items-center text-[11px] grid-rows-[18px_14px] relative left-[26px]">
         <div className="w-1.5 h-1.5 rounded-full bg-[#666666]" />
         <div className="w-3 h-3 rounded-full bg-[#666666]" />
         <div className="w-[18px] h-[18px] rounded-full bg-[#666666]" />
-        <span className="text-nowrap">Lower Proportion</span>
-        <Arrow className="mx-1.5" />
-        <span className="text-nowrap">Higher Proportion</span>
+        <p className="flex flex-col relative top-1">
+          <span className="text-sm relative top-1">Smaller</span>
+          <span className="text-[10px]">Proportion</span>
+        </p>
+        <Arrow className="mx-4" />
+        <p className="flex flex-col relative top-1">
+          <span className="text-sm relative top-1">Larger</span>
+          <span className="text-[10px]">Proportion</span>
+        </p>
       </div>
-      <div className="flex flex-col items-center gap-y-1.5 relative top-0.5 right-2">
-        <div className="relative w-[148px] h-3.5">
+      <div className="flex flex-col items-center gap-y-1.5 relative left-7">
+        <div className="relative top-2 w-[148px] h-3.5">
           <div
             className="absolute w-full h-full"
             style={{ background: gradient }}
@@ -103,9 +109,15 @@ function BubbleChartLegend() {
           </div>
         </div>
         <div className="text-nowrap flex items-center gap-1.5 text-[11px]">
-          <span>Lower Confidence</span>
-          <Arrow />
-          <span>Higher Confidence</span>
+          <p className="flex flex-col relative top-1">
+            <span className="text-sm relative top-1">Lower</span>
+            <span className="text-[10px]">Confidence</span>
+          </p>
+          <Arrow className="mx-2" />
+          <p className="flex flex-col relative top-1">
+            <span className="text-sm relative top-1">Higher</span>
+            <span className="text-[10px]">Confidence</span>
+          </p>
         </div>
       </div>
     </div>

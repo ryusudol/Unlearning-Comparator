@@ -9,10 +9,9 @@ interface Props {
 
 export default function DatasetModeSelector({ dataset, onValueChange }: Props) {
   const isTrainChecked = dataset === TRAIN;
-  const isTestChecked = dataset === TEST;
 
   return (
-    <div className="flex items-center relative right-1">
+    <div className="flex items-center relative right-3.5 bottom-1">
       <RadioGroup
         className="flex"
         defaultValue={TRAIN}
@@ -36,7 +35,7 @@ export default function DatasetModeSelector({ dataset, onValueChange }: Props) {
             value={TEST}
             id={TEST}
             color="#4d4d4d"
-            checked={isTestChecked}
+            checked={!isTrainChecked}
           />
           <Label className="text-sm font-light text-[#4d4d4d]" htmlFor={TEST}>
             Test
