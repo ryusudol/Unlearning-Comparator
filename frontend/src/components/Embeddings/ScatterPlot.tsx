@@ -72,8 +72,9 @@ interface Props {
 
 const ScatterPlot = forwardRef(
   ({ mode, modelType, data, onHover, hoveredInstance }: Props, ref) => {
-    const { forgetClass } = useForgetClassStore();
-    const { modelA, modelB } = useModelDataStore();
+    const forgetClass = useForgetClassStore((state) => state.forgetClass);
+    const modelA = useModelDataStore((state) => state.modelA);
+    const modelB = useModelDataStore((state) => state.modelB);
     const modelAExperiment = useModelAExperiment();
     const modelBExperiment = useModelBExperiment();
 
@@ -368,8 +369,6 @@ const ScatterPlot = forwardRef(
                 barChartData={barChartData}
                 forgetClass={forgetClass}
                 isBaseline={isBaseline}
-                modelAType={modelAExperiment?.Type}
-                modelBType={modelBExperiment?.Type}
               />
             );
 
