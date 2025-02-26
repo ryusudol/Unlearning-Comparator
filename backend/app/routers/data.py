@@ -1,4 +1,5 @@
 # Python standard libraries
+import base64
 import io
 import json
 import os
@@ -181,15 +182,6 @@ async def get_all_subset_images(forget_class: str):
       ]
     }
     """
-    import os
-    import json
-    import base64
-    import io
-    from fastapi import HTTPException
-    from PIL import Image
-    import numpy as np
-    from app.utils.data_loader import get_fixed_umap_indices
-
     # Validate forget_class parameter
     try:
         class_id = int(forget_class)
@@ -200,9 +192,9 @@ async def get_all_subset_images(forget_class: str):
         raise HTTPException(status_code=400, detail="forget_class must be between 0 and 9")
     
     # Set up the cache file path in the data/subset directory
-    cache_dir = os.path.join("data", "subset", forget_class)
+    cache_dir = os.path.join("data", "subset", str(class_id))
     os.makedirs(cache_dir, exist_ok=True)
-    cache_file = os.path.join(cache_dir, f"{class_id}_all_base64.json")
+    cache_file = os.path.join(cache_dir, f"{class_id}_base64.json")
 
     # If cached file exists, load and return it
     if os.path.exists(cache_file):
@@ -228,9 +220,9 @@ async def get_all_subset_images(forget_class: str):
         orig_img = x_train[idx]  # Original image as a numpy array (32x32x3)
         img = Image.fromarray(orig_img)
         # Resize image to 12x12 using bilinear interpolation
-        img_resized = img.resize((12, 12), Image.BILINEAR)
+        img_resized = img.resize((30, 30), Image.BILINEAR)
         buffer = io.BytesIO()
-        # Save the resized image as PNG (you can consider webp for further optimization)
+        # Save the resized image as PNG
         img_resized.save(buffer, format="PNG")
         base64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
         images_data.append({
