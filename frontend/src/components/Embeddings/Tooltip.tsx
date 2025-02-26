@@ -21,9 +21,7 @@ const CONFIG = {
   PATTERN_SIZE: 3,
   LEGEND_X: 11,
   LEGEND_Y: 7,
-  LEGEND_ORIGINAL_X_OFFSET: 99,
-  LEGEND_RETRAINED_X_OFFSET: 106,
-  LEGEND_UNLEARNED_X_OFFSET: 108,
+  LEGEND_X_OFFSET: 100,
   LEGEND_GAP: 58,
   LEGEND_FONT_SIZE: "10px",
   LEGEND_RECT_SIZE: 8,
@@ -41,8 +39,6 @@ interface Props {
   };
   forgetClass: number;
   isBaseline: boolean;
-  modelAType: string;
-  modelBType: string;
 }
 
 export default React.memo(function Tooltip({
@@ -51,8 +47,6 @@ export default React.memo(function Tooltip({
   barChartData,
   forgetClass,
   isBaseline,
-  modelAType,
-  modelBType,
 }: Props) {
   const svgRef = useRef(null);
 
@@ -124,18 +118,12 @@ export default React.memo(function Tooltip({
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH);
 
-    const baselineXOffset =
-      modelBType === "Original"
-        ? CONFIG.LEGEND_ORIGINAL_X_OFFSET
-        : modelBType === "Retrained"
-        ? CONFIG.LEGEND_RETRAINED_X_OFFSET
-        : CONFIG.LEGEND_UNLEARNED_X_OFFSET;
     const basleineLegend = svg
       .append("g")
       .attr("class", "legend")
       .attr(
         "transform",
-        `translate(${width - CONFIG.MARGIN.right - baselineXOffset}, 1)`
+        `translate(${width - CONFIG.MARGIN.right - CONFIG.LEGEND_X_OFFSET}, 1)`
       );
 
     basleineLegend
@@ -149,7 +137,7 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text(modelAType)
+      .text("Model A")
       .style("fill", COLORS.EMERALD)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
@@ -175,7 +163,7 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text(modelBType)
+      .text("Model B")
       .style("fill", COLORS.PURPLE)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
@@ -335,8 +323,6 @@ export default React.memo(function Tooltip({
     forgetClass,
     isBaseline,
     legendRectColor,
-    modelAType,
-    modelBType,
   ]);
 
   return (
@@ -361,13 +347,13 @@ export default React.memo(function Tooltip({
             <p>Predicted Class</p>
             <p className="flex items-center text-nowrap">
               <span style={{ color: COLORS.EMERALD }} className="mr-0.5">
-                {modelAType} Model:
+                Model A:
               </span>
               <span className="font-semibold">{baselinePrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
               <span style={{ color: COLORS.PURPLE }} className="mr-0.5">
-                {modelBType} Model:
+                Model B:
               </span>
               <span className="font-semibold">{comparisonPrediction}</span>
             </p>
