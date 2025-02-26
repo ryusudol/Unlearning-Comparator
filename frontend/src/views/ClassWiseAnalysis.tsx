@@ -45,7 +45,7 @@ export default function ClassWiseAnalysis() {
       <Subtitle title="Class-wise Accuracy" />
       {forgetClass !== undefined ? (
         modelA !== "" && modelB !== "" ? (
-          <div className="flex items-center py-1 relative left-2">
+          <div className="flex items-center relative left-2">
             <VerticalBarChart
               mode="Training"
               gapData={accuracyData.trainAccuracyGap}
