@@ -163,6 +163,17 @@ export default function VerticalBarChart({
                   }
                 ).viewBox || {};
 
+                const modelAType = modelAExperiment?.Type;
+                const modelBType = modelBExperiment?.Type;
+                let lowerTextDx =
+                  x +
+                  width / 2 +
+                  (modelAType === "Original"
+                    ? 5.5
+                    : modelAType === "Retrained"
+                    ? 2
+                    : 0);
+
                 return (
                   <g className="flex flex-col items-center justify-center">
                     <text
@@ -179,17 +190,17 @@ export default function VerticalBarChart({
                       {" High →"}
                     </text>
                     <text
-                      x={x + width / 2}
+                      x={lowerTextDx}
                       y={y + 42}
                       textAnchor="middle"
                       fill={COLORS.BLACK}
                       className="text-xs"
                     >
                       <tspan fill={COLORS.EMERALD}>
-                        ({modelAExperiment?.Type}, {modelA})
+                        ({modelAType}, {modelA})
                       </tspan>
-                      <tspan fill={COLORS.PURPLE} dx="10">
-                        ({modelBExperiment?.Type}, {modelB})
+                      <tspan fill={COLORS.PURPLE} dx="3">
+                        ({modelBType}, {modelB})
                       </tspan>
                     </text>
                   </g>
