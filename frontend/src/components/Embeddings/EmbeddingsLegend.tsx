@@ -41,7 +41,6 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           </li>
         </ul>
       </div>
-
       <div className="flex flex-col mr-1.5">
         <p className="text-lg font-medium mb-1">Predicted Class</p>
         <div
@@ -78,7 +77,6 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           })}
         </div>
       </div>
-
       <div className="flex gap-[15px]">
         <div className="ml-2">
           <p className="text-lg font-medium mb-[5px]">Highlight</p>
@@ -110,10 +108,9 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           ))}
         </div>
       </div>
-
       <Separator
         orientation="horizontal"
-        className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"
+        className="w-[calc(100%+12.8px)] h-[1px] absolute bottom-0 right-[10px]"
       />
     </div>
   );
