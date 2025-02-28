@@ -5,6 +5,7 @@ export interface UnlearningConfigurationData {
   epochs: number;
   learning_rate: number;
   batch_size: number;
+  base_weights: string;
 }
 
 // Status
