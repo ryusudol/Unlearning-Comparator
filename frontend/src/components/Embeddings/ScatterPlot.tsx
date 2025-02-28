@@ -841,7 +841,7 @@ const ScatterPlot = forwardRef(
             onClick={resetZoom}
           />
         )}
-        <div className="text-[15px] flex items-center relative bottom-3 px-3 bg-white z-10">
+        <div className="text-[15px] flex items-center relative bottom-3 px-3.5 bg-white z-10">
           {isBaseline ? (
             <div style={{ color: COLORS.EMERALD }}>
               <span>
@@ -856,7 +856,7 @@ const ScatterPlot = forwardRef(
             </div>
           )}
         </div>
-        <div className="w-[632px] h-[620px] flex flex-col justify-center items-center">
+        <div className="w-[632px] h-[638px] flex flex-col justify-center items-center">
           <div
             ref={containerRef}
             style={{
