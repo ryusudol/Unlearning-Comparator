@@ -40,12 +40,14 @@ class UnlearningFTThread(threading.Thread):
         test_loader,
         train_set,
         test_set,
-        status
+        status,
+        base_weights_path
     ):
         threading.Thread.__init__(self)
         self.model_before = model_before
         self.model = model_after
         self.device = device
+        self.base_weights_path = base_weights_path
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
@@ -311,7 +313,7 @@ class UnlearningFTThread(threading.Thread):
             "ID": self.status.recent_id,
             "FC": self.request.forget_class,
             "Type": "Unlearned",
-            "Base": f"000{self.request.forget_class}",
+            "Base": os.path.basename(self.base_weights_path).replace('.pth', ''),
             "Method": "FineTuning",
             "Epoch": self.request.epochs,
             "BS": self.request.batch_size,

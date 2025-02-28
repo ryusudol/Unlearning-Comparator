@@ -42,10 +42,10 @@ class UnlearningRequest(BaseModel):
         lt=10, 
         description="Class to forget (0-9), -1 for original"
     )
-    # weights_filename: str = Field(
-    #     default="0000.pth", 
-    #     description="Filename of the weights in trained_models folder"
-    # )
+    base_weights: str = Field(
+        default="0000.pth", 
+        description="Filename of the weights in unlearned_models folder"
+    )
 
 @router.post("/unlearn/ga")
 async def start_unlearning_ga(
@@ -58,14 +58,15 @@ async def start_unlearning_ga(
             detail="Unlearning is already in progress"
         )
     status.reset()
-    weights_path = 'trained_models/0000.pth'
-    if not os.path.exists(weights_path):
+    base_weights_name = f"000{request.forget_class}.pth" if request.base_weights == "0000.pth" else request.base_weights
+    base_weights_path = f'unlearned_models/{request.forget_class}/{base_weights_name}'
+    if not os.path.exists(base_weights_path):
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights '{weights_path}' not found in trained_models/ folder"
+            detail=f"Weights '{base_weights_path}' not found in unlearned_models/ folder"
         )
 
-    background_tasks.add_task(run_unlearning_GA, request, status, weights_path)
+    background_tasks.add_task(run_unlearning_GA, request, status, base_weights_path)
     return {"message": "GA Unlearning started"}
 
 @router.post("/unlearn/rl")
@@ -79,14 +80,15 @@ async def start_unlearning_rl(
             detail="Unlearning is already in progress"
         )
     status.reset()
-    weights_path = 'trained_models/0000.pth'
-    if not os.path.exists(weights_path):
+    base_weights_name = f"000{request.forget_class}.pth" if request.base_weights == "0000.pth" else request.base_weights
+    base_weights_path = f'unlearned_models/{request.forget_class}/{base_weights_name}'
+    if not os.path.exists(base_weights_path):  
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights '{weights_path}' not found in trained_models/ folder"
+            detail=f"Weights '{base_weights_path}' not found in unlearned_models/ folder"
         )
 
-    background_tasks.add_task(run_unlearning_RL, request, status, weights_path)
+    background_tasks.add_task(run_unlearning_RL, request, status, base_weights_path)
     return {"message": "RL Unlearning started"}
 
 @router.post("/unlearn/ft")
@@ -100,14 +102,15 @@ async def start_unlearning_ft(
             detail="Unlearning is already in progress"
         )
     status.reset()
-    weights_path = 'trained_models/0000.pth'
-    if not os.path.exists(weights_path):
+    base_weights_name = f"000{request.forget_class}.pth" if request.base_weights == "0000.pth" else request.base_weights
+    base_weights_path = f'unlearned_models/{request.forget_class}/{base_weights_name}'
+    if not os.path.exists(base_weights_path):
         raise HTTPException(
             status_code=404, 
-            detail=f"Weights '{weights_path}' not found in trained_models/ folder"
+            detail=f"Weights '{base_weights_path}' not found in unlearned_models/ folder"
         )
 
-    background_tasks.add_task(run_unlearning_FT, request, status, weights_path)
+    background_tasks.add_task(run_unlearning_FT, request, status, base_weights_path)
     return {"message": "FT Unlearning started"}
 
 @router.post("/unlearn/retrain")
@@ -146,7 +149,8 @@ async def get_unlearning_status():
 async def start_unlearning_custom(
     background_tasks: BackgroundTasks,
     forget_class: int = Form(..., ge=-1, lt=10),
-    weights_file: UploadFile = File(...)
+    weights_file: UploadFile = File(...),
+    base_weights: str = Form("0000.pth") # only name of the weights file
 ):
     if status.is_unlearning:
         raise HTTPException(
@@ -163,11 +167,13 @@ async def start_unlearning_custom(
         content = await weights_file.read()
         buffer.write(content)
     
+    base_weights = f"000{forget_class}.pth" if base_weights == "0000.pth" else base_weights
     background_tasks.add_task(
         run_unlearning_custom, 
         forget_class, 
         status,
-        weights_path
+        weights_path,
+        base_weights
     )
     
     return {"message": "Custom Unlearning started"}

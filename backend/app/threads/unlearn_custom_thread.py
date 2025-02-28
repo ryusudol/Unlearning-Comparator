@@ -35,7 +35,8 @@ class UnlearningCustomThread(threading.Thread):
                  train_set,
                  test_set,
                  criterion,
-                 device):
+                 device,
+                 base_weights):
         threading.Thread.__init__(self)
         self.forget_class = forget_class
         self.is_training_eval = (forget_class == -1)
@@ -48,6 +49,7 @@ class UnlearningCustomThread(threading.Thread):
         self.test_set = test_set
         self.criterion = criterion
         self.device = device
+        self.base_weights = base_weights
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
 
@@ -285,7 +287,7 @@ class UnlearningCustomThread(threading.Thread):
             "ID": self.status.recent_id,
             "FC": "N/A" if self.is_training_eval else self.forget_class,
             "Type": "Pretrained" if self.is_training_eval else "Unlearned", 
-            "Base": "N/A",
+            "Base": self.base_weights.replace('.pth', ''),
             "Method": "Custom",
             "Epoch": "N/A",
             "BS": "N/A",

@@ -40,7 +40,8 @@ class UnlearningRLThread(threading.Thread):
         optimizer,
         scheduler,
         device,
-        retain_loader
+        retain_loader,
+        base_weights_path
     ):
         threading.Thread.__init__(self)
         self.request = request
@@ -60,6 +61,7 @@ class UnlearningRLThread(threading.Thread):
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.device = device
+        self.base_weights_path = base_weights_path
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
         
@@ -336,7 +338,7 @@ class UnlearningRLThread(threading.Thread):
             "ID": self.status.recent_id,
             "FC": self.request.forget_class,
             "Type": "Unlearned",
-            "Base": f"000{self.request.forget_class}",
+            "Base": os.path.basename(self.base_weights_path).replace('.pth', ''),
             "Method": "RandomLabeling",
             "Epoch": self.request.epochs,
             "BS": self.request.batch_size,

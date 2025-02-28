@@ -149,7 +149,7 @@ async def get_image(index: int):
 @router.get("/trained_models")
 async def get_trained_model():
     """Download the trained model file (0000.pth)"""
-    model_dir = 'trained_models'
+    model_dir = 'unlearned_models/0'
     file_path = os.path.join(model_dir, '0000.pth')
     
     if not os.path.exists(file_path):
