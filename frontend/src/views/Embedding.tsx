@@ -1,6 +1,5 @@
-import { useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 
-import InformationButton from "../components/Embeddings/InformationButton";
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
 import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
 import EmbeddingsLegend from "../components/Embeddings/EmbeddingsLegend";
@@ -22,6 +21,8 @@ export default function Embeddings({
 }: Props) {
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
+
+  const [viewMode, setViewMode] = useState("All");
 
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
@@ -93,31 +94,36 @@ export default function Embeddings({
   );
 
   return (
-    <div className="h-[665px] flex items-center border rounded-md px-1.5 rounded-tr-none relative">
-      <EmbeddingsLegend />
+    <div className="h-[764px] flex flex-col border rounded-md px-1.5 relative">
       <ConnectionLineWrapper positionRef={positionRef} />
-      <InformationButton />
-      {modelAExperiment && (
-        <ScatterPlot
-          mode="Baseline"
-          modelType={modelAExperiment.Type}
-          data={baselinePoints}
-          onHover={handleHover}
-          hoveredInstance={hoveredInstanceRef.current}
-          ref={baselineRef}
-        />
-      )}
-      <Separator orientation="vertical" className="h-[641px] w-[1px] mx-1" />
-      {modelBExperiment && (
-        <ScatterPlot
-          mode="Comparison"
-          modelType={modelBExperiment.Type}
-          data={comparisonPoints}
-          onHover={handleHover}
-          hoveredInstance={hoveredInstanceRef.current}
-          ref={comparisonRef}
-        />
-      )}
+      <EmbeddingsLegend viewMode={viewMode} setViewMode={setViewMode} />
+      <div className="flex items-center">
+        {modelAExperiment && (
+          <ScatterPlot
+            mode="Baseline"
+            modelType={modelAExperiment.Type}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            data={baselinePoints}
+            onHover={handleHover}
+            hoveredInstance={hoveredInstanceRef.current}
+            ref={baselineRef}
+          />
+        )}
+        <Separator orientation="vertical" className="h-[641px] w-[1px] mx-1" />
+        {modelBExperiment && (
+          <ScatterPlot
+            mode="Comparison"
+            modelType={modelBExperiment.Type}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            data={comparisonPoints}
+            onHover={handleHover}
+            hoveredInstance={hoveredInstanceRef.current}
+            ref={comparisonRef}
+          />
+        )}
+      </div>
     </div>
   );
 }

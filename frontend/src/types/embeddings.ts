@@ -14,15 +14,15 @@ export type HoverInstance = {
   comparisonProb?: Prob;
 } | null;
 
+export type ViewMode = {
+  label: string;
+  explanation: string;
+  length: number;
+};
+
 export type Prob = { [key: string]: number };
 
 export type SelectedData = (number | Prob)[][];
-
-export type ViewModeType =
-  | "All Instances"
-  | "Forgetting Target"
-  | "Forgetting Failed"
-  | "Over-Forgotten";
 
 export type SvgElementsRefType = {
   svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;
