@@ -837,11 +837,11 @@ const ScatterPlot = forwardRef(
       >
         {idExist && (
           <AiOutlineHome
-            className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
+            className="mr-1 cursor-pointer absolute top-[18px] left-[9px] z-10"
             onClick={resetZoom}
           />
         )}
-        <div className="text-[15px] flex items-center relative bottom-3 px-3.5 bg-white z-10">
+        <div className="text-[15px] flex items-center relative bottom-[9px] px-3.5 bg-white z-10">
           {isBaseline ? (
             <div style={{ color: COLORS.EMERALD }}>
               <span>

@@ -27,10 +27,10 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
   };
 
   return (
-    <div className="w-full h-[104px] flex items-center px-2 py-1 text-sm z-10 relative left-4">
+    <div className="w-full h-[104px] flex p-2 text-sm z-10 relative top-1 left-4">
       <div className="flex flex-col mr-[34px]">
         <p className="text-lg font-medium mb-1">True Class</p>
-        <ul className="flex flex-col gap-1.5">
+        <ul className="flex flex-col gap-1">
           <li className="flex items-center">
             <CircleIcon className="w-2 h-2 mr-1.5" />
             <span>Retain Classes</span>
@@ -45,7 +45,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
         <p className="text-lg font-medium mb-1">Predicted Class</p>
         <div
           style={{ gridTemplateColumns: "100px 70px 70px 70px 70px" }}
-          className="grid"
+          className="grid gap-y-1"
         >
           {oddIndices.map((name, idx) => {
             const originalIdx = idx * 2;
