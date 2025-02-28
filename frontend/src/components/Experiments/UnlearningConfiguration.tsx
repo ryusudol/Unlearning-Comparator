@@ -91,10 +91,15 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
-  const { saveModelB } = useModelDataStore();
-  const { forgetClass } = useForgetClassStore();
-  const { updateRunningIndex } = useRunningIndexStore();
-  const { addExperiment, updateExperiment } = useExperimentsStore();
+  const saveModelB = useModelDataStore((state) => state.saveModelB);
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const addExperiment = useExperimentsStore((state) => state.addExperiment);
+  const updateRunningIndex = useRunningIndexStore(
+    (state) => state.updateRunningIndex
+  );
+  const updateExperiment = useExperimentsStore(
+    (state) => state.updateExperiment
+  );
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useRunningStatusStore();
 
@@ -302,6 +307,7 @@ export default function UnlearningConfiguration() {
           epochs: combination.epochs,
           learning_rate: combination.learning_rate,
           batch_size: combination.batch_size,
+          base_weights: initModel,
         };
 
         try {
