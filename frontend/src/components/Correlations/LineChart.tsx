@@ -20,12 +20,12 @@ import {
   FONT_CONFIG,
   ANIMATION_DURATION,
 } from "../../constants/common";
-import { COLORS } from "../../constants/colors";
-import { getCkaData } from "../../utils/data/getCkaData";
 import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
+import { COLORS } from "../../constants/colors";
+import { getCkaData } from "../../utils/data/getCkaData";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { ChartContainer } from "../UI/chart";
 
@@ -279,7 +279,7 @@ function CustomLegend() {
   const CIRCLE = "circle";
 
   return (
-    <div className="absolute bottom-[70px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[2px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
+    <div className="absolute bottom-[70px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
       {LINE_CHART_LEGEND_DATA.map((item, i) => {
         const Icon =
           item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
@@ -309,8 +309,8 @@ function CustomLegend() {
             <span style={i > 1 ? { marginLeft: "6px" } : undefined}>
               <span style={{ color: item.color }}>
                 {item.label} ({experiment.Type}, {experiment.ID}){" "}
-                {i < 2 ? "Retrain" : "Forget"}
               </span>
+              <span>{i < 2 ? "Retain" : "Forget"}</span>
             </span>
           </div>
         );
