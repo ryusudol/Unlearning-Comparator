@@ -11,6 +11,7 @@ export async function executeMethodUnlearning(
     epochs: runningConfig.epochs,
     learning_rate: runningConfig.learning_rate,
     batch_size: runningConfig.batch_size,
+    base_weights: runningConfig.base_weights,
   };
 
   try {
