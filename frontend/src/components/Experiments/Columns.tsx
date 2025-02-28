@@ -59,7 +59,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     cell: ({ row }) => {
       const value = row.getValue("Type") as string;
       const { color, backgroundColor } = getTypeColors(value);
-      return <Badge style={{ backgroundColor, color }}>{value}</Badge>;
+      return (
+        <Badge
+          className="w-[70px] flex justify-center"
+          style={{ backgroundColor, color }}
+        >
+          {value}
+        </Badge>
+      );
     },
   },
   {
