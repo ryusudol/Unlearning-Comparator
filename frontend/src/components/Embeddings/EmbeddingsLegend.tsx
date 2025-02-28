@@ -1,41 +1,116 @@
+import Button from "../CustomButton";
 import { Separator } from "../UI/separator";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { CIFAR_10_CLASSES } from "../../constants/common";
 import { TABLEAU10 } from "../../constants/colors";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
+import { VIEW_MODES } from "../../constants/embeddings";
 
-export default function EmbeddingsLegend() {
+interface Props {
+  viewMode: string;
+  setViewMode: (mode: string) => void;
+}
+
+export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
+  const oddIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 === 0);
+  const evenIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 !== 0);
+
+  const handleHighlightBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const mode = e.currentTarget.innerHTML;
+    if (mode !== viewMode) {
+      setViewMode(mode);
+    } else {
+      setViewMode("All");
+    }
+  };
+
   return (
-    <div className="h-9 flex items-center bg-white border border-b-white rounded-t-[6px] px-2 py-1 absolute -top-9 -right-[1px] text-sm z-10">
-      <div className="flex items-center mr-4">
-        <span className="font-medium mr-2.5">True Class</span>
-        <ul className="flex items-center gap-[9.2px]">
+    <div className="w-full h-[104px] flex items-center px-2 py-1 text-sm z-10 relative left-4">
+      <div className="flex flex-col mr-[34px]">
+        <p className="text-lg font-medium mb-1">True Class</p>
+        <ul className="flex flex-col gap-1.5">
           <li className="flex items-center">
-            <CircleIcon className="w-[9px] h-[9px] mr-[3px]" />
-            <span>Retain</span>
+            <CircleIcon className="w-2 h-2 mr-1.5" />
+            <span>Retain Classes</span>
           </li>
           <li className="flex items-center">
-            <FatMultiplicationSignIcon className="mr-[3px]" />
-            <span>Forget</span>
+            <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1.5" />
+            <span>Forget Class</span>
           </li>
         </ul>
       </div>
-      <div className="flex items-center">
-        <span className="font-medium mr-2.5">Predicted Class</span>
-        <ul className="flex items-center gap-2">
-          {CIFAR_10_CLASSES.map((name, idx) => (
-            <li key={idx} className="flex items-center">
-              <div
-                style={{ backgroundColor: TABLEAU10[idx] }}
-                className="w-3.5 h-3.5 mr-[3px]"
-              />
-              <span>{forgetClass === idx ? name + " (X)" : name}</span>
-            </li>
+
+      <div className="flex flex-col mr-1.5">
+        <p className="text-lg font-medium mb-1">Predicted Class</p>
+        <div
+          style={{ gridTemplateColumns: "100px 70px 70px 70px 70px" }}
+          className="grid"
+        >
+          {oddIndices.map((name, idx) => {
+            const originalIdx = idx * 2;
+            return (
+              <li key={originalIdx} className="flex items-center">
+                <div
+                  style={{ backgroundColor: TABLEAU10[originalIdx] }}
+                  className="w-3 h-4 mr-[5px]"
+                />
+                <span>
+                  {forgetClass === originalIdx ? name + " (X)" : name}
+                </span>
+              </li>
+            );
+          })}
+          {evenIndices.map((name, idx) => {
+            const originalIdx = idx * 2 + 1;
+            return (
+              <li key={originalIdx} className="flex items-center">
+                <div
+                  style={{ backgroundColor: TABLEAU10[originalIdx] }}
+                  className="w-3 h-4 mr-[5px]"
+                />
+                <span>
+                  {forgetClass === originalIdx ? name + " (X)" : name}
+                </span>
+              </li>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex gap-[15px]">
+        <div className="ml-2">
+          <p className="text-lg font-medium mb-[5px]">Highlight</p>
+          <p className="w-[100px] text-[13px] font-light">
+            Choose a category to emphasize:
+          </p>
+        </div>
+        <div className="flex gap-[15px]">
+          {VIEW_MODES.map((mode, idx) => (
+            <div key={idx}>
+              <Button
+                onClick={handleHighlightBtnClick}
+                className={`mb-1 ${
+                  viewMode === mode.label
+                    ? "bg-gray-100 hover:bg-gray-100 text-red-500"
+                    : ""
+                }`}
+                style={{ width: mode.length }}
+              >
+                {mode.label}
+              </Button>
+              <p
+                style={{ width: mode.length }}
+                className="text-[13px] font-light"
+              >
+                {mode.explanation}
+              </p>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
+
       <Separator
         orientation="horizontal"
         className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"

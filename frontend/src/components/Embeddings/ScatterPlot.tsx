@@ -1,5 +1,4 @@
 import React, {
-  useState,
   useEffect,
   useImperativeHandle,
   forwardRef,
@@ -12,26 +11,24 @@ import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
-import ViewModeSelector from "./ViewModeSelector";
 import Tooltip from "./Tooltip";
 import {
   Mode,
   SelectedData,
   HoverInstance,
   Prob,
-  ViewModeType,
   SvgElementsRefType,
 } from "../../types/embeddings";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
 
 /**
  * 0 -> ground thruth
@@ -44,7 +41,7 @@ import {
  */
 
 const CONFIG = {
-  WIDTH: 580,
+  WIDTH: 600,
   HEIGHT: 640,
   DOT_SIZE: 4,
   CROSS__SIZE: 4,
@@ -65,20 +62,31 @@ const CONFIG = {
 interface Props {
   mode: Mode;
   modelType: string;
+  viewMode: string;
+  setViewMode: (viewMode: string) => void;
   data: SelectedData;
   onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
   hoveredInstance: HoverInstance | null;
 }
 
 const ScatterPlot = forwardRef(
-  ({ mode, modelType, data, onHover, hoveredInstance }: Props, ref) => {
+  (
+    {
+      mode,
+      modelType,
+      viewMode,
+      setViewMode,
+      data,
+      onHover,
+      hoveredInstance,
+    }: Props,
+    ref
+  ) => {
     const forgetClass = useForgetClassStore((state) => state.forgetClass);
     const modelA = useModelDataStore((state) => state.modelA);
     const modelB = useModelDataStore((state) => state.modelB);
     const modelAExperiment = useModelAExperiment();
     const modelBExperiment = useModelBExperiment();
-
-    const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
 
     const elementMapRef = useRef(new Map<number, Element>());
     const hoveredInstanceRef = useRef<HoverInstance | null>(null);
@@ -413,12 +421,14 @@ const ScatterPlot = forwardRef(
         const isForgettingData = d[0] === forgetClass;
         const isRemainData = !isForgettingData;
 
-        if (viewMode === VIEW_MODES[1] /* Forgetting Target */) {
+        if (viewMode === VIEW_MODES[0].label /* Target to Forget */) {
           return isRemainData;
-        } else if (viewMode === VIEW_MODES[2] /* Forgetting Failed */) {
+        } else if (viewMode === VIEW_MODES[1].label /* Correctly Forgotten */) {
+          return isRemainData || (isForgettingData && d[0] === d[1]);
+        } else if (viewMode === VIEW_MODES[2].label /* Not Forgotten */) {
           const isForgettingSuccess = isForgettingData && d[1] !== forgetClass;
           return isRemainData || isForgettingSuccess;
-        } else if (viewMode === VIEW_MODES[3] /* Misclassification */) {
+        } else if (viewMode === VIEW_MODES[3].label /* Overly Forgotten */) {
           const isMisclassified = isRemainData && d[0] !== d[1];
           return !isMisclassified;
         }
@@ -442,7 +452,7 @@ const ScatterPlot = forwardRef(
               "opacity",
               shouldLowerOpacity(d)
                 ? CONFIG.LOWERED_OPACITY
-                : viewMode === VIEW_MODES[3]
+                : viewMode === VIEW_MODES[3].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
@@ -520,7 +530,7 @@ const ScatterPlot = forwardRef(
         .style("opacity", (d) =>
           shouldLowerOpacity(d)
             ? CONFIG.LOWERED_OPACITY
-            : viewMode === VIEW_MODES[3]
+            : viewMode === VIEW_MODES[3].label
             ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
             : CONFIG.DEFAULT_CIRCLE_OPACITY
         )
@@ -672,7 +682,7 @@ const ScatterPlot = forwardRef(
             shouldLowerOpacity(d)
               ? CONFIG.LOWERED_OPACITY
               : isCircle
-              ? viewMode === VIEW_MODES[3]
+              ? viewMode === VIEW_MODES[3].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
               : CONFIG.DEFAULT_CROSS_OPACITY
@@ -744,8 +754,8 @@ const ScatterPlot = forwardRef(
     }, [hoveredInstance, mode, z]);
 
     useEffect(() => {
-      setViewMode(VIEW_MODES[0]);
-    }, [data]);
+      setViewMode("All");
+    }, [setViewMode, data]);
 
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
@@ -826,36 +836,22 @@ const ScatterPlot = forwardRef(
         className="flex flex-col justify-start items-center relative"
       >
         {idExist && (
-          <div>
-            <AiOutlineHome
-              className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
-              onClick={resetZoom}
-            />
-            <div className="flex items-center absolute z-10 right-0 top-6">
-              <span className="mr-1.5 text-sm">Show:</span>
-              <ViewModeSelector viewMode={viewMode} setViewMode={setViewMode} />
-            </div>
-          </div>
+          <AiOutlineHome
+            className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
+            onClick={resetZoom}
+          />
         )}
-        <div className="text-[15px] mt-1 flex items-center">
+        <div className="text-[15px] flex items-center relative bottom-3 px-3 bg-white z-10">
           {isBaseline ? (
-            <div
-              style={{ color: COLORS.EMERALD }}
-              className="flex flex-col items-center leading-4"
-            >
-              <span>Model A</span>
+            <div style={{ color: COLORS.EMERALD }}>
               <span>
-                ({modelType}, {modelA})
+                Model A ({modelType}, {modelA})
               </span>
             </div>
           ) : (
-            <div
-              style={{ color: COLORS.PURPLE }}
-              className="flex flex-col items-center leading-4"
-            >
-              <span>Model B</span>
+            <div style={{ color: COLORS.PURPLE }}>
               <span>
-                ({modelType}, {modelB})
+                Model B ({modelType}, {modelB})
               </span>
             </div>
           )}
