@@ -32,6 +32,7 @@ const CONFIG = {
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
   COLOR_MAPPING_THRESHOLD: 0.8,
   COLOR_MAPPING_RTE_THRESHOLD: 200,
+  COLOR_TEMPERATURE: 0.8,
 };
 
 interface Props {
@@ -55,7 +56,8 @@ export default function _TableBody({ table }: Props) {
   const greenScaleLower = useMemo(
     () =>
       d3
-        .scaleSequential(d3.interpolateGreens)
+        .scaleSequential()
+        .interpolator((t) => d3.interpolateGreens(0.0 + t * CONFIG.COLOR_TEMPERATURE))
         .domain([1 - CONFIG.COLOR_MAPPING_THRESHOLD, 0])
         .clamp(true),
     []
@@ -63,7 +65,8 @@ export default function _TableBody({ table }: Props) {
   const greenScaleHigher = useMemo(
     () =>
       d3
-        .scaleSequential(d3.interpolateGreens)
+        .scaleSequential()
+        .interpolator((t) => d3.interpolateGreens(0.0 + t * CONFIG.COLOR_TEMPERATURE))
         .domain([CONFIG.COLOR_MAPPING_THRESHOLD, 1])
         .clamp(true),
     []
@@ -71,13 +74,19 @@ export default function _TableBody({ table }: Props) {
   const blueScaleRTE = useMemo(
     () =>
       d3
-        .scaleSequential(d3.interpolateBlues)
+        .scaleSequential()
+        .interpolator((t) => d3.interpolateBlues(0.0 + t * CONFIG.COLOR_TEMPERATURE))
         .domain([CONFIG.COLOR_MAPPING_RTE_THRESHOLD, 0])
         .clamp(true),
     []
   );
   const blueScaleFQS = useMemo(
-    () => d3.scaleSequential(d3.interpolateBlues).domain([0, 1]).clamp(true),
+    () =>
+      d3
+        .scaleSequential()
+        .interpolator((t) => d3.interpolateBlues(0.0 + t * CONFIG.COLOR_TEMPERATURE))
+        .domain([0, 1])
+        .clamp(true),
     []
   );
 
