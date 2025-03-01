@@ -8,12 +8,14 @@ interface Props {
 }
 
 export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
-  const {
-    forgetClass,
-    selectedForgetClasses,
-    saveForgetClass,
-    deleteSelectedForgetClass,
-  } = useForgetClassStore();
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
+  const selectedForgetClasses = useForgetClassStore(
+    (state) => state.selectedForgetClasses
+  );
+  const deleteSelectedForgetClass = useForgetClassStore(
+    (state) => state.deleteSelectedForgetClass
+  );
 
   const handleForgetClassChange = async (value: string) => {
     saveForgetClass(value);

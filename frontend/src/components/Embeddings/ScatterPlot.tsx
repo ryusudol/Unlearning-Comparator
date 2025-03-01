@@ -832,16 +832,16 @@ const ScatterPlot = forwardRef(
 
     return (
       <div
-        style={{ height: "660px" }}
+        style={{ height: "650px" }}
         className="flex flex-col justify-start items-center relative"
       >
         {idExist && (
           <AiOutlineHome
-            className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
+            className="mr-1 cursor-pointer absolute top-[18px] left-[9px] z-10"
             onClick={resetZoom}
           />
         )}
-        <div className="text-[15px] flex items-center relative bottom-3 px-3 bg-white z-10">
+        <div className="text-[15px] flex items-center relative px-3.5 bg-white z-10">
           {isBaseline ? (
             <div style={{ color: COLORS.EMERALD }}>
               <span>
@@ -856,7 +856,7 @@ const ScatterPlot = forwardRef(
             </div>
           )}
         </div>
-        <div className="w-[632px] h-[620px] flex flex-col justify-center items-center">
+        <div className="w-[632px] h-[638px] flex flex-col justify-center items-center">
           <div
             ref={containerRef}
             style={{

@@ -70,7 +70,7 @@ export default function PrivacyAttack({
   };
 
   return (
-    <div className="h-[665px] flex items-center border rounded-md px-1.5 rounded-tr-none relative">
+    <div className="h-[764px] flex flex-col border rounded-md px-1.5">
       <AttackLegend
         metric={metric}
         aboveThreshold={aboveThreshold}
@@ -78,48 +78,50 @@ export default function PrivacyAttack({
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
       />
-      {!retrainData ? (
-        <Indicator text="Failed to fetch retrain data" />
-      ) : isModelAOriginal ? (
-        <Indicator text="Please select an unlearned model to compare the attack results" />
-      ) : (
-        <AttackAnalytics
-          mode="Baseline"
-          metric={metric}
-          aboveThreshold={aboveThreshold}
-          thresholdStrategy={thresholdStrategy}
-          strategyCount={strategyCount}
-          userModified={userModified}
-          retrainPoints={retrainData.points}
-          unlearnPoints={baselinePoints}
-          retrainAttackData={retrainData.attack}
-          setThresholdStrategy={setThresholdStrategy}
-          setUserModified={setUserModified}
+      <div className="flex items-center">
+        {!retrainData ? (
+          <Indicator text="Failed to fetch retrain data" />
+        ) : isModelAOriginal ? (
+          <Indicator text="Please select an unlearned model to compare the attack results" />
+        ) : (
+          <AttackAnalytics
+            mode="Baseline"
+            metric={metric}
+            aboveThreshold={aboveThreshold}
+            thresholdStrategy={thresholdStrategy}
+            strategyCount={strategyCount}
+            userModified={userModified}
+            retrainPoints={retrainData.points}
+            unlearnPoints={baselinePoints}
+            retrainAttackData={retrainData.attack}
+            setThresholdStrategy={setThresholdStrategy}
+            setUserModified={setUserModified}
+          />
+        )}
+        <Separator
+          orientation="vertical"
+          className="h-[635px] w-[1px] mx-1 relative top-4"
         />
-      )}
-      <Separator
-        orientation="vertical"
-        className="h-[612px] w-[1px] ml-3.5 mr-2"
-      />
-      {!retrainData ? (
-        <Indicator text="Failed to fetch retrain data" />
-      ) : isModelBOriginal ? (
-        <Indicator text="Please select an unlearned model to compare the attack results" />
-      ) : (
-        <AttackAnalytics
-          mode="Comparison"
-          metric={metric}
-          aboveThreshold={aboveThreshold}
-          thresholdStrategy={thresholdStrategy}
-          strategyCount={strategyCount}
-          userModified={userModified}
-          retrainPoints={retrainData.points}
-          unlearnPoints={comparisonPoints}
-          retrainAttackData={retrainData.attack}
-          setThresholdStrategy={setThresholdStrategy}
-          setUserModified={setUserModified}
-        />
-      )}
+        {!retrainData ? (
+          <Indicator text="Failed to fetch retrain data" />
+        ) : isModelBOriginal ? (
+          <Indicator text="Please select an unlearned model to compare the attack results" />
+        ) : (
+          <AttackAnalytics
+            mode="Comparison"
+            metric={metric}
+            aboveThreshold={aboveThreshold}
+            thresholdStrategy={thresholdStrategy}
+            strategyCount={strategyCount}
+            userModified={userModified}
+            retrainPoints={retrainData.points}
+            unlearnPoints={comparisonPoints}
+            retrainAttackData={retrainData.attack}
+            setThresholdStrategy={setThresholdStrategy}
+            setUserModified={setUserModified}
+          />
+        )}
+      </div>
     </div>
   );
 }

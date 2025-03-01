@@ -40,9 +40,17 @@ export default function ForgetClassTabPlusButton({
   fetchAndSaveExperiments,
   hasNoSelectedForgetClass,
 }: Props) {
-  const { saveDataset, saveNeuralNetworkModel } = useBaseConfigStore();
-  const { addSelectedForgetClass, saveForgetClass, selectedForgetClasses } =
-    useForgetClassStore();
+  const saveDataset = useBaseConfigStore((state) => state.saveDataset);
+  const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
+  const saveNeuralNetworkModel = useBaseConfigStore(
+    (state) => state.saveNeuralNetworkModel
+  );
+  const addSelectedForgetClass = useForgetClassStore(
+    (state) => state.addSelectedForgetClass
+  );
+  const selectedForgetClasses = useForgetClassStore(
+    (state) => state.selectedForgetClasses
+  );
 
   const unselectForgetClasses = useMemo(
     () =>

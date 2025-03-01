@@ -27,11 +27,11 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
   };
 
   return (
-    <div className="w-full h-[104px] flex items-center px-2 py-1 text-sm z-10 relative left-4">
-      <div className="flex flex-col mr-[34px]">
+    <div className="w-full h-[94px] flex px-3.5 text-sm z-10 relative top-3">
+      <div className="flex flex-col mr-[22px]">
         <p className="text-lg font-medium mb-1">True Class</p>
-        <ul className="flex flex-col gap-1.5">
-          <li className="flex items-center">
+        <ul className="flex flex-col gap-1">
+          <li className="flex items-center text-nowrap">
             <CircleIcon className="w-2 h-2 mr-1.5" />
             <span>Retain Classes</span>
           </li>
@@ -41,12 +41,11 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           </li>
         </ul>
       </div>
-
-      <div className="flex flex-col mr-1.5">
+      <div className="flex flex-col mr-3.5">
         <p className="text-lg font-medium mb-1">Predicted Class</p>
         <div
-          style={{ gridTemplateColumns: "100px 70px 70px 70px 70px" }}
-          className="grid"
+          style={{ gridTemplateColumns: "100px 70px 70px 70px 75px" }}
+          className="grid gap-y-1"
         >
           {oddIndices.map((name, idx) => {
             const originalIdx = idx * 2;
@@ -78,7 +77,6 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           })}
         </div>
       </div>
-
       <div className="flex gap-[15px]">
         <div className="ml-2">
           <p className="text-lg font-medium mb-[5px]">Highlight</p>
@@ -110,10 +108,9 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           ))}
         </div>
       </div>
-
       <Separator
         orientation="horizontal"
-        className="absolute bottom-[1px] h-[1px] w-[calc(100%-16px)]"
+        className="w-[calc(100%+12.8px)] h-[1px] absolute bottom-0 -right-1.5"
       />
     </div>
   );

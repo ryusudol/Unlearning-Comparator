@@ -110,7 +110,10 @@ export default function Embeddings({
             ref={baselineRef}
           />
         )}
-        <Separator orientation="vertical" className="h-[641px] w-[1px] mx-1" />
+        <Separator
+          orientation="vertical"
+          className="h-[635px] w-[1px] mx-1 relative top-4"
+        />
         {modelBExperiment && (
           <ScatterPlot
             mode="Comparison"

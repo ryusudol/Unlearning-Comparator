@@ -6,21 +6,29 @@ interface LineGraphLegendData {
 interface ThresholdStrategy {
   strategy: string;
   explanation: string;
+  length: number;
 }
 
 export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
   {
-    strategy: "MAX ATTACK SCORE",
-    explanation: "Maximizes a quality score from FPR and FNR",
+    strategy: "Custom Threshold",
+    explanation: "Set threshold manually with a slider",
+    length: 135,
   },
   {
-    strategy: "MAX SUCCESS RATE",
-    explanation: "Targets the highest overall attack accuracy",
+    strategy: "Max Attack Score",
+    explanation: "Maximizes the attack score based on FPR and FNR",
+    length: 140,
   },
   {
-    strategy: "COMMON THRESHOLD",
-    explanation:
-      "Uses a single threshold for both models, maximizing quality score sum",
+    strategy: "Max Success Rate",
+    explanation: "Targets the highest attack success rate",
+    length: 135,
+  },
+  {
+    strategy: "Common Threshold",
+    explanation: "A single threshold that maximizes attack scores",
+    length: 150,
   },
 ];
 
