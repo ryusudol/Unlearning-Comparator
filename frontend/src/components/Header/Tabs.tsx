@@ -9,8 +9,13 @@ import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 
 export default function Tabs() {
-  const { selectedForgetClasses } = useForgetClassStore();
-  const { saveExperiments, setIsExperimentsLoading } = useExperimentsStore();
+  const saveExperiments = useExperimentsStore((state) => state.saveExperiments);
+  const selectedForgetClasses = useForgetClassStore(
+    (state) => state.selectedForgetClasses
+  );
+  const setIsExperimentsLoading = useExperimentsStore(
+    (state) => state.setIsExperimentsLoading
+  );
 
   const hasNoSelectedForgetClass = selectedForgetClasses.length === 0;
 
