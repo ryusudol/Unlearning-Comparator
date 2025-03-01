@@ -103,7 +103,7 @@ export default function UnlearningConfiguration() {
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useRunningStatusStore();
 
-  const [initModel, setInitialModel] = useState(`000${forgetClass}`);
+  const [initModel, setInitialModel] = useState(`000${forgetClass}.pth`);
   const [weightNames, setWeightNames] = useState<string[]>([]);
   const [method, setMethod] = useState("ft");
   const [epochList, setEpochList] = useState<string[]>([]);
