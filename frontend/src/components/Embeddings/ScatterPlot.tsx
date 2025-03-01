@@ -832,7 +832,7 @@ const ScatterPlot = forwardRef(
 
     return (
       <div
-        style={{ height: "660px" }}
+        style={{ height: "650px" }}
         className="flex flex-col justify-start items-center relative"
       >
         {idExist && (
@@ -841,7 +841,7 @@ const ScatterPlot = forwardRef(
             onClick={resetZoom}
           />
         )}
-        <div className="text-[15px] flex items-center relative bottom-[9px] px-3.5 bg-white z-10">
+        <div className="text-[15px] flex items-center relative bottom-2 px-3.5 bg-white z-10">
           {isBaseline ? (
             <div style={{ color: COLORS.EMERALD }}>
               <span>
