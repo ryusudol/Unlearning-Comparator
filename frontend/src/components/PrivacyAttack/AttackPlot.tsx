@@ -1408,7 +1408,7 @@ export default function ButterflyPlot({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex items-center text-[15px]">
+      <div className="flex items-center relative bottom-[9px] px-3.5 bg-white z-10">
         <span style={{ color: COLORS.DARK_GRAY }} className="font-medium">
           Retrained Model (a00{forgetClass})
         </span>
