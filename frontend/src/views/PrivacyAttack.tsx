@@ -100,7 +100,7 @@ export default function PrivacyAttack({
         )}
         <Separator
           orientation="vertical"
-          className="h-[635px] w-[1px] mx-1 relative top-4"
+          className="h-[635px] w-[1px] mx-1 relative top-1"
         />
         {!retrainData ? (
           <Indicator text="Failed to fetch retrain data" />

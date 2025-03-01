@@ -14,8 +14,9 @@ import { Bin, Data, CategoryType } from "./AttackAnalytics";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
-  FONT_SIZE: "10",
-  LABEL_FONT_SIZE: "12",
+  FONT_SIZE_10: "10",
+  FONT_SIZE_12: "12",
+  FONT_SIZE_13: "13",
   BLACK: "black",
   RED: "#e41a1c",
   BLUE: "#377eb8",
@@ -30,17 +31,17 @@ const CONFIG = {
   CONFIDENCE_SCOPE_MIN: -2.5,
   CONFIDENCE_SCOPE_MAX: 10,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
-  BUTTERFLY_CIRCLE_RADIUS: 3,
+  BUTTERFLY_CIRCLE_RADIUS: 3.5,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   BUTTERFLY_CHART_X_AXIS_TICK_STEP: 10,
-  BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING: 12,
-  BUTTERFLY_CHART_LEGEND_TEXT_GAP: 4,
-  BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 10,
-  BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-6, 6],
-  BUTTERFLY_CHART_WIDTH: 460,
-  LINE_CHART_WIDTH: 168,
-  HEIGHT: 360,
+  BUTTERFLY_CHART_LEGEND_VERTICAL_SPACING: 14,
+  BUTTERFLY_CHART_LEGEND_TEXT_GAP: 6,
+  BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 12,
+  BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-7, 7],
+  BUTTERFLY_CHART_WIDTH: 420,
+  LINE_CHART_WIDTH: 160,
+  HEIGHT: 420,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
   BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 54 },
@@ -275,7 +276,7 @@ export default function ButterflyPlot({
             .attr("x", markerCx)
             .attr("y", yPos)
             .attr("text-anchor", "end")
-            .attr("font-size", CONFIG.FONT_SIZE)
+            .attr("font-size", CONFIG.FONT_SIZE_10)
             .attr("fill", CONFIG.BLACK)
             .text(`+${extraCount}`);
         }
@@ -330,7 +331,7 @@ export default function ButterflyPlot({
             .attr("x", markerCx - 6)
             .attr("y", yPos)
             .attr("text-anchor", "start")
-            .attr("font-size", CONFIG.FONT_SIZE)
+            .attr("font-size", CONFIG.FONT_SIZE_10)
             .attr("fill", CONFIG.BLACK)
             .text(`+${extraCount}`);
         }
@@ -351,36 +352,56 @@ export default function ButterflyPlot({
       xAxisB
         .append("text")
         .attr("class", "x-axis-label-b")
-        .attr("x", -45.5)
+        .attr("x", -107)
         .attr("y", 15)
-        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
-        .text("← Retrain Samples | ");
+        .text("← ");
 
       xAxisB
         .append("text")
         .attr("class", "x-axis-label-b")
-        .attr("x", -38.5)
+        .attr("x", -89)
         .attr("y", 15)
-        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", COLORS.DARK_GRAY)
+        .attr("text-anchor", "middle")
+        .attr("dx", "1em")
+        .text("Retrained");
+
+      xAxisB
+        .append("text")
+        .attr("class", "x-axis-label-b")
+        .attr("x", -23.5)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-family", CONFIG.FONT_FAMILY)
+        .attr("fill", CONFIG.BLACK)
+        .attr("text-anchor", "middle")
+        .text(" Samples | ");
+
+      xAxisB
+        .append("text")
+        .attr("class", "x-axis-label-b")
+        .attr("x", 26)
+        .attr("y", 15)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", isBaseline ? COLORS.EMERALD : COLORS.PURPLE)
         .attr("text-anchor", "middle")
-        .attr("dx", "5.2em")
         .text(`${isBaseline ? "Model A" : "Model B"}`);
-
       xAxisB
         .append("text")
         .attr("class", "x-axis-label-b")
-        .attr("x", -30)
+        .attr("x", 78)
         .attr("y", 15)
-        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
-        .attr("fill", CONFIG.BLACK)
+        .attr("fill", COLORS.BLACK)
         .attr("text-anchor", "middle")
-        .attr("dx", "8.5em")
         .text(" Samples →");
       xAxisB
         .selectAll(".tick")
@@ -401,8 +422,8 @@ export default function ButterflyPlot({
         .attr("class", "y-axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -hB / 2)
-        .attr("y", -226)
-        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("y", -206)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
@@ -412,18 +433,18 @@ export default function ButterflyPlot({
       if (extraRetrain > 0) {
         gB.append("text")
           .attr("x", xScaleB(-maxDisplayCircles))
-          .attr("y", hB + +CONFIG.FONT_SIZE)
+          .attr("y", hB + +CONFIG.FONT_SIZE_10)
           .attr("text-anchor", "end")
-          .attr("font-size", CONFIG.FONT_SIZE)
+          .attr("font-size", CONFIG.FONT_SIZE_10)
           .attr("fill", CONFIG.BLACK)
           .text(`+${extraRetrain}`);
       }
       if (extraUnlearn > 0) {
         gB.append("text")
           .attr("x", xScaleB(maxDisplayCircles))
-          .attr("y", hB + +CONFIG.FONT_SIZE)
+          .attr("y", hB + +CONFIG.FONT_SIZE_10)
           .attr("text-anchor", "start")
-          .attr("font-size", CONFIG.FONT_SIZE)
+          .attr("font-size", CONFIG.FONT_SIZE_10)
           .attr("fill", CONFIG.BLACK)
           .text(`+${extraUnlearn}`);
       }
@@ -457,14 +478,14 @@ export default function ButterflyPlot({
       const butterflyLegendGroup = gB
         .append("g")
         .attr("class", "butterfly-legend-group")
-        .attr("transform", "translate(-6.5, 12)");
+        .attr("transform", "translate(-6.5, 21)");
 
       butterflyLegendGroup
         .insert("rect", ":first-child")
-        .attr("x", -129)
-        .attr("y", -16)
-        .attr("width", 272)
-        .attr("height", 31)
+        .attr("x", -167.5)
+        .attr("y", -18.5)
+        .attr("width", 350)
+        .attr("height", 36)
         .attr("fill", "white")
         .attr("opacity", 0.6)
         .attr("stroke", "#d6d6d6")
@@ -521,7 +542,7 @@ export default function ButterflyPlot({
             .attr("y", yPos)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", CONFIG.FONT_SIZE)
+            .attr("font-size", CONFIG.FONT_SIZE_13)
             .text(item.label);
         } else {
           butterflyLegendGroup
@@ -535,7 +556,7 @@ export default function ButterflyPlot({
             .attr("y", yPos)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", CONFIG.FONT_SIZE)
+            .attr("font-size", CONFIG.FONT_SIZE_13)
             .text(item.label);
         }
       });
@@ -581,10 +602,10 @@ export default function ButterflyPlot({
       threshGroupB
         .append("text")
         .attr("class", "threshold-label-up")
-        .attr("x", -195)
+        .attr("x", -172)
         .attr("y", -4)
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_12)
         .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
         .text(
@@ -595,10 +616,10 @@ export default function ButterflyPlot({
       threshGroupB
         .append("text")
         .attr("class", "threshold-label-down")
-        .attr("x", -195)
-        .attr("y", 10)
+        .attr("x", -172)
+        .attr("y", 12)
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_12)
         .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
         .text(
@@ -761,7 +782,7 @@ export default function ButterflyPlot({
         .attr("class", "axis-label")
         .attr("x", wL / 2)
         .attr("y", 15)
-        .attr("font-size", CONFIG.LABEL_FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
@@ -830,13 +851,13 @@ export default function ButterflyPlot({
       // Draw a legend for a line chart
       const lineChartLegendGroup = gL
         .append("g")
-        .attr("transform", `translate(${wL - 37}, -5)`);
+        .attr("transform", `translate(${wL - 37}, -1.5)`);
       lineChartLegendGroup
         .append("rect")
-        .attr("x", -98)
+        .attr("x", -100)
         .attr("y", 0)
-        .attr("width", 110)
-        .attr("height", 35)
+        .attr("width", 130)
+        .attr("height", 42)
         .attr("fill", "white")
         .attr("opacity", 0.6)
         .attr("stroke", "#d6d6d6")
@@ -844,10 +865,10 @@ export default function ButterflyPlot({
         .attr("rx", 2)
         .attr("ry", 2);
       LINE_GRAPH_LEGEND_DATA.forEach((item, i) => {
-        const yPos = 8 + i * 10;
+        const yPos = 10 + i * 12;
         const legendItemGroup = lineChartLegendGroup
           .append("g")
-          .attr("transform", `translate(-91, ${yPos})`);
+          .attr("transform", `translate(-94, ${yPos})`);
         const lineElement = legendItemGroup
           .append("line")
           .attr("x1", 0)
@@ -866,7 +887,7 @@ export default function ButterflyPlot({
           .attr("class", "line-legend-" + item.color)
           .attr("x", 20)
           .attr("y", 3)
-          .attr("font-size", CONFIG.FONT_SIZE)
+          .attr("font-size", CONFIG.FONT_SIZE_13)
           .text(item.label);
       });
 
@@ -978,7 +999,7 @@ export default function ButterflyPlot({
         .attr("class", "info-group")
         .attr(
           "transform",
-          `translate(${infoGroupXPos + 2}, ${infoGroupYPos - 42})`
+          `translate(${infoGroupXPos + 4}, ${infoGroupYPos - 47})`
         );
       infoGroup
         .append("text")
@@ -989,7 +1010,7 @@ export default function ButterflyPlot({
             ? "red"
             : CONFIG.BLACK
         )
-        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_12)
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
         .append("text")
@@ -1000,19 +1021,19 @@ export default function ButterflyPlot({
             ? "red"
             : CONFIG.BLACK
         )
-        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_12)
         .attr("dy", "1.2em")
         .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_12)
         .attr("dy", "2.4em")
         .text(`FPR: ${currentData.fpr.toFixed(3)}`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE)
+        .attr("font-size", CONFIG.FONT_SIZE_12)
         .attr("dy", "3.6em")
         .text(`FNR: ${currentData.fnr.toFixed(3)}`);
 
@@ -1120,10 +1141,10 @@ export default function ButterflyPlot({
     newThreshGroupB
       .append("text")
       .attr("class", "threshold-label-up")
-      .attr("x", -195)
+      .attr("x", -172)
       .attr("y", -4)
       .attr("text-anchor", "start")
-      .attr("font-size", CONFIG.FONT_SIZE)
+      .attr("font-size", CONFIG.FONT_SIZE_12)
       .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
       .text(
@@ -1134,10 +1155,10 @@ export default function ButterflyPlot({
     newThreshGroupB
       .append("text")
       .attr("class", "threshold-label-down")
-      .attr("x", -195)
-      .attr("y", 10)
+      .attr("x", -172)
+      .attr("y", 12)
       .attr("text-anchor", "start")
-      .attr("font-size", CONFIG.FONT_SIZE)
+      .attr("font-size", CONFIG.FONT_SIZE_12)
       .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
       .text(
@@ -1323,7 +1344,7 @@ export default function ButterflyPlot({
 
       infoGroup.attr(
         "transform",
-        `translate(${infoGroupXPos + 2}, ${infoGroupYPos - 42})`
+        `translate(${infoGroupXPos + 4}, ${infoGroupYPos - 47})`
       );
       infoGroup
         .select("text:nth-child(1)")
