@@ -5,9 +5,13 @@ import {
   LINE_GRAPH_LEGEND_DATA,
   THRESHOLD_STRATEGIES,
 } from "../../constants/privacyAttack";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { COLORS } from "../../constants/colors";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { AttackResult } from "../../types/data";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
 import { Bin, Data, CategoryType } from "./AttackAnalytics";
@@ -82,6 +86,8 @@ export default function ButterflyPlot({
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
+  const modelAExperiment = useModelAExperiment();
+  const modelBExperiment = useModelBExperiment();
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -1429,13 +1435,15 @@ export default function ButterflyPlot({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex items-center relative bottom-[9px] px-3.5 bg-white z-10">
+      <div className="flex items-center relative bottom-[7px] px-3.5 bg-white z-10">
         <span style={{ color: COLORS.DARK_GRAY }} className="font-medium">
           Retrained Model (a00{forgetClass})
         </span>
         <span className="mx-1.5">vs</span>
         <span style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}>
-          {isBaseline ? "Model A" : "Model B"} ({isBaseline ? modelA : modelB})
+          {isBaseline ? "Model A" : "Model B"} (
+          {isBaseline ? modelAExperiment.Type : modelBExperiment.Type}{" "}
+          {isBaseline ? modelA : modelB})
         </span>
       </div>
       <div className="flex">
