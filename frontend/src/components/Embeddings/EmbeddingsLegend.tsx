@@ -27,7 +27,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
   };
 
   return (
-    <div className="w-full h-[102px] flex px-3.5 text-sm z-10 relative top-3">
+    <div className="w-full h-[94px] flex px-3.5 text-sm z-10 relative top-3">
       <div className="flex flex-col mr-[22px]">
         <p className="text-lg font-medium mb-1">True Class</p>
         <ul className="flex flex-col gap-1">
@@ -110,7 +110,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
       </div>
       <Separator
         orientation="horizontal"
-        className="w-[calc(100%+12.8px)] h-[1px] absolute bottom-2 -right-1.5"
+        className="w-[calc(100%+12.8px)] h-[1px] absolute bottom-0 -right-1.5"
       />
     </div>
   );
