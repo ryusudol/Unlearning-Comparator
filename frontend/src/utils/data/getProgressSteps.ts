@@ -27,7 +27,7 @@ export const getProgressSteps = (
       {
         step: 3,
         title: "Analyze",
-        description: `Computing UMAP Embedding\nCalculating CKA Similarity`,
+        description: `Computing UMAP Embedding\nCalculating CKA Values`,
       },
     ];
   }
@@ -90,10 +90,15 @@ export const getProgressSteps = (
         (activeStep === 3 && progress.includes(CKA)) ||
         (completedSteps.includes(3) &&
           (progress === IDLE || progress === UNLEARNING))
-          ? `Calculating CKA Similarity... **${
+          ? `Calculating CKA Values... **${
               progress === IDLE || progress === UNLEARNING ? "100" : ckaProgress
             }%**`
-          : "Calculating CKA Similarity"
+          : "Calculating CKA Values"
+      }\n${
+        completedSteps.includes(3) &&
+        (progress === IDLE || progress === UNLEARNING)
+          ? `Done! Model ID: **${status.recent_id}**`
+          : ""
       }`,
     },
   ];
