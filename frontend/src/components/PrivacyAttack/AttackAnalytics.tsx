@@ -4,15 +4,15 @@ import { createRoot } from "react-dom/client";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import Tooltip from "./Tooltip";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 import { Prob } from "../../types/embeddings";
 import { API_URL } from "../../constants/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { ENTROPY, UNLEARN, Metric } from "../../views/PrivacyAttack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
 import { AttackResult, AttackResults, AttackData } from "../../types/data";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
@@ -420,7 +420,7 @@ export default function AttackAnalytics({
   }, [hideTooltip]);
 
   return (
-    <div className="relative h-full flex flex-col" ref={containerRef}>
+    <div className="w-[635px] h-full relative flex flex-col" ref={containerRef}>
       {data && (
         <>
           <AttackPlot

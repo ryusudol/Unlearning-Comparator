@@ -12,6 +12,7 @@ import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Separator } from "../UI/separator";
 import { Label } from "..//UI/label";
+import { COLORS } from "../../constants/colors";
 
 interface AttackLegendProps {
   metric: Metric;
@@ -33,12 +34,25 @@ export default function AttackLegend({
 
   return (
     <div className="w-full flex px-3.5 pt-2.5 pb-3.5 text-sm z-10 relative top-1">
-      <Button className="w-[175px] h-[70px] bg-[#cc0000] hover:bg-red-600 text-xl font-medium leading-5 rounded-md mr-[27px]">
-        SET WORST CASE
-        <br />
-        SCENARIO
-      </Button>
-      <div className="flex flex-col mr-[25px]">
+      <div className="flex items-center">
+        <Button
+          style={{ backgroundColor: COLORS.EMERALD }}
+          className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md mr-2.5"
+        >
+          Model A
+          <br />
+          Best Attack
+        </Button>
+        <Button
+          style={{ backgroundColor: COLORS.PURPLE }}
+          className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md mr-5"
+        >
+          Model B
+          <br />
+          Best Attack
+        </Button>
+      </div>
+      <div className="flex flex-col mr-5">
         <p className="text-lg font-medium">Metric</p>
         <RadioGroup
           className="flex flex-col gap-1"
@@ -71,8 +85,8 @@ export default function AttackLegend({
           </div>
         </RadioGroup>
       </div>
-      <div className="flex flex-col mr-[40px]">
-        <p className="text-lg font-medium">Threshold Direction</p>
+      <div className="flex flex-col mr-6">
+        <p className="text-lg font-medium text-nowrap">Threshold Direction</p>
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
           defaultValue={UNLEARN}
@@ -87,7 +101,7 @@ export default function AttackLegend({
               checked={isUnlearnChecked}
             />
             <Label className="text-sm text-[#4d4d4d]" htmlFor={UNLEARN}>
-              {"Above -> Suggested Model"}
+              {"Above -> Model A/B"}
             </Label>
           </div>
           <div className="flex items-center space-x-[5px]">
@@ -99,19 +113,19 @@ export default function AttackLegend({
               checked={!isUnlearnChecked}
             />
             <Label className="text-sm text-[#4d4d4d]" htmlFor={RETRAIN}>
-              {"Above -> Retrained Model"}
+              {"Above -> Retrained"}
             </Label>
           </div>
         </RadioGroup>
       </div>
       <div className="flex">
-        <div className="mr-2.5">
+        <div className="mr-2">
           <p className="text-lg font-medium">Strategy</p>
           <p className="w-[120px] text-[13px] font-light">
             Choose how thresholds are determined:
           </p>
         </div>
-        <div className="flex gap-[15px]">
+        <div className="flex gap-3.5">
           {THRESHOLD_STRATEGIES.map((strategy, idx) => (
             <div key={idx} className="flex flex-col">
               <Button
@@ -133,7 +147,7 @@ export default function AttackLegend({
       </div>
       <Separator
         orientation="horizontal"
-        className="w-[calc(100%+12.8px)] h-[1px] absolute bottom-0 -right-1.5"
+        className="w-[calc(100%+12.8px)] h-[1px] absolute -bottom-0.5 -right-1.5"
       />
     </div>
   );
