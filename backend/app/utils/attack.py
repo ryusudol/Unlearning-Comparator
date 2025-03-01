@@ -32,7 +32,14 @@ def prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps):
         "values": values
     }
 
-def calculate_scores(values_unlearn, values_retrain, bins, range_vals, mode='entropy', direction='unlearn'):
+def calculate_scores(
+        values_unlearn, 
+        values_retrain, 
+        bins, 
+        range_vals, 
+        mode='entropy', 
+        direction='unlearn'
+    ):
     """
     Calculate attack scores by comparing the unlearn and retrain distributions.
     Returns a list of dictionaries each containing:
@@ -103,7 +110,7 @@ async def process_attack_metrics(
         forget_class=5, 
         t1=2.0,
         t2=1.0
-):
+    ):
     model.eval()
     logit_entropies = []
     max_logit_gaps = []
@@ -220,7 +227,10 @@ async def process_attack_metrics(
     
     best_attack_entropy = max(best_attack_ent_unlearn, best_attack_ent_retrain)
     best_attack_confidence = max(best_attack_conf_retrain, best_attack_conf_unlearn)
-    final_fqs = 1 - ((best_attack_entropy + best_attack_confidence) / 2)
+    
+    # Use the maximum value instead of the average
+    best_overall_attack = max(best_attack_entropy, best_attack_confidence)
+    final_fqs = 1 - best_overall_attack
     
     attack_results = {
         "entropy_above_unlearn": scores_ent_unlearn,
@@ -229,5 +239,4 @@ async def process_attack_metrics(
         "confidence_above_unlearn": scores_conf_unlearn
     }
     
-    # Return the distribution values, attack results, and computed FQS.
     return distribution_data["values"], attack_results, round(final_fqs, 3)
