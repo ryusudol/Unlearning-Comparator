@@ -28,7 +28,7 @@ export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
   {
     strategy: "Common Threshold",
     explanation: "A single threshold that maximizes attack scores",
-    length: 150,
+    length: 145,
   },
 ];
 

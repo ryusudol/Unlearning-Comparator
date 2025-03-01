@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import * as d3 from "d3";
 
+import { Slider } from "../UI/slider";
 import { ScrollArea } from "../UI/scroll-area";
 import { UNLEARN, RETRAIN } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
@@ -19,6 +20,7 @@ const CONFIG = {
   TOTAL_DATA_COUNT: 400,
   ENTROPY_THRESHOLD_STEP: 0.05,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
+  IMG_SIZES: [12, 16, 20, 24, 30],
 } as const;
 
 interface AttackSuccessFailureProps {
@@ -49,6 +51,9 @@ export default function AttackSuccessFailure({
   setHoveredId,
   onElementClick,
 }: AttackSuccessFailureProps) {
+  const [successImgSize, setSuccessImgSize] = useState(0);
+  const [failureImgSize, setFailureImgSize] = useState(0);
+
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
@@ -121,6 +126,12 @@ export default function AttackSuccessFailure({
     };
   }, [data, isAboveThresholdUnlearn, thresholdValue]);
 
+  const getGridColumns = (imgSize: number) => {
+    const size = CONFIG.IMG_SIZES[imgSize];
+    const columns = Math.floor(240 / size);
+    return columns;
+  };
+
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
@@ -165,10 +176,12 @@ export default function AttackSuccessFailure({
               type: groupItem.type as CategoryType,
             });
           }}
-          className="w-3 h-3 cursor-pointer"
+          className="cursor-pointer"
           style={{
             border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
+            width: `${CONFIG.IMG_SIZES[successImgSize]}px`,
+            height: `${CONFIG.IMG_SIZES[successImgSize]}px`,
           }}
         />
       );
@@ -181,6 +194,7 @@ export default function AttackSuccessFailure({
     onElementClick,
     setHoveredId,
     successGroup,
+    successImgSize,
   ]);
 
   const failureImages = useMemo(() => {
@@ -209,7 +223,7 @@ export default function AttackSuccessFailure({
       borderColor!.opacity = borderOpacity;
       return (
         <img
-          key={`success-${idx}`}
+          key={`failure-${idx}`}
           src={`data:image/png;base64,${imgData.base64}`}
           alt="img"
           onMouseEnter={() => setHoveredId(groupItem.img_idx)}
@@ -227,10 +241,12 @@ export default function AttackSuccessFailure({
               type: groupItem.type as CategoryType,
             });
           }}
-          className="w-3 h-3 cursor-pointer"
+          className="cursor-pointer"
           style={{
             border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
+            width: `${CONFIG.IMG_SIZES[failureImgSize]}px`,
+            height: `${CONFIG.IMG_SIZES[failureImgSize]}px`,
           }}
         />
       );
@@ -243,54 +259,111 @@ export default function AttackSuccessFailure({
     isBaseline,
     onElementClick,
     setHoveredId,
+    failureImgSize,
   ]);
 
+  const handleImgSizeControl = (value: number[], id: string) => {
+    if (id === "success") {
+      setSuccessImgSize(value[0]);
+    } else if (id === "failure") {
+      setFailureImgSize(value[0]);
+    }
+  };
+
   return (
-    <div className="relative h-full flex flex-col items-center mt-1">
-      <div className="flex gap-[38px]">
+    <div className="relative h-full flex flex-col items-center mt-1.5">
+      <p className="text-xl text-center">
+        Forgetting Quality Score ={" "}
+        <span className="font-semibold">
+          {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
+        </span>
+      </p>
+      <div className="flex gap-10">
         <div>
-          <div className="flex items-center">
-            <span
-              className={`text-[15px] font-medium ${
-                isStrategyMaxSuccessRate && "text-red-500"
-              }`}
-            >
-              Attack Success
-            </span>
-            <span
-              className={`ml-1.5 text-[15px] font-light w-11 ${
-                isStrategyMaxSuccessRate && "text-red-500"
-              }`}
-            >
-              {successPct.toFixed(2)}%
-            </span>
+          <div className="flex justify-between items-center">
+            <div>
+              <span className={isStrategyMaxSuccessRate ? "text-red-500" : ""}>
+                Success
+              </span>
+              <span
+                className={`ml-2 text-[15px] font-light w-11 ${
+                  isStrategyMaxSuccessRate && "text-red-500"
+                }`}
+              >
+                {successPct.toFixed(2)}%
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-xs">Size</span>
+              <Slider
+                id="success"
+                className="w-20 h-1"
+                defaultValue={[0]}
+                min={0}
+                max={4}
+                step={1}
+                onValueChange={(value) =>
+                  handleImgSizeControl(value, "success")
+                }
+              />
+              <span className="text-xs">
+                {CONFIG.IMG_SIZES[successImgSize]}px
+              </span>
+            </div>
           </div>
-          <ScrollArea style={{ height: "188px" }}>
-            <div className="grid grid-cols-[repeat(20,12px)] gap-[1px]">
+          <ScrollArea className="w-[] h-[148px]">
+            <div
+              className="grid gap-[1px]"
+              style={{
+                gridTemplateColumns: `repeat(${getGridColumns(
+                  successImgSize
+                )}, ${CONFIG.IMG_SIZES[successImgSize]}px)`,
+              }}
+            >
               {successImages}
             </div>
           </ScrollArea>
         </div>
         <div>
-          <div className="flex items-center">
-            <span className="text-[15px] font-medium mb-0.5">
-              Attack Failure
-            </span>
-            <span className="ml-4 text-[15px] font-light w-11">
-              {failurePct.toFixed(2)}%
-            </span>
+          <div className="flex justify-between items-center">
+            <div>
+              <span>Failure</span>
+              <span className="ml-2 text-[15px] font-light w-11">
+                {failurePct.toFixed(2)}%
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-xs">Size</span>
+              <Slider
+                id="failure"
+                className="w-20 h-1"
+                defaultValue={[0]}
+                min={0}
+                max={4}
+                step={1}
+                onValueChange={(value) =>
+                  handleImgSizeControl(value, "failure")
+                }
+              />
+              <span className="text-xs">
+                {CONFIG.IMG_SIZES[failureImgSize]}px
+              </span>
+            </div>
           </div>
-          <ScrollArea style={{ height: "188px" }}>
-            <div className="grid grid-cols-[repeat(20,12px)] gap-[1px]">
+          <ScrollArea className="w-[] h-[148px]">
+            <div
+              className="grid gap-[1px]"
+              style={{
+                gridTemplateColumns: `repeat(${getGridColumns(
+                  failureImgSize
+                )}, ${CONFIG.IMG_SIZES[failureImgSize]}px)`,
+              }}
+            >
               {failureImages}
             </div>
           </ScrollArea>
         </div>
       </div>
-      <p className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[17px] font-medium text-center">
-        Forgetting Quality Score:{" "}
-        {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
-      </p>
     </div>
   );
 }
