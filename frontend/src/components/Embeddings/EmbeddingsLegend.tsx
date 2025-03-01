@@ -32,7 +32,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
         <p className="text-lg font-medium mb-1">True Class</p>
         <ul className="flex flex-col gap-1">
           <li className="flex items-center text-nowrap">
-            <CircleIcon className="w-2 h-2 mr-1.5" />
+            <CircleIcon className="w-2 h-2 mr-1.5 relative left-[1px]" />
             <span>Retain Classes</span>
           </li>
           <li className="flex items-center">
