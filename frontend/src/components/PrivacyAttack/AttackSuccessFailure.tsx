@@ -13,12 +13,7 @@ const CONFIG = {
   UNLEARN: "unlearn",
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
-  CIRCLE_RADIUS: 3,
-  CELL_SIZE: 3 * 2 + 1,
-  MAX_COLUMNS: 20,
   TOTAL_DATA_COUNT: 400,
-  ENTROPY_THRESHOLD_STEP: 0.05,
-  CONFIDENCE_THRESHOLD_STEP: 0.25,
   IMG_SIZES: [12, 16, 20, 24, 30],
 } as const;
 
@@ -135,7 +130,7 @@ export default function AttackSuccessFailure({
   const getStrokeWidth = (imgSize: number) => {
     const size = CONFIG.IMG_SIZES[imgSize];
     if (size <= CONFIG.IMG_SIZES[1]) return "1px";
-    if (size === 20) return "1.5px";
+    if (size === CONFIG.IMG_SIZES[2]) return "1.5px";
     return "2px";
   };
 
@@ -149,20 +144,14 @@ export default function AttackSuccessFailure({
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY;
-      const defaultBorderOpacity =
-        groupItem.type === CONFIG.RETRAIN
-          ? CONFIG.LOW_OPACITY
-          : CONFIG.HIGH_OPACITY;
       const imageOpacity =
-        hoveredId !== null ? (groupItem.img_idx === hoveredId ? 1 : 0.3) : 1;
-      const borderOpacity =
         hoveredId !== null
           ? groupItem.img_idx === hoveredId
-            ? 1
-            : 0.3
-          : defaultBorderOpacity;
+            ? CONFIG.HIGH_OPACITY
+            : CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
       const borderColor = d3.color(strokeColor);
-      borderColor!.opacity = borderOpacity;
+      borderColor!.opacity = 1;
       return (
         <img
           key={`success-${idx}`}
@@ -216,20 +205,14 @@ export default function AttackSuccessFailure({
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY;
-      const defaultBorderOpacity =
-        groupItem.type === CONFIG.UNLEARN
-          ? CONFIG.LOW_OPACITY
-          : CONFIG.HIGH_OPACITY;
       const imageOpacity =
-        hoveredId !== null ? (groupItem.img_idx === hoveredId ? 1 : 0.3) : 1;
-      const borderOpacity =
         hoveredId !== null
           ? groupItem.img_idx === hoveredId
-            ? 1
-            : 0.3
-          : defaultBorderOpacity;
+            ? CONFIG.HIGH_OPACITY
+            : CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
       const borderColor = d3.color(strokeColor);
-      borderColor!.opacity = borderOpacity;
+      borderColor!.opacity = 1;
       return (
         <img
           key={`failure-${idx}`}
@@ -282,8 +265,8 @@ export default function AttackSuccessFailure({
   };
 
   return (
-    <div className="relative h-full flex flex-col items-center mt-1.5">
-      <p className="text-xl text-center">
+    <div className="relative h-full flex flex-col items-center">
+      <p className="text-xl text-center mt-2 mb-1">
         Forgetting Quality Score ={" "}
         <span className="font-semibold">
           {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
@@ -322,7 +305,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[] h-[148px]">
+          <ScrollArea className="w-[260px] h-[164px]">
             <div
               className="grid gap-[1px]"
               style={{
@@ -361,7 +344,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[] h-[148px]">
+          <ScrollArea className="w-[260px] h-[164px]">
             <div
               className="grid gap-[1px]"
               style={{

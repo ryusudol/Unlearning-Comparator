@@ -36,7 +36,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
             <span>Retain Class</span>
           </li>
           <li className="flex items-center">
-            <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1.5" />
+            <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1" />
             <span>Forget Class</span>
           </li>
         </ul>

@@ -33,7 +33,7 @@ const CONFIG = {
   CONFIDENCE_SCOPE_MIN: -2.5,
   CONFIDENCE_SCOPE_MAX: 10,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
-  BUTTERFLY_CIRCLE_RADIUS: 3.5,
+  BUTTERFLY_CIRCLE_RADIUS: 3.3,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   BUTTERFLY_CHART_X_AXIS_TICK_STEP: 10,
@@ -41,9 +41,9 @@ const CONFIG = {
   BUTTERFLY_CHART_LEGEND_TEXT_GAP: 6,
   BUTTERFLY_CHART_LEGEND_SQUARE_SIZE: 12,
   BUTTERFLY_CHART_LEGEND_SQUARE_POSITIONS: [-7, 7],
-  BUTTERFLY_CHART_WIDTH: 420,
-  LINE_CHART_WIDTH: 160,
-  HEIGHT: 420,
+  BUTTERFLY_CHART_WIDTH: 450,
+  LINE_CHART_WIDTH: 170,
+  HEIGHT: 396,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
   BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 54 },
@@ -457,12 +457,12 @@ export default function AttackPlot({
       // create a legend for butterfly charts
       const butterflyLegendData = [
         {
-          label: `From Retrain / Pred. ${isBaseline ? "Model A" : "Model B"}`,
+          label: `From Retrained / Pred. ${isBaseline ? "Model A" : "Model B"}`,
           side: "left",
           color: COLORS.DARK_GRAY,
         },
         {
-          label: "From Retrain / Pred. Retrain",
+          label: "From Retrained / Pred. Retrained",
           side: "left",
           color: "#D4D4D4",
         },
@@ -474,7 +474,7 @@ export default function AttackPlot({
           color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE,
         },
         {
-          label: `From ${isBaseline ? "Model A" : "Model B"} / Pred. Retrain`,
+          label: `From ${isBaseline ? "Model A" : "Model B"} / Pred. Retrained`,
           side: "right",
           color: isBaseline ? "#C8EADB" : "#E6D0FD",
         },
@@ -487,9 +487,9 @@ export default function AttackPlot({
 
       butterflyLegendGroup
         .insert("rect", ":first-child")
-        .attr("x", -167.5)
+        .attr("x", -184.5)
         .attr("y", -18.5)
-        .attr("width", 350)
+        .attr("width", 374)
         .attr("height", 36)
         .attr("fill", "white")
         .attr("opacity", 0.6)
@@ -605,33 +605,55 @@ export default function AttackPlot({
         .attr("x2", wB / 2)
         .attr("y1", 0)
         .attr("y2", 0);
-      threshGroupB
+      const upText = threshGroupB
         .append("text")
         .attr("class", "threshold-label-up")
-        .attr("x", -172)
-        .attr("y", -4)
+        .attr("x", -188)
+        .attr("y", -4.5)
         .attr("text-anchor", "start")
-        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
-        .attr("fill", CONFIG.BLACK)
-        .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
+      upText.append("tspan").attr("fill", CONFIG.BLACK).text("↑ Pred as ");
+      upText
+        .append("tspan")
+        .attr(
+          "fill",
+          isAboveThresholdUnlearn
+            ? isBaseline
+              ? COLORS.EMERALD
+              : COLORS.PURPLE
+            : COLORS.DARK_GRAY
+        )
         .text(
           isAboveThresholdUnlearn
-            ? `↑ Pred as ${isBaseline ? "Model A" : "Model B"}`
-            : "↑ Pred as Retrain"
+            ? isBaseline
+              ? "Model A"
+              : "Model B"
+            : "Retrained"
         );
-      threshGroupB
+      const downText = threshGroupB
         .append("text")
         .attr("class", "threshold-label-down")
-        .attr("x", -172)
+        .attr("x", -188)
         .attr("y", 12)
         .attr("text-anchor", "start")
-        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
-        .attr("fill", CONFIG.BLACK)
-        .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
+      downText.append("tspan").attr("fill", CONFIG.BLACK).text("↓ Pred as ");
+      downText
+        .append("tspan")
+        .attr(
+          "fill",
+          isAboveThresholdUnlearn
+            ? COLORS.DARK_GRAY
+            : isBaseline
+            ? COLORS.EMERALD
+            : COLORS.PURPLE
+        )
         .text(
           isAboveThresholdUnlearn
-            ? "↓ Pred as Retrain"
-            : `↓ Pred as ${isBaseline ? "Model A" : "Model B"}`
+            ? "Retrained"
+            : isBaseline
+            ? "Model A"
+            : "Model B"
         );
 
       // create a svg for a line chart
@@ -1142,33 +1164,55 @@ export default function AttackPlot({
       .attr("x2", wB / 2)
       .attr("y1", 0)
       .attr("y2", 0);
-    newThreshGroupB
+    const newUpText = newThreshGroupB
       .append("text")
       .attr("class", "threshold-label-up")
-      .attr("x", -172)
-      .attr("y", -4)
+      .attr("x", -188)
+      .attr("y", -4.5)
       .attr("text-anchor", "start")
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
-      .attr("fill", CONFIG.BLACK)
-      .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
+    newUpText.append("tspan").attr("fill", CONFIG.BLACK).text("↑ Pred as ");
+    newUpText
+      .append("tspan")
+      .attr(
+        "fill",
+        isAboveThresholdUnlearn
+          ? isBaseline
+            ? COLORS.EMERALD
+            : COLORS.PURPLE
+          : COLORS.DARK_GRAY
+      )
       .text(
         isAboveThresholdUnlearn
-          ? `↑ Pred as ${isBaseline ? "Model A" : "Model B"}`
-          : "↑ Pred as Retrain"
+          ? isBaseline
+            ? "Model A"
+            : "Model B"
+          : "Retrained"
       );
-    newThreshGroupB
+    const newDownText = newThreshGroupB
       .append("text")
       .attr("class", "threshold-label-down")
-      .attr("x", -172)
+      .attr("x", -188)
       .attr("y", 12)
       .attr("text-anchor", "start")
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
-      .attr("fill", CONFIG.BLACK)
-      .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
+    newDownText.append("tspan").attr("fill", CONFIG.BLACK).text("↓ Pred as ");
+    newDownText
+      .append("tspan")
+      .attr(
+        "fill",
+        isAboveThresholdUnlearn
+          ? COLORS.DARK_GRAY
+          : isBaseline
+          ? COLORS.EMERALD
+          : COLORS.PURPLE
+      )
       .text(
         isAboveThresholdUnlearn
-          ? "↓ Pred as Retrain"
-          : `↓ Pred as ${isBaseline ? "Model A" : "Model B"}`
+          ? "Retrained"
+          : isBaseline
+          ? "Model A"
+          : "Model B"
       );
 
     // Draw a new y-axis for a butterfly chart based on the metric value
@@ -1431,7 +1475,7 @@ export default function AttackPlot({
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center relative bottom-[7px] px-3.5 bg-white z-10">
-        <span style={{ color: COLORS.DARK_GRAY }} className="font-medium">
+        <span style={{ color: COLORS.DARK_GRAY }}>
           Retrained Model (a00{forgetClass})
         </span>
         <span className="mx-1.5">vs</span>

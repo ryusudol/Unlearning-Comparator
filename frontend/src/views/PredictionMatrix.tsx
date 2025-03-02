@@ -81,22 +81,22 @@ function BubbleChartLegend() {
 
   return (
     <div className="flex justify-center items-center gap-11 text-[#666666] mb-1">
-      <div className="grid grid-cols-[1fr,auto,1fr] gap-y-1.5 place-items-center text-[11px] grid-rows-[18px_14px] relative left-[26px]">
-        <div className="w-1.5 h-1.5 rounded-full bg-[#666666]" />
-        <div className="w-3 h-3 rounded-full bg-[#666666]" />
+      <div className="grid grid-cols-[1fr,auto,1fr] gap-y-1.5 place-items-center text-[11px] grid-rows-[18px_14px] relative left-7">
+        <div className="w-1 h-1 rounded-full bg-[#666666]" />
+        <div className="w-[13px] h-[13px] rounded-full bg-[#666666]" />
         <div className="w-[18px] h-[18px] rounded-full bg-[#666666]" />
         <p className="flex flex-col relative top-1">
-          <span className="text-sm relative top-1">Smaller</span>
+          <span className="text-sm relative top-1">Small</span>
           <span className="text-[10px]">Proportion</span>
         </p>
         <Arrow className="mx-4" />
-        <p className="flex flex-col relative top-1">
-          <span className="text-sm relative top-1">Larger</span>
+        <p className="flex flex-col relative top-1 left-1.5">
+          <span className="text-sm relative top-1">Large</span>
           <span className="text-[10px]">Proportion</span>
         </p>
       </div>
       <div className="flex flex-col items-center gap-y-1.5 relative left-7">
-        <div className="relative top-2 w-[148px] h-3.5">
+        <div className="relative top-2 w-[156px] h-3.5">
           <div
             className="absolute w-full h-full"
             style={{ background: gradient }}
@@ -108,14 +108,14 @@ function BubbleChartLegend() {
             <span className="text-[10px] text-white">1</span>
           </div>
         </div>
-        <div className="text-nowrap flex items-center gap-1.5 text-[11px]">
+        <div className="text-nowrap flex items-center gap-2.5 text-[11px]">
           <p className="flex flex-col relative top-1">
-            <span className="text-sm relative top-1">Lower</span>
+            <span className="text-sm relative top-1">Low</span>
             <span className="text-[10px]">Confidence</span>
           </p>
           <Arrow className="mx-2" />
-          <p className="flex flex-col relative top-1">
-            <span className="text-sm relative top-1">Higher</span>
+          <p className="flex flex-col relative top-1 left-0.5">
+            <span className="text-sm relative top-1">High</span>
             <span className="text-[10px]">Confidence</span>
           </p>
         </div>

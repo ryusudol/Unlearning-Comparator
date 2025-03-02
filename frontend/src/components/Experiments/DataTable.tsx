@@ -117,7 +117,7 @@ export default function DataTable({ isExpanded }: Props) {
     <div className="w-full overflow-visible">
       <TableHeader table={table} />
       {isExpanded ? (
-        <div className="w-[1008px] absolute top-[78px] z-[49] bg-white shadow-xl rounded-b-md">
+        <div className="w-[1008px] absolute top-[79px] z-[49] bg-white shadow-xl rounded-b-md">
           <TableBody table={table} />
         </div>
       ) : (

@@ -356,17 +356,20 @@ export default function UnlearningConfiguration() {
       </div>
       <div className="w-full grid grid-cols-2 gap-y-2">
         <Label className="text-base text-nowrap mb-1">Unlearning Method</Label>
-        <Select defaultValue="ft" onValueChange={handleMethodChange}>
+        <Select value={method} onValueChange={handleMethodChange}>
           <SelectTrigger className="h-[25px] text-base">
             <SelectValue placeholder={UNLEARNING_METHODS[0]} />
           </SelectTrigger>
           <SelectContent>
             {UNLEARNING_METHODS.map((method, idx) => {
-              const chunks = method.split("-");
               const value =
-                chunks.length === 1
-                  ? chunks[0].toLowerCase()
-                  : (chunks[0][0] + chunks[1][0]).toLowerCase();
+                method === UNLEARNING_METHODS[0]
+                  ? "ft"
+                  : method === UNLEARNING_METHODS[1]
+                  ? "rl"
+                  : method === UNLEARNING_METHODS[2]
+                  ? "ga"
+                  : "custom";
               return (
                 <SelectItem key={idx} value={value}>
                   {method}
