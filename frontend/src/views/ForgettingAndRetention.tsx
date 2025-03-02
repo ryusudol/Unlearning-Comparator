@@ -9,7 +9,7 @@ export default function ForgettingAndRetention() {
   return (
     <View width={CONFIG.ANALYSIS_VIEW_WIDTH} height={CONFIG.TOTAL_HEIGHT}>
       <Title title="Forgetting and Retention" />
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-[26px]">
         <ClassWiseAnalysis />
         <PredictionMatrix />
         <LayerWiseSimilarity />

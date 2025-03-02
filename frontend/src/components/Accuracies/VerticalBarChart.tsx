@@ -101,7 +101,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={VERTICAL_BAR_CHART_CONFIG}
-        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[272px]`}
+        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[252px]`}
       >
         <BarChart
           accessibilityLayer
@@ -178,10 +178,10 @@ export default function VerticalBarChart({
                   <g className="flex flex-col items-center justify-center">
                     <text
                       x={x + width / 2}
-                      y={y + 28}
+                      y={y + 32}
                       textAnchor="middle"
                       fill={COLORS.BLACK}
-                      className="text-xs"
+                      className="text-[13px]"
                     >
                       {"← "}
                       <tspan fill={COLORS.EMERALD}>Model A</tspan>
@@ -191,10 +191,10 @@ export default function VerticalBarChart({
                     </text>
                     <text
                       x={lowerTextDx}
-                      y={y + 42}
+                      y={y + 46}
                       textAnchor="middle"
                       fill={COLORS.BLACK}
-                      className="text-xs"
+                      className="text-[13px]"
                     >
                       <tspan fill={COLORS.EMERALD}>
                         ({modelAType}, {modelA})
