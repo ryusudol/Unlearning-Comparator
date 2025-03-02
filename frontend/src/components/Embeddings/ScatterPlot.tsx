@@ -841,19 +841,15 @@ const ScatterPlot = forwardRef(
             onClick={resetZoom}
           />
         )}
-        <div className="text-[15px] flex items-center relative px-3.5 bg-white z-10">
+        <div className="flex items-center relative px-3.5 bg-white z-10">
           {isBaseline ? (
-            <div style={{ color: COLORS.EMERALD }}>
-              <span>
-                Model A ({modelType}, {modelA})
-              </span>
-            </div>
+            <span style={{ color: COLORS.EMERALD }}>
+              Model A ({modelType}, {modelA})
+            </span>
           ) : (
-            <div style={{ color: COLORS.PURPLE }}>
-              <span>
-                Model B ({modelType}, {modelB})
-              </span>
-            </div>
+            <span style={{ color: COLORS.PURPLE }}>
+              Model B ({modelType}, {modelB})
+            </span>
           )}
         </div>
         <div className="w-[632px] h-[638px] flex flex-col justify-center items-center">
