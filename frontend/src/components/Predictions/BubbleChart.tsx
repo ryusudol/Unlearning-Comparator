@@ -18,13 +18,19 @@ import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 
 const CONFIG = {
-  WIDTH: 252,
-  HEIGHT: 240,
+  WIDTH: 256,
+  HEIGHT: 244,
   MIN_BUBBLE_SIZE: 1,
   MAX_BUBBLE_SIZE: 90,
   MIN_VALUE_TO_DISPLAY: 0.002,
   CELL_SIZE: 20,
   CELL_ROUNDEDNESS: 4,
+  MARGIN: {
+    top: 8,
+    right: 4,
+    bottom: 48,
+    left: 64,
+  },
 } as const;
 
 type ModeType = "Baseline" | "Comparison";
@@ -90,14 +96,8 @@ export default function BubbleChart({
 
     const data = extractBubbleChartData(datasetMode, experiment);
 
-    const margin = {
-      top: 8,
-      right: 4,
-      bottom: 48,
-      left: 64,
-    };
-    const width = CONFIG.WIDTH - margin.left - margin.right;
-    const height = CONFIG.HEIGHT - margin.top - margin.bottom;
+    const width = CONFIG.WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
+    const height = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
 
     d3.select(svgRef.current).selectAll("*").remove();
 
@@ -106,7 +106,10 @@ export default function BubbleChart({
       .attr("width", CONFIG.WIDTH)
       .attr("height", CONFIG.HEIGHT)
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr(
+        "transform",
+        `translate(${CONFIG.MARGIN.left},${CONFIG.MARGIN.top})`
+      );
 
     const xScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, width]);
 
