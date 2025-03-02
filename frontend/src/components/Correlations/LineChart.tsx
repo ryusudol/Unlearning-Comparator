@@ -81,7 +81,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
       <style>{LINE_CHART_TICK_STYLE}</style>
       <CustomLegend />
       <ChartContainer
-        className="w-[454px] h-[250px] relative"
+        className="w-[460px] h-[250px] relative"
         config={LINE_CHART_CONFIG}
       >
         <LineChart
@@ -91,7 +91,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             top: 8,
             right: 7,
             bottom: 30,
-            left: -14,
+            left: -24,
           }}
           onMouseMove={(state: any) => {
             if (state?.activePayload) {
