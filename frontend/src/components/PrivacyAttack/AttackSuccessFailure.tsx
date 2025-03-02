@@ -265,8 +265,8 @@ export default function AttackSuccessFailure({
   };
 
   return (
-    <div className="relative h-full flex flex-col items-center mt-1.5">
-      <p className="text-xl text-center">
+    <div className="relative h-full flex flex-col items-center">
+      <p className="text-xl text-center mt-2 mb-1">
         Forgetting Quality Score ={" "}
         <span className="font-semibold">
           {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
@@ -305,7 +305,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-[148px]">
+          <ScrollArea className="w-[260px] h-[164px]">
             <div
               className="grid gap-[1px]"
               style={{
@@ -344,7 +344,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-[148px]">
+          <ScrollArea className="w-[260px] h-[164px]">
             <div
               className="grid gap-[1px]"
               style={{
