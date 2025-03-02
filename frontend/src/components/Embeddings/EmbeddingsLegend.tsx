@@ -33,7 +33,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
         <ul className="flex flex-col gap-1">
           <li className="flex items-center text-nowrap">
             <CircleIcon className="w-2 h-2 mr-1.5 relative left-[1px]" />
-            <span>Retain Classes</span>
+            <span>Retain Class</span>
           </li>
           <li className="flex items-center">
             <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1.5" />
