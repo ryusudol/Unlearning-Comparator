@@ -112,9 +112,9 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             label={{
               value: "ResNet18 Layers",
               position: "center",
-              dy: 38,
+              dy: 36,
               style: {
-                fontSize: 12,
+                fontSize: FONT_CONFIG.FONT_SIZE_13,
                 fill: COLORS.BLACK,
               },
             }}
@@ -135,7 +135,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
               angle: -90,
               position: "center",
               style: {
-                fontSize: 12,
+                fontSize: FONT_CONFIG.FONT_SIZE_13,
                 fill: COLORS.BLACK,
               },
             }}
@@ -279,7 +279,7 @@ function CustomLegend() {
   const CIRCLE = "circle";
 
   return (
-    <div className="absolute bottom-[70px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
+    <div className="absolute bottom-[68px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
       {LINE_CHART_LEGEND_DATA.map((item, i) => {
         const Icon =
           item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
