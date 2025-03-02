@@ -32,7 +32,8 @@ const CONFIG = {
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
   COLOR_MAPPING_THRESHOLD: 0.8,
   COLOR_MAPPING_RTE_THRESHOLD: 200,
-  COLOR_TEMPERATURE: 0.8,
+  COLOR_TEMPERATURE_HIGH: 0.77,
+  COLOR_TEMPERATURE_LOW: 0.03,
 };
 
 interface Props {
@@ -57,7 +58,7 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateGreens(0.0 + t * CONFIG.COLOR_TEMPERATURE))
+        .interpolator((t) => d3.interpolateGreens(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
         .domain([1 - CONFIG.COLOR_MAPPING_THRESHOLD, 0])
         .clamp(true),
     []
@@ -66,7 +67,7 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateGreens(0.0 + t * CONFIG.COLOR_TEMPERATURE))
+        .interpolator((t) => d3.interpolateGreens(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
         .domain([CONFIG.COLOR_MAPPING_THRESHOLD, 1])
         .clamp(true),
     []
@@ -75,7 +76,7 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateBlues(0.0 + t * CONFIG.COLOR_TEMPERATURE))
+        .interpolator((t) => d3.interpolateBlues(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
         .domain([CONFIG.COLOR_MAPPING_RTE_THRESHOLD, 0])
         .clamp(true),
     []
@@ -84,7 +85,7 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateBlues(0.0 + t * CONFIG.COLOR_TEMPERATURE))
+        .interpolator((t) => d3.interpolateBlues(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
         .domain([0, 1])
         .clamp(true),
     []
