@@ -343,29 +343,21 @@ export default function BubbleChart({
               </span>
             </div>
             <div>
-              <span>
-                <span
-                  style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
-                >
-                  {isBaseline ? "Model A" : "Model B"}
-                </span>{" "}
-                Proportion
+              <span
+                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+              >
+                Proportion:{" "}
               </span>
-              :{" "}
               <span className="font-semibold">
                 {tooltip.content.label.toFixed(3)}
               </span>
             </div>
             <div>
-              <span>
-                <span
-                  style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
-                >
-                  {isBaseline ? "Model A" : "Model B"}
-                </span>{" "}
-                Confidence
+              <span
+                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+              >
+                Avg. Confidence:{" "}
               </span>
-              :{" "}
               <span className="font-semibold">
                 {tooltip.content.conf.toFixed(3)}
               </span>
