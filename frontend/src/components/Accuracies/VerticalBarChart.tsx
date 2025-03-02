@@ -101,7 +101,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={VERTICAL_BAR_CHART_CONFIG}
-        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[248px]`}
+        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[252px]`}
       >
         <BarChart
           accessibilityLayer
