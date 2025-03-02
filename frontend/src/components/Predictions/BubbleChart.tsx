@@ -18,8 +18,8 @@ import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS, bubbleColorScale } from "../../constants/colors";
 
 const CONFIG = {
-  WIDTH: 256,
-  HEIGHT: 244,
+  WIDTH: 260,
+  HEIGHT: 250,
   MIN_BUBBLE_SIZE: 1,
   MAX_BUBBLE_SIZE: 90,
   MIN_VALUE_TO_DISPLAY: 0.002,
@@ -308,7 +308,7 @@ export default function BubbleChart({
       }`}
     >
       {showYAxis && (
-        <span className="absolute top-[42%] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
+        <span className="absolute top-[calc(42%-8px)] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
           True Class
         </span>
       )}
@@ -373,22 +373,18 @@ export default function BubbleChart({
           </div>,
           document.body
         )}
-      <div className="flex flex-col items-center absolute -bottom-3.5 translate-x-[calc(50%-32px)] text-xs leading-3">
+      <div className="flex flex-col items-center gap-0.5 absolute -bottom-[18px] translate-x-[calc(50%-36px)] text-[13px] leading-3">
         {isBaseline ? (
           <>
-            <span>
-              <span style={{ color: COLORS.EMERALD }}>
-                Model A ({modelType}, {modelA})
-              </span>
+            <span style={{ color: COLORS.EMERALD }}>
+              Model A ({modelType}, {modelA})
             </span>
             <span>Predicted Class</span>
           </>
         ) : (
           <>
-            <span>
-              <span style={{ color: COLORS.PURPLE }}>
-                Model B ({modelType}, {modelB})
-              </span>
+            <span style={{ color: COLORS.PURPLE }}>
+              Model B ({modelType}, {modelB})
             </span>
             <span>Predicted Class</span>
           </>
