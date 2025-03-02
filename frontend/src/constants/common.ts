@@ -43,6 +43,7 @@ export const FONT_CONFIG = {
 
   FONT_SIZE_10: 10,
   FONT_SIZE_12: 12,
+  FONT_SIZE_13: 13,
   FONT_SIZE_14: 14,
 
   ROBOTO_CONDENSED: "Roboto Condensed",

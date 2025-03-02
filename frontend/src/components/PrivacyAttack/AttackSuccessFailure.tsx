@@ -5,8 +5,8 @@ import { Slider } from "../UI/slider";
 import { ScrollArea } from "../UI/scroll-area";
 import { UNLEARN, RETRAIN } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
-import { Data } from "./AttackAnalytics";
-import { Bin, CategoryType, Image } from "./AttackAnalytics";
+import { Bin, Data, CategoryType, Image } from "../../types/attack";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 
 const CONFIG = {
   RETRAIN: "retrain",
@@ -16,7 +16,6 @@ const CONFIG = {
   CIRCLE_RADIUS: 3,
   CELL_SIZE: 3 * 2 + 1,
   MAX_COLUMNS: 20,
-  STROKE_WIDTH: "1.5px",
   TOTAL_DATA_COUNT: 400,
   ENTROPY_THRESHOLD_STEP: 0.05,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
@@ -26,8 +25,8 @@ const CONFIG = {
 interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
   thresholdValue: number;
-  aboveThreshold: string;
-  thresholdStrategy: string;
+  direction: string;
+  strategy: string;
   hoveredId: number | null;
   data: Data;
   imageMap: Map<number, Image>;
@@ -42,8 +41,8 @@ interface AttackSuccessFailureProps {
 export default function AttackSuccessFailure({
   mode,
   thresholdValue,
-  aboveThreshold,
-  thresholdStrategy,
+  direction,
+  strategy,
   hoveredId,
   data,
   imageMap,
@@ -55,9 +54,10 @@ export default function AttackSuccessFailure({
   const [failureImgSize, setFailureImgSize] = useState(0);
 
   const isBaseline = mode === "Baseline";
-  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
+  const isAboveThresholdUnlearn = direction === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
-  const isStrategyMaxSuccessRate = thresholdStrategy === "MAX SUCCESS RATE";
+  const isStrategyMaxSuccessRate =
+    strategy === THRESHOLD_STRATEGIES[2].strategy;
 
   const { successGroup, failureGroup, successPct, failurePct } = useMemo(() => {
     if (!data || (!data.retrainData.length && !data.unlearnData.length)) {
@@ -132,6 +132,13 @@ export default function AttackSuccessFailure({
     return columns;
   };
 
+  const getStrokeWidth = (imgSize: number) => {
+    const size = CONFIG.IMG_SIZES[imgSize];
+    if (size <= CONFIG.IMG_SIZES[1]) return "1px";
+    if (size === 20) return "1.5px";
+    return "2px";
+  };
+
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
@@ -178,7 +185,9 @@ export default function AttackSuccessFailure({
           }}
           className="cursor-pointer"
           style={{
-            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            border: `${getStrokeWidth(
+              successImgSize
+            )} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
             width: `${CONFIG.IMG_SIZES[successImgSize]}px`,
             height: `${CONFIG.IMG_SIZES[successImgSize]}px`,
@@ -243,7 +252,9 @@ export default function AttackSuccessFailure({
           }}
           className="cursor-pointer"
           style={{
-            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            border: `${getStrokeWidth(
+              failureImgSize
+            )} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
             width: `${CONFIG.IMG_SIZES[failureImgSize]}px`,
             height: `${CONFIG.IMG_SIZES[failureImgSize]}px`,

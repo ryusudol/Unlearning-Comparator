@@ -10,17 +10,15 @@ import {
   useModelBExperiment,
 } from "../../stores/experimentsStore";
 import { COLORS } from "../../constants/colors";
+import { FONT_CONFIG } from "../../constants/common";
 import { AttackResult } from "../../types/data";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
-import { Bin, Data, CategoryType } from "./AttackAnalytics";
+import { Bin, Data, CategoryType } from "../../types/attack";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
-  FONT_SIZE_10: "10",
-  FONT_SIZE_12: "12",
-  FONT_SIZE_13: "13",
   BLACK: "black",
   RED: "#e41a1c",
   BLUE: "#377eb8",
@@ -57,8 +55,8 @@ interface Props {
   mode: "Baseline" | "Comparison";
   metric: Metric;
   thresholdValue: number;
-  aboveThreshold: string;
-  thresholdStrategy: string;
+  direction: string;
+  strategy: string;
   hoveredId: number | null;
   data: Data;
   onThresholdLineDrag: (value: number) => void;
@@ -70,12 +68,12 @@ interface Props {
   ) => void;
 }
 
-export default function ButterflyPlot({
+export default function AttackPlot({
   mode,
   metric,
   thresholdValue,
-  aboveThreshold,
-  thresholdStrategy,
+  direction,
+  strategy,
   hoveredId,
   data,
   onThresholdLineDrag,
@@ -100,7 +98,8 @@ export default function ButterflyPlot({
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
-  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
+  const isAboveThresholdUnlearn = direction === UNLEARN;
+  const isStrategyCustom = strategy === THRESHOLD_STRATEGIES[0].strategy;
 
   const thresholdMin = isMetricEntropy
     ? CONFIG.ENTROPY_SCOPE_MIN
@@ -282,7 +281,7 @@ export default function ButterflyPlot({
             .attr("x", markerCx)
             .attr("y", yPos)
             .attr("text-anchor", "end")
-            .attr("font-size", CONFIG.FONT_SIZE_10)
+            .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
             .attr("fill", CONFIG.BLACK)
             .text(`+${extraCount}`);
         }
@@ -337,7 +336,7 @@ export default function ButterflyPlot({
             .attr("x", markerCx - 6)
             .attr("y", yPos)
             .attr("text-anchor", "start")
-            .attr("font-size", CONFIG.FONT_SIZE_10)
+            .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
             .attr("fill", CONFIG.BLACK)
             .text(`+${extraCount}`);
         }
@@ -360,7 +359,7 @@ export default function ButterflyPlot({
         .attr("class", "x-axis-label-b")
         .attr("x", -107)
         .attr("y", 15)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
@@ -371,7 +370,7 @@ export default function ButterflyPlot({
         .attr("class", "x-axis-label-b")
         .attr("x", -89)
         .attr("y", 15)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", COLORS.DARK_GRAY)
         .attr("text-anchor", "middle")
@@ -383,7 +382,7 @@ export default function ButterflyPlot({
         .attr("class", "x-axis-label-b")
         .attr("x", -23.5)
         .attr("y", 15)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
@@ -394,7 +393,7 @@ export default function ButterflyPlot({
         .attr("class", "x-axis-label-b")
         .attr("x", 26)
         .attr("y", 15)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", isBaseline ? COLORS.EMERALD : COLORS.PURPLE)
         .attr("text-anchor", "middle")
@@ -404,7 +403,7 @@ export default function ButterflyPlot({
         .attr("class", "x-axis-label-b")
         .attr("x", 78)
         .attr("y", 15)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", COLORS.BLACK)
         .attr("text-anchor", "middle")
@@ -429,7 +428,7 @@ export default function ButterflyPlot({
         .attr("transform", "rotate(-90)")
         .attr("x", -hB / 2)
         .attr("y", -206)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
@@ -439,18 +438,18 @@ export default function ButterflyPlot({
       if (extraRetrain > 0) {
         gB.append("text")
           .attr("x", xScaleB(-maxDisplayCircles))
-          .attr("y", hB + +CONFIG.FONT_SIZE_10)
+          .attr("y", hB + FONT_CONFIG.FONT_SIZE_10)
           .attr("text-anchor", "end")
-          .attr("font-size", CONFIG.FONT_SIZE_10)
+          .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
           .attr("fill", CONFIG.BLACK)
           .text(`+${extraRetrain}`);
       }
       if (extraUnlearn > 0) {
         gB.append("text")
           .attr("x", xScaleB(maxDisplayCircles))
-          .attr("y", hB + +CONFIG.FONT_SIZE_10)
+          .attr("y", hB + FONT_CONFIG.FONT_SIZE_10)
           .attr("text-anchor", "start")
-          .attr("font-size", CONFIG.FONT_SIZE_10)
+          .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
           .attr("fill", CONFIG.BLACK)
           .text(`+${extraUnlearn}`);
       }
@@ -548,7 +547,7 @@ export default function ButterflyPlot({
             .attr("y", yPos)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", CONFIG.FONT_SIZE_13)
+            .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
             .text(item.label);
         } else {
           butterflyLegendGroup
@@ -562,7 +561,7 @@ export default function ButterflyPlot({
             .attr("y", yPos)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", CONFIG.FONT_SIZE_13)
+            .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
             .text(item.label);
         }
       });
@@ -572,9 +571,10 @@ export default function ButterflyPlot({
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
-        .attr("cursor", "ns-resize")
+        .style("cursor", isStrategyCustom ? "ns-resize" : "default")
         .call(
           d3.drag<SVGGElement, unknown>().on("drag", (event) => {
+            if (!isStrategyCustom) return;
             const [, newY] = d3.pointer(event, gB.node());
             const newThresholdRaw = yScaleB.invert(newY);
             const newThresholdRounded =
@@ -611,7 +611,7 @@ export default function ButterflyPlot({
         .attr("x", -172)
         .attr("y", -4)
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE_12)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
         .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
         .text(
@@ -625,7 +625,7 @@ export default function ButterflyPlot({
         .attr("x", -172)
         .attr("y", 12)
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE_12)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
         .attr("fill", CONFIG.BLACK)
         .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
         .text(
@@ -788,7 +788,7 @@ export default function ButterflyPlot({
         .attr("class", "axis-label")
         .attr("x", wL / 2)
         .attr("y", 15)
-        .attr("font-size", CONFIG.FONT_SIZE_13)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
         .attr("fill", CONFIG.BLACK)
         .attr("text-anchor", "middle")
@@ -817,12 +817,13 @@ export default function ButterflyPlot({
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleL(thresholdValue)})`)
-        .attr("cursor", "ns-resize")
+        .style("cursor", isStrategyCustom ? "ns-resize" : "default")
         .call(
           d3
             .drag<SVGGElement, any>()
             .subject(() => ({ y: yScaleL(thresholdValue) }))
             .on("drag", function (event) {
+              if (!isStrategyCustom) return;
               const [, newY] = d3.pointer(event, gL.node());
               const newThresholdRaw = yScaleL.invert(newY);
               const newThresholdRounded =
@@ -893,7 +894,7 @@ export default function ButterflyPlot({
           .attr("class", "line-legend-" + item.color)
           .attr("x", 20)
           .attr("y", 3)
-          .attr("font-size", CONFIG.FONT_SIZE_13)
+          .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
           .text(item.label);
       });
 
@@ -1012,34 +1013,30 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[3].strategy ? "red" : CONFIG.BLACK
         )
-        .attr("font-size", CONFIG.FONT_SIZE_12)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[1].strategy ? "red" : CONFIG.BLACK
         )
-        .attr("font-size", CONFIG.FONT_SIZE_12)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
         .attr("dy", "1.2em")
         .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE_12)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
         .attr("dy", "2.4em")
         .text(`FPR: ${currentData.fpr.toFixed(3)}`);
       infoGroup
         .append("text")
         .attr("text-anchor", "start")
-        .attr("font-size", CONFIG.FONT_SIZE_12)
+        .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
         .attr("dy", "3.6em")
         .text(`FNR: ${currentData.fnr.toFixed(3)}`);
 
@@ -1111,9 +1108,10 @@ export default function ButterflyPlot({
       .append("g")
       .attr("class", "threshold-group")
       .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
-      .attr("cursor", "ns-resize")
+      .style("cursor", isStrategyCustom ? "ns-resize" : "default")
       .call(
         d3.drag<SVGGElement, unknown>().on("drag", (event) => {
+          if (!isStrategyCustom) return;
           const [, newY] = d3.pointer(event, gB.node());
           const newThresholdRaw = yScaleB.invert(newY);
           const newThresholdRounded =
@@ -1150,7 +1148,7 @@ export default function ButterflyPlot({
       .attr("x", -172)
       .attr("y", -4)
       .attr("text-anchor", "start")
-      .attr("font-size", CONFIG.FONT_SIZE_12)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
       .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 1 : 0.5)
       .text(
@@ -1164,7 +1162,7 @@ export default function ButterflyPlot({
       .attr("x", -172)
       .attr("y", 12)
       .attr("text-anchor", "start")
-      .attr("font-size", CONFIG.FONT_SIZE_12)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
       .attr("fill", CONFIG.BLACK)
       .attr("opacity", isAboveThresholdUnlearn ? 0.5 : 1)
       .text(
@@ -1356,18 +1354,14 @@ export default function ButterflyPlot({
         .select("text:nth-child(1)")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[3].strategy ? "red" : CONFIG.BLACK
         )
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
         .select("text:nth-child(2)")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[1].strategy ? "red" : CONFIG.BLACK
         )
         .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
       infoGroup
@@ -1396,6 +1390,7 @@ export default function ButterflyPlot({
     isAboveThresholdUnlearn,
     isBaseline,
     isMetricEntropy,
+    isStrategyCustom,
     lowerOpacity,
     metric,
     mode,
@@ -1404,10 +1399,10 @@ export default function ButterflyPlot({
     onUpdateAttackScore,
     retrainJson,
     setHoveredId,
+    strategy,
     thresholdMax,
     thresholdMin,
     thresholdStep,
-    thresholdStrategy,
     thresholdValue,
     unlearnJson,
     upperOpacity,
@@ -1417,7 +1412,7 @@ export default function ButterflyPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric, aboveThreshold, modelA, modelB]);
+  }, [metric, direction, modelA, modelB]);
 
   useEffect(() => {
     const strokeOpacity = isAboveThresholdUnlearn ? 1 : 0.3;
