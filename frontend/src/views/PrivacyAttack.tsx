@@ -6,6 +6,7 @@ import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
 import { useModelDataStore } from "../stores/modelDataStore";
+import { THRESHOLD_STRATEGIES } from "../constants/privacyAttack";
 import { fetchFileData } from "../utils/api/unlearning";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ExperimentData } from "../types/data";
@@ -32,9 +33,7 @@ export default function PrivacyAttack({
 
   const [metric, setMetric] = useState<Metric>(ENTROPY);
   const [direction, setDirection] = useState(UNLEARN);
-  const [strategy, setStrategy] = useState("");
-  const [userModified, setUserModified] = useState(false);
-  const [strategyCount, setStrategyClick] = useState(0);
+  const [strategy, setStrategy] = useState(THRESHOLD_STRATEGIES[0].strategy);
   const [retrainData, setRetrainData] = useState<ExperimentData>();
 
   const isModelAOriginal = modelA.startsWith("000");
@@ -59,14 +58,15 @@ export default function PrivacyAttack({
 
   const handleAboveThresholdChange = (threshold: string) => {
     setDirection(threshold);
-    setStrategyClick((prev) => prev + 1);
   };
 
   const handleThresholdStrategyChange = (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
-    const strategy = e.currentTarget.innerHTML;
-    setStrategy(strategy);
+    const currStrategy = e.currentTarget.innerHTML;
+    if (strategy !== currStrategy) {
+      setStrategy(currStrategy);
+    }
   };
 
   return (
@@ -74,6 +74,7 @@ export default function PrivacyAttack({
       <AttackLegend
         metric={metric}
         direction={direction}
+        strategy={strategy}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
@@ -89,13 +90,10 @@ export default function PrivacyAttack({
             metric={metric}
             direction={direction}
             strategy={strategy}
-            strategyCount={strategyCount}
-            userModified={userModified}
             retrainPoints={retrainData.points}
             unlearnPoints={baselinePoints}
             retrainAttackData={retrainData.attack}
             setStrategy={setStrategy}
-            setUserModified={setUserModified}
             onUpdateMetric={handleMetricChange}
             onUpdateDirection={handleAboveThresholdChange}
           />
@@ -114,13 +112,10 @@ export default function PrivacyAttack({
             metric={metric}
             direction={direction}
             strategy={strategy}
-            strategyCount={strategyCount}
-            userModified={userModified}
             retrainPoints={retrainData.points}
             unlearnPoints={comparisonPoints}
             retrainAttackData={retrainData.attack}
             setStrategy={setStrategy}
-            setUserModified={setUserModified}
             onUpdateMetric={handleMetricChange}
             onUpdateDirection={handleAboveThresholdChange}
           />

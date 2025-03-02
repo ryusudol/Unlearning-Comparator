@@ -22,6 +22,7 @@ import { COLORS } from "../../constants/colors";
 interface AttackLegendProps {
   metric: Metric;
   direction: string;
+  strategy: string;
   onMetricChange: (val: Metric) => void;
   onAboveThresholdChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -30,6 +31,7 @@ interface AttackLegendProps {
 export default function AttackLegend({
   metric,
   direction,
+  strategy,
   onMetricChange,
   onAboveThresholdChange,
   onThresholdStrategyChange,
@@ -66,7 +68,7 @@ export default function AttackLegend({
             <Button
               style={{ backgroundColor: COLORS.PURPLE }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
-              onClick={(e) =>
+              onClick={() =>
                 onThresholdStrategyChange({
                   currentTarget: { innerHTML: "BEST_ATTACK_B" },
                 } as React.MouseEvent<HTMLButtonElement>)
@@ -160,20 +162,20 @@ export default function AttackLegend({
           </p>
         </div>
         <div className="flex gap-[15px]">
-          {THRESHOLD_STRATEGIES.map((strategy, idx) => (
+          {THRESHOLD_STRATEGIES.map((s, idx) => (
             <div key={idx} className="flex flex-col">
               <Button
                 onClick={onThresholdStrategyChange}
-                style={{ width: strategy.length }}
-                className="mb-1"
+                style={{ width: s.length }}
+                className={`mb-1 ${
+                  strategy === s.strategy &&
+                  "bg-gray-100 hover:bg-gray-100 text-red-500 cursor-default"
+                }`}
               >
-                {strategy.strategy}
+                {s.strategy}
               </Button>
-              <p
-                className="text-[13px] font-light"
-                style={{ width: strategy.length }}
-              >
-                {strategy.explanation}
+              <p className="text-[13px] font-light" style={{ width: s.length }}>
+                {s.explanation}
               </p>
             </div>
           ))}

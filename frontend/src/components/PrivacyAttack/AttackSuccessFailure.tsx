@@ -6,6 +6,7 @@ import { ScrollArea } from "../UI/scroll-area";
 import { UNLEARN, RETRAIN } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
 import { Bin, Data, CategoryType, Image } from "../../types/attack";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 
 const CONFIG = {
   RETRAIN: "retrain",
@@ -56,7 +57,8 @@ export default function AttackSuccessFailure({
   const isBaseline = mode === "Baseline";
   const isAboveThresholdUnlearn = direction === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
-  const isStrategyMaxSuccessRate = strategy === "MAX SUCCESS RATE";
+  const isStrategyMaxSuccessRate =
+    strategy === THRESHOLD_STRATEGIES[2].strategy;
 
   const { successGroup, failureGroup, successPct, failurePct } = useMemo(() => {
     if (!data || (!data.retrainData.length && !data.unlearnData.length)) {
