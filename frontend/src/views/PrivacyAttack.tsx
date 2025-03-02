@@ -31,8 +31,8 @@ export default function PrivacyAttack({
   const modelB = useModelDataStore((state) => state.modelB);
 
   const [metric, setMetric] = useState<Metric>(ENTROPY);
-  const [aboveThreshold, setAboveThreshold] = useState(UNLEARN);
-  const [thresholdStrategy, setThresholdStrategy] = useState("");
+  const [direction, setDirection] = useState(UNLEARN);
+  const [strategy, setStrategy] = useState("");
   const [userModified, setUserModified] = useState(false);
   const [strategyCount, setStrategyClick] = useState(0);
   const [retrainData, setRetrainData] = useState<ExperimentData>();
@@ -58,7 +58,7 @@ export default function PrivacyAttack({
   };
 
   const handleAboveThresholdChange = (threshold: string) => {
-    setAboveThreshold(threshold);
+    setDirection(threshold);
     setStrategyClick((prev) => prev + 1);
   };
 
@@ -66,14 +66,14 @@ export default function PrivacyAttack({
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     const strategy = e.currentTarget.innerHTML;
-    setThresholdStrategy(strategy);
+    setStrategy(strategy);
   };
 
   return (
     <div className="h-[764px] flex flex-col border rounded-md px-1.5">
       <AttackLegend
         metric={metric}
-        aboveThreshold={aboveThreshold}
+        direction={direction}
         onMetricChange={handleMetricChange}
         onAboveThresholdChange={handleAboveThresholdChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
@@ -87,15 +87,17 @@ export default function PrivacyAttack({
           <AttackAnalytics
             mode="Baseline"
             metric={metric}
-            aboveThreshold={aboveThreshold}
-            thresholdStrategy={thresholdStrategy}
+            direction={direction}
+            strategy={strategy}
             strategyCount={strategyCount}
             userModified={userModified}
             retrainPoints={retrainData.points}
             unlearnPoints={baselinePoints}
             retrainAttackData={retrainData.attack}
-            setThresholdStrategy={setThresholdStrategy}
+            setStrategy={setStrategy}
             setUserModified={setUserModified}
+            onUpdateMetric={handleMetricChange}
+            onUpdateDirection={handleAboveThresholdChange}
           />
         )}
         <Separator
@@ -110,15 +112,17 @@ export default function PrivacyAttack({
           <AttackAnalytics
             mode="Comparison"
             metric={metric}
-            aboveThreshold={aboveThreshold}
-            thresholdStrategy={thresholdStrategy}
+            direction={direction}
+            strategy={strategy}
             strategyCount={strategyCount}
             userModified={userModified}
             retrainPoints={retrainData.points}
             unlearnPoints={comparisonPoints}
             retrainAttackData={retrainData.attack}
-            setThresholdStrategy={setThresholdStrategy}
+            setStrategy={setStrategy}
             setUserModified={setUserModified}
+            onUpdateMetric={handleMetricChange}
+            onUpdateDirection={handleAboveThresholdChange}
           />
         )}
       </div>

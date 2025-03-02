@@ -5,8 +5,7 @@ import { Slider } from "../UI/slider";
 import { ScrollArea } from "../UI/scroll-area";
 import { UNLEARN, RETRAIN } from "../../views/PrivacyAttack";
 import { COLORS } from "../../constants/colors";
-import { Data } from "./AttackAnalytics";
-import { Bin, CategoryType, Image } from "./AttackAnalytics";
+import { Bin, Data, CategoryType, Image } from "../../types/attack";
 
 const CONFIG = {
   RETRAIN: "retrain",
@@ -26,8 +25,8 @@ const CONFIG = {
 interface AttackSuccessFailureProps {
   mode: "Baseline" | "Comparison";
   thresholdValue: number;
-  aboveThreshold: string;
-  thresholdStrategy: string;
+  direction: string;
+  strategy: string;
   hoveredId: number | null;
   data: Data;
   imageMap: Map<number, Image>;
@@ -42,8 +41,8 @@ interface AttackSuccessFailureProps {
 export default function AttackSuccessFailure({
   mode,
   thresholdValue,
-  aboveThreshold,
-  thresholdStrategy,
+  direction,
+  strategy,
   hoveredId,
   data,
   imageMap,
@@ -55,9 +54,9 @@ export default function AttackSuccessFailure({
   const [failureImgSize, setFailureImgSize] = useState(0);
 
   const isBaseline = mode === "Baseline";
-  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
+  const isAboveThresholdUnlearn = direction === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
-  const isStrategyMaxSuccessRate = thresholdStrategy === "MAX SUCCESS RATE";
+  const isStrategyMaxSuccessRate = strategy === "MAX SUCCESS RATE";
 
   const { successGroup, failureGroup, successPct, failurePct } = useMemo(() => {
     if (!data || (!data.retrainData.length && !data.unlearnData.length)) {

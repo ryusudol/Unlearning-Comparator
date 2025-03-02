@@ -14,7 +14,7 @@ import { AttackResult } from "../../types/data";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
-import { Bin, Data, CategoryType } from "./AttackAnalytics";
+import { Bin, Data, CategoryType } from "../../types/attack";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
@@ -57,8 +57,8 @@ interface Props {
   mode: "Baseline" | "Comparison";
   metric: Metric;
   thresholdValue: number;
-  aboveThreshold: string;
-  thresholdStrategy: string;
+  direction: string;
+  strategy: string;
   hoveredId: number | null;
   data: Data;
   onThresholdLineDrag: (value: number) => void;
@@ -74,8 +74,8 @@ export default function ButterflyPlot({
   mode,
   metric,
   thresholdValue,
-  aboveThreshold,
-  thresholdStrategy,
+  direction,
+  strategy,
   hoveredId,
   data,
   onThresholdLineDrag,
@@ -100,7 +100,7 @@ export default function ButterflyPlot({
 
   const isBaseline = mode === "Baseline";
   const isMetricEntropy = metric === ENTROPY;
-  const isAboveThresholdUnlearn = aboveThreshold === UNLEARN;
+  const isAboveThresholdUnlearn = direction === UNLEARN;
 
   const thresholdMin = isMetricEntropy
     ? CONFIG.ENTROPY_SCOPE_MIN
@@ -1012,9 +1012,7 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[2].strategy ? "red" : CONFIG.BLACK
         )
         .attr("font-size", CONFIG.FONT_SIZE_12)
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
@@ -1023,9 +1021,7 @@ export default function ButterflyPlot({
         .attr("text-anchor", "start")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[0].strategy ? "red" : CONFIG.BLACK
         )
         .attr("font-size", CONFIG.FONT_SIZE_12)
         .attr("dy", "1.2em")
@@ -1356,18 +1352,14 @@ export default function ButterflyPlot({
         .select("text:nth-child(1)")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[2].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[2].strategy ? "red" : CONFIG.BLACK
         )
         .text(`Threshold: ${thresholdValue.toFixed(2)}`);
       infoGroup
         .select("text:nth-child(2)")
         .attr(
           "fill",
-          thresholdStrategy === THRESHOLD_STRATEGIES[0].strategy
-            ? "red"
-            : CONFIG.BLACK
+          strategy === THRESHOLD_STRATEGIES[0].strategy ? "red" : CONFIG.BLACK
         )
         .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
       infoGroup
@@ -1407,7 +1399,7 @@ export default function ButterflyPlot({
     thresholdMax,
     thresholdMin,
     thresholdStep,
-    thresholdStrategy,
+    strategy,
     thresholdValue,
     unlearnJson,
     upperOpacity,
@@ -1417,7 +1409,7 @@ export default function ButterflyPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric, aboveThreshold, modelA, modelB]);
+  }, [metric, direction, modelA, modelB]);
 
   useEffect(() => {
     const strokeOpacity = isAboveThresholdUnlearn ? 1 : 0.3;
