@@ -44,7 +44,7 @@ export default function PredictionMatrix() {
         ) : (
           <div className="flex flex-col relative bottom-2.5">
             <BubbleChartLegend />
-            <div className="flex items-center relative left-2">
+            <div className="flex items-center">
               {modelAExperiment && (
                 <BubbleChart
                   mode="Baseline"
@@ -81,7 +81,7 @@ function BubbleChartLegend() {
 
   return (
     <div className="flex justify-center items-center gap-11 text-[#666666] mb-1">
-      <div className="grid grid-cols-[1fr,auto,1fr] gap-y-1.5 place-items-center text-[11px] grid-rows-[18px_14px] relative left-7">
+      <div className="grid grid-cols-[1fr,auto,1fr] gap-y-1.5 place-items-center text-[11px] grid-rows-[18px_14px] relative left-6">
         <div className="w-1 h-1 rounded-full bg-[#666666]" />
         <div className="w-[13px] h-[13px] rounded-full bg-[#666666]" />
         <div className="w-[18px] h-[18px] rounded-full bg-[#666666]" />
@@ -95,7 +95,7 @@ function BubbleChartLegend() {
           <span className="text-[10px]">Proportion</span>
         </p>
       </div>
-      <div className="flex flex-col items-center gap-y-1.5 relative left-7">
+      <div className="flex flex-col items-center gap-y-1.5 relative left-[34px]">
         <div className="relative top-2 w-[156px] h-3.5">
           <div
             className="absolute w-full h-full"
