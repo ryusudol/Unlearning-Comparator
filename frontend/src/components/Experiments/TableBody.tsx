@@ -54,11 +54,37 @@ export default function _TableBody({ table }: Props) {
     experiments
   ) as PerformanceMetrics;
 
+  const maxTRA = useMemo(
+    () =>
+      d3.max(table.getRowModel().rows, (row) => {
+        const val = row.original.TRA;
+        return typeof val === "number" ? val : 0;
+      }) || 1,
+    [table]
+  );
+
+  const traScale = useMemo(
+    () =>
+      d3
+        .scaleSequential()
+        .interpolator((t) =>
+          d3.interpolateGreens(
+            CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
+          )
+        )
+        .domain([0, maxTRA])
+        .clamp(true),
+    [maxTRA]
+  );
   const greenScaleLower = useMemo(
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateGreens(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
+        .interpolator((t) =>
+          d3.interpolateGreens(
+            CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
+          )
+        )
         .domain([1 - CONFIG.COLOR_MAPPING_THRESHOLD, 0])
         .clamp(true),
     []
@@ -67,7 +93,11 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateGreens(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
+        .interpolator((t) =>
+          d3.interpolateGreens(
+            CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
+          )
+        )
         .domain([CONFIG.COLOR_MAPPING_THRESHOLD, 1])
         .clamp(true),
     []
@@ -76,7 +106,11 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateBlues(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
+        .interpolator((t) =>
+          d3.interpolateBlues(
+            CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
+          )
+        )
         .domain([CONFIG.COLOR_MAPPING_RTE_THRESHOLD, 0])
         .clamp(true),
     []
@@ -85,7 +119,11 @@ export default function _TableBody({ table }: Props) {
     () =>
       d3
         .scaleSequential()
-        .interpolator((t) => d3.interpolateBlues(CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH))
+        .interpolator((t) =>
+          d3.interpolateBlues(
+            CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
+          )
+        )
         .domain([0, 1])
         .clamp(true),
     []
@@ -132,6 +170,9 @@ export default function _TableBody({ table }: Props) {
           } else if (columnId === "FQS") {
             backgroundColor = blueScaleFQS(value);
             textColor = value >= 0.5 ? COLORS.WHITE : COLORS.BLACK;
+          } else if (columnId === "TRA") {
+            backgroundColor = traScale(value);
+            textColor = value >= maxTRA * 0.5 ? COLORS.WHITE : COLORS.BLACK;
           } else {
             if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
               backgroundColor = greenScaleHigher(value);
