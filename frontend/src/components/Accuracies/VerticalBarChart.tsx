@@ -219,7 +219,7 @@ export default function VerticalBarChart({
             label={{
               value: `avg (retain): ${remainGapAvg}`,
               position: "top",
-              fontSize: FONT_CONFIG.FONT_SIZE_12,
+              fontSize: FONT_CONFIG.FONT_SIZE_10,
               fill: COLORS.BLACK,
               offset: 3.5,
             }}
