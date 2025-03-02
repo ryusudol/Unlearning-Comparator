@@ -91,7 +91,7 @@ export default function VerticalBarChart({
   );
 
   return (
-    <div className="flex flex-col justify-center items-center relative bottom-1.5">
+    <div className="flex flex-col justify-center items-center relative bottom-1.5 right-2.5">
       <span
         className={`text-[15px] relative ${
           mode === "Training" ? "left-[30px]" : "left-0"
@@ -101,7 +101,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={VERTICAL_BAR_CHART_CONFIG}
-        className={`${showYAxis ? "w-[255px]" : "w-[195px]"} h-[252px]`}
+        className={`${showYAxis ? "w-[260px]" : "w-[200px]"} h-[252px]`}
       >
         <BarChart
           accessibilityLayer
