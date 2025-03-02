@@ -362,11 +362,14 @@ export default function UnlearningConfiguration() {
           </SelectTrigger>
           <SelectContent>
             {UNLEARNING_METHODS.map((method, idx) => {
-              const chunks = method.split("-");
               const value =
-                chunks.length === 1
-                  ? chunks[0].toLowerCase()
-                  : (chunks[0][0] + chunks[1][0]).toLowerCase();
+                method === UNLEARNING_METHODS[0]
+                  ? "ft"
+                  : method === UNLEARNING_METHODS[1]
+                  ? "rl"
+                  : method === UNLEARNING_METHODS[2]
+                  ? "ga"
+                  : "custom";
               return (
                 <SelectItem key={idx} value={value}>
                   {method}
