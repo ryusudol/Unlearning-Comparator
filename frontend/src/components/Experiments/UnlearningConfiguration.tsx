@@ -356,7 +356,7 @@ export default function UnlearningConfiguration() {
       </div>
       <div className="w-full grid grid-cols-2 gap-y-2">
         <Label className="text-base text-nowrap mb-1">Unlearning Method</Label>
-        <Select defaultValue="ft" onValueChange={handleMethodChange}>
+        <Select value={method} onValueChange={handleMethodChange}>
           <SelectTrigger className="h-[25px] text-base">
             <SelectValue placeholder={UNLEARNING_METHODS[0]} />
           </SelectTrigger>
