@@ -16,7 +16,6 @@ const CONFIG = {
   CIRCLE_RADIUS: 3,
   CELL_SIZE: 3 * 2 + 1,
   MAX_COLUMNS: 20,
-  STROKE_WIDTH: "1.5px",
   TOTAL_DATA_COUNT: 400,
   ENTROPY_THRESHOLD_STEP: 0.05,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
@@ -133,6 +132,13 @@ export default function AttackSuccessFailure({
     return columns;
   };
 
+  const getStrokeWidth = (imgSize: number) => {
+    const size = CONFIG.IMG_SIZES[imgSize];
+    if (size <= CONFIG.IMG_SIZES[1]) return "1px";
+    if (size === 20) return "1.5px";
+    return "2px";
+  };
+
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
@@ -179,7 +185,9 @@ export default function AttackSuccessFailure({
           }}
           className="cursor-pointer"
           style={{
-            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            border: `${getStrokeWidth(
+              successImgSize
+            )} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
             width: `${CONFIG.IMG_SIZES[successImgSize]}px`,
             height: `${CONFIG.IMG_SIZES[successImgSize]}px`,
@@ -244,7 +252,9 @@ export default function AttackSuccessFailure({
           }}
           className="cursor-pointer"
           style={{
-            border: `${CONFIG.STROKE_WIDTH} solid ${borderColor?.toString()}`,
+            border: `${getStrokeWidth(
+              failureImgSize
+            )} solid ${borderColor?.toString()}`,
             opacity: imageOpacity,
             width: `${CONFIG.IMG_SIZES[failureImgSize]}px`,
             height: `${CONFIG.IMG_SIZES[failureImgSize]}px`,
