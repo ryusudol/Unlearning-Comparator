@@ -18,8 +18,10 @@ export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
   );
 
   const handleForgetClassChange = async (value: string) => {
-    saveForgetClass(value);
-    await fetchAndSaveExperiments(value);
+    if (CIFAR_10_CLASSES[forgetClass] !== value) {
+      saveForgetClass(value);
+      await fetchAndSaveExperiments(value);
+    }
   };
 
   const handleDeleteClick = async (targetClass: string) => {
@@ -56,10 +58,10 @@ export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
           <div key={idx} className="flex items-center relative">
             <div
               className={
-                "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t cursor-pointer transition " +
+                "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t transition " +
                 (isSelectedForgetClass
-                  ? "bg-white text-black"
-                  : "text-white hover:bg-gray-800 relative bottom-[1px]")
+                  ? "bg-white text-black cursor-default"
+                  : "text-white hover:bg-gray-800 relative bottom-[1px] cursor-pointer")
               }
               onClick={() => handleForgetClassChange(forgetClassName)}
             >
