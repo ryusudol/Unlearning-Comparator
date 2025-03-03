@@ -1,13 +1,18 @@
-import React from "react";
-
 interface Props {
   title: string;
   AdditionalContent?: JSX.Element | false;
+  className?: string;
 }
 
-export default function Subtitle({ title, AdditionalContent }: Props) {
+export default function Subtitle({
+  title,
+  AdditionalContent,
+  className,
+}: Props) {
   return (
-    <div className="flex items-center gap-1 font-medium text-lg text-[#4d4d4d] mb-1">
+    <div
+      className={`flex items-center gap-1 font-medium text-lg text-[#4d4d4d] mb-1 relative ${className}`}
+    >
       <span>{title}</span>
       {AdditionalContent}
     </div>

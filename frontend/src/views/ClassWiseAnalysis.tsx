@@ -42,7 +42,7 @@ export default function ClassWiseAnalysis() {
 
   return (
     <div className="h-[306.5px]">
-      <Subtitle title="Class-wise Accuracy" />
+      <Subtitle title="Class-wise Accuracy" className="left-0.5" />
       {forgetClass !== undefined ? (
         modelA !== "" && modelB !== "" ? (
           <div className="flex items-center relative left-2">

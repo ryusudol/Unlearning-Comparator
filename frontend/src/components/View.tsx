@@ -24,10 +24,10 @@ export default function View({
       style={{
         width,
         height,
-        borderTop: borderTop ? "1.5px solid #E5E7EB" : "0px",
-        borderRight: borderRight ? "1.5px solid #E5E7EB" : "0px",
-        borderBottom: borderBottom ? "1.5px solid #E5E7EB" : "0px",
-        borderLeft: borderLeft ? "1.5px solid #E5E7EB" : "0px",
+        borderTop: borderTop ? "3px solid #E5E7EB" : "0px",
+        borderRight: borderRight ? "3px solid #E5E7EB" : "0px",
+        borderBottom: borderBottom ? "3px solid #E5E7EB" : "0px",
+        borderLeft: borderLeft ? "3px solid #E5E7EB" : "0px",
       }}
       className={"px-3 py-2.5 relative " + className}
     >

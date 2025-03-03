@@ -59,9 +59,11 @@ export default function AttackLegend({
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Automatically picks Metric, Threshold Direction, and
+            Automatically picks Metric, Threshold
             <br />
-            Strategy yielding the lowest forgetting quality score.
+            Direction, and Strategy yielding the
+            <br />
+            lowest forgetting quality score.
           </HoverCardContent>
         </HoverCard>
         <HoverCard openDelay={0} closeDelay={0}>
@@ -81,9 +83,11 @@ export default function AttackLegend({
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-3 py-2" side="top">
-            Automatically picks Metric, Threshold Direction, and
+            Automatically picks Metric, Threshold
             <br />
-            Strategy yielding the lowest forgetting quality score.
+            Direction, and Strategy yielding the
+            <br />
+            lowest forgetting quality score.
           </HoverCardContent>
         </HoverCard>
       </div>
