@@ -138,7 +138,7 @@ export default React.memo(function Tooltip({
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
       .text("Model A")
-      .style("fill", COLORS.EMERALD)
+      .style("fill", COLORS.BLACK)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -164,7 +164,7 @@ export default React.memo(function Tooltip({
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
       .text("Model B")
-      .style("fill", COLORS.PURPLE)
+      .style("fill", COLORS.BLACK)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
