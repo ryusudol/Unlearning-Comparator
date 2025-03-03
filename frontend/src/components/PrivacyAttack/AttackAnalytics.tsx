@@ -426,7 +426,6 @@ export default function AttackAnalytics({
           setThresholdValue(bestResult.threshold);
         }
       }
-      setStrategy(THRESHOLD_STRATEGIES[1].strategy);
     }
   }, [
     data,

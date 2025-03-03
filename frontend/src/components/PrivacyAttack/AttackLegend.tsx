@@ -168,7 +168,8 @@ export default function AttackLegend({
                 onClick={onThresholdStrategyChange}
                 style={{ width: s.length }}
                 className={`mb-1 ${
-                  strategy === s.strategy &&
+                  (strategy === s.strategy ||
+                    (strategy.startsWith("BEST_ATTACK") && idx === 1)) &&
                   "bg-gray-100 hover:bg-gray-100 text-red-500 cursor-default"
                 }`}
               >
