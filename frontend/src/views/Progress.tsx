@@ -103,7 +103,8 @@ export default function Progress() {
     <View
       width={CONFIG.PROGRESS_WIDTH}
       height={CONFIG.EXPERIMENTS_PROGRESS_HEIGHT}
-      className="border-t-0 border-l-0"
+      borderRight
+      borderBottom
     >
       <div className="flex justify-between">
         <Subtitle
