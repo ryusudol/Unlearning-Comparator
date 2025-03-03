@@ -76,16 +76,6 @@ export default function Core() {
     loadModelBData();
   }, [forgetClass, forgetClassExist, modelB]);
 
-  const content = forgetClassExist ? (
-    isEmbeddingMode ? (
-      <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
-    ) : (
-      <PrivacyAttack modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
-    )
-  ) : (
-    <Indicator about="ForgetClass" />
-  );
-
   return (
     <View
       width={CONFIG.CORE_WIDTH}
@@ -113,7 +103,18 @@ export default function Core() {
           onClick={handleDisplayModeChange}
         />
       </div>
-      {content}
+      {forgetClassExist ? (
+        isEmbeddingMode ? (
+          <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
+        ) : (
+          <PrivacyAttack
+            modelAPoints={modelAPoints}
+            modelBPoints={modelBPoints}
+          />
+        )
+      ) : (
+        <Indicator about="ForgetClass" />
+      )}
     </View>
   );
 }

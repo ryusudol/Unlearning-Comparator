@@ -86,38 +86,38 @@ function BubbleChartLegend() {
         <div className="w-[13px] h-[13px] rounded-full bg-[#666666]" />
         <div className="w-[18px] h-[18px] rounded-full bg-[#666666]" />
         <p className="flex flex-col items-center relative top-1">
-          <span className="text-sm relative top-1">Small</span>
-          <span className="text-[10px]">Proportion</span>
+          <span className="text-base relative top-1">Small</span>
+          <span className="text-xs">Proportion</span>
         </p>
         <Arrow className="mx-4" />
         <p className="flex flex-col items-center relative top-1">
-          <span className="text-sm relative top-1">Large</span>
-          <span className="text-[10px]">Proportion</span>
+          <span className="text-base relative top-1">Large</span>
+          <span className="text-xs">Proportion</span>
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-y-1.5 relative left-6">
+      <div className="flex flex-col items-center gap-y-1.5 relative top-0.5 left-6">
         <div className="relative top-2 w-[156px] h-3.5">
           <div
-            className="absolute w-full h-full"
+            className="w-full h-full relative top-1"
             style={{ background: gradient }}
           />
-          <div className="absolute -bottom-[3px] left-1">
+          <div className="absolute -bottom-[7px] left-1">
             <span className="text-[10px] text-white">0</span>
           </div>
-          <div className="absolute -bottom-[3px] right-1">
+          <div className="absolute -bottom-[7px] right-1">
             <span className="text-[10px] text-white">1</span>
           </div>
         </div>
-        <div className="text-nowrap flex items-center gap-2.5 text-[11px]">
-          <p className="flex flex-col items-center relative top-1 left-2">
-            <span className="text-sm relative top-1">Low</span>
-            <span className="text-[10px]">Confidence</span>
+        <div className="text-nowrap flex items-center gap-0 text-[11px]">
+          <p className="flex flex-col items-start relative top-1 left-2">
+            <span className="text-base relative top-1">Low</span>
+            <span className="text-xs">Confidence</span>
           </p>
           <Arrow className="mx-2" />
-          <p className="flex flex-col items-center relative top-1 right-2">
-            <span className="text-sm relative top-1">High</span>
-            <span className="text-[10px]">Confidence</span>
+          <p className="flex flex-col items-end relative top-1 right-2">
+            <span className="text-base relative top-1">High</span>
+            <span className="text-xs">Confidence</span>
           </p>
         </div>
       </div>
