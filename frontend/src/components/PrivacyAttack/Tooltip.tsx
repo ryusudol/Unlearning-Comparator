@@ -38,10 +38,10 @@ interface Props {
   imageUrl: string;
   data: (number | Prob)[];
   barChartData: {
-    baseline: { class: number; value: number }[];
-    comparison: { class: number; value: number }[];
+    modelA: { class: number; value: number }[];
+    modelB: { class: number; value: number }[];
   };
-  isBaseline: boolean;
+  isModelA: boolean;
 }
 
 export default React.memo(function Tooltip({
@@ -50,7 +50,7 @@ export default React.memo(function Tooltip({
   imageUrl,
   data,
   barChartData,
-  isBaseline,
+  isModelA,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
@@ -59,15 +59,15 @@ export default React.memo(function Tooltip({
   const legendRectColor = d3.schemeTableau10[9];
 
   const groundTruthIdx = Number(data[0]);
-  const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
+  const predictionIdx = barChartData.modelA.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
   const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
-  const baselinePrediction = CIFAR_10_CLASSES[predictionIdx];
-  const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
+  const retrainedPrediction = CIFAR_10_CLASSES[predictionIdx];
+  const modelIdx = barChartData.modelB.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const comparisonPrediction = CIFAR_10_CLASSES[comparisonIdx];
+  const modelPrediction = CIFAR_10_CLASSES[modelIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -100,7 +100,7 @@ export default React.memo(function Tooltip({
       .attr("y2", CONFIG.PATTERN_SIZE)
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH)
-      .attr("opacity", !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY);
+      .attr("opacity", !isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY);
 
     const legendPattern = defs
       .append("pattern")
@@ -125,10 +125,10 @@ export default React.memo(function Tooltip({
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH);
 
-    const legendXOffset = isBaseline
+    const legendXOffset = isModelA
       ? CONFIG.LEGEND_X_MODEL_A_OFFSET
       : CONFIG.LEGEND_X_MODEL_B_OFFSET;
-    const basleineLegend = svg
+    const retrainedLegend = svg
       .append("g")
       .attr("class", "legend")
       .attr(
@@ -136,14 +136,14 @@ export default React.memo(function Tooltip({
         `translate(${width - CONFIG.MARGIN.right - legendXOffset}, 1)`
       );
 
-    basleineLegend
+    retrainedLegend
       .append("rect")
       .attr("width", CONFIG.LEGEND_RECT_SIZE)
       .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", legendRectColor)
-      .attr("stroke", isBaseline ? COLORS.BLACK : "none");
+      .attr("stroke", isModelA ? COLORS.BLACK : "none");
 
-    basleineLegend
+    retrainedLegend
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
@@ -151,29 +151,29 @@ export default React.memo(function Tooltip({
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
-    const comparisonLegend = basleineLegend
+    const modelLegend = retrainedLegend
       .append("g")
       .attr("transform", `translate(${CONFIG.LEGEND_GAP}, 0)`);
 
-    comparisonLegend
+    modelLegend
       .append("rect")
       .attr("width", CONFIG.LEGEND_RECT_SIZE)
       .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", legendRectColor);
 
-    comparisonLegend
+    modelLegend
       .append("rect")
       .attr("width", CONFIG.LEGEND_RECT_SIZE)
       .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", "url(#stripe-legend)")
-      .attr("stroke", !isBaseline ? COLORS.BLACK : "none");
+      .attr("stroke", !isModelA ? COLORS.BLACK : "none");
 
-    comparisonLegend
+    modelLegend
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text(isBaseline ? "Model A" : "Model B")
-      .style("fill", isBaseline ? COLORS.EMERALD : COLORS.PURPLE)
+      .text(isModelA ? "Model A" : "Model B")
+      .style("fill", isModelA ? COLORS.EMERALD : COLORS.PURPLE)
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -184,7 +184,7 @@ export default React.memo(function Tooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(barChartData.baseline.map((d) => CIFAR_10_CLASSES[d.class]))
+      .domain(barChartData.modelA.map((d) => CIFAR_10_CLASSES[d.class]))
       .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
@@ -208,30 +208,27 @@ export default React.memo(function Tooltip({
 
     const g = svg.append("g");
 
-    g.selectAll(".bar-baseline-group")
-      .data(barChartData.baseline)
+    g.selectAll(".bar-retrained-group")
+      .data(barChartData.modelA)
       .join("g")
-      .attr("class", "bar-baseline-group")
+      .attr("class", "bar-retrained-group")
       .each(function (d, i) {
         const g = d3.select(this);
-        const barWidth = isBaseline
+        const barWidth = isModelA
           ? xScale(d.value) - CONFIG.MARGIN.left - CONFIG.BAR_STROKE_WIDTH
           : xScale(d.value) - CONFIG.MARGIN.left;
         const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
 
         g.append("rect")
-          .attr("class", "bar-baseline")
+          .attr("class", "bar-retrained")
           .attr("x", CONFIG.MARGIN.left)
           .attr("y", y)
           .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr(
-            "opacity",
-            isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
-          )
-          .attr("stroke", isBaseline ? COLORS.BLACK : "none")
-          .attr("stroke-width", isBaseline ? CONFIG.BAR_STROKE_WIDTH : 0);
+          .attr("opacity", isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY)
+          .attr("stroke", isModelA ? COLORS.BLACK : "none")
+          .attr("stroke-width", isModelA ? CONFIG.BAR_STROKE_WIDTH : 0);
 
         g.append("text")
           .attr("x", CONFIG.MARGIN.left + barWidth + 4)
@@ -239,22 +236,22 @@ export default React.memo(function Tooltip({
           .attr("dy", "0.35em")
           .attr(
             "font-size",
-            isBaseline
+            isModelA
               ? CONFIG.SELECT_CHART_FONT_SIZE
               : CONFIG.UNSELECT_CHART_FONT_SIZE
           )
           .attr("font-family", CONFIG.ROBOTO_CONDENSED)
-          .attr("fill", isBaseline ? COLORS.BLACK : COLORS.GRAY)
+          .attr("fill", isModelA ? COLORS.BLACK : COLORS.GRAY)
           .text(d.value);
       });
 
-    g.selectAll(".bar-comparison-group")
-      .data(barChartData.comparison)
+    g.selectAll(".bar-model-group")
+      .data(barChartData.modelB)
       .join("g")
-      .attr("class", "bar-comparison-group")
+      .attr("class", "bar-model-group")
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
-        const barWidth = !isBaseline
+        const barWidth = !isModelA
           ? xScale(d.value) - CONFIG.MARGIN.left - CONFIG.BAR_STROKE_WIDTH
           : xScale(d.value) - CONFIG.MARGIN.left;
         const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
@@ -265,12 +262,9 @@ export default React.memo(function Tooltip({
           .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr(
-            "opacity",
-            !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
-          )
-          .attr("stroke", !isBaseline ? COLORS.BLACK : "none")
-          .attr("stroke-width", !isBaseline ? CONFIG.BAR_STROKE_WIDTH : 0);
+          .attr("opacity", !isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY)
+          .attr("stroke", !isModelA ? COLORS.BLACK : "none")
+          .attr("stroke-width", !isModelA ? CONFIG.BAR_STROKE_WIDTH : 0);
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -286,12 +280,12 @@ export default React.memo(function Tooltip({
           .attr("dy", "0.35em")
           .attr(
             "font-size",
-            !isBaseline
+            !isModelA
               ? CONFIG.SELECT_CHART_FONT_SIZE
               : CONFIG.UNSELECT_CHART_FONT_SIZE
           )
           .attr("font-family", CONFIG.ROBOTO_CONDENSED)
-          .attr("fill", !isBaseline ? COLORS.BLACK : COLORS.GRAY)
+          .attr("fill", !isModelA ? COLORS.BLACK : COLORS.GRAY)
           .text(d.value);
       });
 
@@ -330,7 +324,7 @@ export default React.memo(function Tooltip({
         const classIndex = CIFAR_10_CLASSES.indexOf(d);
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
-  }, [barChartData, forgetClass, isBaseline, legendRectColor]);
+  }, [barChartData, forgetClass, isModelA, legendRectColor]);
 
   return (
     <div
@@ -356,16 +350,16 @@ export default React.memo(function Tooltip({
               <span style={{ color: COLORS.DARK_GRAY }} className="mr-0.5">
                 Retrained Model:
               </span>
-              <span className="font-semibold">{baselinePrediction}</span>
+              <span className="font-semibold">{retrainedPrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
               <span
-                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}
                 className="mr-0.5"
               >
-                {isBaseline ? "Model A" : "Model B"}:
+                {isModelA ? "Model A" : "Model B"}:
               </span>
-              <span className="font-semibold">{comparisonPrediction}</span>
+              <span className="font-semibold">{modelPrediction}</span>
             </p>
           </div>
         </div>

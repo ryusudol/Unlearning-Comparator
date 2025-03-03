@@ -5,13 +5,11 @@ export type Position = {
   to: Coordinate | null;
 };
 
-export type Mode = "Baseline" | "Comparison";
-
 export type HoverInstance = {
   imgIdx: number;
-  source: Mode;
-  baselineProb?: Prob;
-  comparisonProb?: Prob;
+  source: "A" | "B";
+  modelAProb?: Prob;
+  modelBProb?: Prob;
 } | null;
 
 export type ViewMode = {

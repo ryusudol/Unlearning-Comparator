@@ -19,14 +19,11 @@ export const RETRAIN = "retrain";
 export type Metric = "entropy" | "confidence";
 
 interface Props {
-  baselinePoints: (number | Prob)[][];
-  comparisonPoints: (number | Prob)[][];
+  modelAPoints: (number | Prob)[][];
+  modelBPoints: (number | Prob)[][];
 }
 
-export default function PrivacyAttack({
-  baselinePoints,
-  comparisonPoints,
-}: Props) {
+export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -86,14 +83,13 @@ export default function PrivacyAttack({
           <Indicator text="Please select an unlearned model to compare the attack results" />
         ) : (
           <AttackAnalytics
-            mode="Baseline"
+            mode="A"
             metric={metric}
             direction={direction}
             strategy={strategy}
             retrainPoints={retrainData.points}
-            unlearnPoints={baselinePoints}
+            modelPoints={modelAPoints}
             retrainAttackData={retrainData.attack}
-            setStrategy={setStrategy}
             onUpdateMetric={handleMetricChange}
             onUpdateDirection={handleAboveThresholdChange}
           />
@@ -108,14 +104,13 @@ export default function PrivacyAttack({
           <Indicator text="Please select an unlearned model to compare the attack results" />
         ) : (
           <AttackAnalytics
-            mode="Comparison"
+            mode="B"
             metric={metric}
             direction={direction}
             strategy={strategy}
             retrainPoints={retrainData.points}
-            unlearnPoints={comparisonPoints}
+            modelPoints={modelBPoints}
             retrainAttackData={retrainData.attack}
-            setStrategy={setStrategy}
             onUpdateMetric={handleMetricChange}
             onUpdateDirection={handleAboveThresholdChange}
           />

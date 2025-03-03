@@ -3,7 +3,7 @@ import { useState, useRef, useCallback, useMemo } from "react";
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
 import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
 import EmbeddingsLegend from "../components/Embeddings/EmbeddingsLegend";
-import { HoverInstance, Position, Prob, Mode } from "../types/embeddings";
+import { HoverInstance, Position, Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
 import {
   useModelAExperiment,
@@ -11,14 +11,11 @@ import {
 } from "../stores/experimentsStore";
 
 interface Props {
-  baselinePoints: (number | Prob)[][];
-  comparisonPoints: (number | Prob)[][];
+  modelAPoints: (number | Prob)[][];
+  modelBPoints: (number | Prob)[][];
 }
 
-export default function Embeddings({
-  baselinePoints,
-  comparisonPoints,
-}: Props) {
+export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -26,36 +23,36 @@ export default function Embeddings({
 
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
-  const baselineRef = useRef<any>(null);
-  const comparisonRef = useRef<any>(null);
+  const modelARef = useRef<any>(null);
+  const modelBRef = useRef<any>(null);
 
-  const baselineDataMap = useMemo(() => {
-    return new Map(baselinePoints.map((point) => [point[2], point]));
-  }, [baselinePoints]);
-  const comparisonDataMap = useMemo(() => {
-    return new Map(comparisonPoints.map((point) => [point[2], point]));
-  }, [comparisonPoints]);
+  const modelADataMap = useMemo(() => {
+    return new Map(modelAPoints.map((point) => [point[2], point]));
+  }, [modelAPoints]);
+  const modelBDataMap = useMemo(() => {
+    return new Map(modelBPoints.map((point) => [point[2], point]));
+  }, [modelBPoints]);
 
   const handleHover = useCallback(
-    (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => {
+    (imgIdxOrNull: number | null, source?: "A" | "B", prob?: Prob) => {
       if (imgIdxOrNull === null || !source) {
         if (hoveredInstanceRef.current?.imgIdx !== null) {
           const prevImgIdx = hoveredInstanceRef.current?.imgIdx;
-          baselineRef.current?.removeHighlight(prevImgIdx);
-          comparisonRef.current?.removeHighlight(prevImgIdx);
+          modelARef.current?.removeHighlight(prevImgIdx);
+          modelBRef.current?.removeHighlight(prevImgIdx);
         }
 
         positionRef.current = { from: null, to: null };
         hoveredInstanceRef.current = null;
-        baselineRef.current?.updateHoveredInstance(null);
-        comparisonRef.current?.updateHoveredInstance(null);
+        modelARef.current?.updateHoveredInstance(null);
+        modelBRef.current?.updateHoveredInstance(null);
         return;
       }
 
-      const isBaseline = source === "Baseline";
-      const oppositeInstance = isBaseline
-        ? comparisonDataMap.get(imgIdxOrNull)
-        : baselineDataMap.get(imgIdxOrNull);
+      const isModelA = source === "A";
+      const oppositeInstance = isModelA
+        ? modelBDataMap.get(imgIdxOrNull)
+        : modelADataMap.get(imgIdxOrNull);
 
       if (!oppositeInstance) return;
 
@@ -64,21 +61,21 @@ export default function Embeddings({
       hoveredInstanceRef.current = {
         imgIdx: imgIdxOrNull,
         source,
-        baselineProb: isBaseline ? prob : oppositeProb,
-        comparisonProb: !isBaseline ? prob : oppositeProb,
+        modelAProb: isModelA ? prob : oppositeProb,
+        modelBProb: !isModelA ? prob : oppositeProb,
       };
 
-      baselineRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
-      comparisonRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
+      modelARef.current?.updateHoveredInstance(hoveredInstanceRef.current);
+      modelBRef.current?.updateHoveredInstance(hoveredInstanceRef.current);
 
-      if (isBaseline) {
-        comparisonRef.current?.highlightInstance(imgIdxOrNull);
+      if (isModelA) {
+        modelBRef.current?.highlightInstance(imgIdxOrNull);
       } else {
-        baselineRef.current?.highlightInstance(imgIdxOrNull);
+        modelARef.current?.highlightInstance(imgIdxOrNull);
       }
 
-      const targetRef = isBaseline ? comparisonRef : baselineRef;
-      const currentRef = isBaseline ? baselineRef : comparisonRef;
+      const targetRef = isModelA ? modelBRef : modelARef;
+      const currentRef = isModelA ? modelARef : modelBRef;
 
       if (targetRef.current && currentRef.current) {
         const fromPos = currentRef.current.getInstancePosition(imgIdxOrNull);
@@ -90,7 +87,7 @@ export default function Embeddings({
         };
       }
     },
-    [baselineDataMap, comparisonDataMap]
+    [modelADataMap, modelBDataMap]
   );
 
   return (
@@ -100,14 +97,14 @@ export default function Embeddings({
       <div className="flex items-center">
         {modelAExperiment && (
           <ScatterPlot
-            mode="Baseline"
+            mode="A"
             modelType={modelAExperiment.Type}
             viewMode={viewMode}
             setViewMode={setViewMode}
-            data={baselinePoints}
+            data={modelAPoints}
             onHover={handleHover}
             hoveredInstance={hoveredInstanceRef.current}
-            ref={baselineRef}
+            ref={modelARef}
           />
         )}
         <Separator
@@ -116,14 +113,14 @@ export default function Embeddings({
         />
         {modelBExperiment && (
           <ScatterPlot
-            mode="Comparison"
+            mode="B"
             modelType={modelBExperiment.Type}
             viewMode={viewMode}
             setViewMode={setViewMode}
-            data={comparisonPoints}
+            data={modelBPoints}
             onHover={handleHover}
             hoveredInstance={hoveredInstanceRef.current}
-            ref={comparisonRef}
+            ref={modelBRef}
           />
         )}
       </div>

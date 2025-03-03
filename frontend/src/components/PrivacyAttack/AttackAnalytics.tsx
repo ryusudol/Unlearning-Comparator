@@ -30,14 +30,13 @@ const CONFIG = {
 } as const;
 
 interface Props {
-  mode: "Baseline" | "Comparison";
+  mode: "A" | "B";
   metric: Metric;
   direction: string;
   strategy: string;
   retrainPoints: (number | Prob)[][];
-  unlearnPoints: (number | Prob)[][];
+  modelPoints: (number | Prob)[][];
   retrainAttackData: AttackData;
-  setStrategy: (val: string) => void;
   onUpdateMetric: (val: Metric) => void;
   onUpdateDirection: (val: string) => void;
 }
@@ -48,9 +47,8 @@ export default function AttackAnalytics({
   direction,
   strategy,
   retrainPoints,
-  unlearnPoints,
+  modelPoints,
   retrainAttackData,
-  setStrategy,
   onUpdateMetric,
   onUpdateDirection,
 }: Props) {
@@ -69,7 +67,7 @@ export default function AttackAnalytics({
   const rootRef = useRef<any>(null);
   const fetchControllerRef = useRef<AbortController | null>(null);
 
-  const isBaseline = mode === "Baseline";
+  const isModelA = mode === "A";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = direction === UNLEARN;
 
@@ -148,7 +146,7 @@ export default function AttackAnalytics({
       if (
         !containerRef.current ||
         retrainPoints.length === 0 ||
-        unlearnPoints.length === 0
+        modelPoints.length === 0
       ) {
         return;
       }
@@ -177,34 +175,23 @@ export default function AttackAnalytics({
         const retrainPoint = retrainPoints.find((point) => {
           return point[2] === elementData.img_idx;
         }) as (number | Prob)[];
-        const unlearnPoint = unlearnPoints.find((point) => {
+        const unlearnPoint = modelPoints.find((point) => {
           return point[2] === elementData.img_idx;
         }) as (number | Prob)[];
 
         const retrainProb = retrainPoint![6] as Prob;
         const unlearnProb = unlearnPoint![6] as Prob;
 
-        const barChartData = isBaseline
-          ? {
-              baseline: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(retrainProb[idx] || 0),
-              })),
-              comparison: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(unlearnProb[idx] || 0),
-              })),
-            }
-          : {
-              baseline: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(unlearnProb[idx] || 0),
-              })),
-              comparison: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(retrainProb[idx] || 0),
-              })),
-            };
+        const barChartData = {
+          modelA: Array.from({ length: 10 }, (_, idx) => ({
+            class: idx,
+            value: Number(retrainProb[idx] || 0),
+          })),
+          modelB: Array.from({ length: 10 }, (_, idx) => ({
+            class: idx,
+            value: Number(unlearnProb[idx] || 0),
+          })),
+        };
 
         const tooltipContent = (
           <Tooltip
@@ -213,7 +200,7 @@ export default function AttackAnalytics({
             imageUrl={imageUrl}
             data={unlearnPoint}
             barChartData={barChartData}
-            isBaseline={isBaseline}
+            isModelA={isModelA}
           />
         );
 
@@ -226,7 +213,7 @@ export default function AttackAnalytics({
         console.error(`Failed to fetch tooltip data: ${error}`);
       }
     },
-    [isBaseline, retrainPoints, unlearnPoints]
+    [isModelA, retrainPoints, modelPoints]
   );
 
   useEffect(() => {
@@ -244,7 +231,7 @@ export default function AttackAnalytics({
 
   useEffect(() => {
     const getAttackData = async () => {
-      const experiment = isBaseline ? modelAExperiment : modelBExperiment;
+      const experiment = isModelA ? modelAExperiment : modelBExperiment;
 
       if (!retrainAttackData || !experiment) {
         setData({
@@ -295,8 +282,8 @@ export default function AttackAnalytics({
     getAttackData();
   }, [
     direction,
-    isBaseline,
     isMetricEntropy,
+    isModelA,
     metric,
     modelAExperiment,
     modelBExperiment,
@@ -360,15 +347,15 @@ export default function AttackAnalytics({
     } else if (strategy === THRESHOLD_STRATEGIES[3].strategy) {
       const key =
         `${metric.toLowerCase()}_above_${direction}` as keyof AttackResults;
-      const baselineLineChartData = modelAExperiment
+      const modelALineChartData = modelAExperiment
         ? modelAExperiment.attack.results[key] || []
         : [];
-      const comparisonLineChartData = modelBExperiment
+      const modelBLineChartData = modelBExperiment
         ? modelBExperiment.attack.results[key] || []
         : [];
       const combinedLineChartData = [
-        ...baselineLineChartData,
-        ...comparisonLineChartData,
+        ...modelALineChartData,
+        ...modelBLineChartData,
       ];
       if (combinedLineChartData.length === 0) return;
       const thresholdGroups: { [key: number]: number } = {};
@@ -388,7 +375,7 @@ export default function AttackAnalytics({
       }
     } else if (strategy.startsWith("BEST_ATTACK")) {
       const isModelAButton = strategy.endsWith("A");
-      if ((isModelAButton && isBaseline) || (!isModelAButton && !isBaseline)) {
+      if ((isModelAButton && isModelA) || (!isModelAButton && !isModelA)) {
         let bestResult = {
           metric,
           direction,
@@ -426,20 +413,18 @@ export default function AttackAnalytics({
           setThresholdValue(bestResult.threshold);
         }
       }
-      setStrategy(THRESHOLD_STRATEGIES[1].strategy);
     }
   }, [
     data,
     direction,
     isAboveThresholdUnlearn,
-    isBaseline,
     isMetricEntropy,
+    isModelA,
     metric,
     modelAExperiment,
     modelBExperiment,
     onUpdateDirection,
     onUpdateMetric,
-    setStrategy,
     strategy,
     thresholdValue,
   ]);
