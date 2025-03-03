@@ -28,7 +28,7 @@ import { GapDataItem } from "../../types/data";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
-  BAR_HEIGHT: 12,
+  BAR_HEIGHT: 13,
 } as const;
 
 interface Props {
