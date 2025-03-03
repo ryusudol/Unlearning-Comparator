@@ -572,10 +572,11 @@ export default function AttackPlot({
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
-        .style("cursor", isStrategyCustom ? "ns-resize" : "default")
-        .call(
+        .style("cursor", isStrategyCustom ? "ns-resize" : "default");
+
+      if (isStrategyCustom) {
+        threshGroupB.call(
           d3.drag<SVGGElement, unknown>().on("drag", (event) => {
-            if (!isStrategyCustom) return;
             const [, newY] = d3.pointer(event, gB.node());
             const newThresholdRaw = yScaleB.invert(newY);
             const newThresholdRounded =
@@ -588,6 +589,8 @@ export default function AttackPlot({
             }
           }) as any
         );
+      }
+
       threshGroupB
         .append("rect")
         .attr("x", -halfWB)
@@ -840,13 +843,14 @@ export default function AttackPlot({
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleL(thresholdValue)})`)
-        .style("cursor", isStrategyCustom ? "ns-resize" : "default")
-        .call(
+        .style("cursor", isStrategyCustom ? "ns-resize" : "default");
+
+      if (isStrategyCustom) {
+        threshGroupL.call(
           d3
             .drag<SVGGElement, any>()
             .subject(() => ({ y: yScaleL(thresholdValue) }))
             .on("drag", function (event) {
-              if (!isStrategyCustom) return;
               const [, newY] = d3.pointer(event, gL.node());
               const newThresholdRaw = yScaleL.invert(newY);
               const newThresholdRounded =
@@ -859,6 +863,8 @@ export default function AttackPlot({
               }
             })
         );
+      }
+
       threshGroupL
         .append("rect")
         .attr("x", -3)
@@ -1135,10 +1141,11 @@ export default function AttackPlot({
       .append("g")
       .attr("class", "threshold-group")
       .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
-      .style("cursor", isStrategyCustom ? "ns-resize" : "default")
-      .call(
+      .style("cursor", isStrategyCustom ? "ns-resize" : "default");
+
+    if (isStrategyCustom) {
+      newThreshGroupB.call(
         d3.drag<SVGGElement, unknown>().on("drag", (event) => {
-          if (!isStrategyCustom) return;
           const [, newY] = d3.pointer(event, gB.node());
           const newThresholdRaw = yScaleB.invert(newY);
           const newThresholdRounded =
@@ -1151,6 +1158,8 @@ export default function AttackPlot({
           }
         })
       );
+    }
+
     newThreshGroupB
       .append("rect")
       .attr("x", -halfWB)
@@ -1458,7 +1467,7 @@ export default function AttackPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric, direction, modelA, modelB]);
+  }, [metric, direction, modelA, modelB, strategy]);
 
   useEffect(() => {
     const strokeOpacity = isAboveThresholdUnlearn
