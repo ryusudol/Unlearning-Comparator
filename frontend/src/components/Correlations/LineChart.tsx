@@ -131,7 +131,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
             tickMargin={-2}
             label={{
-              value: "CKA value",
+              value: "Similarity Value",
               angle: -90,
               position: "center",
               style: {
