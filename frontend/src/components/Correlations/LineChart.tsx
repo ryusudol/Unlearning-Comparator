@@ -279,7 +279,7 @@ function CustomLegend() {
   const CIRCLE = "circle";
 
   return (
-    <div className="absolute bottom-[68px] left-[55px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
+    <div className="absolute bottom-[68px] left-[45px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
       {LINE_CHART_LEGEND_DATA.map((item, i) => {
         const Icon =
           item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
