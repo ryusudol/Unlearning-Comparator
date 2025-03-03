@@ -29,7 +29,7 @@ const CONFIG = {
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
   ROBOTO_CONDENSED: "Roboto Condensed",
-  MARGIN: { top: 13, right: 22, bottom: 24, left: 66 },
+  MARGIN: { top: 13, right: 23, bottom: 24, left: 66 },
 } as const;
 
 interface Props {
@@ -214,9 +214,10 @@ export default React.memo(function Tooltip({
       .attr("class", "bar-retrained-group")
       .each(function (d, i) {
         const g = d3.select(this);
+        const baseWidth = xScale(d.value) - CONFIG.MARGIN.left;
         const barWidth = isModelA
-          ? xScale(d.value) - CONFIG.MARGIN.left - CONFIG.BAR_STROKE_WIDTH
-          : xScale(d.value) - CONFIG.MARGIN.left;
+          ? baseWidth - CONFIG.BAR_STROKE_WIDTH
+          : baseWidth;
         const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
 
         g.append("rect")
@@ -251,9 +252,10 @@ export default React.memo(function Tooltip({
       .attr("class", "bar-model-group")
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
-        const barWidth = !isModelA
-          ? xScale(d.value) - CONFIG.MARGIN.left - CONFIG.BAR_STROKE_WIDTH
-          : xScale(d.value) - CONFIG.MARGIN.left;
+        const baseWidth = xScale(d.value) - CONFIG.MARGIN.left;
+        const barWidth = isModelA
+          ? baseWidth - CONFIG.BAR_STROKE_WIDTH
+          : baseWidth;
         const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
 
         g.append("rect")

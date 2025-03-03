@@ -137,21 +137,34 @@ export default function AttackSuccessFailure({
   const successImages = useMemo(() => {
     return successGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
+
       if (!imgData) return null;
+
       const strokeColor =
         groupItem.type === CONFIG.UNLEARN
           ? isModelA
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY;
+      const defaultBorderOpacity =
+        groupItem.type === CONFIG.RETRAIN
+          ? CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
       const imageOpacity =
         hoveredId !== null
           ? groupItem.img_idx === hoveredId
             ? CONFIG.HIGH_OPACITY
             : CONFIG.LOW_OPACITY
           : CONFIG.HIGH_OPACITY;
+      const borderOpacity =
+        hoveredId !== null
+          ? groupItem.img_idx === hoveredId
+            ? CONFIG.HIGH_OPACITY
+            : CONFIG.LOW_OPACITY
+          : defaultBorderOpacity;
       const borderColor = d3.color(strokeColor);
-      borderColor!.opacity = 1;
+      borderColor!.opacity = borderOpacity;
+
       return (
         <img
           key={`success-${idx}`}
@@ -198,21 +211,34 @@ export default function AttackSuccessFailure({
   const failureImages = useMemo(() => {
     return failureGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
+
       if (!imgData) return null;
+
       const strokeColor =
         groupItem.type === CONFIG.UNLEARN
           ? isModelA
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY;
+      const defaultBorderOpacity =
+        groupItem.type === CONFIG.UNLEARN
+          ? CONFIG.LOW_OPACITY
+          : CONFIG.HIGH_OPACITY;
       const imageOpacity =
         hoveredId !== null
           ? groupItem.img_idx === hoveredId
             ? CONFIG.HIGH_OPACITY
             : CONFIG.LOW_OPACITY
           : CONFIG.HIGH_OPACITY;
+      const borderOpacity =
+        hoveredId !== null
+          ? groupItem.img_idx === hoveredId
+            ? CONFIG.HIGH_OPACITY
+            : CONFIG.LOW_OPACITY
+          : defaultBorderOpacity;
       const borderColor = d3.color(strokeColor);
-      borderColor!.opacity = 1;
+      borderColor!.opacity = borderOpacity;
+
       return (
         <img
           key={`failure-${idx}`}
