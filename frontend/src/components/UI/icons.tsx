@@ -273,14 +273,14 @@ export const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const Arrow = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    width="32"
+    width="50"
     height="8"
     viewBox="0 0 63 8"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <rect x="0" y="2" width="58" height="2" fill={props.color ?? "#666666"} />
-    <polygon points="58,0 58,6 63,3" fill={props.color ?? "#666666"} />
+    <rect x="0" y="2" width="58" height="3" fill={props.color ?? "#666666"} />
+    <polygon points="56,-0.5 56,7.5 63,3.5" fill={props.color ?? "#666666"} />
   </svg>
 );
 
