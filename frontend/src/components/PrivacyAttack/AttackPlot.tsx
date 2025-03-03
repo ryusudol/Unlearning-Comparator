@@ -52,7 +52,7 @@ const CONFIG = {
 } as const;
 
 interface Props {
-  mode: "Baseline" | "Comparison";
+  mode: "A" | "B";
   metric: Metric;
   thresholdValue: number;
   direction: string;
@@ -96,7 +96,7 @@ export default function AttackPlot({
   const unlearnJson = data?.unlearnData;
   const attackData = data?.lineChartData;
 
-  const isBaseline = mode === "Baseline";
+  const isModelA = mode === "A";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = direction === UNLEARN;
   const isStrategyCustom = strategy === THRESHOLD_STRATEGIES[0].strategy;
@@ -291,7 +291,7 @@ export default function AttackPlot({
       // Draw circles for the unlearn data on the y-axis corresponding to the threshold value
       unlearnBins.forEach((bin) => {
         const yPos = yScaleB(bin.threshold + binSize / 2);
-        const color = isBaseline ? COLORS.EMERALD : COLORS.PURPLE;
+        const color = isModelA ? COLORS.EMERALD : COLORS.PURPLE;
 
         const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
@@ -396,9 +396,9 @@ export default function AttackPlot({
         .attr("y", 15)
         .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
         .attr("font-family", CONFIG.FONT_FAMILY)
-        .attr("fill", isBaseline ? COLORS.EMERALD : COLORS.PURPLE)
+        .attr("fill", isModelA ? COLORS.EMERALD : COLORS.PURPLE)
         .attr("text-anchor", "middle")
-        .text(`${isBaseline ? "Model A" : "Model B"}`);
+        .text(`${isModelA ? "Model A" : "Model B"}`);
       xAxisB
         .append("text")
         .attr("class", "x-axis-label-b")
@@ -458,7 +458,7 @@ export default function AttackPlot({
       // create a legend for butterfly charts
       const butterflyLegendData = [
         {
-          label: `From Retrained / Pred. ${isBaseline ? "Model A" : "Model B"}`,
+          label: `From Retrained / Pred. ${isModelA ? "Model A" : "Model B"}`,
           side: "left",
           color: COLORS.DARK_GRAY,
         },
@@ -468,16 +468,16 @@ export default function AttackPlot({
           color: "#D4D4D4",
         },
         {
-          label: `From ${isBaseline ? "Model A" : "Model B"} / Pred. ${
-            isBaseline ? "Model A" : "Model B"
+          label: `From ${isModelA ? "Model A" : "Model B"} / Pred. ${
+            isModelA ? "Model A" : "Model B"
           }`,
           side: "right",
-          color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE,
+          color: isModelA ? COLORS.EMERALD : COLORS.PURPLE,
         },
         {
-          label: `From ${isBaseline ? "Model A" : "Model B"} / Pred. Retrained`,
+          label: `From ${isModelA ? "Model A" : "Model B"} / Pred. Retrained`,
           side: "right",
-          color: isBaseline ? "#C8EADB" : "#E6D0FD",
+          color: isModelA ? "#C8EADB" : "#E6D0FD",
         },
       ];
 
@@ -619,14 +619,14 @@ export default function AttackPlot({
         .attr(
           "fill",
           isAboveThresholdUnlearn
-            ? isBaseline
+            ? isModelA
               ? COLORS.EMERALD
               : COLORS.PURPLE
             : COLORS.DARK_GRAY
         )
         .text(
           isAboveThresholdUnlearn
-            ? isBaseline
+            ? isModelA
               ? "Model A"
               : "Model B"
             : "Retrained"
@@ -645,14 +645,14 @@ export default function AttackPlot({
           "fill",
           isAboveThresholdUnlearn
             ? COLORS.DARK_GRAY
-            : isBaseline
+            : isModelA
             ? COLORS.EMERALD
             : COLORS.PURPLE
         )
         .text(
           isAboveThresholdUnlearn
             ? "Retrained"
-            : isBaseline
+            : isModelA
             ? "Model A"
             : "Model B"
         );
@@ -1182,14 +1182,14 @@ export default function AttackPlot({
       .attr(
         "fill",
         isAboveThresholdUnlearn
-          ? isBaseline
+          ? isModelA
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY
       )
       .text(
         isAboveThresholdUnlearn
-          ? isBaseline
+          ? isModelA
             ? "Model A"
             : "Model B"
           : "Retrained"
@@ -1208,16 +1208,12 @@ export default function AttackPlot({
         "fill",
         isAboveThresholdUnlearn
           ? COLORS.DARK_GRAY
-          : isBaseline
+          : isModelA
           ? COLORS.EMERALD
           : COLORS.PURPLE
       )
       .text(
-        isAboveThresholdUnlearn
-          ? "Retrained"
-          : isBaseline
-          ? "Model A"
-          : "Model B"
+        isAboveThresholdUnlearn ? "Retrained" : isModelA ? "Model A" : "Model B"
       );
 
     // Draw a new y-axis for a butterfly chart based on the metric value
@@ -1438,8 +1434,8 @@ export default function AttackPlot({
     halfWB,
     hoveredId,
     isAboveThresholdUnlearn,
-    isBaseline,
     isMetricEntropy,
+    isModelA,
     isStrategyCustom,
     lowerOpacity,
     metric,
@@ -1487,10 +1483,10 @@ export default function AttackPlot({
           Retrained Model (a00{forgetClass})
         </span>
         <span className="mx-1.5">vs</span>
-        <span style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}>
-          {isBaseline ? "Model A" : "Model B"} (
-          {isBaseline ? modelAExperiment.Type : modelBExperiment.Type}{" "}
-          {isBaseline ? modelA : modelB})
+        <span style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}>
+          {isModelA ? "Model A" : "Model B"} (
+          {isModelA ? modelAExperiment.Type : modelBExperiment.Type}{" "}
+          {isModelA ? modelA : modelB})
         </span>
       </div>
       <div className="flex">

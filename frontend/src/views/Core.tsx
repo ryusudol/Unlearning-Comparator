@@ -20,8 +20,8 @@ export default function Core() {
   const modelB = useModelDataStore((state) => state.modelB);
 
   const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
-  const [baselinePoints, setBaselinePoints] = useState<Point[]>([]);
-  const [comparisonPoints, setComparisonPoints] = useState<Point[]>([]);
+  const [modelAPoints, setModelAPoints] = useState<Point[]>([]);
+  const [modelBPoints, setModelBPoints] = useState<Point[]>([]);
 
   const isEmbeddingMode = displayMode === EMBEDDINGS;
   const forgetClassExist = forgetClass !== -1;
@@ -37,7 +37,7 @@ export default function Core() {
   };
 
   useEffect(() => {
-    async function loadBaselineData() {
+    async function loadModelAData() {
       if (!forgetClassExist) return;
 
       const ids: string[] = await fetchAllWeightNames(forgetClass);
@@ -47,17 +47,17 @@ export default function Core() {
 
       try {
         const data = await fetchFileData(forgetClass, modelA);
-        setBaselinePoints(data.points);
+        setModelAPoints(data.points);
       } catch (error) {
-        console.error(`Failed to fetch an unlearned data file: ${error}`);
-        setBaselinePoints([]);
+        console.error(`Failed to fetch an model A data file: ${error}`);
+        setModelAPoints([]);
       }
     }
-    loadBaselineData();
+    loadModelAData();
   }, [forgetClass, forgetClassExist, modelA]);
 
   useEffect(() => {
-    async function loadComparisonData() {
+    async function loadModelBData() {
       if (!forgetClassExist) return;
 
       const ids: string[] = await fetchAllWeightNames(forgetClass);
@@ -67,26 +67,20 @@ export default function Core() {
 
       try {
         const data = await fetchFileData(forgetClass, modelB);
-        setComparisonPoints(data.points);
+        setModelBPoints(data.points);
       } catch (error) {
-        console.error(`Error fetching comparison file data: ${error}`);
-        setComparisonPoints([]);
+        console.error(`Error fetching model B file data: ${error}`);
+        setModelBPoints([]);
       }
     }
-    loadComparisonData();
+    loadModelBData();
   }, [forgetClass, forgetClassExist, modelB]);
 
   const content = forgetClassExist ? (
     isEmbeddingMode ? (
-      <Embedding
-        baselinePoints={baselinePoints}
-        comparisonPoints={comparisonPoints}
-      />
+      <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
     ) : (
-      <PrivacyAttack
-        baselinePoints={baselinePoints}
-        comparisonPoints={comparisonPoints}
-      />
+      <PrivacyAttack modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
     )
   ) : (
     <Indicator about="ForgetClass" />

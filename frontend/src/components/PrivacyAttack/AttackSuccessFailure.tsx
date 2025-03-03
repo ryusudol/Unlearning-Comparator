@@ -18,7 +18,7 @@ const CONFIG = {
 } as const;
 
 interface AttackSuccessFailureProps {
-  mode: "Baseline" | "Comparison";
+  mode: "A" | "B";
   thresholdValue: number;
   direction: string;
   strategy: string;
@@ -48,7 +48,7 @@ export default function AttackSuccessFailure({
   const [successImgSize, setSuccessImgSize] = useState(0);
   const [failureImgSize, setFailureImgSize] = useState(0);
 
-  const isBaseline = mode === "Baseline";
+  const isModelA = mode === "A";
   const isAboveThresholdUnlearn = direction === UNLEARN;
   const forgettingQualityScore = 1 - attackScore;
   const isStrategyMaxSuccessRate =
@@ -140,7 +140,7 @@ export default function AttackSuccessFailure({
       if (!imgData) return null;
       const strokeColor =
         groupItem.type === CONFIG.UNLEARN
-          ? isBaseline
+          ? isModelA
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY;
@@ -188,7 +188,7 @@ export default function AttackSuccessFailure({
     data,
     hoveredId,
     imageMap,
-    isBaseline,
+    isModelA,
     onElementClick,
     setHoveredId,
     successGroup,
@@ -201,7 +201,7 @@ export default function AttackSuccessFailure({
       if (!imgData) return null;
       const strokeColor =
         groupItem.type === CONFIG.UNLEARN
-          ? isBaseline
+          ? isModelA
             ? COLORS.EMERALD
             : COLORS.PURPLE
           : COLORS.DARK_GRAY;
@@ -248,12 +248,12 @@ export default function AttackSuccessFailure({
   }, [
     data,
     failureGroup,
+    failureImgSize,
     hoveredId,
     imageMap,
-    isBaseline,
+    isModelA,
     onElementClick,
     setHoveredId,
-    failureImgSize,
   ]);
 
   const handleImgSizeControl = (value: number[], id: string) => {

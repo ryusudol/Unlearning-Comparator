@@ -34,11 +34,11 @@ interface Props {
   imageUrl: string;
   data: (number | Prob)[];
   barChartData: {
-    baseline: { class: number; value: number }[];
-    comparison: { class: number; value: number }[];
+    modelA: { class: number; value: number }[];
+    modelB: { class: number; value: number }[];
   };
   forgetClass: number;
-  isBaseline: boolean;
+  isModelA: boolean;
 }
 
 export default React.memo(function Tooltip({
@@ -46,21 +46,21 @@ export default React.memo(function Tooltip({
   data,
   barChartData,
   forgetClass,
-  isBaseline,
+  isModelA,
 }: Props) {
   const svgRef = useRef(null);
 
   const legendRectColor = d3.schemeTableau10[9];
   const groundTruthIdx = Number(data[0]);
-  const predictionIdx = barChartData.baseline.reduce((maxObj, currentObj) =>
-    currentObj.value > maxObj.value ? currentObj : maxObj
-  ).class;
   const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
-  const baselinePrediction = CIFAR_10_CLASSES[predictionIdx];
-  const comparisonIdx = barChartData.comparison.reduce((maxObj, currentObj) =>
+  const modelAIdx = barChartData.modelA.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const comparisonPrediction = CIFAR_10_CLASSES[comparisonIdx];
+  const modelAPrediction = CIFAR_10_CLASSES[modelAIdx];
+  const modelBIdx = barChartData.modelB.reduce((maxObj, currentObj) =>
+    currentObj.value > maxObj.value ? currentObj : maxObj
+  ).class;
+  const modelBPrediction = CIFAR_10_CLASSES[modelBIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -93,7 +93,7 @@ export default React.memo(function Tooltip({
       .attr("y2", CONFIG.PATTERN_SIZE)
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH)
-      .attr("opacity", !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY);
+      .attr("opacity", !isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY);
 
     const legendPattern = defs
       .append("pattern")
@@ -131,7 +131,7 @@ export default React.memo(function Tooltip({
       .attr("width", CONFIG.LEGEND_RECT_SIZE)
       .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", legendRectColor)
-      .attr("stroke", isBaseline ? COLORS.BLACK : "none");
+      .attr("stroke", isModelA ? COLORS.BLACK : "none");
 
     basleineLegend
       .append("text")
@@ -142,24 +142,24 @@ export default React.memo(function Tooltip({
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
-    const comparisonLegend = basleineLegend
+    const modelBLegend = basleineLegend
       .append("g")
       .attr("transform", `translate(${CONFIG.LEGEND_GAP}, 0)`);
 
-    comparisonLegend
+    modelBLegend
       .append("rect")
       .attr("width", CONFIG.LEGEND_RECT_SIZE)
       .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", legendRectColor);
 
-    comparisonLegend
+    modelBLegend
       .append("rect")
       .attr("width", CONFIG.LEGEND_RECT_SIZE)
       .attr("height", CONFIG.LEGEND_RECT_SIZE)
       .attr("fill", "url(#stripe-legend)")
-      .attr("stroke", !isBaseline ? COLORS.BLACK : "none");
+      .attr("stroke", !isModelA ? COLORS.BLACK : "none");
 
-    comparisonLegend
+    modelBLegend
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
@@ -175,7 +175,7 @@ export default React.memo(function Tooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(barChartData.baseline.map((d) => CIFAR_10_CLASSES[d.class]))
+      .domain(barChartData.modelA.map((d) => CIFAR_10_CLASSES[d.class]))
       .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
@@ -199,28 +199,25 @@ export default React.memo(function Tooltip({
 
     const g = svg.append("g");
 
-    g.selectAll(".bar-baseline-group")
-      .data(barChartData.baseline)
+    g.selectAll(".bar-modelA-group")
+      .data(barChartData.modelA)
       .join("g")
-      .attr("class", "bar-baseline-group")
+      .attr("class", "bar-modelA-group")
       .each(function (d, i) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
         const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
 
         g.append("rect")
-          .attr("class", "bar-baseline")
+          .attr("class", "bar-modelA")
           .attr("x", CONFIG.MARGIN.left)
           .attr("y", y)
           .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr(
-            "opacity",
-            isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
-          )
-          .attr("stroke", isBaseline ? COLORS.BLACK : "none")
-          .attr("stroke-width", isBaseline ? CONFIG.BAR_STROKE_WIDTH : 0);
+          .attr("opacity", isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY)
+          .attr("stroke", isModelA ? COLORS.BLACK : "none")
+          .attr("stroke-width", isModelA ? CONFIG.BAR_STROKE_WIDTH : 0);
 
         g.append("text")
           .attr("x", CONFIG.MARGIN.left + barWidth + 4)
@@ -228,19 +225,19 @@ export default React.memo(function Tooltip({
           .attr("dy", "0.35em")
           .attr(
             "font-size",
-            isBaseline
+            isModelA
               ? CONFIG.SELECT_CHART_FONT_SIZE
               : CONFIG.UNSELECT_CHART_FONT_SIZE
           )
           .attr("font-family", CONFIG.ROBOTO_CONDENSED)
-          .attr("fill", isBaseline ? COLORS.BLACK : COLORS.GRAY)
+          .attr("fill", isModelA ? COLORS.BLACK : COLORS.GRAY)
           .text(d.value);
       });
 
-    g.selectAll(".bar-comparison-group")
-      .data(barChartData.comparison)
+    g.selectAll(".bar-modelB-group")
+      .data(barChartData.modelB)
       .join("g")
-      .attr("class", "bar-comparison-group")
+      .attr("class", "bar-modelB-group")
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
@@ -252,12 +249,9 @@ export default React.memo(function Tooltip({
           .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr(
-            "opacity",
-            !isBaseline ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
-          )
-          .attr("stroke", !isBaseline ? COLORS.BLACK : "none")
-          .attr("stroke-width", !isBaseline ? CONFIG.BAR_STROKE_WIDTH : 0);
+          .attr("opacity", !isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY)
+          .attr("stroke", !isModelA ? COLORS.BLACK : "none")
+          .attr("stroke-width", !isModelA ? CONFIG.BAR_STROKE_WIDTH : 0);
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -273,12 +267,12 @@ export default React.memo(function Tooltip({
           .attr("dy", "0.35em")
           .attr(
             "font-size",
-            !isBaseline
+            !isModelA
               ? CONFIG.SELECT_CHART_FONT_SIZE
               : CONFIG.UNSELECT_CHART_FONT_SIZE
           )
           .attr("font-family", CONFIG.ROBOTO_CONDENSED)
-          .attr("fill", !isBaseline ? COLORS.BLACK : COLORS.GRAY)
+          .attr("fill", !isModelA ? COLORS.BLACK : COLORS.GRAY)
           .text(d.value);
       });
 
@@ -318,10 +312,10 @@ export default React.memo(function Tooltip({
         return classIndex === forgetClass ? `${d} (X)` : d;
       });
   }, [
-    barChartData.baseline,
-    barChartData.comparison,
+    barChartData.modelA,
+    barChartData.modelB,
     forgetClass,
-    isBaseline,
+    isModelA,
     legendRectColor,
   ]);
 
@@ -349,13 +343,13 @@ export default React.memo(function Tooltip({
               <span style={{ color: COLORS.EMERALD }} className="mr-0.5">
                 Model A:
               </span>
-              <span className="font-semibold">{baselinePrediction}</span>
+              <span className="font-semibold">{modelAPrediction}</span>
             </p>
             <p className="flex items-center text-nowrap">
               <span style={{ color: COLORS.PURPLE }} className="mr-0.5">
                 Model B:
               </span>
-              <span className="font-semibold">{comparisonPrediction}</span>
+              <span className="font-semibold">{modelBPrediction}</span>
             </p>
           </div>
         </div>

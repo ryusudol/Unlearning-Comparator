@@ -13,7 +13,6 @@ import * as d3 from "d3";
 
 import Tooltip from "./Tooltip";
 import {
-  Mode,
   SelectedData,
   HoverInstance,
   Prob,
@@ -60,12 +59,16 @@ const CONFIG = {
 } as const;
 
 interface Props {
-  mode: Mode;
+  mode: "A" | "B";
   modelType: string;
   viewMode: string;
   setViewMode: (viewMode: string) => void;
   data: SelectedData;
-  onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
+  onHover: (
+    imgIdxOrNull: number | null,
+    source?: "A" | "B",
+    prob?: Prob
+  ) => void;
   hoveredInstance: HoverInstance | null;
 }
 
@@ -153,8 +156,8 @@ const ScatterPlot = forwardRef(
       };
     }, [ref]);
 
-    const isBaseline = mode === "Baseline";
-    const id = isBaseline ? modelA : modelB;
+    const isModelA = mode === "A";
+    const id = isModelA ? modelA : modelB;
     const idExist = id !== "";
 
     const x = useMemo(() => {
@@ -341,27 +344,23 @@ const ScatterPlot = forwardRef(
 
           const currentHoveredInstance = hoveredInstanceRef.current;
 
-          const barChartData = isBaseline
+          const barChartData = isModelA
             ? {
-                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                modelA: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
                   value: Number(prob[idx] || 0),
                 })),
-                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                modelB: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(
-                    currentHoveredInstance?.comparisonProb?.[idx] || 0
-                  ),
+                  value: Number(currentHoveredInstance?.modelBProb?.[idx] || 0),
                 })),
               }
             : {
-                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                modelA: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(
-                    currentHoveredInstance?.baselineProb?.[idx] || 0
-                  ),
+                  value: Number(currentHoveredInstance?.modelAProb?.[idx] || 0),
                 })),
-                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                modelB: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
                   value: Number(prob[idx] || 0),
                 })),
@@ -376,7 +375,7 @@ const ScatterPlot = forwardRef(
                 data={d}
                 barChartData={barChartData}
                 forgetClass={forgetClass}
-                isBaseline={isBaseline}
+                isModelA={isModelA}
               />
             );
 
@@ -390,14 +389,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [
-        forgetClass,
-        isBaseline,
-        mode,
-        modelAExperiment,
-        modelBExperiment,
-        onHover,
-      ]
+      [forgetClass, isModelA, mode, modelAExperiment, modelBExperiment, onHover]
     );
 
     const handleMouseEnter = useCallback(
@@ -842,7 +834,7 @@ const ScatterPlot = forwardRef(
           />
         )}
         <div className="flex items-center relative px-3.5 bg-white z-10">
-          {isBaseline ? (
+          {isModelA ? (
             <span style={{ color: COLORS.EMERALD }}>
               Model A ({modelType}, {modelA})
             </span>
