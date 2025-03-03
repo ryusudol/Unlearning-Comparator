@@ -24,7 +24,7 @@ interface AttackLegendProps {
   direction: string;
   strategy: string;
   onMetricChange: (val: Metric) => void;
-  onAboveThresholdChange: (val: string) => void;
+  onDirectionChange: (val: string) => void;
   onThresholdStrategyChange: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -33,7 +33,7 @@ export default function AttackLegend({
   direction,
   strategy,
   onMetricChange,
-  onAboveThresholdChange,
+  onDirectionChange,
   onThresholdStrategyChange,
 }: AttackLegendProps) {
   const isEntropyChecked = metric === ENTROPY;
@@ -127,7 +127,7 @@ export default function AttackLegend({
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
           value={direction}
-          onValueChange={onAboveThresholdChange}
+          onValueChange={onDirectionChange}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
