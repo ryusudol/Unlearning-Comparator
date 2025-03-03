@@ -1482,10 +1482,11 @@ export default function AttackPlot({
         <span style={{ color: COLORS.DARK_GRAY }}>
           Retrained Model (a00{forgetClass})
         </span>
-        <span className="mx-1.5">vs</span>
+        <span className="mx-1.5">vs.</span>
         <span style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}>
           {isModelA ? "Model A" : "Model B"} (
-          {isModelA ? modelAExperiment.Type : modelBExperiment.Type}{" "}
+          {isModelA ? modelAExperiment.Type : modelBExperiment.Type}
+          {", "}
           {isModelA ? modelA : modelB})
         </span>
       </div>
