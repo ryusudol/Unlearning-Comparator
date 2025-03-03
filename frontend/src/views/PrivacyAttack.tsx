@@ -53,8 +53,8 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     setMetric(metric);
   };
 
-  const handleAboveThresholdChange = (threshold: string) => {
-    setDirection(threshold);
+  const handleDirectionChange = (direction: string) => {
+    setDirection(direction);
   };
 
   const handleThresholdStrategyChange = (
@@ -73,7 +73,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
         direction={direction}
         strategy={strategy}
         onMetricChange={handleMetricChange}
-        onAboveThresholdChange={handleAboveThresholdChange}
+        onDirectionChange={handleDirectionChange}
         onThresholdStrategyChange={handleThresholdStrategyChange}
       />
       <div className="flex items-center">
@@ -91,7 +91,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
             modelPoints={modelAPoints}
             retrainAttackData={retrainData.attack}
             onUpdateMetric={handleMetricChange}
-            onUpdateDirection={handleAboveThresholdChange}
+            onUpdateDirection={handleDirectionChange}
           />
         )}
         <Separator
@@ -112,7 +112,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
             modelPoints={modelBPoints}
             retrainAttackData={retrainData.attack}
             onUpdateMetric={handleMetricChange}
-            onUpdateDirection={handleAboveThresholdChange}
+            onUpdateDirection={handleDirectionChange}
           />
         )}
       </div>
