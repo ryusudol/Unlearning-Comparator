@@ -96,7 +96,7 @@ function BubbleChartLegend() {
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-y-1.5 relative top-0.5 left-6">
+      <div className="flex flex-col items-center gap-y-1.5 relative top-0.5 left-4">
         <div className="relative top-2 w-[156px] h-3.5">
           <div
             className="w-full h-full relative top-1"
