@@ -102,10 +102,10 @@ function BubbleChartLegend() {
             className="w-full h-full relative top-1"
             style={{ background: gradient }}
           />
-          <div className="absolute -bottom-[7px] left-1">
+          <div className="absolute -bottom-[7.5px] left-1">
             <span className="text-[10px] text-white">0</span>
           </div>
-          <div className="absolute -bottom-[7px] right-1">
+          <div className="absolute -bottom-[7.5px] right-1">
             <span className="text-[10px] text-white">1</span>
           </div>
         </div>
