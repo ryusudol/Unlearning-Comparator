@@ -63,7 +63,7 @@ export default function ClassWiseAnalysis() {
             />
           </div>
         ) : (
-          <Indicator about="BaselineComparison" />
+          <Indicator about="AB" />
         )
       ) : (
         <Indicator about="ForgetClass" />

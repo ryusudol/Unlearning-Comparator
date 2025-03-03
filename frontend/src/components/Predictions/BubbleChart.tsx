@@ -33,10 +33,8 @@ const CONFIG = {
   },
 } as const;
 
-type ModeType = "Baseline" | "Comparison";
-
 interface Props {
-  mode: ModeType;
+  mode: "A" | "B";
   modelType: string;
   datasetMode: string;
   hoveredY: number | null;
@@ -76,8 +74,8 @@ export default function BubbleChart({
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const zoom = calculateZoom();
-  const isBaseline = mode === "Baseline";
-  const experiment = isBaseline ? modelAExperiment : modelBExperiment;
+  const isModelA = mode === "A";
+  const experiment = isModelA ? modelAExperiment : modelBExperiment;
 
   const handleMouseOut = useCallback(
     (event: MouseEvent) => {
@@ -344,7 +342,7 @@ export default function BubbleChart({
             </div>
             <div>
               <span
-                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}
               >
                 Proportion:{" "}
               </span>
@@ -354,7 +352,7 @@ export default function BubbleChart({
             </div>
             <div>
               <span
-                style={{ color: isBaseline ? COLORS.EMERALD : COLORS.PURPLE }}
+                style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}
               >
                 Avg. Confidence:{" "}
               </span>
@@ -366,7 +364,7 @@ export default function BubbleChart({
           document.body
         )}
       <div className="flex flex-col items-center gap-0.5 absolute -bottom-[18px] translate-x-[calc(50%-36px)] text-[13px] leading-3">
-        {isBaseline ? (
+        {isModelA ? (
           <>
             <span style={{ color: COLORS.EMERALD }}>
               Model A ({modelType}, {modelA})

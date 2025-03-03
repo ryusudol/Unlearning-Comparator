@@ -233,10 +233,10 @@ export default function _TableBody({ table }: Props) {
           } else if (!modelB.startsWith("a00")) {
             saveModelA(`a00${forgetClass}`);
           } else {
-            const nextBaselineExperiment = Object.values(
-              sortedExperiments
-            ).find((experiment) => experiment.ID !== modelB);
-            saveModelA(nextBaselineExperiment!.ID);
+            const nextModelAExperiment = Object.values(sortedExperiments).find(
+              (experiment) => experiment.ID !== modelB
+            );
+            saveModelA(nextModelAExperiment!.ID);
           }
         } else if (id === modelB) {
           if (!modelA.startsWith("000")) {
@@ -244,10 +244,10 @@ export default function _TableBody({ table }: Props) {
           } else if (!modelA.startsWith("a00")) {
             saveModelB(`a00${forgetClass}`);
           } else {
-            const nextComparisonExperiment = Object.values(
-              sortedExperiments
-            ).find((experiment) => experiment.ID !== modelA);
-            saveModelB(nextComparisonExperiment!.ID);
+            const nextModelBExperiment = Object.values(sortedExperiments).find(
+              (experiment) => experiment.ID !== modelA
+            );
+            saveModelB(nextModelBExperiment!.ID);
           }
         }
       }

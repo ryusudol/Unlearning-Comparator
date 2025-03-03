@@ -1,3 +1,12 @@
+export interface GapDataItem {
+  category: string;
+  classLabel: string;
+  gap: number;
+  fill: string;
+  modelAAccuracy: number;
+  modelBAccuracy: number;
+}
+
 export type Dist = {
   [key: string]: number[];
 };

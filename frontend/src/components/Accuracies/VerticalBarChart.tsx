@@ -24,20 +24,12 @@ import { useModelDataStore } from "../../stores/modelDataStore";
 import { COLORS } from "../../constants/colors";
 import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
 import { ChartContainer } from "../UI/chart";
+import { GapDataItem } from "../../types/data";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
   BAR_HEIGHT: 12,
 } as const;
-
-export interface GapDataItem {
-  category: string;
-  classLabel: string;
-  gap: number;
-  fill: string;
-  baselineAccuracy: number;
-  comparisonAccuracy: number;
-}
 
 interface Props {
   mode: "Training" | "Test";
@@ -239,13 +231,13 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         <p>
           <span style={{ color: COLORS.EMERALD }}>Model A: </span>
           <span className="font-semibold">
-            {data.baselineAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
+            {data.modelAAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
           </span>
         </p>
         <p>
           <span style={{ color: COLORS.PURPLE }}>Model B: </span>
           <span className="font-semibold">
-            {data.comparisonAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
+            {data.modelBAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
           </span>
         </p>
         <p>

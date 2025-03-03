@@ -1,13 +1,13 @@
 interface Props {
-  about?: "BaselineComparison" | "ForgetClass";
+  about?: "AB" | "ForgetClass";
   text?: string;
 }
 
 export default function Indicator({ about, text }: Props) {
   const content = text
     ? text
-    : about === "BaselineComparison"
-    ? "Select both Baseline and Comparison."
+    : about === "AB"
+    ? "Select both model A and model B."
     : "Select the target forget class first.";
 
   return (
