@@ -122,6 +122,7 @@ export default function AttackPlot({
     CONFIG.BUTTERFLY_CHART_WIDTH -
     CONFIG.BUTTERFLY_MARGIN.left -
     CONFIG.BUTTERFLY_MARGIN.right;
+  const halfWB = wB / 2;
   const hB =
     CONFIG.HEIGHT -
     CONFIG.BUTTERFLY_MARGIN.top -
@@ -178,7 +179,8 @@ export default function AttackPlot({
       const unlearnBins = createBins(data.unlearnData);
       const maxCountRetrain = d3.max(retrainBins, (d) => d.bins.length) || 0;
       const maxCountUnlearn = d3.max(unlearnBins, (d) => d.bins.length) || 0;
-      const maxDisplayCircles = Math.floor(wB / 2 / circleDiameter);
+      const halfCircles = halfWB / circleDiameter;
+      const maxDisplayCircles = Math.floor(halfCircles);
 
       const extraRetrain =
         maxCountRetrain > maxDisplayCircles
@@ -189,7 +191,6 @@ export default function AttackPlot({
           ? maxCountUnlearn - maxDisplayCircles
           : 0;
 
-      const halfCircles = wB / 2 / circleDiameter;
       const tickMin =
         Math.ceil(-halfCircles / CONFIG.BUTTERFLY_CHART_X_AXIS_TICK_STEP) *
         CONFIG.BUTTERFLY_CHART_X_AXIS_TICK_STEP;
@@ -205,7 +206,7 @@ export default function AttackPlot({
       const xScaleB = d3
         .scaleLinear()
         .domain([-halfCircles, halfCircles])
-        .range([-wB / 2, wB / 2]);
+        .range([-halfWB, halfWB]);
 
       const yScaleB = d3
         .scaleLinear()
@@ -224,7 +225,7 @@ export default function AttackPlot({
         .append("g")
         .attr(
           "transform",
-          `translate(${CONFIG.BUTTERFLY_MARGIN.left + wB / 2}, ${
+          `translate(${CONFIG.BUTTERFLY_MARGIN.left + halfWB}, ${
             CONFIG.BUTTERFLY_MARGIN.top
           })`
         );
@@ -232,7 +233,7 @@ export default function AttackPlot({
       // Draw circles for the retrain data on the y-axis corresponding to the threshold value
       retrainBins.forEach((bin) => {
         const yPos = yScaleB(bin.threshold + binSize / 2);
-        const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
           Math.floor(displayingWidth / circleDiameter) + 1;
         const displayCount = Math.min(maxDisplayCount, bin.bins.length);
@@ -243,8 +244,8 @@ export default function AttackPlot({
           const opacity =
             hoveredId !== null
               ? currentBin.img_idx === hoveredId
-                ? 1
-                : 0.3
+                ? CONFIG.OPACITY_ABOVE_THRESHOLD
+                : CONFIG.OPACITY_BELOW_THRESHOLD
               : getCircleOpacity(yPos, yScaleB(thresholdValue));
           const cx =
             -circleDiameter / 2 - (displayCount - 1 - i) * circleDiameter;
@@ -292,7 +293,7 @@ export default function AttackPlot({
         const yPos = yScaleB(bin.threshold + binSize / 2);
         const color = isBaseline ? COLORS.EMERALD : COLORS.PURPLE;
 
-        const displayingWidth = wB / 2 - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
         const maxDisplayCount =
           Math.floor(displayingWidth / circleDiameter) + 1;
         const displayCount = Math.min(maxDisplayCount, bin.bins.length);
@@ -303,8 +304,8 @@ export default function AttackPlot({
           const opacity =
             hoveredId !== null
               ? currentBin.img_idx === hoveredId
-                ? 1
-                : 0.3
+                ? CONFIG.OPACITY_ABOVE_THRESHOLD
+                : CONFIG.OPACITY_BELOW_THRESHOLD
               : getCircleOpacity(yPos, yScaleB(thresholdValue));
           const cx = circleDiameter / 2 + i * circleDiameter;
 
@@ -421,7 +422,7 @@ export default function AttackPlot({
       // draw the y-axis
       gB.append("g")
         .attr("class", "y-axis")
-        .attr("transform", `translate(${-wB / 2}, 0)`)
+        .attr("transform", `translate(${-halfWB}, 0)`)
         .call((g) => d3.axisLeft(yScaleB).ticks(isMetricEntropy ? 5 : 6)(g));
       gB.append("text")
         .attr("class", "y-axis-label")
@@ -589,7 +590,7 @@ export default function AttackPlot({
         );
       threshGroupB
         .append("rect")
-        .attr("x", -wB / 2)
+        .attr("x", -halfWB)
         .attr("y", -5)
         .attr("width", wB)
         .attr("height", 10)
@@ -601,8 +602,8 @@ export default function AttackPlot({
         .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
         .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
         .attr("stroke-linecap", "round")
-        .attr("x1", -wB / 2)
-        .attr("x2", wB / 2)
+        .attr("x1", -halfWB)
+        .attr("x2", halfWB)
         .attr("y1", 0)
         .attr("y2", 0);
       const upText = threshGroupB
@@ -1080,7 +1081,9 @@ export default function AttackPlot({
     gB.selectAll<SVGCircleElement, Bin>("circle")
       .attr("fill-opacity", function (d) {
         if (hoveredId !== null) {
-          return d.img_idx === hoveredId ? 1 : 0.3;
+          return d.img_idx === hoveredId
+            ? CONFIG.OPACITY_ABOVE_THRESHOLD
+            : CONFIG.OPACITY_BELOW_THRESHOLD;
         }
         return getCircleOpacity(
           +d3.select(this).attr("cy"),
@@ -1089,7 +1092,9 @@ export default function AttackPlot({
       })
       .attr("stroke-opacity", function (d) {
         if (hoveredId !== null) {
-          return d.img_idx === hoveredId ? 1 : 0.3;
+          return d.img_idx === hoveredId
+            ? CONFIG.OPACITY_ABOVE_THRESHOLD
+            : CONFIG.OPACITY_BELOW_THRESHOLD;
         }
         return getCircleOpacity(
           +d3.select(this).attr("cy"),
@@ -1148,7 +1153,7 @@ export default function AttackPlot({
       );
     newThreshGroupB
       .append("rect")
-      .attr("x", -wB / 2)
+      .attr("x", -halfWB)
       .attr("y", -5)
       .attr("width", wB)
       .attr("height", 10)
@@ -1160,8 +1165,8 @@ export default function AttackPlot({
       .attr("stroke-width", CONFIG.THRESHOLD_LINE_WIDTH)
       .attr("stroke-dasharray", CONFIG.THRESHOLD_LINE_DASH)
       .attr("stroke-linecap", "round")
-      .attr("x1", -wB / 2)
-      .attr("x2", wB / 2)
+      .attr("x1", -halfWB)
+      .attr("x2", halfWB)
       .attr("y1", 0)
       .attr("y2", 0);
     const newUpText = newThreshGroupB
@@ -1430,6 +1435,7 @@ export default function AttackPlot({
     getCircleOpacity,
     hB,
     hL,
+    halfWB,
     hoveredId,
     isAboveThresholdUnlearn,
     isBaseline,
@@ -1459,7 +1465,9 @@ export default function AttackPlot({
   }, [metric, direction, modelA, modelB]);
 
   useEffect(() => {
-    const strokeOpacity = isAboveThresholdUnlearn ? 1 : 0.3;
+    const strokeOpacity = isAboveThresholdUnlearn
+      ? CONFIG.OPACITY_ABOVE_THRESHOLD
+      : CONFIG.OPACITY_BELOW_THRESHOLD;
 
     d3.select(butterflyRef.current)
       .selectAll(".threshold-line")
