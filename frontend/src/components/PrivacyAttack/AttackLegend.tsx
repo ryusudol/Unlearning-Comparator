@@ -40,7 +40,7 @@ export default function AttackLegend({
   const isUnlearnChecked = direction === UNLEARN;
 
   return (
-    <div className="w-full flex px-3.5 pt-2.5 pb-3.5 text-sm z-10 relative top-1">
+    <div className="w-full flex px-3.5 pt-3 pb-3.5 text-sm z-10 relative top-1">
       <div className="flex items-center gap-2.5 mr-[21px]">
         <HoverCard openDelay={0} closeDelay={0}>
           <HoverCardTrigger>
