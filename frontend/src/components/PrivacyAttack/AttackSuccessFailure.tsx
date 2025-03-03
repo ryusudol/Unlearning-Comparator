@@ -305,7 +305,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-40">
+          <ScrollArea className="w-[260px] h-[150px]">
             <div
               className="grid gap-[1px]"
               style={{
@@ -344,7 +344,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-40">
+          <ScrollArea className="w-[260px] h-[150px]">
             <div
               className="grid gap-[1px]"
               style={{
