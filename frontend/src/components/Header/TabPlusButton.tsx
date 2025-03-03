@@ -109,24 +109,7 @@ export default function ForgetClassTabPlusButton({
               <div className="grid grid-cols-2 gap-y-4 text-black mt-4">
                 <div className="flex flex-col items-start">
                   <Label className="text-xs text-muted-foreground text-nowrap mb-0.5">
-                    Dataset
-                  </Label>
-                  <Select value={dataset} onValueChange={setDataset}>
-                    <SelectTrigger className="w-11/12">
-                      <SelectValue placeholder={dataset} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DATASETS.map((dataset) => (
-                        <SelectItem key={dataset} value={dataset}>
-                          {dataset}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col items-start">
-                  <Label className="text-xs text-muted-foreground text-nowrap mb-0.5">
-                    Model
+                    Architecture
                   </Label>
                   <Select
                     value={neuralNetworkModel}
@@ -139,6 +122,23 @@ export default function ForgetClassTabPlusButton({
                       {NEURAL_NETWORK_MODELS.map((model) => (
                         <SelectItem key={model} value={model}>
                           {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col items-start">
+                  <Label className="text-xs text-muted-foreground text-nowrap mb-0.5">
+                    Dataset
+                  </Label>
+                  <Select value={dataset} onValueChange={setDataset}>
+                    <SelectTrigger className="w-11/12">
+                      <SelectValue placeholder={dataset} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DATASETS.map((dataset) => (
+                        <SelectItem key={dataset} value={dataset}>
+                          {dataset}
                         </SelectItem>
                       ))}
                     </SelectContent>
