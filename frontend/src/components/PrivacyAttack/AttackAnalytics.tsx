@@ -61,6 +61,7 @@ export default function AttackAnalytics({
   const [data, setData] = useState<Data>(null);
   const [images, setImages] = useState<Image[]>();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [autoUpdated, setAutoUpdated] = useState(false);
 
   const prevMetricRef = useRef(metric);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -311,69 +312,7 @@ export default function AttackAnalytics({
   useEffect(() => {
     if (!data) return;
 
-    if (strategy === THRESHOLD_STRATEGIES[1].strategy) {
-      const maxAttackData = findMaxAttackData(data.lineChartData);
-      if (maxAttackData && maxAttackData.threshold !== thresholdValue) {
-        setThresholdValue(maxAttackData.threshold);
-      }
-    } else if (strategy === THRESHOLD_STRATEGIES[2].strategy) {
-      const allValues = [...data.retrainData, ...data.unlearnData];
-      if (allValues.length === 0) return;
-      const step = isMetricEntropy ? 0.05 : 0.25;
-      const candidateSet = new Set<number>();
-      allValues.forEach((datum) => {
-        const base = Math.floor(datum.value / step) * step;
-        candidateSet.add(base);
-        candidateSet.add(base + step);
-      });
-      const candidates = Array.from(candidateSet).sort((a, b) => a - b);
-      let bestCandidate = thresholdValue;
-      let bestSuccessCount = -Infinity;
-      candidates.forEach((candidate) => {
-        const successCount = isAboveThresholdUnlearn
-          ? data.retrainData.filter((datum) => datum.value < candidate).length +
-            data.unlearnData.filter((datum) => datum.value > candidate).length
-          : data.retrainData.filter((datum) => datum.value > candidate).length +
-            data.unlearnData.filter((datum) => datum.value < candidate).length;
-
-        if (successCount > bestSuccessCount) {
-          bestSuccessCount = successCount;
-          bestCandidate = candidate;
-        }
-      });
-      if (bestCandidate !== thresholdValue) {
-        setThresholdValue(bestCandidate);
-      }
-    } else if (strategy === THRESHOLD_STRATEGIES[3].strategy) {
-      const key =
-        `${metric.toLowerCase()}_above_${direction}` as keyof AttackResults;
-      const modelALineChartData = modelAExperiment
-        ? modelAExperiment.attack.results[key] || []
-        : [];
-      const modelBLineChartData = modelBExperiment
-        ? modelBExperiment.attack.results[key] || []
-        : [];
-      const combinedLineChartData = [
-        ...modelALineChartData,
-        ...modelBLineChartData,
-      ];
-      if (combinedLineChartData.length === 0) return;
-      const thresholdGroups: { [key: number]: number } = {};
-      combinedLineChartData.forEach((item) => {
-        thresholdGroups[item.threshold] =
-          (thresholdGroups[item.threshold] || 0) + item.attack_score;
-      });
-      const bestThresholdEntry = Object.entries(thresholdGroups).reduce(
-        (best, [t, sum]) => {
-          const thresholdCandidate = parseFloat(t);
-          return sum > best.sum ? { th: thresholdCandidate, sum } : best;
-        },
-        { th: thresholdValue, sum: -Infinity }
-      );
-      if (bestThresholdEntry.th !== thresholdValue) {
-        setThresholdValue(bestThresholdEntry.th);
-      }
-    } else if (strategy.startsWith("BEST_ATTACK")) {
+    if (strategy.startsWith("BEST_ATTACK")) {
       const isModelAButton = strategy.endsWith("A");
       if ((isModelAButton && isModelA) || (!isModelAButton && !isModelA)) {
         let bestResult = {
@@ -407,14 +346,87 @@ export default function AttackAnalytics({
           });
         });
 
-        onUpdateMetric(bestResult.metric);
-        onUpdateDirection(bestResult.direction);
-        if (bestResult.threshold !== thresholdValue) {
-          setThresholdValue(bestResult.threshold);
+        if (!autoUpdated) {
+          onUpdateMetric(bestResult.metric);
+          onUpdateDirection(bestResult.direction);
+          if (bestResult.threshold !== thresholdValue) {
+            setThresholdValue(bestResult.threshold);
+          }
+          setAutoUpdated(true);
+        }
+      }
+    } else {
+      if (autoUpdated) setAutoUpdated(false);
+
+      if (strategy === THRESHOLD_STRATEGIES[1].strategy) {
+        const maxAttackData = findMaxAttackData(data.lineChartData);
+        if (maxAttackData && maxAttackData.threshold !== thresholdValue) {
+          setThresholdValue(maxAttackData.threshold);
+        }
+      } else if (strategy === THRESHOLD_STRATEGIES[2].strategy) {
+        const allValues = [...data.retrainData, ...data.unlearnData];
+        if (allValues.length === 0) return;
+        const step = isMetricEntropy ? 0.05 : 0.25;
+        const candidateSet = new Set<number>();
+        allValues.forEach((datum) => {
+          const base = Math.floor(datum.value / step) * step;
+          candidateSet.add(base);
+          candidateSet.add(base + step);
+        });
+        const candidates = Array.from(candidateSet).sort((a, b) => a - b);
+        let bestCandidate = thresholdValue;
+        let bestSuccessCount = -Infinity;
+        candidates.forEach((candidate) => {
+          const successCount = isAboveThresholdUnlearn
+            ? data.retrainData.filter((datum) => datum.value < candidate)
+                .length +
+              data.unlearnData.filter((datum) => datum.value > candidate).length
+            : data.retrainData.filter((datum) => datum.value > candidate)
+                .length +
+              data.unlearnData.filter((datum) => datum.value < candidate)
+                .length;
+
+          if (successCount > bestSuccessCount) {
+            bestSuccessCount = successCount;
+            bestCandidate = candidate;
+          }
+        });
+        if (bestCandidate !== thresholdValue) {
+          setThresholdValue(bestCandidate);
+        }
+      } else if (strategy === THRESHOLD_STRATEGIES[3].strategy) {
+        const key =
+          `${metric.toLowerCase()}_above_${direction}` as keyof AttackResults;
+        const modelALineChartData = modelAExperiment
+          ? modelAExperiment.attack.results[key] || []
+          : [];
+        const modelBLineChartData = modelBExperiment
+          ? modelBExperiment.attack.results[key] || []
+          : [];
+        const combinedLineChartData = [
+          ...modelALineChartData,
+          ...modelBLineChartData,
+        ];
+        if (combinedLineChartData.length === 0) return;
+        const thresholdGroups: { [key: number]: number } = {};
+        combinedLineChartData.forEach((item) => {
+          thresholdGroups[item.threshold] =
+            (thresholdGroups[item.threshold] || 0) + item.attack_score;
+        });
+        const bestThresholdEntry = Object.entries(thresholdGroups).reduce(
+          (best, [t, sum]) => {
+            const thresholdCandidate = parseFloat(t);
+            return sum > best.sum ? { th: thresholdCandidate, sum } : best;
+          },
+          { th: thresholdValue, sum: -Infinity }
+        );
+        if (bestThresholdEntry.th !== thresholdValue) {
+          setThresholdValue(bestThresholdEntry.th);
         }
       }
     }
   }, [
+    autoUpdated,
     data,
     direction,
     isAboveThresholdUnlearn,
