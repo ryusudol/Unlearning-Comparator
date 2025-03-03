@@ -333,7 +333,7 @@ export default function UnlearningConfiguration() {
       onSubmit={handleSubmit}
     >
       <div className="w-full grid grid-cols-2 gap-y-2">
-        <span className="text-base text-nowrap mb-1">Initial Model</span>
+        <span className="text-base text-nowrap mb-1">Base Model</span>
         <Select
           defaultValue={weightNames ? weightNames[0] : initModel}
           onValueChange={handleInitialModelChange}
@@ -403,7 +403,7 @@ export default function UnlearningConfiguration() {
             batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
           }`}
         >
-          This configuration will generate{" "}
+          This configuration will build{" "}
           <span
             className={`font-bold ${
               totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
@@ -411,7 +411,7 @@ export default function UnlearningConfiguration() {
           >
             {totalExperimentsCount}
           </span>{" "}
-          experiment{totalExperimentsCount > 1 && "s"}.
+          model{totalExperimentsCount > 1 && "s"}.
         </span>
       )}
       <Button

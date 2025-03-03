@@ -41,7 +41,26 @@ export default function Header() {
               Unlearning Comparator
             </span>
           </div>
-          <div className="w-[140px] flex gap-4 relative top-2 text-[13px] mr-5">
+          <div className="w-[150px] flex gap-4 relative top-2 text-[13px] mr-5">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-gray-300">Architecture</span>
+              <Select
+                defaultValue={neuralNetworkModel}
+                onValueChange={handleNeuralNetworkModelChange}
+                name="neuralNetworkModel"
+              >
+                <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
+                  <SelectValue placeholder={neuralNetworkModel} />
+                </SelectTrigger>
+                <SelectContent>
+                  {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
+                    <SelectItem key={idx} value={neuralNetworkModel}>
+                      {neuralNetworkModel}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-300">Dataset</span>
               <Select
@@ -56,25 +75,6 @@ export default function Header() {
                   {DATASETS.map((dataset, idx) => (
                     <SelectItem key={idx} value={dataset}>
                       {dataset}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-gray-300">Model</span>
-              <Select
-                defaultValue={neuralNetworkModel}
-                onValueChange={handleNeuralNetworkModelChange}
-                name="neuralNetworkModel"
-              >
-                <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
-                  <SelectValue placeholder={neuralNetworkModel} />
-                </SelectTrigger>
-                <SelectContent>
-                  {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
-                    <SelectItem key={idx} value={neuralNetworkModel}>
-                      {neuralNetworkModel}
                     </SelectItem>
                   ))}
                 </SelectContent>

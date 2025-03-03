@@ -20,11 +20,11 @@ const CONFIG = {
   SELECT_CHART_FONT_SIZE: "9px",
   UNSELECT_CHART_FONT_SIZE: "8.5px",
   PATTERN_SIZE: 3,
-  LEGEND_X_MODEL_A_OFFSET: 92,
-  LEGEND_X_MODEL_B_OFFSET: 91,
+  LEGEND_X_MODEL_A_OFFSET: 102,
+  LEGEND_X_MODEL_B_OFFSET: 101,
   LEGEND_X: 11,
   LEGEND_Y: 7,
-  LEGEND_GAP: 48,
+  LEGEND_GAP: 58,
   LEGEND_FONT_SIZE: "10px",
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
@@ -147,7 +147,7 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
-      .text("Retrain")
+      .text("Retrained")
       .style("font-size", CONFIG.LEGEND_FONT_SIZE)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 

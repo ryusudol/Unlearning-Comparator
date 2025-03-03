@@ -488,9 +488,9 @@ export default function AttackPlot({
 
       butterflyLegendGroup
         .insert("rect", ":first-child")
-        .attr("x", -184.5)
+        .attr("x", -172)
         .attr("y", -18.5)
-        .attr("width", 374)
+        .attr("width", 350)
         .attr("height", 36)
         .attr("fill", "white")
         .attr("opacity", 0.6)
@@ -548,7 +548,7 @@ export default function AttackPlot({
             .attr("y", yPos)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+            .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
             .text(item.label);
         } else {
           butterflyLegendGroup
@@ -562,7 +562,7 @@ export default function AttackPlot({
             .attr("y", yPos)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+            .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
             .text(item.label);
         }
       });
@@ -884,9 +884,9 @@ export default function AttackPlot({
         .attr("transform", `translate(${wL - 37}, -1.5)`);
       lineChartLegendGroup
         .append("rect")
-        .attr("x", -100)
+        .attr("x", -104)
         .attr("y", 0)
-        .attr("width", 130)
+        .attr("width", 122)
         .attr("height", 42)
         .attr("fill", "white")
         .attr("opacity", 0.6)
@@ -898,7 +898,7 @@ export default function AttackPlot({
         const yPos = 10 + i * 12;
         const legendItemGroup = lineChartLegendGroup
           .append("g")
-          .attr("transform", `translate(-94, ${yPos})`);
+          .attr("transform", `translate(-98, ${yPos})`);
         const lineElement = legendItemGroup
           .append("line")
           .attr("x1", 0)
@@ -917,7 +917,7 @@ export default function AttackPlot({
           .attr("class", "line-legend-" + item.color)
           .attr("x", 20)
           .attr("y", 3)
-          .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+          .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
           .text(item.label);
       });
 
@@ -1482,10 +1482,11 @@ export default function AttackPlot({
         <span style={{ color: COLORS.DARK_GRAY }}>
           Retrained Model (a00{forgetClass})
         </span>
-        <span className="mx-1.5">vs</span>
+        <span className="mx-1.5">vs.</span>
         <span style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}>
           {isModelA ? "Model A" : "Model B"} (
-          {isModelA ? modelAExperiment.Type : modelBExperiment.Type}{" "}
+          {isModelA ? modelAExperiment.Type : modelBExperiment.Type}
+          {", "}
           {isModelA ? modelA : modelB})
         </span>
       </div>

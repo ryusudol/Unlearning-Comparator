@@ -829,7 +829,7 @@ const ScatterPlot = forwardRef(
       >
         {idExist && (
           <AiOutlineHome
-            className="mr-1 cursor-pointer absolute top-[18px] left-[9px] z-10"
+            className="cursor-pointer absolute top-6 left-2 z-10"
             onClick={resetZoom}
           />
         )}

@@ -14,7 +14,7 @@ const CONFIG = {
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
   TOTAL_DATA_COUNT: 400,
-  IMG_SIZES: [12, 16, 20, 24, 30],
+  IMG_SIZES: [12, 16, 20, 24, 28],
 } as const;
 
 interface AttackSuccessFailureProps {
@@ -123,7 +123,7 @@ export default function AttackSuccessFailure({
 
   const getGridColumns = (imgSize: number) => {
     const size = CONFIG.IMG_SIZES[imgSize];
-    const columns = Math.floor(240 / size);
+    const columns = Math.floor(261 / (size + 1));
     return columns;
   };
 
@@ -266,7 +266,7 @@ export default function AttackSuccessFailure({
 
   return (
     <div className="relative h-full flex flex-col items-center">
-      <p className="text-xl text-center mt-2 mb-1">
+      <p className="text-xl text-center mt-2.5 mb-1.5">
         Forgetting Quality Score ={" "}
         <span className="font-semibold">
           {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
@@ -305,7 +305,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-[164px]">
+          <ScrollArea className="w-[260px] h-[150px]">
             <div
               className="grid gap-[1px]"
               style={{
@@ -344,7 +344,7 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-[164px]">
+          <ScrollArea className="w-[260px] h-[150px]">
             <div
               className="grid gap-[1px]"
               style={{

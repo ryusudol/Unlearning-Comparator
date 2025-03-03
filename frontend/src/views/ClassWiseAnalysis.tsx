@@ -41,7 +41,7 @@ export default function ClassWiseAnalysis() {
   }, [modelAExperiment, modelBExperiment]);
 
   return (
-    <div>
+    <div className="h-[306.5px]">
       <Subtitle title="Class-wise Accuracy" />
       {forgetClass !== undefined ? (
         modelA !== "" && modelB !== "" ? (

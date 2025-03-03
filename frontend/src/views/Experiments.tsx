@@ -25,7 +25,8 @@ export default function Experiments() {
     <View
       width={CONFIG.EXPERIMENTS_WIDTH}
       height={CONFIG.EXPERIMENTS_PROGRESS_HEIGHT}
-      className="border-0 border-b overflow-visible"
+      className="overflow-visible"
+      borderBottom
     >
       <div className="flex justify-between items-center mb-[3px]">
         <div className="grid grid-flow-col grid-x-2 items-center">

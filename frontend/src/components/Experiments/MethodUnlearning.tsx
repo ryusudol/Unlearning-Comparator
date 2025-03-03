@@ -43,7 +43,7 @@ export default function MethodUnlearning({
 
   return (
     <div className="w-full">
-      <p className="mb-1.5">Hyperparameters</p>
+      <p className="mb-[3px]">Hyperparameters</p>
       <div className="w-full pl-8 grid gap-y-2.5">
         <div className="grid gap-y-2.5">
           <HyperparameterInput
