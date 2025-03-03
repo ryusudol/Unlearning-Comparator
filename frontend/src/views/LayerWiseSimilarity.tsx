@@ -21,7 +21,7 @@ export default function LayerWiseSimilarity() {
   return (
     <div className="h-[306.5px] relative top-4">
       <div className="flex justify-between">
-        <Subtitle title="Layer-Wise Similarity" />
+        <Subtitle title="Layer-Wise Similarity" className="left-0.5" />
         {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector
             dataset={selectedDataset}

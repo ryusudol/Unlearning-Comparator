@@ -30,7 +30,7 @@ export default function PredictionMatrix() {
   return (
     <div className="h-[341px]">
       <div className="flex justify-between">
-        <Subtitle title="Prediction Matrix" />
+        <Subtitle title="Prediction Matrix" className="left-0.5" />
         {forgetClassExist && areAllModelsSelected && (
           <DatasetModeSelector
             dataset={selectedDataset}
