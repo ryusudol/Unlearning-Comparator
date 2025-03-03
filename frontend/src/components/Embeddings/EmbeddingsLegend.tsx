@@ -27,7 +27,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
   };
 
   return (
-    <div className="w-full h-[94px] flex px-3.5 text-sm z-10 relative top-3">
+    <div className="w-full flex px-3.5 pb-[18px] text-sm z-10 relative top-3">
       <div className="flex flex-col mr-[22px]">
         <p className="text-lg font-medium mb-1">True Class</p>
         <ul className="flex flex-col gap-1">
