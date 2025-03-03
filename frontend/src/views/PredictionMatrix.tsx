@@ -40,14 +40,14 @@ export default function PredictionMatrix() {
       </div>
       {forgetClassExist ? (
         !areAllModelsSelected ? (
-          <Indicator about="BaselineComparison" />
+          <Indicator about="AB" />
         ) : (
           <div className="flex flex-col relative bottom-2.5">
             <BubbleChartLegend />
             <div className="flex items-center">
               {modelAExperiment && (
                 <BubbleChart
-                  mode="Baseline"
+                  mode="A"
                   modelType={modelAExperiment.Type}
                   datasetMode={selectedDataset}
                   hoveredY={hoveredY}
@@ -57,7 +57,7 @@ export default function PredictionMatrix() {
               )}
               {modelBExperiment && (
                 <BubbleChart
-                  mode="Comparison"
+                  mode="B"
                   modelType={modelBExperiment.Type}
                   datasetMode={selectedDataset}
                   showYAxis={false}

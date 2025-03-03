@@ -38,7 +38,7 @@ export default function LayerWiseSimilarity() {
             <LineChart dataset={selectedDataset} />
           </div>
         ) : (
-          <Indicator about="BaselineComparison" />
+          <Indicator about="AB" />
         )
       ) : (
         <Indicator about="ForgetClass" />

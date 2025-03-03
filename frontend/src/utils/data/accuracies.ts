@@ -1,5 +1,5 @@
 import { TABLEAU10 } from "../../constants/colors";
-import { GapDataItem } from "../../components/Accuracies/VerticalBarChart";
+import { GapDataItem } from "../../types/data";
 
 const GAP_FIX_LENGTH = 3;
 
@@ -9,18 +9,16 @@ export function getAccuracyGap(
 ) {
   return baseAcc && compAcc
     ? Object.keys(baseAcc).map((key, idx) => {
-        const baselineValue = baseAcc[idx];
-        const comparisonValue = compAcc[idx];
+        const modelAValue = baseAcc[idx];
+        const modelBValue = compAcc[idx];
         const categoryLetter = String.fromCharCode(65 + idx);
         return {
           category: categoryLetter,
           classLabel: key,
-          gap: parseFloat(
-            (comparisonValue - baselineValue).toFixed(GAP_FIX_LENGTH)
-          ),
+          gap: parseFloat((modelBValue - modelAValue).toFixed(GAP_FIX_LENGTH)),
           fill: TABLEAU10[idx],
-          baselineAccuracy: baselineValue,
-          comparisonAccuracy: comparisonValue,
+          modelAAccuracy: modelAValue,
+          modelBAccuracy: modelBValue,
         };
       })
     : [];

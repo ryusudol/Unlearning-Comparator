@@ -146,8 +146,8 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             wrapperStyle={{ zIndex: CONFIG.zIndex }}
           />
           {CKA_DATA_KEYS.map((key, idx) => {
-            const isBaselineLine = key.startsWith("baseline");
-            const dotColor = isBaselineLine ? COLORS.EMERALD : COLORS.PURPLE;
+            const isModelALine = key.startsWith("modelA");
+            const dotColor = isModelALine ? COLORS.EMERALD : COLORS.PURPLE;
             const isForgetLine = key.includes("Forget");
             const dotSize = isForgetLine ? CONFIG.CROSS_SIZE : CONFIG.DOT_SIZE;
             const activeDotStyle = {

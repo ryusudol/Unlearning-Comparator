@@ -99,10 +99,10 @@ export default function DataTable({ isExpanded }: Props) {
   });
 
   useEffect(() => {
-    const baselineExists = Object.values(experiments).some(
+    const modelAExists = Object.values(experiments).some(
       (experiment) => experiment.ID === modelA
     );
-    if (!baselineExists) {
+    if (!modelAExists) {
       if (tableData.length > 0) {
         saveModelA(tableData[0].ID);
         saveModelB(tableData[1].ID);

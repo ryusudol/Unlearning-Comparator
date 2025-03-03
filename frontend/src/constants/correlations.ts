@@ -2,10 +2,10 @@ import { COLORS } from "./colors";
 import { ChartConfig } from "../components/UI/chart";
 
 export const CKA_DATA_KEYS = [
-  "baselineForgetCka",
-  "baselineOtherCka",
-  "comparisonForgetCka",
-  "comparisonOtherCka",
+  "modelAForgetCka",
+  "modelAOtherCka",
+  "modelBForgetCka",
+  "modelBOtherCka",
 ];
 
 export const LINE_CHART_TICK_STYLE = `
@@ -19,20 +19,16 @@ export const LINE_CHART_CONFIG = {
     label: "Layer",
     color: "#000",
   },
-  baselineForgetCka: {
-    label: "Baseline (Forget Class)",
+  modelAForgetCka: {
     color: COLORS.EMERALD,
   },
-  baselineOtherCka: {
-    label: "Baseline (Remain Classes)",
+  modelAOtherCka: {
     color: COLORS.EMERALD,
   },
-  comparisonForgetCka: {
-    label: "Comparison (Forget Class)",
+  modelBForgetCka: {
     color: COLORS.PURPLE,
   },
-  comparisonOtherCka: {
-    label: "Comparison (Remain Classes)",
+  modelBOtherCka: {
     color: COLORS.PURPLE,
   },
 } satisfies ChartConfig;
