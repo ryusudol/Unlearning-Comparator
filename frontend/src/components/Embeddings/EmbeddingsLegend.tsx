@@ -28,7 +28,7 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
 
   return (
     <div className="w-full flex px-3.5 pb-[18px] text-sm z-10 relative top-3">
-      <div className="flex flex-col mr-[22px]">
+      <div className="flex flex-col mr-[39px]">
         <p className="text-lg font-medium mb-1">True Class</p>
         <ul className="flex flex-col gap-1">
           <li className="flex items-center text-nowrap">
@@ -41,10 +41,10 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           </li>
         </ul>
       </div>
-      <div className="flex flex-col mr-3.5">
+      <div className="flex flex-col mr-3">
         <p className="text-lg font-medium mb-1">Predicted Class</p>
         <div
-          style={{ gridTemplateColumns: "100px 70px 70px 70px 75px" }}
+          style={{ gridTemplateColumns: "105px 70px 70px 70px 75px" }}
           className="grid gap-y-1"
         >
           {oddIndices.map((name, idx) => {
@@ -77,8 +77,8 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           })}
         </div>
       </div>
-      <div className="flex gap-[15px]">
-        <div className="ml-2">
+      <div className="flex">
+        <div className="ml-2 mr-3">
           <p className="text-lg font-medium mb-[5px]">Highlight</p>
           <p className="w-[100px] text-[13px] font-light">
             Choose a category to emphasize:
