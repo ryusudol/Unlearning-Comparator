@@ -130,9 +130,9 @@ export const FatMultiplicationSignIcon = ({
 }: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    width="10.5"
-    height="10.5"
+    viewBox="0 0 25 25"
+    width="10"
+    height="10"
     color={style?.color ? style.color : "#000000"}
     fill="none"
     {...props}
