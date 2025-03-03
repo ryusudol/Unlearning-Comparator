@@ -184,27 +184,16 @@ export default function AttackAnalytics({
         const retrainProb = retrainPoint![6] as Prob;
         const unlearnProb = unlearnPoint![6] as Prob;
 
-        const barChartData = isBaseline
-          ? {
-              baseline: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(retrainProb[idx] || 0),
-              })),
-              comparison: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(unlearnProb[idx] || 0),
-              })),
-            }
-          : {
-              baseline: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(unlearnProb[idx] || 0),
-              })),
-              comparison: Array.from({ length: 10 }, (_, idx) => ({
-                class: idx,
-                value: Number(retrainProb[idx] || 0),
-              })),
-            };
+        const barChartData = {
+          baseline: Array.from({ length: 10 }, (_, idx) => ({
+            class: idx,
+            value: Number(retrainProb[idx] || 0),
+          })),
+          comparison: Array.from({ length: 10 }, (_, idx) => ({
+            class: idx,
+            value: Number(unlearnProb[idx] || 0),
+          })),
+        };
 
         const tooltipContent = (
           <Tooltip
