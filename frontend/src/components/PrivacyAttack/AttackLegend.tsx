@@ -24,18 +24,18 @@ interface AttackLegendProps {
   metric: Metric;
   direction: string;
   strategy: string;
-  onMetricChange: (val: Metric) => void;
-  onDirectionChange: (val: string) => void;
-  onThresholdStrategyChange: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onUpdateMetric: (val: Metric) => void;
+  onUpdateDirection: (val: string) => void;
+  onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function AttackLegend({
   metric,
   direction,
   strategy,
-  onMetricChange,
-  onDirectionChange,
-  onThresholdStrategyChange,
+  onUpdateMetric,
+  onUpdateDirection,
+  onUpdateStrategy,
 }: AttackLegendProps) {
   const isEntropyChecked = metric === ENTROPY;
   const isUnlearnChecked = direction === UNLEARN;
@@ -49,7 +49,7 @@ export default function AttackLegend({
               style={{ backgroundColor: COLORS.EMERALD }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
               onClick={() =>
-                onThresholdStrategyChange({
+                onUpdateStrategy({
                   currentTarget: { innerHTML: "BEST_ATTACK_A" },
                 } as React.MouseEvent<HTMLButtonElement>)
               }
@@ -73,7 +73,7 @@ export default function AttackLegend({
               style={{ backgroundColor: COLORS.PURPLE }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
               onClick={() =>
-                onThresholdStrategyChange({
+                onUpdateStrategy({
                   currentTarget: { innerHTML: "BEST_ATTACK_B" },
                 } as React.MouseEvent<HTMLButtonElement>)
               }
@@ -98,7 +98,7 @@ export default function AttackLegend({
         <RadioGroup
           className="flex flex-col gap-1"
           value={metric}
-          onValueChange={onMetricChange}
+          onValueChange={onUpdateMetric}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
@@ -132,7 +132,7 @@ export default function AttackLegend({
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
           value={direction}
-          onValueChange={onDirectionChange}
+          onValueChange={onUpdateDirection}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
@@ -182,7 +182,7 @@ export default function AttackLegend({
           {THRESHOLD_STRATEGIES.map((s, idx) => (
             <div key={idx} className="flex flex-col">
               <Button
-                onClick={onThresholdStrategyChange}
+                onClick={onUpdateStrategy}
                 style={{ width: s.length }}
                 className={`mb-1 ${
                   (strategy === s.strategy ||
