@@ -1,4 +1,5 @@
 import React from "react";
+import { MoveRight } from "lucide-react";
 
 import Button from "../CustomButton";
 import {
@@ -141,8 +142,13 @@ export default function AttackLegend({
               color="#4d4d4d"
               checked={isUnlearnChecked}
             />
-            <Label className="text-sm text-[#4d4d4d]" htmlFor={UNLEARN}>
-              {"Above -> Model A/B"}
+            <Label
+              className="flex items-center text-sm text-[#4d4d4d]"
+              htmlFor={UNLEARN}
+            >
+              <span>Above</span>
+              <MoveRight className="w-2.5 h-2.5 mx-1" />
+              <span>Model A/B</span>
             </Label>
           </div>
           <div className="flex items-center space-x-[5px]">
@@ -153,8 +159,13 @@ export default function AttackLegend({
               color="#4d4d4d"
               checked={!isUnlearnChecked}
             />
-            <Label className="text-sm text-[#4d4d4d]" htmlFor={RETRAIN}>
-              {"Above -> Retrained"}
+            <Label
+              className="flex items-center text-sm text-[#4d4d4d]"
+              htmlFor={RETRAIN}
+            >
+              <span>Above</span>
+              <MoveRight className="w-2.5 h-2.5 mx-1" />
+              <span>Retrained</span>
             </Label>
           </div>
         </RadioGroup>
