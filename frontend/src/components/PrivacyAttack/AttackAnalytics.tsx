@@ -23,6 +23,7 @@ import { Bin, Data, CategoryType, Image } from "../../types/attack";
 import { Prob } from "../../types/embeddings";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
+import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CONFIG = {
   TOOLTIP_WIDTH: 450,
@@ -39,6 +40,7 @@ interface Props {
   retrainAttackData: AttackData;
   onUpdateMetric: (val: Metric) => void;
   onUpdateDirection: (val: string) => void;
+  onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function AttackAnalytics({
@@ -51,8 +53,11 @@ export default function AttackAnalytics({
   retrainAttackData,
   onUpdateMetric,
   onUpdateDirection,
+  onUpdateStrategy,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const modelA = useModelDataStore((state) => state.modelA);
+  const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -67,12 +72,13 @@ export default function AttackAnalytics({
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<any>(null);
   const fetchControllerRef = useRef<AbortController | null>(null);
+  const prevModelA = useRef(modelA);
+  const prevModelB = useRef(modelB);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const isModelA = mode === "A";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = direction === UNLEARN;
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const imageMap = useMemo(() => {
     if (!images) return new Map<number, Image>();
@@ -173,22 +179,22 @@ export default function AttackAnalytics({
         const blob = await response.blob();
         const imageUrl = URL.createObjectURL(blob);
 
-        const retrainPoint = retrainPoints.find((point) => {
+        const retrainedPoint = retrainPoints.find((point) => {
           return point[2] === elementData.img_idx;
         }) as (number | Prob)[];
-        const unlearnPoint = modelPoints.find((point) => {
+        const unlearnedPoint = modelPoints.find((point) => {
           return point[2] === elementData.img_idx;
         }) as (number | Prob)[];
 
-        const retrainProb = retrainPoint![6] as Prob;
-        const unlearnProb = unlearnPoint![6] as Prob;
+        const retrainProb = retrainedPoint![6] as Prob;
+        const unlearnProb = unlearnedPoint![6] as Prob;
 
         const barChartData = {
-          modelA: Array.from({ length: 10 }, (_, idx) => ({
+          retrainedModelData: Array.from({ length: 10 }, (_, idx) => ({
             class: idx,
             value: Number(retrainProb[idx] || 0),
           })),
-          modelB: Array.from({ length: 10 }, (_, idx) => ({
+          modelData: Array.from({ length: 10 }, (_, idx) => ({
             class: idx,
             value: Number(unlearnProb[idx] || 0),
           })),
@@ -199,9 +205,10 @@ export default function AttackAnalytics({
             width={CONFIG.TOOLTIP_WIDTH}
             height={CONFIG.TOOLTIP_HEIGHT}
             imageUrl={imageUrl}
-            data={unlearnPoint}
+            data={unlearnedPoint}
             barChartData={barChartData}
             isModelA={isModelA}
+            clickedType={elementData.type}
           />
         );
 
@@ -451,6 +458,18 @@ export default function AttackAnalytics({
       document.removeEventListener("click", handleClickOutside);
     };
   }, [hideTooltip]);
+
+  useEffect(() => {
+    if (prevModelA.current !== modelA || prevModelB.current !== modelB) {
+      onUpdateMetric(ENTROPY);
+      onUpdateDirection(UNLEARN);
+      onUpdateStrategy({
+        currentTarget: { innerHTML: THRESHOLD_STRATEGIES[0].strategy },
+      } as React.MouseEvent<HTMLButtonElement>);
+      prevModelA.current = modelA;
+      prevModelB.current = modelB;
+    }
+  }, [modelA, modelB, onUpdateDirection, onUpdateMetric, onUpdateStrategy]);
 
   return (
     <div className="w-[635px] h-full relative flex flex-col" ref={containerRef}>

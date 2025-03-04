@@ -14,7 +14,7 @@ const CONFIG = {
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
   TOTAL_DATA_COUNT: 400,
-  IMG_SIZES: [12, 16, 20, 24, 28],
+  IMG_SIZES: [12, 16, 20, 24, 28, 42],
 } as const;
 
 interface AttackSuccessFailureProps {
@@ -320,7 +320,7 @@ export default function AttackSuccessFailure({
                 className="w-20 h-1"
                 defaultValue={[0]}
                 min={0}
-                max={4}
+                max={CONFIG.IMG_SIZES.length - 1}
                 step={1}
                 onValueChange={(value) =>
                   handleImgSizeControl(value, "success")
@@ -359,7 +359,7 @@ export default function AttackSuccessFailure({
                 className="w-20 h-1"
                 defaultValue={[0]}
                 min={0}
-                max={4}
+                max={CONFIG.IMG_SIZES.length - 1}
                 step={1}
                 onValueChange={(value) =>
                   handleImgSizeControl(value, "failure")
