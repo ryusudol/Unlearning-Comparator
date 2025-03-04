@@ -56,7 +56,7 @@ export default function AttackLegend({
             >
               Model A
               <br />
-              Best Attack
+              Worst Case
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-3 py-2" side="top">
@@ -80,7 +80,7 @@ export default function AttackLegend({
             >
               Model B
               <br />
-              Best Attack
+              Worst Case
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-3 py-2" side="top">
