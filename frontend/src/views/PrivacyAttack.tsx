@@ -57,9 +57,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     setDirection(direction);
   };
 
-  const handleThresholdStrategyChange = (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleStrategyChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     const currStrategy = e.currentTarget.innerHTML;
     if (strategy !== currStrategy) {
       setStrategy(currStrategy);
@@ -72,9 +70,9 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
         metric={metric}
         direction={direction}
         strategy={strategy}
-        onMetricChange={handleMetricChange}
-        onDirectionChange={handleDirectionChange}
-        onThresholdStrategyChange={handleThresholdStrategyChange}
+        onUpdateMetric={handleMetricChange}
+        onUpdateDirection={handleDirectionChange}
+        onUpdateStrategy={handleStrategyChange}
       />
       <div className="flex items-center">
         {!retrainData ? (
@@ -92,6 +90,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
             retrainAttackData={retrainData.attack}
             onUpdateMetric={handleMetricChange}
             onUpdateDirection={handleDirectionChange}
+            onUpdateStrategy={handleStrategyChange}
           />
         )}
         <Separator
@@ -113,6 +112,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
             retrainAttackData={retrainData.attack}
             onUpdateMetric={handleMetricChange}
             onUpdateDirection={handleDirectionChange}
+            onUpdateStrategy={handleStrategyChange}
           />
         )}
       </div>
