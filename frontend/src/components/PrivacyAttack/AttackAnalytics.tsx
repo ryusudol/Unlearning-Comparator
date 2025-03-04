@@ -173,22 +173,22 @@ export default function AttackAnalytics({
         const blob = await response.blob();
         const imageUrl = URL.createObjectURL(blob);
 
-        const retrainPoint = retrainPoints.find((point) => {
+        const retrainedPoint = retrainPoints.find((point) => {
           return point[2] === elementData.img_idx;
         }) as (number | Prob)[];
-        const unlearnPoint = modelPoints.find((point) => {
+        const unlearnedPoint = modelPoints.find((point) => {
           return point[2] === elementData.img_idx;
         }) as (number | Prob)[];
 
-        const retrainProb = retrainPoint![6] as Prob;
-        const unlearnProb = unlearnPoint![6] as Prob;
+        const retrainProb = retrainedPoint![6] as Prob;
+        const unlearnProb = unlearnedPoint![6] as Prob;
 
         const barChartData = {
-          modelA: Array.from({ length: 10 }, (_, idx) => ({
+          retrainedModelData: Array.from({ length: 10 }, (_, idx) => ({
             class: idx,
             value: Number(retrainProb[idx] || 0),
           })),
-          modelB: Array.from({ length: 10 }, (_, idx) => ({
+          modelData: Array.from({ length: 10 }, (_, idx) => ({
             class: idx,
             value: Number(unlearnProb[idx] || 0),
           })),
@@ -199,9 +199,10 @@ export default function AttackAnalytics({
             width={CONFIG.TOOLTIP_WIDTH}
             height={CONFIG.TOOLTIP_HEIGHT}
             imageUrl={imageUrl}
-            data={unlearnPoint}
+            data={unlearnedPoint}
             barChartData={barChartData}
             isModelA={isModelA}
+            clickedType={elementData.type}
           />
         );
 
