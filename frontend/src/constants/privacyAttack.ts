@@ -1,3 +1,5 @@
+import { TABLEAU10 } from "./colors";
+
 interface LineGraphLegendData {
   color: string;
   label: string;
@@ -33,7 +35,7 @@ export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
 ];
 
 export const LINE_GRAPH_LEGEND_DATA: LineGraphLegendData[] = [
-  { color: "red", label: "Attack Score" },
-  { color: "blue", label: "False Positive Rate" },
-  { color: "green", label: "False Negative Rate" },
+  { color: TABLEAU10[2], label: "Attack Score" },
+  { color: TABLEAU10[0], label: "False Positive Rate" },
+  { color: TABLEAU10[4], label: "False Negative Rate" },
 ];

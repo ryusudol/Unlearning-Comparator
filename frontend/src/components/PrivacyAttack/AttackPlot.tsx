@@ -9,7 +9,7 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { COLORS } from "../../constants/colors";
+import { COLORS, TABLEAU10 } from "../../constants/colors";
 import { FONT_CONFIG } from "../../constants/common";
 import { AttackResult } from "../../types/data";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
@@ -730,7 +730,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-attack-above")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.RED)
+        .attr("stroke", TABLEAU10[2]) // red
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", attackLine)
@@ -740,7 +740,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-attack-below")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.RED)
+        .attr("stroke", TABLEAU10[2]) // red
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", attackLine)
@@ -757,7 +757,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fpr-above")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.BLUE)
+        .attr("stroke", TABLEAU10[0]) // blue
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", fprLine)
@@ -766,7 +766,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fpr-below")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.BLUE)
+        .attr("stroke", TABLEAU10[0]) // blue
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", fprLine)
@@ -782,7 +782,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fnr-above")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.GREEN)
+        .attr("stroke", TABLEAU10[4]) // green
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", fnrLine)
@@ -791,7 +791,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fnr-below")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.GREEN)
+        .attr("stroke", TABLEAU10[4]) // green
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", fnrLine)
