@@ -262,58 +262,6 @@ function BubbleChart({
 
         handleMouseOut(event);
       });
-
-    // svg
-    //   .selectAll("rect")
-    //   .data(data)
-    //   .join("rect")
-    //   .attr("x", (d) => xScale(d.x) - CONFIG.CELL_SIZE / 2)
-    //   .attr("y", (d) => yScale(d.y) - CONFIG.CELL_SIZE / 2)
-    //   .attr("width", rectSize)
-    //   .attr("height", rectSize)
-    //   .attr("fill", (d) => colorScale(d.conf))
-    //   .on("mouseover", (event, d: any) => {
-    //     event.stopPropagation();
-
-    //     d3.select(event.target).attr("stroke", "black").attr("stroke-width", 1);
-
-    //     const rect = event.target.getBoundingClientRect();
-    //     const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
-
-    //     const rightSpace = window.innerWidth - rect.right;
-    //     const leftSpace = rect.left;
-
-    //     let xPos =
-    //       rightSpace >= tooltipWidth + 20
-    //         ? (rect.right + 10) / zoom
-    //         : (leftSpace - tooltipWidth - 10) / zoom;
-
-    //     let yPos = (rect.top + rect.height / 2) / zoom;
-
-    //     setTooltip({
-    //       display: true,
-    //       x: xPos,
-    //       y: yPos,
-    //       content: {
-    //         groundTruth: d.y,
-    //         prediction: d.x,
-    //         label: d.label,
-    //         conf: d.conf,
-    //       },
-    //     });
-
-    //     svg
-    //       .selectAll(".x-axis .tick text")
-    //       .style("font-weight", (t: any) =>
-    //         t === d.x ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
-    //       );
-
-    //     onHover(d.y);
-    //   })
-    //   .on("mouseout", (event) => {
-    //     d3.select(event.target).attr("stroke", null);
-    //     handleMouseOut(event);
-    //   });
   }, [
     datasetMode,
     experiment,

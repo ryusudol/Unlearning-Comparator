@@ -1,5 +1,3 @@
-import * as d3 from "d3";
-
 export const TABLEAU10 = [
   "#4E79A7",
   "#F28E2B",
@@ -29,7 +27,3 @@ export const COLORS = {
   BUTTON_BG_COLOR: "#585858",
   HOVERED_BUTTON_BG_COLOR: "#696969",
 } as const;
-
-export const bubbleColorScale = Array.from({ length: 256 }, (_, i) => {
-  return d3.interpolateReds(i / 255);
-});
