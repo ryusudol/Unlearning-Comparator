@@ -46,8 +46,8 @@ const CONFIG = {
   HEIGHT: 396,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 54 },
-  LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 36 },
+  LINE_MARGIN: { top: 6, right: 6, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.5,
 } as const;
 
