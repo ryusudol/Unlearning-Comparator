@@ -1,21 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
 import {
-  CIFAR_10_CLASSES,
-  STROKE_CONFIG,
-  FONT_CONFIG,
-} from "../../constants/common";
-import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
+import { CIFAR_10_CLASSES, FONT_CONFIG } from "../../constants/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
-import { COLORS, bubbleColorScale } from "../../constants/colors";
+import { COLORS } from "../../constants/colors";
 
 const CONFIG = {
   WIDTH: 260,
@@ -38,18 +34,16 @@ interface Props {
   modelType: string;
   datasetMode: string;
   hoveredY: number | null;
-  onHover: (y: number) => void;
-  onHoverEnd: () => void;
+  onHover: (y: number | null) => void;
   showYAxis?: boolean;
 }
 
-export default function BubbleChart({
+function BubbleChart({
   mode,
   modelType,
   datasetMode,
   hoveredY,
   onHover,
-  onHoverEnd,
   showYAxis = true,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
@@ -84,9 +78,9 @@ export default function BubbleChart({
         ...prev,
         display: false,
       }));
-      onHoverEnd();
+      onHover(null);
     },
-    [onHoverEnd]
+    [onHover]
   );
 
   useEffect(() => {
@@ -110,18 +104,14 @@ export default function BubbleChart({
       );
 
     const xScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, width]);
+    const cellGap = 1;
+    const rectSize = xScale(1) - xScale(0) - cellGap;
 
     const yScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, height]);
 
     const colorScale = d3
-      .scaleQuantize<string>()
-      .domain([0, 1])
-      .range(bubbleColorScale);
-
-    const sizeScale = d3
-      .scaleLinear()
-      .domain([0, 1])
-      .range([CONFIG.MIN_BUBBLE_SIZE, CONFIG.MAX_BUBBLE_SIZE]);
+      .scaleSequential((t) => d3.interpolateGreys(0.05 + 0.95 * t))
+      .domain([0, 1]);
 
     const xAxis = d3
       .axisBottom(xScale)
@@ -150,9 +140,7 @@ export default function BubbleChart({
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
       .call((g) => {
-        g.select(".domain")
-          .attr("stroke", COLORS.BLACK)
-          .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
+        g.select(".domain").remove();
         g.selectAll(".tick text")
           .attr("transform", "rotate(-45)")
           .style("text-anchor", "end")
@@ -168,9 +156,7 @@ export default function BubbleChart({
         .attr("class", "y-axis")
         .call(yAxis)
         .call((g) => {
-          g.select(".domain")
-            .attr("stroke", COLORS.BLACK)
-            .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
+          g.select(".domain").remove();
           g.selectAll(".tick text")
             .attr("dx", "-.5em")
             .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED);
@@ -181,34 +167,63 @@ export default function BubbleChart({
         .attr("class", "y-axis")
         .call(yAxis)
         .call((g) => {
-          g.select(".domain")
-            .attr("stroke", COLORS.BLACK)
-            .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
-          g.selectAll(".tick text")
-            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
-            .remove();
+          g.select(".domain").remove();
+          g.selectAll(".tick text").remove();
         });
     }
 
-    svg
-      .selectAll("rect")
+    const cellGroup = svg
+      .selectAll("g.cell")
       .data(data)
-      .join("rect")
-      .attr("x", (d) => xScale(d.x) - CONFIG.CELL_SIZE / 2)
-      .attr("y", (d) => yScale(d.y) - CONFIG.CELL_SIZE / 2)
-      .attr("width", CONFIG.CELL_SIZE)
-      .attr("height", CONFIG.CELL_SIZE)
-      .attr("rx", CONFIG.CELL_ROUNDEDNESS)
-      .attr("ry", CONFIG.CELL_ROUNDEDNESS)
-      .attr("fill", "transparent")
-      .on("mouseover", (event, d: any) => {
+      .join("g")
+      .attr("class", "cell");
+
+    cellGroup.each(function (d: any) {
+      const xCenter = xScale(d.x);
+      const yCenter = yScale(d.y);
+
+      const x0 = xCenter - rectSize / 2;
+      const x1 = xCenter + rectSize / 2;
+      const y0 = yCenter - rectSize / 2;
+      const y1 = yCenter + rectSize / 2;
+
+      d3.select(this)
+        .append("path")
+        .attr("d", `M ${x0},${y0} L ${x1},${y0} L ${x1},${y1} Z`)
+        .attr("fill", colorScale(d.conf));
+
+      d3.select(this)
+        .append("path")
+        .attr("d", `M ${x0},${y0} L ${x1},${y1} L ${x0},${y1} Z`)
+        .attr("fill", colorScale(d.label));
+
+      d3.select(this)
+        .append("rect")
+        .attr("class", "cell-border")
+        .attr("x", x0)
+        .attr("y", y0)
+        .attr("width", rectSize)
+        .attr("height", rectSize)
+        .attr("fill", "none")
+        .attr("pointer-events", "all");
+    });
+
+    cellGroup
+      .on("mouseover", function (event: any, d: any) {
         event.stopPropagation();
 
-        d3.select(event.target).attr("fill", "rgba(128, 128, 128, 0.2)");
+        d3.select(this)
+          .select(".cell-border")
+          .attr("stroke", "black")
+          .attr("stroke-width", 1);
 
-        const rect = event.target.getBoundingClientRect();
+        const rect = (
+          d3.select(this).select(".cell-border").node() as HTMLElement
+        ).getBoundingClientRect();
+
+        if (!rect) return;
+
         const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
-
         const rightSpace = window.innerWidth - rect.right;
         const leftSpace = rect.left;
 
@@ -239,43 +254,84 @@ export default function BubbleChart({
 
         onHover(d.y);
       })
-      .on("mouseout", (event) => {
-        d3.select(event.target).attr("fill", "transparent");
+      .on("mouseout", function (event: any) {
+        d3.select(this)
+          .select(".cell-border")
+          .attr("stroke", null)
+          .attr("stroke-width", null);
+
         handleMouseOut(event);
       });
 
-    svg
-      .selectAll("circle")
-      .data(data)
-      .join("circle")
-      .attr("cx", (d) => xScale(d.x))
-      .attr("cy", (d) => yScale(d.y))
-      .attr("r", (d) =>
-        d.label >= CONFIG.MIN_VALUE_TO_DISPLAY
-          ? Math.sqrt(sizeScale(d.label))
-          : 0
-      )
-      .attr("fill", (d) => colorScale(d.conf))
-      .attr("opacity", 0.7)
-      .style("pointer-events", "none");
+    // svg
+    //   .selectAll("rect")
+    //   .data(data)
+    //   .join("rect")
+    //   .attr("x", (d) => xScale(d.x) - CONFIG.CELL_SIZE / 2)
+    //   .attr("y", (d) => yScale(d.y) - CONFIG.CELL_SIZE / 2)
+    //   .attr("width", rectSize)
+    //   .attr("height", rectSize)
+    //   .attr("fill", (d) => colorScale(d.conf))
+    //   .on("mouseover", (event, d: any) => {
+    //     event.stopPropagation();
 
-    if (!svgRef.current) return;
+    //     d3.select(event.target).attr("stroke", "black").attr("stroke-width", 1);
 
-    d3.select(svgRef.current)
-      .selectAll(".y-axis .tick text")
-      .style("font-weight", (t: any) => {
-        return t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT;
-      });
+    //     const rect = event.target.getBoundingClientRect();
+    //     const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
+
+    //     const rightSpace = window.innerWidth - rect.right;
+    //     const leftSpace = rect.left;
+
+    //     let xPos =
+    //       rightSpace >= tooltipWidth + 20
+    //         ? (rect.right + 10) / zoom
+    //         : (leftSpace - tooltipWidth - 10) / zoom;
+
+    //     let yPos = (rect.top + rect.height / 2) / zoom;
+
+    //     setTooltip({
+    //       display: true,
+    //       x: xPos,
+    //       y: yPos,
+    //       content: {
+    //         groundTruth: d.y,
+    //         prediction: d.x,
+    //         label: d.label,
+    //         conf: d.conf,
+    //       },
+    //     });
+
+    //     svg
+    //       .selectAll(".x-axis .tick text")
+    //       .style("font-weight", (t: any) =>
+    //         t === d.x ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
+    //       );
+
+    //     onHover(d.y);
+    //   })
+    //   .on("mouseout", (event) => {
+    //     d3.select(event.target).attr("stroke", null);
+    //     handleMouseOut(event);
+    //   });
   }, [
     datasetMode,
     experiment,
     forgetClass,
     handleMouseOut,
-    hoveredY,
     onHover,
     showYAxis,
     zoom,
   ]);
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+    d3.select(svgRef.current)
+      .selectAll(".y-axis .tick text")
+      .style("font-weight", (t: any) =>
+        t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
+      );
+  }, [hoveredY]);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -383,3 +439,5 @@ export default function BubbleChart({
     </div>
   );
 }
+
+export default React.memo(BubbleChart);
