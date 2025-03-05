@@ -20,25 +20,25 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const evenIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 !== 0);
 
   return (
-    <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
-      <div className="flex flex-col">
+    <div className="w-full flex px-3.5 pb-[18px] text-sm z-10 relative top-3">
+      <div className="flex flex-col mr-6">
         <p className="text-lg font-medium mb-1">True Class</p>
         <ul className="flex flex-col gap-1">
           <li className="flex items-center text-nowrap">
             <CircleIcon className="w-2 h-2 mr-1.5 relative left-[1px]" />
-            <span>Retain Class</span>
+            <span>Retain</span>
           </li>
           <li className="flex items-center">
             <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1" />
-            <span>Forget Class</span>
+            <span>Forget</span>
           </li>
         </ul>
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col mr-10">
         <p className="text-lg font-medium mb-1">Predicted Class</p>
         <div
-          style={{ gridTemplateColumns: "105px 70px 70px 70px 45px" }}
+          style={{ gridTemplateColumns: "109px 76px 75px 75px 46px" }}
           className="grid gap-y-1"
         >
           {oddIndices.map((name, idx) => {
