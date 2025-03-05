@@ -19,7 +19,7 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
-  const [viewMode, setViewMode] = useState("All");
+  const [highlight, setHighlight] = useState("All");
 
   const hoveredInstanceRef = useRef<HoverInstance>(null);
   const positionRef = useRef<Position>({ from: null, to: null });
@@ -93,14 +93,14 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
   return (
     <div className="h-[764px] flex flex-col border rounded-md px-1.5 relative">
       <ConnectionLineWrapper positionRef={positionRef} />
-      <EmbeddingsLegend viewMode={viewMode} setViewMode={setViewMode} />
+      <EmbeddingsLegend highlight={highlight} setHighlight={setHighlight} />
       <div className="flex items-center">
         {modelAExperiment && (
           <ScatterPlot
             mode="A"
             modelType={modelAExperiment.Type}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
+            highlight={highlight}
+            setHighlight={setHighlight}
             data={modelAPoints}
             onHover={handleHover}
             hoveredInstance={hoveredInstanceRef.current}
@@ -115,8 +115,8 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
           <ScatterPlot
             mode="B"
             modelType={modelBExperiment.Type}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
+            highlight={highlight}
+            setHighlight={setHighlight}
             data={modelBPoints}
             onHover={handleHover}
             hoveredInstance={hoveredInstanceRef.current}
