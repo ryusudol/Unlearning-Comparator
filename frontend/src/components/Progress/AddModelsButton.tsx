@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import UnlearningConfiguration from "../Experiments/UnlearningConfiguration";
+import UnlearningConfiguration from "./UnlearningConfiguration";
 import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
@@ -26,7 +26,7 @@ export default function AddExperimentsButton() {
       <DialogTrigger disabled={isRunning}>
         <Button
           onClick={() => setOpen(true)}
-          className={`w-[255px] ${
+          className={`w-[255px] mb-1 ${
             isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
           }`}
         >
@@ -34,8 +34,10 @@ export default function AddExperimentsButton() {
             color={isRunning ? "#d1d5db" : "white"}
             className="w-3 h-3 mr-1.5"
           />
-          <span className={`text-base ${isRunning && "text-gray-300"}`}>
-            Unlearn and Add Model(s)
+          <span
+            className={`text-base font-medium ${isRunning && "text-gray-300"}`}
+          >
+            Open Model Builder
           </span>
         </Button>
       </DialogTrigger>
