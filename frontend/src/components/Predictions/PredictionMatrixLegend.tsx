@@ -101,7 +101,7 @@ function RightArrowIcon() {
 function LeftArrowIcon() {
   return (
     <svg
-      className="absolute right-8 bottom-5"
+      className="absolute right-10 bottom-5"
       width="47"
       height="15"
       viewBox="0 0 47 15"

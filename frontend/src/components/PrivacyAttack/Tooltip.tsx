@@ -345,7 +345,7 @@ export default React.memo(function Tooltip({
       .style("font-family", CONFIG.ROBOTO_CONDENSED)
       .text((d: any) => {
         const classIndex = CIFAR_10_CLASSES.indexOf(d);
-        return classIndex === forgetClass ? `${d} (X)` : d;
+        return classIndex === forgetClass ? `${d} (\u2716)` : d;
       });
   }, [
     barChartData.modelData,

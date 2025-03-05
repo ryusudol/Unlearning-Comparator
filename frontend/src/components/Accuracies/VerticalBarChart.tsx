@@ -130,7 +130,7 @@ export default function VerticalBarChart({
                   value as keyof typeof VERTICAL_BAR_CHART_CONFIG
                 ]?.label;
               const isForgetClass = label === forgettingCIFAR10Class;
-              return isForgetClass ? `${label}\u00A0(X)` : label;
+              return isForgetClass ? `${label} (\u2716)` : label;
             }}
             style={{ whiteSpace: "nowrap" }}
           />
@@ -267,7 +267,7 @@ const AxisTick = memo(
         payload.value as keyof typeof VERTICAL_BAR_CHART_CONFIG
       ]?.label;
     const isForgetClass = label === CIFAR_10_CLASSES[forgetClass];
-    const formattedLabel = isForgetClass ? `${label}\u00A0(X)` : label;
+    const formattedLabel = isForgetClass ? `${label}\u00A0(\u2716)` : label;
 
     return (
       <text

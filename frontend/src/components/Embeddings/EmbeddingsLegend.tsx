@@ -50,7 +50,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                   className="w-3 h-4 mr-[5px]"
                 />
                 <span>
-                  {forgetClass === originalIdx ? name + " (X)" : name}
+                  {forgetClass === originalIdx ? name + " (\u2716)" : name}
                 </span>
               </li>
             );
@@ -64,7 +64,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                   className="w-3 h-4 mr-[5px]"
                 />
                 <span>
-                  {forgetClass === originalIdx ? name + " (X)" : name}
+                  {forgetClass === originalIdx ? name + " (\u2716)" : name}
                 </span>
               </li>
             );

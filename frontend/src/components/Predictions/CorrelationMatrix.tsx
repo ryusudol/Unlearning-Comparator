@@ -119,7 +119,7 @@ function BubbleChart({
       .tickSize(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
           : CIFAR_10_CLASSES[d as number]
       );
 
@@ -130,7 +130,7 @@ function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
           : CIFAR_10_CLASSES[d as number]
       );
 
