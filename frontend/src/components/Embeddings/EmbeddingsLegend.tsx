@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
 import { Separator } from "../UI/separator";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
@@ -84,14 +86,25 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
         >
           <TabsList>
             {VIEW_MODES.map((mode, idx) => (
-              <TabsTrigger
-                key={idx}
-                value={mode.label}
-                style={{ width: mode.length }}
-                className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
-              >
-                {mode.label}
-              </TabsTrigger>
+              <React.Fragment key={idx}>
+                <TabsTrigger
+                  value={mode.label}
+                  style={{ width: mode.length }}
+                  className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+                >
+                  {mode.label}
+                </TabsTrigger>
+                {idx < VIEW_MODES.length - 1 &&
+                  !(
+                    mode.label === highlight ||
+                    VIEW_MODES[idx + 1].label === highlight
+                  ) && (
+                    <Separator
+                      orientation="vertical"
+                      className="h-5 bg-[#aeaeae]"
+                    />
+                  )}
+              </React.Fragment>
             ))}
           </TabsList>
           {VIEW_MODES.map((mode, idx) => (
