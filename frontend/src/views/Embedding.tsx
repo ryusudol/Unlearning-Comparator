@@ -91,7 +91,7 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
   );
 
   return (
-    <div className="h-[764px] flex flex-col border rounded-md px-1.5 relative">
+    <div className="h-[758px] flex flex-col border rounded-md px-1.5 relative">
       <ConnectionLineWrapper positionRef={positionRef} />
       <EmbeddingsLegend highlight={highlight} setHighlight={setHighlight} />
       <div className="flex items-center">
