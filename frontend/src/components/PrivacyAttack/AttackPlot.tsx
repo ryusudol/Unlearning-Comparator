@@ -615,7 +615,7 @@ export default function AttackPlot({
       const upText = threshGroupB
         .append("text")
         .attr("class", "threshold-label-up")
-        .attr("x", -188)
+        .attr("x", -198)
         .attr("y", -4.5)
         .attr("text-anchor", "start")
         .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
@@ -640,7 +640,7 @@ export default function AttackPlot({
       const downText = threshGroupB
         .append("text")
         .attr("class", "threshold-label-down")
-        .attr("x", -188)
+        .attr("x", -198)
         .attr("y", 12)
         .attr("text-anchor", "start")
         .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
@@ -1184,7 +1184,7 @@ export default function AttackPlot({
     const newUpText = newThreshGroupB
       .append("text")
       .attr("class", "threshold-label-up")
-      .attr("x", -188)
+      .attr("x", -198)
       .attr("y", -4.5)
       .attr("text-anchor", "start")
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
@@ -1209,7 +1209,7 @@ export default function AttackPlot({
     const newDownText = newThreshGroupB
       .append("text")
       .attr("class", "threshold-label-down")
-      .attr("x", -188)
+      .attr("x", -198)
       .attr("y", 12)
       .attr("text-anchor", "start")
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12);
