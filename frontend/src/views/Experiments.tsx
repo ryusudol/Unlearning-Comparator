@@ -5,7 +5,6 @@ import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
 import DualMetricsLegend from "../components/Experiments/DualMetricsLegend";
-import AddModelsButton from "../components/Experiments/AddModelsButton";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
 import { CONFIG } from "../app/App";
@@ -42,12 +41,7 @@ export default function Experiments() {
             )}
           </div>
         </div>
-        {forgetClassExist && (
-          <div className="flex items-center relative bottom-0.5">
-            <DualMetricsLegend />
-            <AddModelsButton />
-          </div>
-        )}
+        {forgetClassExist && <DualMetricsLegend />}
       </div>
       {forgetClassExist ? (
         <DataTable isExpanded={isExpanded} />

@@ -2,9 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
-import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
-import Timer from "../components/Progress/Timer";
+import AddModelsButton from "../components/Progress/AddModelsButton";
 import Pagination from "../components/Progress/Pagination";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { CONFIG } from "../app/App";
@@ -105,28 +104,7 @@ export default function Progress() {
       height={CONFIG.EXPERIMENTS_PROGRESS_HEIGHT}
       borderBottom
     >
-      <div className="flex justify-between">
-        <Subtitle
-          title="Progress"
-          AdditionalContent={
-            (forgetClassExist &&
-              (isRunning ||
-                (currentStatus &&
-                  currentStatus.completed_steps.length > 0)) && (
-                <div className="flex items-center gap-1.5 ml-1.5">
-                  <Timer />
-                </div>
-              )) ||
-            undefined
-          }
-        />
-        {totalExperimentsCount > 0 && statuses[forgetClass].length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            onClick={handlePaginationClick}
-          />
-        )}
-      </div>
+      <AddModelsButton />
       {forgetClassExist ? (
         <Stepper
           steps={steps}
@@ -140,6 +118,9 @@ export default function Progress() {
         />
       ) : (
         <Indicator about="ForgetClass" />
+      )}
+      {totalExperimentsCount > 0 && statuses[forgetClass].length > 0 && (
+        <Pagination currentPage={currentPage} onClick={handlePaginationClick} />
       )}
     </View>
   );
