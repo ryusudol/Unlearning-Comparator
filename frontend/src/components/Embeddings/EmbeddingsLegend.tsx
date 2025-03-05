@@ -17,15 +17,6 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const oddIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 === 0);
   const evenIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 !== 0);
 
-  const handleHighlightBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const mode = e.currentTarget.innerHTML;
-    if (mode !== highlight) {
-      setHighlight(mode);
-    } else {
-      setHighlight("All");
-    }
-  };
-
   return (
     <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
       <div className="flex flex-col">
@@ -86,12 +77,15 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
             Choose a category to emphasize:
           </p>
         </div>
-        <Tabs defaultValue={highlight} className="relative top-0.5">
+        <Tabs
+          value={highlight}
+          onValueChange={setHighlight}
+          className="relative top-0.5"
+        >
           <TabsList>
             {VIEW_MODES.map((mode, idx) => (
               <TabsTrigger
                 key={idx}
-                onClick={handleHighlightBtnClick}
                 value={mode.label}
                 style={{ width: mode.length }}
                 className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
