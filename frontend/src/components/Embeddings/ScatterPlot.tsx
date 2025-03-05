@@ -61,8 +61,8 @@ const CONFIG = {
 interface Props {
   mode: "A" | "B";
   modelType: string;
-  viewMode: string;
-  setViewMode: (viewMode: string) => void;
+  highlight: string;
+  setHighlight: (highlight: string) => void;
   data: SelectedData;
   onHover: (
     imgIdxOrNull: number | null,
@@ -77,8 +77,8 @@ const ScatterPlot = forwardRef(
     {
       mode,
       modelType,
-      viewMode,
-      setViewMode,
+      highlight,
+      setHighlight,
       data,
       onHover,
       hoveredInstance,
@@ -413,19 +413,21 @@ const ScatterPlot = forwardRef(
         const isForgettingData = d[0] === forgetClass;
         const isRemainData = !isForgettingData;
 
-        if (viewMode === VIEW_MODES[0].label /* Target to Forget */) {
+        if (highlight === VIEW_MODES[1].label /* Target to Forget */) {
           return isRemainData;
-        } else if (viewMode === VIEW_MODES[1].label /* Correctly Forgotten */) {
+        } else if (
+          highlight === VIEW_MODES[2].label /* Correctly Forgotten */
+        ) {
           return isRemainData || (isForgettingData && d[0] === d[1]);
-        } else if (viewMode === VIEW_MODES[2].label /* Not Forgotten */) {
+        } else if (highlight === VIEW_MODES[3].label /* Not Forgotten */) {
           const isForgettingSuccess = isForgettingData && d[1] !== forgetClass;
           return isRemainData || isForgettingSuccess;
-        } else if (viewMode === VIEW_MODES[3].label /* Overly Forgotten */) {
+        } else if (highlight === VIEW_MODES[4].label /* Overly Forgotten */) {
           const isMisclassified = isRemainData && d[0] !== d[1];
           return !isMisclassified;
         }
       },
-      [forgetClass, viewMode]
+      [forgetClass, highlight]
     );
 
     const handleMouseLeave = useCallback(
@@ -444,7 +446,7 @@ const ScatterPlot = forwardRef(
               "opacity",
               shouldLowerOpacity(d)
                 ? CONFIG.LOWERED_OPACITY
-                : viewMode === VIEW_MODES[3].label
+                : highlight === VIEW_MODES[3].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
@@ -462,7 +464,7 @@ const ScatterPlot = forwardRef(
             );
         }
       },
-      [mode, onHover, shouldLowerOpacity, viewMode, z]
+      [mode, onHover, shouldLowerOpacity, highlight, z]
     );
 
     const transformedData = useMemo(() => {
@@ -522,7 +524,7 @@ const ScatterPlot = forwardRef(
         .style("opacity", (d) =>
           shouldLowerOpacity(d)
             ? CONFIG.LOWERED_OPACITY
-            : viewMode === VIEW_MODES[3].label
+            : highlight === VIEW_MODES[3].label
             ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
             : CONFIG.DEFAULT_CIRCLE_OPACITY
         )
@@ -581,7 +583,7 @@ const ScatterPlot = forwardRef(
       shouldLowerOpacity,
       transformedData.forgetData,
       transformedData.remainData,
-      viewMode,
+      highlight,
       x,
       y,
       z,
@@ -674,7 +676,7 @@ const ScatterPlot = forwardRef(
             shouldLowerOpacity(d)
               ? CONFIG.LOWERED_OPACITY
               : isCircle
-              ? viewMode === VIEW_MODES[3].label
+              ? highlight === VIEW_MODES[3].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
               : CONFIG.DEFAULT_CROSS_OPACITY
@@ -701,7 +703,7 @@ const ScatterPlot = forwardRef(
       if (svgElements.current.crosses) {
         updateOpacity(svgElements.current.crosses);
       }
-    }, [shouldLowerOpacity, viewMode, x, y]);
+    }, [shouldLowerOpacity, highlight, x, y]);
 
     useEffect(() => {
       if (!hoveredInstance) return;
@@ -746,8 +748,8 @@ const ScatterPlot = forwardRef(
     }, [hoveredInstance, mode, z]);
 
     useEffect(() => {
-      setViewMode("All");
-    }, [setViewMode, data]);
+      setHighlight("All");
+    }, [setHighlight, data]);
 
     useImperativeHandle(ref, () => ({
       reset: resetZoom,

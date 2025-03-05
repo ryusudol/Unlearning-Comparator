@@ -1,4 +1,4 @@
-import Button from "../CustomButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
 import { Separator } from "../UI/separator";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { CIFAR_10_CLASSES } from "../../constants/common";
@@ -7,11 +7,11 @@ import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { VIEW_MODES } from "../../constants/embeddings";
 
 interface Props {
-  viewMode: string;
-  setViewMode: (mode: string) => void;
+  highlight: string;
+  setHighlight: (mode: string) => void;
 }
 
-export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
+export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
   const oddIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 === 0);
@@ -19,16 +19,16 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
 
   const handleHighlightBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const mode = e.currentTarget.innerHTML;
-    if (mode !== viewMode) {
-      setViewMode(mode);
+    if (mode !== highlight) {
+      setHighlight(mode);
     } else {
-      setViewMode("All");
+      setHighlight("All");
     }
   };
 
   return (
-    <div className="w-full flex px-3.5 pb-[18px] text-sm z-10 relative top-3">
-      <div className="flex flex-col mr-[39px]">
+    <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
+      <div className="flex flex-col">
         <p className="text-lg font-medium mb-1">True Class</p>
         <ul className="flex flex-col gap-1">
           <li className="flex items-center text-nowrap">
@@ -41,10 +41,11 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           </li>
         </ul>
       </div>
-      <div className="flex flex-col mr-3">
+
+      <div className="flex flex-col">
         <p className="text-lg font-medium mb-1">Predicted Class</p>
         <div
-          style={{ gridTemplateColumns: "105px 70px 70px 70px 75px" }}
+          style={{ gridTemplateColumns: "105px 70px 70px 70px 45px" }}
           className="grid gap-y-1"
         >
           {oddIndices.map((name, idx) => {
@@ -77,36 +78,38 @@ export default function EmbeddingsLegend({ viewMode, setViewMode }: Props) {
           })}
         </div>
       </div>
+
       <div className="flex">
-        <div className="ml-2 mr-3">
+        <div className="mr-4">
           <p className="text-lg font-medium mb-[5px]">Highlight</p>
-          <p className="w-[100px] text-[13px] font-light">
+          <p className="w-[102px] text-sm font-light">
             Choose a category to emphasize:
           </p>
         </div>
-        <div className="flex gap-[15px]">
-          {VIEW_MODES.map((mode, idx) => (
-            <div key={idx}>
-              <Button
+        <Tabs defaultValue={highlight}>
+          <TabsList>
+            {VIEW_MODES.map((mode, idx) => (
+              <TabsTrigger
+                key={idx}
                 onClick={handleHighlightBtnClick}
-                className={`mb-1 ${
-                  viewMode === mode.label
-                    ? "bg-gray-100 hover:bg-gray-100 text-red-500"
-                    : ""
-                }`}
+                value={mode.label}
                 style={{ width: mode.length }}
+                className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
               >
                 {mode.label}
-              </Button>
-              <p
-                style={{ width: mode.length }}
-                className="text-[13px] font-light"
-              >
-                {mode.explanation}
-              </p>
-            </div>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {VIEW_MODES.map((mode, idx) => (
+            <TabsContent
+              key={idx}
+              value={mode.label}
+              className="text-sm font-light"
+            >
+              {mode.explanation}
+            </TabsContent>
           ))}
-        </div>
+        </Tabs>
       </div>
       <Separator
         orientation="horizontal"
