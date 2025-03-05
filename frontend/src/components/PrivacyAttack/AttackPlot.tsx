@@ -1134,7 +1134,9 @@ export default function AttackPlot({
             .attr("text-anchor", textAnchor)
             .attr("font-size", "11px")
             .attr("fill", CONFIG.BLACK)
-            .text(`${metric}: ${d.value}`);
+            .text(
+              `${metric.charAt(0).toUpperCase() + metric.slice(1)}: ${d.value}`
+            );
         });
     }
 
