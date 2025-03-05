@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import Subtitle from "../components/Subtitle";
 import DatasetModeSelector from "../components/DatasetModeSelector";
@@ -27,6 +27,8 @@ export default function PredictionMatrix() {
   const areAllModelsSelected = modelA !== "" && modelB !== "";
   const forgetClassExist = forgetClass !== -1;
 
+  const handleHover = useCallback((y: number | null) => setHoveredY(y), []);
+
   return (
     <div className="h-[341px]">
       <div className="flex justify-between">
@@ -51,8 +53,7 @@ export default function PredictionMatrix() {
                   modelType={modelAExperiment.Type}
                   datasetMode={selectedDataset}
                   hoveredY={hoveredY}
-                  onHover={(y) => setHoveredY(y)}
-                  onHoverEnd={() => setHoveredY(null)}
+                  onHover={handleHover}
                 />
               )}
               {modelBExperiment && (
@@ -62,8 +63,7 @@ export default function PredictionMatrix() {
                   datasetMode={selectedDataset}
                   showYAxis={false}
                   hoveredY={hoveredY}
-                  onHover={(y) => setHoveredY(y)}
-                  onHoverEnd={() => setHoveredY(null)}
+                  onHover={handleHover}
                 />
               )}
             </div>

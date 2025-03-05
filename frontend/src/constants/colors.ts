@@ -31,5 +31,5 @@ export const COLORS = {
 } as const;
 
 export const bubbleColorScale = Array.from({ length: 256 }, (_, i) => {
-  return d3.interpolateTurbo(i / 255);
+  return d3.interpolateReds(i / 255);
 });
