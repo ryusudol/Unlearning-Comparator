@@ -86,7 +86,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
             Choose a category to emphasize:
           </p>
         </div>
-        <Tabs defaultValue={highlight}>
+        <Tabs defaultValue={highlight} className="relative top-0.5">
           <TabsList>
             {VIEW_MODES.map((mode, idx) => (
               <TabsTrigger
