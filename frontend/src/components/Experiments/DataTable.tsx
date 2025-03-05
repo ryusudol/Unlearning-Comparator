@@ -117,11 +117,11 @@ export default function DataTable({ isExpanded }: Props) {
     <div className="w-full overflow-visible">
       <TableHeader table={table} />
       {isExpanded ? (
-        <div className="w-[1008px] absolute top-[79px] z-[49] bg-white shadow-xl rounded-b-md">
+        <div className="w-[1008px] absolute top-[79px] z-[49] bg-white shadow-xl">
           <TableBody table={table} />
         </div>
       ) : (
-        <ScrollArea className="w-full h-[166px]">
+        <ScrollArea className="w-full h-[166px] border-b">
           <TableBody table={table} />
         </ScrollArea>
       )}
