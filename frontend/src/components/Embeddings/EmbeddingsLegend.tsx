@@ -101,7 +101,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                   ) && (
                     <Separator
                       orientation="vertical"
-                      className="h-5 bg-[#aeaeae]"
+                      className="w-[1.5px] h-5 bg-[#d2d5d9]"
                     />
                   )}
               </React.Fragment>

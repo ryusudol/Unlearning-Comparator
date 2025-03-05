@@ -159,7 +159,10 @@ function BubbleChart({
           g.select(".domain").remove();
           g.selectAll(".tick text")
             .attr("dx", "-.5em")
-            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED);
+            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
+            .style("font-weight", (t: any) =>
+              t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
+            );
         });
     } else {
       svg
@@ -267,6 +270,7 @@ function BubbleChart({
     experiment,
     forgetClass,
     handleMouseOut,
+    hoveredY,
     onHover,
     showYAxis,
     zoom,
