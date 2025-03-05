@@ -5,9 +5,9 @@ import { Separator } from "../components/UI/separator";
 export default function ModelScreening() {
   return (
     <div className="flex items-center">
-      <Experiments />
-      <Separator orientation="vertical" className="h-[236px] w-[1px]" />
       <Progress />
+      <Separator orientation="vertical" className="h-[236px] w-[1px]" />
+      <Experiments />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { MoveRight } from "lucide-react";
 
 import Button from "../CustomButton";
 import {
@@ -23,18 +24,18 @@ interface AttackLegendProps {
   metric: Metric;
   direction: string;
   strategy: string;
-  onMetricChange: (val: Metric) => void;
-  onDirectionChange: (val: string) => void;
-  onThresholdStrategyChange: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onUpdateMetric: (val: Metric) => void;
+  onUpdateDirection: (val: string) => void;
+  onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function AttackLegend({
   metric,
   direction,
   strategy,
-  onMetricChange,
-  onDirectionChange,
-  onThresholdStrategyChange,
+  onUpdateMetric,
+  onUpdateDirection,
+  onUpdateStrategy,
 }: AttackLegendProps) {
   const isEntropyChecked = metric === ENTROPY;
   const isUnlearnChecked = direction === UNLEARN;
@@ -48,14 +49,14 @@ export default function AttackLegend({
               style={{ backgroundColor: COLORS.EMERALD }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
               onClick={() =>
-                onThresholdStrategyChange({
+                onUpdateStrategy({
                   currentTarget: { innerHTML: "BEST_ATTACK_A" },
                 } as React.MouseEvent<HTMLButtonElement>)
               }
             >
               Model A
               <br />
-              Best Attack
+              Worst Case
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-3 py-2" side="top">
@@ -72,14 +73,14 @@ export default function AttackLegend({
               style={{ backgroundColor: COLORS.PURPLE }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
               onClick={() =>
-                onThresholdStrategyChange({
+                onUpdateStrategy({
                   currentTarget: { innerHTML: "BEST_ATTACK_B" },
                 } as React.MouseEvent<HTMLButtonElement>)
               }
             >
               Model B
               <br />
-              Best Attack
+              Worst Case
             </Button>
           </HoverCardTrigger>
           <HoverCardContent className="w-auto px-3 py-2" side="top">
@@ -97,7 +98,7 @@ export default function AttackLegend({
         <RadioGroup
           className="flex flex-col gap-1"
           value={metric}
-          onValueChange={onMetricChange}
+          onValueChange={onUpdateMetric}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
@@ -131,7 +132,7 @@ export default function AttackLegend({
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
           value={direction}
-          onValueChange={onDirectionChange}
+          onValueChange={onUpdateDirection}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
@@ -141,8 +142,13 @@ export default function AttackLegend({
               color="#4d4d4d"
               checked={isUnlearnChecked}
             />
-            <Label className="text-sm text-[#4d4d4d]" htmlFor={UNLEARN}>
-              {"Above -> Model A/B"}
+            <Label
+              className="flex items-center text-sm text-[#4d4d4d]"
+              htmlFor={UNLEARN}
+            >
+              <span>Above</span>
+              <MoveRight className="w-2.5 h-2.5 mx-1" />
+              <span>Model A/B</span>
             </Label>
           </div>
           <div className="flex items-center space-x-[5px]">
@@ -153,8 +159,13 @@ export default function AttackLegend({
               color="#4d4d4d"
               checked={!isUnlearnChecked}
             />
-            <Label className="text-sm text-[#4d4d4d]" htmlFor={RETRAIN}>
-              {"Above -> Retrained"}
+            <Label
+              className="flex items-center text-sm text-[#4d4d4d]"
+              htmlFor={RETRAIN}
+            >
+              <span>Above</span>
+              <MoveRight className="w-2.5 h-2.5 mx-1" />
+              <span>Retrained</span>
             </Label>
           </div>
         </RadioGroup>
@@ -171,7 +182,7 @@ export default function AttackLegend({
           {THRESHOLD_STRATEGIES.map((s, idx) => (
             <div key={idx} className="flex flex-col">
               <Button
-                onClick={onThresholdStrategyChange}
+                onClick={onUpdateStrategy}
                 style={{ width: s.length }}
                 className={`mb-1 ${
                   (strategy === s.strategy ||

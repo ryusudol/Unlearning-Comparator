@@ -9,7 +9,7 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { COLORS } from "../../constants/colors";
+import { COLORS, TABLEAU10 } from "../../constants/colors";
 import { FONT_CONFIG } from "../../constants/common";
 import { AttackResult } from "../../types/data";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
@@ -46,8 +46,8 @@ const CONFIG = {
   HEIGHT: 396,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 54 },
-  LINE_MARGIN: { top: 6, right: 3, bottom: 28, left: 10 },
+  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 36 },
+  LINE_MARGIN: { top: 6, right: 6, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.5,
 } as const;
 
@@ -572,10 +572,11 @@ export default function AttackPlot({
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
-        .style("cursor", isStrategyCustom ? "ns-resize" : "default")
-        .call(
+        .style("cursor", isStrategyCustom ? "ns-resize" : "default");
+
+      if (isStrategyCustom) {
+        threshGroupB.call(
           d3.drag<SVGGElement, unknown>().on("drag", (event) => {
-            if (!isStrategyCustom) return;
             const [, newY] = d3.pointer(event, gB.node());
             const newThresholdRaw = yScaleB.invert(newY);
             const newThresholdRounded =
@@ -588,6 +589,8 @@ export default function AttackPlot({
             }
           }) as any
         );
+      }
+
       threshGroupB
         .append("rect")
         .attr("x", -halfWB)
@@ -727,7 +730,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-attack-above")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.RED)
+        .attr("stroke", TABLEAU10[2]) // red
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", attackLine)
@@ -737,7 +740,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-attack-below")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.RED)
+        .attr("stroke", TABLEAU10[2]) // red
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", attackLine)
@@ -754,7 +757,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fpr-above")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.BLUE)
+        .attr("stroke", TABLEAU10[0]) // blue
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", fprLine)
@@ -763,7 +766,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fpr-below")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.BLUE)
+        .attr("stroke", TABLEAU10[0]) // blue
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", fprLine)
@@ -779,7 +782,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fnr-above")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.GREEN)
+        .attr("stroke", TABLEAU10[4]) // green
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", upperOpacity)
         .attr("d", fnrLine)
@@ -788,7 +791,7 @@ export default function AttackPlot({
         .datum(attackData)
         .attr("class", "line-fnr-below")
         .attr("fill", "none")
-        .attr("stroke", CONFIG.GREEN)
+        .attr("stroke", TABLEAU10[4]) // green
         .attr("stroke-width", CONFIG.LINE_WIDTH)
         .attr("stroke-opacity", lowerOpacity)
         .attr("d", fnrLine)
@@ -840,13 +843,14 @@ export default function AttackPlot({
         .append("g")
         .attr("class", "threshold-group")
         .attr("transform", `translate(0, ${yScaleL(thresholdValue)})`)
-        .style("cursor", isStrategyCustom ? "ns-resize" : "default")
-        .call(
+        .style("cursor", isStrategyCustom ? "ns-resize" : "default");
+
+      if (isStrategyCustom) {
+        threshGroupL.call(
           d3
             .drag<SVGGElement, any>()
             .subject(() => ({ y: yScaleL(thresholdValue) }))
             .on("drag", function (event) {
-              if (!isStrategyCustom) return;
               const [, newY] = d3.pointer(event, gL.node());
               const newThresholdRaw = yScaleL.invert(newY);
               const newThresholdRounded =
@@ -859,6 +863,8 @@ export default function AttackPlot({
               }
             })
         );
+      }
+
       threshGroupL
         .append("rect")
         .attr("x", -3)
@@ -1135,10 +1141,11 @@ export default function AttackPlot({
       .append("g")
       .attr("class", "threshold-group")
       .attr("transform", `translate(0, ${yScaleB(thresholdValue)})`)
-      .style("cursor", isStrategyCustom ? "ns-resize" : "default")
-      .call(
+      .style("cursor", isStrategyCustom ? "ns-resize" : "default");
+
+    if (isStrategyCustom) {
+      newThreshGroupB.call(
         d3.drag<SVGGElement, unknown>().on("drag", (event) => {
-          if (!isStrategyCustom) return;
           const [, newY] = d3.pointer(event, gB.node());
           const newThresholdRaw = yScaleB.invert(newY);
           const newThresholdRounded =
@@ -1151,6 +1158,8 @@ export default function AttackPlot({
           }
         })
       );
+    }
+
     newThreshGroupB
       .append("rect")
       .attr("x", -halfWB)
@@ -1458,7 +1467,7 @@ export default function AttackPlot({
 
   useEffect(() => {
     chartInitialized.current = false;
-  }, [metric, direction, modelA, modelB]);
+  }, [metric, direction, modelA, modelB, strategy]);
 
   useEffect(() => {
     const strokeOpacity = isAboveThresholdUnlearn

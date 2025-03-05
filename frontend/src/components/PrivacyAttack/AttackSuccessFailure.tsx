@@ -9,12 +9,13 @@ import { Bin, Data, CategoryType, Image } from "../../types/attack";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 
 const CONFIG = {
+  IMG_COLLECTIONS_WIDTH: 262,
   RETRAIN: "retrain",
   UNLEARN: "unlearn",
   HIGH_OPACITY: 1,
   LOW_OPACITY: 0.3,
   TOTAL_DATA_COUNT: 400,
-  IMG_SIZES: [12, 16, 20, 24, 28],
+  IMG_SIZES: [12, 16, 20, 24, 28, 42],
 } as const;
 
 interface AttackSuccessFailureProps {
@@ -123,7 +124,7 @@ export default function AttackSuccessFailure({
 
   const getGridColumns = (imgSize: number) => {
     const size = CONFIG.IMG_SIZES[imgSize];
-    const columns = Math.floor(261 / (size + 1));
+    const columns = Math.floor((CONFIG.IMG_COLLECTIONS_WIDTH + 1) / (size + 1));
     return columns;
   };
 
@@ -320,7 +321,7 @@ export default function AttackSuccessFailure({
                 className="w-20 h-1"
                 defaultValue={[0]}
                 min={0}
-                max={4}
+                max={CONFIG.IMG_SIZES.length - 1}
                 step={1}
                 onValueChange={(value) =>
                   handleImgSizeControl(value, "success")
@@ -331,7 +332,10 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-[150px]">
+          <ScrollArea
+            style={{ width: CONFIG.IMG_COLLECTIONS_WIDTH }}
+            className="h-[150px]"
+          >
             <div
               className="grid gap-[1px]"
               style={{
@@ -359,7 +363,7 @@ export default function AttackSuccessFailure({
                 className="w-20 h-1"
                 defaultValue={[0]}
                 min={0}
-                max={4}
+                max={CONFIG.IMG_SIZES.length - 1}
                 step={1}
                 onValueChange={(value) =>
                   handleImgSizeControl(value, "failure")
@@ -370,7 +374,10 @@ export default function AttackSuccessFailure({
               </span>
             </div>
           </div>
-          <ScrollArea className="w-[260px] h-[150px]">
+          <ScrollArea
+            style={{ width: CONFIG.IMG_COLLECTIONS_WIDTH }}
+            className="h-[150px]"
+          >
             <div
               className="grid gap-[1px]"
               style={{

@@ -403,7 +403,7 @@ export default function UnlearningConfiguration() {
             batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
           }`}
         >
-          This configuration will build{" "}
+          These settings will build{" "}
           <span
             className={`font-bold ${
               totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"

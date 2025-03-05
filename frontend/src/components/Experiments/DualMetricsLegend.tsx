@@ -1,6 +1,6 @@
 export default function DualMetricsLegend() {
   return (
-    <div className="w-[408px] flex items-center gap-1 relative bottom-0.5 mr-3">
+    <div className="w-[408px] flex items-center gap-1 relative bottom-0.5 right-[100px]">
       <div className="w-full px-2 ml-1">
         <h3 className="text-xs text-gray-800 font-medium">Accuracy Metrics</h3>
         <div className="relative h-[15px]">

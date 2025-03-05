@@ -9,6 +9,7 @@ import {
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
+import { RETRAIN } from "../../views/PrivacyAttack";
 
 const CONFIG = {
   LOW_OPACITY: 0.6,
@@ -25,7 +26,6 @@ const CONFIG = {
   LEGEND_X: 11,
   LEGEND_Y: 7,
   LEGEND_GAP: 58,
-  LEGEND_FONT_SIZE: "10px",
   LEGEND_RECT_SIZE: 8,
   GRID_LINE_COLOR: "#f0f3f8",
   ROBOTO_CONDENSED: "Roboto Condensed",
@@ -38,10 +38,11 @@ interface Props {
   imageUrl: string;
   data: (number | Prob)[];
   barChartData: {
-    modelA: { class: number; value: number }[];
-    modelB: { class: number; value: number }[];
+    retrainedModelData: { class: number; value: number }[];
+    modelData: { class: number; value: number }[];
   };
   isModelA: boolean;
+  clickedType: string;
 }
 
 export default React.memo(function Tooltip({
@@ -51,23 +52,27 @@ export default React.memo(function Tooltip({
   data,
   barChartData,
   isModelA,
+  clickedType,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
   const svgRef = useRef(null);
 
   const legendRectColor = d3.schemeTableau10[9];
+  const isRetrainedClicked = clickedType === RETRAIN;
 
   const groundTruthIdx = Number(data[0]);
-  const predictionIdx = barChartData.modelA.reduce((maxObj, currentObj) =>
-    currentObj.value > maxObj.value ? currentObj : maxObj
-  ).class;
   const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
-  const retrainedPrediction = CIFAR_10_CLASSES[predictionIdx];
-  const modelIdx = barChartData.modelB.reduce((maxObj, currentObj) =>
-    currentObj.value > maxObj.value ? currentObj : maxObj
+  const retrainedPredictionIdx = barChartData.retrainedModelData.reduce(
+    (maxObj, currentObj) =>
+      currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const modelPrediction = CIFAR_10_CLASSES[modelIdx];
+  const modelPredictionIdx = barChartData.modelData.reduce(
+    (maxObj, currentObj) =>
+      currentObj.value > maxObj.value ? currentObj : maxObj
+  ).class;
+  const retrainedPrediction = CIFAR_10_CLASSES[retrainedPredictionIdx];
+  const modelPrediction = CIFAR_10_CLASSES[modelPredictionIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -100,7 +105,10 @@ export default React.memo(function Tooltip({
       .attr("y2", CONFIG.PATTERN_SIZE)
       .attr("stroke", COLORS.BLACK)
       .attr("stroke-width", STROKE_CONFIG.DEFAULT_STROKE_WIDTH)
-      .attr("opacity", !isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY);
+      .attr(
+        "opacity",
+        isRetrainedClicked ? CONFIG.LOW_OPACITY : CONFIG.HIGH_OPACITY
+      );
 
     const legendPattern = defs
       .append("pattern")
@@ -148,7 +156,7 @@ export default React.memo(function Tooltip({
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
       .text("Retrained")
-      .style("font-size", CONFIG.LEGEND_FONT_SIZE)
+      .style("font-size", FONT_CONFIG.FONT_SIZE_10)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
     const modelLegend = retrainedLegend
@@ -173,7 +181,7 @@ export default React.memo(function Tooltip({
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
       .text(isModelA ? "Model A" : "Model B")
-      .style("font-size", CONFIG.LEGEND_FONT_SIZE)
+      .style("font-size", FONT_CONFIG.FONT_SIZE_10)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
     const xScale = d3
@@ -183,7 +191,9 @@ export default React.memo(function Tooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(barChartData.modelA.map((d) => CIFAR_10_CLASSES[d.class]))
+      .domain(
+        barChartData.retrainedModelData.map((d) => CIFAR_10_CLASSES[d.class])
+      )
       .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
@@ -208,13 +218,13 @@ export default React.memo(function Tooltip({
     const g = svg.append("g");
 
     g.selectAll(".bar-retrained-group")
-      .data(barChartData.modelA)
+      .data(barChartData.retrainedModelData)
       .join("g")
       .attr("class", "bar-retrained-group")
       .each(function (d, i) {
         const g = d3.select(this);
         const baseWidth = xScale(d.value) - CONFIG.MARGIN.left;
-        const barWidth = isModelA
+        const barWidth = isRetrainedClicked
           ? baseWidth - CONFIG.BAR_STROKE_WIDTH
           : baseWidth;
         const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
@@ -226,9 +236,15 @@ export default React.memo(function Tooltip({
           .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr("opacity", isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY)
-          .attr("stroke", isModelA ? COLORS.BLACK : "none")
-          .attr("stroke-width", isModelA ? CONFIG.BAR_STROKE_WIDTH : 0);
+          .attr(
+            "opacity",
+            isRetrainedClicked ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
+          )
+          .attr("stroke", isRetrainedClicked ? COLORS.BLACK : "none")
+          .attr(
+            "stroke-width",
+            isRetrainedClicked ? CONFIG.BAR_STROKE_WIDTH : 0
+          );
 
         g.append("text")
           .attr("x", CONFIG.MARGIN.left + barWidth + 4)
@@ -246,13 +262,13 @@ export default React.memo(function Tooltip({
       });
 
     g.selectAll(".bar-model-group")
-      .data(barChartData.modelB)
+      .data(barChartData.modelData)
       .join("g")
       .attr("class", "bar-model-group")
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
         const baseWidth = xScale(d.value) - CONFIG.MARGIN.left;
-        const barWidth = isModelA
+        const barWidth = !isRetrainedClicked
           ? baseWidth - CONFIG.BAR_STROKE_WIDTH
           : baseWidth;
         const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
@@ -263,9 +279,15 @@ export default React.memo(function Tooltip({
           .attr("height", CONFIG.BAR_HEIGHT)
           .attr("width", barWidth)
           .attr("fill", colors[i])
-          .attr("opacity", !isModelA ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY)
-          .attr("stroke", !isModelA ? COLORS.BLACK : "none")
-          .attr("stroke-width", !isModelA ? CONFIG.BAR_STROKE_WIDTH : 0);
+          .attr(
+            "opacity",
+            !isRetrainedClicked ? CONFIG.HIGH_OPACITY : CONFIG.LOW_OPACITY
+          )
+          .attr("stroke", !isRetrainedClicked ? COLORS.BLACK : "none")
+          .attr(
+            "stroke-width",
+            !isRetrainedClicked ? CONFIG.BAR_STROKE_WIDTH : 0
+          );
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -325,7 +347,14 @@ export default React.memo(function Tooltip({
         const classIndex = CIFAR_10_CLASSES.indexOf(d);
         return classIndex === forgetClass ? `${d} (\u2716)` : d;
       });
-  }, [barChartData, forgetClass, isModelA, legendRectColor]);
+  }, [
+    barChartData.modelData,
+    barChartData.retrainedModelData,
+    forgetClass,
+    isModelA,
+    isRetrainedClicked,
+    legendRectColor,
+  ]);
 
   return (
     <div

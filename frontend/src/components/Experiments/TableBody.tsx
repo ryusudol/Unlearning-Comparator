@@ -72,7 +72,7 @@ export default function _TableBody({ table }: Props) {
             CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
           )
         )
-        .domain([0, maxTRA])
+        .domain([CONFIG.COLOR_MAPPING_THRESHOLD, maxTRA])
         .clamp(true),
     [maxTRA]
   );
@@ -169,10 +169,10 @@ export default function _TableBody({ table }: Props) {
             }
           } else if (columnId === "FQS") {
             backgroundColor = blueScaleFQS(value);
-            textColor = value >= 0.5 ? COLORS.WHITE : COLORS.BLACK;
+            textColor = value >= 0.6 ? COLORS.WHITE : COLORS.BLACK;
           } else if (columnId === "TRA") {
             backgroundColor = traScale(value);
-            textColor = value >= maxTRA * 0.5 ? COLORS.WHITE : COLORS.BLACK;
+            textColor = value >= maxTRA * 0.95 ? COLORS.WHITE : COLORS.BLACK;
           } else {
             if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
               backgroundColor = greenScaleHigher(value);

@@ -11,6 +11,7 @@ export default function ForgettingAndRetention() {
       width={CONFIG.ANALYSIS_VIEW_WIDTH}
       height={CONFIG.TOTAL_HEIGHT}
       borderLeft
+      borderBottom
     >
       <Title title="Forgetting and Retention" className="left-0.5" />
       <div className="flex flex-col gap-[26px]">

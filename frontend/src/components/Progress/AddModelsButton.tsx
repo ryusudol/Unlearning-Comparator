@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 
+import UnlearningConfiguration from "../Experiments/UnlearningConfiguration";
+import Button from "../CustomButton";
+import { PlusIcon } from "../UI/icons";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../UI/dialog";
-import UnlearningConfiguration from "./UnlearningConfiguration";
-import Button from "../CustomButton";
-import { PlusIcon } from "../UI/icons";
-import { useRunningStatusStore } from "../../stores/runningStatusStore";
 
 export default function AddExperimentsButton() {
   const { isRunning } = useRunningStatusStore();
@@ -21,20 +21,12 @@ export default function AddExperimentsButton() {
     if (isRunning) setOpen(false);
   }, [isRunning]);
 
-  const handleOpenChange = (value: boolean) => {
-    setOpen(value);
-  };
-
-  const handleAddExpClick = () => {
-    setOpen(true);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={(val: boolean) => setOpen(val)}>
       <DialogTrigger disabled={isRunning}>
         <Button
-          onClick={handleAddExpClick}
-          className={`px-3.5 relative bottom-0.5 ${
+          onClick={() => setOpen(true)}
+          className={`w-[255px] ${
             isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
           }`}
         >
@@ -43,7 +35,7 @@ export default function AddExperimentsButton() {
             className="w-3 h-3 mr-1.5"
           />
           <span className={`text-base ${isRunning && "text-gray-300"}`}>
-            Add Models
+            Unlearn and Add Model(s)
           </span>
         </Button>
       </DialogTrigger>
