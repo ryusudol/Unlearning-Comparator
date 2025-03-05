@@ -35,7 +35,7 @@ export default function AddExperimentsButton() {
             className="w-3 h-3 mr-1.5"
           />
           <span className={`text-base ${isRunning && "text-gray-300"}`}>
-            Open Model Builder
+            Unlearn and Add Model(s)
           </span>
         </Button>
       </DialogTrigger>
