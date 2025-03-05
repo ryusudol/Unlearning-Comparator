@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-import CustomUnlearning from "./CustomUnlearning";
-import MethodUnlearning from "./MethodUnlearning";
+import CustomUnlearning from "../Experiments/CustomUnlearning";
+import MethodUnlearning from "../Experiments/MethodUnlearning";
 import Button from "../CustomButton";
 import {
   executeMethodUnlearning,
@@ -420,7 +420,7 @@ export default function UnlearningConfiguration() {
       >
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
         <span className="text-base">
-          Run and Add Model{totalExperimentsCount > 1 && "s"}
+          Unlearn and Add Model{totalExperimentsCount > 1 && "s"}
         </span>
       </Button>
     </form>

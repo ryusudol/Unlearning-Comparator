@@ -46,8 +46,8 @@ const CONFIG = {
   HEIGHT: 396,
   LINE_WIDTH: 2,
   STROKE_WIDTH: 0.8,
-  BUTTERFLY_MARGIN: { top: 6, right: 9, bottom: 28, left: 36 },
-  LINE_MARGIN: { top: 6, right: 6, bottom: 28, left: 10 },
+  BUTTERFLY_MARGIN: { top: 16, right: 9, bottom: 28, left: 36 },
+  LINE_MARGIN: { top: 16, right: 6, bottom: 28, left: 10 },
   STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.5,
 } as const;
 
@@ -166,7 +166,10 @@ export default function AttackPlot({
       const createBins = (bins: Bin[]) => {
         const binsMap: Record<string, Bin[]> = {};
         bins.forEach((bin) => {
-          const key = (Math.floor(bin.value / binSize) * binSize).toFixed(2);
+          const clampedValue = isMetricEntropy
+            ? bin.value
+            : Math.min(bin.value, thresholdMax);
+          const key = (Math.floor(clampedValue / binSize) * binSize).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
           binsMap[key].push(bin);
         });
@@ -1499,7 +1502,7 @@ export default function AttackPlot({
           {isModelA ? modelA : modelB})
         </span>
       </div>
-      <div className="flex">
+      <div className="flex relative bottom-[7px]">
         <svg ref={butterflyRef}></svg>
         <svg ref={lineRef} className="relative right-3.5"></svg>
       </div>
