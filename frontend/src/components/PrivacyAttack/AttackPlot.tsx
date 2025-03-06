@@ -48,7 +48,7 @@ const CONFIG = {
   STROKE_WIDTH: 0.8,
   BUTTERFLY_MARGIN: { top: 16, right: 9, bottom: 28, left: 36 },
   LINE_MARGIN: { top: 16, right: 6, bottom: 28, left: 10 },
-  STANDARD_ATTACK_SCORE_FOR_INFO_GROUP: 0.5,
+  ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP: 0.43,
 } as const;
 
 interface Props {
@@ -1028,8 +1028,8 @@ export default function AttackPlot({
           : { x: xScaleL(0), y: yScaleL(thresholdValue) };
 
       const infoGroupXPos =
-        currentData.attack_score >= CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
-          ? xScaleL(CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP)
+        currentData.attack_score >= CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP
+          ? xScaleL(CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP)
           : attackIntersectPos.x;
       const infoGroupYPos = yScaleL(thresholdValue);
 
@@ -1398,9 +1398,9 @@ export default function AttackPlot({
 
       let infoGroupXPos = attackIntersectPos.x;
       if (
-        currentData.attack_score >= CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP
+        currentData.attack_score >= CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP
       ) {
-        infoGroupXPos = xScaleL(CONFIG.STANDARD_ATTACK_SCORE_FOR_INFO_GROUP);
+        infoGroupXPos = xScaleL(CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP);
       }
 
       const infoGroupYPos = yScaleL(thresholdValue);
