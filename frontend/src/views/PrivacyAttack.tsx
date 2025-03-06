@@ -52,14 +52,14 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
   const handleMetricChange = (metric: Metric) => {
     setMetric(metric);
     if (strategy.startsWith("BEST_ATTACK")) {
-      setStrategy(THRESHOLD_STRATEGIES[1].strategy);
+      setStrategy(THRESHOLD_STRATEGIES[1].strategy); // Max Attack Score
     }
   };
 
   const handleDirectionChange = (direction: string) => {
     setDirection(direction);
     if (strategy.startsWith("BEST_ATTACK")) {
-      setStrategy(THRESHOLD_STRATEGIES[1].strategy);
+      setStrategy(THRESHOLD_STRATEGIES[1].strategy); // Max Attack Score
     }
   };
 

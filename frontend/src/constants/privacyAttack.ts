@@ -35,7 +35,7 @@ export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
 ];
 
 export const LINE_GRAPH_LEGEND_DATA: LineGraphLegendData[] = [
-  { color: TABLEAU10[2], label: "Attack Score" },
-  { color: TABLEAU10[0], label: "False Positive Rate" },
-  { color: TABLEAU10[4], label: "False Negative Rate" },
+  { color: TABLEAU10[2], label: "Attack Score" }, // red
+  { color: TABLEAU10[0], label: "False Positive Rate" }, // blue
+  { color: TABLEAU10[4], label: "False Negative Rate" }, // green
 ];
