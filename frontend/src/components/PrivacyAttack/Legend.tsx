@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Separator } from "../UI/separator";
-import { Label } from "..//UI/label";
+import { Label } from "../UI/label";
 import { COLORS } from "../../constants/colors";
 import {
   ENTROPY,
@@ -21,7 +21,7 @@ import {
   HoverCardTrigger,
 } from "../UI/hover-card";
 
-interface AttackLegendProps {
+interface Props {
   metric: Metric;
   direction: string;
   strategy: string;
@@ -30,14 +30,14 @@ interface AttackLegendProps {
   onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function AttackLegend({
+export default function Legend({
   metric,
   direction,
   strategy,
   onUpdateMetric,
   onUpdateDirection,
   onUpdateStrategy,
-}: AttackLegendProps) {
+}: Props) {
   const isEntropyChecked = metric === ENTROPY;
   const isUnlearnChecked = direction === UNLEARN;
 
@@ -196,16 +196,17 @@ export default function AttackLegend({
                 >
                   {s.strategy}
                 </TabsTrigger>
-                {idx < THRESHOLD_STRATEGIES.length - 1 &&
-                  !(
-                    s.strategy === strategy ||
-                    THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
-                  ) && (
-                    <Separator
-                      orientation="vertical"
-                      className="w-[1.5px] h-5 bg-[#d2d5d9]"
-                    />
-                  )}
+                {idx < THRESHOLD_STRATEGIES.length - 1 && (
+                  <Separator
+                    orientation="vertical"
+                    className={`w-[1.5px] h-5 ${
+                      s.strategy === strategy ||
+                      THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
+                        ? "bg-muted"
+                        : "bg-[#d2d5d9]"
+                    }`}
+                  />
+                )}
               </React.Fragment>
             ))}
           </TabsList>

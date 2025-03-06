@@ -94,16 +94,17 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                 >
                   {mode.label}
                 </TabsTrigger>
-                {idx < VIEW_MODES.length - 1 &&
-                  !(
-                    mode.label === highlight ||
-                    VIEW_MODES[idx + 1].label === highlight
-                  ) && (
-                    <Separator
-                      orientation="vertical"
-                      className="w-[1.5px] h-5 bg-[#d2d5d9]"
-                    />
-                  )}
+                {idx < VIEW_MODES.length - 1 && (
+                  <Separator
+                    orientation="vertical"
+                    className={`w-[1.5px] h-5 ${
+                      mode.label === highlight ||
+                      VIEW_MODES[idx + 1].label === highlight
+                        ? "bg-muted"
+                        : "bg-[#d2d5d9]"
+                    }`}
+                  />
+                )}
               </React.Fragment>
             ))}
           </TabsList>
