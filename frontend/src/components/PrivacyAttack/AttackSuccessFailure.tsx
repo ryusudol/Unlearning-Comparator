@@ -48,6 +48,12 @@ export default function AttackSuccessFailure({
 }: AttackSuccessFailureProps) {
   const [successImgSize, setSuccessImgSize] = useState(0);
   const [failureImgSize, setFailureImgSize] = useState(0);
+  const [successColor, setSuccessColor] = useState<"gray" | "color" | null>(
+    null
+  );
+  const [failureColor, setFailureColor] = useState<"gray" | "color" | null>(
+    null
+  );
 
   const isModelA = mode === "A";
   const isAboveThresholdUnlearn = direction === UNLEARN;
@@ -136,7 +142,14 @@ export default function AttackSuccessFailure({
   };
 
   const successImages = useMemo(() => {
-    return successGroup.map((groupItem, idx) => {
+    const filteredSuccessGroup =
+      successColor === "gray"
+        ? successGroup.filter((item) => item.type === CONFIG.RETRAIN)
+        : successColor === "color"
+        ? successGroup.filter((item) => item.type === CONFIG.UNLEARN)
+        : successGroup;
+
+    return filteredSuccessGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
 
       if (!imgData) return null;
@@ -205,12 +218,20 @@ export default function AttackSuccessFailure({
     isModelA,
     onElementClick,
     setHoveredId,
+    successColor,
     successGroup,
     successImgSize,
   ]);
 
   const failureImages = useMemo(() => {
-    return failureGroup.map((groupItem, idx) => {
+    const filteredFailureGroup =
+      failureColor === "gray"
+        ? failureGroup.filter((item) => item.type === CONFIG.RETRAIN)
+        : failureColor === "color"
+        ? failureGroup.filter((item) => item.type === CONFIG.UNLEARN)
+        : failureGroup;
+
+    return filteredFailureGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
 
       if (!imgData) return null;
@@ -274,6 +295,7 @@ export default function AttackSuccessFailure({
     });
   }, [
     data,
+    failureColor,
     failureGroup,
     failureImgSize,
     hoveredId,
@@ -291,6 +313,23 @@ export default function AttackSuccessFailure({
     }
   };
 
+  const handleCircleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const id = e.currentTarget.id;
+    if (id === "success-gray") {
+      successColor === "gray" ? setSuccessColor(null) : setSuccessColor("gray");
+    } else if (id === "success-color") {
+      successColor === "color"
+        ? setSuccessColor(null)
+        : setSuccessColor("color");
+    } else if (id === "failure-gray") {
+      failureColor === "gray" ? setFailureColor(null) : setFailureColor("gray");
+    } else {
+      failureColor === "color"
+        ? setFailureColor(null)
+        : setFailureColor("color");
+    }
+  };
+
   return (
     <div className="relative h-full flex flex-col items-center">
       <p className="text-xl text-center mb-1.5">
@@ -302,23 +341,39 @@ export default function AttackSuccessFailure({
       <div className="flex gap-10">
         <div>
           <div className="flex justify-between items-center">
-            <div>
+            <div className="flex items-center">
               <span className={isStrategyMaxSuccessRate ? "text-red-500" : ""}>
                 Success
               </span>
               <span
-                className={`ml-2 text-[15px] font-light w-11 ${
+                className={`mx-1.5 text-[15px] font-light w-11 ${
                   isStrategyMaxSuccessRate && "text-red-500"
                 }`}
               >
                 {successPct.toFixed(2)}%
               </span>
+              <div className="flex items-center gap-1">
+                <div
+                  id="success-gray"
+                  onClick={handleCircleClick}
+                  style={{ backgroundColor: "#D4D4D4" }}
+                  className="w-3 h-3 rounded-full cursor-pointer border"
+                />
+                <div
+                  id="success-color"
+                  onClick={handleCircleClick}
+                  style={{
+                    backgroundColor: isModelA ? COLORS.EMERALD : COLORS.PURPLE,
+                  }}
+                  className="w-3 h-3 rounded-full cursor-pointer border border-[#0D815B]"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-xs">Size</span>
               <Slider
                 id="success"
-                className="w-20 h-1"
+                className="w-16 h-1"
                 defaultValue={[0]}
                 min={0}
                 max={CONFIG.IMG_SIZES.length - 1}
@@ -350,17 +405,31 @@ export default function AttackSuccessFailure({
         </div>
         <div>
           <div className="flex justify-between items-center">
-            <div>
+            <div className="flex items-center">
               <span>Failure</span>
-              <span className="ml-2 text-[15px] font-light w-11">
+              <span className="mx-1.5 text-[15px] font-light w-11">
                 {failurePct.toFixed(2)}%
               </span>
+              <div className="flex items-center gap-1">
+                <div
+                  id="failure-gray"
+                  onClick={handleCircleClick}
+                  style={{ backgroundColor: COLORS.DARK_GRAY }}
+                  className="w-3 h-3 rounded-full cursor-pointer border border-[#505050]"
+                />
+                <div
+                  id="failure-color"
+                  onClick={handleCircleClick}
+                  style={{ backgroundColor: isModelA ? "#C8EADB" : "#E6D0FD" }}
+                  className="w-3 h-3 rounded-full cursor-pointer border border-[#A1CCB9]"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-xs">Size</span>
               <Slider
                 id="failure"
-                className="w-20 h-1"
+                className="w-16 h-1"
                 defaultValue={[0]}
                 min={0}
                 max={CONFIG.IMG_SIZES.length - 1}
