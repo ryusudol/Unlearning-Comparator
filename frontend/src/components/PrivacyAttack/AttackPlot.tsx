@@ -917,7 +917,7 @@ export default function AttackPlot({
           .attr("stroke", item.color)
           .attr("stroke-width", 2);
 
-        if (item.color === "red") {
+        if (item.color === TABLEAU10[2]) {
           lineElement.attr("filter", "url(#glow)");
         }
 
