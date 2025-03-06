@@ -42,8 +42,8 @@ export default function Legend({
   const isUnlearnChecked = direction === UNLEARN;
 
   return (
-    <div className="w-full flex px-3.5 pt-2 pb-[18px] text-sm z-10 relative top-1">
-      <div className="flex items-center gap-2.5 mr-[21px] relative top-0.5">
+    <div className="w-full flex justify-between px-3.5 pt-2 pb-[18px] text-sm z-10 relative top-1">
+      <div className="flex items-center gap-2.5 relative top-0.5">
         <HoverCard openDelay={0} closeDelay={0}>
           <HoverCardTrigger>
             <Button
@@ -93,8 +93,7 @@ export default function Legend({
           </HoverCardContent>
         </HoverCard>
       </div>
-
-      <div className="flex flex-col mr-[21px]">
+      <div className="flex flex-col">
         <p className="text-lg font-medium">Metric</p>
         <RadioGroup
           className="flex flex-col gap-1"
@@ -127,7 +126,7 @@ export default function Legend({
           </div>
         </RadioGroup>
       </div>
-      <div className="flex flex-col mr-[30px]">
+      <div className="flex flex-col">
         <p className="text-lg font-medium text-nowrap">Direction</p>
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
@@ -171,7 +170,7 @@ export default function Legend({
         </RadioGroup>
       </div>
       <div className="flex">
-        <div className="mr-3">
+        <div className="mr-3.5">
           <p className="text-lg font-medium">Strategy</p>
           <p className="w-[120px] text-[13px] font-light">
             Choose how thresholds are determined:
