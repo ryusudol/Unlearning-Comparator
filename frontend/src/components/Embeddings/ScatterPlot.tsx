@@ -846,7 +846,7 @@ const ScatterPlot = forwardRef(
             </span>
           )}
         </div>
-        <div className="w-[632px] h-[638px] flex flex-col justify-center items-center">
+        <div className="w-[632px] h-[633px] flex flex-col justify-center items-center">
           <div
             ref={containerRef}
             style={{

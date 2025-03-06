@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Separator } from "../UI/separator";
-import { Label } from "..//UI/label";
+import { Label } from "../UI/label";
 import { COLORS } from "../../constants/colors";
 import {
   ENTROPY,
@@ -21,7 +21,7 @@ import {
   HoverCardTrigger,
 } from "../UI/hover-card";
 
-interface AttackLegendProps {
+interface Props {
   metric: Metric;
   direction: string;
   strategy: string;
@@ -30,20 +30,20 @@ interface AttackLegendProps {
   onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function AttackLegend({
+export default function Legend({
   metric,
   direction,
   strategy,
   onUpdateMetric,
   onUpdateDirection,
   onUpdateStrategy,
-}: AttackLegendProps) {
+}: Props) {
   const isEntropyChecked = metric === ENTROPY;
   const isUnlearnChecked = direction === UNLEARN;
 
   return (
-    <div className="w-full flex px-3.5 pt-2 pb-[18px] text-sm z-10 relative top-1">
-      <div className="flex items-center gap-2.5 mr-[21px] relative top-0.5">
+    <div className="w-full flex justify-between px-3.5 pt-2 pb-[18px] text-sm z-10 relative top-1">
+      <div className="flex items-center gap-2.5 relative top-0.5">
         <HoverCard openDelay={0} closeDelay={0}>
           <HoverCardTrigger>
             <Button
@@ -93,8 +93,7 @@ export default function AttackLegend({
           </HoverCardContent>
         </HoverCard>
       </div>
-
-      <div className="flex flex-col mr-[21px]">
+      <div className="flex flex-col">
         <p className="text-lg font-medium">Metric</p>
         <RadioGroup
           className="flex flex-col gap-1"
@@ -127,7 +126,7 @@ export default function AttackLegend({
           </div>
         </RadioGroup>
       </div>
-      <div className="flex flex-col mr-[30px]">
+      <div className="flex flex-col">
         <p className="text-lg font-medium text-nowrap">Direction</p>
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
@@ -171,7 +170,7 @@ export default function AttackLegend({
         </RadioGroup>
       </div>
       <div className="flex">
-        <div className="mr-3">
+        <div className="mr-3.5">
           <p className="text-lg font-medium">Strategy</p>
           <p className="w-[120px] text-[13px] font-light">
             Choose how thresholds are determined:
@@ -196,16 +195,17 @@ export default function AttackLegend({
                 >
                   {s.strategy}
                 </TabsTrigger>
-                {idx < THRESHOLD_STRATEGIES.length - 1 &&
-                  !(
-                    s.strategy === strategy ||
-                    THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
-                  ) && (
-                    <Separator
-                      orientation="vertical"
-                      className="w-[1.5px] h-5 bg-[#d2d5d9]"
-                    />
-                  )}
+                {idx < THRESHOLD_STRATEGIES.length - 1 && (
+                  <Separator
+                    orientation="vertical"
+                    className={`w-[1.5px] h-5 ${
+                      s.strategy === strategy ||
+                      THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
+                        ? "bg-muted"
+                        : "bg-[#d2d5d9]"
+                    }`}
+                  />
+                )}
               </React.Fragment>
             ))}
           </TabsList>

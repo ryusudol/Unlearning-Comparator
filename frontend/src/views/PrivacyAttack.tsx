@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import Indicator from "../components/Indicator";
-import AttackLegend from "../components/PrivacyAttack/AttackLegend";
+import Legend from "../components/PrivacyAttack/Legend";
 import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
@@ -72,7 +72,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
 
   return (
     <div className="h-[764px] flex flex-col border rounded-md px-1.5">
-      <AttackLegend
+      <Legend
         metric={metric}
         direction={direction}
         strategy={strategy}
