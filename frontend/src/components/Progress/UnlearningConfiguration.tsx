@@ -3,6 +3,16 @@ import React, { useState, useEffect } from "react";
 import CustomUnlearning from "../Experiments/CustomUnlearning";
 import MethodUnlearning from "../Experiments/MethodUnlearning";
 import Button from "../CustomButton";
+import { Label } from "../UI/label";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { PlusIcon } from "../UI/icons";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
+import { useExperimentsStore } from "../../stores/experimentsStore";
+import { useRunningIndexStore } from "../../stores/runningIndexStore";
+import { UnlearningConfigurationData } from "../../types/experiments";
+import { ExperimentData } from "../../types/data";
+import { fetchUnlearningStatus } from "../../utils/api/requests";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
@@ -26,16 +36,6 @@ import {
   BATCH_SIZE,
   LEARNING_RATE,
 } from "../../constants/experiments";
-import { Label } from "../UI/label";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { PlusIcon } from "../UI/icons";
-import { useRunningStatusStore } from "../../stores/runningStatusStore";
-import { useExperimentsStore } from "../../stores/experimentsStore";
-import { useRunningIndexStore } from "../../stores/runningIndexStore";
-import { UnlearningConfigurationData } from "../../types/experiments";
-import { ExperimentData } from "../../types/data";
-import { fetchUnlearningStatus } from "../../utils/api/requests";
-import { useModelDataStore } from "../../stores/modelDataStore";
 
 const CUSTOM = "custom";
 let initialExperiment: ExperimentData = {
