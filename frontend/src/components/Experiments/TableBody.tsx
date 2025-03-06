@@ -336,7 +336,7 @@ export default function _TableBody({ table }: Props) {
                   </TableRow>
                 </ContextMenuTrigger>
                 {!isTemporaryRow && (
-                  <ContextMenuContent className="z-[50]">
+                  <ContextMenuContent className="z-50">
                     {!row.id.startsWith("000") &&
                       !row.id.startsWith("a00") &&
                       !isRunning && (

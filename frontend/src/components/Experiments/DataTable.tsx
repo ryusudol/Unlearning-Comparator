@@ -71,9 +71,7 @@ export default function DataTable({ isExpanded }: Props) {
             <RadioGroupItem
               value={row.id}
               className={cn(
-                `w-[18px] h-[18px] rounded-full relative ${
-                  isModelAColumn ? "left-1" : ""
-                }`,
+                "w-[18px] h-[18px] rounded-full relative left-1",
                 isSelected && "[&_svg]:h-3 [&_svg]:w-3"
               )}
               checked={isSelected}
