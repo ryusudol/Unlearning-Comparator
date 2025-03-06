@@ -22,11 +22,15 @@ const initialStatus: UnlearningStatus = {
   batch_size: 0,
 };
 
-type RunningStatus = {
+type RunningStatusState = {
   isRunning: boolean;
   statuses: UnlearningStatus[][];
   activeStep: number;
   totalExperimentsCount: number;
+  updateIsRunning: (isRunning: boolean) => void;
+  initStatus: (forgetClass: number, count: number) => void;
+  updateStatus: (payload: UpdateStatusPayload) => void;
+  updateActiveStep: (step: number) => void;
 };
 
 type UpdateStatusPayload = {
@@ -40,14 +44,7 @@ type UpdateStatusPayload = {
   batchSize?: number;
 };
 
-type Actions = {
-  updateIsRunning: (isRunning: boolean) => void;
-  initStatus: (forgetClass: number, count: number) => void;
-  updateStatus: (payload: UpdateStatusPayload) => void;
-  updateActiveStep: (step: number) => void;
-};
-
-export const useRunningStatusStore = create<RunningStatus & Actions>()(
+export const useRunningStatusStore = create<RunningStatusState>()(
   persist(
     (set, get) => ({
       isRunning: false,

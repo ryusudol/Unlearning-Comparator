@@ -1,17 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Config = {
+type BaseConfigState = {
   dataset: string | undefined;
   neuralNetworkModel: string | undefined;
-};
-
-type Actions = {
   saveDataset: (dataset: string) => void;
   saveNeuralNetworkModel: (neuralNetworkModel: string) => void;
 };
 
-export const useBaseConfigStore = create<Config & Actions>()(
+export const useBaseConfigStore = create<BaseConfigState>()(
   persist(
     (set) => ({
       dataset: undefined,

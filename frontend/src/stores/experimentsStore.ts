@@ -7,9 +7,6 @@ import { useModelDataStore } from "./modelDataStore";
 type ExperimentsState = {
   experiments: Experiments;
   isExperimentLoading: boolean;
-};
-
-type Actions = {
   addExperiment: (experiment: ExperimentData, tempIdx?: number) => void;
   updateExperiment: (experiment: ExperimentData, idx: number) => void;
   saveExperiments: (experiments: Experiments) => void;
@@ -17,7 +14,7 @@ type Actions = {
   setIsExperimentsLoading: (loading: boolean) => void;
 };
 
-export const useExperimentsStore = create<ExperimentsState & Actions>()(
+export const useExperimentsStore = create<ExperimentsState>()(
   persist(
     (set, get) => ({
       experiments: {},

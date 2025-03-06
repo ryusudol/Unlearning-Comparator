@@ -1,15 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type RunningIndex = {
+type RunningIndexState = {
   runningIndex: number;
-};
-
-type Actions = {
   updateRunningIndex: (runningIndex: number) => void;
 };
 
-export const useRunningIndexStore = create<RunningIndex & Actions>()(
+export const useRunningIndexStore = create<RunningIndexState>()(
   persist(
     (set, get) => ({
       runningIndex: 0,
