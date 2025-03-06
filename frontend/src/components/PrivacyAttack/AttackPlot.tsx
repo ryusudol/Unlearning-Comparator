@@ -1504,7 +1504,7 @@ export default function AttackPlot({
           {isModelA ? modelA : modelB})
         </span>
       </div>
-      <div className="flex relative bottom-[7px]">
+      <div className="flex relative bottom-3">
         <svg ref={butterflyRef}></svg>
         <svg ref={lineRef} className="relative right-3.5"></svg>
       </div>
