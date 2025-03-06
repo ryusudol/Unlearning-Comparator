@@ -2,6 +2,12 @@ import React from "react";
 import { MoveRight } from "lucide-react";
 
 import Button from "../CustomButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
+import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
+import { Separator } from "../UI/separator";
+import { Label } from "..//UI/label";
+import { COLORS } from "../../constants/colors";
 import {
   ENTROPY,
   CONFIDENCE,
@@ -14,11 +20,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "../UI/hover-card";
-import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
-import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
-import { Separator } from "../UI/separator";
-import { Label } from "..//UI/label";
-import { COLORS } from "../../constants/colors";
 
 interface AttackLegendProps {
   metric: Metric;
@@ -126,7 +127,6 @@ export default function AttackLegend({
           </div>
         </RadioGroup>
       </div>
-
       <div className="flex flex-col mr-[30px]">
         <p className="text-lg font-medium text-nowrap">Direction</p>
         <RadioGroup
@@ -170,34 +170,55 @@ export default function AttackLegend({
           </div>
         </RadioGroup>
       </div>
-
       <div className="flex">
-        <div className="mr-2">
+        <div className="mr-3">
           <p className="text-lg font-medium">Strategy</p>
           <p className="w-[120px] text-[13px] font-light">
             Choose how thresholds are determined:
           </p>
         </div>
-        <div className="flex gap-[15px]">
+        <Tabs
+          value={strategy}
+          onValueChange={(val: string) =>
+            onUpdateStrategy({
+              currentTarget: { innerHTML: val },
+            } as React.MouseEvent<HTMLButtonElement>)
+          }
+          className="relative top-0.5"
+        >
+          <TabsList>
+            {THRESHOLD_STRATEGIES.map((s, idx) => (
+              <React.Fragment key={idx}>
+                <TabsTrigger
+                  value={s.strategy}
+                  style={{ width: s.length }}
+                  className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+                >
+                  {s.strategy}
+                </TabsTrigger>
+                {idx < THRESHOLD_STRATEGIES.length - 1 &&
+                  !(
+                    s.strategy === strategy ||
+                    THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
+                  ) && (
+                    <Separator
+                      orientation="vertical"
+                      className="w-[1.5px] h-5 bg-[#d2d5d9]"
+                    />
+                  )}
+              </React.Fragment>
+            ))}
+          </TabsList>
           {THRESHOLD_STRATEGIES.map((s, idx) => (
-            <div key={idx} className="flex flex-col">
-              <Button
-                onClick={onUpdateStrategy}
-                style={{ width: s.length }}
-                className={`mb-1 ${
-                  (strategy === s.strategy ||
-                    (strategy.startsWith("BEST_ATTACK") && idx === 1)) &&
-                  "bg-gray-100 hover:bg-gray-100 text-red-500 cursor-default"
-                }`}
-              >
-                {s.strategy}
-              </Button>
-              <p className="text-[13px] font-light" style={{ width: s.length }}>
-                {s.explanation}
-              </p>
-            </div>
+            <TabsContent
+              key={idx}
+              value={s.strategy}
+              className="text-sm font-light"
+            >
+              {s.explanation}
+            </TabsContent>
           ))}
-        </div>
+        </Tabs>
       </div>
       <Separator
         orientation="horizontal"
