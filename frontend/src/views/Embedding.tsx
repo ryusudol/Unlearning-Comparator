@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useMemo } from "react";
 
 import ScatterPlot from "../components/Embeddings/ScatterPlot";
 import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
-import EmbeddingsLegend from "../components/Embeddings/EmbeddingsLegend";
+import Legend from "../components/Embeddings/Legend";
 import { HoverInstance, Position, Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
 import {
@@ -93,7 +93,7 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
   return (
     <div className="h-[758px] flex flex-col border rounded-md px-1.5 relative">
       <ConnectionLineWrapper positionRef={positionRef} />
-      <EmbeddingsLegend highlight={highlight} setHighlight={setHighlight} />
+      <Legend highlight={highlight} setHighlight={setHighlight} />
       <div className="flex items-center">
         {modelAExperiment && (
           <ScatterPlot
