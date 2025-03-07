@@ -7,6 +7,11 @@ import { CIFAR_10_CLASSES } from "../../constants/common";
 import { TABLEAU10 } from "../../constants/colors";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { VIEW_MODES } from "../../constants/embeddings";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../UI/hover-card";
 
 interface Props {
   highlight: string;
@@ -90,7 +95,12 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                   style={{ width: mode.length }}
                   className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
-                  {mode.label}
+                  <HoverCard openDelay={0} closeDelay={0}>
+                    <HoverCardTrigger>{mode.label}</HoverCardTrigger>
+                    <HoverCardContent className="w-auto px-3 py-2" side="top">
+                      {mode.explanation}
+                    </HoverCardContent>
+                  </HoverCard>
                 </TabsTrigger>
                 {idx < VIEW_MODES.length - 1 && (
                   <Separator

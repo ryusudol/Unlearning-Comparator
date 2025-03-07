@@ -12,6 +12,12 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import Tooltip from "./Tooltip";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { calculateZoom } from "../../utils/util";
+import { COLORS } from "../../constants/colors";
+import { API_URL, ANIMATION_DURATION } from "../../constants/common";
+import { VIEW_MODES } from "../../constants/embeddings";
 import {
   SelectedData,
   HoverInstance,
@@ -22,12 +28,6 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
-import { calculateZoom } from "../../utils/util";
-import { COLORS } from "../../constants/colors";
-import { API_URL, ANIMATION_DURATION } from "../../constants/common";
-import { VIEW_MODES } from "../../constants/embeddings";
 
 /**
  * 0 -> ground thruth
@@ -446,7 +446,7 @@ const ScatterPlot = forwardRef(
               "opacity",
               shouldLowerOpacity(d)
                 ? CONFIG.LOWERED_OPACITY
-                : highlight === VIEW_MODES[3].label
+                : highlight === VIEW_MODES[4].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
@@ -524,7 +524,7 @@ const ScatterPlot = forwardRef(
         .style("opacity", (d) =>
           shouldLowerOpacity(d)
             ? CONFIG.LOWERED_OPACITY
-            : highlight === VIEW_MODES[3].label
+            : highlight === VIEW_MODES[4].label
             ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
             : CONFIG.DEFAULT_CIRCLE_OPACITY
         )
@@ -676,7 +676,7 @@ const ScatterPlot = forwardRef(
             shouldLowerOpacity(d)
               ? CONFIG.LOWERED_OPACITY
               : isCircle
-              ? highlight === VIEW_MODES[3].label
+              ? highlight === VIEW_MODES[4].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
               : CONFIG.DEFAULT_CROSS_OPACITY

@@ -178,7 +178,12 @@ export default function Legend() {
                   style={{ width: s.length }}
                   className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
-                  {s.strategy}
+                  <HoverCard openDelay={0} closeDelay={0}>
+                    <HoverCardTrigger>{s.strategy}</HoverCardTrigger>
+                    <HoverCardContent className="w-auto px-3 py-2" side="top">
+                      {s.explanation}
+                    </HoverCardContent>
+                  </HoverCard>
                 </TabsTrigger>
                 {idx < THRESHOLD_STRATEGIES.length - 1 && (
                   <Separator

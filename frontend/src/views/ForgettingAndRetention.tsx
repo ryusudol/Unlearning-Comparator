@@ -14,7 +14,7 @@ export default function ForgettingAndRetention() {
       borderBottom
     >
       <Title title="Forgetting and Retention" className="left-0.5" />
-      <div className="flex flex-col gap-[26px]">
+      <div className="flex flex-col gap-6">
         <ClassWiseAnalysis />
         <PredictionMatrix />
         <LayerWiseSimilarity />

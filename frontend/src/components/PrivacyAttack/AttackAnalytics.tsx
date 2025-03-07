@@ -467,6 +467,12 @@ export default function AttackAnalytics({
     }
   }, [modelA, modelB, setDirection, setMetric, setStrategy]);
 
+  useEffect(() => {
+    if (strategy === THRESHOLD_STRATEGIES[0].strategy) {
+      isMetricEntropy ? setThresholdValue(1.25) : setThresholdValue(3.75);
+    }
+  }, [strategy, isMetricEntropy]);
+
   return (
     <div className="w-[635px] h-full relative flex flex-col" ref={containerRef}>
       {data && dataMetric === metric && (
