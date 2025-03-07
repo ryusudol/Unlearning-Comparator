@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import * as d3 from "d3";
 
 import { Slider } from "../UI/slider";
+import { Checkbox } from "../UI/checkbox";
 import { ScrollArea } from "../UI/scroll-area";
 import { useAttackStateStore } from "../../stores/attackStore";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
@@ -226,16 +227,15 @@ export default function InstancePanel({
     setImgSize(value[0]);
   };
 
-  const handleCircleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const id = e.currentTarget.id;
-    if (id.endsWith("gray")) {
+  const handleCircleClick = (color: "gray" | "color") => {
+    if (color === "gray") {
       filteredColor === "gray"
         ? setFilteredColor(null)
-        : setFilteredColor("gray");
-    } else if (id.endsWith("color")) {
+        : setFilteredColor(color);
+    } else if (color === "color") {
       filteredColor === "color"
         ? setFilteredColor(null)
-        : setFilteredColor("color");
+        : setFilteredColor(color);
     }
   };
 
@@ -258,25 +258,31 @@ export default function InstancePanel({
             {pct.toFixed(2)}%
           </span>
           <div className="flex items-center gap-1">
-            <div
+            <Checkbox
               id={`${mode}-gray`}
-              onClick={handleCircleClick}
+              checked={filteredColor === "gray"}
+              onCheckedChange={() => handleCircleClick("gray")}
+              className={`w-3.5 h-3.5 border ${
+                isModeSuccess && "data-[state=checked]:text-black"
+              }`}
               style={{
                 backgroundColor: isModeSuccess
                   ? COLORS.LIGHT_GRAY
                   : COLORS.DARK_GRAY,
                 borderColor: isModeSuccess ? "#ADADAD" : "#4A4A4A",
               }}
-              className="w-3 h-3 rounded-full cursor-pointer border"
             />
-            <div
+            <Checkbox
               id={`${mode}-color`}
-              onClick={handleCircleClick}
+              checked={filteredColor === "color"}
+              onCheckedChange={() => handleCircleClick("color")}
+              className={`w-3.5 h-3.5 border ${
+                !isModeSuccess && "data-[state=checked]:text-black"
+              }`}
               style={{
                 backgroundColor: color,
                 borderColor: circleStrokeColor,
               }}
-              className="w-3 h-3 rounded-full cursor-pointer border border-[#0D815B]"
             />
           </div>
         </div>
