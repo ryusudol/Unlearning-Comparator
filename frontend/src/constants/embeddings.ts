@@ -3,27 +3,32 @@ import { ViewMode } from "../types/embeddings";
 export const VIEW_MODES: ViewMode[] = [
   {
     label: "All",
-    explanation: "Show entire dataset",
+    explanation:
+      "Shows the entire dataset, including both retain and forget classes.",
     length: 50,
   },
   {
     label: "Target to Forget",
-    explanation: "All instances from the forget class",
+    explanation:
+      "Shows all instances of the forget class, which the model should unlearn.",
     length: 125,
   },
   {
     label: "Correctly Forgotten",
-    explanation: "Instances from the forget class successfully unlearned",
+    explanation:
+      "Shows forget class instances successfully unlearned; the model no longer correctly classifies them.",
     length: 145,
   },
   {
     label: "Not Forgotten",
-    explanation: "Instances from the forget class not unlearned",
+    explanation:
+      "Shows forget class instances that the model has not forgotten; it still correctly classifies them.",
     length: 110,
   },
   {
     label: "Overly Forgotten",
-    explanation: "Instances from the retain class mistakenly unlearned",
+    explanation:
+      "Shows retain class instances mistakenly unlearned; the model should still recognize them.",
     length: 130,
   },
 ];
