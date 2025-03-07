@@ -16,11 +16,14 @@ export const COLORS = {
   BLACK: "#000",
 
   PURPLE: "#A855F7",
+  LIGHT_PURPLE: "#E6D0FD",
 
   EMERALD: "#10B981",
+  LIGHT_EMERALD: "#C8EBDA",
 
   GRAY: "#777",
   DARK_GRAY: "#6a6a6a",
+  LIGHT_GRAY: "#D4D4D4",
 
   GRID_COLOR: "#EFEFEF",
 

@@ -10,6 +10,12 @@ export const TEST = "test";
 export const BASELINE = "baseline";
 export const COMPARISON = "comparison";
 
+export const ENTROPY = "entropy";
+export const CONFIDENCE = "confidence";
+
+export const UNLEARN = "unlearn";
+export const RETRAIN = "retrain";
+
 export const CIFAR_10_CLASSES = [
   "airplane",
   "automobile",

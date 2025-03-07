@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import Indicator from "../components/Indicator";
 import Legend from "../components/PrivacyAttack/Legend";
@@ -6,17 +6,12 @@ import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../types/embeddings";
 import { Separator } from "../components/UI/separator";
 import { useModelDataStore } from "../stores/modelDataStore";
-import { THRESHOLD_STRATEGIES } from "../constants/privacyAttack";
 import { fetchFileData } from "../utils/api/unlearning";
 import { useForgetClassStore } from "../stores/forgetClassStore";
+import { useAttackStateStore } from "../stores/attackStore";
 import { ExperimentData } from "../types/data";
-
-export const ENTROPY = "entropy";
-export const CONFIDENCE = "confidence";
-export const UNLEARN = "unlearn";
-export const RETRAIN = "retrain";
-
-export type Metric = "entropy" | "confidence";
+import { ENTROPY, UNLEARN } from "../constants/common";
+import { THRESHOLD_STRATEGIES } from "../constants/privacyAttack";
 
 interface Props {
   modelAPoints: (number | Prob)[][];
@@ -27,14 +22,20 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
+  const setMetric = useAttackStateStore((state) => state.setMetric);
+  const setDirection = useAttackStateStore((state) => state.setDirection);
+  const setStrategy = useAttackStateStore((state) => state.setStrategy);
 
-  const [metric, setMetric] = useState<Metric>(ENTROPY);
-  const [direction, setDirection] = useState(UNLEARN);
-  const [strategy, setStrategy] = useState(THRESHOLD_STRATEGIES[0].strategy);
   const [retrainData, setRetrainData] = useState<ExperimentData>();
 
   const isModelAOriginal = modelA.startsWith("000");
   const isModelBOriginal = modelB.startsWith("000");
+
+  useEffect(() => {
+    setMetric(ENTROPY);
+    setDirection(UNLEARN);
+    setStrategy(THRESHOLD_STRATEGIES[0].strategy);
+  }, [setDirection, setMetric, setStrategy]);
 
   useEffect(() => {
     async function loadRetrainData() {
@@ -49,37 +50,9 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     loadRetrainData();
   }, [forgetClass]);
 
-  const handleMetricChange = (metric: Metric) => {
-    setMetric(metric);
-    if (strategy.startsWith("BEST_ATTACK")) {
-      setStrategy(THRESHOLD_STRATEGIES[1].strategy); // Max Attack Score
-    }
-  };
-
-  const handleDirectionChange = (direction: string) => {
-    setDirection(direction);
-    if (strategy.startsWith("BEST_ATTACK")) {
-      setStrategy(THRESHOLD_STRATEGIES[1].strategy); // Max Attack Score
-    }
-  };
-
-  const handleStrategyChange = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const currStrategy = e.currentTarget.innerHTML;
-    if (strategy !== currStrategy) {
-      setStrategy(currStrategy);
-    }
-  };
-
   return (
     <div className="h-[764px] flex flex-col border rounded-md px-1.5">
-      <Legend
-        metric={metric}
-        direction={direction}
-        strategy={strategy}
-        onUpdateMetric={handleMetricChange}
-        onUpdateDirection={handleDirectionChange}
-        onUpdateStrategy={handleStrategyChange}
-      />
+      <Legend />
       <div className="flex items-center">
         {!retrainData ? (
           <Indicator text="Failed to fetch retrain data" />
@@ -88,15 +61,9 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
         ) : (
           <AttackAnalytics
             mode="A"
-            metric={metric}
-            direction={direction}
-            strategy={strategy}
             retrainPoints={retrainData.points}
             modelPoints={modelAPoints}
             retrainAttackData={retrainData.attack}
-            onUpdateMetric={handleMetricChange}
-            onUpdateDirection={handleDirectionChange}
-            onUpdateStrategy={handleStrategyChange}
           />
         )}
         <Separator
@@ -110,15 +77,9 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
         ) : (
           <AttackAnalytics
             mode="B"
-            metric={metric}
-            direction={direction}
-            strategy={strategy}
             retrainPoints={retrainData.points}
             modelPoints={modelBPoints}
             retrainAttackData={retrainData.attack}
-            onUpdateMetric={handleMetricChange}
-            onUpdateDirection={handleDirectionChange}
-            onUpdateStrategy={handleStrategyChange}
           />
         )}
       </div>
