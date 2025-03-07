@@ -1,17 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Models = {
+type ModelState = {
   modelA: string;
   modelB: string;
-};
-
-type Actions = {
   saveModelA: (modelA: string) => void;
   saveModelB: (modelB: string) => void;
 };
 
-export const useModelDataStore = create<Models & Actions>()(
+export const useModelDataStore = create<ModelState>()(
   persist(
     (set) => ({
       modelA: "",

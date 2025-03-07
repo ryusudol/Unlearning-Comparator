@@ -4,19 +4,9 @@ import { createRoot } from "react-dom/client";
 import AttackPlot from "./AttackPlot";
 import AttackSuccessFailure from "./AttackSuccessFailure";
 import Tooltip from "./Tooltip";
-import {
-  ENTROPY,
-  UNLEARN,
-  RETRAIN,
-  CONFIDENCE,
-  Metric,
-} from "../../views/PrivacyAttack";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
 import { API_URL } from "../../constants/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useAttackStateStore } from "../../stores/attackStore";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { AttackResult, AttackResults, AttackData } from "../../types/data";
 import { Bin, Data, CategoryType, Image } from "../../types/attack";
@@ -24,6 +14,11 @@ import { Prob } from "../../types/embeddings";
 import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
 import { useModelDataStore } from "../../stores/modelDataStore";
+import { ENTROPY, UNLEARN, RETRAIN, CONFIDENCE } from "../../constants/common";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 
 const CONFIG = {
   TOOLTIP_WIDTH: 450,
@@ -32,34 +27,31 @@ const CONFIG = {
 
 interface Props {
   mode: "A" | "B";
-  metric: Metric;
-  direction: string;
-  strategy: string;
   retrainPoints: (number | Prob)[][];
   modelPoints: (number | Prob)[][];
   retrainAttackData: AttackData;
-  onUpdateMetric: (val: Metric) => void;
-  onUpdateDirection: (val: string) => void;
-  onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function AttackAnalytics({
   mode,
-  metric,
-  direction,
-  strategy,
   retrainPoints,
   modelPoints,
   retrainAttackData,
-  onUpdateMetric,
-  onUpdateDirection,
-  onUpdateStrategy,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
+  const {
+    metric,
+    direction,
+    strategy,
+    worstCaseModel,
+    setMetric,
+    setDirection,
+    setStrategy,
+  } = useAttackStateStore();
 
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [attackScore, setAttackScore] = useState(0);
@@ -67,6 +59,7 @@ export default function AttackAnalytics({
   const [images, setImages] = useState<Image[]>();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [autoUpdated, setAutoUpdated] = useState(false);
+  const [dataMetric, setDataMetric] = useState(metric);
 
   const prevMetricRef = useRef(metric);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -286,6 +279,7 @@ export default function AttackAnalytics({
         unlearnData: experimentValues,
         lineChartData,
       });
+      setDataMetric(metric);
     };
     getAttackData();
   }, [
@@ -319,21 +313,24 @@ export default function AttackAnalytics({
   useEffect(() => {
     if (!data) return;
 
-    if (strategy.startsWith("BEST_ATTACK")) {
-      const isModelAButton = strategy.endsWith("A");
-      if ((isModelAButton && isModelA) || (!isModelAButton && !isModelA)) {
+    if (strategy === "BEST_ATTACK") {
+      const isModelAWorstCase = worstCaseModel === "A";
+      if (
+        (isModelAWorstCase && isModelA) ||
+        (!isModelAWorstCase && !isModelA)
+      ) {
         let bestResult = {
           metric,
           direction,
           threshold: thresholdValue,
           attack_score: 0,
         };
-        const metrics: Metric[] = [ENTROPY, CONFIDENCE];
+        const metrics = [ENTROPY, CONFIDENCE];
         const directions = [UNLEARN, RETRAIN];
         metrics.forEach((m) => {
           directions.forEach((d) => {
             const key = `${m}_above_${d}` as keyof AttackResults;
-            const experimentAttackData = isModelAButton
+            const experimentAttackData = isModelAWorstCase
               ? modelAExperiment
               : modelBExperiment;
             const lineData = experimentAttackData
@@ -354,8 +351,8 @@ export default function AttackAnalytics({
         });
 
         if (!autoUpdated) {
-          onUpdateMetric(bestResult.metric);
-          onUpdateDirection(bestResult.direction);
+          setMetric(bestResult.metric);
+          setDirection(bestResult.direction);
           if (bestResult.threshold !== thresholdValue) {
             setThresholdValue(bestResult.threshold);
           }
@@ -442,10 +439,11 @@ export default function AttackAnalytics({
     metric,
     modelAExperiment,
     modelBExperiment,
-    onUpdateDirection,
-    onUpdateMetric,
+    setDirection,
+    setMetric,
     strategy,
     thresholdValue,
+    worstCaseModel,
   ]);
 
   useEffect(() => {
@@ -461,26 +459,21 @@ export default function AttackAnalytics({
 
   useEffect(() => {
     if (prevModelA.current !== modelA || prevModelB.current !== modelB) {
-      onUpdateMetric(ENTROPY);
-      onUpdateDirection(UNLEARN);
-      onUpdateStrategy({
-        currentTarget: { innerHTML: THRESHOLD_STRATEGIES[0].strategy },
-      } as React.MouseEvent<HTMLButtonElement>);
+      setMetric(ENTROPY);
+      setDirection(UNLEARN);
+      setStrategy(THRESHOLD_STRATEGIES[0].strategy);
       prevModelA.current = modelA;
       prevModelB.current = modelB;
     }
-  }, [modelA, modelB, onUpdateDirection, onUpdateMetric, onUpdateStrategy]);
+  }, [modelA, modelB, setDirection, setMetric, setStrategy]);
 
   return (
     <div className="w-[635px] h-full relative flex flex-col" ref={containerRef}>
-      {data && (
+      {data && dataMetric === metric && (
         <>
           <AttackPlot
             mode={mode}
-            metric={metric}
             thresholdValue={thresholdValue}
-            direction={direction}
-            strategy={strategy}
             hoveredId={hoveredId}
             data={data}
             onThresholdLineDrag={handleThresholdLineDrag}
@@ -491,8 +484,6 @@ export default function AttackAnalytics({
           <AttackSuccessFailure
             mode={mode}
             thresholdValue={thresholdValue}
-            direction={direction}
-            strategy={strategy}
             hoveredId={hoveredId}
             data={data}
             imageMap={imageMap}

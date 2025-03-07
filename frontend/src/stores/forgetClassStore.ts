@@ -2,18 +2,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CIFAR_10_CLASSES } from "../constants/common";
 
-type ForgetClassData = {
+type ForgetClassState = {
   forgetClass: number;
   selectedForgetClasses: number[];
-};
-
-type Actions = {
   saveForgetClass: (forgetClass: string | number) => void;
   addSelectedForgetClass: (forgetClass: string) => void;
   deleteSelectedForgetClass: (forgetClass: string) => void;
 };
 
-export const useForgetClassStore = create<ForgetClassData & Actions>()(
+export const useForgetClassStore = create<ForgetClassState>()(
   persist(
     (set, get) => ({
       forgetClass: -1,

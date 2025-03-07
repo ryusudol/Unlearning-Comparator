@@ -3,43 +3,34 @@ import { MoveRight } from "lucide-react";
 
 import Button from "../CustomButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
+import { useAttackStateStore } from "../../stores/attackStore";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Separator } from "../UI/separator";
 import { Label } from "../UI/label";
 import { COLORS } from "../../constants/colors";
-import {
-  ENTROPY,
-  CONFIDENCE,
-  UNLEARN,
-  RETRAIN,
-  Metric,
-} from "../../views/PrivacyAttack";
+import { ENTROPY, CONFIDENCE, UNLEARN, RETRAIN } from "../../constants/common";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "../UI/hover-card";
 
-interface Props {
-  metric: Metric;
-  direction: string;
-  strategy: string;
-  onUpdateMetric: (val: Metric) => void;
-  onUpdateDirection: (val: string) => void;
-  onUpdateStrategy: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
+export default function Legend() {
+  const {
+    metric,
+    direction,
+    strategy,
+    setMetric,
+    setDirection,
+    setStrategy,
+    setWorstCaseModel,
+  } = useAttackStateStore();
 
-export default function Legend({
-  metric,
-  direction,
-  strategy,
-  onUpdateMetric,
-  onUpdateDirection,
-  onUpdateStrategy,
-}: Props) {
   const isEntropyChecked = metric === ENTROPY;
   const isUnlearnChecked = direction === UNLEARN;
+  const displayStrategy =
+    strategy === "BEST_ATTACK" ? THRESHOLD_STRATEGIES[1].strategy : strategy;
 
   return (
     <div className="w-full flex justify-between px-3.5 pt-2 pb-[18px] text-sm z-10 relative top-1">
@@ -49,11 +40,10 @@ export default function Legend({
             <Button
               style={{ backgroundColor: COLORS.EMERALD }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
-              onClick={() =>
-                onUpdateStrategy({
-                  currentTarget: { innerHTML: "BEST_ATTACK_A" },
-                } as React.MouseEvent<HTMLButtonElement>)
-              }
+              onClick={() => {
+                setStrategy("BEST_ATTACK");
+                setWorstCaseModel("A");
+              }}
             >
               Model A
               <br />
@@ -73,11 +63,10 @@ export default function Legend({
             <Button
               style={{ backgroundColor: COLORS.PURPLE }}
               className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
-              onClick={() =>
-                onUpdateStrategy({
-                  currentTarget: { innerHTML: "BEST_ATTACK_B" },
-                } as React.MouseEvent<HTMLButtonElement>)
-              }
+              onClick={() => {
+                setStrategy("BEST_ATTACK");
+                setWorstCaseModel("B");
+              }}
             >
               Model B
               <br />
@@ -98,7 +87,7 @@ export default function Legend({
         <RadioGroup
           className="flex flex-col gap-1"
           value={metric}
-          onValueChange={onUpdateMetric}
+          onValueChange={setMetric}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
@@ -131,7 +120,7 @@ export default function Legend({
         <RadioGroup
           className="flex flex-col gap-1 text-nowrap"
           value={direction}
-          onValueChange={onUpdateDirection}
+          onValueChange={setDirection}
         >
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
@@ -177,12 +166,8 @@ export default function Legend({
           </p>
         </div>
         <Tabs
-          value={strategy}
-          onValueChange={(val: string) =>
-            onUpdateStrategy({
-              currentTarget: { innerHTML: val },
-            } as React.MouseEvent<HTMLButtonElement>)
-          }
+          value={displayStrategy}
+          onValueChange={(val: string) => setStrategy(val)}
           className="relative top-0.5"
         >
           <TabsList>

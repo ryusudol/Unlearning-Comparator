@@ -1,6 +1,14 @@
 import { useRef, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 
+import { COLORS, TABLEAU10 } from "../../constants/colors";
+import { FONT_CONFIG } from "../../constants/common";
+import { AttackResult } from "../../types/data";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { useAttackStateStore } from "../../stores/attackStore";
+import { UNLEARN, RETRAIN, ENTROPY } from "../../constants/common";
+import { Bin, Data, CategoryType } from "../../types/attack";
 import {
   LINE_GRAPH_LEGEND_DATA,
   THRESHOLD_STRATEGIES,
@@ -9,13 +17,6 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { COLORS, TABLEAU10 } from "../../constants/colors";
-import { FONT_CONFIG } from "../../constants/common";
-import { AttackResult } from "../../types/data";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
-import { UNLEARN, RETRAIN, ENTROPY, Metric } from "../../views/PrivacyAttack";
-import { Bin, Data, CategoryType } from "../../types/attack";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
@@ -53,10 +54,7 @@ const CONFIG = {
 
 interface Props {
   mode: "A" | "B";
-  metric: Metric;
   thresholdValue: number;
-  direction: string;
-  strategy: string;
   hoveredId: number | null;
   data: Data;
   onThresholdLineDrag: (value: number) => void;
@@ -70,10 +68,7 @@ interface Props {
 
 export default function AttackPlot({
   mode,
-  metric,
   thresholdValue,
-  direction,
-  strategy,
   hoveredId,
   data,
   onThresholdLineDrag,
@@ -86,6 +81,9 @@ export default function AttackPlot({
   const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
+  const metric = useAttackStateStore((state) => state.metric);
+  const direction = useAttackStateStore((state) => state.direction);
+  const strategy = useAttackStateStore((state) => state.strategy);
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -468,7 +466,7 @@ export default function AttackPlot({
         {
           label: "From Retrained / Pred. Retrained",
           side: "left",
-          color: "#D4D4D4",
+          color: COLORS.LIGHT_GRAY,
         },
         {
           label: `From ${isModelA ? "Model A" : "Model B"} / Pred. ${
@@ -480,7 +478,7 @@ export default function AttackPlot({
         {
           label: `From ${isModelA ? "Model A" : "Model B"} / Pred. Retrained`,
           side: "right",
-          color: isModelA ? "#C8EADB" : "#E6D0FD",
+          color: isModelA ? COLORS.LIGHT_EMERALD : COLORS.LIGHT_PURPLE,
         },
       ];
 

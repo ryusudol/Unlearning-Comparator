@@ -9,7 +9,7 @@ import {
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
-import { RETRAIN } from "../../views/PrivacyAttack";
+import { RETRAIN } from "../../constants/common";
 
 const CONFIG = {
   LOW_OPACITY: 0.6,
