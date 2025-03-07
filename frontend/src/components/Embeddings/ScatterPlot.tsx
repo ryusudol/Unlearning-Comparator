@@ -446,7 +446,7 @@ const ScatterPlot = forwardRef(
               "opacity",
               shouldLowerOpacity(d)
                 ? CONFIG.LOWERED_OPACITY
-                : highlight === VIEW_MODES[3].label
+                : highlight === VIEW_MODES[4].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
             );
@@ -524,7 +524,7 @@ const ScatterPlot = forwardRef(
         .style("opacity", (d) =>
           shouldLowerOpacity(d)
             ? CONFIG.LOWERED_OPACITY
-            : highlight === VIEW_MODES[3].label
+            : highlight === VIEW_MODES[4].label
             ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
             : CONFIG.DEFAULT_CIRCLE_OPACITY
         )
@@ -676,7 +676,7 @@ const ScatterPlot = forwardRef(
             shouldLowerOpacity(d)
               ? CONFIG.LOWERED_OPACITY
               : isCircle
-              ? highlight === VIEW_MODES[3].label
+              ? highlight === VIEW_MODES[4].label
                 ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
                 : CONFIG.DEFAULT_CIRCLE_OPACITY
               : CONFIG.DEFAULT_CROSS_OPACITY
