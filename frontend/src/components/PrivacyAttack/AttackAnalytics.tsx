@@ -362,7 +362,9 @@ export default function AttackAnalytics({
     } else {
       if (autoUpdated) setAutoUpdated(false);
 
-      if (strategy === THRESHOLD_STRATEGIES[1].strategy) {
+      if (strategy === THRESHOLD_STRATEGIES[0].strategy) {
+        isMetricEntropy ? setThresholdValue(1.25) : setThresholdValue(3.75);
+      } else if (strategy === THRESHOLD_STRATEGIES[1].strategy) {
         const maxAttackData = findMaxAttackData(data.lineChartData);
         if (maxAttackData && maxAttackData.threshold !== thresholdValue) {
           setThresholdValue(maxAttackData.threshold);
