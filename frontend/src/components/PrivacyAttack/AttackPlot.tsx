@@ -49,7 +49,9 @@ const CONFIG = {
   STROKE_WIDTH: 0.8,
   BUTTERFLY_MARGIN: { top: 16, right: 9, bottom: 28, left: 36 },
   LINE_MARGIN: { top: 16, right: 6, bottom: 28, left: 10 },
-  ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP: 0.43,
+  ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP: 0.43,
+  ENTROPY_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP: 2.15,
+  CONFIDENCE_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP: 8.25,
 } as const;
 
 interface Props {
@@ -166,7 +168,9 @@ export default function AttackPlot({
         bins.forEach((bin) => {
           const clampedValue = isMetricEntropy
             ? bin.value
-            : Math.min(bin.value, thresholdMax);
+            : bin.value > thresholdMax
+            ? 9.75
+            : bin.value;
           const key = (Math.floor(clampedValue / binSize) * binSize).toFixed(2);
           if (!binsMap[key]) binsMap[key] = [];
           binsMap[key].push(bin);
@@ -1026,10 +1030,19 @@ export default function AttackPlot({
           : { x: xScaleL(0), y: yScaleL(thresholdValue) };
 
       const infoGroupXPos =
-        currentData.attack_score >= CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP
-          ? xScaleL(CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP)
+        currentData.attack_score >= CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP
+          ? xScaleL(CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP)
           : attackIntersectPos.x;
-      const infoGroupYPos = yScaleL(thresholdValue);
+      const effectiveThreshold = isMetricEntropy
+        ? Math.min(
+            thresholdValue,
+            CONFIG.ENTROPY_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP
+          )
+        : Math.min(
+            thresholdValue,
+            CONFIG.CONFIDENCE_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP
+          );
+      const infoGroupYPos = yScaleL(effectiveThreshold);
 
       const infoGroup = gL
         .append("g")
@@ -1396,12 +1409,21 @@ export default function AttackPlot({
 
       let infoGroupXPos = attackIntersectPos.x;
       if (
-        currentData.attack_score >= CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP
+        currentData.attack_score >= CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP
       ) {
-        infoGroupXPos = xScaleL(CONFIG.ATTACK_SCORE_THRESHOLD_FOR_INFO_GROUP);
+        infoGroupXPos = xScaleL(CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP);
       }
 
-      const infoGroupYPos = yScaleL(thresholdValue);
+      const effectiveThreshold = isMetricEntropy
+        ? Math.min(
+            thresholdValue,
+            CONFIG.ENTROPY_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP
+          )
+        : Math.min(
+            thresholdValue,
+            CONFIG.CONFIDENCE_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP
+          );
+      const infoGroupYPos = yScaleL(effectiveThreshold);
 
       infoGroup.attr(
         "transform",
