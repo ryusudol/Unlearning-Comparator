@@ -325,11 +325,11 @@ export default function AttackPlot({
       // Draw circles for the retrain data on the y-axis corresponding to the threshold value
       retrainBins.forEach((bin) => {
         const yPos = yScaleB(bin.threshold + binSize / 2);
-        const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
-        const maxDisplayCount =
-          Math.floor(displayingWidth / circleDiameter) + 1;
-        const displayCount = Math.min(maxDisplayCount, bin.bins.length);
-        const extraCount = bin.bins.length - displayCount;
+        // const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        // const maxDisplayCount =
+        //   Math.floor(displayingWidth / circleDiameter) + 1;
+        // const displayCount = Math.min(maxDisplayCount, bin.bins.length);
+        // const extraCount = bin.bins.length - displayCount;
 
         for (let i = 0; i < bin.bins.length; i++) {
           const currentBin = bin.bins[i];
@@ -339,7 +339,6 @@ export default function AttackPlot({
                 ? CONFIG.OPACITY_ABOVE_THRESHOLD
                 : CONFIG.OPACITY_BELOW_THRESHOLD
               : getCircleOpacity(yPos, yScaleB(thresholdValue));
-          // const originalXDomain = -(displayCount - 1 - i + 0.5);
           const originalXDomain = -(bin.bins.length - 1 - i + 0.5);
 
           gB.append("circle")
@@ -366,31 +365,30 @@ export default function AttackPlot({
             });
         }
 
-        // mark the number of extra circles that extend beyond the x-axis
-        if (extraCount > 0) {
-          const markerCx =
-            -CONFIG.BUTTERFLY_CIRCLE_RADIUS - displayCount * circleDiameter;
+        // // mark the number of extra circles that extend beyond the x-axis
+        // if (extraCount > 0) {
+        //   const markerCx =
+        //     -CONFIG.BUTTERFLY_CIRCLE_RADIUS - displayCount * circleDiameter;
 
-          gB.append("text")
-            .attr("x", markerCx)
-            .attr("y", yPos)
-            .attr("text-anchor", "end")
-            .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
-            .attr("fill", CONFIG.BLACK)
-            .text(`+${extraCount}`);
-        }
+        //   gB.append("text")
+        //     .attr("x", markerCx)
+        //     .attr("y", yPos)
+        //     .attr("text-anchor", "end")
+        //     .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
+        //     .attr("fill", CONFIG.BLACK)
+        //     .text(`+${extraCount}`);
+        // }
       });
 
       // Draw circles for the unlearn data on the y-axis corresponding to the threshold value
       unlearnBins.forEach((bin) => {
         const yPos = yScaleB(bin.threshold + binSize / 2);
         const color = isModelA ? COLORS.EMERALD : COLORS.PURPLE;
-
-        const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
-        const maxDisplayCount =
-          Math.floor(displayingWidth / circleDiameter) + 1;
-        const displayCount = Math.min(maxDisplayCount, bin.bins.length);
-        const extraCount = bin.bins.length - displayCount;
+        // const displayingWidth = halfWB - CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        // const maxDisplayCount =
+        //   Math.floor(displayingWidth / circleDiameter) + 1;
+        // const displayCount = Math.min(maxDisplayCount, bin.bins.length);
+        // const extraCount = bin.bins.length - displayCount;
 
         for (let i = 0; i < bin.bins.length; i++) {
           const currentBin = bin.bins[i];
@@ -422,19 +420,19 @@ export default function AttackPlot({
             });
         }
 
-        if (extraCount > 0) {
-          const markerCx =
-            circleDiameter / 2 +
-            displayCount * circleDiameter +
-            CONFIG.BUTTERFLY_CIRCLE_RADIUS;
-          gB.append("text")
-            .attr("x", markerCx - 6)
-            .attr("y", yPos)
-            .attr("text-anchor", "start")
-            .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
-            .attr("fill", CONFIG.BLACK)
-            .text(`+${extraCount}`);
-        }
+        // if (extraCount > 0) {
+        //   const markerCx =
+        //     circleDiameter / 2 +
+        //     displayCount * circleDiameter +
+        //     CONFIG.BUTTERFLY_CIRCLE_RADIUS;
+        //   gB.append("text")
+        //     .attr("x", markerCx - 6)
+        //     .attr("y", yPos)
+        //     .attr("text-anchor", "start")
+        //     .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
+        //     .attr("fill", CONFIG.BLACK)
+        //     .text(`+${extraCount}`);
+        // }
       });
 
       // draw the x-axis for a butterfly chart
@@ -534,24 +532,24 @@ export default function AttackPlot({
         .text(isMetricEntropy ? "Entropy" : "Confidence");
 
       // mark the total number of extra bins
-      if (extraRetrain > 0) {
-        gB.append("text")
-          .attr("x", xScaleB(-maxDisplayCircles))
-          .attr("y", hB + FONT_CONFIG.FONT_SIZE_10)
-          .attr("text-anchor", "end")
-          .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
-          .attr("fill", CONFIG.BLACK)
-          .text(`+${extraRetrain}`);
-      }
-      if (extraUnlearn > 0) {
-        gB.append("text")
-          .attr("x", xScaleB(maxDisplayCircles))
-          .attr("y", hB + FONT_CONFIG.FONT_SIZE_10)
-          .attr("text-anchor", "start")
-          .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
-          .attr("fill", CONFIG.BLACK)
-          .text(`+${extraUnlearn}`);
-      }
+      // if (extraRetrain > 0) {
+      //   gB.append("text")
+      //     .attr("x", xScaleB(-maxDisplayCircles))
+      //     .attr("y", hB + FONT_CONFIG.FONT_SIZE_10)
+      //     .attr("text-anchor", "end")
+      //     .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
+      //     .attr("fill", CONFIG.BLACK)
+      //     .text(`+${extraRetrain}`);
+      // }
+      // if (extraUnlearn > 0) {
+      //   gB.append("text")
+      //     .attr("x", xScaleB(maxDisplayCircles))
+      //     .attr("y", hB + FONT_CONFIG.FONT_SIZE_10)
+      //     .attr("text-anchor", "start")
+      //     .attr("font-size", FONT_CONFIG.FONT_SIZE_10)
+      //     .attr("fill", CONFIG.BLACK)
+      //     .text(`+${extraUnlearn}`);
+      // }
 
       // create a legend for butterfly charts
       const butterflyLegendData = [
@@ -1177,6 +1175,8 @@ export default function AttackPlot({
         .text(`FNR: ${currentData.fnr.toFixed(3)}`);
 
       onUpdateAttackScore(currentData.attack_score);
+
+      gB.selectAll("circle").raise();
 
       chartInitialized.current = true;
     } else if (attackData) {
