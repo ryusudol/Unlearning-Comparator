@@ -91,6 +91,7 @@ export default function AttackPlot({
   const lineRef = useRef<SVGSVGElement | null>(null);
   const chartInitialized = useRef<boolean>(false);
   const attackDataRef = useRef<AttackResult[]>([]);
+  const panOffset = useRef(0);
 
   const retrainJson = data?.retrainData;
   const unlearnJson = data?.unlearnData;
@@ -235,6 +236,92 @@ export default function AttackPlot({
           })`
         );
 
+      gB.append("clipPath")
+        .attr("id", "clip-butterfly")
+        .append("rect")
+        .attr("x", -halfWB)
+        .attr("y", -hB)
+        .attr("width", wB)
+        .attr("height", 2 * hB);
+
+      // Add a feature for horizontal panning
+      const backgroundGroup = gB.append("g").attr("class", "background");
+      backgroundGroup
+        .append("rect")
+        .attr("class", "panning-overlay")
+        .attr("x", -halfWB)
+        .attr("y", 0)
+        .attr("width", wB)
+        .attr("height", hB)
+        .attr("fill", "transparent")
+        .call(
+          d3.drag<SVGRectElement, unknown>().on("drag", (event) => {
+            panOffset.current -= event.dx / circleDiameter;
+
+            const maxPanLeft = extraRetrain;
+            const maxPanRight = extraUnlearn;
+            panOffset.current = Math.max(
+              -maxPanLeft,
+              Math.min(maxPanRight, panOffset.current)
+            );
+
+            xScaleB.domain([
+              -halfCircles + panOffset.current,
+              halfCircles + panOffset.current,
+            ]);
+
+            const tickStep = CONFIG.BUTTERFLY_CHART_X_AXIS_TICK_STEP;
+            const newTickMin =
+              Math.ceil((-halfCircles + panOffset.current) / tickStep) *
+              tickStep;
+            const newTickMax =
+              Math.floor((halfCircles + panOffset.current) / tickStep) *
+              tickStep;
+            const newTicks = d3.range(
+              newTickMin,
+              newTickMax + tickStep,
+              tickStep
+            );
+
+            xAxisB.call(
+              d3
+                .axisBottom(xScaleB)
+                .tickSize(0)
+                .tickValues(newTicks)
+                .tickFormat((d) => Math.abs(+d).toString())
+            );
+
+            xAxisB.selectAll(".tick").each(function () {
+              d3.select(this).select("line.grid-line").remove();
+              d3.select(this)
+                .append("line")
+                .attr("class", "grid-line")
+                .attr("y1", -hB)
+                .attr("y2", 0)
+                .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
+            });
+
+            gB.selectAll(".retrain-circle").attr("cx", function () {
+              const origX = +d3.select(this).attr("data-original-x");
+              const newX = xScaleB(origX);
+              d3.select(this).attr(
+                "visibility",
+                newX < -200 ? "hidden" : "visible"
+              );
+              return newX;
+            });
+            gB.selectAll(".unlearn-circle").attr("cx", function () {
+              const origX = +d3.select(this).attr("data-original-x");
+              const newX = xScaleB(origX);
+              d3.select(this).attr(
+                "visibility",
+                newX < -200 ? "hidden" : "visible"
+              );
+              return newX;
+            });
+          })
+        );
+
       // Draw circles for the retrain data on the y-axis corresponding to the threshold value
       retrainBins.forEach((bin) => {
         const yPos = yScaleB(bin.threshold + binSize / 2);
@@ -244,7 +331,7 @@ export default function AttackPlot({
         const displayCount = Math.min(maxDisplayCount, bin.bins.length);
         const extraCount = bin.bins.length - displayCount;
 
-        for (let i = 0; i < displayCount; i++) {
+        for (let i = 0; i < bin.bins.length; i++) {
           const currentBin = bin.bins[i];
           const opacity =
             hoveredId !== null
@@ -252,14 +339,14 @@ export default function AttackPlot({
                 ? CONFIG.OPACITY_ABOVE_THRESHOLD
                 : CONFIG.OPACITY_BELOW_THRESHOLD
               : getCircleOpacity(yPos, yScaleB(thresholdValue));
-          const cx =
-            -circleDiameter / 2 - (displayCount - 1 - i) * circleDiameter;
+          // const originalXDomain = -(displayCount - 1 - i + 0.5);
+          const originalXDomain = -(bin.bins.length - 1 - i + 0.5);
 
           gB.append("circle")
             .datum(currentBin)
             .attr("class", "retrain-circle")
             .attr("fill", COLORS.DARK_GRAY)
-            .attr("cx", cx)
+            .attr("cx", xScaleB(originalXDomain))
             .attr("cy", yPos)
             .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
             .attr("fill-opacity", opacity)
@@ -271,6 +358,7 @@ export default function AttackPlot({
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
             .attr("stroke-opacity", opacity)
             .attr("cursor", "pointer")
+            .attr("data-original-x", originalXDomain)
             .on("mouseover", (_, d) => setHoveredId(d.img_idx))
             .on("mouseout", () => setHoveredId(null))
             .on("click", (event, d) => {
@@ -304,7 +392,7 @@ export default function AttackPlot({
         const displayCount = Math.min(maxDisplayCount, bin.bins.length);
         const extraCount = bin.bins.length - displayCount;
 
-        for (let i = 0; i < displayCount; i++) {
+        for (let i = 0; i < bin.bins.length; i++) {
           const currentBin = bin.bins[i];
           const opacity =
             hoveredId !== null
@@ -312,13 +400,13 @@ export default function AttackPlot({
                 ? CONFIG.OPACITY_ABOVE_THRESHOLD
                 : CONFIG.OPACITY_BELOW_THRESHOLD
               : getCircleOpacity(yPos, yScaleB(thresholdValue));
-          const cx = circleDiameter / 2 + i * circleDiameter;
+          const originalXDomain = i + 0.5;
 
           gB.append("circle")
             .datum(currentBin)
             .attr("class", "unlearn-circle")
             .attr("fill", color)
-            .attr("cx", cx)
+            .attr("cx", xScaleB(originalXDomain))
             .attr("cy", yPos)
             .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
             .attr("fill-opacity", opacity)
@@ -326,6 +414,7 @@ export default function AttackPlot({
             .attr("stroke-width", CONFIG.STROKE_WIDTH)
             .attr("stroke-opacity", opacity)
             .attr("cursor", "pointer")
+            .attr("data-original-x", originalXDomain)
             .on("mouseover", (_, d) => setHoveredId(d.img_idx))
             .on("mouseout", () => setHoveredId(null))
             .on("click", (event, d) => {
@@ -360,6 +449,9 @@ export default function AttackPlot({
             .tickValues(ticks)
             .tickFormat((d) => Math.abs(+d).toString())
         );
+
+      xAxisB.attr("clip-path", "url(#clip-butterfly)");
+
       xAxisB
         .append("text")
         .attr("class", "x-axis-label-b")
@@ -414,6 +506,7 @@ export default function AttackPlot({
         .attr("fill", COLORS.BLACK)
         .attr("text-anchor", "middle")
         .text(" Samples →");
+
       xAxisB
         .selectAll(".tick")
         .append("line")
@@ -421,8 +514,8 @@ export default function AttackPlot({
         .attr("y1", -hB)
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
-      xAxisB.lower();
-      xAxisB.selectAll("text").attr("dy", "10px");
+
+      xAxisB.selectAll("text").attr("dy", FONT_CONFIG.FONT_SIZE_10);
 
       // draw the y-axis
       gB.append("g")

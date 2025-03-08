@@ -46,9 +46,8 @@ export default function InstancePanel({
   const strategy = useAttackStateStore((state) => state.strategy);
 
   const [imgSize, setImgSize] = useState(0);
-  const [filteredColor, setFilteredColor] = useState<"gray" | "color" | null>(
-    null
-  );
+  const [isGrayChecked, setIsGrayChecked] = useState(true);
+  const [isColorChecked, setIsColorChecked] = useState(true);
 
   const isModelA = model === "A";
   const isModeSuccess = mode === "success";
@@ -130,12 +129,18 @@ export default function InstancePanel({
   };
 
   const images = useMemo(() => {
-    const filteredSuccessGroup =
-      filteredColor === "gray"
-        ? imageGroup.filter((item) => item.type === RETRAIN)
-        : filteredColor === "color"
-        ? imageGroup.filter((item) => item.type === UNLEARN)
-        : imageGroup;
+    type FilteredImageGroup = {
+      type: string;
+      img_idx: number;
+    };
+    let filteredSuccessGroup: FilteredImageGroup[] = [];
+    if (isGrayChecked && isColorChecked) {
+      filteredSuccessGroup = imageGroup;
+    } else if (isGrayChecked) {
+      filteredSuccessGroup = imageGroup.filter((item) => item.type === RETRAIN);
+    } else if (isColorChecked) {
+      filteredSuccessGroup = imageGroup.filter((item) => item.type === UNLEARN);
+    }
 
     return filteredSuccessGroup.map((groupItem, idx) => {
       const imgData = imageMap.get(groupItem.img_idx);
@@ -205,11 +210,12 @@ export default function InstancePanel({
   }, [
     color,
     data,
-    filteredColor,
     hoveredId,
     imageGroup,
     imageMap,
     imgSize,
+    isColorChecked,
+    isGrayChecked,
     isModeSuccess,
     isModelA,
     mode,
@@ -227,18 +233,6 @@ export default function InstancePanel({
     setImgSize(value[0]);
   };
 
-  const handleCircleClick = (color: "gray" | "color") => {
-    if (color === "gray") {
-      filteredColor === "gray"
-        ? setFilteredColor(null)
-        : setFilteredColor(color);
-    } else if (color === "color") {
-      filteredColor === "color"
-        ? setFilteredColor(null)
-        : setFilteredColor(color);
-    }
-  };
-
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -251,7 +245,7 @@ export default function InstancePanel({
             {mode[0].toUpperCase() + mode.slice(1)}
           </span>
           <span
-            className={`mx-1.5 text-[15px] font-light w-11 ${
+            className={`mx-1 text-sm font-light w-11 ${
               isModeSuccess && isStrategyMaxSuccessRate && "text-red-500"
             }`}
           >
@@ -260,8 +254,8 @@ export default function InstancePanel({
           <div className="flex items-center gap-1">
             <Checkbox
               id={`${mode}-gray`}
-              checked={filteredColor === "gray"}
-              onCheckedChange={() => handleCircleClick("gray")}
+              checked={isGrayChecked}
+              onCheckedChange={(checked: boolean) => setIsGrayChecked(checked)}
               className={`w-3.5 h-3.5 border ${
                 isModeSuccess && "data-[state=checked]:text-black"
               }`}
@@ -274,8 +268,8 @@ export default function InstancePanel({
             />
             <Checkbox
               id={`${mode}-color`}
-              checked={filteredColor === "color"}
-              onCheckedChange={() => handleCircleClick("color")}
+              checked={isColorChecked}
+              onCheckedChange={(checked: boolean) => setIsColorChecked(checked)}
               className={`w-3.5 h-3.5 border ${
                 !isModeSuccess && "data-[state=checked]:text-black"
               }`}
