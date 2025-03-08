@@ -342,6 +342,7 @@ export default function AttackPlot({
           const originalXDomain = -(bin.bins.length - 1 - i + 0.5);
 
           gB.append("circle")
+            .attr("clip-path", "url(#clip-butterfly)")
             .datum(currentBin)
             .attr("class", "retrain-circle")
             .attr("fill", COLORS.DARK_GRAY)
@@ -401,6 +402,7 @@ export default function AttackPlot({
           const originalXDomain = i + 0.5;
 
           gB.append("circle")
+            .attr("clip-path", "url(#clip-butterfly)")
             .datum(currentBin)
             .attr("class", "unlearn-circle")
             .attr("fill", color)
