@@ -26,53 +26,55 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
 
   return (
     <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
-      <div className="flex flex-col">
-        <p className="text-lg font-medium mb-1">True Class</p>
-        <ul className="flex flex-col gap-1">
-          <li className="flex items-center text-nowrap">
-            <CircleIcon className="w-2 h-2 mr-1.5 relative left-[1px]" />
-            <span>Retain</span>
-          </li>
-          <li className="flex items-center">
-            <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1" />
-            <span>Forget</span>
-          </li>
-        </ul>
-      </div>
-      <div className="flex flex-col">
-        <p className="text-lg font-medium mb-1">Predicted Class</p>
-        <div
-          style={{ gridTemplateColumns: "115px 80px 80px 80px 46px" }}
-          className="grid gap-y-1"
-        >
-          {oddIndices.map((name, idx) => {
-            const originalIdx = idx * 2;
-            return (
-              <li key={originalIdx} className="flex items-center">
-                <div
-                  style={{ backgroundColor: TABLEAU10[originalIdx] }}
-                  className="w-3 h-4 mr-[5px]"
-                />
-                <span>
-                  {forgetClass === originalIdx ? name + " (\u2716)" : name}
-                </span>
-              </li>
-            );
-          })}
-          {evenIndices.map((name, idx) => {
-            const originalIdx = idx * 2 + 1;
-            return (
-              <li key={originalIdx} className="flex items-center">
-                <div
-                  style={{ backgroundColor: TABLEAU10[originalIdx] }}
-                  className="w-3 h-4 mr-[5px]"
-                />
-                <span>
-                  {forgetClass === originalIdx ? name + " (\u2716)" : name}
-                </span>
-              </li>
-            );
-          })}
+      <div className="flex">
+        <div className="flex flex-col mr-[35px]">
+          <p className="text-lg font-medium mb-1">True Class</p>
+          <ul className="flex flex-col gap-1">
+            <li className="flex items-center text-nowrap">
+              <CircleIcon className="w-2 h-2 mr-1.5 relative left-[1px]" />
+              <span>Retain</span>
+            </li>
+            <li className="flex items-center">
+              <FatMultiplicationSignIcon className="w-2.5 h-2.5 mr-1" />
+              <span>Forget</span>
+            </li>
+          </ul>
+        </div>
+        <div className="flex flex-col">
+          <p className="text-lg font-medium mb-1">Predicted Class</p>
+          <div
+            style={{ gridTemplateColumns: "115px 80px 80px 80px 46px" }}
+            className="grid gap-y-1"
+          >
+            {oddIndices.map((name, idx) => {
+              const originalIdx = idx * 2;
+              return (
+                <li key={originalIdx} className="flex items-center">
+                  <div
+                    style={{ backgroundColor: TABLEAU10[originalIdx] }}
+                    className="w-3 h-4 mr-[5px]"
+                  />
+                  <span>
+                    {forgetClass === originalIdx ? name + " (\u2716)" : name}
+                  </span>
+                </li>
+              );
+            })}
+            {evenIndices.map((name, idx) => {
+              const originalIdx = idx * 2 + 1;
+              return (
+                <li key={originalIdx} className="flex items-center">
+                  <div
+                    style={{ backgroundColor: TABLEAU10[originalIdx] }}
+                    className="w-3 h-4 mr-[5px]"
+                  />
+                  <span>
+                    {forgetClass === originalIdx ? name + " (\u2716)" : name}
+                  </span>
+                </li>
+              );
+            })}
+          </div>
         </div>
       </div>
       <div className="flex">
