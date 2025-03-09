@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
 import { MatrixProps } from "../../views/PredictionMatrix";
-import { CIFAR_10_CLASSES, FONT_CONFIG } from "../../constants/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS } from "../../constants/colors";
+import {
+  CIFAR_10_CLASSES,
+  STROKE_CONFIG,
+  FONT_CONFIG,
+} from "../../constants/common";
 import {
   useModelAExperiment,
   useModelBExperiment,
@@ -30,7 +34,7 @@ const CONFIG = {
   },
 } as const;
 
-function BubbleChart({
+export default function BubbleChart({
   mode,
   modelType,
   datasetMode,
@@ -96,8 +100,6 @@ function BubbleChart({
       );
 
     const xScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, width]);
-    const cellGap = 1;
-    const rectSize = xScale(1) - xScale(0) - cellGap;
 
     const yScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, height]);
 
@@ -105,13 +107,18 @@ function BubbleChart({
       .scaleSequential((t) => d3.interpolateGreys(0.05 + 0.95 * t))
       .domain([0, 1]);
 
+    const sizeScale = d3
+      .scaleLinear()
+      .domain([0, 1])
+      .range([CONFIG.MIN_BUBBLE_SIZE, CONFIG.MAX_BUBBLE_SIZE]);
+
     const xAxis = d3
       .axisBottom(xScale)
       .tickValues(d3.range(0, 10))
       .tickSize(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
+          ? CIFAR_10_CLASSES[d as number] + " (X)"
           : CIFAR_10_CLASSES[d as number]
       );
 
@@ -122,7 +129,7 @@ function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
+          ? CIFAR_10_CLASSES[d as number] + " (X)"
           : CIFAR_10_CLASSES[d as number]
       );
 
@@ -132,7 +139,9 @@ function BubbleChart({
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
       .call((g) => {
-        g.select(".domain").remove();
+        g.select(".domain")
+          .attr("stroke", COLORS.BLACK)
+          .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
         g.selectAll(".tick text")
           .attr("transform", "rotate(-45)")
           .style("text-anchor", "end")
@@ -148,13 +157,12 @@ function BubbleChart({
         .attr("class", "y-axis")
         .call(yAxis)
         .call((g) => {
-          g.select(".domain").remove();
+          g.select(".domain")
+            .attr("stroke", COLORS.BLACK)
+            .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
           g.selectAll(".tick text")
             .attr("dx", "-.5em")
-            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
-            .style("font-weight", (t: any) =>
-              t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
-            );
+            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED);
         });
     } else {
       svg
@@ -162,63 +170,34 @@ function BubbleChart({
         .attr("class", "y-axis")
         .call(yAxis)
         .call((g) => {
-          g.select(".domain").remove();
-          g.selectAll(".tick text").remove();
+          g.select(".domain")
+            .attr("stroke", COLORS.BLACK)
+            .attr("stroke-width", STROKE_CONFIG.LIGHT_STROKE_WIDTH);
+          g.selectAll(".tick text")
+            .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
+            .remove();
         });
     }
 
-    const cellGroup = svg
-      .selectAll("g.cell")
+    svg
+      .selectAll("rect")
       .data(data)
-      .join("g")
-      .attr("class", "cell");
-
-    cellGroup.each(function (d: any) {
-      const xCenter = xScale(d.x);
-      const yCenter = yScale(d.y);
-
-      const x0 = xCenter - rectSize / 2;
-      const x1 = xCenter + rectSize / 2;
-      const y0 = yCenter - rectSize / 2;
-      const y1 = yCenter + rectSize / 2;
-
-      d3.select(this)
-        .append("path")
-        .attr("d", `M ${x0},${y0} L ${x1},${y0} L ${x1},${y1} Z`)
-        .attr("fill", colorScale(d.conf));
-
-      d3.select(this)
-        .append("path")
-        .attr("d", `M ${x0},${y0} L ${x1},${y1} L ${x0},${y1} Z`)
-        .attr("fill", colorScale(d.label));
-
-      d3.select(this)
-        .append("rect")
-        .attr("class", "cell-border")
-        .attr("x", x0)
-        .attr("y", y0)
-        .attr("width", rectSize)
-        .attr("height", rectSize)
-        .attr("fill", "none")
-        .attr("pointer-events", "all");
-    });
-
-    cellGroup
-      .on("mouseover", function (event: any, d: any) {
+      .join("rect")
+      .attr("x", (d) => xScale(d.x) - CONFIG.CELL_SIZE / 2)
+      .attr("y", (d) => yScale(d.y) - CONFIG.CELL_SIZE / 2)
+      .attr("width", CONFIG.CELL_SIZE)
+      .attr("height", CONFIG.CELL_SIZE)
+      .attr("rx", CONFIG.CELL_ROUNDEDNESS)
+      .attr("ry", CONFIG.CELL_ROUNDEDNESS)
+      .attr("fill", "transparent")
+      .on("mouseover", (event, d: any) => {
         event.stopPropagation();
 
-        d3.select(this)
-          .select(".cell-border")
-          .attr("stroke", "black")
-          .attr("stroke-width", 1);
+        d3.select(event.target).attr("fill", "rgba(128, 128, 128, 0.2)");
 
-        const rect = (
-          d3.select(this).select(".cell-border").node() as HTMLElement
-        ).getBoundingClientRect();
-
-        if (!rect) return;
-
+        const rect = event.target.getBoundingClientRect();
         const tooltipWidth = tooltipRef.current?.offsetWidth || 100;
+
         const rightSpace = window.innerWidth - rect.right;
         const leftSpace = rect.left;
 
@@ -249,13 +228,32 @@ function BubbleChart({
 
         onHover(d.y);
       })
-      .on("mouseout", function (event: any) {
-        d3.select(this)
-          .select(".cell-border")
-          .attr("stroke", null)
-          .attr("stroke-width", null);
-
+      .on("mouseout", (event) => {
+        d3.select(event.target).attr("fill", "transparent");
         handleMouseOut(event);
+      });
+
+    svg
+      .selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", (d) => xScale(d.x))
+      .attr("cy", (d) => yScale(d.y))
+      .attr("r", (d) =>
+        d.label >= CONFIG.MIN_VALUE_TO_DISPLAY
+          ? Math.sqrt(sizeScale(d.label))
+          : 0
+      )
+      .attr("fill", (d) => colorScale(d.conf))
+      .attr("opacity", 0.7)
+      .style("pointer-events", "none");
+
+    if (!svgRef.current) return;
+
+    d3.select(svgRef.current)
+      .selectAll(".y-axis .tick text")
+      .style("font-weight", (t: any) => {
+        return t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT;
       });
   }, [
     datasetMode,
@@ -267,15 +265,6 @@ function BubbleChart({
     showYAxis,
     zoom,
   ]);
-
-  useEffect(() => {
-    if (!svgRef.current) return;
-    d3.select(svgRef.current)
-      .selectAll(".y-axis .tick text")
-      .style("font-weight", (t: any) =>
-        t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
-      );
-  }, [hoveredY]);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -383,5 +372,3 @@ function BubbleChart({
     </div>
   );
 }
-
-export default React.memo(BubbleChart);
