@@ -5,13 +5,14 @@ import DatasetModeSelector from "../components/DatasetModeSelector";
 import CorrelationMatrix from "../components/Predictions/CorrelationMatrix";
 import PredictionMatrixLegend from "../components/Predictions/PredictionMatrixLegend";
 import Indicator from "../components/Indicator";
+import { useForgetClassStore } from "../stores/forgetClassStore";
+import { useModelDataStore } from "../stores/modelDataStore";
+import { TRAIN } from "../constants/common";
+import { ChartChangeIcon } from "../components/UI/icons";
 import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../stores/experimentsStore";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { TRAIN } from "../constants/common";
 
 export default function PredictionMatrix() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
@@ -29,7 +30,8 @@ export default function PredictionMatrix() {
   const handleHover = useCallback((y: number | null) => setHoveredY(y), []);
 
   return (
-    <div className="h-[341px]">
+    <div className="h-[341px] relative">
+      <ChartChangeIcon className="w-6 h-6 absolute left-2 top-[34px] cursor-pointer p-0.5 rounded-sm bg-[#eaeaea]" />
       <div className="flex justify-between">
         <Subtitle title="Prediction Matrix" className="left-0.5" />
         {forgetClassExist && areAllModelsSelected && (
