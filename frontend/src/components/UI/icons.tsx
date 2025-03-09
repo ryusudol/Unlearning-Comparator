@@ -243,10 +243,10 @@ export const HelpCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 interface FilterIconProps extends React.SVGProps<SVGSVGElement> {
-  filterValue?: string;
+  filterValues: string[];
 }
-export const FilterIcon = ({ filterValue, ...props }: FilterIconProps) => {
-  const color = filterValue === "all" ? "#cacaca" : "black";
+export const FilterIcon = ({ filterValues, ...props }: FilterIconProps) => {
+  const color = filterValues.length === 0 ? "#cacaca" : "black";
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

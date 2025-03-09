@@ -7,7 +7,7 @@ import { UNLEARNING_METHODS } from "../../constants/experiments";
 const MOUSEDOWN = "mousedown";
 
 export default function MethodFilterHeader({ column }: { column: any }) {
-  const [filterValue, setFilterValue] = useState("all");
+  const [filterValues, setFilterValues] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0 });
 
@@ -25,8 +25,18 @@ export default function MethodFilterHeader({ column }: { column: any }) {
   }, [showDropdown]);
 
   const handleSelect = (value: string) => () => {
-    column.setFilterValue(value);
-    setFilterValue(value);
+    let newFilterValues: string[];
+
+    if (filterValues.includes(value)) {
+      newFilterValues = filterValues.filter((val) => val !== value);
+    } else if (value === "") {
+      newFilterValues = [];
+    } else {
+      newFilterValues = [...filterValues, value];
+    }
+
+    setFilterValues(newFilterValues);
+    column.setFilterValue(newFilterValues);
     setShowDropdown(false);
   };
 
@@ -56,7 +66,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
     <div ref={containerRef} className="flex items-center relative">
       <span>Method</span>
       <FilterIcon
-        filterValue={filterValue}
+        filterValues={filterValues}
         className="ml-1 cursor-pointer w-3.5"
         onClick={() => setShowDropdown(true)}
       />
@@ -71,7 +81,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
             }}
           >
             <div
-              onClick={handleSelect("all")}
+              onClick={handleSelect("")}
               className="px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer"
             >
               All
@@ -81,6 +91,11 @@ export default function MethodFilterHeader({ column }: { column: any }) {
                 key={method}
                 onClick={handleSelect(method)}
                 className="px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer"
+                style={{
+                  backgroundColor: filterValues.includes(method)
+                    ? "#f0f6fa"
+                    : "transparent",
+                }}
               >
                 {method}
               </div>

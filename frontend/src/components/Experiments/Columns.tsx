@@ -83,8 +83,9 @@ export const columns: ColumnDef<ExperimentData>[] = [
     header: ({ column }) => <MethodFilterHeader column={column} />,
     filterFn: (row, columnId, filterValue) => {
       const rowValue = row.getValue(columnId);
-      if (filterValue === "all") return true;
-      return String(rowValue) === filterValue;
+      if (filterValue.length === 0) return true;
+      return filterValue.includes(String(rowValue));
+      // return String(rowValue) === filterValue;
     },
     cell: ({ row }) => {
       const method = row.getValue("Method");
