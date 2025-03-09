@@ -95,6 +95,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "Epoch",
     header: ({ column }) => <EpochHeader column={column} />,
+
     cell: ({ row }) => {
       const epoch = row.getValue("Epoch");
       const value = getValueToDisplay(epoch);
@@ -104,6 +105,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "BS",
     header: ({ column }) => <BSHeader column={column} />,
+
     cell: ({ row }) => {
       const batchSize = row.getValue("BS");
       const value = getValueToDisplay(batchSize);
@@ -113,6 +115,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "LR",
     header: ({ column }) => <LRHeader column={column} />,
+
     cell: ({ row }) => {
       const learningRate = row.getValue("LR");
       const value = getValueToDisplay(learningRate);
@@ -122,6 +125,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "UA",
     header: ({ column }) => <UAHeader column={column} />,
+
     cell: ({ row }) => {
       const ua = row.getValue("UA");
       const value = getValueToDisplay(ua);
@@ -135,6 +139,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "RA",
     header: ({ column }) => <RAHeader column={column} />,
+
     cell: ({ row }) => {
       const ra = row.getValue("RA");
       const value = getValueToDisplay(ra);
@@ -148,6 +153,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "TUA",
     header: ({ column }) => <TUAHeader column={column} />,
+
     cell: ({ row }) => {
       const tua = row.getValue("TUA");
       const value = getValueToDisplay(tua);
@@ -161,6 +167,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "TRA",
     header: ({ column }) => <TRAHeader column={column} />,
+
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
       const value = getValueToDisplay(tra);
@@ -174,6 +181,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "RTE",
     header: ({ column }) => <RTEHeader column={column} />,
+
     cell: ({ row }) => {
       const rte = row.getValue("RTE");
       const value = getValueToDisplay(rte);
@@ -183,6 +191,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
   {
     accessorKey: "FQS",
     header: ({ column }) => <FQSHeader column={column} />,
+
     cell: ({ row }) => {
       const fqs = row.getValue("FQS");
       const value = getValueToDisplay(fqs);

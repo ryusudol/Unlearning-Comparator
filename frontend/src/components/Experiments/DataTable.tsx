@@ -3,7 +3,6 @@ import {
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
-  getSortedRowModel,
   useReactTable,
   CellContext,
 } from "@tanstack/react-table";
@@ -32,25 +31,40 @@ export default function DataTable({ isExpanded }: Props) {
 
   const tableData = useMemo(() => {
     const experimentsArray = Object.values(experiments);
-
     if (experimentsArray.length === 0) return [];
 
-    const temporaryExps: Experiment[] = [];
-    const nonTemporaryExps: Experiment[] = [];
-    experimentsArray.forEach((exp) => {
-      if (exp.ID !== "-") {
-        nonTemporaryExps.push(exp);
-      } else {
-        temporaryExps.push(exp);
-      }
-    });
-    nonTemporaryExps.sort(
-      (a, b) =>
-        new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime()
-    );
+    if (sorting.length > 0) {
+      const { id, desc } = sorting[0];
+      const validRows = experimentsArray.filter((exp) => {
+        const val = exp[id as keyof Experiment];
+        return val !== "N/A" && val !== "NaN" && val !== undefined;
+      });
+      const undefinedRows = experimentsArray.filter((exp) => {
+        const val = exp[id as keyof Experiment];
+        return val === "N/A" || val === "NaN" || val === undefined;
+      });
 
-    return [...nonTemporaryExps, ...temporaryExps];
-  }, [experiments]);
+      validRows.sort((a, b) => {
+        const aVal = a[id as keyof Experiment];
+        const bVal = b[id as keyof Experiment];
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return aVal - bVal;
+        }
+        return String(aVal).localeCompare(String(bVal));
+      });
+
+      if (desc) {
+        validRows.reverse();
+      }
+
+      return [...validRows, ...undefinedRows];
+    } else {
+      return experimentsArray.sort(
+        (a, b) =>
+          new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime()
+      );
+    }
+  }, [experiments, sorting]);
 
   const modifiedColumns = columns.map((column) => {
     if (column.id !== "A" && column.id !== "B") {
@@ -89,9 +103,9 @@ export default function DataTable({ isExpanded }: Props) {
     getRowId: (row: ExperimentData) => row.ID,
     data: tableData as ExperimentData[],
     columns: modifiedColumns,
+    manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     state: { sorting },
   });
