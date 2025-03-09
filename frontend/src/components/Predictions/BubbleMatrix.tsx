@@ -2,6 +2,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
+import { MatrixProps } from "../../views/PredictionMatrix";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { calculateZoom } from "../../utils/util";
+import { extractBubbleChartData } from "../../utils/data/experiments";
+import { COLORS } from "../../constants/colors";
 import {
   CIFAR_10_CLASSES,
   STROKE_CONFIG,
@@ -11,11 +17,6 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
-import { calculateZoom } from "../../utils/util";
-import { extractBubbleChartData } from "../../utils/data/experiments";
-import { COLORS } from "../../constants/colors";
 
 const CONFIG = {
   WIDTH: 260,
@@ -33,15 +34,6 @@ const CONFIG = {
   },
 } as const;
 
-interface Props {
-  mode: "A" | "B";
-  modelType: string;
-  datasetMode: string;
-  hoveredY: number | null;
-  onHover: (y: number | null) => void;
-  showYAxis?: boolean;
-}
-
 export default function BubbleChart({
   mode,
   modelType,
@@ -49,7 +41,7 @@ export default function BubbleChart({
   hoveredY,
   onHover,
   showYAxis = true,
-}: Props) {
+}: MatrixProps) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);

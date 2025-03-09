@@ -2,16 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
+import { MatrixProps } from "../../views/PredictionMatrix";
 import { CIFAR_10_CLASSES, FONT_CONFIG } from "../../constants/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS } from "../../constants/colors";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 
 const CONFIG = {
   WIDTH: 260,
@@ -29,15 +30,6 @@ const CONFIG = {
   },
 } as const;
 
-interface Props {
-  mode: "A" | "B";
-  modelType: string;
-  datasetMode: string;
-  hoveredY: number | null;
-  onHover: (y: number | null) => void;
-  showYAxis?: boolean;
-}
-
 function BubbleChart({
   mode,
   modelType,
@@ -45,7 +37,7 @@ function BubbleChart({
   hoveredY,
   onHover,
   showYAxis = true,
-}: Props) {
+}: MatrixProps) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -309,7 +301,7 @@ function BubbleChart({
 
   return (
     <div
-      className={`flex flex-col items-center relative ${
+      className={`flex flex-col items-center relative top-4 ${
         showYAxis ? "z-10" : "right-[56px] z-0"
       }`}
     >
