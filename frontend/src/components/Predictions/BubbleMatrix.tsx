@@ -15,7 +15,7 @@ import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
-import { COLORS, bubbleColorScale } from "../../constants/colors";
+import { COLORS } from "../../constants/colors";
 
 const CONFIG = {
   WIDTH: 260,
@@ -38,8 +38,7 @@ interface Props {
   modelType: string;
   datasetMode: string;
   hoveredY: number | null;
-  onHover: (y: number) => void;
-  onHoverEnd: () => void;
+  onHover: (y: number | null) => void;
   showYAxis?: boolean;
 }
 
@@ -49,7 +48,6 @@ export default function BubbleChart({
   datasetMode,
   hoveredY,
   onHover,
-  onHoverEnd,
   showYAxis = true,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
@@ -84,9 +82,9 @@ export default function BubbleChart({
         ...prev,
         display: false,
       }));
-      onHoverEnd();
+      onHover(null);
     },
-    [onHoverEnd]
+    [onHover]
   );
 
   useEffect(() => {
@@ -114,9 +112,8 @@ export default function BubbleChart({
     const yScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, height]);
 
     const colorScale = d3
-      .scaleQuantize<string>()
-      .domain([0, 1])
-      .range(bubbleColorScale);
+      .scaleSequential((t) => d3.interpolateGreys(0.05 + 0.95 * t))
+      .domain([0, 1]);
 
     const sizeScale = d3
       .scaleLinear()
