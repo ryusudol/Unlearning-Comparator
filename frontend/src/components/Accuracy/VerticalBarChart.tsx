@@ -35,18 +35,18 @@ interface Props {
   mode: "Training" | "Test";
   gapData: GapDataItem[];
   maxGap: number;
-  showYAxis?: boolean;
   hoveredClass: string | null;
   onHoverChange: (value: string | null) => void;
+  showYAxis?: boolean;
 }
 
 export default function VerticalBarChart({
   mode,
   gapData,
   maxGap,
-  showYAxis = true,
   hoveredClass,
   onHoverChange,
+  showYAxis = true,
 }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
@@ -93,7 +93,7 @@ export default function VerticalBarChart({
       </span>
       <ChartContainer
         config={VERTICAL_BAR_CHART_CONFIG}
-        className={`${showYAxis ? "w-[260px]" : "w-[200px]"} h-[252px]`}
+        className={`${showYAxis ? "w-[260px]" : "w-[210px]"} h-[252px]`}
       >
         <BarChart
           accessibilityLayer
@@ -122,7 +122,7 @@ export default function VerticalBarChart({
             fontSize={FONT_CONFIG.FONT_SIZE_10}
             fontWeight={FONT_CONFIG.LIGHT_FONT_WEIGHT}
             tick={showYAxis ? renderTick : false}
-            width={showYAxis ? 60 : 1}
+            width={showYAxis ? 60 : 10}
             tickMargin={-1}
             tickFormatter={(value) => {
               const label =

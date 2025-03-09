@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 
 import Subtitle from "../components/Subtitle";
 import Indicator from "../components/Indicator";
-import VerticalBarChart from "../components/Accuracies/VerticalBarChart";
+import VerticalBarChart from "../components/Accuracy/VerticalBarChart";
+import { useForgetClassStore } from "../stores/forgetClassStore";
+import { useModelDataStore } from "../stores/modelDataStore";
+import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../stores/experimentsStore";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 
 export default function ClassWiseAnalysis() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
@@ -57,9 +57,9 @@ export default function ClassWiseAnalysis() {
               mode="Test"
               gapData={accuracyData.testAccuracyGap}
               maxGap={accuracyData.maxGap}
-              showYAxis={false}
               hoveredClass={hoveredClass}
               onHoverChange={setHoveredClass}
+              showYAxis={false}
             />
           </div>
         ) : (
