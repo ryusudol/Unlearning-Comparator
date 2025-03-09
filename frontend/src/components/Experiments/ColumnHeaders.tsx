@@ -9,6 +9,17 @@ import { Button } from "../UI/button";
 import { UnfoldMoreIcon } from "../UI/icons";
 import { ExperimentData } from "../../types/data";
 
+const handleSorting = (column: Column<ExperimentData, unknown>) => {
+  const currentSort = column.getIsSorted();
+  if (!currentSort) {
+    column.toggleSorting(true);
+  } else if (currentSort === "desc") {
+    column.toggleSorting(false);
+  } else if (currentSort === "asc") {
+    column.clearSorting();
+  }
+};
+
 export const EpochHeader = ({
   column,
 }: {
@@ -19,16 +30,7 @@ export const EpochHeader = ({
     <Button
       className="w-full px-0 h-[34px] flex justify-start"
       variant="ghost"
-      onClick={() => {
-        const currentSort = column.getIsSorted();
-        if (!currentSort) {
-          column.toggleSorting(true);
-        } else if (currentSort === "desc") {
-          column.toggleSorting(false);
-        } else if (currentSort === "asc") {
-          column.clearSorting();
-        }
-      }}
+      onClick={() => handleSorting(column)}
     >
       Epoch
       <UnfoldMoreIcon
@@ -51,16 +53,7 @@ export const BSHeader = ({
         <Button
           className="w-full px-0 h-[34px] flex justify-start"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           BS
           <UnfoldMoreIcon
@@ -88,16 +81,7 @@ export const LRHeader = ({
         <Button
           className="w-full px-0 h-[34px] flex justify-start"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           LR
           <UnfoldMoreIcon
@@ -125,16 +109,7 @@ export const UAHeader = ({
         <Button
           className="w-full px-0 h-[34px]"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           UA
           <UnfoldMoreIcon
@@ -162,16 +137,7 @@ export const RAHeader = ({
         <Button
           className="w-full px-0 h-[34px]"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           RA
           <UnfoldMoreIcon
@@ -199,16 +165,7 @@ export const TUAHeader = ({
         <Button
           className="w-full px-0 h-[34px]"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           TUA
           <UnfoldMoreIcon
@@ -236,16 +193,7 @@ export const TRAHeader = ({
         <Button
           className="w-full px-0 h-[34px]"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           TRA
           <UnfoldMoreIcon
@@ -273,16 +221,7 @@ export const RTEHeader = ({
         <Button
           className="w-full px-0 h-[34px]"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           RTE
           <UnfoldMoreIcon
@@ -310,16 +249,7 @@ export const FQSHeader = ({
         <Button
           className="w-full px-0 h-[34px]"
           variant="ghost"
-          onClick={() => {
-            const currentSort = column.getIsSorted();
-            if (!currentSort) {
-              column.toggleSorting(true);
-            } else if (currentSort === "desc") {
-              column.toggleSorting(false);
-            } else if (currentSort === "asc") {
-              column.clearSorting();
-            }
-          }}
+          onClick={() => handleSorting(column)}
         >
           FQS
           <UnfoldMoreIcon
