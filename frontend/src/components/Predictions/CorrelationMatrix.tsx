@@ -301,7 +301,7 @@ function BubbleChart({
 
   return (
     <div
-      className={`flex flex-col items-center relative top-4 ${
+      className={`flex flex-col items-center relative ${
         showYAxis ? "z-10" : "right-[56px] z-0"
       }`}
     >

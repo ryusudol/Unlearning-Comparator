@@ -81,7 +81,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
       <style>{LINE_CHART_TICK_STYLE}</style>
       <CustomLegend />
       <ChartContainer
-        className="w-[460px] h-[250px] relative"
+        className="w-[460px] h-[266px] relative"
         config={LINE_CHART_CONFIG}
       >
         <LineChart
