@@ -189,9 +189,7 @@ export default function Legend() {
                         <br />
                         <span className="text-[11px]">
                           {idx === THRESHOLD_STRATEGIES.length - 1
-                            ? `(A, B: ${strategyThresholds["A"][idx].toFixed(
-                                2
-                              )})`
+                            ? strategyThresholds["A"][idx].toFixed(2)
                             : idx !== 0
                             ? `(A: ${strategyThresholds["A"][idx].toFixed(
                                 2
