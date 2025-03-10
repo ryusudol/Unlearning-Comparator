@@ -77,12 +77,7 @@ export default function Core() {
   }, [forgetClass, forgetClassExist, modelB]);
 
   return (
-    <View
-      width={CONFIG.CORE_WIDTH}
-      height={CONFIG.CORE_HEIGHT}
-      borderBottom
-      borderTop
-    >
+    <View width={CONFIG.CORE_WIDTH} height={CONFIG.CORE_HEIGHT} borderTop>
       <div className="flex items-center gap-1 mb-1.5 ml-1 relative right-1">
         <Title
           title="Embedding Space"

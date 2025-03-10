@@ -15,6 +15,7 @@ import { fetchAllSubsetImages } from "../../utils/api/privacyAttack";
 import { calculateZoom } from "../../utils/util";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { ENTROPY, UNLEARN, RETRAIN, CONFIDENCE } from "../../constants/common";
+import { useThresholdStore } from "../../stores/thresholdStore";
 import {
   useModelAExperiment,
   useModelBExperiment,
@@ -43,6 +44,8 @@ export default function AttackAnalytics({
   const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
+  const { strategyThresholds, initializeThresholds, setStrategyThresholds } =
+    useThresholdStore();
   const {
     metric,
     direction,
@@ -53,12 +56,15 @@ export default function AttackAnalytics({
     setStrategy,
   } = useAttackStateStore();
 
+  const isModelA = mode === "A";
+  const isMetricEntropy = metric === ENTROPY;
+  const isAboveThresholdUnlearn = direction === UNLEARN;
+
   const [thresholdValue, setThresholdValue] = useState(1.25);
   const [attackScore, setAttackScore] = useState(0);
   const [data, setData] = useState<Data>(null);
   const [images, setImages] = useState<Image[]>();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [autoUpdated, setAutoUpdated] = useState(false);
   const [dataMetric, setDataMetric] = useState(metric);
 
   const prevMetricRef = useRef(metric);
@@ -68,10 +74,6 @@ export default function AttackAnalytics({
   const prevModelA = useRef(modelA);
   const prevModelB = useRef(modelB);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const isModelA = mode === "A";
-  const isMetricEntropy = metric === ENTROPY;
-  const isAboveThresholdUnlearn = direction === UNLEARN;
 
   const imageMap = useMemo(() => {
     if (!images) return new Map<number, Image>();
@@ -218,6 +220,10 @@ export default function AttackAnalytics({
   );
 
   useEffect(() => {
+    initializeThresholds(isMetricEntropy);
+  }, [isMetricEntropy, initializeThresholds]);
+
+  useEffect(() => {
     const fetchImage = async () => {
       try {
         type Response = { images: Image[] };
@@ -313,6 +319,137 @@ export default function AttackAnalytics({
   useEffect(() => {
     if (!data) return;
 
+    // 1. Custom
+    const customThreshold = isMetricEntropy ? 1.25 : 3.75;
+
+    // 2. Max Attack Score
+    let maxAttackScoreThreshold = thresholdValue;
+    const maxAttackKey = `${metric}_above_${direction}` as keyof AttackResults;
+    const experiment = isModelA ? modelAExperiment : modelBExperiment;
+    const attackData = experiment
+      ? experiment.attack.results[maxAttackKey] || []
+      : [];
+    if (attackData.length > 0) {
+      const maxAttackData = findMaxAttackData(attackData);
+      maxAttackScoreThreshold = maxAttackData.threshold;
+    }
+
+    // 3. Max Success Rate
+    let maxSuccessRateThreshold = thresholdValue;
+    const allValues = [...data.retrainData, ...data.unlearnData];
+    if (allValues.length > 0) {
+      const step = isMetricEntropy ? 0.05 : 0.25;
+      const candidateSet = new Set<number>();
+      allValues.forEach((datum) => {
+        const base = Math.floor(datum.value / step) * step;
+        candidateSet.add(base);
+        candidateSet.add(base + step);
+      });
+      const candidates = Array.from(candidateSet).sort((a, b) => a - b);
+      let bestCandidate = thresholdValue;
+      let bestSuccessCount = -Infinity;
+      candidates.forEach((candidate) => {
+        const successCount = isAboveThresholdUnlearn
+          ? data.retrainData.filter((datum) => datum.value < candidate).length +
+            data.unlearnData.filter((datum) => datum.value > candidate).length
+          : data.retrainData.filter((datum) => datum.value > candidate).length +
+            data.unlearnData.filter((datum) => datum.value < candidate).length;
+        if (successCount > bestSuccessCount) {
+          bestSuccessCount = successCount;
+          bestCandidate = candidate;
+        }
+      });
+      maxSuccessRateThreshold = bestCandidate;
+    }
+
+    // 4. Common Threshold
+    let commonThreshold = thresholdValue;
+    const commonThresholdKey =
+      `${metric.toLowerCase()}_above_${direction}` as keyof AttackResults;
+    const modelALineChartData = modelAExperiment
+      ? modelAExperiment.attack.results[commonThresholdKey] || []
+      : [];
+    const modelBLineChartData = modelBExperiment
+      ? modelBExperiment.attack.results[commonThresholdKey] || []
+      : [];
+    const combinedLineChartData = [
+      ...modelALineChartData,
+      ...modelBLineChartData,
+    ];
+    if (combinedLineChartData.length > 0) {
+      const thresholdGroups: { [commonThresholdKey: number]: number } = {};
+      combinedLineChartData.forEach((item) => {
+        thresholdGroups[item.threshold] =
+          (thresholdGroups[item.threshold] || 0) + item.attack_score;
+      });
+      const bestThresholdEntry = Object.entries(thresholdGroups).reduce(
+        (best, [t, sum]) => {
+          const thresholdCandidate = parseFloat(t);
+          return sum > best.sum ? { th: thresholdCandidate, sum } : best;
+        },
+        { th: thresholdValue, sum: -Infinity }
+      );
+      commonThreshold = bestThresholdEntry.th;
+    }
+
+    const newThresholds = [
+      customThreshold,
+      maxAttackScoreThreshold,
+      maxSuccessRateThreshold,
+      commonThreshold,
+    ];
+
+    const modeKey = isModelA ? "A" : "B";
+    const currentThresholds = strategyThresholds[modeKey];
+    const isEqual =
+      currentThresholds &&
+      currentThresholds.length === newThresholds.length &&
+      currentThresholds.every((v, i) => v === newThresholds[i]);
+    if (isEqual) return;
+
+    setStrategyThresholds(modeKey, newThresholds);
+  }, [
+    data,
+    direction,
+    isAboveThresholdUnlearn,
+    isMetricEntropy,
+    isModelA,
+    metric,
+    modelAExperiment,
+    modelBExperiment,
+    setStrategyThresholds,
+    strategyThresholds,
+    thresholdValue,
+  ]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      hideTooltip();
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [hideTooltip]);
+
+  useEffect(() => {
+    if (prevModelA.current !== modelA || prevModelB.current !== modelB) {
+      setMetric(ENTROPY);
+      setDirection(UNLEARN);
+      setStrategy(THRESHOLD_STRATEGIES[0].strategy);
+      prevModelA.current = modelA;
+      prevModelB.current = modelB;
+    }
+  }, [modelA, modelB, setDirection, setMetric, setStrategy]);
+
+  useEffect(() => {
+    if (strategy === THRESHOLD_STRATEGIES[0].strategy) {
+      isMetricEntropy ? setThresholdValue(1.25) : setThresholdValue(3.75);
+    }
+  }, [strategy, isMetricEntropy]);
+
+  useEffect(() => {
     if (strategy === "BEST_ATTACK") {
       const isModelAWorstCase = worstCaseModel === "A";
       if (
@@ -349,129 +486,38 @@ export default function AttackAnalytics({
             }
           });
         });
-
-        if (!autoUpdated) {
-          setMetric(bestResult.metric);
-          setDirection(bestResult.direction);
-          if (bestResult.threshold !== thresholdValue) {
-            setThresholdValue(bestResult.threshold);
-          }
-          setAutoUpdated(true);
-        }
+        setMetric(bestResult.metric);
+        setDirection(bestResult.direction);
+        setThresholdValue(bestResult.threshold);
       }
     } else {
-      if (autoUpdated) setAutoUpdated(false);
-
+      const modeKey = isModelA ? "A" : "B";
+      let index = 0;
       if (strategy === THRESHOLD_STRATEGIES[1].strategy) {
-        const maxAttackData = findMaxAttackData(data.lineChartData);
-        if (maxAttackData && maxAttackData.threshold !== thresholdValue) {
-          setThresholdValue(maxAttackData.threshold);
-        }
+        index = 1;
       } else if (strategy === THRESHOLD_STRATEGIES[2].strategy) {
-        const allValues = [...data.retrainData, ...data.unlearnData];
-        if (allValues.length === 0) return;
-        const step = isMetricEntropy ? 0.05 : 0.25;
-        const candidateSet = new Set<number>();
-        allValues.forEach((datum) => {
-          const base = Math.floor(datum.value / step) * step;
-          candidateSet.add(base);
-          candidateSet.add(base + step);
-        });
-        const candidates = Array.from(candidateSet).sort((a, b) => a - b);
-        let bestCandidate = thresholdValue;
-        let bestSuccessCount = -Infinity;
-        candidates.forEach((candidate) => {
-          const successCount = isAboveThresholdUnlearn
-            ? data.retrainData.filter((datum) => datum.value < candidate)
-                .length +
-              data.unlearnData.filter((datum) => datum.value > candidate).length
-            : data.retrainData.filter((datum) => datum.value > candidate)
-                .length +
-              data.unlearnData.filter((datum) => datum.value < candidate)
-                .length;
-
-          if (successCount > bestSuccessCount) {
-            bestSuccessCount = successCount;
-            bestCandidate = candidate;
-          }
-        });
-        if (bestCandidate !== thresholdValue) {
-          setThresholdValue(bestCandidate);
-        }
+        index = 2;
       } else if (strategy === THRESHOLD_STRATEGIES[3].strategy) {
-        const key =
-          `${metric.toLowerCase()}_above_${direction}` as keyof AttackResults;
-        const modelALineChartData = modelAExperiment
-          ? modelAExperiment.attack.results[key] || []
-          : [];
-        const modelBLineChartData = modelBExperiment
-          ? modelBExperiment.attack.results[key] || []
-          : [];
-        const combinedLineChartData = [
-          ...modelALineChartData,
-          ...modelBLineChartData,
-        ];
-        if (combinedLineChartData.length === 0) return;
-        const thresholdGroups: { [key: number]: number } = {};
-        combinedLineChartData.forEach((item) => {
-          thresholdGroups[item.threshold] =
-            (thresholdGroups[item.threshold] || 0) + item.attack_score;
-        });
-        const bestThresholdEntry = Object.entries(thresholdGroups).reduce(
-          (best, [t, sum]) => {
-            const thresholdCandidate = parseFloat(t);
-            return sum > best.sum ? { th: thresholdCandidate, sum } : best;
-          },
-          { th: thresholdValue, sum: -Infinity }
-        );
-        if (bestThresholdEntry.th !== thresholdValue) {
-          setThresholdValue(bestThresholdEntry.th);
-        }
+        index = 3;
+      }
+      const newThreshold = strategyThresholds[modeKey][index];
+      if (newThreshold !== thresholdValue) {
+        setThresholdValue(newThreshold);
       }
     }
   }, [
-    autoUpdated,
-    data,
-    direction,
-    isAboveThresholdUnlearn,
-    isMetricEntropy,
+    strategy,
+    strategyThresholds,
+    worstCaseModel,
     isModelA,
     metric,
+    direction,
+    thresholdValue,
     modelAExperiment,
     modelBExperiment,
-    setDirection,
     setMetric,
-    strategy,
-    thresholdValue,
-    worstCaseModel,
+    setDirection,
   ]);
-
-  useEffect(() => {
-    const handleClickOutside = () => {
-      hideTooltip();
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [hideTooltip]);
-
-  useEffect(() => {
-    if (prevModelA.current !== modelA || prevModelB.current !== modelB) {
-      setMetric(ENTROPY);
-      setDirection(UNLEARN);
-      setStrategy(THRESHOLD_STRATEGIES[0].strategy);
-      prevModelA.current = modelA;
-      prevModelB.current = modelB;
-    }
-  }, [modelA, modelB, setDirection, setMetric, setStrategy]);
-
-  useEffect(() => {
-    if (strategy === THRESHOLD_STRATEGIES[0].strategy) {
-      isMetricEntropy ? setThresholdValue(1.25) : setThresholdValue(3.75);
-    }
-  }, [strategy, isMetricEntropy]);
 
   return (
     <div className="w-[635px] h-full relative flex flex-col" ref={containerRef}>

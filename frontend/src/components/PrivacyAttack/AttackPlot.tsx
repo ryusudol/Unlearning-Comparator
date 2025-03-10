@@ -1086,15 +1086,80 @@ export default function AttackPlot({
           : prev,
       attackData[0]
     );
+
+    const attackIntersectPos =
+      redInts.length > 0
+        ? redInts[0]
+        : { x: xScaleL(0), y: yScaleL(thresholdValue) };
+    const infoGroupXPos =
+      currentData.attack_score >= CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP
+        ? xScaleL(CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP)
+        : attackIntersectPos.x;
+    const effectiveThreshold = isMetricEntropy
+      ? Math.min(
+          thresholdValue,
+          CONFIG.ENTROPY_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP
+        )
+      : Math.min(
+          thresholdValue,
+          CONFIG.CONFIDENCE_THRESHOLD_Y_LIMIT_FOR_INFO_GROUP
+        );
+    const infoGroupYPos = yScaleL(effectiveThreshold);
+
+    const infoGroup = gL
+      .append("g")
+      .attr("class", "info-group")
+      .attr(
+        "transform",
+        `translate(${infoGroupXPos + 4}, ${infoGroupYPos - 47})`
+      );
+
+    infoGroup
+      .append("text")
+      .attr("text-anchor", "start")
+      .attr(
+        "fill",
+        strategy === THRESHOLD_STRATEGIES[3].strategy ? "red" : CONFIG.BLACK
+      )
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
+      .text(`Threshold: ${thresholdValue.toFixed(2)}`);
+
+    infoGroup
+      .append("text")
+      .attr("text-anchor", "start")
+      .attr(
+        "fill",
+        strategy === THRESHOLD_STRATEGIES[1].strategy ? "red" : CONFIG.BLACK
+      )
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
+      .attr("dy", "1.2em")
+      .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
+
+    infoGroup
+      .append("text")
+      .attr("text-anchor", "start")
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
+      .attr("dy", "2.4em")
+      .text(`FPR: ${currentData.fpr.toFixed(3)}`);
+
+    infoGroup
+      .append("text")
+      .attr("text-anchor", "start")
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
+      .attr("dy", "3.6em")
+      .text(`FNR: ${currentData.fnr.toFixed(3)}`);
+
     onUpdateAttackScore(currentData.attack_score);
   }, [
     attackData,
     isAboveThresholdUnlearn,
+    isMetricEntropy,
     isModelA,
     isStrategyCustom,
     mode,
     onThresholdLineDrag,
     onUpdateAttackScore,
+    strategy,
     thresholdMax,
     thresholdMin,
     thresholdStep,
