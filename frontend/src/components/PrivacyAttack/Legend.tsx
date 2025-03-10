@@ -3,6 +3,7 @@ import { MoveRight } from "lucide-react";
 
 import Button from "../CustomButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
+import { useThresholdStore } from "../../stores/thresholdStore";
 import { useAttackStateStore } from "../../stores/attackStore";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
@@ -17,6 +18,9 @@ import {
 } from "../UI/hover-card";
 
 export default function Legend() {
+  const strategyThresholds = useThresholdStore(
+    (state) => state.strategyThresholds
+  );
   const {
     metric,
     direction,
@@ -170,16 +174,25 @@ export default function Legend() {
           onValueChange={(val: string) => setStrategy(val)}
           className="relative top-0.5"
         >
-          <TabsList>
+          <TabsList className="h-12">
             {THRESHOLD_STRATEGIES.map((s, idx) => (
               <React.Fragment key={idx}>
                 <TabsTrigger
                   value={s.strategy}
                   style={{ width: s.length }}
-                  className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+                  className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
-                    <HoverCardTrigger>{s.strategy}</HoverCardTrigger>
+                    <HoverCardTrigger>
+                      <p className="leading-[13px]">
+                        {s.strategy}
+                        <br />
+                        <span className="text-[11px]">
+                          (A: {strategyThresholds["A"][idx].toFixed(2)}, B:{" "}
+                          {strategyThresholds["B"][idx].toFixed(2)})
+                        </span>
+                      </p>
+                    </HoverCardTrigger>
                     <HoverCardContent className="w-auto px-3 py-2" side="top">
                       {s.explanation}
                     </HoverCardContent>
@@ -203,7 +216,7 @@ export default function Legend() {
             <TabsContent
               key={idx}
               value={s.strategy}
-              className="text-sm font-light"
+              className="mt-1 text-sm font-light"
             >
               {s.explanation}
             </TabsContent>

@@ -89,13 +89,13 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
           onValueChange={setHighlight}
           className="relative top-0.5"
         >
-          <TabsList>
+          <TabsList className="h-12">
             {VIEW_MODES.map((mode, idx) => (
               <React.Fragment key={idx}>
                 <TabsTrigger
                   value={mode.label}
                   style={{ width: mode.length }}
-                  className="data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+                  className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
                     <HoverCardTrigger>{mode.label}</HoverCardTrigger>
@@ -122,7 +122,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
             <TabsContent
               key={idx}
               value={mode.label}
-              className="text-sm font-light"
+              className="mt-1 text-sm font-light"
             >
               {mode.explanation}
             </TabsContent>
