@@ -216,7 +216,7 @@ export default function Legend() {
             <TabsContent
               key={idx}
               value={s.strategy}
-              className="mt-1 text-sm font-light"
+              className="absolute -bottom-1 left-0 text-sm font-light"
             >
               {s.explanation}
             </TabsContent>
