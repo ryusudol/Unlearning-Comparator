@@ -122,7 +122,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
             <TabsContent
               key={idx}
               value={mode.label}
-              className="absolute bottom-0 left-0 text-sm font-light"
+              className="absolute bottom-0.5 left-0 text-sm font-light"
             >
               {mode.explanation}
             </TabsContent>

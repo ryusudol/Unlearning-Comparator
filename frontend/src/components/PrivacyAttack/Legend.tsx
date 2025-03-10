@@ -188,8 +188,17 @@ export default function Legend() {
                         {s.strategy}
                         <br />
                         <span className="text-[11px]">
-                          (A: {strategyThresholds["A"][idx].toFixed(2)}, B:{" "}
-                          {strategyThresholds["B"][idx].toFixed(2)})
+                          {idx === THRESHOLD_STRATEGIES.length - 1
+                            ? `(A, B: ${strategyThresholds["A"][idx].toFixed(
+                                2
+                              )})`
+                            : idx !== 0
+                            ? `(A: ${strategyThresholds["A"][idx].toFixed(
+                                2
+                              )}, B: ${strategyThresholds["B"][idx].toFixed(
+                                2
+                              )})`
+                            : ""}
                         </span>
                       </p>
                     </HoverCardTrigger>
@@ -216,7 +225,7 @@ export default function Legend() {
             <TabsContent
               key={idx}
               value={s.strategy}
-              className="absolute -bottom-1 left-0 text-sm font-light"
+              className="absolute -bottom-0.5 left-0 text-sm font-light"
             >
               {s.explanation}
             </TabsContent>

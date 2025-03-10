@@ -102,8 +102,9 @@ export default function ForgetClassTabPlusButton({
           <DialogTitle>Unlearning Comparator</DialogTitle>
           <DialogDescription>
             <p>
-              Select {hasNoSelectedForgetClass && "a dataset, a model, and "}a
-              forget class to visualize the outcomes of unlearning experiments.
+              Select{" "}
+              {hasNoSelectedForgetClass && "an architecture, a dataset, and "}a
+              forget class.
             </p>
             {hasNoSelectedForgetClass && (
               <div className="grid grid-cols-2 gap-y-4 text-black mt-4">
