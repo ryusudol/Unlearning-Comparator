@@ -369,7 +369,9 @@ export default function UnlearningConfiguration() {
                   ? "rl"
                   : method === UNLEARNING_METHODS[2]
                   ? "ga"
-                  : "custom";
+                  : idx === UNLEARNING_METHODS.length - 1
+                  ? "custom"
+                  : "-";
               return (
                 <SelectItem key={idx} value={value}>
                   {method}
