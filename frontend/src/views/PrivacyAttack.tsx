@@ -51,7 +51,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
   }, [forgetClass]);
 
   return (
-    <div className="h-[764px] flex flex-col border rounded-md px-1.5">
+    <div className="h-[758px] flex flex-col border rounded-md px-1.5">
       <Legend />
       <div className="flex items-center">
         {!retrainData ? (
