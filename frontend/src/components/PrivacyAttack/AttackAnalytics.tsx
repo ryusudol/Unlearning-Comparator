@@ -478,6 +478,7 @@ export default function AttackAnalytics({
         setMetric(bestResult.metric);
         setDirection(bestResult.direction);
         setThresholdValue(bestResult.threshold);
+        setStrategy(THRESHOLD_STRATEGIES[1].strategy);
       }
     } else {
       const modeKey = isModelA ? "A" : "B";
@@ -495,17 +496,18 @@ export default function AttackAnalytics({
       }
     }
   }, [
-    strategy,
-    strategyThresholds,
-    worstCaseModel,
+    direction,
     isModelA,
     metric,
-    direction,
-    thresholdValue,
     modelAExperiment,
     modelBExperiment,
-    setMetric,
     setDirection,
+    setMetric,
+    setStrategy,
+    strategy,
+    strategyThresholds,
+    thresholdValue,
+    worstCaseModel,
   ]);
 
   return (
