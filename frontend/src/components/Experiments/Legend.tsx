@@ -1,22 +1,39 @@
 import * as d3 from "d3";
 
+const CONFIG = {
+  COLOR_TEMPERATURE_LOW: 0.03,
+  COLOR_TEMPERATURE_HIGH: 0.77,
+} as const;
+
 export default function DualMetricsLegend() {
   const greenScale = d3
-    .scaleSequential((t) => d3.interpolateGreens(0.03 + 0.77 * t))
+    .scaleSequential((t) =>
+      d3.interpolateGreens(
+        CONFIG.COLOR_TEMPERATURE_LOW + CONFIG.COLOR_TEMPERATURE_HIGH * t
+      )
+    )
     .domain([0, 1]);
   const accuracyGradient = `linear-gradient(to right, ${greenScale(
     0
   )} 0%, ${greenScale(1)} 100%)`;
 
   const blueScale = d3
-    .scaleSequential((t) => d3.interpolateBlues(0.03 + 0.77 * t))
+    .scaleSequential((t) =>
+      d3.interpolateBlues(
+        CONFIG.COLOR_TEMPERATURE_LOW + CONFIG.COLOR_TEMPERATURE_HIGH * t
+      )
+    )
     .domain([0, 1]);
   const efficiencyGradient = `linear-gradient(to right, ${blueScale(
     0
   )} 0%, ${blueScale(1)} 100%)`;
 
   const orangeScale = d3
-    .scaleSequential((t) => d3.interpolateOranges(0.03 + 0.77 * t))
+    .scaleSequential((t) =>
+      d3.interpolateOranges(
+        CONFIG.COLOR_TEMPERATURE_LOW + CONFIG.COLOR_TEMPERATURE_HIGH * t
+      )
+    )
     .domain([0, 1]);
   const forgettingQualityGradient = `linear-gradient(to right, ${orangeScale(
     0
