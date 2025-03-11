@@ -102,7 +102,7 @@ export default function _TableBody({ table }: Props) {
         .clamp(true),
     []
   );
-  const blueScaleRTE = useMemo(
+  const blueScale = useMemo(
     () =>
       d3
         .scaleSequential()
@@ -115,7 +115,7 @@ export default function _TableBody({ table }: Props) {
         .clamp(true),
     []
   );
-  const orangeScaleFQS = useMemo(
+  const orangeScale = useMemo(
     () =>
       d3
         .scaleSequential()
@@ -147,13 +147,13 @@ export default function _TableBody({ table }: Props) {
       } else {
         if (columnId === "RTE") {
           if (value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD) {
-            backgroundColor = blueScaleRTE(value);
+            backgroundColor = blueScale(value);
             textColor =
               value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD / 2
                 ? COLORS.WHITE
                 : COLORS.BLACK;
           } else {
-            backgroundColor = blueScaleRTE(CONFIG.COLOR_MAPPING_RTE_THRESHOLD);
+            backgroundColor = blueScale(CONFIG.COLOR_MAPPING_RTE_THRESHOLD);
             textColor = COLORS.BLACK;
           }
         } else {
@@ -168,7 +168,7 @@ export default function _TableBody({ table }: Props) {
               textColor = COLORS.BLACK;
             }
           } else if (columnId === "FQS") {
-            backgroundColor = orangeScaleFQS(value);
+            backgroundColor = orangeScale(value);
             textColor = value >= 0.6 ? COLORS.WHITE : COLORS.BLACK;
           } else if (columnId === "TRA") {
             backgroundColor = traScale(value);

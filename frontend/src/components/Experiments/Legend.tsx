@@ -2,7 +2,7 @@ import * as d3 from "d3";
 
 export default function DualMetricsLegend() {
   const colorScale = d3
-    .scaleSequential((t) => d3.interpolateOranges(0.05 + 0.95 * t))
+    .scaleSequential((t) => d3.interpolateOranges(0.03 + 0.77 * t))
     .domain([0, 1]);
   const steps = 8;
   const orangeColors = Array.from({ length: steps }, (_, i) =>
