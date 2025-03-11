@@ -3,17 +3,6 @@ import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 import * as d3 from "d3";
 
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
-} from "../UI/context-menu";
-import {
-  deleteRow,
-  downloadJSON,
-  downloadPTH,
-} from "../../utils/api/dataTable";
 import { columns } from "./Columns";
 import { COLUMN_WIDTHS } from "./Columns";
 import { COLORS } from "../../constants/colors";
@@ -27,6 +16,17 @@ import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "../UI/context-menu";
+import {
+  deleteRow,
+  downloadJSON,
+  downloadPTH,
+} from "../../utils/api/dataTable";
 
 const CONFIG = {
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
@@ -115,12 +115,12 @@ export default function _TableBody({ table }: Props) {
         .clamp(true),
     []
   );
-  const blueScaleFQS = useMemo(
+  const orangeScaleFQS = useMemo(
     () =>
       d3
         .scaleSequential()
         .interpolator((t) =>
-          d3.interpolateBlues(
+          d3.interpolateOranges(
             CONFIG.COLOR_TEMPERATURE_LOW + t * CONFIG.COLOR_TEMPERATURE_HIGH
           )
         )
@@ -168,7 +168,7 @@ export default function _TableBody({ table }: Props) {
               textColor = COLORS.BLACK;
             }
           } else if (columnId === "FQS") {
-            backgroundColor = blueScaleFQS(value);
+            backgroundColor = orangeScaleFQS(value);
             textColor = value >= 0.6 ? COLORS.WHITE : COLORS.BLACK;
           } else if (columnId === "TRA") {
             backgroundColor = traScale(value);

@@ -1,9 +1,12 @@
 import * as d3 from "d3";
 
 export default function DualMetricsLegend() {
-  const steps = 7;
-  const orangeColors = Array.from({ length: steps + 1 }, (_, i) =>
-    d3.interpolateOranges(i / steps)
+  const colorScale = d3
+    .scaleSequential((t) => d3.interpolateOranges(0.05 + 0.95 * t))
+    .domain([0, 1]);
+  const steps = 8;
+  const orangeColors = Array.from({ length: steps }, (_, i) =>
+    colorScale(i / steps)
   );
   const forgettingQualityGradient = `linear-gradient(to right, ${orangeColors.join(
     ", "
