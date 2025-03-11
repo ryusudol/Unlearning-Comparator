@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import Subtitle from "../components/Subtitle";
 import DatasetModeSelector from "../components/DatasetModeSelector";
 import BubbleMatrix from "../components/Predictions/BubbleMatrix";
-import BubbleMatrixLegend from "../components/Predictions/BubbleMatrixLegend";
+import Legend from "../components/Predictions/Legend";
 import CorrelationMatrix from "../components/Predictions/CorrelationMatrix";
 import CorrelationMatrixLegend from "../components/Predictions/CorrelationMatrixLegend";
 import Indicator from "../components/Indicator";
@@ -54,11 +54,7 @@ export default function PredictionMatrix() {
   }
 
   function MatrixLegend() {
-    return isChartModeCorr ? (
-      <CorrelationMatrixLegend />
-    ) : (
-      <BubbleMatrixLegend />
-    );
+    return isChartModeCorr ? <CorrelationMatrixLegend /> : <Legend />;
   }
 
   return (
