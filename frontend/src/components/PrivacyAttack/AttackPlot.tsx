@@ -108,12 +108,7 @@ function createThresholdGroup(
   xRange: [number, number],
   yScale: d3.ScaleLinear<number, number>,
   thresholdValue: number,
-  thresholdStep: number,
-  thresholdMin: number,
-  thresholdMax: number,
   isStrategyCustom: boolean,
-  onThresholdLineDrag: (value: number) => void,
-  draggingThresholdRef: React.MutableRefObject<number>,
   isAboveThresholdUnlearn: boolean,
   isModelA: boolean
 ) {
@@ -122,28 +117,6 @@ function createThresholdGroup(
     .attr("class", "threshold-group")
     .attr("transform", `translate(0, ${yScale(thresholdValue)})`)
     .style("cursor", isStrategyCustom ? "ns-resize" : "default");
-
-  // if (isStrategyCustom) {
-  //   group.call(
-  //     d3
-  //       .drag<SVGGElement, unknown>()
-  //       .on("drag", function (event) {
-  //         const [, newY] = d3.pointer(event, g.node());
-  //         const newThresholdRaw = yScale.invert(newY);
-  //         const newThresholdRounded =
-  //           Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
-  //         const clamped = Math.max(
-  //           thresholdMin,
-  //           Math.min(thresholdMax, newThresholdRounded)
-  //         );
-  //         draggingThresholdRef.current = clamped;
-  //         d3.select(this).attr("transform", `translate(0, ${yScale(clamped)})`);
-  //       })
-  //       .on("end", function () {
-  //         onThresholdLineDrag(draggingThresholdRef.current);
-  //       })
-  //   );
-  // }
 
   group
     .append("rect")
@@ -248,16 +221,15 @@ export default function AttackPlot({
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
   const chartInitialized = useRef<boolean>(false);
-  const draggingThresholdRef = useRef(thresholdValue);
   const attackDataRef = useRef<AttackResult[]>([]);
   const panOffset = useRef(0);
   const butterflyThresholdRef = useRef<SVGGElement | null>(null);
+  const lineYScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
+  const prevStrategy = useRef(strategy);
   const lineThresholdRef = useRef<SVGGElement | null>(null);
   const butterflyYScaleRef = useRef<d3.ScaleLinear<number, number> | null>(
     null
   );
-  const lineYScaleRef = useRef<d3.ScaleLinear<number, number> | null>(null);
-  const prevStrategy = useRef(strategy);
 
   const retrainJson = data?.retrainData;
   const unlearnJson = data?.unlearnData;
@@ -716,12 +688,7 @@ export default function AttackPlot({
       [-halfWB, halfWB],
       yScaleB,
       thresholdValue,
-      thresholdStep,
-      thresholdMin,
-      thresholdMax,
       isStrategyCustom,
-      onThresholdLineDrag,
-      draggingThresholdRef,
       isAboveThresholdUnlearn,
       isModelA
     );
@@ -739,12 +706,10 @@ export default function AttackPlot({
     isStrategyCustom,
     metric,
     onElementClick,
-    onThresholdLineDrag,
     retrainJson,
     setHoveredId,
     thresholdMax,
     thresholdMin,
-    thresholdStep,
     thresholdValue,
     unlearnJson,
   ]);
@@ -1010,12 +975,7 @@ export default function AttackPlot({
       [-3, wL],
       yScaleL,
       thresholdValue,
-      thresholdStep,
-      thresholdMin,
-      thresholdMax,
       isStrategyCustom,
-      onThresholdLineDrag,
-      draggingThresholdRef,
       isAboveThresholdUnlearn,
       isModelA
     );
@@ -1157,12 +1117,10 @@ export default function AttackPlot({
     isModelA,
     isStrategyCustom,
     mode,
-    onThresholdLineDrag,
     onUpdateAttackScore,
     strategy,
     thresholdMax,
     thresholdMin,
-    thresholdStep,
     thresholdValue,
   ]);
 
@@ -1215,12 +1173,13 @@ export default function AttackPlot({
   useEffect(() => {
     if (!butterflyThresholdRef.current || !lineThresholdRef.current) return;
 
+    if (!isStrategyCustom) return;
+
     const dragHandler = d3
       .drag<SVGGElement, unknown>()
       .on("drag", function (event) {
         const container = d3.select(butterflyRef.current);
         const [, newY] = d3.pointer(event, container.node());
-
         const newThresholdRaw = butterflyYScaleRef.current!.invert(newY);
         const newThresholdRounded =
           Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
@@ -1248,149 +1207,13 @@ export default function AttackPlot({
 
     d3.select(butterflyThresholdRef.current).call(dragHandler);
     d3.select(lineThresholdRef.current).call(dragHandler);
-  }, [thresholdStep, thresholdMin, thresholdMax, onThresholdLineDrag]);
-  //   if (!butterflyThresholdRef.current || !lineThresholdRef.current) return;
-
-  //   const dragHandler = d3
-  //     .drag<SVGGElement, unknown>()
-  //     .on("drag", function (event) {
-  //       const container = d3.select(butterflyRef.current);
-  //       const [, newY] = d3.pointer(event, container.node());
-  //       const newThresholdRaw = butterflyYScaleRef.current!.invert(newY);
-  //       const newThresholdRounded =
-  //         Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
-  //       const clamped = Math.max(
-  //         thresholdMin,
-  //         Math.min(thresholdMax, newThresholdRounded)
-  //       );
-
-  //       if (butterflyYScaleRef.current && butterflyThresholdRef.current) {
-  //         d3.select(butterflyThresholdRef.current).attr(
-  //           "transform",
-  //           `translate(0, ${butterflyYScaleRef.current(clamped)})`
-  //         );
-  //       }
-  //       if (lineYScaleRef.current && lineThresholdRef.current) {
-  //         d3.select(lineThresholdRef.current).attr(
-  //           "transform",
-  //           `translate(0, ${lineYScaleRef.current(clamped)})`
-  //         );
-  //       }
-
-  //       if (butterflyYScaleRef.current) {
-  //         const newThresholdPos = butterflyYScaleRef.current(clamped);
-  //         d3.select(butterflyRef.current)
-  //           .selectAll("circle")
-  //           .attr("fill-opacity", function () {
-  //             const cy = parseFloat(d3.select(this).attr("cy"));
-  //             return getCircleOpacity(cy, newThresholdPos);
-  //           })
-  //           .attr("stroke-opacity", function () {
-  //             const cy = parseFloat(d3.select(this).attr("cy"));
-  //             return getCircleOpacity(cy, newThresholdPos);
-  //           });
-  //       }
-
-  //       if (lineYScaleRef.current) {
-  //         const newYThreshold = lineYScaleRef.current(clamped);
-  //         const hL =
-  //           CONFIG.HEIGHT - CONFIG.LINE_MARGIN.top - CONFIG.LINE_MARGIN.bottom;
-  //         d3.select(`#aboveThreshold-${mode} rect`).attr(
-  //           "height",
-  //           newYThreshold
-  //         );
-  //         d3.select(`#belowThreshold-${mode} rect`)
-  //           .attr("y", newYThreshold)
-  //           .attr("height", hL - newYThreshold);
-  //       }
-
-  //       if (attackData && lineYScaleRef.current) {
-  //         const wL =
-  //           CONFIG.LINE_CHART_WIDTH -
-  //           CONFIG.LINE_MARGIN.left -
-  //           CONFIG.LINE_MARGIN.right;
-  //         const xScaleL = d3.scaleLinear().domain([0, 1.05]).range([0, wL]);
-  //         const yScaleL = lineYScaleRef.current;
-  //         const svgL = d3.select(lineRef.current);
-  //         svgL.selectAll(".intersection-group").remove();
-  //         const intGroup = svgL
-  //           .select("g")
-  //           .append("g")
-  //           .attr("class", "intersection-group");
-
-  //         const redInts = getIntersections(
-  //           attackData,
-  //           (d) => d.attack_score,
-  //           clamped,
-  //           xScaleL,
-  //           yScaleL
-  //         );
-  //         redInts.forEach((pt) => {
-  //           intGroup
-  //             .append("circle")
-  //             .attr("class", "intersection-red")
-  //             .attr("cx", pt.x)
-  //             .attr("cy", pt.y)
-  //             .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
-  //             .attr("fill", CONFIG.RED)
-  //             .attr("stroke", CONFIG.BLACK)
-  //             .attr("stroke-width", 1);
-  //         });
-
-  //         const blueInts = getIntersections(
-  //           attackData,
-  //           (d) => d.fpr,
-  //           clamped,
-  //           xScaleL,
-  //           yScaleL
-  //         );
-  //         blueInts.forEach((pt) => {
-  //           intGroup
-  //             .append("circle")
-  //             .attr("cx", pt.x)
-  //             .attr("cy", pt.y)
-  //             .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
-  //             .attr("fill", CONFIG.BLUE)
-  //             .attr("stroke", CONFIG.BLACK)
-  //             .attr("stroke-width", 1);
-  //         });
-
-  //         const greenInts = getIntersections(
-  //           attackData,
-  //           (d) => d.fnr,
-  //           clamped,
-  //           xScaleL,
-  //           yScaleL
-  //         );
-  //         greenInts.forEach((pt) => {
-  //           intGroup
-  //             .append("circle")
-  //             .attr("cx", pt.x)
-  //             .attr("cy", pt.y)
-  //             .attr("r", CONFIG.BUTTERFLY_CIRCLE_RADIUS)
-  //             .attr("fill", CONFIG.GREEN)
-  //             .attr("stroke", CONFIG.BLACK)
-  //             .attr("stroke-width", 1);
-  //         });
-  //       }
-
-  //       draggingThresholdRef.current = clamped;
-  //     })
-  //     .on("end", function () {
-  //       onThresholdLineDrag(draggingThresholdRef.current);
-  //     });
-
-  //   d3.select(butterflyThresholdRef.current).call(dragHandler);
-  //   d3.select(lineThresholdRef.current).call(dragHandler);
-  // }, [
-  //   thresholdStep,
-  //   thresholdMin,
-  //   thresholdMax,
-  //   onThresholdLineDrag,
-  //   attackData,
-  //   getCircleOpacity,
-  //   mode,
-  // ]);
+  }, [
+    isStrategyCustom,
+    onThresholdLineDrag,
+    thresholdMax,
+    thresholdMin,
+    thresholdStep,
+  ]);
 
   return (
     <div className="flex flex-col items-center">

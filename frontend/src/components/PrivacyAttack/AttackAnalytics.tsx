@@ -55,7 +55,6 @@ export default function AttackAnalytics({
     setDirection,
     setStrategy,
   } = useAttackStateStore();
-
   const isModelA = mode === "A";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = direction === UNLEARN;
@@ -299,16 +298,6 @@ export default function AttackAnalytics({
     strategy,
   ]);
 
-  useEffect(() => {
-    const defaultThreshold = isMetricEntropy ? 1.25 : 3.75;
-    const validRange = isMetricEntropy
-      ? { min: 0, max: 2.5 }
-      : { min: -2.5, max: 10 };
-    if (thresholdValue < validRange.min || thresholdValue > validRange.max) {
-      setThresholdValue(defaultThreshold);
-    }
-  }, [isMetricEntropy, thresholdValue]);
-
   const findMaxAttackData = (lineData: AttackResult[]) => {
     return lineData.reduce(
       (prev, curr) => (curr.attack_score > prev.attack_score ? curr : prev),
@@ -445,9 +434,9 @@ export default function AttackAnalytics({
 
   useEffect(() => {
     if (strategy === THRESHOLD_STRATEGIES[0].strategy) {
-      isMetricEntropy ? setThresholdValue(1.25) : setThresholdValue(3.75);
+      setThresholdValue(isMetricEntropy ? 1.25 : 3.75);
     }
-  }, [strategy, isMetricEntropy]);
+  }, [isMetricEntropy, strategy]);
 
   useEffect(() => {
     if (strategy === "BEST_ATTACK") {
@@ -489,6 +478,7 @@ export default function AttackAnalytics({
         setMetric(bestResult.metric);
         setDirection(bestResult.direction);
         setThresholdValue(bestResult.threshold);
+        setStrategy(THRESHOLD_STRATEGIES[1].strategy);
       }
     } else {
       const modeKey = isModelA ? "A" : "B";
@@ -506,17 +496,18 @@ export default function AttackAnalytics({
       }
     }
   }, [
-    strategy,
-    strategyThresholds,
-    worstCaseModel,
+    direction,
     isModelA,
     metric,
-    direction,
-    thresholdValue,
     modelAExperiment,
     modelBExperiment,
-    setMetric,
     setDirection,
+    setMetric,
+    setStrategy,
+    strategy,
+    strategyThresholds,
+    thresholdValue,
+    worstCaseModel,
   ]);
 
   return (

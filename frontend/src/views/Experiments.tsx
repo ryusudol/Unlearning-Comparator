@@ -4,7 +4,7 @@ import View from "../components/View";
 import Title from "../components/Title";
 import Indicator from "../components/Indicator";
 import DataTable from "../components/Experiments/DataTable";
-import DualMetricsLegend from "../components/Experiments/DualMetricsLegend";
+import Legend from "../components/Experiments/Legend";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
 import { CONFIG } from "../app/App";
@@ -40,7 +40,7 @@ export default function Experiments() {
             )}
           </div>
         </div>
-        {forgetClassExist && <DualMetricsLegend />}
+        {forgetClassExist && <Legend />}
       </div>
       {forgetClassExist ? (
         <DataTable isExpanded={isExpanded} />
