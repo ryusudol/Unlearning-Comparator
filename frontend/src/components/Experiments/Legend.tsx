@@ -83,10 +83,10 @@ export default function DualMetricsLegend() {
             style={{ background: forgettingQualityGradient }}
           >
             <span className="absolute left-1 text-[10px] text-gray-700 top-2 -translate-y-1/2">
-              Worst
+              0
             </span>
             <span className="absolute right-1 text-[10px] text-white top-2 -translate-y-1/2">
-              Best
+              1
             </span>
           </div>
         </div>
