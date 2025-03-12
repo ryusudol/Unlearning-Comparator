@@ -5,10 +5,12 @@ export interface Bin {
   value: number;
 }
 
+export type AttackResultWithType = AttackResult & { type: string };
+
 export type Data = {
   retrainData: Bin[];
   unlearnData: Bin[];
-  lineChartData: AttackResult[];
+  lineChartData: AttackResultWithType[];
 } | null;
 
 export type CategoryType = "unlearn" | "retrain";

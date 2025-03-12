@@ -42,16 +42,19 @@ export default function InstancePanel({
   setHoveredId,
   onElementClick,
 }: Props) {
-  const direction = useAttackStateStore((state) => state.direction);
   const strategy = useAttackStateStore((state) => state.strategy);
 
   const [imgSize, setImgSize] = useState(0);
   const [isGrayChecked, setIsGrayChecked] = useState(true);
   const [isColorChecked, setIsColorChecked] = useState(true);
 
+  const computedThresholdData = data?.lineChartData.find(
+    (d) => Math.abs(d.threshold - thresholdValue) < 0.001
+  );
+
   const isModelA = model === "A";
   const isModeSuccess = mode === "success";
-  const isAboveThresholdUnlearn = direction === UNLEARN;
+  const isAboveThresholdUnlearn = computedThresholdData?.type === UNLEARN;
   const isStrategyMaxSuccessRate =
     strategy === THRESHOLD_STRATEGIES[2].strategy;
   const color = isModeSuccess

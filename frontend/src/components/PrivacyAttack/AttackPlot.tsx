@@ -235,9 +235,13 @@ export default function AttackPlot({
   const unlearnJson = data?.unlearnData;
   const attackData = data?.lineChartData;
 
+  const computedThresholdData = attackData?.find(
+    (d) => Math.abs(d.threshold - thresholdValue) < 0.001
+  );
+
   const isModelA = mode === "A";
   const isMetricEntropy = metric === ENTROPY;
-  const isAboveThresholdUnlearn = direction === UNLEARN;
+  const isAboveThresholdUnlearn = computedThresholdData?.type === UNLEARN;
   const isStrategyCustom = strategy === THRESHOLD_STRATEGIES[0].strategy;
 
   const thresholdMin = isMetricEntropy
