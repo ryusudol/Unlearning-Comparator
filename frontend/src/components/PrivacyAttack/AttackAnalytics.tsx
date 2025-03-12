@@ -55,6 +55,7 @@ export default function AttackAnalytics({
     setDirection,
     setStrategy,
   } = useAttackStateStore();
+
   const isModelA = mode === "A";
   const isMetricEntropy = metric === ENTROPY;
   const isAboveThresholdUnlearn = direction === UNLEARN;
@@ -305,6 +306,7 @@ export default function AttackAnalytics({
     );
   };
 
+  // TODO:
   useEffect(() => {
     if (!data) return;
 
@@ -480,9 +482,9 @@ export default function AttackAnalytics({
         setThresholdValue(bestResult.threshold);
         setStrategy(THRESHOLD_STRATEGIES[1].strategy);
       }
-    } else {
+    } else if (strategy !== THRESHOLD_STRATEGIES[0].strategy) {
       const modeKey = isModelA ? "A" : "B";
-      let index = 0;
+      let index = 1;
       if (strategy === THRESHOLD_STRATEGIES[1].strategy) {
         index = 1;
       } else if (strategy === THRESHOLD_STRATEGIES[2].strategy) {
@@ -492,6 +494,7 @@ export default function AttackAnalytics({
       }
       const newThreshold = strategyThresholds[modeKey][index];
       if (newThreshold !== thresholdValue) {
+        console.log("hello");
         setThresholdValue(newThreshold);
       }
     }
