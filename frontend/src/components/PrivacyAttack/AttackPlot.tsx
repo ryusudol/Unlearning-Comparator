@@ -444,6 +444,7 @@ export default function AttackPlot({
     );
 
     // X-axis
+    const xAxisBY = 25;
     const xAxisB = gB
       .append("g")
       .attr("class", "x-axis-b")
@@ -455,6 +456,65 @@ export default function AttackPlot({
           .tickValues(ticks)
           .tickFormat((d) => Math.abs(+d).toString())
       );
+
+    xAxisB.selectAll(".tick text").attr("dy", "9px");
+
+    xAxisB
+      .append("text")
+      .attr("class", "x-axis-label-b")
+      .attr("x", -107)
+      .attr("y", xAxisBY)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+      .attr("font-family", CONFIG.FONT_FAMILY)
+      .attr("fill", CONFIG.BLACK)
+      .attr("text-anchor", "middle")
+      .text("← ");
+
+    xAxisB
+      .append("text")
+      .attr("class", "x-axis-label-b")
+      .attr("x", -89)
+      .attr("y", xAxisBY)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+      .attr("font-family", CONFIG.FONT_FAMILY)
+      .attr("fill", COLORS.DARK_GRAY)
+      .attr("text-anchor", "middle")
+      .attr("dx", "1em")
+      .text("Retrained");
+
+    xAxisB
+      .append("text")
+      .attr("class", "x-axis-label-b")
+      .attr("x", -23.5)
+      .attr("y", xAxisBY)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+      .attr("font-family", CONFIG.FONT_FAMILY)
+      .attr("fill", CONFIG.BLACK)
+      .attr("text-anchor", "middle")
+      .text(" Samples | ");
+
+    xAxisB
+      .append("text")
+      .attr("class", "x-axis-label-b")
+      .attr("x", 26)
+      .attr("y", xAxisBY)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+      .attr("font-family", CONFIG.FONT_FAMILY)
+      .attr("fill", isModelA ? COLORS.EMERALD : COLORS.PURPLE)
+      .attr("text-anchor", "middle")
+      .text(`${isModelA ? "Model A" : "Model B"}`);
+
+    xAxisB
+      .append("text")
+      .attr("class", "x-axis-label-b")
+      .attr("x", 78)
+      .attr("y", xAxisBY)
+      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
+      .attr("font-family", CONFIG.FONT_FAMILY)
+      .attr("fill", COLORS.BLACK)
+      .attr("text-anchor", "middle")
+      .text(" Samples →");
+
     xAxisB.selectAll(".tick").each(function () {
       d3.select(this)
         .append("line")
@@ -463,6 +523,7 @@ export default function AttackPlot({
         .attr("y2", 0)
         .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
     });
+
     xAxisB.attr("clip-path", "url(#clip-butterfly)");
 
     // Y-Axis
@@ -809,13 +870,14 @@ export default function AttackPlot({
       .append("text")
       .attr("class", "axis-label")
       .attr("x", wL / 2)
-      .attr("y", 15)
+      .attr("y", 16)
       .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
       .attr("font-family", CONFIG.FONT_FAMILY)
       .attr("fill", CONFIG.BLACK)
       .attr("text-anchor", "middle")
       .text("Value");
-    xAxisL.selectAll("text").attr("dy", FONT_CONFIG.FONT_SIZE_10);
+
+    xAxisL.selectAll("text").attr("dy", "9px");
 
     // Y-Axis
     gL.append("line")
