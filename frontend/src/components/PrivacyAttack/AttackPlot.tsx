@@ -409,7 +409,6 @@ export default function AttackPlot({
               .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
           });
 
-          // Update retrain/unlearn circles' locations
           gB.selectAll(".retrain-circle").attr("cx", function () {
             const origX = +d3.select(this).attr("data-original-x");
             const newX = xScaleB(origX);
@@ -429,7 +428,68 @@ export default function AttackPlot({
             return newX;
           });
         })
-      );
+      )
+      .on("wheel", (event) => {
+        event.preventDefault();
+
+        const scrollFactor = 40;
+        panOffset.current -= event.deltaY / scrollFactor;
+        const maxPanLeft = extraRetrain;
+        const maxPanRight = extraUnlearn;
+        panOffset.current = Math.max(
+          -maxPanLeft,
+          Math.min(maxPanRight, panOffset.current)
+        );
+
+        xScaleB.domain([
+          -halfCircles + panOffset.current,
+          halfCircles + panOffset.current,
+        ]);
+
+        const tickStep = CONFIG.BUTTERFLY_CHART_X_AXIS_TICK_STEP;
+        const newTickMin =
+          Math.ceil((-halfCircles + panOffset.current) / tickStep) * tickStep;
+        const newTickMax =
+          Math.floor((halfCircles + panOffset.current) / tickStep) * tickStep;
+        const newTicks = d3.range(newTickMin, newTickMax + tickStep, tickStep);
+
+        xAxisB.call(
+          d3
+            .axisBottom(xScaleB)
+            .tickSize(0)
+            .tickValues(newTicks)
+            .tickFormat((d) => Math.abs(+d).toString())
+        );
+
+        xAxisB.selectAll(".tick").each(function () {
+          d3.select(this).select("line.grid-line").remove();
+          d3.select(this)
+            .append("line")
+            .attr("class", "grid-line")
+            .attr("y1", -hB)
+            .attr("y2", 0)
+            .attr("stroke", CONFIG.VERTICAL_LINE_COLOR);
+        });
+
+        gB.selectAll(".retrain-circle").attr("cx", function () {
+          const origX = +d3.select(this).attr("data-original-x");
+          const newX = xScaleB(origX);
+          d3.select(this).attr(
+            "visibility",
+            newX < -200 ? "hidden" : "visible"
+          );
+          return newX;
+        });
+        gB.selectAll(".unlearn-circle").attr("cx", function () {
+          const origX = +d3.select(this).attr("data-original-x");
+          const newX = xScaleB(origX);
+          d3.select(this).attr(
+            "visibility",
+            newX < -200 ? "hidden" : "visible"
+          );
+          return newX;
+        });
+      });
 
     const tickMin =
       Math.ceil(-halfCircles / CONFIG.BUTTERFLY_CHART_X_AXIS_TICK_STEP) *
