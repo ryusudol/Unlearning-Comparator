@@ -2,8 +2,8 @@ export const UNLEARNING_METHODS = [
   "FineTuning",
   "RandomLabeling",
   "GradientAscent",
-  "My Method1",
-  "Weight Upload",
+  "MyMethod1",
+  "Weight File Upload",
 ];
 
 export const EPOCH = "epoch";
