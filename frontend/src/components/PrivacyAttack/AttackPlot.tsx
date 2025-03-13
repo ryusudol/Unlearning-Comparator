@@ -1298,14 +1298,25 @@ export default function AttackPlot({
 
   useEffect(() => {
     if (!butterflyThresholdRef.current || !lineThresholdRef.current) return;
-
     if (!isStrategyCustom) return;
+
+    let dragOffset = 0;
 
     const dragHandler = d3
       .drag<SVGGElement, unknown>()
+      .on("start", function (event) {
+        const container = d3.select(butterflyRef.current);
+        const [, pointerY] = d3.pointer(event, container.node());
+        const currentTransform = d3.select(this).attr("transform");
+        const currentY = currentTransform
+          ? +currentTransform.replace(/translate\(0,\s*|\)/g, "")
+          : 0;
+        dragOffset = pointerY - currentY;
+      })
       .on("drag", function (event) {
         const container = d3.select(butterflyRef.current);
-        const [, newY] = d3.pointer(event, container.node());
+        const [, pointerY] = d3.pointer(event, container.node());
+        const newY = pointerY - dragOffset;
         const newThresholdRaw = butterflyYScaleRef.current!.invert(newY);
         const newThresholdRounded =
           Math.round(newThresholdRaw / thresholdStep) * thresholdStep;
@@ -1322,7 +1333,6 @@ export default function AttackPlot({
             `translate(0, ${butterflyYScaleRef.current(clamped)})`
           );
         }
-
         if (lineYScaleRef.current && lineThresholdRef.current) {
           d3.select(lineThresholdRef.current).attr(
             "transform",
