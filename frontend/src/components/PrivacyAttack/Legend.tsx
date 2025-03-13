@@ -78,7 +78,7 @@ export default function Legend() {
         </HoverCard>
       </div>
       <div className="flex flex-col">
-        <p className="text-lg font-medium">Attack Metric</p>
+        <p className="text-lg font-medium">Metric</p>
         <RadioGroup
           className="flex flex-col gap-1"
           value={metric}
