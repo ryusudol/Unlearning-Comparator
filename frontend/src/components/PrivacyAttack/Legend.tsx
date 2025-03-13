@@ -1,5 +1,4 @@
 import React from "react";
-import { MoveRight } from "lucide-react";
 
 import Button from "../CustomButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
@@ -10,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "../UI/radio-group";
 import { Separator } from "../UI/separator";
 import { Label } from "../UI/label";
 import { COLORS } from "../../constants/colors";
-import { ENTROPY, CONFIDENCE, UNLEARN, RETRAIN } from "../../constants/common";
+import { ENTROPY, CONFIDENCE } from "../../constants/common";
 import {
   HoverCard,
   HoverCardContent,
@@ -21,29 +20,21 @@ export default function Legend() {
   const strategyThresholds = useThresholdStore(
     (state) => state.strategyThresholds
   );
-  const {
-    metric,
-    direction,
-    strategy,
-    setMetric,
-    setDirection,
-    setStrategy,
-    setWorstCaseModel,
-  } = useAttackStateStore();
+  const { metric, strategy, setMetric, setStrategy, setWorstCaseModel } =
+    useAttackStateStore();
 
   const isEntropyChecked = metric === ENTROPY;
-  const isUnlearnChecked = direction === UNLEARN;
   const displayStrategy =
     strategy === "BEST_ATTACK" ? THRESHOLD_STRATEGIES[1].strategy : strategy;
 
   return (
     <div className="w-full flex justify-between px-3.5 pt-2 pb-[18px] text-sm z-10 relative top-1">
-      <div className="flex items-center gap-2.5 relative top-0.5">
+      <div className="flex items-center gap-5 relative top-0.5">
         <HoverCard openDelay={0} closeDelay={0}>
           <HoverCardTrigger>
             <Button
               style={{ backgroundColor: COLORS.EMERALD }}
-              className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
+              className="w-[140px] h-[70px] text-xl font-medium leading-5 rounded-md"
               onClick={() => {
                 setStrategy("BEST_ATTACK");
                 setWorstCaseModel("A");
@@ -66,7 +57,7 @@ export default function Legend() {
           <HoverCardTrigger>
             <Button
               style={{ backgroundColor: COLORS.PURPLE }}
-              className="w-[115px] h-[70px] text-xl font-medium leading-5 rounded-md"
+              className="w-[140px] h-[70px] text-xl font-medium leading-5 rounded-md"
               onClick={() => {
                 setStrategy("BEST_ATTACK");
                 setWorstCaseModel("B");
@@ -87,7 +78,7 @@ export default function Legend() {
         </HoverCard>
       </div>
       <div className="flex flex-col">
-        <p className="text-lg font-medium">Metric</p>
+        <p className="text-lg font-medium">Attack Metric</p>
         <RadioGroup
           className="flex flex-col gap-1"
           value={metric}
@@ -102,7 +93,7 @@ export default function Legend() {
               checked={isEntropyChecked}
             />
             <Label className="text-sm text-[#4d4d4d]" htmlFor={ENTROPY}>
-              Entropy
+              Top-1 Confidence
             </Label>
           </div>
           <div className="flex items-center space-x-[5px]">
@@ -114,56 +105,13 @@ export default function Legend() {
               checked={!isEntropyChecked}
             />
             <Label className="text-sm text-[#4d4d4d]" htmlFor={CONFIDENCE}>
-              Confidence
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
-      <div className="flex flex-col">
-        <p className="text-lg font-medium text-nowrap">Direction</p>
-        <RadioGroup
-          className="flex flex-col gap-1 text-nowrap"
-          value={direction}
-          onValueChange={setDirection}
-        >
-          <div className="flex items-center space-x-[5px]">
-            <RadioGroupItem
-              className="w-3 h-3"
-              value={UNLEARN}
-              id={UNLEARN}
-              color="#4d4d4d"
-              checked={isUnlearnChecked}
-            />
-            <Label
-              className="flex items-center text-sm text-[#4d4d4d]"
-              htmlFor={UNLEARN}
-            >
-              <span>Above</span>
-              <MoveRight className="w-2.5 h-2.5 mx-1" />
-              <span>Model A/B</span>
-            </Label>
-          </div>
-          <div className="flex items-center space-x-[5px]">
-            <RadioGroupItem
-              className="w-3 h-3"
-              value={RETRAIN}
-              id={RETRAIN}
-              color="#4d4d4d"
-              checked={!isUnlearnChecked}
-            />
-            <Label
-              className="flex items-center text-sm text-[#4d4d4d]"
-              htmlFor={RETRAIN}
-            >
-              <span>Above</span>
-              <MoveRight className="w-2.5 h-2.5 mx-1" />
-              <span>Retrained</span>
+              Output Entropy
             </Label>
           </div>
         </RadioGroup>
       </div>
       <div className="flex">
-        <div className="mr-3.5">
+        <div className="mr-4">
           <p className="text-lg font-medium">Strategy</p>
           <p className="w-[120px] text-[13px] font-light">
             Choose how thresholds are determined:

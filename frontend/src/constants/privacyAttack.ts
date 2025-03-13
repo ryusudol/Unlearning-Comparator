@@ -16,25 +16,25 @@ export const THRESHOLD_STRATEGIES: ThresholdStrategy[] = [
     strategy: "Custom Threshold",
     explanation:
       "Manually set the threshold using a slider for custom control.",
-    length: 135,
+    length: 145,
   },
   {
     strategy: "Max Attack Score",
     explanation:
       "Maximizes the attack score by balancing false positive and false negative rates.",
-    length: 140,
+    length: 150,
   },
   {
     strategy: "Max Success Rate",
     explanation:
       "Aims to maximize the probability of correctly identifying the model's type as retrained or trained.",
-    length: 135,
+    length: 145,
   },
   {
     strategy: "Common Threshold",
     explanation:
       "Sets a single threshold that maximizes the sum of attack scores across different models.",
-    length: 145,
+    length: 155,
   },
 ];
 
