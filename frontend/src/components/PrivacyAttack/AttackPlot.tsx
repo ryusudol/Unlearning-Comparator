@@ -504,7 +504,6 @@ export default function AttackPlot({
     );
 
     // X-axis
-    const xAxisBY = 25;
     const xAxisB = gB
       .append("g")
       .attr("class", "x-axis-b")
@@ -518,62 +517,6 @@ export default function AttackPlot({
       );
 
     xAxisB.selectAll(".tick text").attr("dy", "9px");
-
-    xAxisB
-      .append("text")
-      .attr("class", "x-axis-label-b")
-      .attr("x", -107)
-      .attr("y", xAxisBY)
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
-      .attr("font-family", CONFIG.FONT_FAMILY)
-      .attr("fill", CONFIG.BLACK)
-      .attr("text-anchor", "middle")
-      .text("← ");
-
-    xAxisB
-      .append("text")
-      .attr("class", "x-axis-label-b")
-      .attr("x", -89)
-      .attr("y", xAxisBY)
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
-      .attr("font-family", CONFIG.FONT_FAMILY)
-      .attr("fill", COLORS.DARK_GRAY)
-      .attr("text-anchor", "middle")
-      .attr("dx", "1em")
-      .text("Retrained");
-
-    xAxisB
-      .append("text")
-      .attr("class", "x-axis-label-b")
-      .attr("x", -23.5)
-      .attr("y", xAxisBY)
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
-      .attr("font-family", CONFIG.FONT_FAMILY)
-      .attr("fill", CONFIG.BLACK)
-      .attr("text-anchor", "middle")
-      .text(" Samples | ");
-
-    xAxisB
-      .append("text")
-      .attr("class", "x-axis-label-b")
-      .attr("x", 26)
-      .attr("y", xAxisBY)
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
-      .attr("font-family", CONFIG.FONT_FAMILY)
-      .attr("fill", isModelA ? COLORS.EMERALD : COLORS.PURPLE)
-      .attr("text-anchor", "middle")
-      .text(`${isModelA ? "Model A" : "Model B"}`);
-
-    xAxisB
-      .append("text")
-      .attr("class", "x-axis-label-b")
-      .attr("x", 78)
-      .attr("y", xAxisBY)
-      .attr("font-size", FONT_CONFIG.FONT_SIZE_13)
-      .attr("font-family", CONFIG.FONT_FAMILY)
-      .attr("fill", COLORS.BLACK)
-      .attr("text-anchor", "middle")
-      .text(" Samples →");
 
     xAxisB.selectAll(".tick").each(function () {
       d3.select(this)
@@ -1368,6 +1311,13 @@ export default function AttackPlot({
       <div className="flex relative bottom-3">
         <svg ref={butterflyRef}></svg>
         <svg ref={lineRef} className="relative right-3.5"></svg>
+        <p className="absolute -bottom-0.5 left-[123.5px] text-[13px]">
+          ← <span style={{ color: COLORS.DARK_GRAY }}>Retrained</span> Samples |{" "}
+          <span style={{ color: isModelA ? COLORS.EMERALD : COLORS.PURPLE }}>
+            {isModelA ? "Model A" : "Model B"}
+          </span>{" "}
+          Samples →
+        </p>
       </div>
     </div>
   );
