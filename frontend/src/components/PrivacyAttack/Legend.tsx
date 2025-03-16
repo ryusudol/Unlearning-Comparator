@@ -84,6 +84,7 @@ export default function Legend() {
           value={metric}
           onValueChange={setMetric}
         >
+          
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
               className="w-3 h-3"
@@ -93,7 +94,7 @@ export default function Legend() {
               checked={isEntropyChecked}
             />
             <Label className="text-sm text-[#4d4d4d]" htmlFor={ENTROPY}>
-              Top-1 Confidence
+              Output Entropy
             </Label>
           </div>
           <div className="flex items-center space-x-[5px]">
@@ -105,9 +106,10 @@ export default function Legend() {
               checked={!isEntropyChecked}
             />
             <Label className="text-sm text-[#4d4d4d]" htmlFor={CONFIDENCE}>
-              Output Entropy
+              Top-1 Confidence
             </Label>
           </div>
+          
         </RadioGroup>
       </div>
       <div className="flex">
