@@ -104,7 +104,7 @@ export default function BubbleChart({
     const yScale = d3.scaleLinear().domain([-0.5, 9.5]).range([0, height]);
 
     const colorScale = d3
-      .scaleSequential((t) => d3.interpolateGreys(0.05 + 0.95 * t))
+      .scaleSequential((t) => d3.interpolateTurbo(0.05 + 0.95 * t))
       .domain([0, 1]);
 
     const sizeScale = d3
@@ -118,7 +118,7 @@ export default function BubbleChart({
       .tickSize(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
           : CIFAR_10_CLASSES[d as number]
       );
 
@@ -129,7 +129,7 @@ export default function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (X)"
+          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
           : CIFAR_10_CLASSES[d as number]
       );
 
