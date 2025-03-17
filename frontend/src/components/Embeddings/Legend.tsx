@@ -43,7 +43,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
         <div className="flex flex-col">
           <p className="text-lg font-medium mb-1">Predicted Class</p>
           <div
-            style={{ gridTemplateColumns: "115px 80px 80px 80px 46px" }}
+            style={{ gridTemplateColumns: "115px 80px 80px 80px 78px" }}
             className="grid gap-y-1"
           >
             {oddIndices.map((name, idx) => {
