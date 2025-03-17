@@ -51,7 +51,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
   }, [forgetClass]);
 
   return (
-    <div className="h-[758px] flex flex-col border rounded-md px-1.5">
+    <div className="h-[760px] flex flex-col border rounded-md px-1.5">
       <Legend />
       <div className="flex items-center">
         {!retrainData ? (
@@ -68,7 +68,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
         )}
         <Separator
           orientation="vertical"
-          className="h-[635px] w-[1px] mx-1 relative top-3"
+          className="h-[630px] w-[1px] mx-1 relative top-3.5"
         />
         {!retrainData ? (
           <Indicator text="Failed to fetch retrain data" />

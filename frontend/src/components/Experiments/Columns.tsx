@@ -31,8 +31,8 @@ export const COLUMN_WIDTHS = {
   Type: 78,
   Base: 40,
   Method: 90,
-  Epoch: 60,
-  BS: 44,
+  Epoch: 57,
+  BS: 42,
   LR: 60,
   UA: 60,
   RA: 60,
@@ -41,7 +41,7 @@ export const COLUMN_WIDTHS = {
   RTE: 60,
   FQS: 60,
   A: 46,
-  B: 46,
+  B: 52,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [

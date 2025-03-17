@@ -825,10 +825,7 @@ const ScatterPlot = forwardRef(
     }));
 
     return (
-      <div
-        style={{ height: "650px" }}
-        className="flex flex-col justify-start items-center relative"
-      >
+      <div className="h-[650px] flex flex-col justify-start items-center relative">
         {idExist && (
           <AiOutlineHome
             className="cursor-pointer absolute top-6 left-2 z-10"
@@ -849,15 +846,9 @@ const ScatterPlot = forwardRef(
         <div className="w-[632px] h-[633px] flex flex-col justify-center items-center">
           <div
             ref={containerRef}
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            className="w-full h-full flex justify-center items-center"
           >
-            <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
+            <svg ref={svgRef} className="w-full h-full" />
           </div>
         </div>
       </div>

@@ -4,9 +4,9 @@ import { Arrow } from "../UI/icons";
 
 export default function BubbleChartLegend() {
   const colorScale = d3
-    .scaleSequential((t) => d3.interpolateGreys(0.05 + 0.95 * t))
+    .scaleSequential((t) => d3.interpolateTurbo(0.05 + 0.95 * t))
     .domain([0, 1]);
-  const numStops = 10;
+  const numStops = 100;
   const bubbleColorScale = Array.from({ length: numStops }, (_, i) =>
     colorScale(i / (numStops - 1))
   );
@@ -36,7 +36,7 @@ export default function BubbleChartLegend() {
             style={{ background: gradient }}
           />
           <div className="absolute -bottom-[7.5px] left-1">
-            <span className="text-[10px] text-black">0</span>
+            <span className="text-[10px] text-white">0</span>
           </div>
           <div className="absolute -bottom-[7.5px] right-1">
             <span className="text-[10px] text-white">1</span>

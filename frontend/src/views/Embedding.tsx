@@ -91,7 +91,7 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
   );
 
   return (
-    <div className="h-[758px] flex flex-col border rounded-md px-1.5 relative">
+    <div className="h-[760px] flex flex-col border rounded-md px-1.5 relative">
       <ConnectionLineWrapper positionRef={positionRef} />
       <Legend highlight={highlight} setHighlight={setHighlight} />
       <div className="flex items-center">
@@ -109,7 +109,7 @@ export default function Embeddings({ modelAPoints, modelBPoints }: Props) {
         )}
         <Separator
           orientation="vertical"
-          className="h-[635px] w-[1px] mx-1 relative top-4"
+          className="h-[630px] w-[1px] mx-1 relative top-3.5"
         />
         {modelBExperiment && (
           <ScatterPlot
