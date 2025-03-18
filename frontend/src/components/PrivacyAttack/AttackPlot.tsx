@@ -1124,6 +1124,11 @@ export default function AttackPlot({
         `translate(${infoGroupXPos + 4}, ${infoGroupYPos - 47})`
       );
 
+
+
+
+    const textShadowStyle = "text-shadow: -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white;";
+    
     infoGroup
       .append("text")
       .attr("text-anchor", "start")
@@ -1132,6 +1137,7 @@ export default function AttackPlot({
         strategy === THRESHOLD_STRATEGIES[3].strategy ? "red" : CONFIG.BLACK
       )
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
+      .attr("style", textShadowStyle)
       .text(`Threshold: ${thresholdValue.toFixed(2)}`);
 
     infoGroup
@@ -1143,6 +1149,7 @@ export default function AttackPlot({
       )
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
       .attr("dy", "1.2em")
+      .attr("style", textShadowStyle)
       .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
 
     infoGroup
@@ -1150,6 +1157,7 @@ export default function AttackPlot({
       .attr("text-anchor", "start")
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
       .attr("dy", "2.4em")
+      .attr("style", textShadowStyle)
       .text(`FPR: ${currentData.fpr.toFixed(3)}`);
 
     infoGroup
@@ -1157,6 +1165,7 @@ export default function AttackPlot({
       .attr("text-anchor", "start")
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
       .attr("dy", "3.6em")
+      .attr("style", textShadowStyle)
       .text(`FNR: ${currentData.fnr.toFixed(3)}`);
 
     onUpdateAttackScore(currentData.attack_score);
