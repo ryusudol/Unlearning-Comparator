@@ -298,7 +298,7 @@ export default function InstancePanel({
       </div>
       <ScrollArea
         style={{ width: CONFIG.IMG_COLLECTIONS_WIDTH }}
-        className="h-[160px]"
+        className="h-[168px]"
       >
         <div
           className="grid gap-[1px]"

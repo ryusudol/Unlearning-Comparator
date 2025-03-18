@@ -172,7 +172,7 @@ export default function _TableBody({ table }: Props) {
             textColor = value >= 0.6 ? COLORS.WHITE : COLORS.BLACK;
           } else if (columnId === "TRA") {
             backgroundColor = traScale(value);
-            textColor = value >= maxTRA * 0.95 ? COLORS.WHITE : COLORS.BLACK;
+            textColor = value >= maxTRA * 0.9 ? COLORS.WHITE : COLORS.BLACK;
           } else {
             if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
               backgroundColor = greenScaleHigher(value);

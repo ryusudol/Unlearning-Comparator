@@ -4,11 +4,12 @@ import * as d3 from "d3";
 import { COLORS, TABLEAU10 } from "../../constants/colors";
 import { FONT_CONFIG } from "../../constants/common";
 import { AttackResult } from "../../types/data";
+import { Bin, Data, CategoryType } from "../../types/attack";
+import { getButterflyLegendData } from "../../utils/data/getButterflyLegendData";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { useAttackStateStore } from "../../stores/attackStore";
 import { UNLEARN, RETRAIN, ENTROPY } from "../../constants/common";
-import { Bin, Data, CategoryType } from "../../types/attack";
 import {
   LINE_GRAPH_LEGEND_DATA,
   THRESHOLD_STRATEGIES,
@@ -27,14 +28,14 @@ const CONFIG = {
   VERTICAL_LINE_COLOR: "#efefef",
   THRESHOLD_LINE_COLOR: "#a5a5a5",
   THRESHOLD_LINE_DASH: "5,2",
-  THRESHOLD_LINE_WIDTH: 1.2,
+  THRESHOLD_LINE_WIDTH: 0.8,
   ENTROPY_SCOPE_MIN: 0,
   ENTROPY_SCOPE_MAX: 2.5,
   ENTROPY_THRESHOLD_STEP: 0.05,
   CONFIDENCE_SCOPE_MIN: -2.5,
   CONFIDENCE_SCOPE_MAX: 10,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
-  BUTTERFLY_CIRCLE_RADIUS: 3.3,
+  BUTTERFLY_CIRCLE_RADIUS: 3,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   BUTTERFLY_CHART_X_AXIS_TICK_STEP: 10,
@@ -616,30 +617,10 @@ export default function AttackPlot({
     });
 
     // Draw a legend
-    const BUTTERFLY_LEGEND_DATA = [
-      {
-        label: `From Retrained / Pred. ${isModelA ? "Model A" : "Model B"}`,
-        side: "left",
-        color: COLORS.DARK_GRAY,
-      },
-      {
-        label: "From Retrained / Pred. Retrained",
-        side: "left",
-        color: COLORS.LIGHT_GRAY,
-      },
-      {
-        label: `From ${isModelA ? "Model A" : "Model B"} / Pred. ${
-          isModelA ? "Model A" : "Model B"
-        }`,
-        side: "right",
-        color: isModelA ? COLORS.EMERALD : COLORS.PURPLE,
-      },
-      {
-        label: `From ${isModelA ? "Model A" : "Model B"} / Pred. Retrained`,
-        side: "right",
-        color: isModelA ? COLORS.LIGHT_EMERALD : COLORS.LIGHT_PURPLE,
-      },
-    ];
+    const BUTTERFLY_LEGEND_DATA = getButterflyLegendData(
+      isAboveThresholdUnlearn,
+      isModelA
+    );
 
     const butterflyLegendGroup = gB
       .append("g")
