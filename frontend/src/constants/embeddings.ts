@@ -9,25 +9,25 @@ export const VIEW_MODES: ViewMode[] = [
   {
     label: "Target to Forget",
     explanation:
-      "Shows all forget class instances that the model is supposed to unlearn.",
+      "Highlights all forget class instances that the model is supposed to unlearn.",
     length: 125,
   },
   {
     label: "Correctly Forgotten",
     explanation:
-      "Shows forget class instances that the model successfully unlearned and now misclassifies.",
+      "Highlights forget class instances that the model successfully unlearned and now misclassifies.",
     length: 145,
   },
   {
     label: "Not Forgotten",
     explanation:
-      "Shows forget class instances that the model failed to unlearn and still correctly classifies.",
+      "Highlights forget class instances that the model failed to unlearn and still correctly classifies.",
     length: 110,
   },
   {
     label: "Overly Forgotten",
     explanation:
-      "Shows retain class instances that the model was not supposed to unlearn but did.",
+      "Highlights retain class instances that the model was not supposed to unlearn but did.",
     length: 130,
   },
 ];
