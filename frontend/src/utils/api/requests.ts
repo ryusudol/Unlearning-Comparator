@@ -37,7 +37,13 @@ export async function fetchUnlearningStatus(): Promise<UnlearningStatus> {
       );
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    if (data.method) {
+      data.method = data.method.replace(/-/g, "");
+    }
+
+    return data;
   } catch (error) {
     throw new Error(`Failed to fetch unlearning status: ${error}`);
   }
