@@ -10,6 +10,12 @@ import {
   TooltipProps,
 } from "recharts";
 
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { COLORS } from "../../constants/colors";
+import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
+import { ChartContainer } from "../UI/chart";
+import { GapDataItem } from "../../types/data";
 import {
   CIFAR_10_CLASSES,
   FONT_CONFIG,
@@ -19,12 +25,6 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
-import { COLORS } from "../../constants/colors";
-import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
-import { ChartContainer } from "../UI/chart";
-import { GapDataItem } from "../../types/data";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
@@ -227,7 +227,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     const data = payload[0].payload as GapDataItem;
 
     return (
-      <div className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl">
+      <div className="rounded-lg border border-border/50 bg-white px-3 py-2 text-sm shadow-xl">
         <p>
           <span style={{ color: COLORS.EMERALD }}>Model A: </span>
           <span className="font-semibold">

@@ -32,8 +32,8 @@ export default function LayerWiseSimilarity() {
       {forgetClassExist ? (
         areAllModelsSelected ? (
           <div className="relative bottom-[3px]">
-            <p className="w-fit text-center text-[15px] mb-0.5 relative left-[122px]">
-              CKA Between Before and After Unlearning
+            <p className="w-fit text-center text-[15px] mb-0.5 relative left-[106px]">
+              Similarity Between Before and After Unlearning
             </p>
             <LineChart dataset={selectedDataset} />
           </div>

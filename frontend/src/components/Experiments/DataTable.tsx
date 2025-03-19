@@ -88,12 +88,13 @@ export default function DataTable({ isExpanded }: Props) {
       ...column,
       cell: ({ row }: CellContext<ExperimentData, unknown>) => {
         const isSelected = currentSelection === row.id;
+        const radioDistance = isModelAColumn ? "left-1" : "left-0.5";
         return (
           <RadioGroup className="flex justify-center items-center">
             <RadioGroupItem
               value={row.id}
               className={cn(
-                "w-[18px] h-[18px] rounded-full relative left-1",
+                "w-[18px] h-[18px] rounded-full relative " + radioDistance,
                 isSelected && "[&_svg]:h-3 [&_svg]:w-3"
               )}
               checked={isSelected}

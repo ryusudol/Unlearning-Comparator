@@ -422,7 +422,7 @@ export default function UnlearningConfiguration() {
       >
         <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
         <span className="text-base">
-          Unlearn and Add Model{totalExperimentsCount > 1 && "s"}
+          Build Model{totalExperimentsCount > 1 && "s"}
         </span>
       </Button>
     </form>

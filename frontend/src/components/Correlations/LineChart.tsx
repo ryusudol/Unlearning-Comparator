@@ -131,7 +131,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
             ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0]}
             tickMargin={-2}
             label={{
-              value: "Similarity Score",
+              value: "CKA Value",
               angle: -90,
               position: "center",
               style: {
@@ -224,7 +224,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     return (
       <div
         style={{ zIndex: CONFIG.zIndex }}
-        className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl"
+        className="rounded-lg border border-border/50 bg-white px-3 py-2 text-sm shadow-xl"
       >
         <p className="leading-[18px]">
           <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}

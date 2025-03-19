@@ -1,6 +1,6 @@
 import React from "react";
 
-import Button from "../CustomButton";
+import { Button } from "../UI/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
 import { useThresholdStore } from "../../stores/thresholdStore";
 import { useAttackStateStore } from "../../stores/attackStore";
@@ -84,7 +84,6 @@ export default function Legend() {
           value={metric}
           onValueChange={setMetric}
         >
-          
           <div className="flex items-center space-x-[5px]">
             <RadioGroupItem
               className="w-3 h-3"
@@ -109,7 +108,6 @@ export default function Legend() {
               Top-1 Confidence
             </Label>
           </div>
-          
         </RadioGroup>
       </div>
       <div className="flex">
@@ -130,7 +128,7 @@ export default function Legend() {
                 <TabsTrigger
                   value={s.strategy}
                   style={{ width: s.length }}
-                  className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+                  className="h-10 data-[state=active]:bg-[#696969] data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
                     <HoverCardTrigger>
