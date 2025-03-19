@@ -724,8 +724,9 @@ export default function AttackPlot({
             .attr("x", labelX)
             .attr("y", labelY)
             .attr("text-anchor", textAnchor)
-            .attr("font-size", "11px")
+            .attr("font-size", "12px")
             .attr("fill", CONFIG.BLACK)
+            .attr("style", "text-shadow: -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white;")
             .text(labelText);
         });
       gB.selectAll(".hovered-label").raise();
