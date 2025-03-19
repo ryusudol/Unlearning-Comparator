@@ -128,7 +128,7 @@ export default function Legend() {
                 <TabsTrigger
                   value={s.strategy}
                   style={{ width: s.length }}
-                  className="h-10 data-[state=active]:bg-[#696969] data-[state=active]:text-white"
+                  className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
                     <HoverCardTrigger>

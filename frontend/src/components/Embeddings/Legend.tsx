@@ -95,7 +95,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                 <TabsTrigger
                   value={mode.label}
                   style={{ width: mode.length }}
-                  className="h-10 data-[state=active]:bg-[#696969] data-[state=active]:text-white"
+                  className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
                     <HoverCardTrigger>{mode.label}</HoverCardTrigger>
