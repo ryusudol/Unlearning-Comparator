@@ -708,13 +708,10 @@ const ScatterPlot = forwardRef(
       highlightInstance: (imgIdx: number) => {
         const element = elementMapRef.current.get(imgIdx);
         if (element) {
-          const selection = d3.select(element);
-          // const d = selection.datum() as (number | Prob)[];
-          
-          selection
+          d3.select(element)
             .style("stroke", COLORS.BLACK)
             .style("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
-            .style("stroke-opacity", 1) 
+            .style("stroke-opacity", 1)
             .raise();
         }
       },

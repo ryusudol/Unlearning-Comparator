@@ -322,7 +322,6 @@ function BubbleChart({
               position: "fixed",
               left: tooltip.x,
               top: tooltip.y,
-              transform: "translateY(0)",
               pointerEvents: "none",
               zIndex: 10,
               zoom,
