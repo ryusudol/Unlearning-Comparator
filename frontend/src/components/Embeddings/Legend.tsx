@@ -99,7 +99,10 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
                     <HoverCardTrigger>{mode.label}</HoverCardTrigger>
-                    <HoverCardContent className="w-auto px-3 py-2" side="top">
+                    <HoverCardContent
+                      className="w-auto px-2.5 py-1.5 font-normal"
+                      side="top"
+                    >
                       {mode.explanation}
                     </HoverCardContent>
                   </HoverCard>

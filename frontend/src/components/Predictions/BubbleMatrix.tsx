@@ -304,7 +304,7 @@ export default function BubbleChart({
         createPortal(
           <div
             ref={tooltipRef}
-            className={`w-auto h-auto bg-white px-3 py-2 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+            className={`w-auto h-auto bg-white px-2.5 py-1.5 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
               tooltip.display ? "opacity-100" : "opacity-0"
             }`}
             style={{

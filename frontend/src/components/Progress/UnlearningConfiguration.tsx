@@ -5,7 +5,6 @@ import MethodUnlearning from "../Experiments/MethodUnlearning";
 import Button from "../CustomButton";
 import { Label } from "../UI/label";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { PlusIcon } from "../UI/icons";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useRunningIndexStore } from "../../stores/runningIndexStore";
@@ -329,7 +328,7 @@ export default function UnlearningConfiguration() {
 
   return (
     <form
-      className="w-full h-full flex flex-col items-start justify-between"
+      className="w-full h-full flex flex-col items-end justify-between"
       onSubmit={handleSubmit}
     >
       <div className="w-full grid grid-cols-2 gap-y-2">
@@ -405,7 +404,7 @@ export default function UnlearningConfiguration() {
             batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
           }`}
         >
-          These settings will build{" "}
+          These settings will build and add{" "}
           <span
             className={`font-bold ${
               totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
@@ -417,13 +416,12 @@ export default function UnlearningConfiguration() {
         </span>
       )}
       <Button
-        className={`w-full flex items-center ${isCustom ? "mt-2" : "mt-1"}`}
+        className={`h-[34px] flex items-center text-base px-4 ${
+          isCustom ? "mt-2" : "mt-1"
+        }`}
         disabled={isDisabled}
       >
-        <PlusIcon className="w-3 h-3 mr-1.5" color="white" />
-        <span className="text-base">
-          Build Model{totalExperimentsCount > 1 && "s"}
-        </span>
+        BUILD
       </Button>
     </form>
   );

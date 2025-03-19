@@ -224,7 +224,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     return (
       <div
         style={{ zIndex: CONFIG.zIndex }}
-        className="rounded-lg border border-border/50 bg-white px-3 py-2 text-sm shadow-xl"
+        className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl"
       >
         <p className="leading-5">
           <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}

@@ -40,7 +40,7 @@ export default function DualMetricsLegend() {
   )} 0%, ${orangeScale(1)} 100%)`;
 
   return (
-    <div className="w-[538px] flex items-center gap-2 relative bottom-0.5 right-0">
+    <div className="w-[542px] flex items-center gap-2 relative bottom-0.5 right-0">
       <div className="w-full">
         <h3 className="text-xs text-gray-800 font-medium">Accuracy</h3>
         <div className="relative h-[15px]">

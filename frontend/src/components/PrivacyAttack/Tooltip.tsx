@@ -398,8 +398,8 @@ export default React.memo(function Tooltip({
       </div>
       <div>
         <svg ref={svgRef} className="w-full" />
-        <p className="text-xs absolute bottom-0.5 right-[117px] translate-x-1/2">
-          Confidence Score
+        <p className="text-xs absolute bottom-0.5 right-[118px] translate-x-1/2">
+          Confidence
         </p>
       </div>
     </div>

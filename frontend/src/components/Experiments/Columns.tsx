@@ -1,5 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 
+import MethodFilterHeader from "./MethodFilterHeader";
+import { Badge } from "../UI/badge";
+import { ExperimentData } from "../../types/data";
+import { getTypeColors } from "../../utils/data/colors";
+import { COLORS } from "../../constants/colors";
 import {
   EpochHeader,
   BSHeader,
@@ -11,11 +16,6 @@ import {
   RTEHeader,
   FQSHeader,
 } from "./ColumnHeaders";
-import MethodFilterHeader from "./MethodFilterHeader";
-import { Badge } from "../UI/badge";
-import { ExperimentData } from "../../types/data";
-import { getTypeColors } from "../../utils/data/colors";
-import { COLORS } from "../../constants/colors";
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A" || value === "NaN"
@@ -30,16 +30,16 @@ export const COLUMN_WIDTHS = {
   ID: 36,
   Type: 72,
   Base: 36,
-  Method: 90,
-  Epoch: 54,
+  Method: 92,
+  Epoch: 56,
   BS: 42,
   LR: 60,
-  UA: 62,
-  RA: 62,
-  TUA: 62,
-  TRA: 62,
-  RTE: 62,
-  FQS: 62,
+  UA: 60,
+  RA: 60,
+  TUA: 60,
+  TRA: 60,
+  RTE: 60,
+  FQS: 60,
   A: 46,
   B: 52,
 };
@@ -85,11 +85,17 @@ export const columns: ColumnDef<ExperimentData>[] = [
       const rowValue = row.getValue(columnId);
       if (filterValue.length === 0) return true;
       return filterValue.includes(String(rowValue));
-      // return String(rowValue) === filterValue;
     },
     cell: ({ row }) => {
       const method = row.getValue("Method");
-      const value = getValueToDisplay(method) as string;
+      const valueToDisplay = getValueToDisplay(method) as string;
+      const value = valueToDisplay.startsWith("F")
+        ? "Fine-Tuning"
+        : valueToDisplay.startsWith("R")
+        ? "Random Labeling"
+        : valueToDisplay.startsWith("G")
+        ? "Gradient Ascent"
+        : valueToDisplay;
       return <div>{value}</div>;
     },
   },

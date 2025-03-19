@@ -1,5 +1,10 @@
 import { useMemo, useEffect, useState } from "react";
 
+import Button from "../CustomButton";
+import { useBaseConfigStore } from "../../stores/baseConfigStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { Label } from "../UI/label";
+import { PlusIcon } from "../UI/icons";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +26,6 @@ import {
   DATASETS,
   NEURAL_NETWORK_MODELS,
 } from "../../constants/common";
-import { useBaseConfigStore } from "../../stores/baseConfigStore";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { Label } from "../UI/label";
-import { PlusIcon } from "../UI/icons";
-import Button from "../CustomButton";
 
 interface Props {
   open: boolean;
@@ -167,8 +167,11 @@ export default function ForgetClassTabPlusButton({
           </Select>
         </div>
         <DialogFooter>
-          <Button onClick={handleButtonClick}>
-            {hasNoSelectedForgetClass ? "Apply" : "Add"}
+          <Button
+            className="h-[34px] flex items-center text-base px-4"
+            onClick={handleButtonClick}
+          >
+            {hasNoSelectedForgetClass ? "APPLY" : "ADD"}
           </Button>
         </DialogFooter>
       </DialogContent>

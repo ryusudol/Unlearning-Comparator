@@ -135,7 +135,10 @@ export default function _TableBody({ table }: Props) {
   ): React.CSSProperties => {
     const columnId = cell.column.id;
     const columnWidth = COLUMN_WIDTHS[columnId as keyof typeof COLUMN_WIDTHS];
-    let style: React.CSSProperties = { width: `${columnWidth}px` };
+    let style: React.CSSProperties = {
+      width: `${columnWidth}px`,
+      minWidth: `${columnWidth}px`,
+    };
 
     if (columnId in performanceMetrics) {
       const value = cell.getValue() as "N/A" | number;

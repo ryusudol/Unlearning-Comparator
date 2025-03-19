@@ -86,7 +86,7 @@ export default function VerticalBarChart({
     <div className="flex flex-col justify-center items-center relative bottom-1.5 right-2.5">
       <span
         className={`text-[15px] relative ${
-          mode === "Training" ? "left-[30px]" : "left-0"
+          mode === "Training" ? "left-7" : "left-0"
         }`}
       >
         {mode} Dataset
@@ -227,7 +227,7 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     const data = payload[0].payload as GapDataItem;
 
     return (
-      <div className="rounded-lg border border-border/50 bg-white px-3 py-2 text-sm shadow-xl">
+      <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
         <p>
           <span style={{ color: COLORS.EMERALD }}>Model A: </span>
           <span className="font-semibold">
