@@ -319,15 +319,11 @@ const ScatterPlot = forwardRef(
       async (event: MouseEvent, d: (number | Prob)[]) => {
         event.stopPropagation();
 
-        const imgIdx = d[2] as number;
-        const prob = d[6] as Prob;
-
-        onHover(imgIdx, mode, prob);
-
         if (fetchControllerRef.current) {
           fetchControllerRef.current.abort();
         }
 
+        const prob = d[6] as Prob;
         const controller = new AbortController();
         fetchControllerRef.current = controller;
 
@@ -389,23 +385,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [forgetClass, isModelA, mode, modelAExperiment, modelBExperiment, onHover]
-    );
-
-    const handleMouseEnter = useCallback(
-      (event: MouseEvent, d: (number | Prob)[]) => {
-        const imgIdx = d[2] as number;
-        const prob = d[6] as Prob;
-
-        onHover(imgIdx, mode, prob);
-
-        const element = event.currentTarget as Element;
-        d3.select(element)
-          .attr("stroke", COLORS.BLACK)
-          .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
-          .raise();
-      },
-      [mode, onHover]
+      [forgetClass, isModelA, modelAExperiment, modelBExperiment]
     );
 
     const shouldLowerOpacity = useCallback(
@@ -430,6 +410,22 @@ const ScatterPlot = forwardRef(
       [forgetClass, highlight]
     );
 
+    const handleMouseEnter = useCallback(
+      (event: MouseEvent, d: (number | Prob)[]) => {
+        const imgIdx = d[2] as number;
+        const prob = d[6] as Prob;
+
+        onHover(imgIdx, mode, prob);
+
+        const element = event.currentTarget as Element;
+        d3.select(element)
+          .style("stroke", COLORS.BLACK)
+          .style("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
+          .raise();
+      },
+      [mode, onHover]
+    );
+
     const handleMouseLeave = useCallback(
       (event: MouseEvent) => {
         onHover(null, mode);
@@ -439,32 +435,32 @@ const ScatterPlot = forwardRef(
         const d = selection.datum() as (number | Prob)[];
 
         if (element.tagName === "circle") {
+          const originalOpacity = shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : highlight === VIEW_MODES[4].label
+            ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+            : CONFIG.DEFAULT_CIRCLE_OPACITY;
           selection
-            .attr("stroke", null)
-            .attr("stroke-width", null)
-            .style(
-              "opacity",
-              shouldLowerOpacity(d)
-                ? CONFIG.LOWERED_OPACITY
-                : highlight === VIEW_MODES[4].label
-                ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
-                : CONFIG.DEFAULT_CIRCLE_OPACITY
-            );
+            .style("stroke", null)
+            .style("stroke-width", null)
+            .style("stroke-opacity", null)
+            .style("fill-opacity", originalOpacity);
         } else {
           const colorStr = z(d[1] as number);
           const color = d3.color(colorStr);
+          const originalOpacity = shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY;
           selection
-            .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
-            .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
             .style(
-              "opacity",
-              shouldLowerOpacity(d)
-                ? CONFIG.LOWERED_OPACITY
-                : CONFIG.DEFAULT_CROSS_OPACITY
-            );
+              "stroke",
+              color ? color.darker().darker().toString() : COLORS.BLACK
+            )
+            .style("stroke-width", CONFIG.X_STROKE_WIDTH)
+            .style("stroke-opacity", originalOpacity);
         }
       },
-      [mode, onHover, shouldLowerOpacity, highlight, z]
+      [highlight, mode, onHover, shouldLowerOpacity, z]
     );
 
     const transformedData = useMemo(() => {
@@ -520,15 +516,18 @@ const ScatterPlot = forwardRef(
         .attr("cy", (d) => y(d[5] as number))
         .attr("r", CONFIG.DOT_SIZE / currentTransform.k)
         .attr("fill", (d) => z(d[1] as number))
-        .style("cursor", "pointer")
-        .style("opacity", (d) =>
+        .style("fill-opacity", (d) =>
           shouldLowerOpacity(d)
             ? CONFIG.LOWERED_OPACITY
             : highlight === VIEW_MODES[4].label
             ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
             : CONFIG.DEFAULT_CIRCLE_OPACITY
         )
+        .style("cursor", "pointer")
         .style("vector-effect", "non-scaling-stroke")
+        .style("pointer-events", (d) =>
+          shouldLowerOpacity(d) ? "none" : "auto"
+        )
         .each(function (d) {
           elementMapRef.current.set(d[2] as number, this);
         });
@@ -541,7 +540,6 @@ const ScatterPlot = forwardRef(
           const xPos = x(d[4] as number);
           const yPos = y(d[5] as number);
           const scale = 1 / currentTransform.k;
-
           return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
         })
         .attr(
@@ -551,14 +549,26 @@ const ScatterPlot = forwardRef(
             .type(d3.symbolCross)
             .size(Math.pow(CONFIG.CROSS__SIZE / CONFIG.X_SIZE_DIVIDER, 2))
         )
-        .attr("fill", (d) => z(d[1] as number))
-        .attr("stroke", (d) => {
+        .style("fill", (d) => z(d[1] as number))
+        .style("stroke", (d) => {
           const color = d3.color(z(d[1] as number));
           return color ? color.darker().darker().toString() : "black";
         })
-        .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
+        .style("stroke-width", CONFIG.X_STROKE_WIDTH)
+        .style("fill-opacity", (d) =>
+          shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY
+        )
+        .style("stroke-opacity", (d) =>
+          shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY
+        )
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY)
+        .style("pointer-events", (d) =>
+          shouldLowerOpacity(d) ? "none" : "auto"
+        )
         .each(function (d) {
           elementMapRef.current.set(d[2] as number, this);
         });
@@ -662,92 +672,6 @@ const ScatterPlot = forwardRef(
     }, [data.length, idExist, initializeSvg, updateElements, zoom]);
 
     useEffect(() => {
-      if (!svgElements.current.circles && !svgElements.current.crosses) return;
-
-      const currentTransform = svgRef.current
-        ? d3.zoomTransform(svgRef.current)
-        : d3.zoomIdentity;
-
-      const updateOpacity = (selection: d3.Selection<any, any, any, any>) => {
-        const isCircle = selection.node()?.tagName === "circle";
-
-        selection
-          .style("opacity", (d) =>
-            shouldLowerOpacity(d)
-              ? CONFIG.LOWERED_OPACITY
-              : isCircle
-              ? highlight === VIEW_MODES[4].label
-                ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
-                : CONFIG.DEFAULT_CIRCLE_OPACITY
-              : CONFIG.DEFAULT_CROSS_OPACITY
-          )
-          .style("pointer-events", (d) =>
-            shouldLowerOpacity(d) ? "none" : "auto"
-          );
-
-        if (isCircle) {
-          selection.attr("r", CONFIG.DOT_SIZE / currentTransform.k);
-        } else {
-          selection.attr("transform", (d) => {
-            const xPos = x(d[4] as number);
-            const yPos = y(d[5] as number);
-            const scale = 1 / currentTransform.k;
-            return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
-          });
-        }
-      };
-
-      if (svgElements.current.circles) {
-        updateOpacity(svgElements.current.circles);
-      }
-      if (svgElements.current.crosses) {
-        updateOpacity(svgElements.current.crosses);
-      }
-    }, [shouldLowerOpacity, highlight, x, y]);
-
-    useEffect(() => {
-      if (!hoveredInstance) return;
-
-      const currentElementMap = elementMapRef.current;
-
-      if (hoveredInstance.source !== mode) {
-        const element = currentElementMap.get(hoveredInstance.imgIdx);
-        if (element) {
-          const selection = d3.select(element);
-          selection
-            .attr("stroke", COLORS.BLACK)
-            .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH);
-        }
-      }
-
-      return () => {
-        if (hoveredInstance.source !== mode) {
-          const element = currentElementMap.get(hoveredInstance.imgIdx);
-          if (element) {
-            const selection = d3.select(element);
-            if (element.tagName === "circle") {
-              selection
-                .attr("stroke", null)
-                .attr("stroke-width", null)
-                .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY);
-            } else {
-              const d = selection.datum() as (number | Prob)[];
-              const colorStr = z(d[1] as number);
-              const color = d3.color(colorStr);
-              selection
-                .attr(
-                  "stroke",
-                  color ? color.darker().toString() : COLORS.BLACK
-                )
-                .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
-                .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY);
-            }
-          }
-        }
-      };
-    }, [hoveredInstance, mode, z]);
-
-    useEffect(() => {
       setHighlight("All");
     }, [setHighlight, data]);
 
@@ -784,15 +708,10 @@ const ScatterPlot = forwardRef(
       highlightInstance: (imgIdx: number) => {
         const element = elementMapRef.current.get(imgIdx);
         if (element) {
-          const selection = d3.select(element);
-          const d = selection.datum() as (number | Prob)[];
-
-          if (!shouldLowerOpacity(d)) {
-            selection
-              .attr("stroke", COLORS.BLACK)
-              .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
-              .raise();
-          }
+          d3.select(element)
+            .style("stroke", COLORS.BLACK)
+            .style("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
+            .raise();
         }
       },
       removeHighlight: (imgIdx: number) => {
@@ -801,24 +720,28 @@ const ScatterPlot = forwardRef(
           const selection = d3.select(element);
           const d = selection.datum() as (number | Prob)[];
           const isCircle = element.tagName === "circle";
-          const opacityValue = shouldLowerOpacity(d)
-            ? CONFIG.LOWERED_OPACITY
-            : isCircle
-            ? CONFIG.DEFAULT_CIRCLE_OPACITY
-            : CONFIG.DEFAULT_CROSS_OPACITY;
 
           if (isCircle) {
+            const originalOpacity = shouldLowerOpacity(d)
+              ? CONFIG.LOWERED_OPACITY
+              : highlight === VIEW_MODES[4].label
+              ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+              : CONFIG.DEFAULT_CIRCLE_OPACITY;
             selection
-              .attr("stroke", null)
-              .attr("stroke-width", null)
-              .style("opacity", opacityValue);
+              .style("stroke", null)
+              .style("stroke-width", null)
+              .style("fill-opacity", originalOpacity);
           } else {
             const colorStr = z(d[1] as number);
             const color = d3.color(colorStr);
+            const originalOpacity = shouldLowerOpacity(d)
+              ? CONFIG.LOWERED_OPACITY
+              : CONFIG.DEFAULT_CROSS_OPACITY;
             selection
-              .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
-              .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
-              .style("opacity", opacityValue);
+              .style("stroke", color ? color.darker().toString() : COLORS.BLACK)
+              .style("stroke-width", CONFIG.X_STROKE_WIDTH)
+              .style("fill-opacity", originalOpacity)
+              .style("stroke-opacity", originalOpacity);
           }
         }
       },
