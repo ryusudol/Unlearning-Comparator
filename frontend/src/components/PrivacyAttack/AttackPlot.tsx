@@ -28,14 +28,14 @@ const CONFIG = {
   VERTICAL_LINE_COLOR: "#efefef",
   THRESHOLD_LINE_COLOR: "#a5a5a5",
   THRESHOLD_LINE_DASH: "5,2",
-  THRESHOLD_LINE_WIDTH: 0.8,
+  THRESHOLD_LINE_WIDTH: 1.2,
   ENTROPY_SCOPE_MIN: 0,
   ENTROPY_SCOPE_MAX: 2.5,
   ENTROPY_THRESHOLD_STEP: 0.05,
   CONFIDENCE_SCOPE_MIN: -2.5,
   CONFIDENCE_SCOPE_MAX: 10,
   CONFIDENCE_THRESHOLD_STEP: 0.25,
-  BUTTERFLY_CIRCLE_RADIUS: 3,
+  BUTTERFLY_CIRCLE_RADIUS: 3.3,
   OPACITY_ABOVE_THRESHOLD: 1,
   OPACITY_BELOW_THRESHOLD: 0.3,
   BUTTERFLY_CHART_X_AXIS_TICK_STEP: 10,
@@ -1124,11 +1124,9 @@ export default function AttackPlot({
         `translate(${infoGroupXPos + 4}, ${infoGroupYPos - 47})`
       );
 
+    const textShadowStyle =
+      "text-shadow: -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white;";
 
-
-
-    const textShadowStyle = "text-shadow: -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white;";
-    
     infoGroup
       .append("text")
       .attr("text-anchor", "start")

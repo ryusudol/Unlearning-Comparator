@@ -249,11 +249,11 @@ export default function UnlearningConfiguration() {
 
     const methodFullName =
       method === "ft"
-        ? "Fine-Tuning"
+        ? "FineTuning"
         : method === "rl"
-        ? "Random-Labeling"
+        ? "RandomLabeling"
         : method === "ga"
-        ? "Gradient-Ascent"
+        ? "GradientAscent"
         : "Custom";
 
     if (isCustom) {

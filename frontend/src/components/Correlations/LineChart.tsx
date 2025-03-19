@@ -9,6 +9,10 @@ import {
   TooltipProps,
 } from "recharts";
 
+import { COLORS } from "../../constants/colors";
+import { getCkaData } from "../../utils/data/getCkaData";
+import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
+import { ChartContainer } from "../UI/chart";
 import {
   CKA_DATA_KEYS,
   LINE_CHART_TICK_STYLE,
@@ -24,10 +28,6 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../stores/experimentsStore";
-import { COLORS } from "../../constants/colors";
-import { getCkaData } from "../../utils/data/getCkaData";
-import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
-import { ChartContainer } from "../UI/chart";
 
 const CONFIG = {
   DOT_SIZE: 10,
@@ -226,46 +226,22 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         style={{ zIndex: CONFIG.zIndex }}
         className="rounded-lg border border-border/50 bg-white px-2 py-1 text-sm shadow-xl"
       >
-        <div className="flex items-center leading-[18px]">
-          <CircleIcon
-            className="mr-1"
-            style={{ width: CONFIG.DOT_SIZE, color: COLORS.EMERALD }}
-          />
-          <p>
-            <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
-            <span className="font-semibold">{payload[1].value}</span>
-          </p>
-        </div>
-        <div className="flex items-center leading-[18px]">
-          <CircleIcon
-            className="mr-1"
-            style={{ width: CONFIG.DOT_SIZE, color: COLORS.PURPLE }}
-          />
-          <p>
-            <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
-            <span className="font-semibold">{payload[3].value}</span>
-          </p>
-        </div>
-        <div className="flex items-center leading-[18px]">
-          <FatMultiplicationSignIcon
-            className="mr-1"
-            style={{ width: CONFIG.CROSS_SIZE, color: COLORS.EMERALD }}
-          />
-          <p>
-            <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
-            <span className="font-semibold">{payload[0].value}</span>
-          </p>
-        </div>
-        <div className="flex items-center leading-[18px]">
-          <FatMultiplicationSignIcon
-            className="mr-1"
-            style={{ width: CONFIG.CROSS_SIZE, color: COLORS.PURPLE }}
-          />
-          <p>
-            <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
-            <span className="font-semibold">{payload[2].value}</span>
-          </p>
-        </div>
+        <p className="leading-[18px]">
+          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
+          <span className="font-semibold">{payload[1].value}</span>
+        </p>
+        <p className="leading-[18px]">
+          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
+          <span className="font-semibold">{payload[3].value}</span>
+        </p>
+        <p className="leading-[18px]">
+          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
+          <span className="font-semibold">{payload[0].value}</span>
+        </p>
+        <p className="leading-[18px]">
+          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
+          <span className="font-semibold">{payload[2].value}</span>
+        </p>
       </div>
     );
   }
