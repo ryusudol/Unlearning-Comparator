@@ -28,7 +28,7 @@ export default function AttackSuccessFailure({
   const forgettingQualityScore = 1 - attackScore;
 
   return (
-    <div className="h-full flex flex-col items-center relative bottom-0.5 left-1.5">
+    <div className="h-full flex flex-col items-center relative bottom-0.5 left-[3px]">
       <p className="text-xl text-center mb-1.5">
         Forgetting Quality Score ={" "}
         <span className="font-semibold">
