@@ -708,9 +708,14 @@ const ScatterPlot = forwardRef(
       highlightInstance: (imgIdx: number) => {
         const element = elementMapRef.current.get(imgIdx);
         if (element) {
-          d3.select(element)
+          const selection = d3.select(element);
+          // const d = selection.datum() as (number | Prob)[];
+          
+          // pointer-events는 건드리지 않고 오직 테두리 스타일만 적용
+          selection
             .style("stroke", COLORS.BLACK)
             .style("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
+            .style("stroke-opacity", 1) // 테두리는 항상 완전히 불투명하게
             .raise();
         }
       },
