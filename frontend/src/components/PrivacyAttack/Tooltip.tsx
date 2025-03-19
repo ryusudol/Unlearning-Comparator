@@ -156,6 +156,7 @@ export default React.memo(function Tooltip({
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
       .text("Retrained")
+      .style("fill", COLORS.DARK_GRAY)
       .style("font-size", FONT_CONFIG.FONT_SIZE_10)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
 
@@ -180,6 +181,7 @@ export default React.memo(function Tooltip({
       .append("text")
       .attr("x", CONFIG.LEGEND_X)
       .attr("y", CONFIG.LEGEND_Y)
+      .style("fill", isModelA ? COLORS.EMERALD : COLORS.PURPLE)
       .text(isModelA ? "Model A" : "Model B")
       .style("font-size", FONT_CONFIG.FONT_SIZE_10)
       .style("font-family", CONFIG.ROBOTO_CONDENSED);
@@ -396,7 +398,7 @@ export default React.memo(function Tooltip({
       </div>
       <div>
         <svg ref={svgRef} className="w-full" />
-        <p className="text-xs absolute bottom-0.5 right-[calc(26%)] translate-x-1/2">
+        <p className="text-xs absolute bottom-0.5 right-[117px] translate-x-1/2">
           Confidence Score
         </p>
       </div>
