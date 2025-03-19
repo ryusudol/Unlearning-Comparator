@@ -149,7 +149,7 @@ export default function _TableBody({ table }: Props) {
           if (value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD) {
             backgroundColor = blueScale(value);
             textColor =
-              value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD / 2
+              value <= CONFIG.COLOR_MAPPING_RTE_THRESHOLD * 0.4
                 ? COLORS.WHITE
                 : COLORS.BLACK;
           } else {
@@ -172,11 +172,11 @@ export default function _TableBody({ table }: Props) {
             textColor = value >= 0.6 ? COLORS.WHITE : COLORS.BLACK;
           } else if (columnId === "TRA") {
             backgroundColor = traScale(value);
-            textColor = value >= maxTRA * 0.9 ? COLORS.WHITE : COLORS.BLACK;
+            textColor = value >= maxTRA * 0.92 ? COLORS.WHITE : COLORS.BLACK;
           } else {
             if (value >= CONFIG.COLOR_MAPPING_THRESHOLD) {
               backgroundColor = greenScaleHigher(value);
-              textColor = value >= 0.9 ? COLORS.WHITE : COLORS.BLACK;
+              textColor = value >= 0.92 ? COLORS.WHITE : COLORS.BLACK;
             } else {
               backgroundColor = greenScaleHigher(
                 CONFIG.COLOR_MAPPING_THRESHOLD
