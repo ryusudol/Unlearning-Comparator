@@ -229,13 +229,15 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
     return (
       <div className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl">
         <p>
-          <span style={{ color: COLORS.EMERALD }}>Model A: </span>
+          <span style={{ color: COLORS.EMERALD }}>Model A</span>
+          <span> Acc: </span>
           <span className="font-semibold">
             {data.modelAAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
           </span>
         </p>
         <p>
-          <span style={{ color: COLORS.PURPLE }}>Model B: </span>
+          <span style={{ color: COLORS.PURPLE }}>Model B</span>
+          <span> Acc: </span>
           <span className="font-semibold">
             {data.modelBAccuracy.toFixed(CONFIG.TOOLTIP_TO_FIXED_LENGTH)}
           </span>

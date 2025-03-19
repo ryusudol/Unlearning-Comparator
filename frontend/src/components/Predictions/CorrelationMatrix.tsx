@@ -227,7 +227,7 @@ function BubbleChart({
             ? (rect.right + 10) / zoom
             : (leftSpace - tooltipWidth - 10) / zoom;
 
-        let yPos = (rect.top + rect.height / 2) / zoom;
+        let yPos = (rect.bottom + 10) / zoom;
 
         setTooltip({
           display: true,
@@ -322,7 +322,7 @@ function BubbleChart({
               position: "fixed",
               left: tooltip.x,
               top: tooltip.y,
-              transform: "translateY(-50%)",
+              transform: "translateY(0)",
               pointerEvents: "none",
               zIndex: 10,
               zoom,
