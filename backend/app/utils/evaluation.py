@@ -107,7 +107,6 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
             outputs = model(images)
             loss = criterion(outputs, labels)
             total_loss += loss.item()
-            
             temperature = 1.0
             scaled_outputs = outputs / temperature
             probabilities = F.softmax(scaled_outputs, dim=1)
@@ -125,7 +124,8 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 
                 label_distribution[label][pred] += 1
                 confidence_sum[label] += probabilities[i].cpu().numpy()
-    
+
+
     accuracy = correct / total
     class_accuracies = {
         i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0)
