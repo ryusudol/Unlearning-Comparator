@@ -7,10 +7,10 @@ This tool facilitates the evaluation and comparison of machine unlearning method
 Try our live demo: [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/)
 
 ### Embedding Space
-![Machine Unlearning Comparator](img/embedding.png)
+![Embedding Space](img/embedding.png)
 
 ### Attack Simulation
-![Machine Unlearning Comparator](img/attack.png)
+![Attack Simulation](img/attack.png)
 
 ## Features
 
