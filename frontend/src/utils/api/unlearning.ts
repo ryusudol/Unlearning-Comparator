@@ -11,6 +11,7 @@ export async function executeMethodUnlearning(
     epochs: runningConfig.epochs,
     learning_rate: runningConfig.learning_rate,
     batch_size: runningConfig.batch_size,
+    base_weights: runningConfig.base_weights,
   };
 
   try {
@@ -72,26 +73,27 @@ export async function executeCustomUnlearning(
   }
 }
 
-export async function fetchDataFile(
+export async function fetchFileData(
   forgetClass: number,
-  id: string
+  fileName: string
 ): Promise<ExperimentData> {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/${id}`);
+    const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`);
+
+    if (!response.ok) {
+      throw new Error(
+        `Server error: ${response.status} ${response.statusText}`
+      );
+    }
 
     return await response.json();
   } catch (error) {
     console.error("Failed to fetch an unlearned data file:", error);
 
-    if (error instanceof Error) {
-      alert(`Failed to fetch an unlearned data file: ${error.message}`);
-    } else {
-      alert(
-        "An unknown error occurred while fetching an unlearned data file . . ."
-      );
-    }
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred.";
 
-    throw error;
+    throw new Error(`Failed to fetch an unlearned data file: ${errorMessage}`);
   }
 }
 
@@ -109,6 +111,26 @@ export async function fetchAllExperimentsData(forgetClass: number) {
       alert(
         "An unknown error occurred while fetching all unlearned data file . . ."
       );
+    }
+
+    throw error;
+  }
+}
+
+export async function fetchAllWeightNames(forgetClass: number) {
+  try {
+    const response = await fetch(
+      `${API_URL}/data/${forgetClass}/all_weights_name`
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch all weights names:", error);
+
+    if (error instanceof Error) {
+      alert(`Failed to fetch all weights names: ${error.message}`);
+    } else {
+      alert("An unknown error occurred while fetching all weights names . . .");
     }
 
     throw error;

@@ -2,6 +2,7 @@ import asyncio
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import os
 
 from app.threads import UnlearningFTThread
 from app.models import get_resnet18
@@ -14,7 +15,7 @@ from app.config import (
     UNLEARN_SEED
 )
 
-async def unlearning_FT(request, status, weights_path):
+async def unlearning_FT(request, status, base_weights_path):
     print(f"Starting FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
     set_seed(UNLEARN_SEED)
     
@@ -27,8 +28,9 @@ async def unlearning_FT(request, status, weights_path):
     # Create Unlearning Settings
     model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load(weights_path, map_location=device))
-    model_after.load_state_dict(torch.load(weights_path, map_location=device))
+    
+    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
+    model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
     (
         train_loader,
@@ -99,6 +101,7 @@ async def unlearning_FT(request, status, weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device,
+        base_weights_path=base_weights_path
     )
     
     unlearning_FT_thread.start()
@@ -122,12 +125,12 @@ async def unlearning_FT(request, status, weights_path):
 
     return status
 
-async def run_unlearning_FT(request, status, weights_path):
+async def run_unlearning_FT(request, status, base_weights_path):
     try:
         status.is_unlearning = True
         status.progress = "Unlearning"
-        updated_status = await unlearning_FT(request, status, weights_path)
+        updated_status = await unlearning_FT(request, status, base_weights_path)
         return updated_status
     finally:
         status.cancel_requested = False
-        status.progress = "Idle"
+        status.progress = "Completed"

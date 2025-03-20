@@ -2,10 +2,10 @@ import { COLORS } from "./colors";
 import { ChartConfig } from "../components/UI/chart";
 
 export const CKA_DATA_KEYS = [
-  "baselineForgetCka",
-  "baselineOtherCka",
-  "comparisonForgetCka",
-  "comparisonOtherCka",
+  "modelAForgetCka",
+  "modelAOtherCka",
+  "modelBForgetCka",
+  "modelBOtherCka",
 ];
 
 export const LINE_CHART_TICK_STYLE = `
@@ -19,20 +19,43 @@ export const LINE_CHART_CONFIG = {
     label: "Layer",
     color: "#000",
   },
-  baselineForgetCka: {
-    label: "Baseline (Forget Class)",
-    color: COLORS.PURPLE,
-  },
-  baselineOtherCka: {
-    label: "Baseline (Remain Classes)",
-    color: COLORS.PURPLE,
-  },
-  comparisonForgetCka: {
-    label: "Comparison (Forget Class)",
+  modelAForgetCka: {
     color: COLORS.EMERALD,
   },
-  comparisonOtherCka: {
-    label: "Comparison (Remain Classes)",
+  modelAOtherCka: {
     color: COLORS.EMERALD,
+  },
+  modelBForgetCka: {
+    color: COLORS.PURPLE,
+  },
+  modelBOtherCka: {
+    color: COLORS.PURPLE,
   },
 } satisfies ChartConfig;
+
+export const LINE_CHART_LEGEND_DATA = [
+  {
+    type: "circle",
+    color: COLORS.EMERALD,
+    label: "Model A",
+    spacing: "py-0.5",
+  },
+  {
+    type: "circle",
+    color: COLORS.PURPLE,
+    label: "Model B",
+    spacing: "py-0.5",
+  },
+  {
+    type: "cross",
+    color: COLORS.EMERALD,
+    label: "Model A",
+    spacing: "py-0.5",
+  },
+  {
+    type: "cross",
+    color: COLORS.PURPLE,
+    label: "Model B",
+    spacing: "py-0.5",
+  },
+] as const;

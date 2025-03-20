@@ -1,8 +1,7 @@
-import os
-import pickle
 import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+from app.config import UNLEARN_SEED
 
 def load_cifar10_data():
     """Load CIFAR-10 training data with automatic download"""
@@ -36,3 +35,21 @@ def get_data_loaders(batch_size, augmentation=False):
     test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=0)
     print("loaded loaders")
     return train_loader, test_loader, train_set, test_set
+
+def get_fixed_umap_indices(total_samples=2000, seed=UNLEARN_SEED):
+    import torch
+    _, y_train = load_cifar10_data()
+    num_classes = 10
+    targets_tensor = torch.tensor(y_train)
+    
+    samples_per_class = total_samples // num_classes
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    
+    indices_dict = {}
+    for i in range(num_classes):
+        class_indices = (targets_tensor == i).nonzero(as_tuple=False).squeeze()
+        perm = torch.randperm(len(class_indices), generator=generator)
+        indices_dict[i] = class_indices[perm[:samples_per_class]].tolist()
+        
+    return indices_dict

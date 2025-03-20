@@ -3,26 +3,41 @@ import { RadioGroup, RadioGroupItem } from "./UI/radio-group";
 import { TRAIN, TEST } from "../constants/common";
 
 interface Props {
+  dataset: string;
   onValueChange: (value: string) => void;
 }
 
-export default function DatasetModeSelector({ onValueChange }: Props) {
+export default function DatasetModeSelector({ dataset, onValueChange }: Props) {
+  const isTrainChecked = dataset === TRAIN;
+
   return (
-    <div className="flex items-center relative right-4 bottom-0.5">
+    <div className="flex items-center relative right-3.5 bottom-1">
       <RadioGroup
         className="flex"
         defaultValue={TRAIN}
         onValueChange={onValueChange}
       >
         <div className="flex items-center space-x-0.5">
-          <RadioGroupItem value={TRAIN} id={TRAIN} />
-          <Label className="text-xs font-light" htmlFor={TRAIN}>
+          <RadioGroupItem
+            className="w-3 h-3"
+            value={TRAIN}
+            id={TRAIN}
+            color="#4d4d4d"
+            checked={isTrainChecked}
+          />
+          <Label className="text-sm font-light text-[#4d4d4d]" htmlFor={TRAIN}>
             Train
           </Label>
         </div>
         <div className="flex items-center space-x-0.5">
-          <RadioGroupItem value={TEST} id={TEST} />
-          <Label className="text-xs font-light" htmlFor={TEST}>
+          <RadioGroupItem
+            className="w-3 h-3"
+            value={TEST}
+            id={TEST}
+            color="#4d4d4d"
+            checked={!isTrainChecked}
+          />
+          <Label className="text-sm font-light text-[#4d4d4d]" htmlFor={TEST}>
             Test
           </Label>
         </div>

@@ -21,6 +21,7 @@ from app.config.settings import (
 	UMAP_DATASET,
 	UNLEARN_SEED
 )
+from app.utils.attack import process_attack_metrics
 
 
 class UnlearningRLThread(threading.Thread):
@@ -39,7 +40,8 @@ class UnlearningRLThread(threading.Thread):
         optimizer,
         scheduler,
         device,
-        retain_loader
+        retain_loader,
+        base_weights_path
     ):
         threading.Thread.__init__(self)
         self.request = request
@@ -59,6 +61,7 @@ class UnlearningRLThread(threading.Thread):
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.device = device
+        self.base_weights_path = base_weights_path
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
         
@@ -102,10 +105,18 @@ class UnlearningRLThread(threading.Thread):
         )
 
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        targets = torch.tensor(dataset.targets)
+        class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
+        
+        samples_per_class = UMAP_DATA_SIZE // self.num_classes
         generator = torch.Generator()
         generator.manual_seed(UNLEARN_SEED)
-        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        selected_indices = []
+        for indices in class_indices:
+            perm = torch.randperm(len(indices), generator=generator)
+            selected_indices.extend(indices[perm[:samples_per_class]].tolist())
+        
+        umap_subset = torch.utils.data.Subset(dataset, selected_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
         )
@@ -201,7 +212,7 @@ class UnlearningRLThread(threading.Thread):
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.request.forget_class
+            # forget_class=self.request.forget_class
         )
 
         # Update training evaluation status for remain classes only
@@ -236,7 +247,7 @@ class UnlearningRLThread(threading.Thread):
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.request.forget_class
+            # forget_class=self.request.forget_class
         )
 
         # Update test evaluation status for remain classes only
@@ -277,6 +288,15 @@ class UnlearningRLThread(threading.Thread):
             forget_class=self.request.forget_class,
             forget_labels=forget_labels
         )
+        
+        # Process attack metrics similar to GA and custom threads
+        print("Processing attack metrics on UMAP subset")
+        values, attack_results, fqs = await process_attack_metrics(
+            model=self.model, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class
+        )
 
         # CKA similarity calculation
         self.status.progress = "Calculating CKA Similarity"
@@ -294,8 +314,8 @@ class UnlearningRLThread(threading.Thread):
         self.status.progress = "Preparing Results"
         detailed_results = []
         for i in range(len(umap_subset)):
-            original_index = umap_subset_indices[i].item()
-            ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
+            original_index = selected_indices[i]
+            ground_truth = umap_subset.dataset.targets[original_index]
             is_forget = (ground_truth == self.request.forget_class)
             detailed_results.append([
                 int(ground_truth),                             # gt
@@ -312,21 +332,24 @@ class UnlearningRLThread(threading.Thread):
            sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
         )
 
-        # Save results
+        # Save results including attack metrics
         results = {
-            "id": self.status.recent_id,
-            "fc": self.request.forget_class,
-            "phase": "Unlearned",
-            "init": f"000{self.request.forget_class}",
-            "method": "Random-Labeling",
-            "epochs": self.request.epochs,
+            "CreatedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            "ID": self.status.recent_id,
+            "FC": self.request.forget_class,
+            "Type": "Unlearned",
+            "Base": os.path.basename(self.base_weights_path).replace('.pth', ''),
+            "Method": "RandomLabeling",
+            "Epoch": self.request.epochs,
             "BS": self.request.batch_size,
             "LR": self.request.learning_rate,
             "UA": round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
+            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
+            "FQS": fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
@@ -335,13 +358,17 @@ class UnlearningRLThread(threading.Thread):
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": cka_results["similarity"],
             "points": detailed_results,
+            "attack": {
+                "values": values,
+                "results": attack_results
+            }
         }
         # Create base data directory if it doesn't exist
         os.makedirs('data', exist_ok=True)
         forget_class_dir = os.path.join('data', str(self.request.forget_class))
         os.makedirs(forget_class_dir, exist_ok=True)
         
-        result_path = os.path.join(forget_class_dir, f'{results["id"]}.json')
+        result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')
         with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
 

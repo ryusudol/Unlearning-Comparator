@@ -10,7 +10,7 @@ from app.models import get_resnet18
 from app.config import UNLEARN_SEED
 
 
-async def unlearning_custom(forget_class, status, weights_path):
+async def unlearning_custom(forget_class, status, weights_path, base_weights):
     print(f"Starting custom unlearning inference for class {forget_class}...")
     set_seed(UNLEARN_SEED)
     (
@@ -28,21 +28,22 @@ async def unlearning_custom(forget_class, status, weights_path):
                          else "mps" if torch.backends.mps.is_available() 
                          else "cpu")
     model_before = get_resnet18().to(device)
-    model_after = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load("trained_models/0000.pth", map_location=device))
-    model_after.load_state_dict(torch.load(weights_path, map_location=device))
+    model_before.load_state_dict(torch.load(f"unlearned_models/{forget_class}/000{forget_class}.pth", map_location=device))
+    model = get_resnet18().to(device)
+    model.load_state_dict(torch.load(weights_path, map_location=device))
 
     unlearning_thread = UnlearningCustomThread(
         forget_class=forget_class,
         status=status,
         model_before=model_before,
-        model_after=model_after,
+        model=model,
         train_loader=train_loader,
         test_loader=test_loader,
         train_set=train_set,
         test_set=test_set,
         criterion=criterion,
-        device=device
+        device=device,
+        base_weights=base_weights
     )
     unlearning_thread.start()
     print("unlearning started")
@@ -68,12 +69,13 @@ async def unlearning_custom(forget_class, status, weights_path):
 
     return status
 
-async def run_unlearning_custom(forget_class, status, weights_path):
+async def run_unlearning_custom(forget_class, status, weights_path, base_weights):
     try:
         status.is_unlearning = True
-        updated_status = await unlearning_custom(forget_class, status, weights_path)
+        updated_status = await unlearning_custom(forget_class, status, weights_path, base_weights)
         return updated_status
     finally:
         status.is_unlearning = False
         status.cancel_requested = False
+        status.progress = "Completed"
         os.remove(weights_path)

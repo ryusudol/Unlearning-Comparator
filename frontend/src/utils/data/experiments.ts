@@ -1,18 +1,31 @@
 import * as d3 from "d3";
 
 import { Dist } from "../../types/data";
-import { ExperimentData } from "../../types/data";
-import { Experiments } from "../../types/experiments-context";
+import { Experiment, Experiments } from "../../types/data";
 import { TRAIN } from "../../constants/common";
 
-type Values = {
-  UA: number[];
-  RA: number[];
-  TUA: number[];
-  TRA: number[];
-  RTE: number[];
-  FQ: number[];
-};
+const metrics = ["UA", "TUA", "RA", "TRA", "PA", "RTE", "FQS"] as const;
+export function calculatePerformanceMetrics(data: Experiments) {
+  const values = metrics.reduce((acc, key) => {
+    acc[key] = Object.values(data).map((d) => Number(d[key]));
+    return acc;
+  }, {} as Record<(typeof metrics)[number], number[]>);
+
+  const mins = metrics.reduce((acc, key) => {
+    acc[key] = d3.min(values[key])!;
+    return acc;
+  }, {} as Record<(typeof metrics)[number], number>);
+
+  const maxes = metrics.reduce((acc, key) => {
+    acc[key] = d3.max(values[key])!;
+    return acc;
+  }, {} as Record<(typeof metrics)[number], number>);
+
+  return metrics.reduce((acc, key) => {
+    acc[key] = d3.scaleLinear().domain([mins[key], maxes[key]]).range([0, 1]);
+    return acc;
+  }, {} as Record<(typeof metrics)[number], d3.ScaleLinear<number, number>>);
+}
 
 type BubbleChartData = {
   x: number;
@@ -21,115 +34,7 @@ type BubbleChartData = {
   conf: number;
 }[];
 
-const BRIGHTEST = 0;
-const DARKEST = 1;
-const RED = "#bb151a";
-const GREEN = "#157f3b";
-const baseColors = {
-  UA: RED,
-  RA: GREEN,
-  TUA: RED,
-  TRA: GREEN,
-  RTE: RED,
-  FQ: RED,
-};
-
-// TODO: MIA에 있는 RTE 모두 MIA로 변경할 것
-export function calculatePerformanceMetrics(data: Experiments) {
-  const values: Values = {
-    UA: Object.values(data).map((d) => d.UA),
-    RA: Object.values(data).map((d) => d.RA),
-    TUA: Object.values(data).map((d) => d.TUA),
-    TRA: Object.values(data).map((d) => d.TRA),
-    RTE: Object.values(data)
-      .filter((d) => typeof d.RTE === "number")
-      .map((d) => d.RTE as number),
-    FQ: Object.values(data)
-      .filter((d) => typeof d.RTE === "number")
-      .map((d) => d.RTE as number),
-  };
-
-  const mins = {
-    UA: d3.min(values.UA.map((v) => Number(v)))!,
-    RA: d3.min(values.RA)!,
-    TUA: d3.min(values.TUA.map((v) => Number(v)))!,
-    TRA: d3.min(values.TRA)!,
-    RTE: d3.min(values.RTE)!,
-    FQ: d3.min(values.RTE)!,
-  };
-
-  const maxs = {
-    UA: d3.max(values.UA.map((v) => Number(v)))!,
-    RA: d3.max(values.RA)!,
-    TUA: d3.max(values.TUA.map((v) => Number(v)))!,
-    TRA: d3.max(values.TRA)!,
-    RTE: d3.max(values.RTE)!,
-    FQ: d3.max(values.RTE)!,
-  };
-
-  return {
-    UA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.UA, maxs.UA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.UA,
-    },
-    RA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.RA, maxs.RA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RA,
-    },
-    TUA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.TUA, maxs.TUA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.TUA,
-    },
-    TRA: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.TRA, maxs.TRA])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.TRA,
-    },
-    RTE: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.RTE, maxs.RTE])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RTE,
-    },
-    FQ: {
-      colorScale: d3
-        .scaleLinear()
-        .domain([mins.RTE, maxs.RTE])
-        .range([BRIGHTEST, DARKEST]),
-      baseColor: baseColors.RTE,
-    },
-  };
-}
-
-export function extractSelectedData(data: ExperimentData | undefined) {
-  return data
-    ? data.points.map((point) => [
-        point[4], // x coordinate
-        point[5], // y coordinate
-        point[0], // ground truth
-        point[1], // prediction
-        point[2], // img
-        point[6], // prob
-      ])
-    : [];
-}
-
-export function extractBubbleChartData(
-  datasetMode: string,
-  data: ExperimentData
-) {
+export function extractBubbleChartData(datasetMode: string, data: Experiment) {
   let bubbleChartData: {
     label_dist: Dist;
     conf_dist: Dist;

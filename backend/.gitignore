@@ -1,13 +1,9 @@
 **/__pycache__/
-backend/data/
 backend/umap_visualizations/
 backend/trained_models/
 backend/unlearned_models/
 backend/uploaded_models/
-backend/**/*.png
-backend/**/*.json
-Unlearn-Saliency/
-Unlearning-inversion-attacks/
+backend/*.png
 d3ex/
-data/
 attack/
+attack_exp/

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 import {
   HelpCircleIcon,
@@ -21,7 +21,7 @@ export default function InformationButton() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <HelpCircleIcon className="z-10 w-4 h-4 absolute left-7 top-[7px] cursor-pointer" />
+        <HelpCircleIcon className="z-10 w-4 h-4 absolute left-7 top-[9.5px] cursor-pointer" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[320px] p-4">
         <DialogHeader className="hidden">

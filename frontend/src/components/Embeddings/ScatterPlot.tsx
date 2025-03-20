@@ -1,5 +1,4 @@
 import React, {
-  useState,
   useEffect,
   useImperativeHandle,
   forwardRef,
@@ -12,70 +11,85 @@ import { createRoot, Root } from "react-dom/client";
 import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
-import {
-  Mode,
-  SelectedData,
-  HoverInstance,
-  Prob,
-  ViewModeType,
-} from "../../types/embeddings";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../UI/select";
-import EmbeddingTooltip from "./EmbeddingTooltip";
-import { useForgetClass } from "../../hooks/useForgetClass";
-import { useModelSelection } from "../../hooks/useModelSelection";
+import Tooltip from "./Tooltip";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
+import { VIEW_MODES } from "../../constants/embeddings";
+import {
+  SelectedData,
+  HoverInstance,
+  Prob,
+  SvgElementsRefType,
+} from "../../types/embeddings";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../stores/experimentsStore";
 
-const VIEW_MODES: ViewModeType[] = [
-  "All Instances",
-  "Forgetting Target",
-  "Forgetting Failed",
-];
+/**
+ * 0 -> ground thruth
+ * 1 -> prediction
+ * 2 -> img
+ * 3 -> ?
+ * 4 -> x
+ * 5 -> y
+ * 6 -> prob
+ */
+
 const CONFIG = {
-  WIDTH: 630,
-  HEIGHT: 630,
+  WIDTH: 600,
+  HEIGHT: 640,
   DOT_SIZE: 4,
   CROSS__SIZE: 4,
   MIN_ZOOM: 0.6,
   MAX_ZOOM: 32,
   X_SIZE_DIVIDER: 0.4,
   X_STROKE_WIDTH: 1,
-  LOWERED_OPACITY: 0.1,
+  LOWERED_OPACITY: 0.05,
   HOVERED_STROKE_WIDTH: 2,
   PADDING_RATIO: 0.01,
   TOOLTIP_X_SIZE: 450,
   TOOLTIP_Y_SIZE: 274,
   DEFAULT_CROSS_OPACITY: 0.85,
   DEFAULT_CIRCLE_OPACITY: 0.6,
+  MISCLASSIFICATION_CIRCLE_OPACITY: 0.85,
 } as const;
-const UNLEARNING_TARGET = "Forgetting Target";
-const UNLEARNING_FAILED = "Forgetting Failed";
 
 interface Props {
-  mode: Mode;
-  height: number;
+  mode: "A" | "B";
+  modelType: string;
+  highlight: string;
+  setHighlight: (highlight: string) => void;
   data: SelectedData;
-  onHover: (imgIdxOrNull: number | null, source?: Mode, prob?: Prob) => void;
+  onHover: (
+    imgIdxOrNull: number | null,
+    source?: "A" | "B",
+    prob?: Prob
+  ) => void;
   hoveredInstance: HoverInstance | null;
 }
 
 const ScatterPlot = forwardRef(
-  ({ mode, height, data, onHover, hoveredInstance }: Props, ref) => {
-    const { forgetClass } = useForgetClass();
-    const { baseline, comparison } = useModelSelection();
-
-    const [viewMode, setViewMode] = useState<ViewModeType>(VIEW_MODES[0]);
+  (
+    {
+      mode,
+      modelType,
+      highlight,
+      setHighlight,
+      data,
+      onHover,
+      hoveredInstance,
+    }: Props,
+    ref
+  ) => {
+    const forgetClass = useForgetClassStore((state) => state.forgetClass);
+    const modelA = useModelDataStore((state) => state.modelA);
+    const modelB = useModelDataStore((state) => state.modelB);
+    const modelAExperiment = useModelAExperiment();
+    const modelBExperiment = useModelBExperiment();
 
     const elementMapRef = useRef(new Map<number, Element>());
     const hoveredInstanceRef = useRef<HoverInstance | null>(null);
@@ -85,23 +99,7 @@ const ScatterPlot = forwardRef(
     const tooltipRef = useRef<HTMLDivElement | null>(null);
     const rootRef = useRef<Root | null>(null);
     const fetchControllerRef = useRef<AbortController | null>(null);
-    const svgElements = useRef<{
-      svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;
-      gMain: d3.Selection<SVGGElement, unknown, null, undefined> | null;
-      gDot: d3.Selection<SVGGElement, unknown, null, undefined> | null;
-      circles: d3.Selection<
-        SVGCircleElement,
-        (number | Prob)[],
-        SVGGElement,
-        undefined
-      > | null;
-      crosses: d3.Selection<
-        SVGPathElement,
-        (number | Prob)[],
-        SVGGElement,
-        undefined
-      > | null;
-    }>({
+    const svgElements = useRef<SvgElementsRefType>({
       svg: null,
       gMain: null,
       gDot: null,
@@ -158,8 +156,8 @@ const ScatterPlot = forwardRef(
       };
     }, [ref]);
 
-    const isBaseline = mode === "Baseline";
-    const id = isBaseline ? baseline : comparison;
+    const isModelA = mode === "A";
+    const id = isModelA ? modelA : modelB;
     const idExist = id !== "";
 
     const x = useMemo(() => {
@@ -169,7 +167,7 @@ const ScatterPlot = forwardRef(
 
       return d3
         .scaleLinear()
-        .domain(d3.extent(data, (d) => d[0] as number) as [number, number])
+        .domain(d3.extent(data, (d) => d[4] as number) as [number, number])
         .nice()
         .range([0, CONFIG.WIDTH]);
     }, [data]);
@@ -179,7 +177,7 @@ const ScatterPlot = forwardRef(
         return d3.scaleLinear().domain([0, 1]).range([CONFIG.HEIGHT, 0]);
       }
 
-      const [min, max] = d3.extent(data, (d) => d[1] as number) as [
+      const [min, max] = d3.extent(data, (d) => d[5] as number) as [
         number,
         number
       ];
@@ -213,8 +211,8 @@ const ScatterPlot = forwardRef(
 
         if (svgElements.current.crosses) {
           svgElements.current.crosses.attr("transform", (d) => {
-            const xPos = x(d[0] as number);
-            const yPos = y(d[1] as number);
+            const xPos = x(d[4] as number);
+            const yPos = y(d[5] as number);
             const scale = 1 / transform.k;
             return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
           });
@@ -321,68 +319,61 @@ const ScatterPlot = forwardRef(
       async (event: MouseEvent, d: (number | Prob)[]) => {
         event.stopPropagation();
 
-        const imgIdx = d[4] as number;
-        onHover(imgIdx, mode, d[5] as Prob);
-
         if (fetchControllerRef.current) {
           fetchControllerRef.current.abort();
         }
 
+        const prob = d[6] as Prob;
         const controller = new AbortController();
         fetchControllerRef.current = controller;
 
         try {
-          const response = await fetch(`${API_URL}/image/cifar10/${d[4]}`, {
+          const response = await fetch(`${API_URL}/image/cifar10/${d[2]}`, {
             signal: controller.signal,
           });
 
           if (!response.ok) throw new Error("Failed to fetch image");
-
-          const blob = await response.blob();
           if (controller.signal.aborted) return;
 
-          const prob = d[5] as Prob;
+          const blob = await response.blob();
           const imageUrl = URL.createObjectURL(blob);
 
           const currentHoveredInstance = hoveredInstanceRef.current;
 
-          const barChartData = isBaseline
+          const barChartData = isModelA
             ? {
-                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                modelA: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
                   value: Number(prob[idx] || 0),
                 })),
-                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                modelB: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(
-                    currentHoveredInstance?.comparisonProb?.[idx] || 0
-                  ),
+                  value: Number(currentHoveredInstance?.modelBProb?.[idx] || 0),
                 })),
               }
             : {
-                baseline: Array.from({ length: 10 }, (_, idx) => ({
+                modelA: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
-                  value: Number(
-                    currentHoveredInstance?.baselineProb?.[idx] || 0
-                  ),
+                  value: Number(currentHoveredInstance?.modelAProb?.[idx] || 0),
                 })),
-                comparison: Array.from({ length: 10 }, (_, idx) => ({
+                modelB: Array.from({ length: 10 }, (_, idx) => ({
                   class: idx,
                   value: Number(prob[idx] || 0),
                 })),
               };
 
-          const tooltipContent = (
-            <EmbeddingTooltip
-              width={CONFIG.TOOLTIP_X_SIZE}
-              height={CONFIG.TOOLTIP_Y_SIZE}
-              imageUrl={imageUrl}
-              data={d}
-              barChartData={barChartData}
-              forgetClass={forgetClass!}
-              isBaseline={isBaseline}
-            />
-          );
+          const tooltipContent =
+            !modelAExperiment || !modelBExperiment ? (
+              <></>
+            ) : (
+              <Tooltip
+                imageUrl={imageUrl}
+                data={d}
+                barChartData={barChartData}
+                forgetClass={forgetClass}
+                isModelA={isModelA}
+              />
+            );
 
           showTooltip(event, tooltipContent);
 
@@ -394,31 +385,45 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [forgetClass, isBaseline, mode, onHover]
-    );
-
-    const handleMouseEnter = useCallback(
-      (event: MouseEvent, d: (number | Prob)[]) => {
-        onHover(d[4] as number, mode, d[5] as Prob);
-
-        const element = event.currentTarget as Element;
-        d3.select(element)
-          .attr("stroke", COLORS.BLACK)
-          .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
-          .raise();
-      },
-      [mode, onHover]
+      [forgetClass, isModelA, modelAExperiment, modelBExperiment]
     );
 
     const shouldLowerOpacity = useCallback(
       (d: (number | Prob)[]) => {
-        const dataCondition =
-          d[2] !== forgetClass && viewMode === UNLEARNING_TARGET;
-        const classCondition =
-          d[3] !== forgetClass && viewMode === UNLEARNING_FAILED;
-        return dataCondition || classCondition;
+        const isForgettingData = d[0] === forgetClass;
+        const isRemainData = !isForgettingData;
+
+        if (highlight === VIEW_MODES[1].label /* Target to Forget */) {
+          return isRemainData;
+        } else if (
+          highlight === VIEW_MODES[2].label /* Correctly Forgotten */
+        ) {
+          return isRemainData || (isForgettingData && d[0] === d[1]);
+        } else if (highlight === VIEW_MODES[3].label /* Not Forgotten */) {
+          const isForgettingSuccess = isForgettingData && d[1] !== forgetClass;
+          return isRemainData || isForgettingSuccess;
+        } else if (highlight === VIEW_MODES[4].label /* Overly Forgotten */) {
+          const isMisclassified = isRemainData && d[0] !== d[1];
+          return !isMisclassified;
+        }
       },
-      [forgetClass, viewMode]
+      [forgetClass, highlight]
+    );
+
+    const handleMouseEnter = useCallback(
+      (event: MouseEvent, d: (number | Prob)[]) => {
+        const imgIdx = d[2] as number;
+        const prob = d[6] as Prob;
+
+        onHover(imgIdx, mode, prob);
+
+        const element = event.currentTarget as Element;
+        d3.select(element)
+          .style("stroke", COLORS.BLACK)
+          .style("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
+          .raise();
+      },
+      [mode, onHover]
     );
 
     const handleMouseLeave = useCallback(
@@ -430,36 +435,38 @@ const ScatterPlot = forwardRef(
         const d = selection.datum() as (number | Prob)[];
 
         if (element.tagName === "circle") {
+          const originalOpacity = shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : highlight === VIEW_MODES[4].label
+            ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+            : CONFIG.DEFAULT_CIRCLE_OPACITY;
           selection
-            .attr("stroke", null)
-            .attr("stroke-width", null)
-            .style(
-              "opacity",
-              shouldLowerOpacity(d)
-                ? CONFIG.LOWERED_OPACITY
-                : CONFIG.DEFAULT_CIRCLE_OPACITY
-            );
+            .style("stroke", null)
+            .style("stroke-width", null)
+            .style("stroke-opacity", null)
+            .style("fill-opacity", originalOpacity);
         } else {
-          const colorStr = z(d[3] as number);
+          const colorStr = z(d[1] as number);
           const color = d3.color(colorStr);
+          const originalOpacity = shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY;
           selection
-            .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
-            .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
             .style(
-              "opacity",
-              shouldLowerOpacity(d)
-                ? CONFIG.LOWERED_OPACITY
-                : CONFIG.DEFAULT_CROSS_OPACITY
-            );
+              "stroke",
+              color ? color.darker().darker().toString() : COLORS.BLACK
+            )
+            .style("stroke-width", CONFIG.X_STROKE_WIDTH)
+            .style("stroke-opacity", originalOpacity);
         }
       },
-      [mode, onHover, shouldLowerOpacity, z]
+      [highlight, mode, onHover, shouldLowerOpacity, z]
     );
 
     const transformedData = useMemo(() => {
-      const forgetClassData = data.filter((d) => d[2] === forgetClass);
-      const normalData = data.filter((d) => d[2] !== forgetClass);
-      return { forgetClassData, normalData };
+      const forgetData = data.filter((d) => d[0] === forgetClass);
+      const remainData = data.filter((d) => d[0] !== forgetClass);
+      return { forgetData, remainData };
     }, [data, forgetClass]);
 
     const initializeSvg = useCallback(() => {
@@ -503,28 +510,36 @@ const ScatterPlot = forwardRef(
 
       svgElements.current.circles = gDot
         .selectAll<SVGCircleElement, (number | Prob)[]>("circle")
-        .data(transformedData.normalData)
+        .data(transformedData.remainData)
         .join("circle")
-        .attr("cx", (d) => x(d[0] as number))
-        .attr("cy", (d) => y(d[1] as number))
+        .attr("cx", (d) => x(d[4] as number))
+        .attr("cy", (d) => y(d[5] as number))
         .attr("r", CONFIG.DOT_SIZE / currentTransform.k)
-        .attr("fill", (d) => z(d[3] as number))
+        .attr("fill", (d) => z(d[1] as number))
+        .style("fill-opacity", (d) =>
+          shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : highlight === VIEW_MODES[4].label
+            ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+            : CONFIG.DEFAULT_CIRCLE_OPACITY
+        )
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY)
         .style("vector-effect", "non-scaling-stroke")
+        .style("pointer-events", (d) =>
+          shouldLowerOpacity(d) ? "none" : "auto"
+        )
         .each(function (d) {
-          elementMapRef.current.set(d[4] as number, this);
+          elementMapRef.current.set(d[2] as number, this);
         });
 
       svgElements.current.crosses = gDot
         .selectAll<SVGPathElement, (number | Prob)[]>("path")
-        .data(transformedData.forgetClassData)
+        .data(transformedData.forgetData)
         .join("path")
         .attr("transform", (d) => {
-          const xPos = x(d[0] as number);
-          const yPos = y(d[1] as number);
+          const xPos = x(d[4] as number);
+          const yPos = y(d[5] as number);
           const scale = 1 / currentTransform.k;
-
           return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
         })
         .attr(
@@ -534,16 +549,28 @@ const ScatterPlot = forwardRef(
             .type(d3.symbolCross)
             .size(Math.pow(CONFIG.CROSS__SIZE / CONFIG.X_SIZE_DIVIDER, 2))
         )
-        .attr("fill", (d) => z(d[3] as number))
-        .attr("stroke", (d) => {
-          const color = d3.color(z(d[3] as number));
+        .style("fill", (d) => z(d[1] as number))
+        .style("stroke", (d) => {
+          const color = d3.color(z(d[1] as number));
           return color ? color.darker().darker().toString() : "black";
         })
-        .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
+        .style("stroke-width", CONFIG.X_STROKE_WIDTH)
+        .style("fill-opacity", (d) =>
+          shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY
+        )
+        .style("stroke-opacity", (d) =>
+          shouldLowerOpacity(d)
+            ? CONFIG.LOWERED_OPACITY
+            : CONFIG.DEFAULT_CROSS_OPACITY
+        )
         .style("cursor", "pointer")
-        .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY)
+        .style("pointer-events", (d) =>
+          shouldLowerOpacity(d) ? "none" : "auto"
+        )
         .each(function (d) {
-          elementMapRef.current.set(d[4] as number, this);
+          elementMapRef.current.set(d[2] as number, this);
         });
 
       if (svgElements.current.circles) {
@@ -560,13 +587,16 @@ const ScatterPlot = forwardRef(
           .on("mouseleave", handleMouseLeave);
       }
     }, [
-      transformedData,
-      x,
-      y,
-      z,
       handleInstanceClick,
       handleMouseEnter,
       handleMouseLeave,
+      shouldLowerOpacity,
+      transformedData.forgetData,
+      transformedData.remainData,
+      highlight,
+      x,
+      y,
+      z,
     ]);
 
     useEffect(() => {
@@ -642,103 +672,19 @@ const ScatterPlot = forwardRef(
     }, [data.length, idExist, initializeSvg, updateElements, zoom]);
 
     useEffect(() => {
-      if (!svgElements.current.circles && !svgElements.current.crosses) return;
-
-      const currentTransform = svgRef.current
-        ? d3.zoomTransform(svgRef.current)
-        : d3.zoomIdentity;
-
-      const updateOpacity = (selection: d3.Selection<any, any, any, any>) => {
-        const isCircle = selection.node()?.tagName === "circle";
-
-        selection
-          .style("opacity", (d: any) =>
-            shouldLowerOpacity(d)
-              ? CONFIG.LOWERED_OPACITY
-              : isCircle
-              ? CONFIG.DEFAULT_CIRCLE_OPACITY
-              : CONFIG.DEFAULT_CROSS_OPACITY
-          )
-          .style("pointer-events", (d: any) =>
-            shouldLowerOpacity(d) ? "none" : "auto"
-          );
-
-        if (isCircle) {
-          selection.attr("r", CONFIG.DOT_SIZE / currentTransform.k);
-        } else {
-          selection.attr("transform", (d: any) => {
-            const xPos = x(d[0] as number);
-            const yPos = y(d[1] as number);
-            const scale = 1 / currentTransform.k;
-            return `translate(${xPos},${yPos}) scale(${scale}) rotate(45)`;
-          });
-        }
-      };
-
-      if (svgElements.current.circles) {
-        updateOpacity(svgElements.current.circles);
-      }
-      if (svgElements.current.crosses) {
-        updateOpacity(svgElements.current.crosses);
-      }
-    }, [shouldLowerOpacity, x, y]);
-
-    useEffect(() => {
-      if (!hoveredInstance) return;
-
-      const currentElementMap = elementMapRef.current;
-
-      if (hoveredInstance.source !== mode) {
-        const element = currentElementMap.get(hoveredInstance.imgIdx);
-        if (element) {
-          const selection = d3.select(element);
-          selection
-            .attr("stroke", COLORS.BLACK)
-            .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH);
-        }
-      }
-
-      return () => {
-        if (hoveredInstance.source !== mode) {
-          const element = currentElementMap.get(hoveredInstance.imgIdx);
-          if (element) {
-            const selection = d3.select(element);
-            if (element.tagName === "circle") {
-              selection
-                .attr("stroke", null)
-                .attr("stroke-width", null)
-                .style("opacity", CONFIG.DEFAULT_CIRCLE_OPACITY);
-            } else {
-              const d = selection.datum() as (number | Prob)[];
-              const colorStr = z(d[3] as number);
-              const color = d3.color(colorStr);
-              selection
-                .attr(
-                  "stroke",
-                  color ? color.darker().toString() : COLORS.BLACK
-                )
-                .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
-                .style("opacity", CONFIG.DEFAULT_CROSS_OPACITY);
-            }
-          }
-        }
-      };
-    }, [hoveredInstance, mode, z]);
-
-    useEffect(() => {
-      setViewMode(VIEW_MODES[0]);
-    }, [data]);
+      setHighlight("All");
+    }, [setHighlight, data]);
 
     useImperativeHandle(ref, () => ({
       reset: resetZoom,
       getInstancePosition: (imgIdx: number) => {
-        const datum = data.find((d) => d[4] === imgIdx);
+        const datum = data.find((d) => d[2] === imgIdx);
         if (datum && svgRef.current) {
           const svgElement = svgRef.current;
           const point = svgElement.createSVGPoint();
 
-          const svgX = x(datum[0] as number);
-          const svgY = y(datum[1] as number);
+          const svgX = x(datum[4] as number);
+          const svgY = y(datum[5] as number);
 
           const transform = d3.zoomTransform(svgElement);
 
@@ -762,15 +708,11 @@ const ScatterPlot = forwardRef(
       highlightInstance: (imgIdx: number) => {
         const element = elementMapRef.current.get(imgIdx);
         if (element) {
-          const selection = d3.select(element);
-          const d = selection.datum() as (number | Prob)[];
-
-          if (!shouldLowerOpacity(d)) {
-            selection
-              .attr("stroke", COLORS.BLACK)
-              .attr("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
-              .raise();
-          }
+          d3.select(element)
+            .style("stroke", COLORS.BLACK)
+            .style("stroke-width", CONFIG.HOVERED_STROKE_WIDTH)
+            .style("stroke-opacity", 1)
+            .raise();
         }
       },
       removeHighlight: (imgIdx: number) => {
@@ -779,68 +721,58 @@ const ScatterPlot = forwardRef(
           const selection = d3.select(element);
           const d = selection.datum() as (number | Prob)[];
           const isCircle = element.tagName === "circle";
-          const opacityValue = shouldLowerOpacity(d)
-            ? CONFIG.LOWERED_OPACITY
-            : isCircle
-            ? CONFIG.DEFAULT_CIRCLE_OPACITY
-            : CONFIG.DEFAULT_CROSS_OPACITY;
 
           if (isCircle) {
+            const originalOpacity = shouldLowerOpacity(d)
+              ? CONFIG.LOWERED_OPACITY
+              : highlight === VIEW_MODES[4].label
+              ? CONFIG.MISCLASSIFICATION_CIRCLE_OPACITY
+              : CONFIG.DEFAULT_CIRCLE_OPACITY;
             selection
-              .attr("stroke", null)
-              .attr("stroke-width", null)
-              .style("opacity", opacityValue);
+              .style("stroke", null)
+              .style("stroke-width", null)
+              .style("fill-opacity", originalOpacity);
           } else {
-            const colorStr = z(d[3] as number);
+            const colorStr = z(d[1] as number);
             const color = d3.color(colorStr);
+            const originalOpacity = shouldLowerOpacity(d)
+              ? CONFIG.LOWERED_OPACITY
+              : CONFIG.DEFAULT_CROSS_OPACITY;
             selection
-              .attr("stroke", color ? color.darker().toString() : COLORS.BLACK)
-              .attr("stroke-width", CONFIG.X_STROKE_WIDTH)
-              .style("opacity", opacityValue);
+              .style("stroke", color ? color.darker().toString() : COLORS.BLACK)
+              .style("stroke-width", CONFIG.X_STROKE_WIDTH)
+              .style("fill-opacity", originalOpacity)
+              .style("stroke-opacity", originalOpacity);
           }
         }
       },
     }));
 
     return (
-      <div
-        style={{ height }}
-        className="flex flex-col justify-start items-center relative"
-      >
+      <div className="h-[650px] flex flex-col justify-start items-center relative">
         {idExist && (
-          <div>
-            <AiOutlineHome
-              className="mr-1 cursor-pointer absolute top-2 left-0 z-10"
-              onClick={resetZoom}
-            />
-            <div className="flex items-center absolute z-10 right-0 top-6">
-              <span className="mr-1.5 text-sm">View:</span>
-              <ViewModeSelect viewMode={viewMode} setViewMode={setViewMode} />
-            </div>
-          </div>
+          <AiOutlineHome
+            className="cursor-pointer absolute top-6 left-2 z-10"
+            onClick={resetZoom}
+          />
         )}
-        <div className="text-[15px] mt-1 flex items-center">
-          {isBaseline ? (
-            <BaselineNeuralNetworkIcon className="mr-1" />
+        <div className="flex items-center relative px-3.5 bg-white z-10">
+          {isModelA ? (
+            <span style={{ color: COLORS.EMERALD }}>
+              Model A ({modelType}, {modelA})
+            </span>
           ) : (
-            <ComparisonNeuralNetworkIcon className="mr-1" />
+            <span style={{ color: COLORS.PURPLE }}>
+              Model B ({modelType}, {modelB})
+            </span>
           )}
-          <span>
-            {mode} {idExist ? `(${id})` : ""}
-          </span>
         </div>
-        <div className="w-[638px] h-[607px] flex flex-col justify-center items-center">
+        <div className="w-[632px] h-[633px] flex flex-col justify-center items-center">
           <div
             ref={containerRef}
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            className="w-full h-full flex justify-center items-center"
           >
-            <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
+            <svg ref={svgRef} className="w-full h-full" />
           </div>
         </div>
       </div>
@@ -849,31 +781,3 @@ const ScatterPlot = forwardRef(
 );
 
 export default React.memo(ScatterPlot);
-
-interface ViewModeSelectorProps {
-  viewMode: ViewModeType;
-  setViewMode: (val: ViewModeType) => void;
-}
-
-const ViewModeSelect = React.memo(
-  ({ viewMode, setViewMode }: ViewModeSelectorProps) => {
-    return (
-      <Select
-        value={viewMode}
-        defaultValue={VIEW_MODES[0]}
-        onValueChange={(value: ViewModeType) => setViewMode(value)}
-      >
-        <SelectTrigger className="w-36 h-6">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {VIEW_MODES.map((viewMode, idx) => (
-            <SelectItem key={idx} value={viewMode}>
-              {viewMode}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  }
-);

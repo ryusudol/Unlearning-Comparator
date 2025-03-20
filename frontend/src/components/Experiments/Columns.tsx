@@ -1,101 +1,118 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
 
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../UI/hover-card";
-import {
-  BaselineNeuralNetworkIcon,
-  ComparisonNeuralNetworkIcon,
-} from "../UI/icons";
+import MethodFilterHeader from "./MethodFilterHeader";
 import { Badge } from "../UI/badge";
-import { Button } from "../UI/button";
 import { ExperimentData } from "../../types/data";
-import { getPhaseColors } from "../../utils/data/colors";
+import { getTypeColors } from "../../utils/data/colors";
+import { COLORS } from "../../constants/colors";
+import {
+  EpochHeader,
+  BSHeader,
+  LRHeader,
+  UAHeader,
+  RAHeader,
+  TUAHeader,
+  TRAHeader,
+  RTEHeader,
+  FQSHeader,
+} from "./ColumnHeaders";
 
 function getValueToDisplay(value: unknown) {
-  return value === "N/A"
+  return value === "N/A" || value === "NaN"
     ? "-"
     : typeof value === "string"
     ? value
     : Number(value);
 }
 
+const DECIMAL_POINT = 3;
 export const COLUMN_WIDTHS = {
-  id: 36,
-  phase: 78,
-  init: 42,
-  method: 90,
-  epochs: 46,
-  BS: 52,
-  LR: 54,
+  ID: 36,
+  Type: 72,
+  Base: 36,
+  Method: 92,
+  Epoch: 56,
+  BS: 42,
+  LR: 60,
   UA: 60,
   RA: 60,
   TUA: 60,
   TRA: 60,
   RTE: 60,
-  FQ: 60,
-  baseline: 60,
-  comparison: 60,
+  FQS: 60,
+  A: 46,
+  B: 52,
 };
 
 export const columns: ColumnDef<ExperimentData>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "ID",
     header: "ID",
     cell: ({ row }) => {
-      const value = row.getValue("id") as string;
+      const value = row.getValue("ID") as string;
       return <div className="w-7">{value}</div>;
     },
   },
   {
-    accessorKey: "phase",
-    header: "Phase",
+    accessorKey: "Type",
+    header: "Type",
     cell: ({ row }) => {
-      const method = row.getValue("method") as string;
-      const phase = row.getValue("phase") as string;
-      const value =
-        method === "Retrain"
-          ? "Retrained"
-          : phase === "Training"
-          ? "Pretrained"
-          : phase;
-      const { color, backgroundColor } = getPhaseColors(value, 1, 0.15);
-      return <Badge style={{ backgroundColor, color }}>{value}</Badge>;
+      const value = row.getValue("Type") as string;
+      const { color, backgroundColor } = getTypeColors(value);
+      return (
+        <Badge
+          className="w-[70px] flex justify-center"
+          style={{ backgroundColor, color }}
+        >
+          {value}
+        </Badge>
+      );
     },
   },
   {
-    accessorKey: "init",
-    header: "Init",
+    accessorKey: "Base",
+    header: "Base",
     cell: ({ row }) => {
-      const init = row.getValue("init");
+      const init = row.getValue("Base");
       const value = getValueToDisplay(init);
       return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "method",
-    header: "Method",
+    accessorKey: "Method",
+    header: ({ column }) => <MethodFilterHeader column={column} />,
+    filterFn: (row, columnId, filterValue) => {
+      const rowValue = row.getValue(columnId);
+      if (filterValue.length === 0) return true;
+      return filterValue.includes(String(rowValue));
+    },
     cell: ({ row }) => {
-      const method = row.getValue("method");
-      const value = getValueToDisplay(method);
+      const method = row.getValue("Method");
+      const valueToDisplay = getValueToDisplay(method) as string;
+      const value = valueToDisplay.startsWith("F")
+        ? "Fine-Tuning"
+        : valueToDisplay.startsWith("R")
+        ? "Random Labeling"
+        : valueToDisplay.startsWith("G")
+        ? "Gradient Ascent"
+        : valueToDisplay;
       return <div>{value}</div>;
     },
   },
   {
-    accessorKey: "epochs",
-    header: "Epochs",
+    accessorKey: "Epoch",
+    header: ({ column }) => <EpochHeader column={column} />,
+
     cell: ({ row }) => {
-      const epochs = row.getValue("epochs");
-      const value = getValueToDisplay(epochs);
+      const epoch = row.getValue("Epoch");
+      const value = getValueToDisplay(epoch);
       return <div>{value}</div>;
     },
   },
   {
     accessorKey: "BS",
-    header: "# Batch",
+    header: ({ column }) => <BSHeader column={column} />,
+
     cell: ({ row }) => {
       const batchSize = row.getValue("BS");
       const value = getValueToDisplay(batchSize);
@@ -104,7 +121,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "LR",
-    header: "LR",
+    header: ({ column }) => <LRHeader column={column} />,
+
     cell: ({ row }) => {
       const learningRate = row.getValue("LR");
       const value = getValueToDisplay(learningRate);
@@ -113,139 +131,64 @@ export const columns: ColumnDef<ExperimentData>[] = [
   },
   {
     accessorKey: "UA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            UA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Unlearning Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <UAHeader column={column} />,
+
     cell: ({ row }) => {
       const ua = row.getValue("UA");
-      const value = getValueToDisplay(ua) as number;
+      const value = getValueToDisplay(ua);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "RA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            RA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Remaining Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <RAHeader column={column} />,
+
     cell: ({ row }) => {
       const ra = row.getValue("RA");
-      const value = getValueToDisplay(ra) as number;
+      const value = getValueToDisplay(ra);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "TUA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            TUA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Test Unlearning Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <TUAHeader column={column} />,
+
     cell: ({ row }) => {
       const tua = row.getValue("TUA");
-      const value = getValueToDisplay(tua) as number;
+      const value = getValueToDisplay(tua);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "TRA",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            TRA
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Test Remaining Accuracy
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <TRAHeader column={column} />,
+
     cell: ({ row }) => {
       const tra = row.getValue("TRA");
-      const value = getValueToDisplay(tra) as number;
+      const value = getValueToDisplay(tra);
       return (
         <div className="text-center">
-          {value === 0 || value === 1 ? value : value.toFixed(3)}
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
         </div>
       );
     },
   },
   {
     accessorKey: "RTE",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            RTE(s)
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Run-Time Efficiency
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    header: ({ column }) => <RTEHeader column={column} />,
+
     cell: ({ row }) => {
       const rte = row.getValue("RTE");
       const value = getValueToDisplay(rte);
@@ -253,51 +196,25 @@ export const columns: ColumnDef<ExperimentData>[] = [
     },
   },
   {
-    id: "FQ",
-    header: ({ column }) => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger>
-          <Button
-            className="w-full px-0 h-[34px]"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            FQ
-            <ArrowUpDown className="w-4" />
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Forgetting Quality
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    accessorKey: "FQS",
+    header: ({ column }) => <FQSHeader column={column} />,
+
+    cell: ({ row }) => {
+      const fqs = row.getValue("FQS");
+      const value = getValueToDisplay(fqs);
+      return (
+        <div className="text-center">
+          {typeof value === "number" ? value.toFixed(DECIMAL_POINT) : value}
+        </div>
+      );
+    },
   },
   {
-    id: "baseline",
-    header: () => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger className="w-full text-center flex items-center">
-          <BaselineNeuralNetworkIcon className="mr-1" />
-          <span>Base</span>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Baseline Model
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    id: "A",
+    header: () => <span style={{ color: COLORS.EMERALD }}>Model A</span>,
   },
   {
-    id: "comparison",
-    header: () => (
-      <HoverCard openDelay={0} closeDelay={100}>
-        <HoverCardTrigger className="w-full text-center flex items-center">
-          <ComparisonNeuralNetworkIcon className="mr-1" />
-          <span>Comp</span>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto px-3 py-2" side="top">
-          Comparison Model
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    id: "B",
+    header: () => <span style={{ color: COLORS.PURPLE }}>Model B</span>,
   },
 ];

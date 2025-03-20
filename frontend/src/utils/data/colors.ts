@@ -1,30 +1,14 @@
-export function hexToRgba(hex: string, opacity: number) {
-  const bigint = parseInt(hex.slice(1), 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
+import { COLORS } from "../../constants/colors";
 
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-}
-
-export function getPhaseColors(
-  phase: string,
-  colorOpacity: number,
-  backgroundColorOpacity: number
-) {
-  let color, backgroundColor;
-  if (phase === "Unlearned") {
-    color = `rgba(255, 140, 0, ${colorOpacity})`;
-    backgroundColor = `rgba(255, 140, 0, ${backgroundColorOpacity})`;
-  } else if (phase === "Defended") {
-    color = `rgba(34, 139, 34, ${colorOpacity})`;
-    backgroundColor = `rgba(34, 139, 34, ${backgroundColorOpacity})`;
-  } else if (phase === "Pretrained") {
-    color = `#dd151a`;
-    backgroundColor = `rgba(255, 0, 0, 0.25)`;
-  } else {
-    color = `rgba(80,80,80, ${colorOpacity})`;
-    backgroundColor = `rgba(80,80,80, ${backgroundColorOpacity})`;
+export function getTypeColors(type: string) {
+  let backgroundColor;
+  if (type === "Original") {
+    backgroundColor = "#F3F4F6";
+  } else if (type === "Retrained") {
+    backgroundColor = COLORS.DARK_GRAY;
+  } else if (type === "Unlearned") {
+    backgroundColor = "#FF8C00";
   }
+  const color = type === "Original" ? "#222222" : "#FFFFFF";
   return { color, backgroundColor };
 }

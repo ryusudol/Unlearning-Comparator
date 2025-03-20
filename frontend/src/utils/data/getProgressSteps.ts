@@ -7,11 +7,31 @@ const UNLEARNING = "Unlearning";
 const IDLE = "Idle";
 
 export const getProgressSteps = (
-  status: UnlearningStatus,
+  status: UnlearningStatus | null,
   activeStep: number,
   umapProgress: number,
   ckaProgress: number
 ) => {
+  if (!status) {
+    return [
+      {
+        step: 1,
+        title: "Unlearn",
+        description: `Method: **-** | Epochs: **-**\nCurrent Unlearning Accuracy: **-**`,
+      },
+      {
+        step: 2,
+        title: "Evaluate",
+        description: `Training Accuracy: **-**\nTest Accuracy: **-**`,
+      },
+      {
+        step: 3,
+        title: "Analyze",
+        description: `Computing UMAP Embedding\nCalculating CKA Values`,
+      },
+    ];
+  }
+
   const method = status && status.method ? status.method : "";
   const progress = status.progress;
   const currentUnlearnAccuracy = status.current_unlearn_accuracy;
@@ -25,9 +45,9 @@ export const getProgressSteps = (
     {
       step: 1,
       title: "Unlearn",
-      description: `Method: **${method ? method : "-"}** | Epochs: **${
+      description: `Method: **${method ? method : "-"}** | Epoch: **${
         !completedSteps.includes(1) ? "-" : currentEpoch + "/" + totalEpochs
-      }**\nUnlearning Accuracy: **${
+      }**\nCurrent Unlearning Accuracy: **${
         completedSteps.includes(1) &&
         (currentEpoch > 1 || (totalEpochs === 1 && completedSteps.includes(2)))
           ? currentUnlearnAccuracy === 0
@@ -70,14 +90,14 @@ export const getProgressSteps = (
         (activeStep === 3 && progress.includes(CKA)) ||
         (completedSteps.includes(3) &&
           (progress === IDLE || progress === UNLEARNING))
-          ? `Calculating CKA Similarity... **${
+          ? `Calculating CKA Values... **${
               progress === IDLE || progress === UNLEARNING ? "100" : ckaProgress
             }%**`
-          : "Calculating CKA Similarity"
+          : "Calculating CKA Values"
       }\n${
         completedSteps.includes(3) &&
         (progress === IDLE || progress === UNLEARNING)
-          ? `Done! Experiment ID: **${status.recent_id}**`
+          ? `Done! Model ID: **${status.recent_id}**`
           : ""
       }`,
     },

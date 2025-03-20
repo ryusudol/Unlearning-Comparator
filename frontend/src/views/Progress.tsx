@@ -1,57 +1,75 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import View from "../components/View";
 import Stepper from "../components/Progress/Stepper";
-import Title from "../components/Title";
 import Indicator from "../components/Indicator";
-import Timer from "../components/Progress/Timer";
-import { useForgetClass } from "../hooks/useForgetClass";
-import { ViewProps } from "../types/common";
-import { Step } from "../types/progress";
-import { VitalIcon } from "../components/UI/icons";
-import { RunningStatusContext } from "../store/running-status-context";
+import AddModelsButton from "../components/Progress/AddModelsButton";
+import Pagination from "../components/Progress/Pagination";
+import { useForgetClassStore } from "../stores/forgetClassStore";
+import { CONFIG } from "../app/App";
+import { useRunningIndexStore } from "../stores/runningIndexStore";
+import { useRunningStatusStore } from "../stores/runningStatusStore";
 import { getProgressSteps } from "../utils/data/getProgressSteps";
 
-export default function Progress({ width, height }: ViewProps) {
-  const { isRunning, status, activeStep } = useContext(RunningStatusContext);
+export type Step = {
+  step: number;
+  title: string;
+  description: string;
+};
 
-  const { forgetClassNumber, forgetClassExist } = useForgetClass();
+export const PREV = "prev";
+export const NEXT = "next";
+
+export default function Progress() {
+  const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const runningIndex = useRunningIndexStore((state) => state.runningIndex);
+  const { isRunning, statuses, activeStep, totalExperimentsCount } =
+    useRunningStatusStore();
 
   const [umapProgress, setUmapProgress] = useState(0);
   const [ckaProgress, setCkaProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(runningIndex + 1);
 
-  const progress = forgetClassExist ? status[forgetClassNumber].progress : "";
+  const displayedPageIdx = currentPage - 1;
+  const forgetClassExist = forgetClass !== -1;
+
+  useEffect(() => {
+    if (isRunning) {
+      setCurrentPage(1);
+    }
+  }, [isRunning]);
+
+  useEffect(() => {
+    setCurrentPage(runningIndex + 1);
+  }, [runningIndex]);
+
+  const currentStatus =
+    forgetClassExist && statuses[forgetClass].length > displayedPageIdx
+      ? statuses[forgetClass][displayedPageIdx]
+      : null;
+
+  const progress = currentStatus ? currentStatus.progress : "";
+
   const steps: Step[] = useMemo(
     () =>
       forgetClassExist
-        ? getProgressSteps(
-            status[forgetClassNumber],
-            activeStep,
-            umapProgress,
-            ckaProgress
-          )
+        ? getProgressSteps(currentStatus, activeStep, umapProgress, ckaProgress)
         : [],
-    [
-      activeStep,
-      ckaProgress,
-      forgetClassExist,
-      forgetClassNumber,
-      status,
-      umapProgress,
-    ]
+    [activeStep, ckaProgress, currentStatus, forgetClassExist, umapProgress]
   );
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
     const startTime = Date.now();
-    const duration = 10000;
+    const durationInSeconds = 10;
+    const maxProgress = durationInSeconds * 10;
 
-    if (forgetClassExist) {
+    if (forgetClassExist && progress) {
       intervalId = setInterval(() => {
-        const elapsed = Date.now() - startTime;
+        const elapsedTime = Date.now() - startTime;
         const progressValue = Math.min(
-          Math.floor((elapsed / duration) * 100),
-          100
+          Math.floor(elapsedTime / 100),
+          maxProgress
         );
 
         if (progress.includes("UMAP")) {
@@ -60,43 +78,48 @@ export default function Progress({ width, height }: ViewProps) {
           setCkaProgress(progressValue);
         }
 
-        if (progressValue === 100) {
+        if (progressValue === maxProgress) {
           clearInterval(intervalId!);
         }
       }, 100);
     }
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     };
   }, [forgetClassExist, progress]);
 
+  const handlePaginationClick = (event: React.MouseEvent<HTMLLIElement>) => {
+    const id = event.currentTarget.id;
+    if (id === PREV && currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    } else if (id === NEXT && currentPage < totalExperimentsCount) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
   return (
-    <View width={width} height={height} className="border-t-0">
-      <Title
-        Icon={<VitalIcon />}
-        title="Progress"
-        AdditionalContent={
-          forgetClassExist && (
-            <div className="flex items-center gap-1.5 ml-1.5">
-              {isRunning || status[forgetClassNumber].completed_steps.length ? (
-                <Timer />
-              ) : null}
-            </div>
-          )
-        }
-      />
+    <View
+      width={CONFIG.PROGRESS_WIDTH}
+      height={CONFIG.EXPERIMENTS_PROGRESS_HEIGHT}
+    >
+      <AddModelsButton />
       {forgetClassExist ? (
         <Stepper
           steps={steps}
-          activeStep={activeStep}
-          completedSteps={status[forgetClassNumber].completed_steps}
-          isRunning={isRunning}
+          activeStep={
+            displayedPageIdx === runningIndex
+              ? activeStep
+              : (currentStatus?.completed_steps?.length ?? 0) + 1
+          }
+          completedSteps={currentStatus?.completed_steps || []}
+          isRunning={displayedPageIdx === runningIndex ? isRunning : false}
         />
       ) : (
         <Indicator about="ForgetClass" />
+      )}
+      {totalExperimentsCount > 0 && statuses[forgetClass].length > 0 && (
+        <Pagination currentPage={currentPage} onClick={handlePaginationClick} />
       )}
     </View>
   );

@@ -1,9 +1,22 @@
+// export const API_URL = "http://115.145.171.130:8000";
 export const API_URL = "http://localhost:8000";
+
+export const DATASETS = ["CIFAR-10", "Imagenette"];
+export const NEURAL_NETWORK_MODELS = ["ResNet-18", "ViT-B/16"];
 
 export const TRAIN = "train";
 export const TEST = "test";
 
-export const FORGET_CLASS_NAMES = [
+export const BASELINE = "baseline";
+export const COMPARISON = "comparison";
+
+export const ENTROPY = "entropy";
+export const CONFIDENCE = "confidence";
+
+export const UNLEARN = "unlearn";
+export const RETRAIN = "retrain";
+
+export const CIFAR_10_CLASSES = [
   "airplane",
   "automobile",
   "bird",
@@ -16,6 +29,19 @@ export const FORGET_CLASS_NAMES = [
   "truck",
 ];
 
+export const FASHION_MNIST_CLASSES = [
+  "T-shirt/top",
+  "Trouser",
+  "Pullover",
+  "Dress",
+  "Coat",
+  "Sandal",
+  "Shirt",
+  "Sneaker",
+  "Bag",
+  "Ankle boot",
+];
+
 export const ANIMATION_DURATION = 500;
 
 export const FONT_CONFIG = {
@@ -23,6 +49,7 @@ export const FONT_CONFIG = {
 
   FONT_SIZE_10: 10,
   FONT_SIZE_12: 12,
+  FONT_SIZE_13: 13,
   FONT_SIZE_14: 14,
 
   ROBOTO_CONDENSED: "Roboto Condensed",

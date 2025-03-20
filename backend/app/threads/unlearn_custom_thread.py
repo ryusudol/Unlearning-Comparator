@@ -9,10 +9,15 @@ import uuid
 from app.utils.evaluation import (
 	evaluate_model_with_distributions, 
 	get_layer_activations_and_predictions, 
-	calculate_cka_similarity
+	calculate_cka_similarity,
 )
+from app.utils.attack import process_attack_metrics
 from app.utils.visualization import compute_umap_embedding
-from app.utils.helpers import format_distribution, compress_prob_array
+from app.utils.helpers import (
+	format_distribution, 
+	compress_prob_array, 
+	save_model
+)
 from app.config import (
 	UMAP_DATA_SIZE, 
 	UMAP_DATASET, 
@@ -24,25 +29,27 @@ class UnlearningCustomThread(threading.Thread):
                  forget_class,
                  status,
                  model_before,
-                 model_after,
+                 model,
                  train_loader,
                  test_loader,
                  train_set,
                  test_set,
                  criterion,
-                 device):
+                 device,
+                 base_weights):
         threading.Thread.__init__(self)
         self.forget_class = forget_class
         self.is_training_eval = (forget_class == -1)
         self.status = status
         self.model_before = model_before
-        self.model_after = model_after
+        self.model = model
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.train_set = train_set
         self.test_set = test_set
         self.criterion = criterion
         self.device = device
+        self.base_weights = base_weights
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.forget_class]
 
@@ -80,17 +87,27 @@ class UnlearningCustomThread(threading.Thread):
         self.status.recent_id = uuid.uuid4().hex[:4]
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        
+        targets = torch.tensor(dataset.targets)
+        class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
+        
+        samples_per_class = UMAP_DATA_SIZE // self.num_classes
         generator = torch.Generator()
         generator.manual_seed(UNLEARN_SEED)
-        umap_subset_indices = torch.randperm(len(dataset), generator=generator)[:UMAP_DATA_SIZE]
-        umap_subset = torch.utils.data.Subset(dataset, umap_subset_indices)
+        
+        selected_indices = []
+        for indices in class_indices:
+            perm = torch.randperm(len(indices), generator=generator)
+            selected_indices.extend(indices[perm[:samples_per_class]].tolist())
+        
+        umap_subset = torch.utils.data.Subset(dataset, selected_indices)
         umap_subset_loader = torch.utils.data.DataLoader(
             umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
         )
         
         start_time = time.time()
         
-        print(f"Models loaded successfully at{time.time() - start_time:.3f} seconds")
+        print(f"Models loaded successfully at {time.time() - start_time:.3f} seconds")
         
         # Evaluate on train set
         self.status.progress = "Evaluating Train Set"
@@ -108,11 +125,10 @@ class UnlearningCustomThread(threading.Thread):
             train_label_dist, 
             train_conf_dist
         ) = await evaluate_model_with_distributions (
-            model=self.model_after, 
+            model=self.model, 
             data_loader=self.train_loader,
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.forget_class
         )
 
         # Update training evaluation status for remain classes only
@@ -150,11 +166,10 @@ class UnlearningCustomThread(threading.Thread):
             test_label_dist, 
             test_conf_dist
         ) = await evaluate_model_with_distributions(
-            model=self.model_after, 
+            model=self.model, 
             data_loader=self.test_loader, 
             criterion=self.criterion, 
             device=self.device,
-            forget_class=self.forget_class
         )
 
         # Update test evaluation status for remain classes only
@@ -188,7 +203,7 @@ class UnlearningCustomThread(threading.Thread):
             predicted_labels, 
             probs, 
         ) = await get_layer_activations_and_predictions(
-            model=self.model_after,
+            model=self.model,
             data_loader=umap_subset_loader,
             device=self.device,
         )
@@ -204,18 +219,27 @@ class UnlearningCustomThread(threading.Thread):
             forget_labels=forget_labels
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
-
+        
+        # Process attack metrics using the same umap_subset_loader (no visualization here)
+        print("Processing attack metrics on UMAP subset")
+        values, attack_results, fqs = await process_attack_metrics(
+            model=self.model, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.forget_class
+        )
+        
         # Detailed results preparation
         detailed_results = []
         for i in range(len(umap_subset)):
-            original_index = umap_subset_indices[i].item()
-            ground_truth = umap_subset.dataset.targets[umap_subset_indices[i]]
+            original_index = selected_indices[i]
+            ground_truth = umap_subset.dataset.targets[original_index]
             is_forget = ground_truth == self.forget_class
             detailed_results.append([
                 int(ground_truth),                             # gt
                 int(predicted_labels[i]),                      # pred
-                int(original_index),                           # img
-                1 if is_forget else 0,                         # forget as binary
+                int(original_index),                           # img index
+                1 if is_forget else 0,                         # forget flag as binary
                 round(float(umap_embedding[i][0]), 2),         # x coordinate
                 round(float(umap_embedding[i][1]), 2),         # y coordinate
                 compress_prob_array(probs[i].tolist()),        # compressed probabilities
@@ -249,7 +273,7 @@ class UnlearningCustomThread(threading.Thread):
             print("Calculating CKA similarity")
             cka_results = await calculate_cka_similarity(
                 model_before=self.model_before,
-                model_after=self.model_after,
+                model_after=self.model,
                 train_loader=self.train_loader,
                 test_loader=self.test_loader,
                 forget_class=self.forget_class,
@@ -257,21 +281,24 @@ class UnlearningCustomThread(threading.Thread):
             )
             print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
-        # Prepare results dictionary
+        # Prepare results dictionary with computed FQS and attack results
         results = {
-            "id": self.status.recent_id,
-            "fc": "N/A" if self.is_training_eval else self.forget_class,
-            "phase": "Pretrained" if self.is_training_eval else "Unlearned", 
-            "init": "N/A",
-            "method": "Custom",
-            "epochs": "N/A",
+            "CreatedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            "ID": self.status.recent_id,
+            "FC": "N/A" if self.is_training_eval else self.forget_class,
+            "Type": "Pretrained" if self.is_training_eval else "Unlearned", 
+            "Base": self.base_weights.replace('.pth', ''),
+            "Method": "Custom",
+            "Epoch": "N/A",
             "BS": "N/A",
             "LR": "N/A",
             "UA": "N/A" if self.is_training_eval else round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": "N/A" if self.is_training_eval else round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
+            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": "N/A",
+            "FQS": fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
@@ -280,6 +307,10 @@ class UnlearningCustomThread(threading.Thread):
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
             "points": detailed_results,
+            "attack": {
+                "values": values,
+                "results": attack_results
+            }
         }
 
         # Save results to JSON file
@@ -287,10 +318,16 @@ class UnlearningCustomThread(threading.Thread):
         forget_class_dir = os.path.join('data', str(self.forget_class))
         os.makedirs(forget_class_dir, exist_ok=True)
 
-        result_path = os.path.join(forget_class_dir, f'{results["id"]}.json')
+        result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')
         with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
 
+        save_model(
+            model=self.model, 
+            forget_class=self.forget_class,
+            model_name=self.status.recent_id
+        )
+        
         print(f"Results saved to {result_path}")
         print(f"Custom unlearning inference completed at {time.time() - start_time:.3f} seconds")
         self.status.progress = "Completed"

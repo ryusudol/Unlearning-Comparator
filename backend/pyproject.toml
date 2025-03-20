@@ -58,7 +58,8 @@ no-cov = "cov --no-cov {args}"
 start = "uvicorn main:app --reload"
 
 [tool.hatch.envs.default.scripts]
-start = "uvicorn main:app --reload"
+start = "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+# start = "uvicorn main:app --reload"
 
 [tool.hatch.build.targets.wheel] 
 packages = ["app"]
