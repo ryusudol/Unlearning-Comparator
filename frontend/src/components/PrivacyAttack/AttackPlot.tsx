@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import * as d3 from "d3";
 
 import { COLORS, TABLEAU10 } from "../../constants/colors";
@@ -218,6 +218,8 @@ export default function AttackPlot({
   const metric = useAttackStateStore((state) => state.metric);
   const direction = useAttackStateStore((state) => state.direction);
   const strategy = useAttackStateStore((state) => state.strategy);
+
+  const [isLegendVisible, setIsLegendVisible] = useState(true);
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -625,7 +627,8 @@ export default function AttackPlot({
     const butterflyLegendGroup = gB
       .append("g")
       .attr("class", "butterfly-legend-group")
-      .attr("transform", "translate(-3, 21)");
+      .attr("transform", "translate(-3, 21)")
+      .style("display", isLegendVisible ? "block" : "none");
 
     butterflyLegendGroup
       .insert("rect", ":first-child")
@@ -694,6 +697,29 @@ export default function AttackPlot({
       }
     });
 
+    const buttonGroup = svgB
+      .append("g")
+      .attr("class", "legend-toggle-button")
+      .attr("transform", `translate(${CONFIG.BUTTERFLY_CHART_WIDTH - 217}, 10)`)
+      .style("cursor", "pointer")
+      .on("click", () => {
+        setIsLegendVisible((prev) => !prev);
+      });
+    buttonGroup
+      .append("rect")
+      .attr("x", -8)
+      .attr("y", -8)
+      .attr("width", 32)
+      .attr("height", 16)
+      .attr("fill", "transparent");
+    buttonGroup
+      .append("title")
+      .text(isLegendVisible ? "Hide Legend" : "Show Legend");
+    buttonGroup.attr(
+      "aria-label",
+      isLegendVisible ? "Hide Legend" : "Show Legend"
+    );
+
     // To resolve not removing hovering effects on circles
     d3.select(butterflyRef.current).on("mousemove", (event) => {
       if (!(event.target instanceof SVGCircleElement)) {
@@ -726,7 +752,10 @@ export default function AttackPlot({
             .attr("text-anchor", textAnchor)
             .attr("font-size", "12px")
             .attr("fill", CONFIG.BLACK)
-            .attr("style", "text-shadow: -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white;")
+            .attr(
+              "style",
+              "text-shadow: -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white;"
+            )
             .text(labelText);
         });
       gB.selectAll(".hovered-label").raise();
@@ -751,6 +780,7 @@ export default function AttackPlot({
     getCircleOpacity,
     hoveredId,
     isAboveThresholdUnlearn,
+    isLegendVisible,
     isMetricEntropy,
     isModelA,
     isStrategyCustom,
