@@ -251,7 +251,7 @@ export const FQSHeader = ({
           variant="ghost"
           onClick={() => handleSorting(column)}
         >
-          FQS
+          PS
           <UnfoldMoreIcon
             className="w-4 text-muted-foreground"
             sortOrder={sortOrder}
@@ -259,7 +259,7 @@ export const FQSHeader = ({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto px-3 py-2" side="top">
-        Forgetting Quality Score
+        Privacy Score
       </HoverCardContent>
     </HoverCard>
   );
