@@ -50,7 +50,7 @@ export default function Legend() {
             <br />
             Direction, and Strategy yielding the
             <br />
-            lowest forgetting quality score.
+            lowest privacy score.
           </HoverCardContent>
         </HoverCard>
         <HoverCard openDelay={0} closeDelay={0}>
@@ -73,7 +73,7 @@ export default function Legend() {
             <br />
             Direction, and Strategy yielding the
             <br />
-            lowest forgetting quality score.
+            lowest privacy score.
           </HoverCardContent>
         </HoverCard>
       </div>
