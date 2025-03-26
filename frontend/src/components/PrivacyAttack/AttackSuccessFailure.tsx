@@ -30,7 +30,7 @@ export default function AttackSuccessFailure({
   return (
     <div className="h-full flex flex-col items-center relative bottom-0.5 left-[3px]">
       <p className="text-xl text-center mb-1.5">
-        Forgetting Quality Score ={" "}
+        Privacy Score ={" "}
         <span className="font-semibold">
           {forgettingQualityScore === 1 ? 1 : forgettingQualityScore.toFixed(3)}
         </span>
