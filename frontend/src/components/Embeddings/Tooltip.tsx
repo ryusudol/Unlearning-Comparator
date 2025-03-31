@@ -1,13 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import {
-  CIFAR_10_CLASSES,
-  FONT_CONFIG,
-  STROKE_CONFIG,
-} from "../../constants/common";
 import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
+import { useClasses } from "../../hooks/useClasses";
+import { FONT_CONFIG, STROKE_CONFIG } from "../../constants/common";
 
 const CONFIG = {
   LOW_OPACITY: 0.6,
@@ -48,19 +45,21 @@ export default React.memo(function Tooltip({
   forgetClass,
   isModelA,
 }: Props) {
+  const classes = useClasses();
+
   const svgRef = useRef(null);
 
   const legendRectColor = d3.schemeTableau10[9];
   const groundTruthIdx = Number(data[0]);
-  const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
+  const groundTruth = classes[groundTruthIdx];
   const modelAIdx = barChartData.modelA.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const modelAPrediction = CIFAR_10_CLASSES[modelAIdx];
+  const modelAPrediction = classes[modelAIdx];
   const modelBIdx = barChartData.modelB.reduce((maxObj, currentObj) =>
     currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const modelBPrediction = CIFAR_10_CLASSES[modelBIdx];
+  const modelBPrediction = classes[modelBIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -175,7 +174,7 @@ export default React.memo(function Tooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(barChartData.modelA.map((d) => CIFAR_10_CLASSES[d.class]))
+      .domain(barChartData.modelA.map((d) => classes[d.class]))
       .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
@@ -206,7 +205,7 @@ export default React.memo(function Tooltip({
       .each(function (d, i) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
-        const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
+        const y = yScale(classes[d.class]) ?? 0;
 
         g.append("rect")
           .attr("class", "bar-modelA")
@@ -241,7 +240,7 @@ export default React.memo(function Tooltip({
       .each(function (d: { class: number; value: number }, i: number) {
         const g = d3.select(this);
         const barWidth = xScale(d.value) - CONFIG.MARGIN.left;
-        const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
+        const y = (yScale(classes[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -308,12 +307,13 @@ export default React.memo(function Tooltip({
       .style("font-weight", FONT_CONFIG.LIGHT_FONT_WEIGHT)
       .style("font-family", CONFIG.ROBOTO_CONDENSED)
       .text((d: any) => {
-        const classIndex = CIFAR_10_CLASSES.indexOf(d);
+        const classIndex = classes.indexOf(d);
         return classIndex === forgetClass ? `${d} (\u2716)` : d;
       });
   }, [
     barChartData.modelA,
     barChartData.modelB,
+    classes,
     forgetClass,
     isModelA,
     legendRectColor,

@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Experiments } from "../types/data";
 import { ExperimentData } from "../types/data";
-import { useModelDataStore } from "./modelDataStore";
 
 type ExperimentsState = {
   experiments: Experiments;
@@ -69,17 +68,3 @@ export const useExperimentsStore = create<ExperimentsState>()(
     }
   )
 );
-
-export const useModelAExperiment = () => {
-  const experiments = useExperimentsStore((state) => state.experiments);
-  const modelA = useModelDataStore((state) => state.modelA);
-  return experiments[modelA];
-};
-
-export const useModelBExperiment = () => {
-  const experiments = useExperimentsStore((state) => state.experiments);
-  const modelB = useModelDataStore((state) => state.modelB);
-  return experiments[modelB];
-};
-
-export default useExperimentsStore;

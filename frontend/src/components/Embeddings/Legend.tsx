@@ -2,11 +2,12 @@ import React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/tabs";
 import { Separator } from "../UI/separator";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { CIFAR_10_CLASSES } from "../../constants/common";
 import { TABLEAU10 } from "../../constants/colors";
 import { CircleIcon, FatMultiplicationSignIcon } from "../UI/icons";
 import { VIEW_MODES } from "../../constants/embeddings";
+import { useClasses } from "../../hooks/useClasses";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import {
   HoverCard,
   HoverCardContent,
@@ -19,15 +20,21 @@ interface Props {
 }
 
 export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
+  const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
+  const dataset = useBaseConfigStore((state) => state.dataset);
 
-  const oddIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 === 0);
-  const evenIndices = CIFAR_10_CLASSES.filter((_, idx) => idx % 2 !== 0);
+  const isDatasetCIFAR10 = dataset === "CIFAR-10";
+  const oddIndices = classes.filter((_, idx) => idx % 2 === 0);
+  const evenIndices = classes.filter((_, idx) => idx % 2 !== 0);
 
   return (
     <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
       <div className="flex">
-        <div className="flex flex-col mr-[35px]">
+        <div
+          style={{ marginRight: isDatasetCIFAR10 ? "35px" : "27px" }}
+          className="flex flex-col"
+        >
           <p className="text-lg font-medium mb-1">True Class</p>
           <ul className="flex flex-col gap-1">
             <li className="flex items-center text-nowrap">
@@ -43,7 +50,11 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
         <div className="flex flex-col">
           <p className="text-lg font-medium mb-1">Predicted Class</p>
           <div
-            style={{ gridTemplateColumns: "115px 80px 80px 80px 78px" }}
+            style={{
+              gridTemplateColumns: isDatasetCIFAR10
+                ? "115px 80px 80px 80px 78px"
+                : "92px 94px 86px 93px 68px",
+            }}
             className="grid gap-y-1"
           >
             {oddIndices.map((name, idx) => {

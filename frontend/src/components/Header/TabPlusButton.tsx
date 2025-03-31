@@ -1,10 +1,12 @@
 import { useMemo, useEffect, useState } from "react";
 
 import Button from "../CustomButton";
-import { useBaseConfigStore } from "../../stores/baseConfigStore";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { Label } from "../UI/label";
 import { PlusIcon } from "../UI/icons";
+import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
+import { useClasses } from "../../hooks/useClasses";
+import { useBaseConfigStore } from "../../stores/baseConfigStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../UI/select";
-import {
-  CIFAR_10_CLASSES,
-  DATASETS,
-  NEURAL_NETWORK_MODELS,
-} from "../../constants/common";
 
 interface Props {
   open: boolean;
@@ -40,6 +37,7 @@ export default function ForgetClassTabPlusButton({
   fetchAndSaveExperiments,
   hasNoSelectedForgetClass,
 }: Props) {
+  const classes = useClasses();
   const saveDataset = useBaseConfigStore((state) => state.saveDataset);
   const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
   const saveNeuralNetworkModel = useBaseConfigStore(
@@ -54,11 +52,10 @@ export default function ForgetClassTabPlusButton({
 
   const unselectForgetClasses = useMemo(
     () =>
-      CIFAR_10_CLASSES.filter(
-        (item) =>
-          !selectedForgetClasses.includes(CIFAR_10_CLASSES.indexOf(item))
+      classes.filter(
+        (item) => !selectedForgetClasses.includes(classes.indexOf(item))
       ),
-    [selectedForgetClasses]
+    [classes, selectedForgetClasses]
   );
 
   const [forgetClass, setForgetClass] = useState(unselectForgetClasses[0]);

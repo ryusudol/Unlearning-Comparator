@@ -12,22 +12,22 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import Tooltip from "./Tooltip";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../hooks/useModelExperiment";
 import {
   SelectedData,
   HoverInstance,
   Prob,
   SvgElementsRefType,
 } from "../../types/embeddings";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
 
 /**
  * 0 -> ground thruth

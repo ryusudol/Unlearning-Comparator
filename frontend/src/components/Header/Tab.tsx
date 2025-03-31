@@ -1,5 +1,5 @@
 import { MultiplicationSignIcon } from "../UI/icons";
-import { CIFAR_10_CLASSES } from "../../constants/common";
+import { useClasses } from "../../hooks/useClasses";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
 }
 
 export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
+  const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
   const selectedForgetClasses = useForgetClassStore(
@@ -18,7 +19,7 @@ export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
   );
 
   const handleForgetClassChange = async (value: string) => {
-    if (CIFAR_10_CLASSES[forgetClass] !== value) {
+    if (classes[forgetClass] !== value) {
       saveForgetClass(value);
       await fetchAndSaveExperiments(value);
     }
@@ -28,20 +29,20 @@ export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
     const firstSelectedForgetClass = selectedForgetClasses[0];
     const secondSelectedForgetClass = selectedForgetClasses[1];
     const targetSelectedForgetClassesIndex = selectedForgetClasses.indexOf(
-      CIFAR_10_CLASSES.indexOf(targetClass)
+      classes.indexOf(targetClass)
     );
 
     deleteSelectedForgetClass(targetClass);
 
-    if (targetClass === CIFAR_10_CLASSES[forgetClass]) {
+    if (targetClass === classes[forgetClass]) {
       if (selectedForgetClasses.length === 1) {
         saveForgetClass(-1);
         setOpen(true);
       } else {
         const autoSelectedForgetClass =
           targetSelectedForgetClassesIndex === 0
-            ? CIFAR_10_CLASSES[secondSelectedForgetClass]
-            : CIFAR_10_CLASSES[firstSelectedForgetClass];
+            ? classes[secondSelectedForgetClass]
+            : classes[firstSelectedForgetClass];
         saveForgetClass(autoSelectedForgetClass);
         await fetchAndSaveExperiments(autoSelectedForgetClass);
       }
@@ -52,7 +53,7 @@ export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
     <>
       {selectedForgetClasses.map((selectedForgetClass, idx) => {
         const isSelectedForgetClass = selectedForgetClass === forgetClass;
-        const forgetClassName = CIFAR_10_CLASSES[selectedForgetClass];
+        const forgetClassName = classes[selectedForgetClass];
 
         return (
           <div key={idx} className="flex items-center relative">

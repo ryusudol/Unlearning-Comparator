@@ -13,7 +13,7 @@ import { TRAIN } from "../constants/common";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../stores/experimentsStore";
+} from "../hooks/useModelExperiment";
 
 export interface MatrixProps {
   mode: "A" | "B";
