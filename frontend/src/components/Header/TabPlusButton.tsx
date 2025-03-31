@@ -38,17 +38,15 @@ export default function ForgetClassTabPlusButton({
   hasNoSelectedForgetClass,
 }: Props) {
   const classes = useClasses();
-  const saveDataset = useBaseConfigStore((state) => state.saveDataset);
   const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
-  const saveNeuralNetworkModel = useBaseConfigStore(
-    (state) => state.saveNeuralNetworkModel
-  );
   const addSelectedForgetClass = useForgetClassStore(
     (state) => state.addSelectedForgetClass
   );
   const selectedForgetClasses = useForgetClassStore(
     (state) => state.selectedForgetClasses
   );
+  const { dataset, setDataset, neuralNetworkModel, setNeuralNetworkModel } =
+    useBaseConfigStore();
 
   const unselectForgetClasses = useMemo(
     () =>
@@ -59,23 +57,17 @@ export default function ForgetClassTabPlusButton({
   );
 
   const [forgetClass, setForgetClass] = useState(unselectForgetClasses[0]);
-  const [dataset, setDataset] = useState(DATASETS[0]);
-  const [neuralNetworkModel, setNeuralNetworkModel] = useState(
-    NEURAL_NETWORK_MODELS[0]
-  );
 
   useEffect(() => {
     setForgetClass(unselectForgetClasses[0]);
   }, [unselectForgetClasses]);
 
   const handleButtonClick = async () => {
+    setOpen(false);
     addSelectedForgetClass(forgetClass);
     saveForgetClass(forgetClass);
-    saveDataset(dataset);
-    saveNeuralNetworkModel(neuralNetworkModel);
-
-    setOpen(false);
-
+    setDataset(dataset);
+    setNeuralNetworkModel(neuralNetworkModel);
     await fetchAndSaveExperiments(forgetClass);
   };
 
@@ -110,11 +102,17 @@ export default function ForgetClassTabPlusButton({
                     Architecture
                   </Label>
                   <Select
-                    value={neuralNetworkModel}
-                    onValueChange={setNeuralNetworkModel}
+                    value={neuralNetworkModel ?? NEURAL_NETWORK_MODELS[0]}
+                    onValueChange={(value: string) =>
+                      setNeuralNetworkModel(value)
+                    }
                   >
                     <SelectTrigger className="w-11/12">
-                      <SelectValue placeholder={neuralNetworkModel} />
+                      <SelectValue
+                        placeholder={
+                          neuralNetworkModel ?? NEURAL_NETWORK_MODELS[0]
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {NEURAL_NETWORK_MODELS.map((model) => (
@@ -129,9 +127,12 @@ export default function ForgetClassTabPlusButton({
                   <Label className="text-xs text-muted-foreground text-nowrap mb-0.5">
                     Dataset
                   </Label>
-                  <Select value={dataset} onValueChange={setDataset}>
+                  <Select
+                    value={dataset ?? DATASETS[0]}
+                    onValueChange={(value: string) => setDataset(value)}
+                  >
                     <SelectTrigger className="w-11/12">
-                      <SelectValue placeholder={dataset} />
+                      <SelectValue placeholder={dataset ?? DATASETS[0]} />
                     </SelectTrigger>
                     <SelectContent>
                       {DATASETS.map((dataset) => (

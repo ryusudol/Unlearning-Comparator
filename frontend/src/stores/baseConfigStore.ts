@@ -1,20 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { DATASETS, NEURAL_NETWORK_MODELS } from "../constants/common";
+
 type BaseConfigState = {
-  dataset: string | undefined;
-  neuralNetworkModel: string | undefined;
-  saveDataset: (dataset: string) => void;
-  saveNeuralNetworkModel: (neuralNetworkModel: string) => void;
+  dataset: string;
+  neuralNetworkModel: string;
+  setDataset: (dataset: string) => void;
+  setNeuralNetworkModel: (neuralNetworkModel: string) => void;
 };
 
 export const useBaseConfigStore = create<BaseConfigState>()(
   persist(
     (set) => ({
-      dataset: undefined,
-      neuralNetworkModel: undefined,
-      saveDataset: (dataset) => set({ dataset }),
-      saveNeuralNetworkModel: (neuralNetworkModel) =>
+      dataset: DATASETS[0],
+      neuralNetworkModel: NEURAL_NETWORK_MODELS[0],
+      setDataset: (dataset) => set({ dataset }),
+      setNeuralNetworkModel: (neuralNetworkModel) =>
         set({ neuralNetworkModel }),
     }),
     {
