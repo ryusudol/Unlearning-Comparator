@@ -547,7 +547,7 @@ export default function AttackPlot({
       .attr("font-family", CONFIG.FONT_FAMILY)
       .attr("fill", CONFIG.BLACK)
       .attr("text-anchor", "middle")
-      .text(isMetricEntropy ? "Entropy" : "Confidence");
+      .text(isMetricEntropy ? "Entropy" : "Top-1 Confidence");
 
     // Draw retrain circles
     retrainBins.forEach((bin) => {

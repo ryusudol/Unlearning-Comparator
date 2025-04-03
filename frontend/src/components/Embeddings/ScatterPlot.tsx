@@ -262,7 +262,7 @@ const ScatterPlot = forwardRef(
       const containerRect = containerRef.current.getBoundingClientRect();
       const zoom = calculateZoom();
 
-      let xPos = (event.clientX - containerRect.left) / zoom + 10;
+      let xPos = (event.clientX - containerRect.left) / zoom + 60;
       let yPos = (event.clientY - containerRect.top) / zoom + 10;
 
       if (yPos + CONFIG.TOOLTIP_Y_SIZE > containerRect.height / zoom) {
