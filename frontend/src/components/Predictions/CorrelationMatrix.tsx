@@ -3,16 +3,17 @@ import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
 import { MatrixProps } from "../../views/PredictionMatrix";
-import { CIFAR_10_CLASSES, FONT_CONFIG } from "../../constants/common";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
+import { FONT_CONFIG } from "../../constants/common";
 import { calculateZoom } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS } from "../../constants/colors";
+import { useClasses } from "../../hooks/useClasses";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
 
 const CONFIG = {
   WIDTH: 260,
@@ -38,6 +39,7 @@ function BubbleChart({
   onHover,
   showYAxis = true,
 }: MatrixProps) {
+  const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -111,8 +113,8 @@ function BubbleChart({
       .tickSize(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
-          : CIFAR_10_CLASSES[d as number]
+          ? classes[d as number] + " (\u2716)"
+          : classes[d as number]
       );
 
     const yAxis = d3
@@ -122,8 +124,8 @@ function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
-          : CIFAR_10_CLASSES[d as number]
+          ? classes[d as number] + " (\u2716)"
+          : classes[d as number]
       );
 
     svg
@@ -258,6 +260,7 @@ function BubbleChart({
         handleMouseOut(event);
       });
   }, [
+    classes,
     datasetMode,
     experiment,
     forgetClass,
@@ -330,13 +333,13 @@ function BubbleChart({
             <div>
               <span>True Class</span>:{" "}
               <span className="font-semibold">
-                {CIFAR_10_CLASSES[tooltip.content.groundTruth]}
+                {classes[tooltip.content.groundTruth]}
               </span>
             </div>
             <div>
               <span>Predicted Class</span>:{" "}
               <span className="font-semibold">
-                {CIFAR_10_CLASSES[tooltip.content.prediction]}
+                {classes[tooltip.content.prediction]}
               </span>
             </div>
             <div>

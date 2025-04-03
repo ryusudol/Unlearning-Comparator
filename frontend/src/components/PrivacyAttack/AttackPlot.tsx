@@ -17,7 +17,7 @@ import {
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",

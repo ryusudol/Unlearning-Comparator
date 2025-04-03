@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { CIFAR_10_CLASSES } from "../constants/common";
+import { CIFAR_10_CLASSES, FASHION_MNIST_CLASSES } from "../constants/common";
+import { useBaseConfigStore } from "./baseConfigStore";
 
 type ForgetClassState = {
   forgetClass: number;
@@ -10,22 +11,32 @@ type ForgetClassState = {
   deleteSelectedForgetClass: (forgetClass: string) => void;
 };
 
+const getClassesForDataset = () => {
+  const dataset = useBaseConfigStore.getState().dataset;
+  return dataset === "CIFAR-10" ? CIFAR_10_CLASSES : FASHION_MNIST_CLASSES;
+};
+
 export const useForgetClassStore = create<ForgetClassState>()(
   persist(
     (set, get) => ({
       forgetClass: -1,
       selectedForgetClasses: [],
 
-      saveForgetClass: (forgetClass) =>
+      saveForgetClass: (forgetClass) => {
+        const classes = getClassesForDataset();
+
         set({
           forgetClass:
             typeof forgetClass === "string"
-              ? CIFAR_10_CLASSES.indexOf(forgetClass)
+              ? classes.indexOf(forgetClass)
               : forgetClass,
-        }),
+        });
+      },
 
       addSelectedForgetClass: (forgetClass) => {
-        const target = CIFAR_10_CLASSES.indexOf(forgetClass);
+        const classes = getClassesForDataset();
+
+        const target = classes.indexOf(forgetClass);
         if (!get().selectedForgetClasses.includes(target)) {
           set({
             selectedForgetClasses: [...get().selectedForgetClasses, target],
@@ -34,7 +45,9 @@ export const useForgetClassStore = create<ForgetClassState>()(
       },
 
       deleteSelectedForgetClass: (forgetClass) => {
-        const target = CIFAR_10_CLASSES.indexOf(forgetClass);
+        const classes = getClassesForDataset();
+
+        const target = classes.indexOf(forgetClass);
         set({
           selectedForgetClasses: get().selectedForgetClasses.filter(
             (item) => item !== target

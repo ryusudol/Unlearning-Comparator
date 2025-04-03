@@ -2,13 +2,14 @@ import { useState } from "react";
 
 import Tab from "./Tab";
 import ForgetClassTabPlusButton from "./TabPlusButton";
-import { CIFAR_10_CLASSES } from "../../constants/common";
 import { Experiment, Experiments } from "../../types/data";
+import { useClasses } from "../../hooks/useClasses";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 
 export default function Tabs() {
+  const classes = useClasses();
   const saveExperiments = useExperimentsStore((state) => state.saveExperiments);
   const selectedForgetClasses = useForgetClassStore(
     (state) => state.selectedForgetClasses
@@ -22,7 +23,7 @@ export default function Tabs() {
   const [open, setOpen] = useState(hasNoSelectedForgetClass);
 
   const fetchAndSaveExperiments = async (forgetClass: string) => {
-    const classIndex = CIFAR_10_CLASSES.indexOf(forgetClass);
+    const classIndex = classes.indexOf(forgetClass);
     setIsExperimentsLoading(true);
     try {
       const allData: Experiments = await fetchAllExperimentsData(classIndex);

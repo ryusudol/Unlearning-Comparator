@@ -30,7 +30,7 @@ export const CIFAR_10_CLASSES = [
 ];
 
 export const FASHION_MNIST_CLASSES = [
-  "T-shirt/top",
+  "T-shirt",
   "Trouser",
   "Pullover",
   "Dress",
@@ -39,7 +39,7 @@ export const FASHION_MNIST_CLASSES = [
   "Shirt",
   "Sneaker",
   "Bag",
-  "Ankle boot",
+  "Boot",
 ];
 
 export const ANIMATION_DURATION = 500;

@@ -9,7 +9,7 @@ import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../stores/experimentsStore";
+} from "../hooks/useModelExperiment";
 
 export default function ClassWiseAnalysis() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);

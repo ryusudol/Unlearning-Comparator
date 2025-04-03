@@ -8,7 +8,7 @@ import { Separator } from "../components/UI/separator";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../stores/experimentsStore";
+} from "../hooks/useModelExperiment";
 
 interface Props {
   modelAPoints: (number | Prob)[][];
