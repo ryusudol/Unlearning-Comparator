@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import Tab from "./Tab";
-import ForgetClassTabPlusButton from "./TabPlusButton";
+import TabPlusButton from "./TabPlusButton";
 import { CIFAR_10_CLASSES } from "../../constants/common";
 import { Experiments } from "../../types/data";
 import { useExperimentsStore } from "../../stores/experimentsStore";
@@ -38,7 +38,7 @@ export default function Tabs() {
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
       />
-      <ForgetClassTabPlusButton
+      <TabPlusButton
         open={open}
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
