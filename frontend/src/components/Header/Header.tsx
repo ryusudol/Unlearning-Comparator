@@ -43,9 +43,13 @@ export default function Header() {
                 <SelectValue placeholder={neuralNetworkModel} />
               </SelectTrigger>
               <SelectContent>
-                {NEURAL_NETWORK_MODELS.map((neuralNetworkModel, idx) => (
-                  <SelectItem key={idx} value={neuralNetworkModel}>
-                    {neuralNetworkModel}
+                {NEURAL_NETWORK_MODELS.map((model, idx) => (
+                  <SelectItem
+                    key={idx}
+                    value={model}
+                    disabled={model.startsWith("V")}
+                  >
+                    {model}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -63,7 +67,11 @@ export default function Header() {
               </SelectTrigger>
               <SelectContent>
                 {DATASETS.map((dataset, idx) => (
-                  <SelectItem key={idx} value={dataset}>
+                  <SelectItem
+                    key={idx}
+                    value={dataset}
+                    disabled={dataset.startsWith("F")}
+                  >
                     {dataset}
                   </SelectItem>
                 ))}
