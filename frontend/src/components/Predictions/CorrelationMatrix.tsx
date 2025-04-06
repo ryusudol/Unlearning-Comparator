@@ -227,9 +227,9 @@ function BubbleChart({
         let xPos =
           rightSpace >= tooltipWidth + 20
             ? (rect.right + 10) / zoom
-            : (leftSpace - tooltipWidth + 10) / zoom;
+            : (leftSpace - tooltipWidth - 10) / zoom;
 
-        let yPos = (rect.bottom + 10) / zoom;
+        let yPos = (rect.top + rect.height / 2) / zoom;
 
         setTooltip({
           display: true,
