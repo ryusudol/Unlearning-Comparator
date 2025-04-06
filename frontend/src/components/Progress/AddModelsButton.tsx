@@ -27,18 +27,11 @@ export default function AddExperimentsButton() {
         <Button
           onClick={() => setOpen(true)}
           className={`w-[255px] mb-1 ${
-            isRunning && "bg-gray-100 hover:bg-gray-100 cursor-not-allowed"
+            isRunning && "hover:bg-[#585858] cursor-not-allowed"
           }`}
         >
-          <PlusIcon
-            color={isRunning ? "#d1d5db" : "white"}
-            className="w-3 h-3 mr-1.5"
-          />
-          <span
-            className={`text-base font-medium ${isRunning && "text-gray-300"}`}
-          >
-            Open Model Builder
-          </span>
+          <PlusIcon color="white" className="w-3 h-3 mr-1.5" />
+          <span className="text-base font-medium">Open Model Builder</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="w-fit min-w-[340px] p-4">
