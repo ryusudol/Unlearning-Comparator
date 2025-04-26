@@ -320,10 +320,7 @@ export default React.memo(function Tooltip({
   ]);
 
   return (
-    <div
-      style={{ width: 450, height: 274 }}
-      className="flex justify-center items-center z-100"
-    >
+    <div className="w-[450px] h-[274px] flex justify-center items-center z-100">
       <div className="text-sm">
         <img
           src={imageUrl}

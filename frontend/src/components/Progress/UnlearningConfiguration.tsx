@@ -12,6 +12,7 @@ import { UnlearningConfigurationData } from "../../types/experiments";
 import { ExperimentData } from "../../types/data";
 import { fetchUnlearningStatus } from "../../utils/api/requests";
 import { useModelDataStore } from "../../stores/modelDataStore";
+import { cn } from "../../utils/util";
 import {
   executeMethodUnlearning,
   executeCustomUnlearning,
@@ -400,15 +401,17 @@ export default function UnlearningConfiguration() {
       )}
       {!isCustom && (
         <span
-          className={`mb-1 w-full text-center ${
-            batchSizeList.length === 0 ? "mt-2.5" : "mt-1"
-          }`}
+          className={cn("mb-1 w-full text-center", {
+            "mt-2.5": batchSizeList.length === 0,
+            "mt-1": batchSizeList.length > 0,
+          })}
         >
           These settings will build and add{" "}
           <span
-            className={`font-bold ${
-              totalExperimentsCount > 0 ? "text-red-600" : "text-gray-400"
-            }`}
+            className={cn("font-bold", {
+              "text-red-600": totalExperimentsCount > 0,
+              "text-gray-400": totalExperimentsCount === 0,
+            })}
           >
             {totalExperimentsCount}
           </span>{" "}
@@ -416,9 +419,10 @@ export default function UnlearningConfiguration() {
         </span>
       )}
       <Button
-        className={`h-[34px] flex items-center text-base px-4 ${
-          isCustom ? "mt-2" : "mt-1"
-        }`}
+        className={cn("h-[34px] flex items-center text-base px-4", {
+          "mt-2": isCustom,
+          "mt-1": !isCustom,
+        })}
         disabled={isDisabled}
       >
         BUILD

@@ -4,7 +4,7 @@ import * as d3 from "d3";
 
 import { MatrixProps } from "../../views/PredictionMatrix";
 import { FONT_CONFIG } from "../../constants/common";
-import { calculateZoom } from "../../utils/util";
+import { calculateZoom, cn } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS } from "../../constants/colors";
 import { useClasses } from "../../hooks/useClasses";
@@ -304,9 +304,10 @@ function BubbleChart({
 
   return (
     <div
-      className={`flex flex-col items-center relative ${
+      className={cn(
+        "flex flex-col items-center relative",
         showYAxis ? "z-10" : "right-[56px] z-0"
-      }`}
+      )}
     >
       {showYAxis && (
         <span className="absolute top-[calc(42%-8px)] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
@@ -318,15 +319,15 @@ function BubbleChart({
         createPortal(
           <div
             ref={tooltipRef}
-            className={`w-auto h-auto bg-white px-2.5 py-1.5 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+            className={cn(
+              "w-auto h-auto bg-white px-2.5 py-1.5 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out",
               tooltip.display ? "opacity-100" : "opacity-0"
-            }`}
+            )}
             style={{
               position: "fixed",
               left: tooltip.x,
               top: tooltip.y,
               pointerEvents: "none",
-              zIndex: 10,
               zoom,
             }}
           >

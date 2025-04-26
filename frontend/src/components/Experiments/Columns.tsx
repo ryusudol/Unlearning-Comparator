@@ -82,9 +82,17 @@ export const columns: ColumnDef<ExperimentData>[] = [
     accessorKey: "Method",
     header: ({ column }) => <MethodFilterHeader column={column} />,
     filterFn: (row, columnId, filterValue) => {
-      const rowValue = row.getValue(columnId);
+      const rawValue = row.getValue(columnId);
+      const displayValue = getValueToDisplay(rawValue) as string;
+      const methodValue = displayValue.startsWith("F")
+        ? "Fine-Tuning"
+        : displayValue.startsWith("R")
+        ? "Random Labeling"
+        : displayValue.startsWith("G")
+        ? "Gradient Ascent"
+        : displayValue;
       if (filterValue.length === 0) return true;
-      return filterValue.includes(String(rowValue));
+      return filterValue.includes(methodValue);
     },
     cell: ({ row }) => {
       const method = row.getValue("Method");

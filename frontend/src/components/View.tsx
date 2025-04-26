@@ -1,3 +1,5 @@
+import { cn } from "../utils/util";
+
 interface Props {
   width?: number;
   height: number | string;
@@ -29,7 +31,7 @@ export default function View({
         borderBottom: borderBottom ? "3px solid #E5E7EB" : "0px",
         borderLeft: borderLeft ? "3px solid #E5E7EB" : "0px",
       }}
-      className={"px-3 py-2.5 relative " + className}
+      className={cn("px-3 py-2.5 relative", className)}
     >
       {children}
     </section>

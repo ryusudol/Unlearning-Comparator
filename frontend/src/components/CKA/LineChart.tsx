@@ -28,6 +28,7 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../hooks/useModelExperiment";
+import { cn } from "../../utils/util";
 
 const CONFIG = {
   DOT_SIZE: 10,
@@ -262,10 +263,13 @@ function CustomLegend() {
         const experiment = i % 2 === 0 ? modelAExperiment : modelBExperiment;
 
         return (
-          <div key={i} className={`flex items-center ${item.spacing}`}>
+          <div key={i} className={cn("flex items-center", item.spacing)}>
             <div className="relative">
               <Icon
-                className={`z-10 ${item.type === CIRCLE ? "mr-2" : "mr-0.5"}`}
+                className={cn("z-10", {
+                  "mr-2": item.type === CIRCLE,
+                  "mr-0.5": item.type !== CIRCLE,
+                })}
                 style={{
                   color: item.color,
                   width:
@@ -282,7 +286,7 @@ function CustomLegend() {
                 }}
               />
             </div>
-            <span style={i > 1 ? { marginLeft: "6px" } : undefined}>
+            <span className={cn({ "ml-1.5": i > 1 })}>
               <span style={{ color: item.color }}>
                 {item.label} ({experiment.Type}, {experiment.ID}){" "}
               </span>

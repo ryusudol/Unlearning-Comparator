@@ -10,6 +10,7 @@ import { Separator } from "../UI/separator";
 import { Label } from "../UI/label";
 import { COLORS } from "../../constants/colors";
 import { ENTROPY, CONFIDENCE } from "../../constants/common";
+import { cn } from "../../utils/util";
 import {
   HoverCard,
   HoverCardContent,
@@ -157,12 +158,13 @@ export default function Legend() {
                 {idx < THRESHOLD_STRATEGIES.length - 1 && (
                   <Separator
                     orientation="vertical"
-                    className={`w-[1.5px] h-5 ${
+                    className={cn(
+                      "w-[1.5px] h-5",
                       s.strategy === strategy ||
-                      THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
+                        THRESHOLD_STRATEGIES[idx + 1].strategy === strategy
                         ? "bg-muted"
                         : "bg-[#d2d5d9]"
-                    }`}
+                    )}
                   />
                 )}
               </React.Fragment>

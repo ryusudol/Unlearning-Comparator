@@ -1,3 +1,5 @@
+import { cn } from "../utils/util";
+
 interface Props {
   about?: "AB" | "ForgetClass";
   text?: string;
@@ -12,9 +14,10 @@ export default function Indicator({ about, text }: Props) {
 
   return (
     <div
-      className={`${
+      className={cn(
+        "h-full flex justify-center items-center text-[15px] text-gray-500",
         text ? "w-[628px]" : "w-full"
-      } h-full flex justify-center items-center text-[15px] text-gray-500`}
+      )}
     >
       {content}
     </div>

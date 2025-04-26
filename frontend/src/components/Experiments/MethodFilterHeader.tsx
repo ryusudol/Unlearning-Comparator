@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 
 import { FilterIcon } from "../UI/icons";
 import { UNLEARNING_METHODS } from "../../constants/experiments";
+import { cn } from "../../utils/util";
 
 const MOUSEDOWN = "mousedown";
 
@@ -90,12 +91,12 @@ export default function MethodFilterHeader({ column }: { column: any }) {
               <div
                 key={method}
                 onClick={handleSelect(method)}
-                className="px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer"
-                style={{
-                  backgroundColor: filterValues.includes(method)
-                    ? "#f0f6fa"
-                    : "transparent",
-                }}
+                className={cn(
+                  "px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer",
+                  filterValues.includes(method)
+                    ? "bg-[#f0f6fa]"
+                    : "bg-transparent"
+                )}
               >
                 {method}
               </div>

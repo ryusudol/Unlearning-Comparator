@@ -1,5 +1,7 @@
 import React from "react";
 
+import { cn } from "../utils/util";
+
 interface Props {
   title: string;
   id?: string;
@@ -19,10 +21,10 @@ export default function Title({
     <div
       id={id}
       onClick={onClick}
-      className={
-        "flex items-center gap-1 relative bottom-[1px] font-semibold text-xl leading-7 " +
+      className={cn(
+        "flex items-center gap-1 relative bottom-[1px] font-semibold text-xl leading-7",
         className
-      }
+      )}
     >
       <span>{title}</span>
       {AdditionalContent}

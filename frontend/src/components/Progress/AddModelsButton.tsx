@@ -4,6 +4,7 @@ import UnlearningConfiguration from "./UnlearningConfiguration";
 import Button from "../CustomButton";
 import { PlusIcon } from "../UI/icons";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
+import { cn } from "../../utils/util";
 import {
   Dialog,
   DialogContent,
@@ -26,9 +27,9 @@ export default function AddExperimentsButton() {
       <DialogTrigger disabled={isRunning}>
         <Button
           onClick={() => setOpen(true)}
-          className={`w-[255px] mb-1 ${
-            isRunning && "hover:bg-[#585858] cursor-not-allowed"
-          }`}
+          className={cn("w-[255px] mb-1", {
+            "hover:bg-[#585858] cursor-not-allowed": isRunning,
+          })}
         >
           <PlusIcon color="white" className="w-3 h-3 mr-1.5" />
           <span className="text-base font-medium">Open Model Builder</span>

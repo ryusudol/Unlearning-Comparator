@@ -1,3 +1,5 @@
+import { cn } from "../utils/util";
+
 interface Props {
   title: string;
   AdditionalContent?: JSX.Element | false;
@@ -11,7 +13,10 @@ export default function Subtitle({
 }: Props) {
   return (
     <div
-      className={`flex items-center gap-1 font-medium text-lg text-[#4d4d4d] mb-1 relative ${className}`}
+      className={cn(
+        "flex items-center gap-1 font-medium text-lg text-[#4d4d4d] mb-1 relative",
+        className
+      )}
     >
       <span>{title}</span>
       {AdditionalContent}

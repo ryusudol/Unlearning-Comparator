@@ -1,6 +1,7 @@
 import { MultiplicationSignIcon } from "../UI/icons";
 import { useClasses } from "../../hooks/useClasses";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { cn } from "../../utils/util";
 
 interface Props {
   setOpen: (open: boolean) => void;
@@ -58,30 +59,31 @@ export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
         return (
           <div key={idx} className="flex items-center relative">
             <div
-              className={
-                "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t transition " +
-                (isSelectedForgetClass
+              className={cn(
+                "flex justify-center items-center h-[30px] pl-2.5 pr-[26px] rounded-t transition",
+                isSelectedForgetClass
                   ? "bg-white text-black cursor-default"
-                  : "text-white hover:bg-gray-800 relative bottom-[1px] cursor-pointer")
-              }
+                  : "text-white hover:bg-gray-800 relative bottom-[1px] cursor-pointer"
+              )}
               onClick={() => handleForgetClassChange(forgetClassName)}
             >
               <span
-                className={`px-1 font-medium ${
+                className={cn(
+                  "px-1 font-medium",
                   isSelectedForgetClass ? "text-black" : "text-[#64758B]"
-                }`}
+                )}
               >
                 Forget: {forgetClassName}
               </span>
             </div>
             <MultiplicationSignIcon
               onClick={() => handleDeleteClick(forgetClassName)}
-              className={
-                "w-3.5 h-3.5 p-[1px] cursor-pointer rounded-full absolute right-2.5 bg-transparent transition " +
-                (isSelectedForgetClass
-                  ? "text-gray-500 hover:bg-gray-300"
-                  : "text-gray-500 hover:bg-gray-700")
-              }
+              className={cn(
+                "w-3.5 h-3.5 p-[1px] cursor-pointer rounded-full absolute right-2.5 bg-transparent transition text-gray-500",
+                isSelectedForgetClass
+                  ? "hover:bg-gray-300"
+                  : "hover:bg-gray-700"
+              )}
             />
             {isSelectedForgetClass && (
               <div className="w-[calc(100%-19px)] h-0.5 absolute bottom-[1px] left-[10px] bg-black" />

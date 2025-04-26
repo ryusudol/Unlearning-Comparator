@@ -13,6 +13,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "../UI/hover-card";
+import { cn } from "../../utils/util";
 
 interface Props {
   highlight: string;
@@ -32,8 +33,10 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
     <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
       <div className="flex">
         <div
-          style={{ marginRight: isDatasetCIFAR10 ? "35px" : "27px" }}
-          className="flex flex-col"
+          className={cn("flex flex-col", {
+            "mr-[35px]": isDatasetCIFAR10,
+            "mr-[27px]": !isDatasetCIFAR10,
+          })}
         >
           <p className="text-lg font-medium mb-1">True Class</p>
           <ul className="flex flex-col gap-1">
@@ -121,12 +124,13 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                 {idx < VIEW_MODES.length - 1 && (
                   <Separator
                     orientation="vertical"
-                    className={`w-[1.5px] h-5 ${
+                    className={cn(
+                      "w-[1.5px] h-5",
                       mode.label === highlight ||
-                      VIEW_MODES[idx + 1].label === highlight
+                        VIEW_MODES[idx + 1].label === highlight
                         ? "bg-muted"
                         : "bg-[#d2d5d9]"
-                    }`}
+                    )}
                   />
                 )}
               </React.Fragment>

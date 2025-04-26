@@ -4,6 +4,7 @@ import { Input } from "../UI/input";
 import { PlusIcon } from "../UI/icons";
 import { COLORS } from "../../constants/colors";
 import { EPOCH, LEARNING_RATE, BATCH_SIZE } from "../../constants/experiments";
+import { cn } from "../../utils/util";
 
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "list"> {
@@ -109,9 +110,10 @@ export default function HyperparameterInput({
         {...props}
       />
       <div
-        className={`flex justify-center items-center border rounded w-[25px] h-[25px] ${
+        className={cn(
+          "flex justify-center items-center border rounded w-[25px] h-[25px]",
           isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-        }`}
+        )}
         onClick={handlePlusClick}
       >
         <PlusIcon className="w-2 h-2" color={COLORS.BUTTON_BG_COLOR} />
