@@ -7,7 +7,7 @@ const fileNames4 = ["0004", "a004", "4216", "ed7d", "fa3c"];
 const fileNames5 = ["0005", "a005", "5788", "8767", "db4d"];
 const fileNames6 = ["0006", "a006", "6f58", "a87f", "f83f"];
 const fileNames7 = ["0007", "a007", "3d5a", "6b5d", "82b0"];
-const fileNames8 = ["0008", "a008", "2c83", "2c64", "f133"];
+const fileNames8 = ["0008", "a008", "2c8e", "2c64", "f133"];
 const fileNames9 = ["0009", "a009", "228e", "271c", "4718"];
 
 const fileNames = [
