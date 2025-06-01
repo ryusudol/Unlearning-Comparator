@@ -5,7 +5,8 @@ This tool facilitates the evaluation and comparison of machine unlearning method
 ## Demo
 
 Try our live demo: [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/)
-[![Watch the video](https://img.youtube.com/vi/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu/0.jpg)](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
+
+[![Watch the video]()](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
 
 ## Features
 
