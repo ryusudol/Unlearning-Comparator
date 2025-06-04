@@ -1,7 +1,7 @@
 // export const API_URL = "http://115.145.171.130:8000";
 export const API_URL = "http://localhost:8000";
 
-export const DATASETS = ["CIFAR-10", "Imagenette"];
+export const DATASETS = ["CIFAR-10", "Fashion-MNIST"];
 export const NEURAL_NETWORK_MODELS = ["ResNet-18", "ViT-B/16"];
 
 export const TRAIN = "train";
@@ -30,7 +30,7 @@ export const CIFAR_10_CLASSES = [
 ];
 
 export const FASHION_MNIST_CLASSES = [
-  "T-shirt/top",
+  "T-shirt",
   "Trouser",
   "Pullover",
   "Dress",
@@ -39,7 +39,7 @@ export const FASHION_MNIST_CLASSES = [
   "Shirt",
   "Sneaker",
   "Bag",
-  "Ankle boot",
+  "Boot",
 ];
 
 export const ANIMATION_DURATION = 500;

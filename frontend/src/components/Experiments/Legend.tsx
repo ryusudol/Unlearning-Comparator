@@ -75,7 +75,7 @@ export default function DualMetricsLegend() {
       </div>
       <div className="w-full">
         <h3 className="text-xs text-gray-800 font-medium">
-          Forgetting Quality
+          Privacy
         </h3>
         <div className="relative h-[15px]">
           <div

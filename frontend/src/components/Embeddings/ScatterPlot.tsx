@@ -12,22 +12,22 @@ import { AiOutlineHome } from "react-icons/ai";
 import * as d3 from "d3";
 
 import Tooltip from "./Tooltip";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
 import { calculateZoom } from "../../utils/util";
 import { COLORS } from "../../constants/colors";
 import { API_URL, ANIMATION_DURATION } from "../../constants/common";
 import { VIEW_MODES } from "../../constants/embeddings";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import {
+  useModelAExperiment,
+  useModelBExperiment,
+} from "../../hooks/useModelExperiment";
 import {
   SelectedData,
   HoverInstance,
   Prob,
   SvgElementsRefType,
 } from "../../types/embeddings";
-import {
-  useModelAExperiment,
-  useModelBExperiment,
-} from "../../stores/experimentsStore";
 
 /**
  * 0 -> ground thruth
@@ -262,7 +262,7 @@ const ScatterPlot = forwardRef(
       const containerRect = containerRef.current.getBoundingClientRect();
       const zoom = calculateZoom();
 
-      let xPos = (event.clientX - containerRect.left) / zoom + 10;
+      let xPos = (event.clientX - containerRect.left) / zoom + 60;
       let yPos = (event.clientY - containerRect.top) / zoom + 10;
 
       if (yPos + CONFIG.TOOLTIP_Y_SIZE > containerRect.height / zoom) {

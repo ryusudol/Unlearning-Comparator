@@ -1,15 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import {
-  CIFAR_10_CLASSES,
-  FONT_CONFIG,
-  STROKE_CONFIG,
-} from "../../constants/common";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { COLORS } from "../../constants/colors";
 import { Prob } from "../../types/embeddings";
 import { RETRAIN } from "../../constants/common";
+import { useClasses } from "../../hooks/useClasses";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { FONT_CONFIG, STROKE_CONFIG } from "../../constants/common";
 
 const CONFIG = {
   LOW_OPACITY: 0.6,
@@ -54,6 +51,7 @@ export default React.memo(function Tooltip({
   isModelA,
   clickedType,
 }: Props) {
+  const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
   const svgRef = useRef(null);
@@ -62,7 +60,7 @@ export default React.memo(function Tooltip({
   const isRetrainedClicked = clickedType === RETRAIN;
 
   const groundTruthIdx = Number(data[0]);
-  const groundTruth = CIFAR_10_CLASSES[groundTruthIdx];
+  const groundTruth = classes[groundTruthIdx];
   const retrainedPredictionIdx = barChartData.retrainedModelData.reduce(
     (maxObj, currentObj) =>
       currentObj.value > maxObj.value ? currentObj : maxObj
@@ -71,8 +69,8 @@ export default React.memo(function Tooltip({
     (maxObj, currentObj) =>
       currentObj.value > maxObj.value ? currentObj : maxObj
   ).class;
-  const retrainedPrediction = CIFAR_10_CLASSES[retrainedPredictionIdx];
-  const modelPrediction = CIFAR_10_CLASSES[modelPredictionIdx];
+  const retrainedPrediction = classes[retrainedPredictionIdx];
+  const modelPrediction = classes[modelPredictionIdx];
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -193,9 +191,7 @@ export default React.memo(function Tooltip({
 
     const yScale = d3
       .scaleBand()
-      .domain(
-        barChartData.retrainedModelData.map((d) => CIFAR_10_CLASSES[d.class])
-      )
+      .domain(barChartData.retrainedModelData.map((d) => classes[d.class]))
       .range([CONFIG.MARGIN.top, height - CONFIG.MARGIN.bottom])
       .padding(0.2);
 
@@ -229,7 +225,7 @@ export default React.memo(function Tooltip({
         const barWidth = isRetrainedClicked
           ? baseWidth - CONFIG.BAR_STROKE_WIDTH
           : baseWidth;
-        const y = yScale(CIFAR_10_CLASSES[d.class]) ?? 0;
+        const y = yScale(classes[d.class]) ?? 0;
 
         g.append("rect")
           .attr("class", "bar-retrained")
@@ -273,7 +269,7 @@ export default React.memo(function Tooltip({
         const barWidth = !isRetrainedClicked
           ? baseWidth - CONFIG.BAR_STROKE_WIDTH
           : baseWidth;
-        const y = (yScale(CIFAR_10_CLASSES[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
+        const y = (yScale(classes[d.class]) ?? 0) + CONFIG.BAR_HEIGHT;
 
         g.append("rect")
           .attr("x", CONFIG.MARGIN.left)
@@ -346,12 +342,13 @@ export default React.memo(function Tooltip({
       .style("font-weight", FONT_CONFIG.LIGHT_FONT_WEIGHT)
       .style("font-family", CONFIG.ROBOTO_CONDENSED)
       .text((d: any) => {
-        const classIndex = CIFAR_10_CLASSES.indexOf(d);
+        const classIndex = classes.indexOf(d);
         return classIndex === forgetClass ? `${d} (\u2716)` : d;
       });
   }, [
     barChartData.modelData,
     barChartData.retrainedModelData,
+    classes,
     forgetClass,
     isModelA,
     isRetrainedClicked,

@@ -13,7 +13,7 @@ export default function MetricsAnalysis() {
       borderLeft
       borderBottom
     >
-      <Title title="Metrics Analysis" className="left-0.5" />
+      <Title title="Metrics View" className="left-0.5" />
       <div className="flex flex-col gap-6">
         <ClassWiseAnalysis />
         <PredictionMatrix />

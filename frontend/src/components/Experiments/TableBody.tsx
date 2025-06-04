@@ -16,6 +16,7 @@ import { fetchAllExperimentsData } from "../../utils/api/unlearning";
 import { calculatePerformanceMetrics } from "../../utils/data/experiments";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
+import { cn } from "../../utils/util";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -290,9 +291,10 @@ export default function _TableBody({ table }: Props) {
   return (
     <Table className="w-full table-fixed">
       <TableBody
-        className={`text-sm ${
+        className={cn(
+          "text-sm",
           table.getRowModel().rows?.length <= 5 && "[&_tr:last-child]:border-b"
-        }`}
+        )}
       >
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row, rowIdx) => {

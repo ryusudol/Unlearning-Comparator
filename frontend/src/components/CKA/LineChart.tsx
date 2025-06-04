@@ -27,7 +27,8 @@ import {
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
+import { cn } from "../../utils/util";
 
 const CONFIG = {
   DOT_SIZE: 10,
@@ -227,19 +228,19 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
         className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl"
       >
         <p className="leading-5">
-          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain){" "}
+          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
           <span className="font-semibold">{payload[1].value}</span>
         </p>
         <p className="leading-5">
-          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain){" "}
+          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
           <span className="font-semibold">{payload[3].value}</span>
         </p>
         <p className="leading-5">
-          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget){" "}
+          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
           <span className="font-semibold">{payload[0].value}</span>
         </p>
         <p className="leading-5">
-          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget){" "}
+          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
           <span className="font-semibold">{payload[2].value}</span>
         </p>
       </div>
@@ -262,10 +263,13 @@ function CustomLegend() {
         const experiment = i % 2 === 0 ? modelAExperiment : modelBExperiment;
 
         return (
-          <div key={i} className={`flex items-center ${item.spacing}`}>
+          <div key={i} className={cn("flex items-center", item.spacing)}>
             <div className="relative">
               <Icon
-                className={`z-10 ${item.type === CIRCLE ? "mr-2" : "mr-0.5"}`}
+                className={cn("z-10", {
+                  "mr-2": item.type === CIRCLE,
+                  "mr-0.5": item.type !== CIRCLE,
+                })}
                 style={{
                   color: item.color,
                   width:
@@ -282,7 +286,7 @@ function CustomLegend() {
                 }}
               />
             </div>
-            <span style={i > 1 ? { marginLeft: "6px" } : undefined}>
+            <span className={cn({ "ml-1.5": i > 1 })}>
               <span style={{ color: item.color }}>
                 {item.label} ({experiment.Type}, {experiment.ID}){" "}
               </span>

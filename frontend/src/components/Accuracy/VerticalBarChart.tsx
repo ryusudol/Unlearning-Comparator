@@ -10,21 +10,19 @@ import {
   TooltipProps,
 } from "recharts";
 
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
+import { TABLEAU10 } from "../../constants/colors";
+import { type ChartConfig } from "../UI/chart";
 import { COLORS } from "../../constants/colors";
-import { VERTICAL_BAR_CHART_CONFIG } from "../../constants/accuracies";
 import { ChartContainer } from "../UI/chart";
 import { GapDataItem } from "../../types/data";
-import {
-  CIFAR_10_CLASSES,
-  FONT_CONFIG,
-  STROKE_CONFIG,
-} from "../../constants/common";
+import { useClasses } from "../../hooks/useClasses";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { FONT_CONFIG, STROKE_CONFIG } from "../../constants/common";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
 
 const CONFIG = {
   TOOLTIP_TO_FIXED_LENGTH: 3,
@@ -48,35 +46,53 @@ export default function VerticalBarChart({
   onHoverChange,
   showYAxis = true,
 }: Props) {
+  const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
-  const forgettingCIFAR10Class = CIFAR_10_CLASSES[forgetClass];
+  const forgettingClass = classes[forgetClass];
+  const VERTICAL_BAR_CHART_CONFIG = (() => {
+    const config: Record<string, any> = {
+      value: {
+        label: "Gap",
+      },
+    };
+    classes.forEach((label, index) => {
+      const key = String.fromCharCode(65 + index);
+      config[key] = {
+        label,
+        color: TABLEAU10[index],
+      };
+    });
+    return config;
+  })() satisfies ChartConfig;
 
   const renderTick = useCallback(
     (props: any) => (
       <AxisTick
         {...props}
+        classes={classes}
         hoveredClass={hoveredClass}
         forgetClass={forgetClass}
+        chartrConfig={VERTICAL_BAR_CHART_CONFIG}
       />
     ),
-    [forgetClass, hoveredClass]
+    [VERTICAL_BAR_CHART_CONFIG, classes, forgetClass, hoveredClass]
   );
 
   const remainGapAvgValue = useMemo(() => {
     const remainingData = gapData.filter(
-      (datum) => CIFAR_10_CLASSES[+datum.classLabel] !== forgettingCIFAR10Class
+      (datum) => classes[+datum.classLabel] !== forgettingClass
     );
 
     return remainingData.length
       ? remainingData.reduce((sum, datum) => sum + datum.gap, 0) /
           remainingData.length
       : 0;
-  }, [forgettingCIFAR10Class, gapData]);
+  }, [classes, forgettingClass, gapData]);
 
   const remainGapAvg = remainGapAvgValue.toFixed(
     CONFIG.TOOLTIP_TO_FIXED_LENGTH
@@ -129,7 +145,7 @@ export default function VerticalBarChart({
                 VERTICAL_BAR_CHART_CONFIG[
                   value as keyof typeof VERTICAL_BAR_CHART_CONFIG
                 ]?.label;
-              const isForgetClass = label === forgettingCIFAR10Class;
+              const isForgetClass = label === forgettingClass;
               return isForgetClass ? `${label} (\u2716)` : label;
             }}
             style={{ whiteSpace: "nowrap" }}
@@ -258,17 +274,25 @@ type TickProps = {
   x: number;
   y: number;
   payload: any;
+  classes: string[];
   hoveredClass: string | null;
   forgetClass: number;
+  chartrConfig: Record<string, any>;
 };
 
 const AxisTick = memo(
-  ({ x, y, payload, hoveredClass, forgetClass }: TickProps) => {
+  ({
+    x,
+    y,
+    payload,
+    classes,
+    hoveredClass,
+    forgetClass,
+    chartrConfig,
+  }: TickProps) => {
     const label =
-      VERTICAL_BAR_CHART_CONFIG[
-        payload.value as keyof typeof VERTICAL_BAR_CHART_CONFIG
-      ]?.label;
-    const isForgetClass = label === CIFAR_10_CLASSES[forgetClass];
+      chartrConfig[payload.value as keyof typeof chartrConfig]?.label;
+    const isForgetClass = label === classes[forgetClass];
     const formattedLabel = isForgetClass ? `${label}\u00A0(\u2716)` : label;
 
     return (

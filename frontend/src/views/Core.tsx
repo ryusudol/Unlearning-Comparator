@@ -10,6 +10,7 @@ import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
 import { useForgetClassStore } from "../stores/forgetClassStore";
 import { useModelDataStore } from "../stores/modelDataStore";
 import { Point } from "../types/data";
+import { cn } from "../utils/util";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";
@@ -87,18 +88,20 @@ export default function Core() {
         <Title
           title="Embedding Space"
           id={EMBEDDINGS}
-          className={`relative z-10 cursor-pointer px-1 ${
+          className={cn(
+            "relative z-10 cursor-pointer px-1",
             !isEmbeddingMode && "text-gray-400 border-none"
-          }`}
+          )}
           AdditionalContent={isEmbeddingMode && <UnderLine />}
           onClick={handleDisplayModeChange}
         />
         <Title
           title="Attack Simulation"
           id={ATTACK}
-          className={`relative z-10 cursor-pointer px-1 ${
+          className={cn(
+            "relative z-10 cursor-pointer px-1",
             isEmbeddingMode && "text-gray-400 border-none"
-          }`}
+          )}
           AdditionalContent={!isEmbeddingMode && <UnderLine />}
           onClick={handleDisplayModeChange}
         />

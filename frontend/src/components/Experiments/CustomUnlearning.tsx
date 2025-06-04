@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Input } from "../UI/input";
+import { cn } from "../../utils/util";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   fileName: string;
@@ -20,7 +21,7 @@ export default function CustomUnlearning({ fileName, ...props }: Props) {
         />
         <div className="h-[25px] py-0.5 px-3 border rounded-md bg-background flex items-center">
           <span
-            className={`mr-2 text-nowrap truncate ${fileName && "text-sm"}`}
+            className={cn("mr-2 text-nowrap truncate", fileName && "text-sm")}
           >
             {fileName ? fileName : "Choose File"}
           </span>

@@ -17,7 +17,7 @@ import {
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
 
 const CONFIG = {
   FONT_FAMILY: "Roboto Condensed",
@@ -220,6 +220,7 @@ export default function AttackPlot({
   const strategy = useAttackStateStore((state) => state.strategy);
 
   const [isLegendVisible, setIsLegendVisible] = useState(true);
+  const [isLineLegendVisible, setIsLineLegendVisible] = useState(true);
 
   const butterflyRef = useRef<SVGSVGElement | null>(null);
   const lineRef = useRef<SVGSVGElement | null>(null);
@@ -546,7 +547,7 @@ export default function AttackPlot({
       .attr("font-family", CONFIG.FONT_FAMILY)
       .attr("fill", CONFIG.BLACK)
       .attr("text-anchor", "middle")
-      .text(isMetricEntropy ? "Entropy" : "Confidence");
+      .text(isMetricEntropy ? "Entropy" : "Top-1 Confidence");
 
     // Draw retrain circles
     retrainBins.forEach((bin) => {
@@ -823,6 +824,29 @@ export default function AttackPlot({
         `translate(${CONFIG.LINE_MARGIN.left},${CONFIG.LINE_MARGIN.top})`
       );
 
+    const lineButtonGroup = svgL
+      .append("g")
+      .attr("class", "line-legend-toggle-button")
+      .attr("transform", `translate(${CONFIG.LINE_CHART_WIDTH - 94}, 10)`)
+      .style("cursor", "pointer")
+      .on("click", () => {
+        setIsLineLegendVisible((prev) => !prev);
+      });
+    lineButtonGroup
+      .append("rect")
+      .attr("x", -8)
+      .attr("y", -8)
+      .attr("width", 32)
+      .attr("height", 16)
+      .attr("fill", "transparent");
+    lineButtonGroup
+      .append("title")
+      .text(isLineLegendVisible ? "Hide Legend" : "Show Legend");
+    lineButtonGroup.attr(
+      "aria-label",
+      isLineLegendVisible ? "Hide Legend" : "Show Legend"
+    );
+
     // Define the glow filter
     const defs = gL.append("defs");
     const glowFilter = defs
@@ -1010,7 +1034,9 @@ export default function AttackPlot({
     // Draw a legend
     const lineChartLegendGroup = gL
       .append("g")
-      .attr("transform", `translate(${wL - 37}, -1.5)`);
+      .attr("class", "line-legend-group")
+      .attr("transform", `translate(${wL - 37}, -1.5)`)
+      .style("display", isLineLegendVisible ? "block" : "none");
 
     lineChartLegendGroup
       .append("rect")
@@ -1201,6 +1227,7 @@ export default function AttackPlot({
   }, [
     attackData,
     isAboveThresholdUnlearn,
+    isLineLegendVisible,
     isMetricEntropy,
     isModelA,
     isStrategyCustom,

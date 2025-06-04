@@ -3,20 +3,17 @@ import { createPortal } from "react-dom";
 import * as d3 from "d3";
 
 import { MatrixProps } from "../../views/PredictionMatrix";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { useModelDataStore } from "../../stores/modelDataStore";
-import { calculateZoom } from "../../utils/util";
+import { calculateZoom, cn } from "../../utils/util";
 import { extractBubbleChartData } from "../../utils/data/experiments";
 import { COLORS } from "../../constants/colors";
-import {
-  CIFAR_10_CLASSES,
-  STROKE_CONFIG,
-  FONT_CONFIG,
-} from "../../constants/common";
+import { useClasses } from "../../hooks/useClasses";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { STROKE_CONFIG, FONT_CONFIG } from "../../constants/common";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
 
 const CONFIG = {
   WIDTH: 260,
@@ -42,6 +39,7 @@ export default function BubbleChart({
   onHover,
   showYAxis = true,
 }: MatrixProps) {
+  const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -118,8 +116,8 @@ export default function BubbleChart({
       .tickSize(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
-          : CIFAR_10_CLASSES[d as number]
+          ? classes[d as number] + " (\u2716)"
+          : classes[d as number]
       );
 
     const yAxis = d3
@@ -129,8 +127,8 @@ export default function BubbleChart({
       .tickPadding(0)
       .tickFormat((d) =>
         d === forgetClass
-          ? CIFAR_10_CLASSES[d as number] + " (\u2716)"
-          : CIFAR_10_CLASSES[d as number]
+          ? classes[d as number] + " (\u2716)"
+          : classes[d as number]
       );
 
     svg
@@ -256,6 +254,7 @@ export default function BubbleChart({
         return t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT;
       });
   }, [
+    classes,
     datasetMode,
     experiment,
     forgetClass,
@@ -290,9 +289,10 @@ export default function BubbleChart({
 
   return (
     <div
-      className={`flex flex-col items-center relative ${
+      className={cn(
+        "flex flex-col items-center relative",
         showYAxis ? "z-10" : "right-[56px] z-0"
-      }`}
+      )}
     >
       {showYAxis && (
         <span className="absolute top-[calc(42%-8px)] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
@@ -304,29 +304,29 @@ export default function BubbleChart({
         createPortal(
           <div
             ref={tooltipRef}
-            className={`w-auto h-auto bg-white px-2.5 py-1.5 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out ${
+            className={cn(
+              "w-auto h-auto bg-white px-2.5 py-1.5 whitespace-nowrap rounded-lg text-[#333] text-sm z-10 border border-border/50 shadow-xl transition-all duration-500 ease-in-out",
               tooltip.display ? "opacity-100" : "opacity-0"
-            }`}
+            )}
             style={{
               position: "fixed",
               left: tooltip.x,
               top: tooltip.y,
               transform: "translateY(-50%)",
               pointerEvents: "none",
-              zIndex: 10,
               zoom,
             }}
           >
             <div>
               <span>True Class</span>:{" "}
               <span className="font-semibold">
-                {CIFAR_10_CLASSES[tooltip.content.groundTruth]}
+                {classes[tooltip.content.groundTruth]}
               </span>
             </div>
             <div>
               <span>Predicted Class</span>:{" "}
               <span className="font-semibold">
-                {CIFAR_10_CLASSES[tooltip.content.prediction]}
+                {classes[tooltip.content.prediction]}
               </span>
             </div>
             <div>

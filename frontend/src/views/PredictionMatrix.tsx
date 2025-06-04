@@ -13,7 +13,7 @@ import { TRAIN } from "../constants/common";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../stores/experimentsStore";
+} from "../hooks/useModelExperiment";
 
 export interface MatrixProps {
   mode: "A" | "B";
@@ -95,7 +95,7 @@ export default function PredictionMatrix() {
               {modelBExperiment && (
                 <Matrix
                   mode="B"
-                  modelType={modelAExperiment.Type}
+                  modelType={modelBExperiment.Type}
                   datasetMode={selectedDataset}
                   hoveredY={hoveredY}
                   onHover={handleHover}

@@ -9,6 +9,7 @@ import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { UNLEARN, RETRAIN } from "../../constants/common";
 import { COLORS } from "../../constants/colors";
 import { Data, Image, Bin, CategoryType } from "../../types/attack";
+import { cn } from "../../utils/util";
 
 const CONFIG = {
   IMG_COLLECTIONS_WIDTH: 262,
@@ -241,16 +242,17 @@ export default function InstancePanel({
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <span
-            className={
-              isModeSuccess && isStrategyMaxSuccessRate ? "text-red-500" : ""
-            }
+            className={cn(
+              isModeSuccess && isStrategyMaxSuccessRate && "text-red-500"
+            )}
           >
             {mode[0].toUpperCase() + mode.slice(1)}
           </span>
           <span
-            className={`mx-1 text-sm font-light w-11 ${
+            className={cn(
+              "mx-1 text-sm font-light w-11",
               isModeSuccess && isStrategyMaxSuccessRate && "text-red-500"
-            }`}
+            )}
           >
             {pct.toFixed(2)}%
           </span>
@@ -259,9 +261,10 @@ export default function InstancePanel({
               id={`${mode}-gray`}
               checked={isGrayChecked}
               onCheckedChange={(checked: boolean) => setIsGrayChecked(checked)}
-              className={`w-3.5 h-3.5 border ${
+              className={cn(
+                "w-3.5 h-3.5 border",
                 isModeSuccess && "data-[state=checked]:text-black"
-              }`}
+              )}
               style={{
                 backgroundColor: isModeSuccess
                   ? COLORS.LIGHT_GRAY
@@ -273,9 +276,10 @@ export default function InstancePanel({
               id={`${mode}-color`}
               checked={isColorChecked}
               onCheckedChange={(checked: boolean) => setIsColorChecked(checked)}
-              className={`w-3.5 h-3.5 border ${
+              className={cn(
+                "w-3.5 h-3.5 border",
                 !isModeSuccess && "data-[state=checked]:text-black"
-              }`}
+              )}
               style={{
                 backgroundColor: color,
                 borderColor: circleStrokeColor,

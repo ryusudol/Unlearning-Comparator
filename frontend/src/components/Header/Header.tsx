@@ -13,7 +13,7 @@ import {
 } from "../UI/select";
 
 export default function Header() {
-  const { dataset, saveDataset, neuralNetworkModel, saveNeuralNetworkModel } =
+  const { dataset, setDataset, neuralNetworkModel, setNeuralNetworkModel } =
     useBaseConfigStore();
 
   const handleGithubIconClick = () => {
@@ -24,11 +24,11 @@ export default function Header() {
   };
 
   const handleDatasetChange = (dataset: string) => {
-    saveDataset(dataset);
+    setDataset(dataset);
   };
 
   const handleNeuralNetworkModelChange = (model: string) => {
-    saveNeuralNetworkModel(model);
+    setNeuralNetworkModel(model);
   };
 
   return (

@@ -30,7 +30,7 @@ import {
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../../stores/experimentsStore";
+} from "../../hooks/useModelExperiment";
 
 const CONFIG = {
   TOOLTIP_WIDTH: 450,
