@@ -6,7 +6,7 @@ import Indicator from "../../components/common/Indicator";
 import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../../app/App";
-import { fetchFileData, fetchAllWeightNames } from "../../utils/api/unlearning";
+import { fetchFileData, fetchAllWeightNames } from "../../utils/api/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { Point } from "../../types/data";

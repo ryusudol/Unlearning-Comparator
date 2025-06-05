@@ -6,19 +6,18 @@ import Button from "../../common/CustomButton";
 import { Label } from "../../UI/label";
 import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { useRunningStatusStore } from "../../../stores/runningStatusStore";
+import { fetchFileData, fetchAllWeightNames } from "../../../utils/api/common";
 import { useExperimentsStore } from "../../../stores/experimentsStore";
 import { useRunningIndexStore } from "../../../stores/runningIndexStore";
 import { UnlearningConfigurationData } from "../../../types/experiments";
 import { ExperimentData } from "../../../types/data";
-import { fetchUnlearningStatus } from "../../../utils/api/requests";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import { cn } from "../../../utils/util";
 import {
+  fetchUnlearningStatus,
   executeMethodUnlearning,
   executeCustomUnlearning,
-  fetchFileData,
-  fetchAllWeightNames,
-} from "../../../utils/api/unlearning";
+} from "../../../utils/api/modelScreening";
 import {
   Select,
   SelectContent,

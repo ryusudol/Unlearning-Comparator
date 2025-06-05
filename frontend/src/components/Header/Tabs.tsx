@@ -6,7 +6,7 @@ import { Experiment, Experiments } from "../../types/data";
 import { useClasses } from "../../hooks/useClasses";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { fetchAllExperimentsData } from "../../utils/api/unlearning";
+import { fetchAllExperimentsData } from "../../utils/api/modelScreening";
 
 export default function Tabs() {
   const classes = useClasses();

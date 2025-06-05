@@ -13,7 +13,7 @@ import {
   deleteRow,
   downloadJSON,
   downloadPTH,
-} from "../../../utils/api/dataTable";
+} from "../../../utils/api/modelScreening";
 import { columns } from "./Columns";
 import { COLUMN_WIDTHS } from "./Columns";
 import { COLORS } from "../../../constants/colors";
@@ -23,7 +23,7 @@ import { PerformanceMetrics } from "../../../types/experiments";
 import { Experiments } from "../../../types/data";
 import { Table, TableBody, TableCell, TableRow } from "../../UI/table";
 import { useExperimentsStore } from "../../../stores/experimentsStore";
-import { fetchAllExperimentsData } from "../../../utils/api/unlearning";
+import { fetchAllExperimentsData } from "../../../utils/api/modelScreening";
 import { calculatePerformanceMetrics } from "../../../utils/data/experiments";
 import { useRunningStatusStore } from "../../../stores/runningStatusStore";
 import { useModelDataStore } from "../../../stores/modelDataStore";

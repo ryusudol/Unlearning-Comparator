@@ -6,7 +6,7 @@ import AttackAnalytics from "../../components/Core/PrivacyAttack/AttackAnalytics
 import { Prob } from "../../types/embeddings";
 import { Separator } from "../../components/UI/separator";
 import { useModelDataStore } from "../../stores/modelDataStore";
-import { fetchFileData } from "../../utils/api/unlearning";
+import { fetchFileData } from "../../utils/api/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useAttackStateStore } from "../../stores/attackStore";
 import { ExperimentData } from "../../types/data";
