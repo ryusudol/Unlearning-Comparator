@@ -109,7 +109,7 @@ async def start_unlearning_ft(
             status_code=404, 
             detail=f"Weights '{base_weights_path}' not found in unlearned_models/ folder"
         )
-
+    print(f"start unlearning ft with base_weights_path: {base_weights_path}")
     background_tasks.add_task(run_unlearning_FT, request, status, base_weights_path)
     return {"message": "FT Unlearning started"}
 
