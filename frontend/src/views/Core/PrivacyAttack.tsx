@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
-import Indicator from "../../components/Indicator";
-import Legend from "../../components/PrivacyAttack/Legend";
-import AttackAnalytics from "../../components/PrivacyAttack/AttackAnalytics";
+import Indicator from "../../components/common/Indicator";
+import Legend from "../../components/Core/PrivacyAttack/Legend";
+import AttackAnalytics from "../../components/Core/PrivacyAttack/AttackAnalytics";
 import { Prob } from "../../types/embeddings";
 import { Separator } from "../../components/UI/separator";
 import { useModelDataStore } from "../../stores/modelDataStore";

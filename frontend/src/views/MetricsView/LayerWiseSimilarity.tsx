@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import Subtitle from "../../components/Subtitle";
-import Indicator from "../../components/Indicator";
-import LineChart from "../../components/CKA/LineChart";
-import DatasetModeSelector from "../../components/DatasetModeSelector";
+import Subtitle from "../../components/common/Subtitle";
+import Indicator from "../../components/common/Indicator";
+import LineChart from "../../components/MetricsView/CKA/LineChart";
+import DatasetModeSelector from "../../components/common/DatasetModeSelector";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { TRAIN } from "../../constants/common";

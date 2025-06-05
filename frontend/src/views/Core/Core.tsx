@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
-import View from "../../components/View";
-import Title from "../../components/Title";
-import Indicator from "../../components/Indicator";
+import View from "../../components/common/View";
+import Title from "../../components/common/Title";
+import Indicator from "../../components/common/Indicator";
 import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../../app/App";

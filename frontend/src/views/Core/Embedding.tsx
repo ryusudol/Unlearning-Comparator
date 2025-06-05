@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 
-import ScatterPlot from "../../components/Embeddings/ScatterPlot";
-import ConnectionLineWrapper from "../../components/Embeddings/ConnectionLineWrapper";
-import Legend from "../../components/Embeddings/Legend";
+import ScatterPlot from "../../components/Core/Embeddings/ScatterPlot";
+import ConnectionLineWrapper from "../../components/Core/Embeddings/ConnectionLineWrapper";
+import Legend from "../../components/Core/Embeddings/Legend";
 import { HoverInstance, Position, Prob } from "../../types/embeddings";
 import { Separator } from "../../components/UI/separator";
 import {
