@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 
-import Indicator from "../components/Indicator";
-import Legend from "../components/PrivacyAttack/Legend";
-import AttackAnalytics from "../components/PrivacyAttack/AttackAnalytics";
-import { Prob } from "../types/embeddings";
-import { Separator } from "../components/UI/separator";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { fetchFileData } from "../utils/api/unlearning";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { useAttackStateStore } from "../stores/attackStore";
-import { ExperimentData } from "../types/data";
-import { ENTROPY, UNLEARN } from "../constants/common";
-import { THRESHOLD_STRATEGIES } from "../constants/privacyAttack";
+import Indicator from "../../components/Indicator";
+import Legend from "../../components/PrivacyAttack/Legend";
+import AttackAnalytics from "../../components/PrivacyAttack/AttackAnalytics";
+import { Prob } from "../../types/embeddings";
+import { Separator } from "../../components/UI/separator";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { fetchFileData } from "../../utils/api/unlearning";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useAttackStateStore } from "../../stores/attackStore";
+import { ExperimentData } from "../../types/data";
+import { ENTROPY, UNLEARN } from "../../constants/common";
+import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 
 interface Props {
   modelAPoints: (number | Prob)[][];

@@ -1,6 +1,6 @@
 import Experiments from "./Experiments";
 import Progress from "./Progress";
-import { Separator } from "../components/UI/separator";
+import { Separator } from "../../components/UI/separator";
 
 export default function ModelScreening() {
   return (

@@ -1,14 +1,14 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 
-import ScatterPlot from "../components/Embeddings/ScatterPlot";
-import ConnectionLineWrapper from "../components/Embeddings/ConnectionLineWrapper";
-import Legend from "../components/Embeddings/Legend";
-import { HoverInstance, Position, Prob } from "../types/embeddings";
-import { Separator } from "../components/UI/separator";
+import ScatterPlot from "../../components/Embeddings/ScatterPlot";
+import ConnectionLineWrapper from "../../components/Embeddings/ConnectionLineWrapper";
+import Legend from "../../components/Embeddings/Legend";
+import { HoverInstance, Position, Prob } from "../../types/embeddings";
+import { Separator } from "../../components/UI/separator";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../hooks/useModelExperiment";
+} from "../../hooks/useModelExperiment";
 
 interface Props {
   modelAPoints: (number | Prob)[][];

@@ -1,11 +1,11 @@
-import View from "../components/View";
-import Title from "../components/Title";
+import View from "../../components/View";
+import Title from "../../components/Title";
 import ClassWiseAnalysis from "./ClassWiseAnalysis";
 import PredictionMatrix from "./PredictionMatrix";
 import LayerWiseSimilarity from "./LayerWiseSimilarity";
-import { CONFIG } from "../app/App";
+import { CONFIG } from "../../app/App";
 
-export default function MetricsAnalysis() {
+export default function MetricsCore() {
   return (
     <View
       width={CONFIG.ANALYSIS_VIEW_WIDTH}

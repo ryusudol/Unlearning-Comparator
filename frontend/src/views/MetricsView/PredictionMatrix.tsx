@@ -1,19 +1,19 @@
 import { useState, useCallback } from "react";
 
-import Subtitle from "../components/Subtitle";
-import DatasetModeSelector from "../components/DatasetModeSelector";
-import BubbleMatrix from "../components/Predictions/BubbleMatrix";
-import BubbleMatrixLegend from "../components/Predictions/BubbleMatrixLegend";
-import CorrelationMatrix from "../components/Predictions/CorrelationMatrix";
-import CorrelationMatrixLegend from "../components/Predictions/CorrelationMatrixLegend";
-import Indicator from "../components/Indicator";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { TRAIN } from "../constants/common";
+import Subtitle from "../../components/Subtitle";
+import DatasetModeSelector from "../../components/DatasetModeSelector";
+import BubbleMatrix from "../../components/Predictions/BubbleMatrix";
+import BubbleMatrixLegend from "../../components/Predictions/BubbleMatrixLegend";
+import CorrelationMatrix from "../../components/Predictions/CorrelationMatrix";
+import CorrelationMatrixLegend from "../../components/Predictions/CorrelationMatrixLegend";
+import Indicator from "../../components/Indicator";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { TRAIN } from "../../constants/common";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../hooks/useModelExperiment";
+} from "../../hooks/useModelExperiment";
 
 export interface MatrixProps {
   mode: "A" | "B";
