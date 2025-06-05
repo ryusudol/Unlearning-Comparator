@@ -1,7 +1,6 @@
-// export const API_URL = "http://115.145.171.130:8000";
 export const API_URL = "http://localhost:8000";
 
-export const DATASETS = ["CIFAR-10", "Fashion-MNIST"];
+export const DATASETS = ["FaceDataset", "CIFAR-10", "Fashion-MNIST"];
 export const NEURAL_NETWORK_MODELS = ["ResNet-18", "ViT-B/16"];
 
 export const TRAIN = "train";
@@ -15,6 +14,19 @@ export const CONFIDENCE = "confidence";
 
 export const UNLEARN = "unlearn";
 export const RETRAIN = "retrain";
+
+export const FACE_DATASET_CLASSES = [
+  "Go Ara",
+  "Gong Yoo",
+  "Kang Dong-won",
+  "Kim Tae-hoi",
+  "Kwon Yuri",
+  "Lee Jung-jae",
+  "Lee Young-ae",
+  "Ma Dong-seok",
+  "Park Bo-young",
+  "Won Bin",
+];
 
 export const CIFAR_10_CLASSES = [
   "airplane",
