@@ -8,7 +8,10 @@ interface Props {
   fetchAndSaveExperiments: (forgetClass: string) => Promise<void>;
 }
 
-export default function Tab({ setOpen, fetchAndSaveExperiments }: Props) {
+export default function ClassButtons({
+  setOpen,
+  fetchAndSaveExperiments,
+}: Props) {
   const classes = useClasses();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);

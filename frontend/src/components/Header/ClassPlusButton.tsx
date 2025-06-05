@@ -31,7 +31,7 @@ interface Props {
   hasNoSelectedForgetClass: boolean;
 }
 
-export default function ForgetClassTabPlusButton({
+export default function ClassPlusButton({
   open,
   setOpen,
   fetchAndSaveExperiments,

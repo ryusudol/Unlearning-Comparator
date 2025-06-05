@@ -1,6 +1,6 @@
 import { FileText } from "lucide-react";
 
-import Tabs from "./Tabs";
+import ClassSelection from "./ClassSelection";
 import { Logo, GithubIcon } from "../UI/icons";
 import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
@@ -81,7 +81,7 @@ export default function Header() {
               </Select>
             </div>
           </div>
-          <Tabs />
+          <ClassSelection />
         </div>
       </div>
       <div className="flex items-center gap-3">

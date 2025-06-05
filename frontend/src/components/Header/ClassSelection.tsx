@@ -1,14 +1,14 @@
 import { useState } from "react";
 
-import Tab from "./Tab";
-import ForgetClassTabPlusButton from "./TabPlusButton";
+import ClassButtons from "./ClassButtons";
+import ClassPlusButton from "./ClassPlusButton";
 import { Experiment, Experiments } from "../../types/data";
 import { useClasses } from "../../hooks/useClasses";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { fetchAllExperimentsData } from "../../utils/api/modelScreening";
 
-export default function Tabs() {
+export default function ClassSelection() {
   const classes = useClasses();
   const saveExperiments = useExperimentsStore((state) => state.saveExperiments);
   const selectedForgetClasses = useForgetClassStore(
@@ -45,11 +45,11 @@ export default function Tabs() {
 
   return (
     <div className="flex items-center gap-1 relative -bottom-[11px]">
-      <Tab
+      <ClassButtons
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
       />
-      <ForgetClassTabPlusButton
+      <ClassPlusButton
         open={open}
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
