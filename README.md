@@ -1,5 +1,7 @@
 # Machine Unlearning Comparator
-
+<video src="demo.mp4" controls width="640">
+  Your browser does not support the video tag.
+</video>
 This tool facilitates the evaluation and comparison of machine unlearning methods by providing interactive visualizations and analytical insights. It enables a systematic examination of model behavior through privacy attacks and performance metrics, offering comprehensive analysis of various unlearning techniques.
 
 ## Demo
