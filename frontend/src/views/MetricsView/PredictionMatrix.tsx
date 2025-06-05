@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react";
 
-import Subtitle from "../../components/Subtitle";
-import DatasetModeSelector from "../../components/DatasetModeSelector";
-import BubbleMatrix from "../../components/Predictions/BubbleMatrix";
-import BubbleMatrixLegend from "../../components/Predictions/BubbleMatrixLegend";
-import CorrelationMatrix from "../../components/Predictions/CorrelationMatrix";
-import CorrelationMatrixLegend from "../../components/Predictions/CorrelationMatrixLegend";
-import Indicator from "../../components/Indicator";
+import Subtitle from "../../components/common/Subtitle";
+import DatasetModeSelector from "../../components/common/DatasetModeSelector";
+import BubbleMatrix from "../../components/MetricsView/Predictions/BubbleMatrix";
+import BubbleMatrixLegend from "../../components/MetricsView/Predictions/BubbleMatrixLegend";
+import CorrelationMatrix from "../../components/MetricsView/Predictions/CorrelationMatrix";
+import CorrelationMatrixLegend from "../../components/MetricsView/Predictions/CorrelationMatrixLegend";
+import Indicator from "../../components/common/Indicator";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { TRAIN } from "../../constants/common";

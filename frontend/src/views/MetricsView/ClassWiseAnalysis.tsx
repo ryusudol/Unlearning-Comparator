@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 
-import Subtitle from "../../components/Subtitle";
-import Indicator from "../../components/Indicator";
-import VerticalBarChart from "../../components/Accuracy/VerticalBarChart";
+import Subtitle from "../../components/common/Subtitle";
+import Indicator from "../../components/common/Indicator";
+import VerticalBarChart from "../../components/MetricsView/Accuracy/VerticalBarChart";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { getAccuracyGap, getMaxGap } from "../../utils/data/accuracies";

@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import View from "../../components/View";
-import Title from "../../components/Title";
-import Indicator from "../../components/Indicator";
-import DataTable from "../../components/Experiments/DataTable";
-import Legend from "../../components/Experiments/Legend";
+import View from "../../components/common/View";
+import Title from "../../components/common/Title";
+import Indicator from "../../components/common/Indicator";
+import DataTable from "../../components/ModelScreening/Experiments/DataTable";
+import Legend from "../../components/ModelScreening/Experiments/Legend";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { ArrowDownIcon, ArrowUpIcon } from "../../components/UI/icons";
 import { CONFIG } from "../../app/App";

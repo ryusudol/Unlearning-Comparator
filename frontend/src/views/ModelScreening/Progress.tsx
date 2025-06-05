@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 
-import View from "../../components/View";
-import Stepper from "../../components/Progress/Stepper";
-import Indicator from "../../components/Indicator";
-import AddModelsButton from "../../components/Progress/AddModelsButton";
-import Pagination from "../../components/Progress/Pagination";
+import View from "../../components/common/View";
+import Stepper from "../../components/ModelScreening/Progress/Stepper";
+import Indicator from "../../components/common/Indicator";
+import AddModelsButton from "../../components/ModelScreening/Progress/AddModelsButton";
+import Pagination from "../../components/ModelScreening/Progress/Pagination";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { CONFIG } from "../../app/App";
 import { useRunningIndexStore } from "../../stores/runningIndexStore";

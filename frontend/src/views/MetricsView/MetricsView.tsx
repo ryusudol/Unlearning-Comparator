@@ -1,5 +1,5 @@
-import View from "../../components/View";
-import Title from "../../components/Title";
+import View from "../../components/common/View";
+import Title from "../../components/common/Title";
 import ClassWiseAnalysis from "./ClassWiseAnalysis";
 import PredictionMatrix from "./PredictionMatrix";
 import LayerWiseSimilarity from "./LayerWiseSimilarity";
