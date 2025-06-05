@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 
 import Subtitle from "../../components/common/Subtitle";
 import DatasetModeSelector from "../../components/common/DatasetModeSelector";
-import BubbleMatrix from "../../components/MetricsView/Predictions/BubbleMatrix";
-import BubbleMatrixLegend from "../../components/MetricsView/Predictions/BubbleMatrixLegend";
-import CorrelationMatrix from "../../components/MetricsView/Predictions/CorrelationMatrix";
-import CorrelationMatrixLegend from "../../components/MetricsView/Predictions/CorrelationMatrixLegend";
+import BubbleMatrix from "../../components/MetricsView/PredictionMatrix/BubbleMatrix";
+import BubbleMatrixLegend from "../../components/MetricsView/PredictionMatrix/BubbleMatrixLegend";
+import CorrelationMatrix from "../../components/MetricsView/PredictionMatrix/CorrelationMatrix";
+import CorrelationMatrixLegend from "../../components/MetricsView/PredictionMatrix/CorrelationMatrixLegend";
 import Indicator from "../../components/common/Indicator";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import Subtitle from "../../components/common/Subtitle";
 import Indicator from "../../components/common/Indicator";
-import LineChart from "../../components/MetricsView/CKA/LineChart";
+import LineChart from "../../components/MetricsView/LayerwiseSimilarity/LineChart";
 import DatasetModeSelector from "../../components/common/DatasetModeSelector";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
