@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-import View from "../components/View";
-import Title from "../components/Title";
-import Indicator from "../components/Indicator";
-import DataTable from "../components/Experiments/DataTable";
-import Legend from "../components/Experiments/Legend";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { ArrowDownIcon, ArrowUpIcon } from "../components/UI/icons";
-import { CONFIG } from "../app/App";
+import View from "../../components/View";
+import Title from "../../components/Title";
+import Indicator from "../../components/Indicator";
+import DataTable from "../../components/Experiments/DataTable";
+import Legend from "../../components/Experiments/Legend";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { ArrowDownIcon, ArrowUpIcon } from "../../components/UI/icons";
+import { CONFIG } from "../../app/App";
 
 export default function Experiments() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);

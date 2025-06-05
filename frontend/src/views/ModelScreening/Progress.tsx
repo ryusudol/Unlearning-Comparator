@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 
-import View from "../components/View";
-import Stepper from "../components/Progress/Stepper";
-import Indicator from "../components/Indicator";
-import AddModelsButton from "../components/Progress/AddModelsButton";
-import Pagination from "../components/Progress/Pagination";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { CONFIG } from "../app/App";
-import { useRunningIndexStore } from "../stores/runningIndexStore";
-import { useRunningStatusStore } from "../stores/runningStatusStore";
-import { getProgressSteps } from "../utils/data/getProgressSteps";
+import View from "../../components/View";
+import Stepper from "../../components/Progress/Stepper";
+import Indicator from "../../components/Indicator";
+import AddModelsButton from "../../components/Progress/AddModelsButton";
+import Pagination from "../../components/Progress/Pagination";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { CONFIG } from "../../app/App";
+import { useRunningIndexStore } from "../../stores/runningIndexStore";
+import { useRunningStatusStore } from "../../stores/runningStatusStore";
+import { getProgressSteps } from "../../utils/data/getProgressSteps";
 
 export type Step = {
   step: number;

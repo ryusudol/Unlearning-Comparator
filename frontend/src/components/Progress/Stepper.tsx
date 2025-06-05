@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Check, Dot, Loader2 } from "lucide-react";
 
 import { Button } from "../UI/button";
-import { Step } from "../../views/Progress";
+import { Step } from "../../views/ModelScreening/Progress";
 import {
   Stepper,
   StepperDescription,

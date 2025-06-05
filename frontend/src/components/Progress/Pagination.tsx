@@ -7,7 +7,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../UI/pagination";
-import { PREV, NEXT } from "../../views/Progress";
+import { PREV, NEXT } from "../../views/ModelScreening/Progress";
 import { useRunningStatusStore } from "../../stores/runningStatusStore";
 
 interface Props extends React.LiHTMLAttributes<HTMLLIElement> {

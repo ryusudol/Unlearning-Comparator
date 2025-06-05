@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 
 import Header from "../components/Header/Header";
-import ModelScreening from "../views/ModelScreening";
-import Core from "../views/Core";
-import MetricsAnalysis from "../views/MetricsAnalysis";
+import ModelScreening from "../views/ModelScreening/ModelScreening";
+import Core from "../views/Core/Core";
+import MetricsView from "../views/MetricsView/MetricsView";
 import { useExperimentsStore } from "../stores/experimentsStore";
 import { calculateZoom } from "../utils/util";
 
@@ -55,7 +55,7 @@ export default function App() {
             <ModelScreening />
             <Core />
           </div>
-          <MetricsAnalysis />
+          <MetricsView />
         </div>
       )}
     </section>

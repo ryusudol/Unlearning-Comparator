@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 
-import View from "../components/View";
-import Title from "../components/Title";
-import Indicator from "../components/Indicator";
+import View from "../../components/View";
+import Title from "../../components/Title";
+import Indicator from "../../components/Indicator";
 import Embedding from "./Embedding";
 import PrivacyAttack from "./PrivacyAttack";
-import { CONFIG } from "../app/App";
-import { fetchFileData, fetchAllWeightNames } from "../utils/api/unlearning";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { Point } from "../types/data";
-import { cn } from "../utils/util";
+import { CONFIG } from "../../app/App";
+import { fetchFileData, fetchAllWeightNames } from "../../utils/api/unlearning";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { Point } from "../../types/data";
+import { cn } from "../../utils/util";
 
 const EMBEDDINGS = "embeddings";
 const ATTACK = "attack";

@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-import Subtitle from "../components/Subtitle";
-import Indicator from "../components/Indicator";
-import LineChart from "../components/CKA/LineChart";
-import DatasetModeSelector from "../components/DatasetModeSelector";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { TRAIN } from "../constants/common";
+import Subtitle from "../../components/Subtitle";
+import Indicator from "../../components/Indicator";
+import LineChart from "../../components/CKA/LineChart";
+import DatasetModeSelector from "../../components/DatasetModeSelector";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { TRAIN } from "../../constants/common";
 
 export default function LayerWiseSimilarity() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);

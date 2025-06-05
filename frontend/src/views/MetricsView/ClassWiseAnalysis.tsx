@@ -1,15 +1,15 @@
 import { useMemo, useState } from "react";
 
-import Subtitle from "../components/Subtitle";
-import Indicator from "../components/Indicator";
-import VerticalBarChart from "../components/Accuracy/VerticalBarChart";
-import { useForgetClassStore } from "../stores/forgetClassStore";
-import { useModelDataStore } from "../stores/modelDataStore";
-import { getAccuracyGap, getMaxGap } from "../utils/data/accuracies";
+import Subtitle from "../../components/Subtitle";
+import Indicator from "../../components/Indicator";
+import VerticalBarChart from "../../components/Accuracy/VerticalBarChart";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
+import { getAccuracyGap, getMaxGap } from "../../utils/data/accuracies";
 import {
   useModelAExperiment,
   useModelBExperiment,
-} from "../hooks/useModelExperiment";
+} from "../../hooks/useModelExperiment";
 
 export default function ClassWiseAnalysis() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
