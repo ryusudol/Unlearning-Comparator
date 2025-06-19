@@ -44,7 +44,7 @@ export default function Core() {
 
   useEffect(() => {
     async function loadModelAData() {
-      if (!forgetClassExist) return;
+      if (!forgetClassExist || !isDatasetCifar10Mode) return;
 
       const ids: string[] = await fetchAllWeightNames(datasetMode, forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
@@ -60,11 +60,17 @@ export default function Core() {
       }
     }
     loadModelAData();
-  }, [datasetMode, forgetClass, forgetClassExist, modelA]);
+  }, [
+    datasetMode,
+    forgetClass,
+    forgetClassExist,
+    isDatasetCifar10Mode,
+    modelA,
+  ]);
 
   useEffect(() => {
     async function loadModelBData() {
-      if (!forgetClassExist) return;
+      if (!forgetClassExist || !isDatasetCifar10Mode) return;
 
       const ids: string[] = await fetchAllWeightNames(datasetMode, forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
@@ -80,7 +86,13 @@ export default function Core() {
       }
     }
     loadModelBData();
-  }, [datasetMode, forgetClass, forgetClassExist, modelB]);
+  }, [
+    datasetMode,
+    forgetClass,
+    forgetClassExist,
+    isDatasetCifar10Mode,
+    modelB,
+  ]);
 
   return (
     <View
