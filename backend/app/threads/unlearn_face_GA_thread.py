@@ -8,23 +8,23 @@ import os
 from app.utils.helpers import (
 	save_model, 
 	format_distribution, 
-	compress_prob_array
+	# compress_prob_array
 )
+# from app.utils.visualization import compute_umap_embedding
 from app.utils.evaluation import (
-	calculate_cka_similarity,
 	evaluate_model_with_distributions, 
-	get_layer_activations_and_predictions
+	# get_layer_activations_and_predictions
+    # calculate_cka_similarity
 )
-from app.utils.visualization import compute_umap_embedding
 from app.config.settings import (
 	MAX_GRAD_NORM, 
 	UMAP_DATA_SIZE, 
 	UMAP_DATASET,
 	UNLEARN_SEED
 )
-from app.utils.attack import process_attack_metrics
+# from app.utils.attack import process_attack_metrics
 
-class UnlearningGAThread(threading.Thread):
+class UnlearningFaceGAThread(threading.Thread):
     def __init__(
         self,
         request,
@@ -221,69 +221,69 @@ class UnlearningGAThread(threading.Thread):
             return
         
         # UMAP and activation calculation
-        self.status.progress = "Computing UMAP"
+        # self.status.progress = "Computing UMAP"
         
-        print("Computing layer activations")
-        (
-            activations, 
-            predicted_labels, 
-            probs, 
-        ) = await get_layer_activations_and_predictions(
-            model=self.model,
-            data_loader=umap_subset_loader,
-            device=self.device,
-        )
-        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
+        # print("Computing layer activations")
+        # (
+        #     activations,
+        #     predicted_labels, 
+        #     probs, 
+        # ) = await get_layer_activations_and_predictions(
+        #     model=self.model,
+        #     data_loader=umap_subset_loader,
+        #     device=self.device,
+        # )
+        # print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
 
         # UMAP embedding computation
-        print("Computing UMAP embedding")
-        forget_labels = torch.tensor([label == self.request.forget_class for _, label in umap_subset])
-        umap_embedding = await compute_umap_embedding(
-            activation=activations, 
-            labels=predicted_labels, 
-            forget_class=self.request.forget_class,
-            forget_labels=forget_labels
-        )
-        print(f"UMAP embedding computed in {time.time() - start_time:.3f}s")
+        # print("Computing UMAP embedding")
+        # forget_labels = torch.tensor([label == self.request.forget_class for _, label in umap_subset])
+        # umap_embedding = await compute_umap_embedding(
+        #     activation=activations, 
+        #     labels=predicted_labels, 
+        #     forget_class=self.request.forget_class,
+        #     forget_labels=forget_labels
+        # )
+        # print(f"UMAP embedding computed in {time.time() - start_time:.3f}s")
         
         # Add attack metrics processing similar to custom_thread
-        print("Processing attack metrics on UMAP subset")
-        values, attack_results, fqs = await process_attack_metrics(
-            model=self.model, 
-            data_loader=umap_subset_loader, 
-            device=self.device, 
-            forget_class=self.request.forget_class
-        )
+        # print("Processing attack metrics on UMAP subset")
+        # values, attack_results, fqs = await process_attack_metrics(
+        #     model=self.model, 
+        #     data_loader=umap_subset_loader, 
+        #     device=self.device, 
+        #     forget_class=self.request.forget_class
+        # )
 
         # Compute CKA similarity
-        self.status.progress = "Calculating CKA Similarity"
-        print("Calculating CKA similarity")
-        cka_results = await calculate_cka_similarity(
-            model_before=self.model_before,
-            model_after=self.model,
-            train_loader=self.train_loader,
-            test_loader=self.test_loader,
-            forget_class=self.request.forget_class,
-            device=self.device
-        )
-        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
+        # self.status.progress = "Calculating CKA Similarity"
+        # print("Calculating CKA similarity")
+        # cka_results = await calculate_cka_similarity(
+        #     model_before=self.model_before,
+        #     model_after=self.model,
+        #     train_loader=self.train_loader,
+        #     test_loader=self.test_loader,
+        #     forget_class=self.request.forget_class,
+        #     device=self.device
+        # )
+        # print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
-        # Detailed results preparation
-        self.status.progress = "Preparing Results"
-        detailed_results = []
-        for i in range(len(umap_subset)):
-            original_index = selected_indices[i]
-            ground_truth = umap_subset.dataset.targets[original_index]
-            is_forget = (ground_truth == self.request.forget_class)
-            detailed_results.append([
-                int(ground_truth),                             # gt
-                int(predicted_labels[i]),                      # pred
-                int(original_index),                           # img
-                1 if is_forget else 0,                         # forget as binary
-                round(float(umap_embedding[i][0]), 2),         # x coordinate
-                round(float(umap_embedding[i][1]), 2),         # y coordinate
-                compress_prob_array(probs[i].tolist()),        # compressed probabilities
-            ])
+        # # Detailed results preparation
+        # self.status.progress = "Preparing Results"
+        # detailed_results = []
+        # for i in range(len(umap_subset)):
+        #     original_index = selected_indices[i]
+        #     ground_truth = umap_subset.dataset.targets[original_index]
+        #     is_forget = (ground_truth == self.request.forget_class)
+        #     detailed_results.append([
+        #         int(ground_truth),                             # gt
+        #         int(predicted_labels[i]),                      # pred
+        #         int(original_index),                           # img
+        #         1 if is_forget else 0,                         # forget as binary
+        #         round(float(umap_embedding[i][0]), 2),         # x coordinate
+        #         round(float(umap_embedding[i][1]), 2),         # y coordinate
+        #         compress_prob_array(probs[i].tolist()),        # compressed probabilities
+        #     ])
 
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
         test_remain_accuracy = round(
@@ -307,26 +307,26 @@ class UnlearningGAThread(threading.Thread):
             "TRA": test_remain_accuracy,
             "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
-            "FQS": fqs,
+            "FQS": "N/A",
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
             "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
-            "cka": cka_results["similarity"],
-            "points": detailed_results,
+            "cka": "N/A",
+            "points": [],
             "attack": {
-                "values": values,
-                "results": attack_results
+                "values": [],
+                "results": []
             }
         }
 
         # Save results to JSON file
         os.makedirs('data', exist_ok=True)
-        forget_class_dir = os.path.join('data/cifar10', str(self.request.forget_class))
-        
+        forget_class_dir = os.path.join('data/face', str(self.request.forget_class))
         os.makedirs(forget_class_dir, exist_ok=True)
+        
         result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')
         with open(result_path, 'w') as f:
             json.dump(results, f, indent=2)
@@ -335,6 +335,7 @@ class UnlearningGAThread(threading.Thread):
             model=self.model, 
             forget_class=self.request.forget_class,
             model_name=self.status.recent_id,
+            dataset_mode="face",
         )
         
         print(f"Results saved to {result_path}")

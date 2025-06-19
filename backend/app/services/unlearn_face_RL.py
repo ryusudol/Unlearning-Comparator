@@ -3,10 +3,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from app.threads import UnlearningFTThread
-from app.models import get_resnet18
 from app.utils.helpers import set_seed
-from app.utils.data_loader import get_data_loaders
+from app.threads import UnlearningFaceRLThread
+from facenet_pytorch import InceptionResnetV1
+from app.models import FaceNetClassifier
+from app.utils.data_loader import get_face_data_loaders
+
 from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
@@ -14,8 +16,8 @@ from app.config import (
     UNLEARN_SEED
 )
 
-async def unlearning_FT(request, status, base_weights_path):
-    print(f"Starting FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
+async def unlearning_face_RL(request, status, base_weights_path):
+    print(f"Starting RL unlearning for class {request.forget_class} with {request.epochs} epochs...")
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
@@ -24,21 +26,30 @@ async def unlearning_FT(request, status, base_weights_path):
         else "cpu"
     )
 
-    # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
-    model_after = get_resnet18().to(device)
-    
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
-    model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
+    def get_facenet_model(pretrained=True):
+        backbone = InceptionResnetV1(
+            classify=False,
+            pretrained="vggface2" if pretrained else None,
+        )
+        classifier = nn.Linear(512, 10)
+        return FaceNetClassifier(backbone, classifier).to(device)
+
+    model_before = None
+    model_after = get_facenet_model(pretrained=False)
+    state_dict = torch.load(base_weights_path, map_location=device)
+    filtered_state_dict = {k: v for k, v in state_dict.items() if not k.startswith("backbone.logits")}
+    model_after.load_state_dict(filtered_state_dict, strict=False)
     
     (
         train_loader,
         test_loader,
         train_set,
         test_set
-    ) = get_data_loaders(
+    ) = get_face_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=False,
+        train_dir='./data/face/train',
+        test_dir='./data/face/test'
     )
 
     # Create retain loader (excluding forget class)
@@ -84,7 +95,7 @@ async def unlearning_FT(request, status, base_weights_path):
         gamma=0.2
     )
 
-    unlearning_FT_thread = UnlearningFTThread(
+    unlearning_RL_thread = UnlearningFaceRLThread(
         request=request,
         status=status,
         model_before=model_before,
@@ -103,20 +114,20 @@ async def unlearning_FT(request, status, base_weights_path):
         base_weights_path=base_weights_path
     )
     
-    unlearning_FT_thread.start()
+    unlearning_RL_thread.start()
 
     # thread start
-    while unlearning_FT_thread.is_alive():
+    while unlearning_RL_thread.is_alive():
         await asyncio.sleep(0.1)
         if status.cancel_requested:
-            unlearning_FT_thread.stop()
+            unlearning_RL_thread.stop()
             print("Cancellation requested, stopping the unlearning process...")
         
     status.is_unlearning = False
 
     # thread end
-    if unlearning_FT_thread.exception:
-        print(f"An error occurred during FT unlearning: {str(unlearning_FT_thread.exception)}")
+    if unlearning_RL_thread.exception:
+        print(f"An error occurred during RL unlearning: {str(unlearning_RL_thread.exception)}")
     elif status.cancel_requested:
         print("Unlearning process was cancelled.")
     else:
@@ -124,11 +135,11 @@ async def unlearning_FT(request, status, base_weights_path):
 
     return status
 
-async def run_unlearning_FT(request, status, base_weights_path):
+async def run_unlearning_face_RL(request, status, base_weights_path):
     try:
         status.is_unlearning = True
         status.progress = "Unlearning"
-        updated_status = await unlearning_FT(request, status, base_weights_path)
+        updated_status = await unlearning_face_RL(request, status, base_weights_path)
         return updated_status
     finally:
         status.cancel_requested = False

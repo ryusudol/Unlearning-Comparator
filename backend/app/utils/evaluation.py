@@ -22,7 +22,12 @@ async def get_layer_activations_and_predictions(
     def hook_fn(module, input, output):
         activations.append(output.detach().cpu().numpy())
 
-    hook = model.avgpool.register_forward_hook(hook_fn)
+    if hasattr(model, 'avgpool_1a'):
+        hook_layer = model.avgpool_1a
+    else:
+        hook_layer = model.avgpool
+    
+    hook = hook_layer.register_forward_hook(hook_fn)
 
     with torch.no_grad():
         for inputs, labels in data_loader:
@@ -125,7 +130,6 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 label_distribution[label][pred] += 1
                 confidence_sum[label] += probabilities[i].cpu().numpy()
 
-
     accuracy = correct / total
     class_accuracies = {
         i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0)
@@ -209,14 +213,33 @@ async def calculate_cka_similarity(
     forget_class_test_loader, other_classes_test_loader = filter_loader(test_loader, is_train=False)
     
     with torch.no_grad():
-        cka.compare(forget_class_train_loader, forget_class_train_loader)
-        results_forget_train = cka.export()
-        cka.compare(other_classes_train_loader, other_classes_train_loader)
-        results_other_train = cka.export()
-        cka.compare(forget_class_test_loader, forget_class_test_loader)
-        results_forget_test = cka.export()
-        cka.compare(other_classes_test_loader, other_classes_test_loader)
-        results_other_test = cka.export()
+        try:
+            cka.compare(forget_class_train_loader, forget_class_train_loader)
+            results_forget_train = cka.export()
+        except Exception as e:
+            print(f"Warning: CKA for forget_class_train failed with error: {e}. Returning zero matrix.")
+            results_forget_train = {'CKA': np.zeros((len(detailed_layers), len(detailed_layers)))}
+
+        try:
+            cka.compare(other_classes_train_loader, other_classes_train_loader)
+            results_other_train = cka.export()
+        except Exception as e:
+            print(f"Warning: CKA for other_classes_train failed with error: {e}. Returning zero matrix.")
+            results_other_train = {'CKA': np.zeros((len(detailed_layers), len(detailed_layers)))}
+
+        try:
+            cka.compare(forget_class_test_loader, forget_class_test_loader)
+            results_forget_test = cka.export()
+        except Exception as e:
+            print(f"Warning: CKA for forget_class_test failed with error: {e}. Returning zero matrix.")
+            results_forget_test = {'CKA': np.zeros((len(detailed_layers), len(detailed_layers)))}
+
+        try:
+            cka.compare(other_classes_test_loader, other_classes_test_loader)
+            results_other_test = cka.export()
+        except Exception as e:
+            print(f"Warning: CKA for other_classes_test failed with error: {e}. Returning zero matrix.")
+            results_other_test = {'CKA': np.zeros((len(detailed_layers), len(detailed_layers)))}
     
     def format_cka_results(results):
         return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]

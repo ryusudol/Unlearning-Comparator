@@ -4,6 +4,7 @@ import numpy as np
 import logging
 import shutil
 from huggingface_hub import hf_hub_download
+from enum import Enum
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -16,12 +17,17 @@ def set_seed(seed):
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
 
+class DatasetMode(str, Enum):
+    cifar10 = "cifar10"
+    face = "face"
+
 def save_model(
     model, 
     forget_class=-1,
     model_name="ffff",
+    dataset_mode: DatasetMode='cifar10',
 ):
-    save_dir = f'unlearned_models/{forget_class}'
+    save_dir = os.path.join('unlearned_models', dataset_mode, str(forget_class))    
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
@@ -59,7 +65,7 @@ def download_weights_from_hub(repo_id="jaeunglee/resnet18-cifar10-unlearning",
 
     # Set directories for the trained model and unlearned models (per-class)
     trained_models_dir = os.path.join(backend_dir, base_path)
-    unlearned_models_dir = os.path.join(backend_dir, "unlearned_models")
+    unlearned_models_dir = os.path.join(backend_dir, "unlearned_models", "cifar10")
     
     os.makedirs(trained_models_dir, exist_ok=True)
     os.makedirs(unlearned_models_dir, exist_ok=True)

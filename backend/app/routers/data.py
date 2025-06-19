@@ -4,11 +4,11 @@ import io
 import json
 import os
 from collections import OrderedDict
+from enum import Enum
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response
 from PIL import Image
-import numpy as np
 
 from app.utils import load_cifar10_data
 from app.utils.data_loader import get_fixed_umap_indices
@@ -16,12 +16,17 @@ from app.utils.data_loader import get_fixed_umap_indices
 router = APIRouter()
 x_train, y_train = load_cifar10_data()
 
-@router.get("/data/{forget_class}/all")
-async def get_all_json_files(forget_class: str):
-    data_dir = os.path.join('data', forget_class)
+class Dataset(str, Enum):
+    cifar10 = "cifar10"
+    face = "face"
+
+@router.get("/data/{dataset}/{forget_class}/all")
+async def get_all_json_files(dataset: Dataset, forget_class: str):
+    data_dir = os.path.join('data', dataset.value, forget_class)
+
     if not os.path.exists(data_dir):
-        raise HTTPException(status_code=404, detail=f"Directory for {forget_class} not found")
-    
+        raise HTTPException(status_code=404, detail=f"Directory for {forget_class} in {dataset.value} not found")
+
     json_files = [f for f in os.listdir(data_dir) if f.endswith('.json')]
     if not json_files:
         raise HTTPException(status_code=404, detail=f"No JSON files found in {forget_class}")
@@ -48,13 +53,13 @@ async def get_all_json_files(forget_class: str):
     
     return all_data
 
-@router.get("/data/{forget_class}/all_weights_name")
-async def get_all_weights_name(forget_class: str):
+@router.get("/data/{dataset}/{forget_class}/all_weights_name")
+async def get_all_weights_name(dataset: Dataset, forget_class: str):
     """
     Retrieve all existing weight file names for the provided forget_class.
     It looks in the 'unlearned_models/{forget_class}' directory for .pth files.
     """
-    model_dir = os.path.join('unlearned_models', forget_class)
+    model_dir = os.path.join('unlearned_models', dataset.value, forget_class)
     
     if not os.path.exists(model_dir):
         raise HTTPException(status_code=404, detail=f"Directory for {forget_class} not found")
@@ -71,12 +76,12 @@ async def get_all_weights_name(forget_class: str):
     return weight_files
 
 
-@router.get("/data/{forget_class}/{filename}/weights")
-async def get_model_file(forget_class: str, filename: str):
+@router.get("/data/{dataset}/{forget_class}/{filename}/weights")
+async def get_model_file(dataset: Dataset, forget_class: str, filename: str):
     if not filename.endswith('.pth'):
         filename = f"{filename}.pth"
     
-    model_dir = os.path.join('unlearned_models', forget_class)
+    model_dir = os.path.join('unlearned_models', dataset.value, forget_class)
     file_path = os.path.join(model_dir, filename)
     
     if not os.path.exists(file_path):
@@ -84,12 +89,12 @@ async def get_model_file(forget_class: str, filename: str):
     
     return FileResponse(file_path, media_type='application/octet-stream', filename=filename)
 
-@router.get("/data/{forget_class}/{filename}")
-async def get_json_file(forget_class: str, filename: str):
+@router.get("/data/{dataset}/{forget_class}/{filename}")
+async def get_json_file(dataset: Dataset, forget_class: str, filename: str):
     if not filename.endswith('.json'):
         filename = f"{filename}.json"
     
-    data_dir = os.path.join('data', forget_class)
+    data_dir = os.path.join('data', dataset.value, forget_class)
     file_path = os.path.join(data_dir, filename)
     
     if not os.path.exists(file_path):
@@ -102,13 +107,13 @@ async def get_json_file(forget_class: str, filename: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
 
-@router.delete("/data/{forget_class}/{filename}")
-async def delete_files(forget_class: str, filename: str):
+@router.delete("/data/{dataset}/{forget_class}/{filename}")
+async def delete_files(dataset: Dataset, forget_class: str, filename: str):
     response_messages = []
     
     # JSON delete
     json_filename = f"{filename}.json" if not filename.endswith('.json') else filename
-    json_path = os.path.join('data', forget_class, json_filename)
+    json_path = os.path.join('data', dataset.value, forget_class, json_filename)
     if os.path.exists(json_path):
         try:
             os.remove(json_path)
@@ -118,7 +123,7 @@ async def delete_files(forget_class: str, filename: str):
     
     # PTH delete
     pth_filename = f"{filename}.pth" if not filename.endswith('.pth') else filename
-    pth_path = os.path.join('unlearned_models', forget_class, pth_filename)
+    pth_path = os.path.join('unlearned_models', dataset.value, forget_class, pth_filename)
     if os.path.exists(pth_path):
         try:
             os.remove(pth_path)
@@ -240,5 +245,3 @@ async def get_all_subset_images(forget_class: str):
         raise HTTPException(status_code=500, detail=f"Error saving cached file: {str(e)}")
 
     return response_data
-
-

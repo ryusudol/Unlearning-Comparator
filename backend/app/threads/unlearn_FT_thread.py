@@ -341,7 +341,7 @@ class UnlearningFTThread(threading.Thread):
 
         # Save results to JSON file
         os.makedirs('data', exist_ok=True)
-        forget_class_dir = os.path.join('data', str(self.request.forget_class))
+        forget_class_dir = os.path.join('data/cifar10', str(self.request.forget_class))
         os.makedirs(forget_class_dir, exist_ok=True)
 
         result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')  

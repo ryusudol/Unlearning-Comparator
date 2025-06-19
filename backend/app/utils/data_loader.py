@@ -2,6 +2,7 @@ import numpy as np
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.config import UNLEARN_SEED
+import torch
 
 def load_cifar10_data():
     """Load CIFAR-10 training data with automatic download"""
@@ -26,18 +27,43 @@ def get_data_loaders(batch_size, augmentation=False):
             transforms.RandomHorizontalFlip(),
         ] if augmentation else []) + base_transforms
     )
-    
     test_transform = transforms.Compose(base_transforms)
     
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
+    
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0)
     test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=0)
+    
     print("loaded loaders")
+    
+    return train_loader, test_loader, train_set, test_set
+
+def get_face_data_loaders(batch_size, train_dir, test_dir, augmentation=False):
+    base_transforms = [
+        transforms.Resize((160, 160)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.4997, 0.4274, 0.3943), (0.3181, 0.2996, 0.2911))
+    ]
+
+    train_transform = transforms.Compose(
+        ([
+            transforms.RandomHorizontalFlip(),
+        ] if augmentation else []) + base_transforms
+    )
+    test_transform = transforms.Compose(base_transforms)
+
+    train_set = datasets.ImageFolder(root=train_dir, transform=train_transform)
+    test_set = datasets.ImageFolder(root=test_dir, transform=test_transform)
+
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=4)
+    
+    print("Loaded face data loaders")
+    
     return train_loader, test_loader, train_set, test_set
 
 def get_fixed_umap_indices(total_samples=2000, seed=UNLEARN_SEED):
-    import torch
     _, y_train = load_cifar10_data()
     num_classes = 10
     targets_tensor = torch.tensor(y_train)

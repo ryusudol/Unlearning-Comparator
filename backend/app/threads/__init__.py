@@ -25,5 +25,20 @@ from .unlearn_RL_thread import UnlearningRLThread
 from .unlearn_FT_thread import UnlearningFTThread
 from .unlearn_retrain_thread import UnlearningRetrainThread
 from .unlearn_custom_thread import UnlearningCustomThread
+from .unlearn_face_custom_thread import UnlearningFaceCustomThread
+from .unlearn_face_GA_thread import UnlearningFaceGAThread
+from .unlearn_face_RL_thread import UnlearningFaceRLThread
+from .unlearn_face_FT_thread import UnlearningFaceFTThread
 
-__all__ = ['TrainingThread', 'UnlearningGAThread', 'UnlearningRLThread', 'UnlearningFTThread', 'UnlearningRetrainThread', 'UnlearningCustomThread']
+__all__ = [
+    'TrainingThread',
+    'UnlearningGAThread',
+    'UnlearningRLThread',
+    'UnlearningFTThread',
+    'UnlearningRetrainThread',
+    'UnlearningCustomThread',
+    'UnlearningFaceGAThread',
+    'UnlearningFaceRLThread',
+    'UnlearningFaceFTThread',
+    'UnlearningFaceCustomThread'
+]

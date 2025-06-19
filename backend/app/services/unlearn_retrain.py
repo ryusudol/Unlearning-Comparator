@@ -7,12 +7,6 @@ from app.threads import UnlearningRetrainThread
 from app.models import get_resnet18
 from app.utils.helpers import set_seed
 from app.utils.data_loader import get_data_loaders
-from app.utils.visualization import (
-	compute_umap_embedding,
-)
-from app.utils.evaluation import (
-	get_layer_activations_and_predictions,
-)
 from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,

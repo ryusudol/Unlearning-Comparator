@@ -40,6 +40,7 @@ dependencies = [
   "seaborn",
   "torch_cka",
   "huggingface_hub",
+  "facenet-pytorch==2.5.3",
 ]
 
 

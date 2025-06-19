@@ -24,5 +24,20 @@ from .unlearn_RL import run_unlearning_RL
 from .unlearn_FT import run_unlearning_FT
 from .unlearn_retrain import run_unlearning_retrain
 from .unlearn_custom import run_unlearning_custom
+from .unlearn_face_GA import run_unlearning_face_GA
+from .unlearn_face_RL import run_unlearning_face_RL
+from .unlearn_face_FT import run_unlearning_face_FT
+from .unlearn_face_custom import run_unlearning_face_custom
 
-__all__ = ['run_training', 'run_unlearning_GA', 'run_unlearning_RL', 'run_unlearning_FT', 'run_unlearning_retrain', 'run_unlearning_custom']
+__all__ = [
+    'run_training',
+    'run_unlearning_GA',
+    'run_unlearning_RL',
+    'run_unlearning_FT',
+    'run_unlearning_retrain',
+    'run_unlearning_custom',
+    'run_unlearning_face_GA',
+    'run_unlearning_face_RL',
+    'run_unlearning_face_FT',
+    'run_unlearning_face_custom'
+]
