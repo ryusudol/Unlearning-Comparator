@@ -1,11 +1,14 @@
 import View from "../../components/common/View";
 import Title from "../../components/common/Title";
-import ClassWiseAnalysis from "./ClassWiseAnalysis";
+import ClassWiseAccuracy from "./ClassWiseAccuracy";
 import PredictionMatrix from "./PredictionMatrix";
 import LayerWiseSimilarity from "./LayerWiseSimilarity";
 import { CONFIG } from "../../app/App";
+import { useDatasetMode } from "../../hooks/useDatasetMode";
 
 export default function MetricsCore() {
+  const datasetMode = useDatasetMode();
+
   return (
     <View
       width={CONFIG.ANALYSIS_VIEW_WIDTH}
@@ -15,9 +18,9 @@ export default function MetricsCore() {
     >
       <Title title="Metrics View" className="left-0.5" />
       <div className="flex flex-col gap-6">
-        <ClassWiseAnalysis />
+        <ClassWiseAccuracy />
         <PredictionMatrix />
-        <LayerWiseSimilarity />
+        {datasetMode === "cifar10" && <LayerWiseSimilarity />}
       </div>
     </View>
   );

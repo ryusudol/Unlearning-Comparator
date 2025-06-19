@@ -12,6 +12,7 @@ import { useAttackStateStore } from "../../stores/attackStore";
 import { ExperimentData } from "../../types/data";
 import { ENTROPY, UNLEARN } from "../../constants/common";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
+import { useDatasetMode } from "../../hooks/useDatasetMode";
 
 interface Props {
   modelAPoints: (number | Prob)[][];
@@ -19,6 +20,8 @@ interface Props {
 }
 
 export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
+  const datasetMode = useDatasetMode();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -41,14 +44,18 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     async function loadRetrainData() {
       if (forgetClass === -1) return;
       try {
-        const data = await fetchFileData(forgetClass, `a00${forgetClass}`);
+        const data = await fetchFileData(
+          datasetMode,
+          forgetClass,
+          `a00${forgetClass}`
+        );
         setRetrainData(data);
       } catch (error) {
         console.error(`Failed to fetch an retrained data file: ${error}`);
       }
     }
     loadRetrainData();
-  }, [forgetClass]);
+  }, [datasetMode, forgetClass]);
 
   return (
     <div className="h-[760px] flex flex-col border rounded-md px-1.5">

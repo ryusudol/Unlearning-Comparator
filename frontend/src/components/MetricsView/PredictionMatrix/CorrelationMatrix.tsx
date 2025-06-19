@@ -8,6 +8,7 @@ import { calculateZoom, cn } from "../../../utils/util";
 import { extractBubbleChartData } from "../../../utils/data/experiments";
 import { COLORS } from "../../../constants/colors";
 import { useClasses } from "../../../hooks/useClasses";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import {
@@ -26,20 +27,22 @@ const CONFIG = {
   MARGIN: {
     top: 8,
     right: 4,
-    bottom: 48,
+    bottom: 50, // 48
     left: 64,
   },
 } as const;
 
-function BubbleChart({
+function CorrelationMatrix({
   mode,
   modelType,
-  datasetMode,
+  selectedDataset,
   hoveredY,
   onHover,
   showYAxis = true,
 }: MatrixProps) {
   const classes = useClasses();
+  const datasetMode = useDatasetMode();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -62,6 +65,7 @@ function BubbleChart({
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const zoom = calculateZoom();
+  const isFaceDataset = datasetMode === "face";
   const isModelA = mode === "A";
   const experiment = isModelA ? modelAExperiment : modelBExperiment;
 
@@ -80,7 +84,7 @@ function BubbleChart({
   useEffect(() => {
     if (!experiment || !svgRef.current) return;
 
-    const data = extractBubbleChartData(datasetMode, experiment);
+    const data = extractBubbleChartData(selectedDataset, experiment);
 
     const width = CONFIG.WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
     const height = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
@@ -152,7 +156,7 @@ function BubbleChart({
         .call((g) => {
           g.select(".domain").remove();
           g.selectAll(".tick text")
-            .attr("dx", "-.5em")
+            .attr("dx", isFaceDataset ? "-.3em" : "-.5em")
             .style("font-family", FONT_CONFIG.ROBOTO_CONDENSED)
             .style("font-weight", (t: any) =>
               t === hoveredY ? "bold" : FONT_CONFIG.LIGHT_FONT_WEIGHT
@@ -261,12 +265,13 @@ function BubbleChart({
       });
   }, [
     classes,
-    datasetMode,
     experiment,
     forgetClass,
     handleMouseOut,
     hoveredY,
+    isFaceDataset,
     onHover,
+    selectedDataset,
     showYAxis,
     zoom,
   ]);
@@ -310,7 +315,12 @@ function BubbleChart({
       )}
     >
       {showYAxis && (
-        <span className="absolute top-[calc(42%-8px)] left-2.5 -rotate-90 text-nowrap -mx-7 text-xs">
+        <span
+          className={cn(
+            "absolute top-[calc(42%-8px)] -rotate-90 text-nowrap -mx-7 text-xs",
+            isFaceDataset ? "left-1" : "left-2.5"
+          )}
+        >
           True Class
         </span>
       )}
@@ -366,7 +376,12 @@ function BubbleChart({
           </div>,
           document.body
         )}
-      <div className="flex flex-col items-center gap-0.5 absolute -bottom-[18px] translate-x-[calc(50%-36px)] text-[13px] leading-3">
+      <div
+        className={cn(
+          "flex flex-col items-center gap-0.5 absolute translate-x-[calc(50%-36px)] text-[13px] leading-3",
+          isFaceDataset ? "-bottom-[28px]" : "-bottom-[18px]"
+        )}
+      >
         {isModelA ? (
           <>
             <span style={{ color: COLORS.EMERALD }}>
@@ -387,4 +402,4 @@ function BubbleChart({
   );
 }
 
-export default React.memo(BubbleChart);
+export default React.memo(CorrelationMatrix);

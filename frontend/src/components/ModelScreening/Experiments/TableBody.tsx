@@ -28,6 +28,7 @@ import { calculatePerformanceMetrics } from "../../../utils/data/experiments";
 import { useRunningStatusStore } from "../../../stores/runningStatusStore";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import { cn } from "../../../utils/util";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 
 const CONFIG = {
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
@@ -42,6 +43,8 @@ interface Props {
 }
 
 export default function _TableBody({ table }: Props) {
+  const datasetMode = useDatasetMode();
+
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const isRunning = useRunningStatusStore((state) => state.isRunning);
@@ -209,9 +212,10 @@ export default function _TableBody({ table }: Props) {
 
   const handleDeleteRow = async (id: string) => {
     try {
-      await deleteRow(forgetClass, id);
+      await deleteRow(datasetMode, forgetClass, id);
       setIsExperimentsLoading(true);
       const allExperiments: Experiments = await fetchAllExperimentsData(
+        datasetMode,
         forgetClass
       );
       if ("detail" in allExperiments) {
@@ -264,7 +268,7 @@ export default function _TableBody({ table }: Props) {
 
   const handleDownloadJSON = async (id: string) => {
     try {
-      const json = await downloadJSON(forgetClass, id);
+      const json = await downloadJSON(datasetMode, forgetClass, id);
       const jsonString = JSON.stringify(json, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -282,7 +286,7 @@ export default function _TableBody({ table }: Props) {
 
   const handleDownloadPTH = async (id: string) => {
     try {
-      await downloadPTH(forgetClass, id);
+      await downloadPTH(datasetMode, forgetClass, id);
     } catch (error) {
       console.error("Failed to download the PTH file:", error);
     }

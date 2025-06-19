@@ -12,6 +12,7 @@ import { useRunningIndexStore } from "../../../stores/runningIndexStore";
 import { UnlearningConfigurationData } from "../../../types/experiments";
 import { ExperimentData } from "../../../types/data";
 import { useModelDataStore } from "../../../stores/modelDataStore";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 import { cn } from "../../../utils/util";
 import {
   fetchUnlearningStatus,
@@ -90,17 +91,19 @@ type Combination = {
 };
 
 export default function UnlearningConfiguration() {
+  const datasetMode = useDatasetMode();
+
   const saveModelB = useModelDataStore((state) => state.saveModelB);
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const addExperiment = useExperimentsStore((state) => state.addExperiment);
+  const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
+    useRunningStatusStore();
   const updateRunningIndex = useRunningIndexStore(
     (state) => state.updateRunningIndex
   );
   const updateExperiment = useExperimentsStore(
     (state) => state.updateExperiment
   );
-  const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
-    useRunningStatusStore();
 
   const [initModel, setInitialModel] = useState(`000${forgetClass}.pth`);
   const [weightNames, setWeightNames] = useState<string[]>([]);
@@ -121,14 +124,14 @@ export default function UnlearningConfiguration() {
   useEffect(() => {
     async function fetchWeights() {
       try {
-        const names = await fetchAllWeightNames(forgetClass);
+        const names = await fetchAllWeightNames(datasetMode, forgetClass);
         setWeightNames(names);
       } catch (error) {
         console.error("Failed to fetch all weights names: ", error);
       }
     }
     fetchWeights();
-  }, [forgetClass]);
+  }, [datasetMode, forgetClass]);
 
   useEffect(() => {
     if (
@@ -228,6 +231,7 @@ export default function UnlearningConfiguration() {
         updateActiveStep(0);
 
         const newData = await fetchFileData(
+          datasetMode,
           forgetClass,
           unlearningStatus.recent_id as string
         );
@@ -267,8 +271,7 @@ export default function UnlearningConfiguration() {
       };
 
       addExperiment(initialExperiment, 0);
-
-      await executeCustomUnlearning(selectedFile, forgetClass);
+      await executeCustomUnlearning(selectedFile, forgetClass, datasetMode);
       await pollStatus(0);
     } else {
       const combinations: Combination[] = [];
@@ -310,7 +313,7 @@ export default function UnlearningConfiguration() {
         };
 
         try {
-          await executeMethodUnlearning(runningConfig);
+          await executeMethodUnlearning(datasetMode, runningConfig);
           await pollStatus(
             idx,
             combination.learning_rate,

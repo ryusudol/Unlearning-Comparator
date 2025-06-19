@@ -1,12 +1,16 @@
 import { API_URL } from "../../constants/common";
 import { ExperimentData } from "../../types/data";
+import { DatasetMode } from "../../types/common";
 
 export async function fetchFileData(
+  datasetMode: DatasetMode,
   forgetClass: number,
   fileName: string
 ): Promise<ExperimentData> {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`);
+    const response = await fetch(
+      `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}`
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -25,10 +29,13 @@ export async function fetchFileData(
   }
 }
 
-export async function fetchAllWeightNames(forgetClass: number) {
+export async function fetchAllWeightNames(
+  datasetMode: DatasetMode,
+  forgetClass: number
+) {
   try {
     const response = await fetch(
-      `${API_URL}/data/${forgetClass}/all_weights_name`
+      `${API_URL}/data/${datasetMode}/${forgetClass}/all_weights_name`
     );
 
     return await response.json();

@@ -138,7 +138,7 @@ export default function VerticalBarChart({
             fontSize={FONT_CONFIG.FONT_SIZE_10}
             fontWeight={FONT_CONFIG.LIGHT_FONT_WEIGHT}
             tick={showYAxis ? renderTick : false}
-            width={showYAxis ? 60 : 10}
+            width={showYAxis ? 62 : 10}
             tickMargin={-1}
             tickFormatter={(value) => {
               const label =

@@ -4,36 +4,41 @@ import View from "../../components/common/View";
 import Title from "../../components/common/Title";
 import Indicator from "../../components/common/Indicator";
 import Embedding from "./Embedding";
+import GradCam from "./GradCam";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../../app/App";
+import { useDatasetMode } from "../../hooks/useDatasetMode";
 import { fetchFileData, fetchAllWeightNames } from "../../utils/api/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { Point } from "../../types/data";
 import { cn } from "../../utils/util";
 
-const EMBEDDINGS = "embeddings";
-const ATTACK = "attack";
+const FIRST = "first";
+const SECOND = "second";
 
 export default function Core() {
+  const datasetMode = useDatasetMode();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
 
-  const [displayMode, setDisplayMode] = useState(EMBEDDINGS);
+  const [displayMode, setDisplayMode] = useState(FIRST);
   const [modelAPoints, setModelAPoints] = useState<Point[]>([]);
   const [modelBPoints, setModelBPoints] = useState<Point[]>([]);
 
-  const isEmbeddingMode = displayMode === EMBEDDINGS;
+  const isDatasetCifar10Mode = datasetMode === "cifar10";
+  const isFirstMode = displayMode === FIRST;
   const forgetClassExist = forgetClass !== -1;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const id = e.currentTarget.id;
 
-    if (id === EMBEDDINGS) {
-      setDisplayMode(EMBEDDINGS);
+    if (id === FIRST) {
+      setDisplayMode(FIRST);
     } else {
-      setDisplayMode(ATTACK);
+      setDisplayMode(SECOND);
     }
   };
 
@@ -41,13 +46,13 @@ export default function Core() {
     async function loadModelAData() {
       if (!forgetClassExist) return;
 
-      const ids: string[] = await fetchAllWeightNames(forgetClass);
+      const ids: string[] = await fetchAllWeightNames(datasetMode, forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
       if (!modelA || !slicedIds.includes(modelA)) return;
 
       try {
-        const data = await fetchFileData(forgetClass, modelA);
+        const data = await fetchFileData(datasetMode, forgetClass, modelA);
         setModelAPoints(data.points);
       } catch (error) {
         console.error(`Failed to fetch an model A data file: ${error}`);
@@ -55,19 +60,19 @@ export default function Core() {
       }
     }
     loadModelAData();
-  }, [forgetClass, forgetClassExist, modelA]);
+  }, [datasetMode, forgetClass, forgetClassExist, modelA]);
 
   useEffect(() => {
     async function loadModelBData() {
       if (!forgetClassExist) return;
 
-      const ids: string[] = await fetchAllWeightNames(forgetClass);
+      const ids: string[] = await fetchAllWeightNames(datasetMode, forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
 
       if (!modelB || !slicedIds.includes(modelB)) return;
 
       try {
-        const data = await fetchFileData(forgetClass, modelB);
+        const data = await fetchFileData(datasetMode, forgetClass, modelB);
         setModelBPoints(data.points);
       } catch (error) {
         console.error(`Error fetching model B file data: ${error}`);
@@ -75,7 +80,7 @@ export default function Core() {
       }
     }
     loadModelBData();
-  }, [forgetClass, forgetClassExist, modelB]);
+  }, [datasetMode, forgetClass, forgetClassExist, modelB]);
 
   return (
     <View
@@ -86,29 +91,36 @@ export default function Core() {
     >
       <div className="flex items-center gap-1 mb-1.5 ml-1 relative right-1">
         <Title
-          title="Embedding Space"
-          id={EMBEDDINGS}
+          title={`${isDatasetCifar10Mode ? "Embedding" : "Grad-CAM"}`}
+          id={FIRST}
           className={cn(
             "relative z-10 cursor-pointer px-1",
-            !isEmbeddingMode && "text-gray-400 border-none"
+            !isFirstMode && "text-gray-400 border-none"
           )}
-          AdditionalContent={isEmbeddingMode && <UnderLine />}
+          AdditionalContent={isFirstMode && <UnderLine />}
           onClick={handleDisplayModeChange}
         />
         <Title
           title="Attack Simulation"
-          id={ATTACK}
+          id={SECOND}
           className={cn(
             "relative z-10 cursor-pointer px-1",
-            isEmbeddingMode && "text-gray-400 border-none"
+            isFirstMode && "text-gray-400 border-none"
           )}
-          AdditionalContent={!isEmbeddingMode && <UnderLine />}
+          AdditionalContent={!isFirstMode && <UnderLine />}
           onClick={handleDisplayModeChange}
         />
       </div>
       {forgetClassExist ? (
-        isEmbeddingMode ? (
-          <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
+        isFirstMode ? (
+          isDatasetCifar10Mode ? (
+            <Embedding
+              modelAPoints={modelAPoints}
+              modelBPoints={modelBPoints}
+            />
+          ) : (
+            <GradCam />
+          )
         ) : (
           <PrivacyAttack
             modelAPoints={modelAPoints}

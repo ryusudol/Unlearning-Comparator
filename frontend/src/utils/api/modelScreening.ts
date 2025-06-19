@@ -1,14 +1,22 @@
 import { API_URL } from "../../constants/common";
+import { DatasetMode } from "../../types/common";
 import {
   UnlearningConfigurationData,
   UnlearningStatus,
 } from "../../types/experiments";
 
-export async function deleteRow(forgetClass: number, fileName: string) {
+export async function deleteRow(
+  datasetMode: DatasetMode,
+  forgetClass: number,
+  fileName: string
+) {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`, {
-      method: "DELETE",
-    });
+    const response = await fetch(
+      `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}`,
+      {
+        method: "DELETE",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -28,9 +36,15 @@ export async function deleteRow(forgetClass: number, fileName: string) {
   }
 }
 
-export async function downloadJSON(forgetClass: number, fileName: string) {
+export async function downloadJSON(
+  datasetMode: DatasetMode,
+  forgetClass: number,
+  fileName: string
+) {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/${fileName}`);
+    const response = await fetch(
+      `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}`
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -52,11 +66,14 @@ export async function downloadJSON(forgetClass: number, fileName: string) {
   }
 }
 
-export async function downloadPTH(forgetClass: number, fileName: string) {
+export async function downloadPTH(
+  datasetMode: DatasetMode,
+  forgetClass: number,
+  fileName: string
+) {
   const fetchUrl = fileName.startsWith("000")
     ? `${API_URL}/trained_models`
-    : `${API_URL}/data/${forgetClass}/${fileName}/weights`;
-  console.log(fetchUrl);
+    : `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}/weights`;
 
   try {
     const response = await fetch(fetchUrl);
@@ -115,6 +132,7 @@ export async function fetchUnlearningStatus(): Promise<UnlearningStatus> {
 }
 
 export async function executeMethodUnlearning(
+  datasetMode: DatasetMode,
   runningConfig: UnlearningConfigurationData
 ) {
   const method = runningConfig.method;
@@ -127,11 +145,14 @@ export async function executeMethodUnlearning(
   };
 
   try {
-    const response = await fetch(`${API_URL}/unlearn/${method}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `${API_URL}/unlearn/${datasetMode}/${method}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -153,14 +174,15 @@ export async function executeMethodUnlearning(
 
 export async function executeCustomUnlearning(
   customFile: File,
-  forgetClass: number
+  forgetClass: number,
+  dataset: DatasetMode
 ) {
   try {
     const formData = new FormData();
     formData.append("weights_file", customFile);
     formData.append("forget_class", forgetClass.toString());
 
-    const response = await fetch(`${API_URL}/unlearn/custom`, {
+    const response = await fetch(`${API_URL}/unlearn/${dataset}/custom`, {
       method: "POST",
       body: formData,
     });
@@ -185,9 +207,14 @@ export async function executeCustomUnlearning(
   }
 }
 
-export async function fetchAllExperimentsData(forgetClass: number) {
+export async function fetchAllExperimentsData(
+  dataset: DatasetMode,
+  forgetClass: number
+) {
   try {
-    const response = await fetch(`${API_URL}/data/${forgetClass}/all`);
+    const response = await fetch(
+      `${API_URL}/data/${dataset}/${forgetClass}/all`
+    );
 
     return await response.json();
   } catch (error) {

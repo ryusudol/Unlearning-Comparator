@@ -23,14 +23,6 @@ export default function Header() {
     );
   };
 
-  const handleDatasetChange = (dataset: string) => {
-    setDataset(dataset);
-  };
-
-  const handleNeuralNetworkModelChange = (model: string) => {
-    setNeuralNetworkModel(model);
-  };
-
   return (
     <div className="w-[1805px] text-white bg-black h-[52px] flex justify-between items-center px-4 relative">
       <div>
@@ -46,7 +38,7 @@ export default function Header() {
               <span className="text-[10px] text-gray-300">Architecture</span>
               <Select
                 defaultValue={neuralNetworkModel}
-                onValueChange={handleNeuralNetworkModelChange}
+                onValueChange={setNeuralNetworkModel}
                 name="neuralNetworkModel"
               >
                 <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
@@ -65,7 +57,7 @@ export default function Header() {
               <span className="text-[10px] text-gray-300">Dataset</span>
               <Select
                 defaultValue={dataset}
-                onValueChange={handleDatasetChange}
+                onValueChange={setDataset}
                 name="dataset"
               >
                 <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">

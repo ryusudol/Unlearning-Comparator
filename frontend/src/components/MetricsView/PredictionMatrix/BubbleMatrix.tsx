@@ -34,7 +34,7 @@ const CONFIG = {
 export default function BubbleChart({
   mode,
   modelType,
-  datasetMode,
+  selectedDataset,
   hoveredY,
   onHover,
   showYAxis = true,
@@ -80,7 +80,7 @@ export default function BubbleChart({
   useEffect(() => {
     if (!experiment || !svgRef.current) return;
 
-    const data = extractBubbleChartData(datasetMode, experiment);
+    const data = extractBubbleChartData(selectedDataset, experiment);
 
     const width = CONFIG.WIDTH - CONFIG.MARGIN.left - CONFIG.MARGIN.right;
     const height = CONFIG.HEIGHT - CONFIG.MARGIN.top - CONFIG.MARGIN.bottom;
@@ -255,7 +255,7 @@ export default function BubbleChart({
       });
   }, [
     classes,
-    datasetMode,
+    selectedDataset,
     experiment,
     forgetClass,
     handleMouseOut,

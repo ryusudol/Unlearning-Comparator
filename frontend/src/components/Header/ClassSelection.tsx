@@ -4,12 +4,15 @@ import ClassButtons from "./ClassButtons";
 import ClassPlusButton from "./ClassPlusButton";
 import { Experiment, Experiments } from "../../types/data";
 import { useClasses } from "../../hooks/useClasses";
+import { useDatasetMode } from "../../hooks/useDatasetMode";
 import { useExperimentsStore } from "../../stores/experimentsStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { fetchAllExperimentsData } from "../../utils/api/modelScreening";
 
 export default function ClassSelection() {
   const classes = useClasses();
+  const datasetMode = useDatasetMode();
+
   const saveExperiments = useExperimentsStore((state) => state.saveExperiments);
   const selectedForgetClasses = useForgetClassStore(
     (state) => state.selectedForgetClasses
@@ -26,7 +29,10 @@ export default function ClassSelection() {
     const classIndex = classes.indexOf(forgetClass);
     setIsExperimentsLoading(true);
     try {
-      const allData: Experiments = await fetchAllExperimentsData(classIndex);
+      const allData: Experiments = await fetchAllExperimentsData(
+        datasetMode,
+        classIndex
+      );
 
       if ("detail" in allData) {
         saveExperiments({});

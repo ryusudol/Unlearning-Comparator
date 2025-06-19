@@ -10,6 +10,8 @@ import Indicator from "../../components/common/Indicator";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { TRAIN } from "../../constants/common";
+import { cn } from "../../utils/util";
+import { useDatasetMode } from "../../hooks/useDatasetMode";
 import {
   useModelAExperiment,
   useModelBExperiment,
@@ -18,13 +20,15 @@ import {
 export interface MatrixProps {
   mode: "A" | "B";
   modelType: string;
-  datasetMode: string;
+  selectedDataset: string;
   hoveredY: number | null;
   onHover: (y: number | null) => void;
   showYAxis?: boolean;
 }
 
 export default function PredictionMatrix() {
+  const datasetMode = useDatasetMode();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -35,6 +39,7 @@ export default function PredictionMatrix() {
   const [hoveredY, setHoveredY] = useState<number | null>(null);
   const [chartMode, setChartMode] = useState<"corr" | "bubble">("corr");
 
+  const isFaceDataset = datasetMode === "face";
   const areAllModelsSelected = modelA !== "" && modelB !== "";
   const forgetClassExist = forgetClass !== -1;
   const isChartModeCorr = chartMode === "corr";
@@ -80,14 +85,19 @@ export default function PredictionMatrix() {
         !areAllModelsSelected ? (
           <Indicator about="AB" />
         ) : (
-          <div className="flex flex-col relative bottom-2.5">
+          <div
+            className={cn(
+              "flex flex-col relative bottom-2.5",
+              isFaceDataset && "left-1.5"
+            )}
+          >
             <MatrixLegend />
             <div className="flex items-center">
               {modelAExperiment && (
                 <Matrix
                   mode="A"
                   modelType={modelAExperiment.Type}
-                  datasetMode={selectedDataset}
+                  selectedDataset={selectedDataset}
                   hoveredY={hoveredY}
                   onHover={handleHover}
                 />
@@ -96,7 +106,7 @@ export default function PredictionMatrix() {
                 <Matrix
                   mode="B"
                   modelType={modelBExperiment.Type}
-                  datasetMode={selectedDataset}
+                  selectedDataset={selectedDataset}
                   hoveredY={hoveredY}
                   onHover={handleHover}
                   showYAxis={false}
