@@ -39,7 +39,7 @@ async def unlearning_FT(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=True
     )
 
     # Create retain loader (excluding forget class)
@@ -79,10 +79,26 @@ async def unlearning_FT(request, status, base_weights_path):
         momentum=MOMENTUM,
         weight_decay=WEIGHT_DECAY
     )
-    scheduler = optim.lr_scheduler.MultiStepLR(
+    # Option 1: MultiStepLR (기존)
+    # scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    
+    # Option 2: CosineAnnealingLR
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer=optimizer,
+    #     T_max=request.epochs,
+    #     eta_min=0.001
+    # )
+    
+    # Option 3: LinearLR (리니어 감소)
+    scheduler = optim.lr_scheduler.LinearLR(
         optimizer=optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        start_factor=1.0,
+        end_factor=0.001,
+        total_iters=request.epochs
     )
 
     unlearning_FT_thread = UnlearningFTThread(

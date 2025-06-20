@@ -304,10 +304,8 @@ class UnlearningRLThread(threading.Thread):
         cka_results = await calculate_cka_similarity(
             model_before=self.model_before,
             model_after=self.model,
-            train_loader=self.train_loader,
-            test_loader=self.test_loader,
             forget_class=self.request.forget_class,
-            device=self.device
+            device=self.device,
         )
 
         # Prepare results
@@ -356,7 +354,8 @@ class UnlearningRLThread(threading.Thread):
             "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
-            "cka": cka_results["similarity"],
+            "cka": cka_results.get("similarity"),
+            "cka_retrain": cka_results.get("similarity_retrain"),
             "points": detailed_results,
             "attack": {
                 "values": values,

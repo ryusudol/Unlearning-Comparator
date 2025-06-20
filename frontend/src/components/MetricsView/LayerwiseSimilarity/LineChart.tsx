@@ -61,7 +61,12 @@ type TickProps = {
   hoveredLayer: string | null;
 };
 
-export default function _LineChart({ dataset }: { dataset: string }) {
+interface LineChartProps {
+  dataset: string;
+  compareMode: string;
+}
+
+export default function _LineChart({ dataset, compareMode }: LineChartProps) {
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -74,7 +79,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
 
   if (!modelAExperiment || !modelBExperiment) return null;
 
-  const ckaData = getCkaData(dataset, modelAExperiment, modelBExperiment);
+  const ckaData = getCkaData(dataset, modelAExperiment, modelBExperiment, compareMode);
   const layers = ckaData.map((data) => data.layer);
 
   return (

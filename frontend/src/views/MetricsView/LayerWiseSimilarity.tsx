@@ -4,6 +4,7 @@ import Subtitle from "../../components/common/Subtitle";
 import Indicator from "../../components/common/Indicator";
 import LineChart from "../../components/MetricsView/LayerwiseSimilarity/LineChart";
 import DatasetModeSelector from "../../components/common/DatasetModeSelector";
+import CompareModeSelector, { COMPARE_ORIGINAL } from "../../components/common/CompareModeSelector";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { TRAIN } from "../../constants/common";
@@ -14,6 +15,7 @@ export default function LayerWiseSimilarity() {
   const modelB = useModelDataStore((state) => state.modelB);
 
   const [selectedDataset, setSelectedDataset] = useState(TRAIN);
+  const [compareMode, setCompareMode] = useState(COMPARE_ORIGINAL);
 
   const areAllModelsSelected = modelA !== "" && modelB !== "";
   const forgetClassExist = forgetClass !== -1;
@@ -32,10 +34,13 @@ export default function LayerWiseSimilarity() {
       {forgetClassExist ? (
         areAllModelsSelected ? (
           <div className="relative bottom-[3px]">
-            <p className="w-fit text-center text-[15px] mb-0.5 relative left-[106px]">
-              Similarity Between Before and After Unlearning
-            </p>
-            <LineChart dataset={selectedDataset} />
+            <div className="flex items-center justify-center gap-4 mb-1 relative left-2">
+              <CompareModeSelector 
+                compareMode={compareMode} 
+                onValueChange={setCompareMode} 
+              />
+            </div>
+            <LineChart dataset={selectedDataset} compareMode={compareMode} />
           </div>
         ) : (
           <Indicator about="AB" />

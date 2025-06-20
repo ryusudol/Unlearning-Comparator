@@ -84,6 +84,7 @@ export type ExperimentData = {
   t_label_dist: Dist;
   t_conf_dist: Dist;
   cka: CKA;
+  cka_retrain?: CKA | null;
   points: Point[];
   attack: AttackData;
 };

@@ -1,17 +1,27 @@
 import { Experiment } from "../../types/data";
 import { TRAIN } from "../../constants/common";
+import { COMPARE_ORIGINAL, COMPARE_RETRAIN } from "../../components/common/CompareModeSelector";
 
 export const getCkaData = (
   dataset: string,
   modelAExperiment: Experiment,
-  modelBExperiment: Experiment
+  modelBExperiment: Experiment,
+  compareMode: string = COMPARE_ORIGINAL
 ) => {
   const layers = modelAExperiment.cka.layers;
 
+  // Choose between original similarity or retrain similarity
+  const modelACkaSource = compareMode === COMPARE_RETRAIN && modelAExperiment.cka_retrain 
+    ? modelAExperiment.cka_retrain 
+    : modelAExperiment.cka;
+  const modelBCkaSource = compareMode === COMPARE_RETRAIN && modelBExperiment.cka_retrain 
+    ? modelBExperiment.cka_retrain 
+    : modelBExperiment.cka;
+
   const modelACka =
-    dataset === TRAIN ? modelAExperiment.cka.train : modelAExperiment.cka.test;
+    dataset === TRAIN ? modelACkaSource.train : modelACkaSource.test;
   const modelBCka =
-    dataset === TRAIN ? modelBExperiment.cka.train : modelBExperiment.cka.test;
+    dataset === TRAIN ? modelBCkaSource.train : modelBCkaSource.test;
 
   const modelAForgetCka = modelACka.forget_class.map(
     (layer, idx) => layer[idx]
