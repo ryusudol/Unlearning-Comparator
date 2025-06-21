@@ -5,6 +5,13 @@ Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **
 
 ---
 
+## 🔗 Demo & Video
+
+- **Live demo** → [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/)  
+- **5-min overview** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
+  
+---
+
 ## 🚀 Why use the Comparator?
 
 | Pain Point | How the Comparator helps |
@@ -33,13 +40,6 @@ Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **
 
 ### Custom Method API
 Add your algorithm, register it, and the UI will automatically expose metrics, embeddings, and privacy attacks.
-
----
-
-## 🔗 Demo & Video
-
-- **Live demo** → [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/)  
-- **5-min overview** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
 
 ---
 
