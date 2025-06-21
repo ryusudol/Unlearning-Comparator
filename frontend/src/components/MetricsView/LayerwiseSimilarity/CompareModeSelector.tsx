@@ -20,13 +20,13 @@ export default function CompareModeSelector({
         <TabsList className="h-7 bg-gray-100">
           <TabsTrigger
             value={COMPARE_ORIGINAL}
-            className="text-xs px-2 py-1 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+            className="text-xs px-2 py-1 data-[state=active]:bg-neutral-dark data-[state=active]:text-white"
           >
             Original
           </TabsTrigger>
           <TabsTrigger
             value={COMPARE_RETRAIN}
-            className="text-xs px-2 py-1 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+            className="text-xs px-2 py-1 data-[state=active]:bg-neutral-dark data-[state=active]:text-white"
           >
             Retrained
           </TabsTrigger>

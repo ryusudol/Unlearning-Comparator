@@ -13,7 +13,7 @@ export default function CustomButton({ children, className, ...props }: Props) {
   return (
     <Button
       className={cn(
-        `bg-[#585858] hover:bg-[#696969] h-[30px] text-base px-3`,
+        `bg-neutral-dark hover:bg-neutral-dark-hover h-[30px] text-base px-3`,
         className
       )}
       {...props}
