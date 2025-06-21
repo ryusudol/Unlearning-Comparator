@@ -1,4 +1,4 @@
-import { MultiplicationSignIcon } from "../UI/icons";
+import { MultiplicationSignIcon } from "../common/icons";
 import { useClasses } from "../../hooks/useClasses";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { cn } from "../../utils/util";

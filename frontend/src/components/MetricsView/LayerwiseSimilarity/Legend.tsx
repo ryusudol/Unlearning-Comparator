@@ -1,5 +1,5 @@
 import { cn } from "../../../utils/util";
-import { CircleIcon, FatMultiplicationSignIcon } from "../../UI/icons";
+import { CircleIcon, FatMultiplicationSignIcon } from "../../common/icons";
 import { LINE_CHART_LEGEND_DATA } from "../../../constants/layerWiseSimilarity";
 import { CONFIG } from "./LineChart";
 import {

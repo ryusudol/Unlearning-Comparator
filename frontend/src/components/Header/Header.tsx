@@ -1,7 +1,7 @@
 import { FileText } from "lucide-react";
 
 import ClassSelection from "./ClassSelection";
-import { Logo, GithubIcon } from "../UI/icons";
+import { Logo, GithubIcon } from "../common/icons";
 import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {

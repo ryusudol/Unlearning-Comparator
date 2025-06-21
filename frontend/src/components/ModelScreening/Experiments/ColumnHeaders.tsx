@@ -6,7 +6,7 @@ import {
   HoverCardTrigger,
 } from "../../UI/hover-card";
 import { Button } from "../../UI/button";
-import { UnfoldMoreIcon } from "../../UI/icons";
+import { UnfoldMoreIcon } from "../../common/icons";
 import { ExperimentData } from "../../../types/data";
 
 const handleSorting = (column: Column<ExperimentData, unknown>) => {

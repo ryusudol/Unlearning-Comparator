@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-import { FilterIcon } from "../../UI/icons";
+import { FilterIcon } from "../../common/icons";
 import { UNLEARNING_METHODS } from "../../../constants/experiments";
 import { cn } from "../../../utils/util";
 

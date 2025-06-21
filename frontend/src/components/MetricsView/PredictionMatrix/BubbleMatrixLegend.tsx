@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-import { Arrow } from "../../UI/icons";
+import { Arrow } from "../../common/icons";
 
 export default function BubbleChartLegend() {
   const colorScale = d3

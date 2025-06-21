@@ -12,7 +12,7 @@ import MyTooltip from "./Tooltip";
 import Legend from "./Legend";
 import { COLORS } from "../../../constants/colors";
 import { getCkaData } from "../../../utils/data/getCkaData";
-import { CircleIcon, FatMultiplicationSignIcon } from "../../UI/icons";
+import { CircleIcon, FatMultiplicationSignIcon } from "../../common/icons";
 import { ChartContainer } from "../../UI/chart";
 import {
   CKA_DATA_KEYS,

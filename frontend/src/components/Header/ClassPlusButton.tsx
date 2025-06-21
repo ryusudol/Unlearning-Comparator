@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from "react";
 
 import Button from "../common/CustomButton";
 import { Label } from "../UI/label";
-import { PlusIcon } from "../UI/icons";
+import { PlusIcon } from "../common/icons";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import { useClasses } from "../../hooks/useClasses";
 import { useBaseConfigStore } from "../../stores/baseConfigStore";
