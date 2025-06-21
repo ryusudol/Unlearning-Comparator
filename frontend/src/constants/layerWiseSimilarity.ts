@@ -59,3 +59,6 @@ export const LINE_CHART_LEGEND_DATA = [
     spacing: "py-0.5",
   },
 ] as const;
+
+export const COMPARE_ORIGINAL = "original";
+export const COMPARE_RETRAIN = "retrain";

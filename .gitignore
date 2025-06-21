@@ -5,6 +5,7 @@ backend/trained_models/
 backend/unlearned_models/
 backend/uploaded_models/
 backend/attack/
+backend/data/
 backend/.python-version
 backend/*.png
 paper/
@@ -13,3 +14,4 @@ myenv/
 *.py
 *.pdf
 *.mdc
+CLAUDE.md
