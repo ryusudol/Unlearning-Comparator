@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from scipy.stats import entropy
 from typing import Tuple, List
 import os
+import matplotlib.pyplot as plt
 from app.models import get_resnet18
 
 
@@ -249,7 +250,9 @@ async def calculate_model_metrics(
     device, 
     forget_class: int,
     t1: float,
-    t2: float
+    t2: float,
+    create_plots: bool = False,
+    model_name: str = "model"
 ) -> dict:
     """
     Calculate entropy and confidence metrics for a model on the forget class data.
@@ -298,6 +301,45 @@ async def calculate_model_metrics(
             indices.extend(original_indices)
             entropies.extend(batch_entropies)
             confidences.extend(batch_confidences)
+    
+    # Create visualizations only when requested (for retrain model or final unlearn model)
+    if create_plots and len(entropies) > 0:
+        try:
+            # Create output directory
+            os.makedirs('logits_distribution', exist_ok=True)
+            
+            # Entropy distribution plot
+            plt.figure(figsize=(10, 6))
+            plt.hist(entropies, bins=30, alpha=0.7, color='skyblue', edgecolor='black')
+            plt.title(f'{model_name} - Entropy Distribution for Class {forget_class} (t1={t1})')
+            plt.xlabel('Entropy')
+            plt.ylabel('Frequency')
+            plt.grid(True, alpha=0.3)
+            plt.axvline(np.mean(entropies), color='red', linestyle='--', 
+                       label=f'Mean: {np.mean(entropies):.3f}')
+            plt.legend()
+            entropy_path = f'logits_distribution/{model_name.lower()}_entropy_dist_class_{forget_class}_t1_{t1}.png'
+            plt.savefig(entropy_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            # Confidence distribution plot
+            plt.figure(figsize=(10, 6))
+            plt.hist(confidences, bins=30, alpha=0.7, color='lightgreen', edgecolor='black')
+            plt.title(f'{model_name} - Confidence Distribution for Class {forget_class} (t2={t2})')
+            plt.xlabel('Confidence')
+            plt.ylabel('Frequency')
+            plt.grid(True, alpha=0.3)
+            plt.axvline(np.mean(confidences), color='red', linestyle='--', 
+                       label=f'Mean: {np.mean(confidences):.3f}')
+            plt.legend()
+            confidence_path = f'logits_distribution/{model_name.lower()}_confidence_dist_class_{forget_class}_t2_{t2}.png'
+            plt.savefig(confidence_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"{model_name} distribution plots saved: {entropy_path}, {confidence_path}")
+            
+        except Exception as e:
+            print(f"Error creating {model_name} distribution plots: {e}")
     
     return {
         "indices": indices,

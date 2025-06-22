@@ -119,7 +119,7 @@ class UnlearningFTThread(threading.Thread):
                     retrain_model.eval()
                     
                     retrain_metrics_cache = await calculate_model_metrics(
-                        retrain_model, self.train_loader, self.device, self.request.forget_class, 2.0, 1.0
+                        retrain_model, self.train_loader, self.device, self.request.forget_class, 2.0, 1.0, create_plots=True, model_name="Retrain"
                     )
                     print(f"Retrain metrics cached: {len(retrain_metrics_cache['entropies'])} samples")
                     
@@ -205,7 +205,7 @@ class UnlearningFTThread(threading.Thread):
             self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
 
             # Collect epoch-wise metrics (every epoch)
-            enable_epoch_metrics = False  # Set to False to disable epoch-wise metrics collection
+            enable_epoch_metrics = True  # Set to False to disable epoch-wise metrics collection
             
             if enable_epoch_metrics:
                 print(f"Collecting metrics for epoch {epoch + 1}...")
@@ -267,6 +267,17 @@ class UnlearningFTThread(threading.Thread):
                 epoch_metrics['TUA'].append(tua)
                 epoch_metrics['TRA'].append(tra)
                 epoch_metrics['PS'].append(ps)
+
+            # Create distribution plots for current model at the last epoch
+            if epoch == self.request.epochs - 1:  # Last epoch
+                print("Creating distribution plots for final unlearn model...")
+                try:
+                    from app.utils.attack_full_dataset import calculate_model_metrics
+                    await calculate_model_metrics(
+                        self.model, self.train_loader, self.device, self.request.forget_class, 2.0, 1.0, create_plots=True, model_name="Unlearn"
+                    )
+                except Exception as e:
+                    print(f"Error creating final model distribution plots: {e}")
 
             # Get current learning rate
             current_lr = self.optimizer.param_groups[0]['lr']

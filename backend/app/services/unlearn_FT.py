@@ -87,19 +87,27 @@ async def unlearning_FT(request, status, base_weights_path):
     # )
     
     # Option 2: CosineAnnealingLR
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
-    #     optimizer=optimizer,
-    #     T_max=request.epochs,
-    #     eta_min=0.001
-    # )
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=request.epochs,
+        eta_min=0.01
+    )
     
     # Option 3: LinearLR (리니어 감소)
-    scheduler = optim.lr_scheduler.LinearLR(
-        optimizer=optimizer,
-        start_factor=1.0,
-        end_factor=0.001,
-        total_iters=request.epochs
-    )
+    # scheduler = optim.lr_scheduler.LinearLR(
+    #     optimizer=optimizer,
+    #     start_factor=1.0,
+    #     end_factor=0.001,
+    #     total_iters=request.epochs
+    # )
+    
+    # Option 4: CosineAnnealingWarmRestarts (cosine annealing with warm restarts)
+    # scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
+    #     optimizer=optimizer,
+    #     T_0=request.epochs // 3,  # First restart after T_0 epochs
+    #     T_mult=2,  # Multiply T_0 by 2 after each restart
+    #     eta_min=0.001
+    # )
 
     unlearning_FT_thread = UnlearningFTThread(
         request=request,
