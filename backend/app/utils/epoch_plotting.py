@@ -16,7 +16,7 @@ def plot_epoch_metrics(
     
     Args:
         epoch_metrics: Dict containing lists of metrics per epoch
-                      Expected keys: 'UA', 'TA', 'TUA', 'TRA', 'PS'
+                      Expected keys: 'UA', 'TA', 'TUA', 'TRA', 'PS', 'MIA'
         method: Unlearning method name (FT, GA, RL, etc.)
         forget_class: The class being forgotten
         experiment_id: Unique experiment identifier
@@ -26,70 +26,34 @@ def plot_epoch_metrics(
     plot_dir = os.path.join(save_dir, str(forget_class))
     os.makedirs(plot_dir, exist_ok=True)
     
-    # Create figure with subplots
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    # Create single plot with all metrics
+    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
     fig.suptitle(f'{method} Unlearning Progress - Class {forget_class} - ID: {experiment_id}', 
-                 fontsize=14, fontweight='bold')
+                 fontsize=16, fontweight='bold')
     
-    epochs = range(1, len(epoch_metrics['UA']) + 1)
+    # Start epochs from 0 instead of 1
+    epochs = range(0, len(epoch_metrics['UA']))
     
-    # Plot UA (Unlearn Accuracy)
-    axes[0, 0].plot(epochs, epoch_metrics['UA'], 'r-', linewidth=2, label='UA')
-    axes[0, 0].set_title('Unlearn Accuracy (UA)')
-    axes[0, 0].set_xlabel('Epoch')
-    axes[0, 0].set_ylabel('Accuracy')
-    axes[0, 0].grid(True, alpha=0.3)
-    axes[0, 0].legend()
-    axes[0, 0].set_ylim(0, 1)
+    # Plot all metrics with distinct colors
+    ax.plot(epochs, epoch_metrics['UA'], 'red', linewidth=2.5, label='UA (Unlearn Accuracy)', marker='o', markersize=4)
+    ax.plot(epochs, epoch_metrics['TA'], 'blue', linewidth=2.5, label='TA (Train Retain Accuracy)', marker='s', markersize=4)
+    ax.plot(epochs, epoch_metrics['TUA'], 'orange', linewidth=2.5, label='TUA (Test Unlearn Accuracy)', marker='^', markersize=4)
+    ax.plot(epochs, epoch_metrics['TRA'], 'green', linewidth=2.5, label='TRA (Test Retain Accuracy)', marker='d', markersize=4)
+    ax.plot(epochs, epoch_metrics['PS'], 'purple', linewidth=2.5, label='PS (Ours)', marker='*', markersize=6)
     
-    # Plot TA (Training Accuracy on remaining classes)
-    axes[0, 1].plot(epochs, epoch_metrics['TA'], 'b-', linewidth=2, label='TA')
-    axes[0, 1].set_title('Training Remaining Accuracy (TA)')
-    axes[0, 1].set_xlabel('Epoch')
-    axes[0, 1].set_ylabel('Accuracy')
-    axes[0, 1].grid(True, alpha=0.3)
-    axes[0, 1].legend()
-    axes[0, 1].set_ylim(0, 1)
+    if 'MIA' in epoch_metrics and len(epoch_metrics['MIA']) > 0:
+        ax.plot(epochs, epoch_metrics['MIA'], 'brown', linewidth=2.5, label='MIA (SALUN)', marker='x', markersize=6)
     
-    # Plot TUA (Test Unlearn Accuracy)
-    axes[0, 2].plot(epochs, epoch_metrics['TUA'], 'orange', linewidth=2, label='TUA')
-    axes[0, 2].set_title('Test Unlearn Accuracy (TUA)')
-    axes[0, 2].set_xlabel('Epoch')
-    axes[0, 2].set_ylabel('Accuracy')
-    axes[0, 2].grid(True, alpha=0.3)
-    axes[0, 2].legend()
-    axes[0, 2].set_ylim(0, 1)
+    ax.set_title('All Unlearning Metrics', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Epoch', fontsize=12)
+    ax.set_ylabel('Value', fontsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
+    ax.set_ylim(0, 1)
+    ax.set_xlim(0, len(epoch_metrics['UA']) - 1)
     
-    # Plot TRA (Test Remaining Accuracy)
-    axes[1, 0].plot(epochs, epoch_metrics['TRA'], 'green', linewidth=2, label='TRA')
-    axes[1, 0].set_title('Test Remaining Accuracy (TRA)')
-    axes[1, 0].set_xlabel('Epoch')
-    axes[1, 0].set_ylabel('Accuracy')
-    axes[1, 0].grid(True, alpha=0.3)
-    axes[1, 0].legend()
-    axes[1, 0].set_ylim(0, 1)
-    
-    # Plot PS (Privacy Score)
-    axes[1, 1].plot(epochs, epoch_metrics['PS'], 'purple', linewidth=2, label='PS')
-    axes[1, 1].set_title('Privacy Score (PS)')
-    axes[1, 1].set_xlabel('Epoch')
-    axes[1, 1].set_ylabel('Privacy Score')
-    axes[1, 1].grid(True, alpha=0.3)
-    axes[1, 1].legend()
-    axes[1, 1].set_ylim(0, 1)
-    
-    # Combined plot
-    axes[1, 2].plot(epochs, epoch_metrics['UA'], 'r-', linewidth=2, label='UA', alpha=0.8)
-    axes[1, 2].plot(epochs, epoch_metrics['TA'], 'b-', linewidth=2, label='TA', alpha=0.8)
-    axes[1, 2].plot(epochs, epoch_metrics['TUA'], 'orange', linewidth=2, label='TUA', alpha=0.8)
-    axes[1, 2].plot(epochs, epoch_metrics['TRA'], 'green', linewidth=2, label='TRA', alpha=0.8)
-    axes[1, 2].plot(epochs, epoch_metrics['PS'], 'purple', linewidth=2, label='PS', alpha=0.8)
-    axes[1, 2].set_title('All Metrics Combined')
-    axes[1, 2].set_xlabel('Epoch')
-    axes[1, 2].set_ylabel('Value')
-    axes[1, 2].grid(True, alpha=0.3)
-    axes[1, 2].legend()
-    axes[1, 2].set_ylim(0, 1)
+    # Set x-axis ticks to show all epochs starting from 0
+    ax.set_xticks(range(0, len(epoch_metrics['UA'])))
     
     plt.tight_layout()
     
@@ -142,6 +106,8 @@ def plot_comparison_metrics(
         axes[row, col].grid(True, alpha=0.3)
         axes[row, col].legend()
         axes[row, col].set_ylim(0, 1)
+        max_epochs = max(len(metrics[metric]) for metrics in all_metrics.values() if metric in metrics)
+        axes[row, col].set_xticks(range(1, max_epochs + 1))
     
     # Hide the last subplot if not needed
     axes[1, 2].axis('off')

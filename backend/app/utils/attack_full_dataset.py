@@ -133,22 +133,24 @@ async def process_attack_metrics_full_dataset(
         retrain_model, data_loader, device, forget_class, t1, t2
     )
     
-    # Apply the SAME attack calculation logic as attack.py
+    # Apply the SAME attack calculation logic as attack.py with epoch bins for stability
     privacy_score = calculate_attack_scores_original_logic(
-        unlearn_metrics, retrain_metrics
+        unlearn_metrics, retrain_metrics, use_epoch_bins=True
     )
     
     # Prepare return values in expected format
     values = []
-    for idx, entropy, confidence in zip(
+    for idx, entropy, confidence, loss in zip(
         unlearn_metrics["indices"], 
         unlearn_metrics["entropies"], 
-        unlearn_metrics["confidences"]
+        unlearn_metrics["confidences"],
+        unlearn_metrics["losses"]
     ):
         values.append({
             "img": idx,
             "entropy": round(float(entropy), 2),
-            "confidence": round(float(confidence), 2)
+            "confidence": round(float(confidence), 2),
+            "loss": round(float(loss), 3)
         })
     
     attack_results = {
@@ -164,20 +166,34 @@ async def process_attack_metrics_full_dataset(
 
 def calculate_attack_scores_original_logic(
     unlearn_metrics: dict, 
-    retrain_metrics: dict
+    retrain_metrics: dict,
+    use_epoch_bins: bool = False
 ) -> float:
     """
     Apply the SAME attack calculation logic as attack.py but with full dataset.
+    Args:
+        use_epoch_bins: If True, uses 201 bins for more stable epoch-wise PS calculation
     """
-    # Configuration from attack.py
-    ENTROPY_CONFIG = {
-        "bins": 51,
-        "range": [0.00, 2.50]
-    }
-    CONFIDENCE_CONFIG = {
-        "bins": 51,
-        "range": [-2.50, 10.00]
-    }
+    # Configuration - use 201 bins for epoch-wise calculations to reduce noise
+    if use_epoch_bins:
+        ENTROPY_CONFIG = {
+            "bins": 201,
+            "range": [0.00, 2.50]
+        }
+        CONFIDENCE_CONFIG = {
+            "bins": 201,
+            "range": [-2.50, 10.00]
+        }
+    else:
+        # Original configuration from attack.py for visualization consistency
+        ENTROPY_CONFIG = {
+            "bins": 51,
+            "range": [0.00, 2.50]
+        }
+        CONFIDENCE_CONFIG = {
+            "bins": 51,
+            "range": [-2.50, 10.00]
+        }
     
     unlearn_entropies = np.array(unlearn_metrics["entropies"])
     unlearn_confidences = np.array(unlearn_metrics["confidences"])
@@ -260,7 +276,11 @@ async def calculate_model_metrics(
     model.eval()
     entropies = []
     confidences = []
+    losses = []
     indices = []
+    
+    # Create loss function for loss calculation
+    criterion = torch.nn.CrossEntropyLoss(reduction='none')
     
     with torch.no_grad():
         for batch_idx, (images, labels) in enumerate(data_loader):
@@ -285,6 +305,10 @@ async def calculate_model_metrics(
                 original_indices = [batch_start_idx + idx.item() for idx in local_indices]
             
             selected_outputs = outputs[forget_mask]
+            selected_labels = labels[forget_mask]
+            
+            # Calculate loss
+            batch_losses = criterion(selected_outputs, selected_labels).cpu().numpy()
             
             # Calculate entropy
             scaled_outputs_entropy = selected_outputs / t1
@@ -301,6 +325,7 @@ async def calculate_model_metrics(
             indices.extend(original_indices)
             entropies.extend(batch_entropies)
             confidences.extend(batch_confidences)
+            losses.extend(batch_losses)
     
     # Create visualizations only when requested (for retrain model or final unlearn model)
     if create_plots and len(entropies) > 0:
@@ -336,7 +361,21 @@ async def calculate_model_metrics(
             plt.savefig(confidence_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"{model_name} distribution plots saved: {entropy_path}, {confidence_path}")
+            # Loss distribution plot
+            plt.figure(figsize=(10, 6))
+            plt.hist(losses, bins=30, alpha=0.7, color='orange', edgecolor='black')
+            plt.title(f'{model_name} - Loss Distribution for Class {forget_class}')
+            plt.xlabel('Cross Entropy Loss')
+            plt.ylabel('Frequency')
+            plt.grid(True, alpha=0.3)
+            plt.axvline(np.mean(losses), color='red', linestyle='--', 
+                       label=f'Mean: {np.mean(losses):.3f}')
+            plt.legend()
+            loss_path = f'logits_distribution/{model_name.lower()}_loss_dist_class_{forget_class}.png'
+            plt.savefig(loss_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"{model_name} distribution plots saved: {entropy_path}, {confidence_path}, {loss_path}")
             
         except Exception as e:
             print(f"Error creating {model_name} distribution plots: {e}")
@@ -344,7 +383,8 @@ async def calculate_model_metrics(
     return {
         "indices": indices,
         "entropies": entropies,
-        "confidences": confidences
+        "confidences": confidences,
+        "losses": losses
     }
 
 
@@ -411,17 +451,20 @@ async def process_attack_metrics_simplified(
     
     # Prepare return values
     values = []
-    for idx, entropy, confidence in zip(metrics["indices"], metrics["entropies"], metrics["confidences"]):
+    for idx, entropy, confidence, loss in zip(metrics["indices"], metrics["entropies"], metrics["confidences"], metrics["losses"]):
         values.append({
             "img": idx,
             "entropy": round(float(entropy), 2),
-            "confidence": round(float(confidence), 2)
+            "confidence": round(float(confidence), 2),
+            "loss": round(float(loss), 3)
         })
     
+    losses = np.array(metrics["losses"])
     attack_results = {
         "simplified_calculation": True,
         "entropy_mean": float(np.mean(entropies)),
         "confidence_mean": float(np.mean(confidences)),
+        "loss_mean": float(np.mean(losses)),
         "samples": len(entropies)
     }
     
