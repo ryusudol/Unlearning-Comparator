@@ -5,8 +5,7 @@ import torch.optim as optim
 
 from app.utils.helpers import set_seed
 from app.threads import UnlearningFaceRLThread
-from facenet_pytorch import InceptionResnetV1
-from app.models import FaceNetClassifier
+from app.models import get_facenet_model
 from app.utils.data_loader import get_face_data_loaders
 
 from app.config import (
@@ -26,16 +25,8 @@ async def unlearning_face_RL(request, status, base_weights_path):
         else "cpu"
     )
 
-    def get_facenet_model(pretrained=True):
-        backbone = InceptionResnetV1(
-            classify=False,
-            pretrained="vggface2" if pretrained else None,
-        )
-        classifier = nn.Linear(512, 10)
-        return FaceNetClassifier(backbone, classifier).to(device)
-
     model_before = None
-    model_after = get_facenet_model(pretrained=False)
+    model_after = get_facenet_model(device, pretrained=False)
     state_dict = torch.load(base_weights_path, map_location=device)
     filtered_state_dict = {k: v for k, v in state_dict.items() if not k.startswith("backbone.logits")}
     model_after.load_state_dict(filtered_state_dict, strict=False)

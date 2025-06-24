@@ -6,10 +6,12 @@ It includes implementations of ResNet and status tracking classes for training a
 from app.models.resnet import get_resnet18
 from app.models.status import TrainingStatus, UnlearningStatus
 from app.models.face_resnet import FaceNetClassifier
+from app.models.face_resnet import get_facenet_model
 
 __all__ = [
     'get_resnet18',
     'TrainingStatus',
     'UnlearningStatus',
-    'FaceNetClassifier'
+    'FaceNetClassifier',
+    'get_facenet_model'
 ]
