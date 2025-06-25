@@ -4,11 +4,8 @@ import ClassWiseAccuracy from "./ClassWiseAccuracy";
 import PredictionMatrix from "./PredictionMatrix";
 import LayerWiseSimilarity from "./LayerWiseSimilarity";
 import { CONFIG } from "../../app/App";
-import { useDatasetMode } from "../../hooks/useDatasetMode";
 
 export default function MetricsCore() {
-  const datasetMode = useDatasetMode();
-
   return (
     <View
       width={CONFIG.ANALYSIS_VIEW_WIDTH}
@@ -20,7 +17,7 @@ export default function MetricsCore() {
       <div className="flex flex-col gap-6">
         <ClassWiseAccuracy />
         <PredictionMatrix />
-        {datasetMode === "cifar10" && <LayerWiseSimilarity />}
+        <LayerWiseSimilarity />
       </div>
     </View>
   );

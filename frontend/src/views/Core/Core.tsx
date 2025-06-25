@@ -4,7 +4,7 @@ import View from "../../components/common/View";
 import Title from "../../components/common/Title";
 import Indicator from "../../components/common/Indicator";
 import Embedding from "./Embedding";
-import GradCam from "./GradCam";
+// import GradCam from "./GradCam";
 import PrivacyAttack from "./PrivacyAttack";
 import { CONFIG } from "../../app/App";
 import { useDatasetMode } from "../../hooks/useDatasetMode";
@@ -28,7 +28,6 @@ export default function Core() {
   const [modelAPoints, setModelAPoints] = useState<Point[]>([]);
   const [modelBPoints, setModelBPoints] = useState<Point[]>([]);
 
-  const isDatasetCifar10Mode = datasetMode === "cifar10";
   const isFirstMode = displayMode === FIRST;
   const forgetClassExist = forgetClass !== -1;
 
@@ -44,7 +43,7 @@ export default function Core() {
 
   useEffect(() => {
     async function loadModelAData() {
-      if (!forgetClassExist || !isDatasetCifar10Mode) return;
+      if (!forgetClassExist) return;
 
       const ids: string[] = await fetchAllWeightNames(datasetMode, forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
@@ -60,17 +59,11 @@ export default function Core() {
       }
     }
     loadModelAData();
-  }, [
-    datasetMode,
-    forgetClass,
-    forgetClassExist,
-    isDatasetCifar10Mode,
-    modelA,
-  ]);
+  }, [datasetMode, forgetClass, forgetClassExist, modelA]);
 
   useEffect(() => {
     async function loadModelBData() {
-      if (!forgetClassExist || !isDatasetCifar10Mode) return;
+      if (!forgetClassExist) return;
 
       const ids: string[] = await fetchAllWeightNames(datasetMode, forgetClass);
       const slicedIds = ids.map((id) => id.slice(0, -4));
@@ -86,13 +79,7 @@ export default function Core() {
       }
     }
     loadModelBData();
-  }, [
-    datasetMode,
-    forgetClass,
-    forgetClassExist,
-    isDatasetCifar10Mode,
-    modelB,
-  ]);
+  }, [datasetMode, forgetClass, forgetClassExist, modelB]);
 
   return (
     <View
@@ -103,7 +90,7 @@ export default function Core() {
     >
       <div className="flex items-center gap-1 mb-1.5 ml-1 relative right-1">
         <Title
-          title={`${isDatasetCifar10Mode ? "Embedding" : "Grad-CAM"}`}
+          title="Embedding"
           id={FIRST}
           className={cn(
             "relative z-10 cursor-pointer px-1",
@@ -125,14 +112,7 @@ export default function Core() {
       </div>
       {forgetClassExist ? (
         isFirstMode ? (
-          isDatasetCifar10Mode ? (
-            <Embedding
-              modelAPoints={modelAPoints}
-              modelBPoints={modelBPoints}
-            />
-          ) : (
-            <GradCam />
-          )
+          <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
         ) : (
           <PrivacyAttack
             modelAPoints={modelAPoints}
