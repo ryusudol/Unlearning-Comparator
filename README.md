@@ -65,8 +65,8 @@ pnpm start
 
 ## Related Resources
 - **ResNet-18 CIFAR-10 MU checkpoints** → <https://huggingface.co/jaeunglee/resnet18-cifar10-unlearning>
-- **ResNet-18 FashionMNIST MU checkpoints** → <https://huggingface.co/Yurim0507/ResNet18_FashionMNIST>
-- **ViT-Base CIFAR-10 MU checkpoints** → <https://huggingface.co/Yurim0507/ViT_base_CIFAR10>
+- **ResNet-18 FashionMNIST MU checkpoints** → <https://huggingface.co/Yurim0507/resnet18-fashionmnist-unlearning>
+- **ViT-Base CIFAR-10 MU checkpoints** → <https://huggingface.co/Yurim0507/vit-base-16-cifar10-unlearning>
 
 
 
