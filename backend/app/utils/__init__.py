@@ -9,9 +9,11 @@ from .data_loader import (
 )
 from .evaluation import (
 	get_layer_activations_and_predictions,
+	get_layer_activations_and_predictions_face,
 	evaluate_model,
 	evaluate_model_with_distributions,
-	calculate_cka_similarity
+	calculate_cka_similarity,
+	calculate_cka_similarity_face
 )
 from .helpers import (
 	set_seed, 
@@ -19,12 +21,26 @@ from .helpers import (
 	format_distribution,
 	compress_prob_array
 )
-from .visualization import compute_umap_embedding
+from .visualization import (
+	compute_umap_embedding,
+	compute_umap_embedding_face
+)
 
 
 __all__ = [
-    'load_cifar10_data', 'get_data_loaders', 'get_face_data_loaders',
-    'get_layer_activations_and_predictions', 'evaluate_model',
-    'evaluate_model_with_distributions', 'calculate_cka_similarity', 'set_seed', 'save_model',
-    'compute_umap_embedding', 'format_distribution', 'compress_prob_array'
+    'load_cifar10_data',
+    'get_data_loaders',
+    'get_face_data_loaders',
+    'get_layer_activations_and_predictions',
+    'get_layer_activations_and_predictions_face',
+    'evaluate_model',
+    'evaluate_model_with_distributions',
+    'calculate_cka_similarity',
+    'calculate_cka_similarity_face',
+    'set_seed',
+    'save_model',
+    'compute_umap_embedding',
+    'compute_umap_embedding_face',
+    'format_distribution',
+    'compress_prob_array'
 ]
