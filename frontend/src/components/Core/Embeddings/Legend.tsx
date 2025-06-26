@@ -25,17 +25,16 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const dataset = useBaseConfigStore((state) => state.dataset);
 
-  const isDatasetCIFAR10 = dataset === "CIFAR-10";
   const oddIndices = classes.filter((_, idx) => idx % 2 === 0);
   const evenIndices = classes.filter((_, idx) => idx % 2 !== 0);
 
   return (
     <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
-      <div className="flex">
+      <div className={cn("flex", dataset === "FaceDataset" && "gap-5")}>
         <div
           className={cn("flex flex-col", {
-            "mr-[35px]": isDatasetCIFAR10,
-            "mr-[27px]": !isDatasetCIFAR10,
+            "mr-[35px]": dataset === "CIFAR-10",
+            "mr-[27px]": dataset === "Fashion-MNIST",
           })}
         >
           <p className="text-lg font-medium mb-1">True Class</p>
@@ -54,9 +53,12 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
           <p className="text-lg font-medium mb-1">Predicted Class</p>
           <div
             style={{
-              gridTemplateColumns: isDatasetCIFAR10
-                ? "115px 80px 80px 80px 78px"
-                : "92px 94px 86px 93px 68px",
+              gridTemplateColumns:
+                dataset === "CIFAR-10"
+                  ? "115px 80px 80px 80px 78px"
+                  : dataset === "Fashion-MNIST"
+                  ? "92px 94px 86px 93px 68px"
+                  : "78px 110px 94px 102px 100px",
             }}
             className="grid gap-y-1"
           >
@@ -92,7 +94,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
         </div>
       </div>
       <div className="flex">
-        <div className="mr-4">
+        <div className={cn(dataset === "FaceDataset" ? "mr-2" : "mr-4")}>
           <p className="text-lg font-medium mb-[5px]">Highlight</p>
           <p className="w-[102px] text-sm font-light">
             Choose a category to emphasize:
@@ -108,7 +110,10 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
               <React.Fragment key={idx}>
                 <TabsTrigger
                   value={mode.label}
-                  style={{ width: mode.length }}
+                  style={{
+                    width:
+                      dataset === "CIFAR-10" ? mode.length : mode.length - 8,
+                  }}
                   className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
