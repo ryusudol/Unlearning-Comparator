@@ -10,48 +10,34 @@ def entropy(p, dim=-1, keepdim=False):
     return -torch.where(p > 0, p * p.log(), p.new([0.0])).sum(dim=dim, keepdim=keepdim)
 
 
-def m_entropy(p, labels, dim=-1, keepdim=False):
-    """Calculate modified entropy (SALUN-specific metric)."""
-    log_prob = torch.where(p > 0, p.log(), torch.tensor(1e-30).to(p.device).log())
-    reverse_prob = 1 - p
-    log_reverse_prob = torch.where(
-        reverse_prob > 0, reverse_prob.log(), p.new_tensor(-30.0)
-    )
-    
-    modified_probs = p.clone()
-    modified_log_probs = log_reverse_prob.clone()
-    
-    # 행별 인덱싱으로 정확한 라벨 위치만 수정
-    idx = torch.arange(p.size(0), device=p.device)
-    modified_probs[idx, labels] = reverse_prob[idx, labels]
-    modified_log_probs[idx, labels] = log_prob[idx, labels]
-    return -torch.sum(modified_probs * modified_log_probs, dim=dim, keepdim=keepdim)
 
 
 def collect_prob(data_loader, model, device, target_class=None):
     """Collect probability predictions from model."""
+    from app.utils.evaluation import model_eval_mode
+    
     if data_loader is None:
         return torch.zeros([0, 10]), torch.zeros([0])
 
     prob = []
     targets = []
 
-    model.eval()
-    with torch.no_grad():
-        for batch_idx, (data, target) in enumerate(data_loader):
-            data, target = data.to(device), target.to(device)
-            
-            # Filter by target class if specified
-            if target_class is not None:
-                mask = (target == target_class)
-                if not torch.any(mask):
-                    continue
-                data = data[mask]
-                target = target[mask]
-            
-            output = model(data)
-            prob.append(F.softmax(output, dim=-1).data)
-            targets.append(target)
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for batch_idx, (data, target) in enumerate(data_loader):
+                data, target = data.to(device), target.to(device)
+                
+                # Filter by target class if specified
+                if target_class is not None:
+                    mask = (target == target_class)
+                    if not torch.any(mask):
+                        continue
+                    data = data[mask]
+                    target = target[mask]
+                
+                output = model(data)
+                prob.append(F.softmax(output, dim=-1).data)
+                targets.append(target)
 
     if len(prob) == 0:
         return torch.zeros([0, 10]), torch.zeros([0])
@@ -147,52 +133,38 @@ async def calculate_salun_mia_efficacy(
 
     # Extract features for MIA
     
-    # 1. Correctness feature
-    shadow_train_corr = (torch.argmax(shadow_train_prob, axis=1) == shadow_train_labels).float().unsqueeze(1)
-    shadow_test_corr = (torch.argmax(shadow_test_prob, axis=1) == shadow_test_labels).float().unsqueeze(1)
-    forget_corr = (torch.argmax(forget_prob, axis=1) == forget_labels).float().unsqueeze(1)
-
-    # 2. Confidence feature (ground truth class probability)
+    # 1. Confidence feature (ground truth class probability)
     shadow_train_conf = torch.gather(shadow_train_prob, 1, shadow_train_labels[:, None])
     shadow_test_conf = torch.gather(shadow_test_prob, 1, shadow_test_labels[:, None])
     forget_conf = torch.gather(forget_prob, 1, forget_labels[:, None])
 
-    # 3. Entropy feature
+    # 2. Entropy feature
     shadow_train_entr = entropy(shadow_train_prob).unsqueeze(1)
     shadow_test_entr = entropy(shadow_test_prob).unsqueeze(1)
     forget_entr = entropy(forget_prob).unsqueeze(1)
 
-    # 4. Modified entropy feature
-    shadow_train_m_entr = m_entropy(shadow_train_prob, shadow_train_labels).unsqueeze(1)
-    shadow_test_m_entr = m_entropy(shadow_test_prob, shadow_test_labels).unsqueeze(1)
-    forget_m_entr = m_entropy(forget_prob, forget_labels).unsqueeze(1)
-
-    # Calculate MIA efficacy for each feature (excluding prob for stability)
+    # Calculate MIA efficacy for confidence and entropy features only
     results = {}
     
     try:
-        results["correctness"] = SVC_fit_predict(
-            shadow_train_corr, shadow_test_corr, None, forget_corr
-        )
-        results["confidence"] = SVC_fit_predict(
+        # C-MIA: Confidence-based MIA
+        c_mia = SVC_fit_predict(
             shadow_train_conf, shadow_test_conf, None, forget_conf
         )
-        results["entropy"] = SVC_fit_predict(
+        results["C-MIA"] = c_mia
+        
+        # E-MIA: Entropy-based MIA
+        e_mia = SVC_fit_predict(
             shadow_train_entr, shadow_test_entr, None, forget_entr
         )
-        results["m_entropy"] = SVC_fit_predict(
-            shadow_train_m_entr, shadow_test_m_entr, None, forget_m_entr
-        )
+        results["E-MIA"] = e_mia
         
-        # Overall MIA efficacy - maximum across all features
-        results["mia_efficacy"] = max(results.values())
-        
-        print(f"MIA Debug - Features: {results}")
+        print(f"MIA Debug - C-MIA: {c_mia:.3f}, E-MIA: {e_mia:.3f}")
         print(f"MIA Debug - Shadow train: {shadow_train_prob.shape[0]}, Shadow test: {shadow_test_prob.shape[0]}, Forget: {forget_prob.shape[0]}")
         
     except Exception as e:
         print(f"Error in MIA calculation: {e}")
-        results = {"mia_efficacy": 0.5}
+        results = {"C-MIA": 0.5, "E-MIA": 0.5}
     
     return results
 
@@ -226,18 +198,12 @@ async def train_mia_classifier_once(
         print("Warning: Insufficient shadow data for MIA training")
         return None
     
-    # Extract features for MIA training
-    shadow_train_corr = (torch.argmax(shadow_train_prob, axis=1) == shadow_train_labels).float().unsqueeze(1)
-    shadow_test_corr = (torch.argmax(shadow_test_prob, axis=1) == shadow_test_labels).float().unsqueeze(1)
-    
+    # Extract features for MIA training (confidence and entropy only)
     shadow_train_conf = torch.gather(shadow_train_prob, 1, shadow_train_labels[:, None])
     shadow_test_conf = torch.gather(shadow_test_prob, 1, shadow_test_labels[:, None])
     
     shadow_train_entr = entropy(shadow_train_prob).unsqueeze(1)
     shadow_test_entr = entropy(shadow_test_prob).unsqueeze(1)
-    
-    shadow_train_m_entr = m_entropy(shadow_train_prob, shadow_train_labels).unsqueeze(1)
-    shadow_test_m_entr = m_entropy(shadow_test_prob, shadow_test_labels).unsqueeze(1)
     
     # Train classifiers for each feature (excluding prob for stability)
     classifiers = {}
@@ -245,10 +211,8 @@ async def train_mia_classifier_once(
     try:
         # Train separate classifier for each feature
         features = {
-            'correctness': (shadow_train_corr, shadow_test_corr),
             'confidence': (shadow_train_conf, shadow_test_conf), 
-            'entropy': (shadow_train_entr, shadow_test_entr),
-            'm_entropy': (shadow_train_m_entr, shadow_test_m_entr)
+            'entropy': (shadow_train_entr, shadow_test_entr)
         }
         
         for feat_name, (train_feat, test_feat) in features.items():
@@ -281,20 +245,20 @@ async def predict_mia_efficacy(
     forget_loader,
     device,
     forget_class: int
-) -> float:
+) -> Dict[str, float]:
     """
     Predict MIA-Efficacy using trained classifier with current model.
     MIA-Efficacy = proportion of forget data predicted as non-member (0)
     Higher value = better unlearning (forget data looks like non-member)
     """
     if mia_classifier is None:
-        return 0.5
+        return {'C-MIA': 0.5, 'E-MIA': 0.5}
     
     # Extract features from current model
     forget_prob, forget_labels = collect_prob(forget_loader, current_model, device, target_class=None)
     
     if forget_prob.shape[0] == 0:
-        return 0.5
+        return {'C-MIA': 0.5, 'E-MIA': 0.5}
     
     # Debug: Check forget data
     forget_classes = torch.unique(forget_labels)
@@ -306,17 +270,13 @@ async def predict_mia_efficacy(
         sample_prob = forget_prob[0]
         print(f"Sample forget prob: {sample_prob.tolist()[:5]}...")  # First 5 values
     
-    # Extract same features as training (excluding prob for stability)
-    forget_corr = (torch.argmax(forget_prob, axis=1) == forget_labels).float().unsqueeze(1)
+    # Extract same features as training (confidence and entropy only)
     forget_conf = torch.gather(forget_prob, 1, forget_labels[:, None])
     forget_entr = entropy(forget_prob).unsqueeze(1)
-    forget_m_entr = m_entropy(forget_prob, forget_labels).unsqueeze(1)
     
     features = {
-        'correctness': forget_corr,
         'confidence': forget_conf,
-        'entropy': forget_entr, 
-        'm_entropy': forget_m_entr
+        'entropy': forget_entr
     }
     
     # Predict with each classifier
@@ -334,13 +294,14 @@ async def predict_mia_efficacy(
             efficacy = (predictions == 0).mean()
             efficacies[feat_name] = efficacy
     
-    # Return maximum efficacy across all features
+    # Return efficacies for both C-MIA and E-MIA
     if efficacies:
-        max_efficacy = max(efficacies.values())
-        print(f"MIA Efficacy by feature: {efficacies}, Max: {max_efficacy:.3f}")
-        return max_efficacy
+        c_mia = efficacies.get('confidence', 0.5)
+        e_mia = efficacies.get('entropy', 0.5)
+        print(f"MIA Efficacy - C-MIA: {c_mia:.3f}, E-MIA: {e_mia:.3f}")
+        return {'C-MIA': c_mia, 'E-MIA': e_mia}
     else:
-        return 0.5
+        return {'C-MIA': 0.5, 'E-MIA': 0.5}
 
 
 def create_shadow_loaders(train_loader, test_loader, forget_class: int, device):

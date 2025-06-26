@@ -1,414 +1,190 @@
-import threading
-import asyncio
 import torch
 import time
-import os
 import uuid
-import json
-from app.utils.helpers import (
-	save_model, 
-    format_distribution, 
-    compress_prob_array   
-)
+from app.utils.helpers import format_distribution
 from app.utils.evaluation import (
     calculate_cka_similarity,
     evaluate_model_with_distributions,
-    get_layer_activations_and_predictions,
-    evaluate_model
+    get_layer_activations_and_predictions
 )
-from app.utils.attack import process_attack_metrics
-from app.utils.attack_full_dataset import process_attack_metrics_full_dataset
-from app.utils.attack_optimized_ps import calculate_ps_with_cached_retrain
-from app.utils.salun_mia import calculate_salun_mia_efficacy
 from app.utils.visualization import compute_umap_embedding
-from app.utils.epoch_plotting import plot_epoch_metrics
-from app.config import (
-	UMAP_DATA_SIZE, 
-	UMAP_DATASET,
-	UNLEARN_SEED
+from app.utils.attack import process_attack_metrics
+from app.utils.thread_base import BaseUnlearningThread
+from app.utils.thread_operations import (
+    setup_umap_subset,
+    update_training_status,
+    prepare_detailed_results,
+    create_base_results_dict,
+    save_results_and_model,
+    print_epoch_progress,
+    evaluate_on_forget_set,
+    calculate_accuracy_metrics,
+    calculate_comprehensive_epoch_metrics,
+    initialize_epoch_metrics_system,
+    update_epoch_metrics_collection,
+    save_epoch_plots
 )
 
 
-class UnlearningFTThread(threading.Thread):
+class UnlearningFTThread(BaseUnlearningThread):
     def __init__(
         self,
+        request,
+        status,
         model_before,
         model_after,
-        device,
-        criterion,
-        optimizer,
-        scheduler,
-        request,
         retain_loader,
         forget_loader,
         train_loader,
         test_loader,
         train_set,
         test_set,
-        status,
+        criterion,
+        optimizer,
+        scheduler,
+        device,
         base_weights_path
     ):
-        threading.Thread.__init__(self)
+        super().__init__()
+        self.request = request
+        self.status = status
         self.model_before = model_before
         self.model = model_after
-        self.device = device
-        self.base_weights_path = base_weights_path
-        self.criterion = criterion
-        self.optimizer = optimizer
-        self.scheduler = scheduler
-        self.request = request
+
         self.retain_loader = retain_loader
         self.forget_loader = forget_loader
         self.train_loader = train_loader
         self.test_loader = test_loader
+
         self.train_set = train_set
         self.test_set = test_set
-        self.status = status
+        
+        self.criterion = criterion
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+        self.device = device
+        self.base_weights_path = base_weights_path
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
 
-        self.exception = None
-        self.loop = None
-        self._stop_event = threading.Event()
-
-    def stop(self):
-        self._stop_event.set()
-
-    def stopped(self):
-        return self._stop_event.is_set()
-
-    def run(self):
-        try:
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.loop.run_until_complete(self.unlearn_FT_model())
-        except Exception as e:
-            self.exception = e
-        finally:
-            if self.loop:
-                self.loop.close()
-        
-    async def unlearn_FT_model(self):
+    async def async_main(self):
         print(f"Starting FT unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
         self.status.method = "Fine-Tuning"
         self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
+
+        umap_subset, umap_subset_loader, selected_indices = setup_umap_subset(
+            self.train_set, self.test_set, self.num_classes
+        )
         
-        # Initialize epoch-wise metrics collection
+        # Initialize epoch-wise metrics collection (all-or-nothing toggle)
+        enable_epoch_metrics = True  # Set to True to enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+        
         epoch_metrics = {
             'UA': [],  # Unlearn Accuracy (train)
-            'TA': [],  # Training Accuracy (remaining classes)
+            'RA': [],  # Retain Accuracy (remaining classes)
             'TUA': [], # Test Unlearn Accuracy
             'TRA': [], # Test Remaining Accuracy
             'PS': [],  # Privacy Score
-            'MIA': []  # MIA-Efficacy (SALUN method)
-        }
+            'C-MIA': [],  # Confidence-based MIA
+            'E-MIA': []   # Entropy-based MIA
+        } if enable_epoch_metrics else {}
         
-        # Initialize MIA classifier (train once with epoch 0 model)
-        self.mia_classifier_trained = False
-        self.mia_shadow_loaders = None
+        # Initialize comprehensive metrics system if enabled
+        metrics_components = None
+        if enable_epoch_metrics:
+            metrics_components = await initialize_epoch_metrics_system(
+                self.model, self.train_set, self.test_set, self.train_loader, self.device,
+                self.request.forget_class, True, True  # Enable both PS and MIA
+            )
         
-        # Pre-calculate retrain metrics once for PS calculation (optimization)
-        retrain_metrics_cache = None
-        if True:  # Will be used if enable_epoch_metrics and use_full_dataset are True
-            try:
-                from app.utils.attack_full_dataset import calculate_model_metrics
-                from app.models import get_resnet18
-                import os
-                
-                retrain_model_path = f"unlearned_models/{self.request.forget_class}/a00{self.request.forget_class}.pth"
-                if os.path.exists(retrain_model_path):
-                    print("Pre-calculating retrain metrics for PS optimization...")
-                    retrain_model = get_resnet18().to(self.device)
-                    retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=self.device))
-                    retrain_model.eval()
-                    
-                    retrain_metrics_cache = await calculate_model_metrics(
-                        retrain_model, self.train_loader, self.device, self.request.forget_class, 2.0, 1.0, create_plots=True, model_name="Retrain"
-                    )
-                    print(f"Retrain metrics cached: {len(retrain_metrics_cache['entropies'])} samples")
-                    
-                    # Free memory
-                    del retrain_model
-                    torch.cuda.empty_cache() if self.device.type == 'cuda' else None
-                else:
-                    print(f"Warning: Retrain model not found at {retrain_model_path}")
-            except Exception as e:
-                print(f"Error pre-calculating retrain metrics: {e}")
-                retrain_metrics_cache = None
-        
-        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        targets = torch.tensor(dataset.targets)
-        class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
-        
-        samples_per_class = UMAP_DATA_SIZE // self.num_classes
-        generator = torch.Generator()
-        generator.manual_seed(UNLEARN_SEED)
-        selected_indices = []
-        for indices in class_indices:
-            perm = torch.randperm(len(indices), generator=generator)
-            selected_indices.extend(indices[perm[:samples_per_class]].tolist())
-        
-        umap_subset = torch.utils.data.Subset(dataset, selected_indices)
-        umap_subset_loader = torch.utils.data.DataLoader(
-            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
-        )
+        start_time = time.time()
 
         # Collect epoch 0 metrics (initial state before training)
-        enable_epoch_metrics = True  # Will be used in training loop too
+        if enable_epoch_metrics:
+            print("Collecting initial metrics (epoch 0)...")
+            initial_metrics = await calculate_comprehensive_epoch_metrics(
+                self.model, self.train_loader, self.test_loader,
+                self.train_set, self.test_set, self.criterion, self.device,
+                self.request.forget_class, enable_epoch_metrics,
+                metrics_components['retrain_metrics_cache'] if metrics_components else None,
+                metrics_components['mia_classifier'] if metrics_components else None
+            )
+            update_epoch_metrics_collection(epoch_metrics, initial_metrics)
 
-        start_time = time.time()
-        
-        # Initialize variables for epoch -1
-        forget_epoch_loss = 0.0
-        forget_epoch_acc = 0.0
-        
-        for epoch in range(-1, self.request.epochs):  # Start from -1 to include epoch 0
+        for epoch in range(self.request.epochs):
+            self.model.train()
+            self.status.current_epoch = epoch + 1
+            running_loss = 0.0
+            total = 0
+            correct = 0
             
-            # Skip training for epoch -1 (collect initial metrics only)
-            if epoch >= 0:
-                self.model.train()
-                self.status.current_epoch = epoch + 1
-                running_loss = 0.0
-                total = 0
-                correct = 0
-                
-                for i, (inputs, labels) in enumerate(self.retain_loader):
-                    if self.stopped():
-                        self.status.is_unlearning = False
-                        print("\nTraining cancelled mid-batch.")
-                        return
+            # FT-specific training: only on retain data
+            for i, (inputs, labels) in enumerate(self.retain_loader):
+                if self.stopped():
+                    self.status.is_unlearning = False
+                    print("\nTraining cancelled mid-batch.")
+                    return
 
-                    inputs, labels = inputs.to(self.device), labels.to(self.device)
-                    self.optimizer.zero_grad()
-                    outputs = self.model(inputs)
-                    loss = self.criterion(outputs, labels)
-                    loss.backward()
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                self.optimizer.zero_grad()
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, labels)
+                loss.backward()
 
-                    self.optimizer.step()
-                    running_loss += loss.item()
+                self.optimizer.step()
+                running_loss += loss.item()
 
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
-                # Evaluate on forget loader after each epoch
-                self.model.eval()
-                forget_running_loss = 0.0
-                forget_correct = 0
-                forget_total = 0
-                
-                with torch.no_grad():
-                    for inputs, labels in self.forget_loader:
-                        inputs, labels = inputs.to(self.device), labels.to(self.device)
-                        outputs = self.model(inputs)
-                        loss = self.criterion(outputs, labels)
-                        forget_running_loss += loss.item()
-
-                        _, predicted = torch.max(outputs.data, 1)
-                        forget_total += labels.size(0)
-                        forget_correct += (predicted == labels).sum().item()
-
-                forget_epoch_loss = forget_running_loss / len(self.forget_loader)
-                forget_epoch_acc = forget_correct / forget_total
-
-                # Status update with forget set metrics
-                elapsed_time = time.time() - start_time
-                estimated_total_time = elapsed_time / (epoch + 1) * self.request.epochs
-                
-                self.status.current_unlearn_loss = forget_epoch_loss
-                self.status.current_unlearn_accuracy = forget_epoch_acc
-                self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
-            else:
-                # For epoch -1, just calculate initial forget metrics for completeness
-                self.model.eval()
-                forget_running_loss = 0.0
-                forget_correct = 0
-                forget_total = 0
-                
-                with torch.no_grad():
-                    for inputs, labels in self.forget_loader:
-                        inputs, labels = inputs.to(self.device), labels.to(self.device)
-                        outputs = self.model(inputs)
-                        loss = self.criterion(outputs, labels)
-                        forget_running_loss += loss.item()
-
-                        _, predicted = torch.max(outputs.data, 1)
-                        forget_total += labels.size(0)
-                        forget_correct += (predicted == labels).sum().item()
-
-                forget_epoch_loss = forget_running_loss / len(self.forget_loader)
-                forget_epoch_acc = forget_correct / forget_total
-
-            # Collect epoch-wise metrics (every epoch)
-            enable_epoch_metrics = True  # Set to False to disable epoch-wise metrics collection
+            # Evaluate on forget loader after each epoch
+            forget_epoch_loss, forget_epoch_acc = evaluate_on_forget_set(
+                self.model, self.forget_loader, self.criterion, self.device
+            )
             
+            # Update status
+            update_training_status(
+                self.status, epoch, self.request.epochs, start_time, 
+                forget_epoch_loss, forget_epoch_acc
+            )
+
+            # Calculate comprehensive epoch metrics if enabled
             if enable_epoch_metrics:
-                display_epoch = epoch + 1 if epoch >= 0 else 0
-                print(f"Collecting metrics for epoch {display_epoch}...")
-                
-                # Evaluate on full train and test sets
-                train_loss, _, train_class_accuracies = await evaluate_model(
-                    self.model, self.train_loader, self.criterion, self.device
+                print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
+                metrics = await calculate_comprehensive_epoch_metrics(
+                    self.model, self.train_loader, self.test_loader,
+                    self.train_set, self.test_set, self.criterion, self.device,
+                    self.request.forget_class, enable_epoch_metrics,
+                    metrics_components['retrain_metrics_cache'] if metrics_components else None,
+                    metrics_components['mia_classifier'] if metrics_components else None
                 )
-                test_loss, _, test_class_accuracies = await evaluate_model(
-                    self.model, self.test_loader, self.criterion, self.device
-                )
-                
-                # Calculate metrics
-                ua = train_class_accuracies[self.request.forget_class]  # Unlearn Accuracy
-                ta = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)  # Train Accuracy
-                tua = test_class_accuracies[self.request.forget_class]  # Test Unlearn Accuracy
-                tra = sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)  # Test Remaining Accuracy
-                
-                # Calculate Privacy Score 
-                # Option 1: Use subset for faster epoch-wise calculation (current)
-                # Option 2: Use full dataset for accurate calculation (slow)
-                use_full_dataset = True  # Set to True for full dataset PS
-                
-                try:
-                    if use_full_dataset and retrain_metrics_cache is not None:
-                        # Use optimized PS calculation with cached retrain metrics
-                        epoch_ps = await calculate_ps_with_cached_retrain(
-                            unlearn_model=self.model, 
-                            data_loader=self.train_loader, 
-                            device=self.device, 
-                            forget_class=self.request.forget_class,
-                            retrain_metrics_cache=retrain_metrics_cache
-                        )
-                    elif use_full_dataset:
-                        # Fallback to original full dataset calculation (slow)
-                        _, _, epoch_ps = await process_attack_metrics_full_dataset(
-                            unlearn_model=self.model, 
-                            data_loader=self.train_loader, 
-                            device=self.device, 
-                            forget_class=self.request.forget_class,
-                            retrain_model_path=f"unlearned_models/{self.request.forget_class}/a00{self.request.forget_class}.pth"
-                        )
-                    else:
-                        # Use subset for efficiency (original approach)
-                        _, _, epoch_ps = await process_attack_metrics(
-                            model=self.model, 
-                            data_loader=umap_subset_loader, 
-                            device=self.device, 
-                            forget_class=self.request.forget_class
-                        )
-                    ps = epoch_ps  # Privacy Score from attack metrics
-                except Exception as e:
-                    print(f"Error calculating PS for epoch {display_epoch}: {e}")
-                    ps = 0.5  # Default value if calculation fails
-                
-                # Calculate MIA-Efficacy using SALUN methodology
-                try:
-                    # Initialize shadow loaders once (epoch 0)
-                    if not self.mia_classifier_trained:
-                        print("Initializing MIA classifier with epoch 0 model...")
-                        # Create shadow loaders (remaining classes for training, all classes for testing)
-                        from torch.utils.data import DataLoader, Subset
-                        
-                        # Shadow train: remaining classes from train set (exclude forget class, balanced 4500 samples)
-                        remaining_train_indices = [i for i, target in enumerate(self.train_set.targets) 
-                                                  if target != self.request.forget_class]
-                        import random
-                        shadow_train_size = min(4500, len(remaining_train_indices))
-                        shadow_train_indices = random.sample(remaining_train_indices, shadow_train_size)
-                        shadow_train_subset = Subset(self.train_set, shadow_train_indices)
-                        shadow_train_loader = DataLoader(shadow_train_subset, batch_size=128, shuffle=False)
-                        
-                        # Shadow test: random sample from test set (exclude forget class, balanced 4500 samples)
-                        remaining_test_indices = [i for i, target in enumerate(self.test_set.targets) 
-                                                 if target != self.request.forget_class]
-                        shadow_test_size = min(4500, len(remaining_test_indices))
-                        shadow_test_indices = random.sample(remaining_test_indices, shadow_test_size)
-                        shadow_test_subset = Subset(self.test_set, shadow_test_indices)
-                        shadow_test_loader = DataLoader(shadow_test_subset, batch_size=128, shuffle=False)
-                        
-                        # Store shadow loaders for reuse
-                        self.mia_shadow_loaders = {
-                            'shadow_train': shadow_train_loader,
-                            'shadow_test': shadow_test_loader
-                        }
-                        
-                        # Train MIA classifier with epoch 0 model
-                        from app.utils.salun_mia import train_mia_classifier_once
-                        self.mia_classifier = await train_mia_classifier_once(
-                            baseline_model=self.model,  # epoch 0 model
-                            shadow_train_loader=shadow_train_loader,
-                            shadow_test_loader=shadow_test_loader,
-                            device=self.device,
-                            forget_class=self.request.forget_class
-                        )
-                        self.mia_classifier_trained = True
-                        print("MIA classifier training completed!")
-                    
-                    # Predict with current model using trained classifier
-                    forget_indices = [i for i, target in enumerate(self.train_set.targets) 
-                                    if target == self.request.forget_class]
-                    forget_subset = Subset(self.train_set, forget_indices)
-                    forget_loader = DataLoader(forget_subset, batch_size=128, shuffle=False)
-                    
-                    from app.utils.salun_mia import predict_mia_efficacy
-                    mia_efficacy = await predict_mia_efficacy(
-                        current_model=self.model,
-                        mia_classifier=self.mia_classifier,
-                        forget_loader=forget_loader,
-                        device=self.device,
-                        forget_class=self.request.forget_class
-                    )
-                    
-                except Exception as e:
-                    print(f"Error calculating MIA-Efficacy for epoch {display_epoch}: {e}")
-                    mia_efficacy = 0.5  # Default value if calculation fails
-                
-                # Store metrics
-                epoch_metrics['UA'].append(ua)
-                epoch_metrics['TA'].append(ta)
-                epoch_metrics['TUA'].append(tua)
-                epoch_metrics['TRA'].append(tra)
-                epoch_metrics['PS'].append(ps)
-                epoch_metrics['MIA'].append(mia_efficacy)
-
-            # Create distribution plots for current model at the last epoch
-            if epoch == self.request.epochs - 1:  # Last epoch
-                print("Creating distribution plots for final unlearn model...")
-                try:
-                    from app.utils.attack_full_dataset import calculate_model_metrics
-                    await calculate_model_metrics(
-                        self.model, self.train_loader, self.device, self.request.forget_class, 2.0, 1.0, create_plots=True, model_name="Unlearn"
-                    )
-                except Exception as e:
-                    print(f"Error creating final model distribution plots: {e}")
-
-            # Get current learning rate
-            current_lr = self.optimizer.param_groups[0]['lr']
+                update_epoch_metrics_collection(epoch_metrics, metrics)
             
-            print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
-            print(f"Learning Rate: {current_lr:.6f}")
-            print(f"Forget Loss: {forget_epoch_loss:.4f}, Forget Accuracy: {forget_epoch_acc:.3f}")
+            # Print progress
+            additional_metrics = None
+            if enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
+                additional_metrics = {
+                    'UA': epoch_metrics['UA'][-1],
+                    'RA': epoch_metrics['RA'][-1],
+                    'TUA': epoch_metrics['TUA'][-1],
+                    'TRA': epoch_metrics['TRA'][-1],
+                    'PS': epoch_metrics['PS'][-1],
+                    'C-MIA': epoch_metrics['C-MIA'][-1],
+                    'E-MIA': epoch_metrics['E-MIA'][-1]
+                }
             
-            # Show metrics if collected this epoch
-            if len(epoch_metrics['UA']) > 0:
-                latest_ua = epoch_metrics['UA'][-1]
-                latest_ta = epoch_metrics['TA'][-1]
-                latest_tua = epoch_metrics['TUA'][-1]
-                latest_tra = epoch_metrics['TRA'][-1]
-                latest_ps = epoch_metrics['PS'][-1]
-                latest_mia = epoch_metrics['MIA'][-1]
-                
-                print(f"Metrics - UA: {latest_ua:.3f}, TA: {latest_ta:.3f}, TUA: {latest_tua:.3f}, TRA: {latest_tra:.3f}, PS: {latest_ps:.3f}, MIA: {latest_mia:.3f}")
-            
-            print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
-            
-            # Update learning rate scheduler (skip for initial epoch -1)
-            if epoch >= 0:
-                self.scheduler.step()
+            print_epoch_progress(
+                epoch + 1, self.request.epochs, forget_epoch_loss, forget_epoch_acc,
+                eta=self.status.estimated_time_remaining,
+                additional_metrics=additional_metrics
+            )
 
         rte = time.time() - start_time
-        
 
-        if self.stopped():
-            self.status.is_unlearning = False
+        if self.check_stopped_and_return(self.status):
             return
 
         # Evaluate on train set
@@ -424,10 +200,9 @@ class UnlearningFTThread(threading.Thread):
             model=self.model, 
             data_loader=self.train_loader,
             criterion=self.criterion, 
-            device=self.device,
-            # forget_class=self.request.forget_class
+            device=self.device
         )
-        
+
         # Update training evaluation status for remain classes only
         self.status.p_training_loss = train_loss
         remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
@@ -445,7 +220,7 @@ class UnlearningFTThread(threading.Thread):
 
         if self.stopped():
             return
-
+        
         # Evaluate on test set
         self.status.progress = "Evaluating Test Set"
         print("Start Test set evaluation")
@@ -459,8 +234,7 @@ class UnlearningFTThread(threading.Thread):
             model=self.model, 
             data_loader=self.test_loader, 
             criterion=self.criterion, 
-            device=self.device,
-            # forget_class=self.request.forget_class   
+            device=self.device
         )
 
         # Update test evaluation status for remain classes only
@@ -473,10 +247,9 @@ class UnlearningFTThread(threading.Thread):
             print(f"  Class {i}: {acc:.3f}")
         print(f"Test set evaluation finished at {time.time() - start_time:.3f} seconds")
 
-        if self.stopped():
-            self.status.is_unlearning = False
+        if self.check_stopped_and_return(self.status):
             return
-
+        
         # UMAP and activation calculation
         self.status.progress = "Computing UMAP"
         
@@ -490,7 +263,6 @@ class UnlearningFTThread(threading.Thread):
             data_loader=umap_subset_loader,
             device=self.device,
         )
-        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
 
         # UMAP embedding computation
         print("Computing UMAP embedding")
@@ -501,9 +273,8 @@ class UnlearningFTThread(threading.Thread):
             forget_class=self.request.forget_class,
             forget_labels=forget_labels
         )
-        print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
-
-        # Process attack metrics using the same umap_subset_loader (no visualization here)
+        
+        # Process attack metrics using the same umap_subset_loader
         print("Processing attack metrics on UMAP subset")
         values, attack_results, fqs = await process_attack_metrics(
             model=self.model, 
@@ -511,6 +282,7 @@ class UnlearningFTThread(threading.Thread):
             device=self.device, 
             forget_class=self.request.forget_class
         )
+
         # CKA similarity calculation
         self.status.progress = "Calculating CKA Similarity"
         print("Calculating CKA similarity")
@@ -519,42 +291,33 @@ class UnlearningFTThread(threading.Thread):
             model_after=self.model,
             forget_class=self.request.forget_class,
             device=self.device,
-            batch_size=self.request.batch_size
         )
-        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
+        # Calculate accuracy metrics after both train and test evaluations
+        accuracy_metrics = calculate_accuracy_metrics(
+            train_class_accuracies, test_class_accuracies, 
+            self.request.forget_class, self.num_classes
+        )
+        
         # Prepare detailed results
-        detailed_results = []
-        for i in range(len(umap_subset)):
-            original_index = selected_indices[i]
-            ground_truth = umap_subset.dataset.targets[original_index]
-            is_forget = (ground_truth == self.request.forget_class)
-            detailed_results.append([
-                int(ground_truth),                             # gt
-                int(predicted_labels[i]),                      # pred
-                int(original_index),                           # img
-                1 if is_forget else 0,                         # forget as binary
-                round(float(umap_embedding[i][0]), 2),         # x coordinate
-                round(float(umap_embedding[i][1]), 2),         # y coordinate
-                compress_prob_array(probs[i].tolist()),        # compressed probabilities
-            ])
-
+        self.status.progress = "Preparing Results"
+        detailed_results = prepare_detailed_results(
+            umap_subset, selected_indices, predicted_labels, 
+            umap_embedding, probs, self.request.forget_class
+        )
+        
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
         test_remain_accuracy = round(
            sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
         )
 
-        # Prepare results dictionary
-        results = {
-            "CreatedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-            "ID": self.status.recent_id,
-            "FC": self.request.forget_class,
-            "Type": "Unlearned",
-            "Base": os.path.basename(self.base_weights_path).replace('.pth', ''),
-            "Method": "FineTuning",
-            "Epoch": self.request.epochs,
-            "BS": self.request.batch_size,
-            "LR": self.request.learning_rate,
+        # Create results dictionary
+        results = create_base_results_dict(
+            self.status, self.request.forget_class, self.base_weights_path, 
+            "FineTuning", self.request
+        )
+        
+        results.update({
             "UA": round(unlearn_accuracy, 3),
             "RA": remain_accuracy,
             "TUA": round(test_unlearn_accuracy, 3),
@@ -575,39 +338,25 @@ class UnlearningFTThread(threading.Thread):
                 "values": values,
                 "results": attack_results
             }
-        }
-
+        })
+        
         # Generate epoch-wise plots if we have collected metrics
-        if epoch_metrics['UA']:  # Check if we have any metrics collected
+        if enable_epoch_metrics and epoch_metrics:
             print("Generating epoch-wise plots...")
-            try:
-                plot_path = plot_epoch_metrics(
-                    epoch_metrics=epoch_metrics,
-                    method="FT",
-                    forget_class=self.request.forget_class,
-                    experiment_id=self.status.recent_id
-                )
+            plot_path = save_epoch_plots(
+                epoch_metrics, "FT", self.request.forget_class, self.status.recent_id
+            )
+            if plot_path:
                 results["epoch_plot_path"] = plot_path
-            except Exception as e:
-                print(f"Error generating epoch plot: {e}")
+            
+            # Add epoch metrics to results
+            results["epoch_metrics"] = epoch_metrics
 
-        # Add epoch metrics to results
-        results["epoch_metrics"] = epoch_metrics
-
-        # Save results to JSON file
-        os.makedirs('data', exist_ok=True)
-        forget_class_dir = os.path.join('data', str(self.request.forget_class))
-        os.makedirs(forget_class_dir, exist_ok=True)
-
-        result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')  
-        with open(result_path, 'w') as f:
-            json.dump(results, f, indent=2)
-
-        save_model(
-            model=self.model, 
-            forget_class=self.request.forget_class,
-            model_name=self.status.recent_id,
+        # Save results and model
+        result_path = save_results_and_model(
+            results, self.model, self.request.forget_class, self.status
         )
+        
         print(f"Results saved to {result_path}")
         print("FT Unlearning inference completed!")
         self.status.progress = "Completed"

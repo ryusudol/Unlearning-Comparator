@@ -16,7 +16,7 @@ def plot_epoch_metrics(
     
     Args:
         epoch_metrics: Dict containing lists of metrics per epoch
-                      Expected keys: 'UA', 'TA', 'TUA', 'TRA', 'PS', 'MIA'
+                      Expected keys: 'UA', 'RA', 'TUA', 'TRA', 'PS', 'C-MIA', 'E-MIA'
         method: Unlearning method name (FT, GA, RL, etc.)
         forget_class: The class being forgotten
         experiment_id: Unique experiment identifier
@@ -34,26 +34,50 @@ def plot_epoch_metrics(
     # Start epochs from 0 instead of 1
     epochs = range(0, len(epoch_metrics['UA']))
     
-    # Plot all metrics with distinct colors
-    ax.plot(epochs, epoch_metrics['UA'], 'red', linewidth=2.5, label='UA (Unlearn Accuracy)', marker='o', markersize=4)
-    ax.plot(epochs, epoch_metrics['TA'], 'blue', linewidth=2.5, label='TA (Train Retain Accuracy)', marker='s', markersize=4)
-    ax.plot(epochs, epoch_metrics['TUA'], 'orange', linewidth=2.5, label='TUA (Test Unlearn Accuracy)', marker='^', markersize=4)
-    ax.plot(epochs, epoch_metrics['TRA'], 'green', linewidth=2.5, label='TRA (Test Retain Accuracy)', marker='d', markersize=4)
-    ax.plot(epochs, epoch_metrics['PS'], 'purple', linewidth=2.5, label='PS (Ours)', marker='*', markersize=6)
+    # Plot all metrics with specified styles
+    # UA, TUA: X 마커 (뚱뚱한 X)
+    ax.plot(epochs, epoch_metrics['UA'], color='darkgreen', linewidth=2.5, linestyle='-', 
+            label='UA (Unlearn Accuracy)', marker='X', markersize=12)
+    ax.plot(epochs, epoch_metrics['TUA'], color='green', linewidth=2.5, linestyle='--', 
+            label='TUA (Test Unlearn Accuracy)', marker='X', markersize=12)
     
-    if 'MIA' in epoch_metrics and len(epoch_metrics['MIA']) > 0:
-        ax.plot(epochs, epoch_metrics['MIA'], 'brown', linewidth=2.5, label='MIA (SALUN)', marker='x', markersize=6)
+    # RA, TRA: 동그라미 마커
+    ax.plot(epochs, epoch_metrics['RA'], color='darkgreen', linewidth=2.5, linestyle='-', 
+            label='RA (Remain Accuracy)', marker='o', markersize=12)
+    ax.plot(epochs, epoch_metrics['TRA'], color='green', linewidth=2.5, linestyle='--', 
+            label='TRA (Test Remain Accuracy)', marker='o', markersize=12)
+    
+    # PS: 1점 쇄선, 진한 주황(거의 빨간색), 별 마커
+    ax.plot(epochs, epoch_metrics['PS'], color='#FF4500', linewidth=2.5, linestyle='-.',
+            label='PS (Ours)', marker='*', markersize=14)
+    
+    # MIA: C-MIA와 E-MIA의 최솟값으로 계산, 더 진한 주황색, 세모 마커
+    if 'C-MIA' in epoch_metrics and 'E-MIA' in epoch_metrics and len(epoch_metrics['C-MIA']) > 0 and len(epoch_metrics['E-MIA']) > 0:
+        # 각 에포크별로 C-MIA와 E-MIA의 최솟값 계산
+        mia_min = [min(c, e) for c, e in zip(epoch_metrics['C-MIA'], epoch_metrics['E-MIA'])]
+        ax.plot(epochs, mia_min, color='#FF7F00', linewidth=2.5, linestyle='-.',
+                label='MIA', marker='^', markersize=12)
+    elif 'C-MIA' in epoch_metrics and len(epoch_metrics['C-MIA']) > 0:
+        # C-MIA만 있는 경우
+        ax.plot(epochs, epoch_metrics['C-MIA'], color='#FF7F00', linewidth=2.5, linestyle='-.',
+                label='MIA', marker='^', markersize=12)
+    elif 'E-MIA' in epoch_metrics and len(epoch_metrics['E-MIA']) > 0:
+        # E-MIA만 있는 경우
+        ax.plot(epochs, epoch_metrics['E-MIA'], color='#FF7F00', linewidth=2.5, linestyle='-.',
+                label='MIA', marker='^', markersize=12)
     
     ax.set_title('All Unlearning Metrics', fontsize=14, fontweight='bold')
     ax.set_xlabel('Epoch', fontsize=12)
     ax.set_ylabel('Value', fontsize=12)
     ax.grid(True, alpha=0.3)
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
-    ax.set_ylim(0, 1)
-    ax.set_xlim(0, len(epoch_metrics['UA']) - 1)
+    # Set limits with margin to prevent marker clipping
+    num_epochs = len(epoch_metrics['UA'])
+    ax.set_ylim(-0.05, 1.05)  # Add 5% margin on top and bottom
+    ax.set_xlim(-0.5, num_epochs - 0.5)  # Add margin on left and right
     
     # Set x-axis ticks to show all epochs starting from 0
-    ax.set_xticks(range(0, len(epoch_metrics['UA'])))
+    ax.set_xticks(range(0, num_epochs))
     
     plt.tight_layout()
     
@@ -84,7 +108,7 @@ def plot_comparison_metrics(
     plot_dir = os.path.join(save_dir, str(forget_class))
     os.makedirs(plot_dir, exist_ok=True)
     
-    metric_names = ['UA', 'TA', 'TUA', 'TRA', 'PS']
+    metric_names = ['UA', 'RA', 'TUA', 'TRA', 'PS']
     
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
     fig.suptitle(f'Unlearning Methods Comparison - Class {forget_class}', 
@@ -105,8 +129,9 @@ def plot_comparison_metrics(
         axes[row, col].set_ylabel('Value')
         axes[row, col].grid(True, alpha=0.3)
         axes[row, col].legend()
-        axes[row, col].set_ylim(0, 1)
+        axes[row, col].set_ylim(-0.05, 1.05)  # Add margin to prevent marker clipping
         max_epochs = max(len(metrics[metric]) for metrics in all_metrics.values() if metric in metrics)
+        axes[row, col].set_xlim(0.5, max_epochs + 0.5)  # Add margin on left and right
         axes[row, col].set_xticks(range(1, max_epochs + 1))
     
     # Hide the last subplot if not needed

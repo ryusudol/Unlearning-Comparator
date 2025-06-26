@@ -8,6 +8,67 @@ import matplotlib.pyplot as plt
 from app.models import get_resnet18
 
 
+def _create_single_distribution_plot(data, title, xlabel, color, filename, mean_value):
+    """Create a single distribution plot with consistent styling."""
+    plt.figure(figsize=(10, 6))
+    plt.hist(data, bins=30, alpha=0.7, color=color, edgecolor='black')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel('Frequency')
+    plt.grid(True, alpha=0.3)
+    plt.axvline(mean_value, color='red', linestyle='--', 
+               label=f'Mean: {mean_value:.3f}')
+    plt.legend()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+
+
+def _create_distribution_plots(entropies, confidences, losses, model_name, forget_class, t1, t2):
+    """Create distribution plots for entropy, confidence, and loss."""
+    try:
+        # Create output directory
+        os.makedirs('logits_distribution', exist_ok=True)
+        
+        # Define plot configurations
+        plot_configs = [
+            {
+                'data': entropies,
+                'title': f'{model_name} - Entropy Distribution for Class {forget_class} (t1={t1})',
+                'xlabel': 'Entropy',
+                'color': 'skyblue',
+                'filename': f'logits_distribution/{model_name.lower()}_entropy_dist_class_{forget_class}_t1_{t1}.png'
+            },
+            {
+                'data': confidences,
+                'title': f'{model_name} - Confidence Distribution for Class {forget_class} (t2={t2})',
+                'xlabel': 'Confidence',
+                'color': 'lightgreen',
+                'filename': f'logits_distribution/{model_name.lower()}_confidence_dist_class_{forget_class}_t2_{t2}.png'
+            },
+            {
+                'data': losses,
+                'title': f'{model_name} - Loss Distribution for Class {forget_class}',
+                'xlabel': 'Cross Entropy Loss',
+                'color': 'orange',
+                'filename': f'logits_distribution/{model_name.lower()}_loss_dist_class_{forget_class}.png'
+            }
+        ]
+        
+        # Create plots
+        saved_paths = []
+        for config in plot_configs:
+            _create_single_distribution_plot(
+                config['data'], config['title'], config['xlabel'], 
+                config['color'], config['filename'], np.mean(config['data'])
+            )
+            saved_paths.append(config['filename'])
+        
+        print(f"{model_name} distribution plots saved: {', '.join(saved_paths)}")
+        
+    except Exception as e:
+        print(f"Error creating {model_name} distribution plots: {e}")
+
+
 # Import the original attack calculation functions
 def calculate_scores(
         values_unlearn, 
@@ -273,7 +334,8 @@ async def calculate_model_metrics(
     """
     Calculate entropy and confidence metrics for a model on the forget class data.
     """
-    model.eval()
+    from app.utils.evaluation import model_eval_mode
+    
     entropies = []
     confidences = []
     losses = []
@@ -282,103 +344,55 @@ async def calculate_model_metrics(
     # Create loss function for loss calculation
     criterion = torch.nn.CrossEntropyLoss(reduction='none')
     
-    with torch.no_grad():
-        for batch_idx, (images, labels) in enumerate(data_loader):
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
-            
-            # Select only forget class samples
-            forget_mask = (labels == forget_class)
-            if not torch.any(forget_mask):
-                continue
-            
-            local_indices = torch.where(forget_mask)[0]
-            batch_start_idx = batch_idx * data_loader.batch_size
-            
-            # Calculate original indices
-            if hasattr(data_loader.dataset, 'indices'):
-                # If using Subset
-                original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
-                                  for idx in local_indices]
-            else:
-                # If using full dataset
-                original_indices = [batch_start_idx + idx.item() for idx in local_indices]
-            
-            selected_outputs = outputs[forget_mask]
-            selected_labels = labels[forget_mask]
-            
-            # Calculate loss
-            batch_losses = criterion(selected_outputs, selected_labels).cpu().numpy()
-            
-            # Calculate entropy
-            scaled_outputs_entropy = selected_outputs / t1
-            probs_entropy = F.softmax(scaled_outputs_entropy, dim=1)
-            batch_entropies = entropy(probs_entropy.cpu().numpy().T)
-            
-            # Calculate confidence
-            scaled_outputs_conf = selected_outputs / t2
-            probs_conf = F.softmax(scaled_outputs_conf, dim=1).cpu().numpy()
-            max_probs = np.max(probs_conf, axis=1)
-            other_probs = 1 - max_probs
-            batch_confidences = np.log(max_probs + 1e-45) - np.log(other_probs + 1e-45)
-            
-            indices.extend(original_indices)
-            entropies.extend(batch_entropies)
-            confidences.extend(batch_confidences)
-            losses.extend(batch_losses)
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for batch_idx, (images, labels) in enumerate(data_loader):
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                
+                # Select only forget class samples
+                forget_mask = (labels == forget_class)
+                if not torch.any(forget_mask):
+                    continue
+                
+                local_indices = torch.where(forget_mask)[0]
+                batch_start_idx = batch_idx * data_loader.batch_size
+                
+                # Calculate original indices
+                if hasattr(data_loader.dataset, 'indices'):
+                    # If using Subset
+                    original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
+                                      for idx in local_indices]
+                else:
+                    # If using full dataset
+                    original_indices = [batch_start_idx + idx.item() for idx in local_indices]
+                
+                selected_outputs = outputs[forget_mask]
+                selected_labels = labels[forget_mask]
+                
+                # Calculate loss
+                batch_losses = criterion(selected_outputs, selected_labels).cpu().numpy()
+                
+                # Calculate entropy
+                scaled_outputs_entropy = selected_outputs / t1
+                probs_entropy = F.softmax(scaled_outputs_entropy, dim=1)
+                batch_entropies = entropy(probs_entropy.cpu().numpy().T)
+                
+                # Calculate confidence
+                scaled_outputs_conf = selected_outputs / t2
+                probs_conf = F.softmax(scaled_outputs_conf, dim=1).cpu().numpy()
+                max_probs = np.max(probs_conf, axis=1)
+                other_probs = 1 - max_probs
+                batch_confidences = np.log(max_probs + 1e-45) - np.log(other_probs + 1e-45)
+                
+                indices.extend(original_indices)
+                entropies.extend(batch_entropies)
+                confidences.extend(batch_confidences)
+                losses.extend(batch_losses)
     
-    # Create visualizations only when requested (for retrain model or final unlearn model)
+    # Create visualizations only when requested
     if create_plots and len(entropies) > 0:
-        try:
-            # Create output directory
-            os.makedirs('logits_distribution', exist_ok=True)
-            
-            # Entropy distribution plot
-            plt.figure(figsize=(10, 6))
-            plt.hist(entropies, bins=30, alpha=0.7, color='skyblue', edgecolor='black')
-            plt.title(f'{model_name} - Entropy Distribution for Class {forget_class} (t1={t1})')
-            plt.xlabel('Entropy')
-            plt.ylabel('Frequency')
-            plt.grid(True, alpha=0.3)
-            plt.axvline(np.mean(entropies), color='red', linestyle='--', 
-                       label=f'Mean: {np.mean(entropies):.3f}')
-            plt.legend()
-            entropy_path = f'logits_distribution/{model_name.lower()}_entropy_dist_class_{forget_class}_t1_{t1}.png'
-            plt.savefig(entropy_path, dpi=300, bbox_inches='tight')
-            plt.close()
-            
-            # Confidence distribution plot
-            plt.figure(figsize=(10, 6))
-            plt.hist(confidences, bins=30, alpha=0.7, color='lightgreen', edgecolor='black')
-            plt.title(f'{model_name} - Confidence Distribution for Class {forget_class} (t2={t2})')
-            plt.xlabel('Confidence')
-            plt.ylabel('Frequency')
-            plt.grid(True, alpha=0.3)
-            plt.axvline(np.mean(confidences), color='red', linestyle='--', 
-                       label=f'Mean: {np.mean(confidences):.3f}')
-            plt.legend()
-            confidence_path = f'logits_distribution/{model_name.lower()}_confidence_dist_class_{forget_class}_t2_{t2}.png'
-            plt.savefig(confidence_path, dpi=300, bbox_inches='tight')
-            plt.close()
-            
-            # Loss distribution plot
-            plt.figure(figsize=(10, 6))
-            plt.hist(losses, bins=30, alpha=0.7, color='orange', edgecolor='black')
-            plt.title(f'{model_name} - Loss Distribution for Class {forget_class}')
-            plt.xlabel('Cross Entropy Loss')
-            plt.ylabel('Frequency')
-            plt.grid(True, alpha=0.3)
-            plt.axvline(np.mean(losses), color='red', linestyle='--', 
-                       label=f'Mean: {np.mean(losses):.3f}')
-            plt.legend()
-            loss_path = f'logits_distribution/{model_name.lower()}_loss_dist_class_{forget_class}.png'
-            plt.savefig(loss_path, dpi=300, bbox_inches='tight')
-            plt.close()
-            
-            print(f"{model_name} distribution plots saved: {entropy_path}, {confidence_path}, {loss_path}")
-            
-        except Exception as e:
-            print(f"Error creating {model_name} distribution plots: {e}")
+        _create_distribution_plots(entropies, confidences, losses, model_name, forget_class, t1, t2)
     
     return {
         "indices": indices,

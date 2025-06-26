@@ -5,11 +5,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from datetime import datetime
+from contextlib import contextmanager
 
 from torch_cka import CKA
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from app.config import UMAP_DATA_SIZE
+
+
+@contextmanager
+def model_eval_mode(model):
+    """Context manager to temporarily set model to eval mode and restore original state."""
+    was_training = model.training
+    model.eval()
+    try:
+        yield model
+    finally:
+        if was_training:
+            model.train()
 
 
 async def get_layer_activations_and_predictions(
@@ -18,8 +31,6 @@ async def get_layer_activations_and_predictions(
     device, 
     num_samples=UMAP_DATA_SIZE
 ):
-    was_training = model.training
-    model.eval()
     activations = []
     predictions = []
     probabilities = []
@@ -28,61 +39,59 @@ async def get_layer_activations_and_predictions(
     def hook_fn(module, input, output):
         activations.append(output.detach().cpu().numpy())
 
-    hook = model.avgpool.register_forward_hook(hook_fn)
+    with model_eval_mode(model):
+        hook = model.avgpool.register_forward_hook(hook_fn)
+        
+        with torch.no_grad():
+            for inputs, labels in data_loader:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
 
-    with torch.no_grad():
-        for inputs, labels in data_loader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+                outputs = model(inputs)
+                _, predicted = outputs.max(1)
+                predictions.extend(predicted.cpu().numpy())
 
-            outputs = model(inputs)
-            _, predicted = outputs.max(1)
-            predictions.extend(predicted.cpu().numpy())
+                temperature = 2.0 
+                scaled_outputs = outputs / temperature
+                probs = F.softmax(scaled_outputs, dim=1)
+                probabilities.extend(probs.cpu().numpy())
 
-            temperature = 2.0 
-            scaled_outputs = outputs / temperature
-            probs = F.softmax(scaled_outputs, dim=1)
-            probabilities.extend(probs.cpu().numpy())
+                sample_count += inputs.size(0)
+                if sample_count >= num_samples:
+                    break
 
-            sample_count += inputs.size(0)
-            if sample_count >= num_samples:
-                break
+        hook.remove()
 
-    hook.remove()
+        activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
+        predictions = np.array(predictions)
+        probabilities = np.array(probabilities)
 
-    activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
-    predictions = np.array(predictions)
-    probabilities = np.array(probabilities)
-
-    if was_training:
-        model.train()
     return activations, predictions, probabilities
 
 # For training and retraining
 async def evaluate_model(model, data_loader, criterion, device): 
-    was_training = model.training
-    model.eval()
     total_loss = 0
     correct = 0
     total = 0
     class_correct = [0] * 10
     class_total = [0] * 10
     
-    with torch.no_grad():
-        for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            total_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total += labels.size(0)
-            correct += predicted.eq(labels).sum().item()
-            
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for data in data_loader:
+                images, labels = data[0].to(device), data[1].to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+                
+                c = (predicted == labels).squeeze()
+                for i in range(len(labels)):
+                    label = labels[i]
+                    class_correct[label] += c[i].item()
+                    class_total[label] += 1
     
     accuracy = correct / total
     class_accuracies = {
@@ -98,8 +107,6 @@ async def evaluate_model(model, data_loader, criterion, device):
             f"total: {class_total[i]}, "
             f"accuracy: {class_accuracies[i]:.4f}"
         )
-    if was_training:
-        model.train()
     return avg_loss, accuracy, class_accuracies
 
 def visualize_logits_distribution(all_logits, class_logits, save_dir="aaai_exp"):
@@ -237,8 +244,6 @@ def visualize_logits_distribution(all_logits, class_logits, save_dir="aaai_exp")
     return timestamp
 
 async def evaluate_model_with_distributions(model, data_loader, criterion, device):
-    was_training = model.training
-    model.eval()
     total_loss = 0
     correct = 0
     total = 0
@@ -251,38 +256,39 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     all_logits = []  # Store all logits for distribution visualization
     class_logits = [[] for _ in range(10)]  # Store logits for each class separately
     
-    with torch.no_grad():
-        for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            total_loss += loss.item()
-            
-            # Collect raw logits before softmax
-            all_logits.append(outputs.cpu().numpy())
-            
-            # Collect logits for each class
-            for i in range(labels.size(0)):
-                label = labels[i].item()
-                class_logits[label].append(outputs[i].cpu().numpy())
-            
-            temperature = 1.0
-            scaled_outputs = outputs / temperature
-            probabilities = F.softmax(scaled_outputs, dim=1)
-            _, predicted = torch.max(probabilities, 1)
-            
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-            for i in range(labels.size(0)):
-                label = labels[i].item()
-                pred = predicted[i].item()
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for data in data_loader:
+                images, labels = data[0].to(device), data[1].to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
                 
-                class_total[label] += 1
-                if label == pred:
-                    class_correct[label] += 1
+                # Collect raw logits before softmax
+                all_logits.append(outputs.cpu().numpy())
                 
-                label_distribution[label][pred] += 1
-                confidence_sum[label] += probabilities[i].cpu().numpy()
+                # Collect logits for each class
+                for i in range(labels.size(0)):
+                    label = labels[i].item()
+                    class_logits[label].append(outputs[i].cpu().numpy())
+                
+                temperature = 1.0
+                scaled_outputs = outputs / temperature
+                probabilities = F.softmax(scaled_outputs, dim=1)
+                _, predicted = torch.max(probabilities, 1)
+                
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                for i in range(labels.size(0)):
+                    label = labels[i].item()
+                    pred = predicted[i].item()
+                    
+                    class_total[label] += 1
+                    if label == pred:
+                        class_correct[label] += 1
+                    
+                    label_distribution[label][pred] += 1
+                    confidence_sum[label] += probabilities[i].cpu().numpy()
 
     # Convert logits to numpy arrays
     all_logits = np.concatenate(all_logits, axis=0)
@@ -300,8 +306,6 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
 
     label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
     confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
-    if was_training:
-        model.train()
     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
 
 async def calculate_cka_similarity(
@@ -339,16 +343,6 @@ async def calculate_cka_similarity(
         'layer4.1',
         'fc'
     ]
-    model_before.eval()
-    model_after.eval()
-    
-    cka = CKA(model_before, 
-              model_after, 
-              model1_name="Before Unlearning", 
-              model2_name="After Unlearning",
-              model1_layers=detailed_layers, 
-              model2_layers=detailed_layers, 
-              device=device)
     
     def filter_loader(loader, is_train=False):
         targets = loader.dataset.targets
@@ -398,7 +392,6 @@ async def calculate_cka_similarity(
             from app.models import get_resnet18
             retrain_model = get_resnet18().to(device)
             retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=device))
-            retrain_model.eval()
             retrain_model_loaded = True
             print(f"Loaded retrain model from {retrain_model_path}")
         except Exception as e:
@@ -409,40 +402,51 @@ async def calculate_cka_similarity(
         print(f"Retrain model not found at {retrain_model_path}")
         retrain_model_loaded = False
     
-    with torch.no_grad():
-        # Original comparison: before vs after
-        cka.compare(forget_class_train_loader, forget_class_train_loader)
-        results_forget_train = cka.export()
-        cka.compare(other_classes_train_loader, other_classes_train_loader)
-        results_other_train = cka.export()
-        cka.compare(forget_class_test_loader, forget_class_test_loader)
-        results_forget_test = cka.export()
-        cka.compare(other_classes_test_loader, other_classes_test_loader)
-        results_other_test = cka.export()
+    with model_eval_mode(model_before), model_eval_mode(model_after):
         
-        # Retrain comparison: retrain vs unlearned
-        retrain_results_forget_train = None
-        retrain_results_other_train = None
-        retrain_results_forget_test = None
-        retrain_results_other_test = None
+        cka = CKA(model_before, 
+                  model_after, 
+                  model1_name="Before Unlearning", 
+                  model2_name="After Unlearning",
+                  model1_layers=detailed_layers, 
+                  model2_layers=detailed_layers, 
+                  device=device)
         
-        if retrain_model_loaded and retrain_model is not None:
-            cka_retrain = CKA(retrain_model, 
-                            model_after, 
-                            model1_name="Retrain Model", 
-                            model2_name="Unlearned Model",
-                            model1_layers=detailed_layers, 
-                            model2_layers=detailed_layers, 
-                            device=device)
+        with torch.no_grad():
+            # Original comparison: before vs after
+            cka.compare(forget_class_train_loader, forget_class_train_loader)
+            results_forget_train = cka.export()
+            cka.compare(other_classes_train_loader, other_classes_train_loader)
+            results_other_train = cka.export()
+            cka.compare(forget_class_test_loader, forget_class_test_loader)
+            results_forget_test = cka.export()
+            cka.compare(other_classes_test_loader, other_classes_test_loader)
+            results_other_test = cka.export()
             
-            cka_retrain.compare(forget_class_train_loader, forget_class_train_loader)
-            retrain_results_forget_train = cka_retrain.export()
-            cka_retrain.compare(other_classes_train_loader, other_classes_train_loader)
-            retrain_results_other_train = cka_retrain.export()
-            cka_retrain.compare(forget_class_test_loader, forget_class_test_loader)
-            retrain_results_forget_test = cka_retrain.export()
-            cka_retrain.compare(other_classes_test_loader, other_classes_test_loader)
-            retrain_results_other_test = cka_retrain.export()
+            # Retrain comparison: retrain vs unlearned
+            retrain_results_forget_train = None
+            retrain_results_other_train = None
+            retrain_results_forget_test = None
+            retrain_results_other_test = None
+            
+            if retrain_model_loaded and retrain_model is not None:
+                with model_eval_mode(retrain_model):
+                    cka_retrain = CKA(retrain_model, 
+                                    model_after, 
+                                    model1_name="Retrain Model", 
+                                    model2_name="Unlearned Model",
+                                    model1_layers=detailed_layers, 
+                                    model2_layers=detailed_layers, 
+                                    device=device)
+                    
+                    cka_retrain.compare(forget_class_train_loader, forget_class_train_loader)
+                    retrain_results_forget_train = cka_retrain.export()
+                    cka_retrain.compare(other_classes_train_loader, other_classes_train_loader)
+                    retrain_results_other_train = cka_retrain.export()
+                    cka_retrain.compare(forget_class_test_loader, forget_class_test_loader)
+                    retrain_results_forget_test = cka_retrain.export()
+                    cka_retrain.compare(other_classes_test_loader, other_classes_test_loader)
+                    retrain_results_other_test = cka_retrain.export()
     
     def format_cka_results(results):
         if results is None:
