@@ -3,6 +3,8 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.config import UNLEARN_SEED
 import torch
+from PIL import Image
+import os
 
 def load_cifar10_data():
     """Load CIFAR-10 training data with automatic download"""
@@ -12,6 +14,39 @@ def load_cifar10_data():
     # Convert to numpy array in the format we need
     x_train = train_set.data  # This is already in (N, 32, 32, 3) format
     y_train = np.array(train_set.targets)
+    
+    return x_train, y_train
+
+def load_face_data():
+    """Load face dataset training data as numpy arrays using ImageFolder"""
+    from torchvision import datasets, transforms
+    
+    train_dir = './data/face/train'
+    
+    # Use ImageFolder to automatically handle class mapping like in training
+    transform = transforms.Compose([
+        transforms.Resize((160, 160)),
+        transforms.ToTensor()
+    ])
+    
+    dataset = datasets.ImageFolder(root=train_dir, transform=transform)
+    
+    # Convert to numpy arrays
+    x_train = []
+    y_train = []
+    
+    for i in range(len(dataset)):
+        image_tensor, label = dataset[i]
+        # Convert tensor back to numpy array (H, W, C) format
+        image_array = (image_tensor.permute(1, 2, 0).numpy() * 255).astype('uint8')
+        x_train.append(image_array)
+        y_train.append(label)
+    
+    x_train = np.array(x_train)
+    y_train = np.array(y_train)
+    
+    print(f"Loaded {len(x_train)} face images from {len(np.unique(y_train))} classes")
+    print(f"ImageFolder class order: {dataset.classes}")
     
     return x_train, y_train
 
@@ -77,5 +112,30 @@ def get_fixed_umap_indices(total_samples=2000, seed=UNLEARN_SEED):
         class_indices = (targets_tensor == i).nonzero(as_tuple=False).squeeze()
         perm = torch.randperm(len(class_indices), generator=generator)
         indices_dict[i] = class_indices[perm[:samples_per_class]].tolist()
+        
+    return indices_dict
+
+def get_fixed_face_umap_indices(total_samples=2000, seed=UNLEARN_SEED):
+    """Get fixed indices for face dataset sampling for UMAP visualization"""
+    _, y_train = load_face_data()
+    num_classes = 10
+    targets_tensor = torch.tensor(y_train)
+    
+    samples_per_class = total_samples // num_classes
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    
+    indices_dict = {}
+    for i in range(num_classes):
+        class_indices = (targets_tensor == i).nonzero(as_tuple=False).squeeze()
+        if len(class_indices.shape) == 0:  # Handle case with single element
+            class_indices = class_indices.unsqueeze(0)
+        
+        # Ensure we don't try to sample more than available
+        available_samples = len(class_indices)
+        actual_samples = min(samples_per_class, available_samples)
+        
+        perm = torch.randperm(available_samples, generator=generator)
+        indices_dict[i] = class_indices[perm[:actual_samples]].tolist()
         
     return indices_dict

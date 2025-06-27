@@ -11,10 +11,11 @@ from fastapi.responses import FileResponse, Response
 from PIL import Image
 
 from app.utils import load_cifar10_data
-from app.utils.data_loader import get_fixed_umap_indices
+from app.utils.data_loader import get_fixed_umap_indices, load_face_data, get_fixed_face_umap_indices
 
 router = APIRouter()
 x_train, y_train = load_cifar10_data()
+x_face_train, y_face_train = load_face_data()
 
 class Dataset(str, Enum):
     cifar10 = "cifar10"
@@ -151,6 +152,21 @@ async def get_image(index: int):
 
     return Response(content=img_byte_arr, media_type="image/png")
 
+@router.get("/image/face/{index}")
+async def get_face_image(index: int):
+    if index < 0 or index >= len(x_face_train):
+        raise HTTPException(status_code=404, detail="Image index out of range")
+
+    img_data = x_face_train[index]
+    
+    img = Image.fromarray(img_data.astype('uint8'))
+    
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return Response(content=img_byte_arr, media_type="image/png")
+
 @router.get("/trained_models")
 async def get_trained_model():
     """Download the trained model file (0000.pth)"""
@@ -225,6 +241,85 @@ async def get_all_subset_images(forget_class: str):
         orig_img = x_train[idx]  # Original image as a numpy array (32x32x3)
         img = Image.fromarray(orig_img)
         # Resize image to 12x12 using bilinear interpolation
+        img_resized = img.resize((30, 30), Image.BILINEAR)
+        buffer = io.BytesIO()
+        # Save the resized image as PNG
+        img_resized.save(buffer, format="PNG")
+        base64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        images_data.append({
+            "index": int(idx),
+            "base64": base64_str
+        })
+
+    response_data = {"images": images_data}
+
+    # Cache the result on disk for future requests
+    try:
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(response_data, f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving cached file: {str(e)}")
+
+    return response_data
+
+@router.get("/image/face_subset/{forget_class}")
+async def get_all_face_subset_images(forget_class: str):
+    """
+    Retrieve 200 face dataset images for the given forget_class as a single API call.
+    
+    The original images (160x160x3) are resized to 30x30 pixels using bilinear interpolation,
+    compressed in PNG format, and then base64-encoded. The selected indices are determined
+    using get_fixed_face_umap_indices(total_samples=2000, seed=2048) (i.e., 200 images per class).
+    
+    The result is cached on disk as a JSON file at: data/subset/face/{forget_class}_base64.json.
+    
+    The returned JSON format is:
+    {
+      "images": [
+         {"index": 123, "base64": "iVBORw0KGgoA..."},
+         {"index": 456, "base64": "..." },
+         ...
+      ]
+    }
+    """
+    # Validate forget_class parameter
+    try:
+        class_id = int(forget_class)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid forget_class parameter. Must be an integer.")
+
+    if class_id < 0 or class_id >= 10:
+        raise HTTPException(status_code=400, detail="forget_class must be between 0 and 9")
+    
+    # Set up the cache file path in the data/subset/face directory
+    cache_dir = os.path.join("data", "subset", "face", str(class_id))
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, f"{class_id}_base64.json")
+
+    # If cached file exists, load and return it
+    if os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                cached_data = json.load(f)
+            return cached_data
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error reading cached file: {str(e)}")
+
+    # Global variables x_face_train and y_face_train are loaded at startup
+    global x_face_train, y_face_train
+
+    # Get indices using a fixed seed (2048) such that each class gets 200 images for a total of 2000 samples
+    indices_dict = get_fixed_face_umap_indices(total_samples=2000, seed=2048)
+    if class_id not in indices_dict:
+        raise HTTPException(status_code=404, detail="Indices not found for this class.")
+
+    selected_indices = indices_dict[class_id]
+
+    images_data = []
+    for idx in selected_indices:
+        orig_img = x_face_train[idx]  # Original image as a numpy array (160x160x3)
+        img = Image.fromarray(orig_img.astype('uint8'))
+        # Resize image to 30x30 using bilinear interpolation
         img_resized = img.resize((30, 30), Image.BILINEAR)
         buffer = io.BytesIO()
         # Save the resized image as PNG
