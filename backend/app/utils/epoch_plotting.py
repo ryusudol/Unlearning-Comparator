@@ -35,46 +35,40 @@ def plot_epoch_metrics(
     epochs = range(0, len(epoch_metrics['UA']))
     
     # Plot all metrics with specified styles
-    # UA, TUA: X 마커 (뚱뚱한 X)
-    ax.plot(epochs, epoch_metrics['UA'], color='darkgreen', linewidth=2.5, linestyle='-', 
-            label='UA (Unlearn Accuracy)', marker='X', markersize=12)
-    ax.plot(epochs, epoch_metrics['TUA'], color='green', linewidth=2.5, linestyle='--', 
-            label='TUA (Test Unlearn Accuracy)', marker='X', markersize=12)
+    # UA, TUA: X 마커 (뚱뚱한 X) - UA들이 점선
+    ax.plot(epochs, epoch_metrics['UA'], color='darkgreen', linewidth=2.5, linestyle='--', 
+            label='UA (Unlearn Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
+    ax.plot(epochs, epoch_metrics['TUA'], color='#228B22', linewidth=2.5, linestyle='--', 
+            label='TUA (Test Unlearn Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
     
-    # RA, TRA: 동그라미 마커
+    # RA, TRA: 동그라미 마커 - RA들이 실선
     ax.plot(epochs, epoch_metrics['RA'], color='darkgreen', linewidth=2.5, linestyle='-', 
-            label='RA (Remain Accuracy)', marker='o', markersize=12)
-    ax.plot(epochs, epoch_metrics['TRA'], color='green', linewidth=2.5, linestyle='--', 
-            label='TRA (Test Remain Accuracy)', marker='o', markersize=12)
+            label='RA (Remain Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
+    ax.plot(epochs, epoch_metrics['TRA'], color='#228B22', linewidth=2.5, linestyle='-', 
+            label='TRA (Test Remain Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
     
-    # PS: 1점 쇄선, 진한 주황(거의 빨간색), 별 마커
-    ax.plot(epochs, epoch_metrics['PS'], color='#FF4500', linewidth=2.5, linestyle='-.',
-            label='PS (Ours)', marker='*', markersize=14)
+    # PS: 1점 쇄선, 진한 주황색, 별 마커
+    ax.plot(epochs, epoch_metrics['PS'], color='#FF6600', linewidth=2.5, linestyle='-.',
+            label='PS (Ours)', marker='*', markersize=14, zorder=10, clip_on=False)
     
-    # MIA: C-MIA와 E-MIA의 최솟값으로 계산, 더 진한 주황색, 세모 마커
-    if 'C-MIA' in epoch_metrics and 'E-MIA' in epoch_metrics and len(epoch_metrics['C-MIA']) > 0 and len(epoch_metrics['E-MIA']) > 0:
-        # 각 에포크별로 C-MIA와 E-MIA의 최솟값 계산
-        mia_min = [min(c, e) for c, e in zip(epoch_metrics['C-MIA'], epoch_metrics['E-MIA'])]
-        ax.plot(epochs, mia_min, color='#FF7F00', linewidth=2.5, linestyle='-.',
-                label='MIA', marker='^', markersize=12)
-    elif 'C-MIA' in epoch_metrics and len(epoch_metrics['C-MIA']) > 0:
-        # C-MIA만 있는 경우
-        ax.plot(epochs, epoch_metrics['C-MIA'], color='#FF7F00', linewidth=2.5, linestyle='-.',
-                label='MIA', marker='^', markersize=12)
-    elif 'E-MIA' in epoch_metrics and len(epoch_metrics['E-MIA']) > 0:
-        # E-MIA만 있는 경우
-        ax.plot(epochs, epoch_metrics['E-MIA'], color='#FF7F00', linewidth=2.5, linestyle='-.',
-                label='MIA', marker='^', markersize=12)
+    # MIA: C-MIA와 E-MIA 개별 플롯
+    if 'C-MIA' in epoch_metrics and len(epoch_metrics['C-MIA']) > 0:
+        ax.plot(epochs, epoch_metrics['C-MIA'], color='#CC8800', linewidth=2.5, linestyle='-.',
+                label='C-MIA (Confidence)', marker='^', markersize=10, zorder=10, clip_on=False)
+    
+    if 'E-MIA' in epoch_metrics and len(epoch_metrics['E-MIA']) > 0:
+        ax.plot(epochs, epoch_metrics['E-MIA'], color='#BB7700', linewidth=2.5, linestyle='-.',
+                label='E-MIA (Entropy)', marker='v', markersize=10, zorder=10, clip_on=False)
     
     ax.set_title('All Unlearning Metrics', fontsize=14, fontweight='bold')
     ax.set_xlabel('Epoch', fontsize=12)
     ax.set_ylabel('Value', fontsize=12)
     ax.grid(True, alpha=0.3)
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
-    # Set limits with margin to prevent marker clipping
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10, markerscale=0.7)
+    # Set limits with no margin to remove padding
     num_epochs = len(epoch_metrics['UA'])
-    ax.set_ylim(-0.05, 1.05)  # Add 5% margin on top and bottom
-    ax.set_xlim(-0.5, num_epochs - 0.5)  # Add margin on left and right
+    ax.set_ylim(0, 1)  # Remove top/bottom margins
+    ax.set_xlim(0, num_epochs - 1)  # Remove left/right margins
     
     # Set x-axis ticks to show all epochs starting from 0
     ax.set_xticks(range(0, num_epochs))
@@ -122,7 +116,7 @@ def plot_comparison_metrics(
             if metric in epoch_metrics:
                 epochs = range(1, len(epoch_metrics[metric]) + 1)
                 axes[row, col].plot(epochs, epoch_metrics[metric], 
-                                  linewidth=2, label=method_name, alpha=0.8)
+                                  linewidth=2, label=method_name, alpha=0.8, zorder=10)
         
         axes[row, col].set_title(f'{metric} Comparison')
         axes[row, col].set_xlabel('Epoch')
@@ -131,7 +125,7 @@ def plot_comparison_metrics(
         axes[row, col].legend()
         axes[row, col].set_ylim(-0.05, 1.05)  # Add margin to prevent marker clipping
         max_epochs = max(len(metrics[metric]) for metrics in all_metrics.values() if metric in metrics)
-        axes[row, col].set_xlim(0.5, max_epochs + 0.5)  # Add margin on left and right
+        axes[row, col].set_xlim(1, max_epochs)  # Remove left/right margins
         axes[row, col].set_xticks(range(1, max_epochs + 1))
     
     # Hide the last subplot if not needed

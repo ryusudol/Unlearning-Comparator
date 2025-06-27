@@ -349,8 +349,10 @@ class UnlearningFTThread(BaseUnlearningThread):
             if plot_path:
                 results["epoch_plot_path"] = plot_path
             
-            # Add epoch metrics to results
-            results["epoch_metrics"] = epoch_metrics
+            # Add epoch metrics to results (rounded to 3 decimal places)
+            results["epoch_metrics"] = {
+                key: [round(val, 3) for val in values] for key, values in epoch_metrics.items()
+            }
 
         # Save results and model
         result_path = save_results_and_model(

@@ -93,7 +93,7 @@ class UnlearningRLThread(BaseUnlearningThread):
         )
         
         # Initialize epoch-wise metrics collection (all-or-nothing toggle)
-        enable_epoch_metrics = False  # Set to True to enable comprehensive epoch-wise metrics (UA, TA, TUA, TRA, PS, MIA)
+        enable_epoch_metrics = True  # Set to True to enable comprehensive epoch-wise metrics (UA, TA, TUA, TRA, PS, MIA)
         
         epoch_metrics = {
             'UA': [],  # Unlearn Accuracy (train)
@@ -377,8 +377,10 @@ class UnlearningRLThread(BaseUnlearningThread):
             if plot_path:
                 results["epoch_plot_path"] = plot_path
             
-            # Add epoch metrics to results
-            results["epoch_metrics"] = epoch_metrics
+            # Add epoch metrics to results (rounded to 3 decimal places)
+            results["epoch_metrics"] = {
+                key: [round(val, 3) for val in values] for key, values in epoch_metrics.items()
+            }
 
         # Save results and model
         result_path = save_results_and_model(
