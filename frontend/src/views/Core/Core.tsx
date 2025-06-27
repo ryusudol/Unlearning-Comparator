@@ -114,10 +114,12 @@ export default function Core() {
         isFirstMode ? (
           <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
         ) : (
-          <PrivacyAttack
-            modelAPoints={modelAPoints}
-            modelBPoints={modelBPoints}
-          />
+          datasetMode === "cifar10" && (
+            <PrivacyAttack
+              modelAPoints={modelAPoints}
+              modelBPoints={modelBPoints}
+            />
+          )
         )
       ) : (
         <Indicator about="ForgetClass" />

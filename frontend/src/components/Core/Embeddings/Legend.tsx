@@ -15,6 +15,12 @@ import {
 } from "../../UI/hover-card";
 import { cn } from "../../../utils/util";
 
+const baseWidths = {
+  "CIFAR-10": [115, 80, 80, 80, 78],
+  "Fashion-MNIST": [92, 94, 86, 93, 68],
+  FaceDataset: [78, 110, 94, 104, 104],
+};
+
 interface Props {
   highlight: string;
   setHighlight: (mode: string) => void;
@@ -28,9 +34,22 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const oddIndices = classes.filter((_, idx) => idx % 2 === 0);
   const evenIndices = classes.filter((_, idx) => idx % 2 !== 0);
 
+  const getGridTemplateColumns = () => {
+    const widths = [...baseWidths[dataset as keyof typeof baseWidths]];
+
+    if (forgetClass !== -1) {
+      const forgetClassColumn = Math.floor(forgetClass / 2);
+      if (forgetClassColumn >= 0 && forgetClassColumn < widths.length) {
+        widths[forgetClassColumn] += 18;
+      }
+    }
+
+    return widths.map((w) => `${w}px`).join(" ");
+  };
+
   return (
     <div className="w-full flex justify-between px-3.5 pb-[18px] text-sm z-10 relative top-3">
-      <div className={cn("flex", dataset === "FaceDataset" && "gap-5")}>
+      <div className={cn("flex", dataset === "FaceDataset" && "gap-4")}>
         <div
           className={cn("flex flex-col", {
             "mr-[35px]": dataset === "CIFAR-10",
@@ -53,12 +72,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
           <p className="text-lg font-medium mb-1">Predicted Class</p>
           <div
             style={{
-              gridTemplateColumns:
-                dataset === "CIFAR-10"
-                  ? "115px 80px 80px 80px 78px"
-                  : dataset === "Fashion-MNIST"
-                  ? "92px 94px 86px 93px 68px"
-                  : "78px 110px 94px 102px 100px",
+              gridTemplateColumns: getGridTemplateColumns(),
             }}
             className="grid gap-y-1"
           >
@@ -112,7 +126,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                   value={mode.label}
                   style={{
                     width:
-                      dataset === "CIFAR-10" ? mode.length : mode.length - 8,
+                      dataset === "CIFAR-10" ? mode.length : mode.length - 12,
                   }}
                   className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
                 >

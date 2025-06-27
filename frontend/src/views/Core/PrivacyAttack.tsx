@@ -57,38 +57,47 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     loadRetrainData();
   }, [datasetMode, forgetClass]);
 
+  const FetchFailedIndicator = (
+    <Indicator text="Failed to fetch retrain data" />
+  );
+  const UnselectedModelIndicator = (
+    <Indicator text="Please select an unlearned model to compare the attack results" />
+  );
+  const contentA = !retrainData ? (
+    FetchFailedIndicator
+  ) : isModelAOriginal ? (
+    UnselectedModelIndicator
+  ) : (
+    <AttackAnalytics
+      mode="A"
+      retrainPoints={retrainData.points}
+      modelPoints={modelAPoints}
+      retrainAttackData={retrainData.attack}
+    />
+  );
+  const contentB = !retrainData ? (
+    FetchFailedIndicator
+  ) : isModelBOriginal ? (
+    UnselectedModelIndicator
+  ) : (
+    <AttackAnalytics
+      mode="B"
+      retrainPoints={retrainData.points}
+      modelPoints={modelBPoints}
+      retrainAttackData={retrainData.attack}
+    />
+  );
+
   return (
     <div className="h-[760px] flex flex-col border rounded-md px-1.5">
       <Legend />
       <div className="flex items-center">
-        {!retrainData ? (
-          <Indicator text="Failed to fetch retrain data" />
-        ) : isModelAOriginal ? (
-          <Indicator text="Please select an unlearned model to compare the attack results" />
-        ) : (
-          <AttackAnalytics
-            mode="A"
-            retrainPoints={retrainData.points}
-            modelPoints={modelAPoints}
-            retrainAttackData={retrainData.attack}
-          />
-        )}
+        {contentA}
         <Separator
           orientation="vertical"
           className="h-[630px] w-[1px] mx-1 relative top-3.5"
         />
-        {!retrainData ? (
-          <Indicator text="Failed to fetch retrain data" />
-        ) : isModelBOriginal ? (
-          <Indicator text="Please select an unlearned model to compare the attack results" />
-        ) : (
-          <AttackAnalytics
-            mode="B"
-            retrainPoints={retrainData.points}
-            modelPoints={modelBPoints}
-            retrainAttackData={retrainData.attack}
-          />
-        )}
+        {contentB}
       </div>
     </div>
   );
