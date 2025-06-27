@@ -22,6 +22,7 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../../hooks/useModelExperiment";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 import {
   SelectedData,
   HoverInstance,
@@ -85,6 +86,8 @@ const ScatterPlot = forwardRef(
     }: Props,
     ref
   ) => {
+    const datasetMode = useDatasetMode();
+
     const forgetClass = useForgetClassStore((state) => state.forgetClass);
     const modelA = useModelDataStore((state) => state.modelA);
     const modelB = useModelDataStore((state) => state.modelB);
@@ -328,9 +331,12 @@ const ScatterPlot = forwardRef(
         fetchControllerRef.current = controller;
 
         try {
-          const response = await fetch(`${API_URL}/image/cifar10/${d[2]}`, {
-            signal: controller.signal,
-          });
+          const response = await fetch(
+            `${API_URL}/image/${datasetMode}/${d[2]}`,
+            {
+              signal: controller.signal,
+            }
+          );
 
           if (!response.ok) throw new Error("Failed to fetch image");
           if (controller.signal.aborted) return;
@@ -385,7 +391,7 @@ const ScatterPlot = forwardRef(
           console.error("Failed to fetch tooltip data:", err);
         }
       },
-      [forgetClass, isModelA, modelAExperiment, modelBExperiment]
+      [forgetClass, isModelA, modelAExperiment, modelBExperiment, datasetMode]
     );
 
     const shouldLowerOpacity = useCallback(

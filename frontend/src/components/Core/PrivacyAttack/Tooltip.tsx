@@ -5,6 +5,7 @@ import { COLORS } from "../../../constants/colors";
 import { Prob } from "../../../types/embeddings";
 import { RETRAIN } from "../../../constants/common";
 import { useClasses } from "../../../hooks/useClasses";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { FONT_CONFIG, STROKE_CONFIG } from "../../../constants/common";
 
@@ -52,6 +53,8 @@ export default React.memo(function Tooltip({
   clickedType,
 }: Props) {
   const classes = useClasses();
+  const datasetMode = useDatasetMode();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
 
   const svgRef = useRef(null);
@@ -353,6 +356,7 @@ export default React.memo(function Tooltip({
     isModelA,
     isRetrainedClicked,
     legendRectColor,
+    datasetMode,
   ]);
 
   return (
@@ -363,7 +367,7 @@ export default React.memo(function Tooltip({
       <div className="text-sm">
         <img
           src={imageUrl}
-          alt="cifar-10"
+          alt={datasetMode === "face" ? "face-dataset" : "cifar-10"}
           width="180"
           height="180"
           className="mb-1.5 ml-0.5"

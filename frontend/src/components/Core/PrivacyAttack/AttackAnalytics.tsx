@@ -36,6 +36,7 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../../hooks/useModelExperiment";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 
 const CONFIG = {
   TOOLTIP_WIDTH: 450,
@@ -55,6 +56,8 @@ export default function AttackAnalytics({
   modelPoints,
   retrainAttackData,
 }: Props) {
+  const datasetMode = useDatasetMode();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);
@@ -175,7 +178,7 @@ export default function AttackAnalytics({
 
       try {
         const response = await fetch(
-          `${API_URL}/image/cifar10/${elementData.img_idx}`,
+          `${API_URL}/image/${datasetMode}/${elementData.img_idx}`,
           {
             signal: controller.signal,
           }
@@ -229,7 +232,7 @@ export default function AttackAnalytics({
         console.error(`Failed to fetch tooltip data: ${error}`);
       }
     },
-    [isModelA, retrainPoints, modelPoints]
+    [datasetMode, isModelA, modelPoints, retrainPoints]
   );
 
   useEffect(() => {

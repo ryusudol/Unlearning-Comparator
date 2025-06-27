@@ -4,6 +4,7 @@ import * as d3 from "d3";
 import { COLORS } from "../../../constants/colors";
 import { Prob } from "../../../types/embeddings";
 import { useClasses } from "../../../hooks/useClasses";
+import { useDatasetMode } from "../../../hooks/useDatasetMode";
 import { FONT_CONFIG, STROKE_CONFIG } from "../../../constants/common";
 
 const CONFIG = {
@@ -46,6 +47,7 @@ export default React.memo(function Tooltip({
   isModelA,
 }: Props) {
   const classes = useClasses();
+  const datasetMode = useDatasetMode();
 
   const svgRef = useRef(null);
 
@@ -317,6 +319,7 @@ export default React.memo(function Tooltip({
     forgetClass,
     isModelA,
     legendRectColor,
+    datasetMode,
   ]);
 
   return (
@@ -324,7 +327,7 @@ export default React.memo(function Tooltip({
       <div className="text-sm">
         <img
           src={imageUrl}
-          alt="cifar-10"
+          alt={datasetMode === "face" ? "face-dataset" : "cifar-10"}
           width="180"
           height="180"
           className="mb-1.5 ml-0.5"
