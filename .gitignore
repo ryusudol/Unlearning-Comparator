@@ -7,9 +7,14 @@ backend/uploaded_models/
 backend/attack/
 backend/.python-version
 backend/*.png
+backend/data/cifar-10-batches-py/
+backend/data/cifar-10-python.tar.gz
 paper/
 z_dist_exp/
 myenv/
 # *.py
 *.pdf
 *.mdc
+
+# Claude settings
+.claude/settings.local.json
