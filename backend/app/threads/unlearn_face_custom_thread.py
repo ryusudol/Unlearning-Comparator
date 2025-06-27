@@ -11,7 +11,7 @@ from app.utils.evaluation import (
 	get_layer_activations_and_predictions_face, 
 	calculate_cka_similarity_face,
 )
-# from app.utils.attack import process_attack_metrics
+# from app.utils.attack import process_face_attack_metrics
 from app.utils.visualization import compute_umap_embedding_face
 from app.utils.helpers import (
 	format_distribution, 
@@ -220,11 +220,15 @@ class UnlearningFaceCustomThread(threading.Thread):
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
         
-        # Process attack metrics using the same umap_subset_loader (no visualization here)
-        # print("Processing attack metrics on UMAP subset")
-        # values, attack_results, fqs = await process_attack_metrics(
+        # Create a new DataLoader containing only the forget class samples for attack metrics
+        # print("Processing attack metrics on the forget set")
+        # forget_class_indices = class_indices[self.forget_class].tolist()
+        # forget_subset = torch.utils.data.Subset(dataset, forget_class_indices)
+        # forget_subset_loader = torch.utils.data.DataLoader(forget_subset, batch_size=32, shuffle=False)
+
+        # values, attack_results, fqs = await process_face_attack_metrics(
         #     model=self.model,
-        #     data_loader=umap_subset_loader,
+        #     data_loader=forget_subset_loader,
         #     device=self.device,
         #     forget_class=self.forget_class
         # )

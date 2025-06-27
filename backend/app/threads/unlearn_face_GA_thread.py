@@ -8,13 +8,13 @@ import os
 from app.utils.helpers import (
 	save_model, 
 	format_distribution, 
-	# compress_prob_array
+	compress_prob_array
 )
-# from app.utils.visualization import compute_umap_embedding
+from app.utils.visualization import compute_umap_embedding_face
 from app.utils.evaluation import (
 	evaluate_model_with_distributions, 
-	# get_layer_activations_and_predictions
-    # calculate_cka_similarity
+	get_layer_activations_and_predictions_face,
+    calculate_cka_similarity_face
 )
 from app.config.settings import (
 	MAX_GRAD_NORM, 
@@ -22,7 +22,7 @@ from app.config.settings import (
 	UMAP_DATASET,
 	UNLEARN_SEED
 )
-# from app.utils.attack import process_attack_metrics
+# from app.utils.attack import process_face_attack_metrics
 
 class UnlearningFaceGAThread(threading.Thread):
     def __init__(
@@ -221,34 +221,34 @@ class UnlearningFaceGAThread(threading.Thread):
             return
         
         # UMAP and activation calculation
-        # self.status.progress = "Computing UMAP"
+        self.status.progress = "Computing UMAP"
         
-        # print("Computing layer activations")
-        # (
-        #     activations,
-        #     predicted_labels, 
-        #     probs, 
-        # ) = await get_layer_activations_and_predictions(
-        #     model=self.model,
-        #     data_loader=umap_subset_loader,
-        #     device=self.device,
-        # )
-        # print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
+        print("Computing layer activations")
+        (
+            activations,
+            predicted_labels, 
+            probs, 
+        ) = await get_layer_activations_and_predictions_face(
+            model=self.model,
+            data_loader=umap_subset_loader,
+            device=self.device,
+        )
+        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
 
         # UMAP embedding computation
-        # print("Computing UMAP embedding")
-        # forget_labels = torch.tensor([label == self.request.forget_class for _, label in umap_subset])
-        # umap_embedding = await compute_umap_embedding(
-        #     activation=activations, 
-        #     labels=predicted_labels, 
-        #     forget_class=self.request.forget_class,
-        #     forget_labels=forget_labels
-        # )
-        # print(f"UMAP embedding computed in {time.time() - start_time:.3f}s")
+        print("Computing UMAP embedding")
+        forget_labels = torch.tensor([label == self.request.forget_class for _, label in umap_subset])
+        umap_embedding = await compute_umap_embedding_face(
+            activation=activations, 
+            labels=predicted_labels, 
+            forget_class=self.request.forget_class,
+            forget_labels=forget_labels
+        )
+        print(f"UMAP embedding computed in {time.time() - start_time:.3f}s")
         
         # Add attack metrics processing similar to custom_thread
         # print("Processing attack metrics on UMAP subset")
-        # values, attack_results, fqs = await process_attack_metrics(
+        # values, attack_results, fqs = await process_face_attack_metrics(
         #     model=self.model, 
         #     data_loader=umap_subset_loader, 
         #     device=self.device, 
@@ -256,34 +256,34 @@ class UnlearningFaceGAThread(threading.Thread):
         # )
 
         # Compute CKA similarity
-        # self.status.progress = "Calculating CKA Similarity"
-        # print("Calculating CKA similarity")
-        # cka_results = await calculate_cka_similarity(
-        #     model_before=self.model_before,
-        #     model_after=self.model,
-        #     train_loader=self.train_loader,
-        #     test_loader=self.test_loader,
-        #     forget_class=self.request.forget_class,
-        #     device=self.device
-        # )
-        # print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
+        self.status.progress = "Calculating CKA Similarity"
+        print("Calculating CKA similarity")
+        cka_results = await calculate_cka_similarity_face(
+            model_before=self.model_before,
+            model_after=self.model,
+            train_loader=self.train_loader,
+            test_loader=self.test_loader,
+            forget_class=self.request.forget_class,
+            device=self.device
+        )
+        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
         # # Detailed results preparation
-        # self.status.progress = "Preparing Results"
-        # detailed_results = []
-        # for i in range(len(umap_subset)):
-        #     original_index = selected_indices[i]
-        #     ground_truth = umap_subset.dataset.targets[original_index]
-        #     is_forget = (ground_truth == self.request.forget_class)
-        #     detailed_results.append([
-        #         int(ground_truth),                             # gt
-        #         int(predicted_labels[i]),                      # pred
-        #         int(original_index),                           # img
-        #         1 if is_forget else 0,                         # forget as binary
-        #         round(float(umap_embedding[i][0]), 2),         # x coordinate
-        #         round(float(umap_embedding[i][1]), 2),         # y coordinate
-        #         compress_prob_array(probs[i].tolist()),        # compressed probabilities
-        #     ])
+        self.status.progress = "Preparing Results"
+        detailed_results = []
+        for i in range(len(umap_subset)):
+            original_index = selected_indices[i]
+            ground_truth = umap_subset.dataset.targets[original_index]
+            is_forget = (ground_truth == self.request.forget_class)
+            detailed_results.append([
+                int(ground_truth),                             # gt
+                int(predicted_labels[i]),                      # pred
+                int(original_index),                           # img
+                1 if is_forget else 0,                         # forget as binary
+                round(float(umap_embedding[i][0]), 2),         # x coordinate
+                round(float(umap_embedding[i][1]), 2),         # y coordinate
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
+            ])
 
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
         test_remain_accuracy = round(
@@ -314,8 +314,8 @@ class UnlearningFaceGAThread(threading.Thread):
             "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
-            "cka": "N/A",
-            "points": [],
+            "cka": cka_results["similarity"],
+            "points": detailed_results,
             "attack": {
                 "values": [],
                 "results": []

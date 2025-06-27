@@ -25,7 +25,8 @@ async def unlearning_face_RL(request, status, base_weights_path):
         else "cpu"
     )
 
-    model_before = None
+    model_before = get_facenet_model(device, pretrained=False)
+    model_before.load_state_dict(torch.load(f"unlearned_models/face/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after = get_facenet_model(device, pretrained=False)
     state_dict = torch.load(base_weights_path, map_location=device)
     filtered_state_dict = {k: v for k, v in state_dict.items() if not k.startswith("backbone.logits")}

@@ -141,15 +141,22 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     total = 0
     class_correct = [0] * 10
     class_total = [0] * 10
-    label_distribution = np.zeros((10, 10))  # Ground truth vs predicted class distribution
-    confidence_sum = np.zeros((10, 10))      # Ground truth vs sum of confidence for all classes
+    label_distribution = np.zeros((10, 10))
+    confidence_sum = np.zeros((10, 10))
     
     with torch.no_grad():
         for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
+            images, raw_labels = data[0].to(device), data[1].to(device)
+            
+            if raw_labels.ndim > 1 and raw_labels.shape[1] > 1:
+                labels = torch.argmax(raw_labels, dim=1)
+            else:
+                labels = raw_labels
+
             outputs = model(images)
             loss = criterion(outputs, labels)
             total_loss += loss.item()
+            
             temperature = 1.0
             scaled_outputs = outputs / temperature
             probabilities = F.softmax(scaled_outputs, dim=1)
@@ -157,6 +164,7 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
             
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            
             for i in range(labels.size(0)):
                 label = labels[i].item()
                 pred = predicted[i].item()
@@ -168,15 +176,22 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
                 label_distribution[label][pred] += 1
                 confidence_sum[label] += probabilities[i].cpu().numpy()
 
-    accuracy = correct / total
+    accuracy = correct / total if total > 0 else 0.0
     class_accuracies = {
         i: (class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0)
         for i in range(10)
     }
-    avg_loss = total_loss / len(data_loader)
+    avg_loss = total_loss / len(data_loader) if len(data_loader) > 0 else 0.0
 
-    label_distribution = label_distribution / label_distribution.sum(axis=1, keepdims=True)
-    confidence_distribution = confidence_sum / np.array(class_total)[:, np.newaxis]
+    class_total_np = np.array(class_total)
+    
+    with np.errstate(divide='ignore', invalid='ignore'):
+        label_dist_sum = label_distribution.sum(axis=1, keepdims=True)
+        label_distribution = np.divide(label_distribution, label_dist_sum, out=np.zeros_like(label_distribution), where=label_dist_sum!=0)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        confidence_distribution = np.divide(confidence_sum, class_total_np[:, np.newaxis], out=np.zeros_like(confidence_sum), where=class_total_np[:, np.newaxis]!=0)
+
     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
 
 async def calculate_cka_similarity(
