@@ -113,8 +113,6 @@ class UnlearningRLThread(BaseUnlearningThread):
                 self.request.forget_class, True, True  # Enable both PS and MIA
             )
         
-        start_time = time.time()
-
         # Collect epoch 0 metrics (initial state before training)
         if enable_epoch_metrics:
             print("Collecting initial metrics (epoch 0)...")
@@ -126,6 +124,10 @@ class UnlearningRLThread(BaseUnlearningThread):
                 metrics_components['mia_classifier'] if metrics_components else None
             )
             update_epoch_metrics_collection(epoch_metrics, initial_metrics)
+
+        # Start timing after all preprocessing
+        start_time = time.time()
+        total_metrics_time = 0  # 메트릭 계산 시간 누적
 
         for epoch in range(self.request.epochs):
             self.model.train()
@@ -175,8 +177,9 @@ class UnlearningRLThread(BaseUnlearningThread):
                 forget_epoch_loss, forget_epoch_acc
             )
 
-            # Calculate comprehensive epoch metrics if enabled
+            # Calculate comprehensive epoch metrics if enabled (exclude from timing)
             if enable_epoch_metrics:
+                metrics_start = time.time()
                 print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
                 metrics = await calculate_comprehensive_epoch_metrics(
                     self.model, self.train_loader, self.test_loader,
@@ -186,6 +189,7 @@ class UnlearningRLThread(BaseUnlearningThread):
                     metrics_components['mia_classifier'] if metrics_components else None
                 )
                 update_epoch_metrics_collection(epoch_metrics, metrics)
+                total_metrics_time += time.time() - metrics_start
             
             # Print progress
             additional_metrics = None
@@ -206,7 +210,8 @@ class UnlearningRLThread(BaseUnlearningThread):
                 additional_metrics=additional_metrics
             )
 
-        rte = time.time() - start_time
+        # Calculate pure training time (excluding metrics calculation)
+        rte = time.time() - start_time - total_metrics_time
 
 
         if self.check_stopped_and_return(self.status):

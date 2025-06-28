@@ -9,6 +9,7 @@ Available threads:
     UnlearningGAThread: Unlearning using gradient ascent method
     UnlearningRLThread: Unlearning using random labeling method
     UnlearningFTThread: Unlearning using fine-tuning method
+    UnlearningSCRUBThread: Unlearning using SCRUB method
     UnlearningRetrainThread: Unlearning by retraining from scratch
     UnlearningCustomThread: Custom unlearning method for inference
 
@@ -23,7 +24,8 @@ from .train_thread import TrainingThread
 from .unlearn_GA_thread import UnlearningGAThread
 from .unlearn_RL_thread import UnlearningRLThread
 from .unlearn_FT_thread import UnlearningFTThread
+from .unlearn_SCRUB_thread import UnlearningSCRUBThread
 from .unlearn_retrain_thread import UnlearningRetrainThread
 from .unlearn_custom_thread import UnlearningCustomThread
 
-__all__ = ['TrainingThread', 'UnlearningGAThread', 'UnlearningRLThread', 'UnlearningFTThread', 'UnlearningRetrainThread', 'UnlearningCustomThread']
+__all__ = ['TrainingThread', 'UnlearningGAThread', 'UnlearningRLThread', 'UnlearningFTThread', 'UnlearningSCRUBThread', 'UnlearningRetrainThread', 'UnlearningCustomThread']

@@ -368,6 +368,8 @@ export default function UnlearningConfiguration() {
                   ? "rl"
                   : method === UNLEARNING_METHODS[2]
                   ? "ga"
+                  : method === UNLEARNING_METHODS[3]
+                  ? "scrub"
                   : idx === UNLEARNING_METHODS.length - 1
                   ? "custom"
                   : "-";

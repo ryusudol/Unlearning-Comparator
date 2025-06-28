@@ -90,6 +90,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
         ? "Random Labeling"
         : displayValue.startsWith("G")
         ? "Gradient Ascent"
+        : displayValue.startsWith("S")
+        ? "SCRUB"
         : displayValue;
       if (filterValue.length === 0) return true;
       return filterValue.includes(methodValue);
@@ -103,6 +105,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
         ? "Random Labeling"
         : valueToDisplay.startsWith("G")
         ? "Gradient Ascent"
+        : valueToDisplay.startsWith("S")
+        ? "SCRUB"
         : valueToDisplay;
       return <div>{value}</div>;
     },

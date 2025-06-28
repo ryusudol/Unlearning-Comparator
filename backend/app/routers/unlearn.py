@@ -13,6 +13,7 @@ from app.services import (
 	run_unlearning_RL,
 	run_unlearning_GA,
 	run_unlearning_FT,
+	run_unlearning_SCRUB,
 	run_unlearning_custom
 )
 from app.models import UnlearningStatus
@@ -112,6 +113,28 @@ async def start_unlearning_ft(
     print(f"start unlearning ft with base_weights_path: {base_weights_path}")
     background_tasks.add_task(run_unlearning_FT, request, status, base_weights_path)
     return {"message": "FT Unlearning started"}
+
+@router.post("/unlearn/scrub")
+async def start_unlearning_scrub(
+    background_tasks: BackgroundTasks,
+    request: UnlearningRequest
+):
+    if status.is_unlearning:
+        raise HTTPException(
+            status_code=400, 
+            detail="Unlearning is already in progress"
+        )
+    status.reset()
+    base_weights_name = f"000{request.forget_class}.pth" if request.base_weights == "0000.pth" else request.base_weights
+    base_weights_path = f'unlearned_models/{request.forget_class}/{base_weights_name}'
+    if not os.path.exists(base_weights_path):
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Weights '{base_weights_path}' not found in unlearned_models/ folder"
+        )
+    print(f"start unlearning SCRUB with base_weights_path: {base_weights_path}")
+    background_tasks.add_task(run_unlearning_SCRUB, request, status, base_weights_path)
+    return {"message": "SCRUB Unlearning started"}
 
 @router.post("/unlearn/retrain")
 async def start_unlearning_retrain(

@@ -9,6 +9,10 @@ export function getDefaultUnlearningConfig(method: string) {
     epoch = "3";
     learning_rate = "0.001";
     batch_size = "64";
+  } else if (method === "scrub") {
+    epoch = "5";
+    learning_rate = "0.01";
+    batch_size = "128";
   } else {
     epoch = "7";
     learning_rate = "0.0001";
