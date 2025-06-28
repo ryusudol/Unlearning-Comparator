@@ -55,7 +55,6 @@ const METRIC_COLORS = {
   PS: "#D54B04", // Orange/red
 } as const;
 
-// Render order: light green first (bottom), then dark green (top), then PS
 const RENDER_ORDER = ["TUA", "TRA", "UA", "RA", "PS"] as const;
 
 const LEGEND_DATA = [

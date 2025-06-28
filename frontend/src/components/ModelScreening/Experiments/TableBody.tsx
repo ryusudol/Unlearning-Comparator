@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 import * as d3 from "d3";
@@ -101,14 +102,21 @@ export default function MyTableBody({ table }: Props) {
 
     const experiment = experiments[experimentId];
     if (experiment?.epoch_metrics) {
-      setTooltipData({
-        epochMetrics: experiment.epoch_metrics,
-        experimentId,
-        position: {
-          x: e.clientX + 120,
-          y: e.clientY + 10,
-        },
-      });
+      const appContainer = document.getElementById("app-container");
+      if (appContainer) {
+        const containerRect = appContainer.getBoundingClientRect();
+        const relativeX = e.clientX - containerRect.left + 60;
+        const relativeY = e.clientY - containerRect.top + 10;
+
+        setTooltipData({
+          epochMetrics: experiment.epoch_metrics,
+          experimentId,
+          position: {
+            x: relativeX,
+            y: relativeY,
+          },
+        });
+      }
     }
   };
 
@@ -346,7 +354,7 @@ export default function MyTableBody({ table }: Props) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" data-table-container>
       <Table className="w-full table-fixed">
         <TableBody
           className={cn(
@@ -440,21 +448,23 @@ export default function MyTableBody({ table }: Props) {
           )}
         </TableBody>
       </Table>
-      {tooltipData && (
-        <div
-          ref={tooltipRef}
-          className="fixed z-50"
-          style={{
-            left: tooltipData.position.x,
-            top: tooltipData.position.y,
-          }}
-        >
-          <Tooltip
-            epochMetrics={tooltipData.epochMetrics}
-            experimentId={tooltipData.experimentId}
-          />
-        </div>
-      )}
+      {tooltipData &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            className="absolute z-[60]"
+            style={{
+              left: tooltipData.position.x,
+              top: tooltipData.position.y,
+            }}
+          >
+            <Tooltip
+              epochMetrics={tooltipData.epochMetrics}
+              experimentId={tooltipData.experimentId}
+            />
+          </div>,
+          document.getElementById("app-container") || document.body
+        )}
     </div>
   );
 }
