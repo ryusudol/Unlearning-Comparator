@@ -37,7 +37,7 @@ const StarIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const CONFIG = {
   WIDTH: 445,
   HEIGHT: 230,
-  MARGIN: { top: 8, right: 7, bottom: -10, left: -40 },
+  MARGIN: { top: 8, right: 7, bottom: 6, left: -40 },
   STROKE_WIDTH: 2,
   DOT_SIZE: 10,
   CROSS_SIZE: 13,
@@ -47,16 +47,6 @@ const CONFIG = {
   DASH_DOT_PATTERN: "8 3 2 3",
 } as const;
 
-const METRIC_COLORS = {
-  UA: "#2A6218", // Dark green
-  RA: "#2A6218", // Dark green (same as UA)
-  TUA: "#67CA4D", // Light green
-  TRA: "#67CA4D", // Light green (same as TUA)
-  PS: "#D54B04", // Orange/red
-} as const;
-
-const RENDER_ORDER = ["TUA", "TRA", "UA", "RA", "PS"] as const;
-
 const LEGEND_DATA = [
   {
     color: "#2A6218",
@@ -65,20 +55,20 @@ const LEGEND_DATA = [
     lineStyle: "dashed",
   },
   {
+    color: "#2A6218",
+    fullName: "RA (Retaining Accuracy)",
+    icon: "circle",
+    lineStyle: "solid",
+  },
+  {
     color: "#67CA4D",
     fullName: "TUA (Test Unlearn Accuracy)",
     icon: "cross",
     lineStyle: "dashed",
   },
   {
-    color: "#2A6218",
-    fullName: "RA (Remain Accuracy)",
-    icon: "circle",
-    lineStyle: "solid",
-  },
-  {
     color: "#67CA4D",
-    fullName: "TRA (Test Remain Accuracy)",
+    fullName: "TRA (Test Retaining Accuracy)",
     icon: "circle",
     lineStyle: "solid",
   },
@@ -89,6 +79,8 @@ const LEGEND_DATA = [
     lineStyle: "dash-dot",
   },
 ] as const;
+
+const LINE_RENDER_ORDER = ["TUA", "TRA", "UA", "RA", "PS"] as const;
 
 interface Props {
   epochMetrics: EpochMetrics;
@@ -104,12 +96,12 @@ interface ChartDataPoint {
   PS: number;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white px-2 py-1.5 border border-gray-200 shadow-lg rounded text-sm">
         {LEGEND_DATA.map(({ fullName }, index) => {
-          const metricKey = fullName.split(" ")[0]; // "UA", "TUA", "RA", "TRA", "PS" 추출
+          const metricKey = fullName.split(" ")[0];
           const entry = payload.find((p: any) => p.dataKey === metricKey);
 
           if (!entry) return null;
@@ -194,6 +186,15 @@ export default function EpochMetricsTooltip({
           <CartesianGrid stroke={COLORS.GRID_COLOR} />
           <XAxis
             dataKey="epoch"
+            label={{
+              value: "Epoch",
+              position: "center",
+              dy: 10,
+              style: {
+                fontSize: FONT_CONFIG.FONT_SIZE_13,
+                fill: COLORS.BLACK,
+              },
+            }}
             tickLine={false}
             axisLine={{ stroke: COLORS.BLACK }}
             tickMargin={2}
@@ -221,11 +222,15 @@ export default function EpochMetricsTooltip({
             cursor={false}
             wrapperStyle={{ zIndex: 50 }}
           />
-          {RENDER_ORDER.map((metric) => {
-            const color = METRIC_COLORS[metric];
-            const isDashed = metric === "UA" || metric === "TUA";
-            const isCross = metric === "UA" || metric === "TUA";
-            const isStar = metric === "PS";
+          {LINE_RENDER_ORDER.map((metric) => {
+            const legendItem = LEGEND_DATA.find(
+              (item) => item.fullName.split(" ")[0] === metric
+            );
+            if (!legendItem) return null;
+            const { color, icon, lineStyle } = legendItem;
+            const isDashed = lineStyle === "dashed";
+            const isCross = icon === "cross";
+            const isStar = icon === "star";
             const dotSize = isCross
               ? CONFIG.CROSS_SIZE
               : isStar
@@ -248,7 +253,7 @@ export default function EpochMetricsTooltip({
                 strokeDasharray={
                   isDashed
                     ? STROKE_CONFIG.STROKE_DASHARRAY
-                    : isStar
+                    : lineStyle === "dash-dot"
                     ? CONFIG.DASH_DOT_PATTERN
                     : undefined
                 }
@@ -323,7 +328,7 @@ export default function EpochMetricsTooltip({
             );
           })}
         </LineChart>
-        <div className="absolute right-3.5 bottom-8 text-xs leading-4 z-10 border-2 border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
+        <div className="absolute right-3.5 bottom-12 text-xs leading-4 z-10 border-2 border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
           {LEGEND_DATA.map(({ color, fullName, icon, lineStyle }, idx) => (
             <div key={idx} className="flex items-center py-0.5">
               <div className="relative mr-2">
