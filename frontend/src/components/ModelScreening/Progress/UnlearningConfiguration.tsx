@@ -255,6 +255,8 @@ export default function UnlearningConfiguration() {
         ? "GradientAscent"
         : method === "ga_ft"
         ? "GA+FT"
+        : method === "ga_sl_ft"
+        ? "GA+SL+FT"
         : method === "scrub"
         ? "SCRUB"
         : "Custom";
@@ -375,6 +377,8 @@ export default function UnlearningConfiguration() {
                   : method === UNLEARNING_METHODS[3]
                   ? "ga_ft"
                   : method === UNLEARNING_METHODS[4]
+                  ? "ga_sl_ft"
+                  : method === UNLEARNING_METHODS[5]
                   ? "scrub"
                   : idx === UNLEARNING_METHODS.length - 1
                   ? "custom"

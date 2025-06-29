@@ -34,7 +34,7 @@ async def unlearning_GA_FT(request, status, base_weights_path):
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
     # ========== GA+FT Configuration (easily configurable) ==========
-    ga_lr_ratio = 0.1     # GA LR = request.lr * ga_lr_ratio (changeable)
+    ga_lr_ratio = 0.5     # GA LR = request.lr * ga_lr_ratio (changeable)
     ga_batch_ratio = 1.0  # GA batch size = request.batch_size * ga_batch_ratio (changeable)
     # Examples:
     # - ga_batch_ratio = 0.5: GA uses half the batch size of FT
@@ -55,7 +55,7 @@ async def unlearning_GA_FT(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=True
     )
 
     # Create retain loader for FT (excluding forget class)

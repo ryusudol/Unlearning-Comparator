@@ -109,7 +109,8 @@ async def process_attack_metrics(
         device, 
         forget_class=5, 
         t1=2.0,
-        t2=1.0
+        t2=1.0,
+        create_plots=False
     ):
     from app.utils.evaluation import model_eval_mode
     
@@ -240,5 +241,12 @@ async def process_attack_metrics(
         "confidence_above_retrain": scores_conf_retrain,
         "confidence_above_unlearn": scores_conf_unlearn
     }
+    
+    # Create distribution plots only if requested (for final results)
+    if create_plots:
+        from app.utils.attack_full_dataset import _create_distribution_plots
+        _create_distribution_plots(
+            logit_entropies, max_logit_gaps, "Unlearn", forget_class, t1, t2
+        )
     
     return distribution_data["values"], attack_results, round(final_fqs, 3)

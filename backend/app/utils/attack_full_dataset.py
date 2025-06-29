@@ -8,10 +8,17 @@ import matplotlib.pyplot as plt
 from app.models import get_resnet18
 
 
-def _create_single_distribution_plot(data, title, xlabel, color, filename, mean_value):
+def _create_single_distribution_plot(data, title, xlabel, color, filename, mean_value, bins=30, range_vals=None):
     """Create a single distribution plot with consistent styling."""
     plt.figure(figsize=(10, 6))
-    plt.hist(data, bins=30, alpha=0.7, color=color, edgecolor='black')
+    
+    # Use consistent range and bins for proper comparison
+    if range_vals is not None:
+        plt.hist(data, bins=bins, alpha=0.7, color=color, edgecolor='black', range=range_vals)
+        plt.xlim(range_vals)
+    else:
+        plt.hist(data, bins=bins, alpha=0.7, color=color, edgecolor='black')
+    
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel('Frequency')
@@ -26,24 +33,46 @@ def _create_single_distribution_plot(data, title, xlabel, color, filename, mean_
 def _create_distribution_plots(entropies, confidences, model_name, forget_class, t1, t2):
     """Create distribution plots for entropy and confidence."""
     try:
+        from datetime import datetime
+        
         # Create output directory
         os.makedirs('logits_distribution', exist_ok=True)
         
-        # Define plot configurations (removed loss distribution)
+        # For retrain models, don't include timestamp (static filename)
+        # For unlearn models, include timestamp (versioned filename)
+        if model_name.lower() == "retrain":
+            entropy_filename = f'logits_distribution/{model_name.lower()}_entropy_{forget_class}.png'
+            confidence_filename = f'logits_distribution/{model_name.lower()}_confidence_{forget_class}.png'
+        else:
+            # Generate timestamp for unlearn models
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            entropy_filename = f'logits_distribution/{model_name.lower()}_entropy_{forget_class}_{timestamp}.png'
+            confidence_filename = f'logits_distribution/{model_name.lower()}_confidence_{forget_class}_{timestamp}.png'
+        
+        # Define consistent ranges for proper comparison between retrain and unlearn
+        ENTROPY_RANGE = (0.0, 2.5)
+        CONFIDENCE_RANGE = (-2.5, 10.0)  # Same as attack.py configuration
+        BINS = 51  # Same as attack.py for consistency
+        
+        # Define plot configurations with consistent ranges
         plot_configs = [
             {
                 'data': entropies,
-                'title': f'{model_name} - Entropy Distribution for Class {forget_class} (t1={t1})',
+                'title': f'{model_name} - Entropy Distribution for Class {forget_class}',
                 'xlabel': 'Entropy',
                 'color': 'skyblue',
-                'filename': f'logits_distribution/{model_name.lower()}_entropy_dist_class_{forget_class}_t1_{t1}.png'
+                'filename': entropy_filename,
+                'bins': BINS,
+                'range_vals': ENTROPY_RANGE
             },
             {
                 'data': confidences,
-                'title': f'{model_name} - Confidence Distribution for Class {forget_class} (t2={t2})',
+                'title': f'{model_name} - Confidence Distribution for Class {forget_class}',
                 'xlabel': 'Confidence',
                 'color': 'lightgreen',
-                'filename': f'logits_distribution/{model_name.lower()}_confidence_dist_class_{forget_class}_t2_{t2}.png'
+                'filename': confidence_filename,
+                'bins': BINS,
+                'range_vals': CONFIDENCE_RANGE
             }
         ]
         
@@ -52,7 +81,8 @@ def _create_distribution_plots(entropies, confidences, model_name, forget_class,
         for config in plot_configs:
             _create_single_distribution_plot(
                 config['data'], config['title'], config['xlabel'], 
-                config['color'], config['filename'], np.mean(config['data'])
+                config['color'], config['filename'], np.mean(config['data']),
+                bins=config['bins'], range_vals=config['range_vals']
             )
             saved_paths.append(config['filename'])
         

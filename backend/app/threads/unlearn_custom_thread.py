@@ -226,7 +226,22 @@ class UnlearningCustomThread(threading.Thread):
             model=self.model, 
             data_loader=umap_subset_loader, 
             device=self.device, 
-            forget_class=self.forget_class
+            forget_class=self.forget_class,
+            create_plots=False  # No plots for UI data
+        )
+        
+        # Generate distribution plots on full forget class data (for analysis)
+        print("Generating distribution plots on full forget class data")
+        from app.utils.attack_full_dataset import calculate_model_metrics
+        await calculate_model_metrics(
+            model=self.model,
+            data_loader=self.train_loader,
+            device=self.device,
+            forget_class=self.forget_class,
+            t1=2.0,
+            t2=1.0,
+            create_plots=True,
+            model_name="Unlearn"
         )
         
         # Detailed results preparation
