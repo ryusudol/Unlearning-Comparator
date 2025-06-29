@@ -325,7 +325,8 @@ async def calculate_comprehensive_epoch_metrics(
     forget_class,
     enable_metrics=False,
     retrain_metrics_cache=None,
-    mia_classifier=None
+    mia_classifier=None,
+    current_epoch=None
 ):
     """
     Calculate comprehensive epoch metrics (UA, RA, TUA, TRA, PS, C-MIA, E-MIA) if enabled.
@@ -370,27 +371,32 @@ async def calculate_comprehensive_epoch_metrics(
         
         # Calculate Privacy Score
         try:
-            from app.utils.attack_optimized_ps import calculate_ps_with_cached_retrain
-            from app.utils.attack import process_attack_metrics
-            
-            if retrain_metrics_cache is not None:
-                # Use optimized PS calculation with cached retrain metrics
-                ps_score = await calculate_ps_with_cached_retrain(
-                    unlearn_model=model,
-                    data_loader=train_loader,
-                    device=device,
-                    forget_class=forget_class,
-                    retrain_metrics_cache=retrain_metrics_cache
-                )
+            # If epoch is 0, set PS to 0 (initial state before training)
+            if current_epoch is not None and current_epoch == 0:
+                ps_score = 0.0
+                print(f"Setting PS to 0.0 for epoch {current_epoch} (initial state)")
             else:
-                # Fallback to subset calculation for speed
-                umap_subset, umap_subset_loader, _ = setup_umap_subset(train_set, test_set, 10)
-                _, _, ps_score = await process_attack_metrics(
-                    model=model,
-                    data_loader=umap_subset_loader,
-                    device=device,
-                    forget_class=forget_class
-                )
+                from app.utils.attack_optimized_ps import calculate_ps_with_cached_retrain
+                from app.utils.attack import process_attack_metrics
+                
+                if retrain_metrics_cache is not None:
+                    # Use optimized PS calculation with cached retrain metrics
+                    ps_score = await calculate_ps_with_cached_retrain(
+                        unlearn_model=model,
+                        data_loader=train_loader,
+                        device=device,
+                        forget_class=forget_class,
+                        retrain_metrics_cache=retrain_metrics_cache
+                    )
+                else:
+                    # Fallback to subset calculation for speed
+                    umap_subset, umap_subset_loader, _ = setup_umap_subset(train_set, test_set, 10)
+                    _, _, ps_score = await process_attack_metrics(
+                        model=model,
+                        data_loader=umap_subset_loader,
+                        device=device,
+                        forget_class=forget_class
+                    )
             result_metrics['PS'] = ps_score
         except Exception as e:
             print(f"Error calculating PS: {e}")

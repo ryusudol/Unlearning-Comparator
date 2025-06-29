@@ -23,13 +23,13 @@ def _create_single_distribution_plot(data, title, xlabel, color, filename, mean_
     plt.close()
 
 
-def _create_distribution_plots(entropies, confidences, losses, model_name, forget_class, t1, t2):
-    """Create distribution plots for entropy, confidence, and loss."""
+def _create_distribution_plots(entropies, confidences, model_name, forget_class, t1, t2):
+    """Create distribution plots for entropy and confidence."""
     try:
         # Create output directory
         os.makedirs('logits_distribution', exist_ok=True)
         
-        # Define plot configurations
+        # Define plot configurations (removed loss distribution)
         plot_configs = [
             {
                 'data': entropies,
@@ -44,13 +44,6 @@ def _create_distribution_plots(entropies, confidences, losses, model_name, forge
                 'xlabel': 'Confidence',
                 'color': 'lightgreen',
                 'filename': f'logits_distribution/{model_name.lower()}_confidence_dist_class_{forget_class}_t2_{t2}.png'
-            },
-            {
-                'data': losses,
-                'title': f'{model_name} - Loss Distribution for Class {forget_class}',
-                'xlabel': 'Cross Entropy Loss',
-                'color': 'orange',
-                'filename': f'logits_distribution/{model_name.lower()}_loss_dist_class_{forget_class}.png'
             }
         ]
         
@@ -201,17 +194,15 @@ async def process_attack_metrics_full_dataset(
     
     # Prepare return values in expected format
     values = []
-    for idx, entropy, confidence, loss in zip(
+    for idx, entropy, confidence in zip(
         unlearn_metrics["indices"], 
         unlearn_metrics["entropies"], 
-        unlearn_metrics["confidences"],
-        unlearn_metrics["losses"]
+        unlearn_metrics["confidences"]
     ):
         values.append({
             "img": idx,
             "entropy": round(float(entropy), 2),
-            "confidence": round(float(confidence), 2),
-            "loss": round(float(loss), 3)
+            "confidence": round(float(confidence), 2)
         })
     
     attack_results = {
@@ -338,11 +329,7 @@ async def calculate_model_metrics(
     
     entropies = []
     confidences = []
-    losses = []
     indices = []
-    
-    # Create loss function for loss calculation
-    criterion = torch.nn.CrossEntropyLoss(reduction='none')
     
     with model_eval_mode(model):
         with torch.no_grad():
@@ -368,10 +355,6 @@ async def calculate_model_metrics(
                     original_indices = [batch_start_idx + idx.item() for idx in local_indices]
                 
                 selected_outputs = outputs[forget_mask]
-                selected_labels = labels[forget_mask]
-                
-                # Calculate loss
-                batch_losses = criterion(selected_outputs, selected_labels).cpu().numpy()
                 
                 # Calculate entropy
                 scaled_outputs_entropy = selected_outputs / t1
@@ -388,17 +371,15 @@ async def calculate_model_metrics(
                 indices.extend(original_indices)
                 entropies.extend(batch_entropies)
                 confidences.extend(batch_confidences)
-                losses.extend(batch_losses)
     
     # Create visualizations only when requested
     if create_plots and len(entropies) > 0:
-        _create_distribution_plots(entropies, confidences, losses, model_name, forget_class, t1, t2)
+        _create_distribution_plots(entropies, confidences, model_name, forget_class, t1, t2)
     
     return {
         "indices": indices,
         "entropies": entropies,
-        "confidences": confidences,
-        "losses": losses
+        "confidences": confidences
     }
 
 

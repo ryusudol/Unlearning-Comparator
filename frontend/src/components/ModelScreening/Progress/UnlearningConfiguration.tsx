@@ -253,6 +253,10 @@ export default function UnlearningConfiguration() {
         ? "RandomLabeling"
         : method === "ga"
         ? "GradientAscent"
+        : method === "ga_ft"
+        ? "GA+FT"
+        : method === "scrub"
+        ? "SCRUB"
         : "Custom";
 
     if (isCustom) {
@@ -369,6 +373,8 @@ export default function UnlearningConfiguration() {
                   : method === UNLEARNING_METHODS[2]
                   ? "ga"
                   : method === UNLEARNING_METHODS[3]
+                  ? "ga_ft"
+                  : method === UNLEARNING_METHODS[4]
                   ? "scrub"
                   : idx === UNLEARNING_METHODS.length - 1
                   ? "custom"

@@ -34,7 +34,8 @@ async def calculate_ps_with_cached_retrain(
     
     # Calculate metrics only for unlearn model (retrain is cached)
     unlearn_metrics = await calculate_model_metrics(
-        unlearn_model, data_loader, device, forget_class, t1, t2
+        unlearn_model, data_loader, device, forget_class, t1, t2,
+        create_plots=True, model_name="Unlearn"
     )
     
     if len(unlearn_metrics["entropies"]) == 0:

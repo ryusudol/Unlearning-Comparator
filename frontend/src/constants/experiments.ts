@@ -2,6 +2,7 @@ export const UNLEARNING_METHODS = [
   "Fine-Tuning",
   "Random Labeling",
   "Gradient Ascent",
+  "GA+FT",
   "SCRUB",
   "Upload",
 ];

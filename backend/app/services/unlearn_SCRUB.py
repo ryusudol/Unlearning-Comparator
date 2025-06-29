@@ -77,7 +77,7 @@ async def unlearning_SCRUB(request, status, base_weights_path):
     # SCRUB specific hyperparameters (easily configurable here)
     scrub_config = {
         'alpha': 0.5,          # Knowledge distillation weight
-        'beta': 0,             # Forget set loss weight (논문값: 0)
+        'beta': 0,             # Forget set loss weight (paper value: 0)
         'gamma': 1.0,          # Retain set loss weight
         'kd_temperature': 2.0, # Temperature for knowledge distillation
         'msteps': 100            # Maximum steps for forget set loss

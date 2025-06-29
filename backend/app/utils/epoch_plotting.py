@@ -35,23 +35,23 @@ def plot_epoch_metrics(
     epochs = range(0, len(epoch_metrics['UA']))
     
     # Plot all metrics with specified styles
-    # UA, TUA: X 마커 (뚱뚱한 X) - UA들이 점선
+    # UA, TUA: X markers (thick X) - UA with dashed lines
     ax.plot(epochs, epoch_metrics['UA'], color='darkgreen', linewidth=2.5, linestyle='--', 
             label='UA (Unlearn Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
     ax.plot(epochs, epoch_metrics['TUA'], color='#228B22', linewidth=2.5, linestyle='--', 
             label='TUA (Test Unlearn Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
     
-    # RA, TRA: 동그라미 마커 - RA들이 실선
+    # RA, TRA: circle markers - RA with solid lines
     ax.plot(epochs, epoch_metrics['RA'], color='darkgreen', linewidth=2.5, linestyle='-', 
             label='RA (Remain Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
     ax.plot(epochs, epoch_metrics['TRA'], color='#228B22', linewidth=2.5, linestyle='-', 
             label='TRA (Test Remain Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
     
-    # PS: 1점 쇄선, 진한 주황색, 별 마커
+    # PS: dash-dot line, dark orange, star marker
     ax.plot(epochs, epoch_metrics['PS'], color='#FF6600', linewidth=2.5, linestyle='-.',
             label='PS (Ours)', marker='*', markersize=14, zorder=10, clip_on=False)
     
-    # MIA: C-MIA와 E-MIA 개별 플롯
+    # MIA: individual plots for C-MIA and E-MIA
     if 'C-MIA' in epoch_metrics and len(epoch_metrics['C-MIA']) > 0:
         ax.plot(epochs, epoch_metrics['C-MIA'], color='#CC8800', linewidth=2.5, linestyle='-.',
                 label='C-MIA (Confidence)', marker='^', markersize=10, zorder=10, clip_on=False)

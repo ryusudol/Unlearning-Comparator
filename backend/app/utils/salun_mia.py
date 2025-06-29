@@ -266,9 +266,7 @@ async def predict_mia_efficacy(
     print(f"Forget samples: {forget_prob.shape[0]}")
     
     # Debug: Sample probability distributions
-    if forget_prob.shape[0] > 0:
-        sample_prob = forget_prob[0]
-        print(f"Sample forget prob: {sample_prob.tolist()[:5]}...")  # First 5 values
+    # Skip logging sample probabilities for cleaner output
     
     # Extract same features as training (confidence and entropy only)
     forget_conf = torch.gather(forget_prob, 1, forget_labels[:, None])

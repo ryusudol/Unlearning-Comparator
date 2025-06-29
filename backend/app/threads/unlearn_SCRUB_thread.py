@@ -142,10 +142,10 @@ class UnlearningSCRUBThread(BaseUnlearningThread):
         ce_loss = self.criterion(outputs, labels)
         
         if is_forget_batch:
-            # SCRUB: KL 극대화 (negative)
+            # SCRUB: KL maximization (negative)
             total_loss = -self.alpha * kd_loss
         else:
-            # Retain: 일반 학습
+            # Retain: normal learning
             total_loss = self.alpha * kd_loss + self.gamma * ce_loss
             
         return total_loss, ce_loss.detach(), kd_loss.detach()
@@ -195,13 +195,30 @@ class UnlearningSCRUBThread(BaseUnlearningThread):
                 self.train_set, self.test_set, self.criterion, self.device,
                 self.request.forget_class, enable_epoch_metrics,
                 metrics_components['retrain_metrics_cache'] if metrics_components else None,
-                metrics_components['mia_classifier'] if metrics_components else None
+                metrics_components['mia_classifier'] if metrics_components else None,
+                current_epoch=0
             )
             update_epoch_metrics_collection(epoch_metrics, initial_metrics)
+            
+            # Display epoch 0 metrics
+            if initial_metrics:
+                print_epoch_progress(
+                    0, self.request.epochs, 0.0, initial_metrics.get('UA', 0.0),
+                    eta=None,
+                    additional_metrics={
+                        'UA': initial_metrics.get('UA', 0.0),
+                        'RA': initial_metrics.get('RA', 0.0),
+                        'TUA': initial_metrics.get('TUA', 0.0),
+                        'TRA': initial_metrics.get('TRA', 0.0),
+                        'PS': initial_metrics.get('PS', 0.0),
+                        'C-MIA': initial_metrics.get('C-MIA', 0.0),
+                        'E-MIA': initial_metrics.get('E-MIA', 0.0)
+                    }
+                )
 
         # Start timing after all preprocessing  
         start_time = time.time()
-        total_metrics_time = 0  # 메트릭 계산 시간 누적
+        total_metrics_time = 0  # Accumulate metrics calculation time
 
         for epoch in range(self.request.epochs):
             self.model.train()
@@ -310,7 +327,8 @@ class UnlearningSCRUBThread(BaseUnlearningThread):
                     self.train_set, self.test_set, self.criterion, self.device,
                     self.request.forget_class, enable_epoch_metrics,
                     metrics_components['retrain_metrics_cache'] if metrics_components else None,
-                    metrics_components['mia_classifier'] if metrics_components else None
+                    metrics_components['mia_classifier'] if metrics_components else None,
+                    current_epoch=epoch + 1
                 )
                 update_epoch_metrics_collection(epoch_metrics, metrics)
                 total_metrics_time += time.time() - metrics_start

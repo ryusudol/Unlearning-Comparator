@@ -79,7 +79,7 @@ async def unlearning_FT(request, status, base_weights_path):
         momentum=MOMENTUM,
         weight_decay=WEIGHT_DECAY
     )
-    # Option 1: MultiStepLR (기존)
+    # Option 1: MultiStepLR (original)
     # scheduler = optim.lr_scheduler.MultiStepLR(
     #     optimizer=optimizer,
     #     milestones=DECREASING_LR,
@@ -93,7 +93,7 @@ async def unlearning_FT(request, status, base_weights_path):
         eta_min=0.004
     )
     
-    # Option 3: LinearLR (리니어 감소)
+    # Option 3: LinearLR (linear decay)
     # scheduler = optim.lr_scheduler.LinearLR(
     #     optimizer=optimizer,
     #     start_factor=1.0,

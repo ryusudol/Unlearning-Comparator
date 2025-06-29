@@ -88,6 +88,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
         ? "Fine-Tuning"
         : displayValue.startsWith("R")
         ? "Random Labeling"
+        : displayValue === "GA+FT"
+        ? "GA+FT"
         : displayValue.startsWith("G")
         ? "Gradient Ascent"
         : displayValue.startsWith("S")
@@ -103,6 +105,8 @@ export const columns: ColumnDef<ExperimentData>[] = [
         ? "Fine-Tuning"
         : valueToDisplay.startsWith("R")
         ? "Random Labeling"
+        : valueToDisplay === "GA+FT"
+        ? "GA+FT"
         : valueToDisplay.startsWith("G")
         ? "Gradient Ascent"
         : valueToDisplay.startsWith("S")
