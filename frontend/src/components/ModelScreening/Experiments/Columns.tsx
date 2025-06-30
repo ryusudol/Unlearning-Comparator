@@ -91,6 +91,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
         "GA+FT": "GA+FT",
         "GA+SL+FT": "GA+SL+FT",
         "SCRUB": "SCRUB",
+        "SalUn": "SalUn",
         "Custom": "Upload"
       };
       const methodValue = methodMapping[displayValue] || displayValue;
@@ -107,6 +108,7 @@ export const columns: ColumnDef<ExperimentData>[] = [
         "GA+FT": "GA+FT",
         "GA+SL+FT": "GA+SL+FT",
         "SCRUB": "SCRUB",
+        "SalUn": "SalUn",
         "Custom": "Upload"
       };
       const value = methodMapping[valueToDisplay] || valueToDisplay;

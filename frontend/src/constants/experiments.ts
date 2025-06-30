@@ -5,6 +5,7 @@ export const UNLEARNING_METHODS = [
   "GA+FT",
   "GA+SL+FT",
   "SCRUB",
+  "SalUn",
   "Upload",
 ];
 

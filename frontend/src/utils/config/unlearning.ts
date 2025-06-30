@@ -22,9 +22,9 @@ export function getDefaultUnlearningConfig(method: string) {
     learning_rate = "0.01";
     batch_size = "128";
   } else {
-    epoch = "7";
-    learning_rate = "0.0001";
-    batch_size = "256";
+    epoch = "3";
+    learning_rate = "0.001";
+    batch_size = "128";
   }
 
   return { epoch, learning_rate, batch_size };
