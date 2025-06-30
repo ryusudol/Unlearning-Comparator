@@ -1,8 +1,24 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Table as TableType, flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 import * as d3 from "d3";
 
+import Tooltip from "./Tooltip";
+import { columns } from "./Columns";
+import { COLUMN_WIDTHS } from "./Columns";
+import { COLORS } from "../../../constants/colors";
+import { ExperimentData, EpochMetrics } from "../../../types/data";
+import { useForgetClassStore } from "../../../stores/forgetClassStore";
+import { PerformanceMetrics } from "../../../types/experiments";
+import { Experiments } from "../../../types/data";
+import { Table, TableBody, TableCell, TableRow } from "../../UI/table";
+import { useExperimentsStore } from "../../../stores/experimentsStore";
+import { fetchAllExperimentsData } from "../../../utils/api/modelScreening";
+import { calculatePerformanceMetrics } from "../../../utils/data/experiments";
+import { useRunningStatusStore } from "../../../stores/runningStatusStore";
+import { useModelDataStore } from "../../../stores/modelDataStore";
+import { cn } from "../../../utils/util";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -13,21 +29,7 @@ import {
   deleteRow,
   downloadJSON,
   downloadPTH,
-} from "../../../utils/api/dataTable";
-import { columns } from "./Columns";
-import { COLUMN_WIDTHS } from "./Columns";
-import { COLORS } from "../../../constants/colors";
-import { ExperimentData } from "../../../types/data";
-import { useForgetClassStore } from "../../../stores/forgetClassStore";
-import { PerformanceMetrics } from "../../../types/experiments";
-import { Experiments } from "../../../types/data";
-import { Table, TableBody, TableCell, TableRow } from "../../UI/table";
-import { useExperimentsStore } from "../../../stores/experimentsStore";
-import { fetchAllExperimentsData } from "../../../utils/api/unlearning";
-import { calculatePerformanceMetrics } from "../../../utils/data/experiments";
-import { useRunningStatusStore } from "../../../stores/runningStatusStore";
-import { useModelDataStore } from "../../../stores/modelDataStore";
-import { cn } from "../../../utils/util";
+} from "../../../utils/api/modelScreening";
 
 const CONFIG = {
   TEMPORARY_ROW_BG_COLOR: "#F0F6FA",
@@ -41,7 +43,7 @@ interface Props {
   table: TableType<ExperimentData>;
 }
 
-export default function _TableBody({ table }: Props) {
+export default function MyTableBody({ table }: Props) {
   const { modelA, modelB, saveModelA, saveModelB } = useModelDataStore();
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const isRunning = useRunningStatusStore((state) => state.isRunning);
@@ -51,9 +53,72 @@ export default function _TableBody({ table }: Props) {
     (state) => state.setIsExperimentsLoading
   );
 
+  const [tooltipData, setTooltipData] = useState<{
+    epochMetrics: EpochMetrics;
+    experimentId: string;
+    position: { x: number; y: number };
+  } | null>(null);
+
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
   const performanceMetrics = calculatePerformanceMetrics(
     experiments
   ) as PerformanceMetrics;
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        tooltipRef.current &&
+        !tooltipRef.current.contains(e.target as Node)
+      ) {
+        setTooltipData(null);
+      }
+    };
+
+    if (tooltipData) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [tooltipData]);
+
+  const handleRowClick = (e: React.MouseEvent, experimentId: string) => {
+    const tableCell = (e.target as HTMLElement).closest("td");
+    if (tableCell) {
+      const row = tableCell.closest("tr");
+      if (row) {
+        const cells = Array.from(row.children);
+        const cellIndex = cells.indexOf(tableCell);
+
+        const totalColumns = cells.length;
+        const isModelAColumn = cellIndex === totalColumns - 2;
+        const isModelBColumn = cellIndex === totalColumns - 1;
+
+        if (isModelAColumn || isModelBColumn) {
+          return;
+        }
+      }
+    }
+
+    const experiment = experiments[experimentId];
+    if (experiment?.epoch_metrics) {
+      const appContainer = document.getElementById("app-container");
+      if (appContainer) {
+        const containerRect = appContainer.getBoundingClientRect();
+        const relativeX = e.clientX - containerRect.left + 60;
+        const relativeY = e.clientY - containerRect.top + 10;
+
+        setTooltipData({
+          epochMetrics: experiment.epoch_metrics,
+          experimentId,
+          position: {
+            x: relativeX,
+            y: relativeY,
+          },
+        });
+      }
+    }
+  };
 
   const maxTRA = useMemo(
     () =>
@@ -289,90 +354,117 @@ export default function _TableBody({ table }: Props) {
   };
 
   return (
-    <Table className="w-full table-fixed">
-      <TableBody
-        className={cn(
-          "text-sm",
-          table.getRowModel().rows?.length <= 5 && "[&_tr:last-child]:border-b"
-        )}
-      >
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row, rowIdx) => {
-            const isTemporaryRow = row.id === "-";
-            let isRunningRow = false;
-            if (isTemporaryRow) {
-              const temporaryExperimentEntries = Object.entries(
-                experiments
-              ).filter(([key]) => key.length < 4);
-              const tempIndex = temporaryExperimentEntries.findIndex(
-                ([, experiment]) => experiment === row.original
-              );
-              isRunningRow = tempIndex === 0;
-            }
+    <div className="relative" data-table-container>
+      <Table className="w-full table-fixed">
+        <TableBody
+          className={cn(
+            "text-sm",
+            table.getRowModel().rows?.length <= 5 &&
+              "[&_tr:last-child]:border-b"
+          )}
+        >
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row, rowIdx) => {
+              const isTemporaryRow = row.id === "-";
+              let isRunningRow = false;
+              if (isTemporaryRow) {
+                const temporaryExperimentEntries = Object.entries(
+                  experiments
+                ).filter(([key]) => key.length < 4);
+                const tempIndex = temporaryExperimentEntries.findIndex(
+                  ([, experiment]) => experiment === row.original
+                );
+                isRunningRow = tempIndex === 0;
+              }
 
-            return (
-              <ContextMenu key={rowIdx}>
-                <ContextMenuTrigger className="contents">
-                  <TableRow
-                    id={row.id}
-                    className="!border-b"
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      const columnId = cell.column.id;
-                      const cellStyle = getCellStyle(cell, isTemporaryRow);
+              return (
+                <ContextMenu key={rowIdx}>
+                  <ContextMenuTrigger className="contents">
+                    <TableRow
+                      id={row.id}
+                      className="!border-b cursor-pointer"
+                      data-state={row.getIsSelected() && "selected"}
+                      onClick={(event) =>
+                        !isTemporaryRow && handleRowClick(event, row.id)
+                      }
+                    >
+                      {row.getVisibleCells().map((cell) => {
+                        const columnId = cell.column.id;
+                        const cellStyle = getCellStyle(cell, isTemporaryRow);
 
-                      const cellContent =
-                        isRunningRow && columnId === "ID" ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )
+                        const cellContent =
+                          isRunningRow && columnId === "ID" ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )
+                          );
+
+                        return (
+                          <TableCell key={cell.id} style={cellStyle}>
+                            {cellContent}
+                          </TableCell>
                         );
-
-                      return (
-                        <TableCell key={cell.id} style={cellStyle}>
-                          {cellContent}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                </ContextMenuTrigger>
-                {!isTemporaryRow && (
-                  <ContextMenuContent className="z-50">
-                    {!row.id.startsWith("000") &&
-                      !row.id.startsWith("a00") &&
-                      !isRunning && (
-                        <ContextMenuItem
-                          onClick={() => handleDeleteRow(row.id)}
-                        >
-                          Delete
-                        </ContextMenuItem>
-                      )}
-                    <ContextMenuItem onClick={() => handleDownloadJSON(row.id)}>
-                      Download JSON
-                    </ContextMenuItem>
-                    <ContextMenuItem onClick={() => handleDownloadPTH(row.id)}>
-                      Download PTH
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                )}
-              </ContextMenu>
-            );
-          })
-        ) : (
-          <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="h-[178px] text-center text-gray-500 text-[15px]"
-            >
-              No data found.
-            </TableCell>
-          </TableRow>
+                      })}
+                    </TableRow>
+                  </ContextMenuTrigger>
+                  {!isTemporaryRow && (
+                    <ContextMenuContent className="z-50">
+                      {!row.id.startsWith("000") &&
+                        !row.id.startsWith("a00") &&
+                        !isRunning && (
+                          <ContextMenuItem
+                            onClick={() => handleDeleteRow(row.id)}
+                          >
+                            Delete
+                          </ContextMenuItem>
+                        )}
+                      <ContextMenuItem
+                        onClick={() => handleDownloadJSON(row.id)}
+                      >
+                        Download JSON
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => handleDownloadPTH(row.id)}
+                      >
+                        Download PTH
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  )}
+                </ContextMenu>
+              );
+            })
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-[178px] text-center text-gray-500 text-[15px]"
+              >
+                No data found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      {tooltipData &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            className="absolute z-[60]"
+            style={{
+              left: tooltipData.position.x,
+              top: tooltipData.position.y,
+            }}
+          >
+            <Tooltip
+              epochMetrics={tooltipData.epochMetrics}
+              experimentId={tooltipData.experimentId}
+            />
+          </div>,
+          document.getElementById("app-container") || document.body
         )}
-      </TableBody>
-    </Table>
+    </div>
   );
 }

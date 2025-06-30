@@ -6,19 +6,18 @@ import Button from "../../common/CustomButton";
 import { Label } from "../../UI/label";
 import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { useRunningStatusStore } from "../../../stores/runningStatusStore";
+import { fetchFileData, fetchAllWeightNames } from "../../../utils/api/common";
 import { useExperimentsStore } from "../../../stores/experimentsStore";
 import { useRunningIndexStore } from "../../../stores/runningIndexStore";
 import { UnlearningConfigurationData } from "../../../types/experiments";
 import { ExperimentData } from "../../../types/data";
-import { fetchUnlearningStatus } from "../../../utils/api/requests";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import { cn } from "../../../utils/util";
 import {
+  fetchUnlearningStatus,
   executeMethodUnlearning,
   executeCustomUnlearning,
-  fetchFileData,
-  fetchAllWeightNames,
-} from "../../../utils/api/unlearning";
+} from "../../../utils/api/modelScreening";
 import {
   Select,
   SelectContent,
@@ -254,6 +253,14 @@ export default function UnlearningConfiguration() {
         ? "RandomLabeling"
         : method === "ga"
         ? "GradientAscent"
+        : method === "ga_ft"
+        ? "GA+FT"
+        : method === "ga_sl_ft"
+        ? "GA+SL+FT"
+        : method === "scrub"
+        ? "SCRUB"
+        : method === "salun"
+        ? "SalUn"
         : "Custom";
 
     if (isCustom) {
@@ -369,6 +376,14 @@ export default function UnlearningConfiguration() {
                   ? "rl"
                   : method === UNLEARNING_METHODS[2]
                   ? "ga"
+                  : method === UNLEARNING_METHODS[3]
+                  ? "ga_ft"
+                  : method === UNLEARNING_METHODS[4]
+                  ? "ga_sl_ft"
+                  : method === UNLEARNING_METHODS[5]
+                  ? "scrub"
+                  : method === UNLEARNING_METHODS[6]
+                  ? "salun"
                   : idx === UNLEARNING_METHODS.length - 1
                   ? "custom"
                   : "-";

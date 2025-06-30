@@ -6,19 +6,19 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  TooltipProps,
 } from "recharts";
 
+import MyTooltip from "./Tooltip";
+import Legend from "./Legend";
 import { COLORS } from "../../../constants/colors";
 import { getCkaData } from "../../../utils/data/getCkaData";
-import { CircleIcon, FatMultiplicationSignIcon } from "../../UI/icons";
+import { CircleIcon, FatMultiplicationSignIcon } from "../../common/icons";
 import { ChartContainer } from "../../UI/chart";
 import {
   CKA_DATA_KEYS,
   LINE_CHART_TICK_STYLE,
   LINE_CHART_CONFIG,
-  LINE_CHART_LEGEND_DATA,
-} from "../../../constants/correlations";
+} from "../../../constants/layerWiseSimilarity";
 import {
   STROKE_CONFIG,
   FONT_CONFIG,
@@ -28,9 +28,8 @@ import {
   useModelAExperiment,
   useModelBExperiment,
 } from "../../../hooks/useModelExperiment";
-import { cn } from "../../../utils/util";
 
-const CONFIG = {
+export const CONFIG = {
   DOT_SIZE: 10,
   CROSS_SIZE: 13,
   ACTIVE_DOT_STROKE_WIDTH: 3,
@@ -61,7 +60,12 @@ type TickProps = {
   hoveredLayer: string | null;
 };
 
-export default function _LineChart({ dataset }: { dataset: string }) {
+interface LineChartProps {
+  dataset: string;
+  compareMode: string;
+}
+
+export default function MyLineChart({ dataset, compareMode }: LineChartProps) {
   const modelAExperiment = useModelAExperiment();
   const modelBExperiment = useModelBExperiment();
 
@@ -74,13 +78,18 @@ export default function _LineChart({ dataset }: { dataset: string }) {
 
   if (!modelAExperiment || !modelBExperiment) return null;
 
-  const ckaData = getCkaData(dataset, modelAExperiment, modelBExperiment);
+  const ckaData = getCkaData(
+    dataset,
+    modelAExperiment,
+    modelBExperiment,
+    compareMode
+  );
   const layers = ckaData.map((data) => data.layer);
 
   return (
     <div className="relative">
       <style>{LINE_CHART_TICK_STYLE}</style>
-      <CustomLegend />
+      <Legend />
       <ChartContainer
         className="w-[460px] h-[266px] relative"
         config={LINE_CHART_CONFIG}
@@ -143,7 +152,7 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           />
           <Tooltip
             cursor={false}
-            content={<CustomTooltip />}
+            content={<MyTooltip />}
             wrapperStyle={{ zIndex: CONFIG.zIndex }}
           />
           {CKA_DATA_KEYS.map((key, idx) => {
@@ -216,85 +225,6 @@ export default function _LineChart({ dataset }: { dataset: string }) {
           })}
         </LineChart>
       </ChartContainer>
-    </div>
-  );
-}
-
-function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
-  if (active && payload && payload.length) {
-    return (
-      <div
-        style={{ zIndex: CONFIG.zIndex }}
-        className="rounded-lg border border-border/50 bg-white px-2.5 py-1.5 text-sm shadow-xl"
-      >
-        <p className="leading-5">
-          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
-          <span className="font-semibold">{payload[1].value}</span>
-        </p>
-        <p className="leading-5">
-          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
-          <span className="font-semibold">{payload[3].value}</span>
-        </p>
-        <p className="leading-5">
-          <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
-          <span className="font-semibold">{payload[0].value}</span>
-        </p>
-        <p className="leading-5">
-          <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
-          <span className="font-semibold">{payload[2].value}</span>
-        </p>
-      </div>
-    );
-  }
-  return null;
-}
-
-function CustomLegend() {
-  const modelAExperiment = useModelAExperiment();
-  const modelBExperiment = useModelBExperiment();
-
-  const CIRCLE = "circle";
-
-  return (
-    <div className="absolute bottom-[68px] left-[45px] text-xs leading-4 z-10 border-[2px] border-[#EFEFEF] rounded-[4px] pl-2.5 pr-1.5 py-0.5 bg-white/60">
-      {LINE_CHART_LEGEND_DATA.map((item, i) => {
-        const Icon =
-          item.type === CIRCLE ? CircleIcon : FatMultiplicationSignIcon;
-        const experiment = i % 2 === 0 ? modelAExperiment : modelBExperiment;
-
-        return (
-          <div key={i} className={cn("flex items-center", item.spacing)}>
-            <div className="relative">
-              <Icon
-                className={cn("z-10", {
-                  "mr-2": item.type === CIRCLE,
-                  "mr-0.5": item.type !== CIRCLE,
-                })}
-                style={{
-                  color: item.color,
-                  width:
-                    item.type === CIRCLE ? CONFIG.DOT_SIZE : CONFIG.CROSS_SIZE,
-                }}
-              />
-              <div
-                className="absolute top-1/2 w-[18px] h-[1px]"
-                style={{
-                  transform: `translate(${i > 1 ? "-3.8px" : "-4px"}, -50%)`,
-                  ...(i > 1
-                    ? { borderTop: `2px dashed ${item.color}` }
-                    : { backgroundColor: item.color }),
-                }}
-              />
-            </div>
-            <span className={cn({ "ml-1.5": i > 1 })}>
-              <span style={{ color: item.color }}>
-                {item.label} ({experiment.Type}, {experiment.ID}){" "}
-              </span>
-              <span>{i < 2 ? "Retain" : "Forget"}</span>
-            </span>
-          </div>
-        );
-      })}
     </div>
   );
 }

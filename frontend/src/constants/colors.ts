@@ -26,7 +26,4 @@ export const COLORS = {
   LIGHT_GRAY: "#D4D4D4",
 
   GRID_COLOR: "#EFEFEF",
-
-  BUTTON_BG_COLOR: "#585858",
-  HOVERED_BUTTON_BG_COLOR: "#696969",
 } as const;

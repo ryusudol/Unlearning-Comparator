@@ -109,44 +109,47 @@ async def process_attack_metrics(
         device, 
         forget_class=5, 
         t1=2.0,
-        t2=1.0
+        t2=1.0,
+        create_plots=False
     ):
-    model.eval()
+    from app.utils.evaluation import model_eval_mode
+    
     logit_entropies = []
     max_logit_gaps = []
     image_indices = []
     
-    with torch.no_grad():
-        for batch_idx, data in enumerate(data_loader):
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            
-            # Select only those outputs for the forget class
-            forget_mask = (labels == forget_class)
-            if not torch.any(forget_mask):
-                continue
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for batch_idx, data in enumerate(data_loader):
+                images, labels = data[0].to(device), data[1].to(device)
+                outputs = model(images)
                 
-            local_indices = torch.where(forget_mask)[0]
-            batch_start_idx = batch_idx * data_loader.batch_size
-            original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
-                                for idx in local_indices]
-            selected_outputs = outputs[forget_mask]
+                # Select only those outputs for the forget class
+                forget_mask = (labels == forget_class)
+                if not torch.any(forget_mask):
+                    continue
+                    
+                local_indices = torch.where(forget_mask)[0]
+                batch_start_idx = batch_idx * data_loader.batch_size
+                original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
+                                    for idx in local_indices]
+                selected_outputs = outputs[forget_mask]
 
-            # Compute entropy scores
-            scaled_logits_entropy = selected_outputs / t1
-            probs_entropy = F.softmax(scaled_logits_entropy, dim=1)
-            entropies = entropy(probs_entropy.cpu().numpy().T)
+                # Compute entropy scores
+                scaled_logits_entropy = selected_outputs / t1
+                probs_entropy = F.softmax(scaled_logits_entropy, dim=1)
+                entropies = entropy(probs_entropy.cpu().numpy().T)
 
-            # Compute (logit) confidence scores 
-            scaled_logits_conf = selected_outputs / t2
-            probs_conf = F.softmax(scaled_logits_conf, dim=1).cpu().numpy()
-            max_probs = np.max(probs_conf, axis=1)
-            other_probs = 1 - max_probs
-            confidence_scores = np.log(max_probs + 1e-45) - np.log(other_probs + 1e-45)
-            
-            image_indices.extend(original_indices)
-            logit_entropies.extend(entropies)
-            max_logit_gaps.extend(confidence_scores)
+                # Compute (logit) confidence scores 
+                scaled_logits_conf = selected_outputs / t2
+                probs_conf = F.softmax(scaled_logits_conf, dim=1).cpu().numpy()
+                max_probs = np.max(probs_conf, axis=1)
+                other_probs = 1 - max_probs
+                confidence_scores = np.log(max_probs + 1e-45) - np.log(other_probs + 1e-45)
+                
+                image_indices.extend(original_indices)
+                logit_entropies.extend(entropies)
+                max_logit_gaps.extend(confidence_scores)
     
     distribution_data = prepare_distribution_data(image_indices, logit_entropies, max_logit_gaps)
     unlearn_data = {
@@ -238,5 +241,12 @@ async def process_attack_metrics(
         "confidence_above_retrain": scores_conf_retrain,
         "confidence_above_unlearn": scores_conf_unlearn
     }
+    
+    # Create distribution plots only if requested (for final results)
+    if create_plots:
+        from app.utils.attack_full_dataset import _create_distribution_plots
+        _create_distribution_plots(
+            logit_entropies, max_logit_gaps, "Unlearn", forget_class, t1, t2
+        )
     
     return distribution_data["values"], attack_results, round(final_fqs, 3)

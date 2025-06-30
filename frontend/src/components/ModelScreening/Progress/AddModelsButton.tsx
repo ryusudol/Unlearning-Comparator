@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import UnlearningConfiguration from "./UnlearningConfiguration";
 import Button from "../../common/CustomButton";
-import { PlusIcon } from "../../UI/icons";
+import { PlusIcon } from "../../common/icons";
 import { useRunningStatusStore } from "../../../stores/runningStatusStore";
 import { cn } from "../../../utils/util";
 import {
@@ -28,7 +28,7 @@ export default function AddExperimentsButton() {
         <Button
           onClick={() => setOpen(true)}
           className={cn("w-[255px] mb-1", {
-            "hover:bg-[#585858] cursor-not-allowed": isRunning,
+            "hover:bg-neutral-dark cursor-not-allowed": isRunning,
           })}
         >
           <PlusIcon color="white" className="w-3 h-3 mr-1.5" />

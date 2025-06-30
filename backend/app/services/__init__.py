@@ -9,6 +9,10 @@ Available services:
     unlearn_GA: Unlearning using gradient ascent method
     unlearn_RL: Unlearning using random labeling method  
     unlearn_FT: Unlearning using fine-tuning method
+    unlearn_GA_FT: Unlearning using combined GA+FT method
+    unlearn_GA_SL_FT: Unlearning using GA+SL+FT method with second logit
+    unlearn_SCRUB: Unlearning using SCRUB method
+    unlearn_SalUn: Unlearning using SalUn gradient saliency method
     unlearn_custom: Custom unlearning method for inference
 
 Each service module follows a similar pattern:
@@ -22,7 +26,11 @@ from .train import run_training
 from .unlearn_GA import run_unlearning_GA
 from .unlearn_RL import run_unlearning_RL
 from .unlearn_FT import run_unlearning_FT
+from .unlearn_GA_FT import run_unlearning_GA_FT
+from .unlearn_GA_SL_FT import run_unlearning_GA_SL_FT
+from .unlearn_SCRUB import run_unlearning_SCRUB
+from .unlearn_SalUn import run_unlearning_SalUn
 from .unlearn_retrain import run_unlearning_retrain
 from .unlearn_custom import run_unlearning_custom
 
-__all__ = ['run_training', 'run_unlearning_GA', 'run_unlearning_RL', 'run_unlearning_FT', 'run_unlearning_retrain', 'run_unlearning_custom']
+__all__ = ['run_training', 'run_unlearning_GA', 'run_unlearning_RL', 'run_unlearning_FT', 'run_unlearning_GA_FT', 'run_unlearning_GA_SL_FT', 'run_unlearning_SCRUB', 'run_unlearning_SalUn', 'run_unlearning_retrain', 'run_unlearning_custom']

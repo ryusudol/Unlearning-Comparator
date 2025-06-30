@@ -6,7 +6,7 @@ import Indicator from "../../components/common/Indicator";
 import DataTable from "../../components/ModelScreening/Experiments/DataTable";
 import Legend from "../../components/ModelScreening/Experiments/Legend";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
-import { ArrowDownIcon, ArrowUpIcon } from "../../components/UI/icons";
+import { ArrowDownIcon, ArrowUpIcon } from "../../components/common/icons";
 import { CONFIG } from "../../app/App";
 
 export default function Experiments() {

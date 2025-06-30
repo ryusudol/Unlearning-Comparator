@@ -9,7 +9,7 @@ import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { useAttackStateStore } from "../../../stores/attackStore";
 import { THRESHOLD_STRATEGIES } from "../../../constants/privacyAttack";
 import { Prob } from "../../../types/embeddings";
-import { fetchAllSubsetImages } from "../../../utils/api/privacyAttack";
+import { fetchAllSubsetImages } from "../../../utils/api/attackSimulations";
 import { calculateZoom } from "../../../utils/util";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import { useThresholdStore } from "../../../stores/thresholdStore";

@@ -1,10 +1,28 @@
 import torch
 import numpy as np
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+from datetime import datetime
+from contextlib import contextmanager
 
 from torch_cka import CKA
 from torch.utils.data import DataLoader, Subset
+from torchvision import datasets, transforms
 from app.config import UMAP_DATA_SIZE
+
+
+@contextmanager
+def model_eval_mode(model):
+    """Context manager to temporarily set model to eval mode and restore original state."""
+    was_training = model.training
+    model.eval()
+    try:
+        yield model
+    finally:
+        if was_training:
+            model.train()
 
 
 async def get_layer_activations_and_predictions(
@@ -13,7 +31,6 @@ async def get_layer_activations_and_predictions(
     device, 
     num_samples=UMAP_DATA_SIZE
 ):
-    model.eval()
     activations = []
     predictions = []
     probabilities = []
@@ -22,58 +39,59 @@ async def get_layer_activations_and_predictions(
     def hook_fn(module, input, output):
         activations.append(output.detach().cpu().numpy())
 
-    hook = model.avgpool.register_forward_hook(hook_fn)
+    with model_eval_mode(model):
+        hook = model.avgpool.register_forward_hook(hook_fn)
+        
+        with torch.no_grad():
+            for inputs, labels in data_loader:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
 
-    with torch.no_grad():
-        for inputs, labels in data_loader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+                outputs = model(inputs)
+                _, predicted = outputs.max(1)
+                predictions.extend(predicted.cpu().numpy())
 
-            outputs = model(inputs)
-            _, predicted = outputs.max(1)
-            predictions.extend(predicted.cpu().numpy())
+                temperature = 2.0 
+                scaled_outputs = outputs / temperature
+                probs = F.softmax(scaled_outputs, dim=1)
+                probabilities.extend(probs.cpu().numpy())
 
-            temperature = 2.0 
-            scaled_outputs = outputs / temperature
-            probs = F.softmax(scaled_outputs, dim=1)
-            probabilities.extend(probs.cpu().numpy())
+                sample_count += inputs.size(0)
+                if sample_count >= num_samples:
+                    break
 
-            sample_count += inputs.size(0)
-            if sample_count >= num_samples:
-                break
+        hook.remove()
 
-    hook.remove()
-
-    activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
-    predictions = np.array(predictions)
-    probabilities = np.array(probabilities)
+        activations = np.concatenate(activations, axis=0)[:num_samples].reshape(num_samples, -1)
+        predictions = np.array(predictions)
+        probabilities = np.array(probabilities)
 
     return activations, predictions, probabilities
 
 # For training and retraining
 async def evaluate_model(model, data_loader, criterion, device): 
-    model.eval()
     total_loss = 0
     correct = 0
     total = 0
     class_correct = [0] * 10
     class_total = [0] * 10
     
-    with torch.no_grad():
-        for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            total_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total += labels.size(0)
-            correct += predicted.eq(labels).sum().item()
-            
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for data in data_loader:
+                images, labels = data[0].to(device), data[1].to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+                
+                c = (predicted == labels).squeeze()
+                for i in range(len(labels)):
+                    label = labels[i]
+                    class_correct[label] += c[i].item()
+                    class_total[label] += 1
     
     accuracy = correct / total
     class_accuracies = {
@@ -91,8 +109,141 @@ async def evaluate_model(model, data_loader, criterion, device):
         )
     return avg_loss, accuracy, class_accuracies
 
+def visualize_logits_distribution(all_logits, class_logits, save_dir="aaai_exp"):
+    """
+    Visualize and save logits distribution analysis
+    
+    Args:
+        all_logits: numpy array of all logits (n_samples, n_classes)
+        class_logits: list of numpy arrays, each containing logits for samples of that class
+        save_dir: directory to save the visualizations and data
+    """
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # 1. True Class logits statistics
+    plt.figure(figsize=(12, 8))
+    plt.subplot(2, 2, 1)
+    
+    # Calculate statistics for true class logits
+    true_class_stats = {
+        'mean': [],
+        'std': [],
+        'max': [],
+        'min': []
+    }
+    
+    for i in range(10):
+        if len(class_logits[i]) > 0:
+            # Get ALL logits for samples with true label i (all classes 0-9)
+            all_logits_for_class = class_logits[i].flatten()
+            true_class_stats['mean'].append(np.mean(all_logits_for_class))
+            true_class_stats['std'].append(np.std(all_logits_for_class))
+            true_class_stats['max'].append(np.max(all_logits_for_class))
+            true_class_stats['min'].append(np.min(all_logits_for_class))
+        else:
+            true_class_stats['mean'].append(0)
+            true_class_stats['std'].append(0)
+            true_class_stats['max'].append(0)
+            true_class_stats['min'].append(0)
+    
+    # Add overall statistics for all logits
+    overall_logits = all_logits.flatten()
+    true_class_stats['mean'].append(np.mean(overall_logits))
+    true_class_stats['std'].append(np.std(overall_logits))
+    true_class_stats['max'].append(np.max(overall_logits))
+    true_class_stats['min'].append(np.min(overall_logits))
+    
+    # Plot statistics
+    x = np.arange(11)  # Now includes overall statistics
+    width = 0.2
+    
+    bars1 = plt.bar(x - 1.5*width, true_class_stats['mean'], width, label='Mean', alpha=0.8)
+    bars2 = plt.bar(x - 0.5*width, true_class_stats['std'], width, label='Std Dev', alpha=0.8)
+    bars3 = plt.bar(x + 0.5*width, true_class_stats['max'], width, label='Max', alpha=0.8)
+    bars4 = plt.bar(x + 1.5*width, true_class_stats['min'], width, label='Min', alpha=0.8)
+    
+    # Add value labels on bars
+    for i, (bar1, bar2, bar3, bar4) in enumerate(zip(bars1, bars2, bars3, bars4)):
+        plt.text(bar1.get_x() + bar1.get_width()/2., bar1.get_height() + 0.1,
+                f'{true_class_stats["mean"][i]:.2f}', ha='center', va='bottom', fontsize=8)
+        plt.text(bar2.get_x() + bar2.get_width()/2., bar2.get_height() + 0.1,
+                f'{true_class_stats["std"][i]:.2f}', ha='center', va='bottom', fontsize=8)
+        plt.text(bar3.get_x() + bar3.get_width()/2., bar3.get_height() + 0.1,
+                f'{true_class_stats["max"][i]:.2f}', ha='center', va='bottom', fontsize=8)
+        plt.text(bar4.get_x() + bar4.get_width()/2., bar4.get_height() + 0.1,
+                f'{true_class_stats["min"][i]:.2f}', ha='center', va='bottom', fontsize=8)
+    
+    plt.xlabel('True Class')
+    plt.ylabel('Logit Value')
+    plt.title('All Logits Statistics per True Class (+ Overall)')
+    plt.legend()
+    class_labels = [f'Class {i}' for i in range(10)] + ['Overall']
+    plt.xticks(x, class_labels, rotation=45)
+    plt.grid(True, alpha=0.3)
+    
+    # 2. Mean logits per class
+    plt.subplot(2, 2, 2)
+    mean_logits_per_class = []
+    for i in range(10):
+        if len(class_logits[i]) > 0:
+            mean_logits_per_class.append(np.mean(class_logits[i], axis=0))
+        else:
+            mean_logits_per_class.append(np.zeros(10))
+    mean_logits_per_class = np.array(mean_logits_per_class)
+    sns.heatmap(mean_logits_per_class, annot=True, fmt='.2f', cmap='RdBu_r', center=0)
+    plt.title('Mean Logits per True Class')
+    plt.xlabel('Predicted Class')
+    plt.ylabel('True Class')
+    
+    # 3. Logits distribution histogram for each class
+    plt.subplot(2, 2, 3)
+    colors = plt.cm.tab10(np.linspace(0, 1, 10))
+    for i in range(10):
+        if len(class_logits[i]) > 0:
+            logits_for_true_class = class_logits[i][:, i]  # Logits for true class
+            plt.hist(logits_for_true_class, alpha=0.6, label=f'Class {i}', 
+                    color=colors[i], bins=30)
+    plt.xlabel('Logit Value for True Class')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of True Class Logits')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    # 4. Standard deviation of logits per class
+    plt.subplot(2, 2, 4)
+    std_logits_per_class = []
+    for i in range(10):
+        if len(class_logits[i]) > 0:
+            std_logits_per_class.append(np.std(class_logits[i], axis=0))
+        else:
+            std_logits_per_class.append(np.zeros(10))
+    std_logits_per_class = np.array(std_logits_per_class)
+    sns.heatmap(std_logits_per_class, annot=True, fmt='.2f', cmap='YlOrRd')
+    plt.title('Standard Deviation of Logits per True Class')
+    plt.xlabel('Predicted Class')
+    plt.ylabel('True Class')
+    
+    plt.tight_layout()
+    plt.savefig(f'{save_dir}/logits_distribution_{timestamp}.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # Save raw logits data
+    logits_data = {
+        'all_logits': all_logits,
+        'class_logits': class_logits,
+        'mean_logits_per_class': mean_logits_per_class,
+        'std_logits_per_class': std_logits_per_class,
+        'true_class_stats': true_class_stats,
+        'timestamp': timestamp
+    }
+    np.save(f'{save_dir}/logits_data_{timestamp}.npy', logits_data)
+    
+    print(f"Logits distribution visualization saved to {save_dir}/logits_distribution_{timestamp}.png")
+    print(f"Logits data saved to {save_dir}/logits_data_{timestamp}.npy")
+    
+    return timestamp
+
 async def evaluate_model_with_distributions(model, data_loader, criterion, device):
-    model.eval()
     total_loss = 0
     correct = 0
     total = 0
@@ -101,30 +252,50 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     label_distribution = np.zeros((10, 10))  # Ground truth vs predicted class distribution
     confidence_sum = np.zeros((10, 10))      # Ground truth vs sum of confidence for all classes
     
-    with torch.no_grad():
-        for data in data_loader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            total_loss += loss.item()
-            temperature = 1.0
-            scaled_outputs = outputs / temperature
-            probabilities = F.softmax(scaled_outputs, dim=1)
-            _, predicted = torch.max(probabilities, 1)
-            
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-            for i in range(labels.size(0)):
-                label = labels[i].item()
-                pred = predicted[i].item()
+    # Collect logits for each class
+    all_logits = []  # Store all logits for distribution visualization
+    class_logits = [[] for _ in range(10)]  # Store logits for each class separately
+    
+    with model_eval_mode(model):
+        with torch.no_grad():
+            for data in data_loader:
+                images, labels = data[0].to(device), data[1].to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
                 
-                class_total[label] += 1
-                if label == pred:
-                    class_correct[label] += 1
+                # Collect raw logits before softmax
+                all_logits.append(outputs.cpu().numpy())
                 
-                label_distribution[label][pred] += 1
-                confidence_sum[label] += probabilities[i].cpu().numpy()
+                # Collect logits for each class
+                for i in range(labels.size(0)):
+                    label = labels[i].item()
+                    class_logits[label].append(outputs[i].cpu().numpy())
+                
+                temperature = 1.0
+                scaled_outputs = outputs / temperature
+                probabilities = F.softmax(scaled_outputs, dim=1)
+                _, predicted = torch.max(probabilities, 1)
+                
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                for i in range(labels.size(0)):
+                    label = labels[i].item()
+                    pred = predicted[i].item()
+                    
+                    class_total[label] += 1
+                    if label == pred:
+                        class_correct[label] += 1
+                    
+                    label_distribution[label][pred] += 1
+                    confidence_sum[label] += probabilities[i].cpu().numpy()
 
+    # Convert logits to numpy arrays
+    all_logits = np.concatenate(all_logits, axis=0)
+    class_logits = [np.array(logits) for logits in class_logits if len(logits) > 0]
+    
+    # Visualize logits distribution
+    # visualize_logits_distribution(all_logits, class_logits)
 
     accuracy = correct / total
     class_accuracies = {
@@ -140,11 +311,22 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
 async def calculate_cka_similarity(
     model_before, 
     model_after, 
-    train_loader, 
-    test_loader, 
     forget_class, 
-    device
+    device,
+    batch_size=1000
 ):
+    # Create clean data loaders without augmentation for consistent CKA calculation
+    base_transforms = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    ])
+    
+    clean_train_set = datasets.CIFAR10(root='./data', train=True, download=False, transform=base_transforms)
+    clean_test_set = datasets.CIFAR10(root='./data', train=False, download=False, transform=base_transforms)
+    
+    train_loader = DataLoader(clean_train_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(clean_test_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    
     # List of layers to analyze in ResNet18 model
     # conv1: First convolutional layer
     # layerX.Y: ResNet block Y in group X
@@ -161,14 +343,6 @@ async def calculate_cka_similarity(
         'layer4.1',
         'fc'
     ]
-    
-    cka = CKA(model_before, 
-              model_after, 
-              model1_name="Before Unlearning", 
-              model2_name="After Unlearning",
-              model1_layers=detailed_layers, 
-              model2_layers=detailed_layers, 
-              device=device)
     
     def filter_loader(loader, is_train=False):
         targets = loader.dataset.targets
@@ -208,19 +382,82 @@ async def calculate_cka_similarity(
     forget_class_train_loader, other_classes_train_loader = filter_loader(train_loader, is_train=True)
     forget_class_test_loader, other_classes_test_loader = filter_loader(test_loader, is_train=False)
     
-    with torch.no_grad():
-        cka.compare(forget_class_train_loader, forget_class_train_loader)
-        results_forget_train = cka.export()
-        cka.compare(other_classes_train_loader, other_classes_train_loader)
-        results_other_train = cka.export()
-        cka.compare(forget_class_test_loader, forget_class_test_loader)
-        results_forget_test = cka.export()
-        cka.compare(other_classes_test_loader, other_classes_test_loader)
-        results_other_test = cka.export()
+    # Load retrain model for additional CKA comparison
+    retrain_model = None
+    retrain_model_path = f"unlearned_models/{forget_class}/a00{forget_class}.pth"
+    retrain_model_loaded = False
+    
+    if os.path.exists(retrain_model_path):
+        try:
+            from app.models import get_resnet18
+            retrain_model = get_resnet18().to(device)
+            retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=device))
+            retrain_model_loaded = True
+            print(f"Loaded retrain model from {retrain_model_path}")
+        except Exception as e:
+            print(f"Error loading retrain model: {e}")
+            retrain_model = None
+            retrain_model_loaded = False
+    else:
+        print(f"Retrain model not found at {retrain_model_path}")
+        retrain_model_loaded = False
+    
+    with model_eval_mode(model_before), model_eval_mode(model_after):
+        
+        cka = CKA(model_before, 
+                  model_after, 
+                  model1_name="Before Unlearning", 
+                  model2_name="After Unlearning",
+                  model1_layers=detailed_layers, 
+                  model2_layers=detailed_layers, 
+                  device=device)
+        
+        with torch.no_grad():
+            # Original comparison: before vs after
+            cka.compare(forget_class_train_loader, forget_class_train_loader)
+            results_forget_train = cka.export()
+            cka.compare(other_classes_train_loader, other_classes_train_loader)
+            results_other_train = cka.export()
+            cka.compare(forget_class_test_loader, forget_class_test_loader)
+            results_forget_test = cka.export()
+            cka.compare(other_classes_test_loader, other_classes_test_loader)
+            results_other_test = cka.export()
+            
+            # Retrain comparison: retrain vs unlearned
+            retrain_results_forget_train = None
+            retrain_results_other_train = None
+            retrain_results_forget_test = None
+            retrain_results_other_test = None
+            
+            if retrain_model_loaded and retrain_model is not None:
+                with model_eval_mode(retrain_model):
+                    cka_retrain = CKA(retrain_model, 
+                                    model_after, 
+                                    model1_name="Retrain Model", 
+                                    model2_name="Unlearned Model",
+                                    model1_layers=detailed_layers, 
+                                    model2_layers=detailed_layers, 
+                                    device=device)
+                    
+                    cka_retrain.compare(forget_class_train_loader, forget_class_train_loader)
+                    retrain_results_forget_train = cka_retrain.export()
+                    cka_retrain.compare(other_classes_train_loader, other_classes_train_loader)
+                    retrain_results_other_train = cka_retrain.export()
+                    cka_retrain.compare(forget_class_test_loader, forget_class_test_loader)
+                    retrain_results_forget_test = cka_retrain.export()
+                    cka_retrain.compare(other_classes_test_loader, other_classes_test_loader)
+                    retrain_results_other_test = cka_retrain.export()
     
     def format_cka_results(results):
+        if results is None:
+            return None
         return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
 
+    # Clean up retrain model to free memory
+    if retrain_model_loaded and retrain_model is not None:
+        del retrain_model
+        torch.cuda.empty_cache() if device.type == 'cuda' else None
+    
     return {
         "similarity": {
             "layers": detailed_layers,
@@ -232,5 +469,16 @@ async def calculate_cka_similarity(
                 "forget_class": format_cka_results(results_forget_test),
                 "other_classes": format_cka_results(results_other_test)
             }
-        }
+        },
+        "similarity_retrain": {
+            "layers": detailed_layers,
+            "train": {
+                "forget_class": format_cka_results(retrain_results_forget_train),
+                "other_classes": format_cka_results(retrain_results_other_train)
+            },
+            "test": {
+                "forget_class": format_cka_results(retrain_results_forget_test),
+                "other_classes": format_cka_results(retrain_results_other_test)
+            }
+        } if retrain_model_loaded else None
     }

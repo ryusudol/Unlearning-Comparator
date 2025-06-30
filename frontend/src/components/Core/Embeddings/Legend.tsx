@@ -3,7 +3,7 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../UI/tabs";
 import { Separator } from "../../UI/separator";
 import { TABLEAU10 } from "../../../constants/colors";
-import { CircleIcon, FatMultiplicationSignIcon } from "../../UI/icons";
+import { CircleIcon, FatMultiplicationSignIcon } from "../../common/icons";
 import { VIEW_MODES } from "../../../constants/embeddings";
 import { useClasses } from "../../../hooks/useClasses";
 import { useForgetClassStore } from "../../../stores/forgetClassStore";
@@ -109,7 +109,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
                 <TabsTrigger
                   value={mode.label}
                   style={{ width: mode.length }}
-                  className="h-10 data-[state=active]:bg-[#585858] data-[state=active]:text-white"
+                  className="h-10 data-[state=active]:bg-neutral-dark data-[state=active]:text-white"
                 >
                   <HoverCard openDelay={0} closeDelay={0}>
                     <HoverCardTrigger>{mode.label}</HoverCardTrigger>

@@ -162,11 +162,11 @@ def plot_right_line(ax_line, precomputed_scores, range_vals, mode='entropy', dir
     fpr_arr = np.array([s['fpr'] for s in sorted_scores])
     fnr_arr = np.array([s['fnr'] for s in sorted_scores])
     
-    # 좌측 플롯과 동일하게 최적의 attack score 기준 threshold를 선택
+    # Select optimal threshold based on attack score same as left plot
     best_s = max(precomputed_scores, key=lambda s: s["attack_score"])
     best_thr = best_s["threshold"]
     
-    # best_thr와 일치하는 인덱스 추출 (부동소수점 오차 감안)
+    # Extract index matching best_thr (accounting for floating point errors)
     idx_arr = np.where(np.isclose(thr_list, best_thr))[0]
     if len(idx_arr) > 0:
         idx = idx_arr[0]
@@ -177,7 +177,7 @@ def plot_right_line(ax_line, precomputed_scores, range_vals, mode='entropy', dir
     fpr_val_at_thr = fpr_arr[idx]
     fnr_val_at_thr = fnr_arr[idx]
     
-    # 세 가지 라인 플롯 (Attack Score, FPR, FNR)
+    # Three line plots (Attack Score, FPR, FNR)
     line_attack = ax_line.plot(attack_list, thr_list,
                                color='#E41A1C', alpha=1.0, linewidth=2.0, label='Attack Score')[0]
     line_attack.set_path_effects([pe.Stroke(linewidth=8, foreground='#FFCCCC', alpha=0.5),
@@ -185,7 +185,7 @@ def plot_right_line(ax_line, precomputed_scores, range_vals, mode='entropy', dir
     ax_line.plot(fpr_arr, thr_list, color='#377EB8', alpha=1.0, linewidth=2.0, label='False Positive Rate')
     ax_line.plot(fnr_arr, thr_list, color='#4DAF4A', alpha=1.0, linewidth=2.0, label='False Negative Rate')
     
-    # x축, y축 및 스파인 설정
+    # X-axis, Y-axis and spine settings
     x_min = min(attack_list.min(), fpr_arr.min(), fnr_arr.min())
     x_max = max(1.0, attack_list.max()+0.05, fpr_arr.max()+0.05, fnr_arr.max()+0.05)
     ax_line.set_xlim([x_min, x_max])
@@ -195,15 +195,15 @@ def plot_right_line(ax_line, precomputed_scores, range_vals, mode='entropy', dir
     for spine in ["top", "right"]:
         ax_line.spines[spine].set_visible(False)
     
-    # 오른쪽 그래프 전체에 최적 threshold에 해당하는 수평 점선 표시
+    # Show horizontal dashed line for optimal threshold across entire right graph
     ax_line.axhline(y=best_thr, color='#4D4D4D', linestyle='--', alpha=0.5)
     
     marker_size = 6
-    # 빨간 점 (Attack Score 위치)만 원으로 표시
+    # Show only red dot (Attack Score position) as circle
     ax_line.plot(attack_val_at_thr, best_thr, marker='o', markersize=marker_size,
                  markerfacecolor='#E41A1C', markeredgecolor='black')
     
-    # 빨간 점 오른쪽 위에 Attack, FPR, FNR 값을 수직으로 표시 (한 개의 텍스트 박스)
+    # Display Attack, FPR, FNR values vertically in upper right of red dot (single text box)
     annotation_text = (f"Attack: {attack_val_at_thr:.3f}\n"
                        f"FPR: {fpr_val_at_thr:.3f}\n"
                        f"FNR: {fnr_val_at_thr:.3f}\n"
@@ -352,7 +352,7 @@ def main():
     ax_conf_left2.set_ylim(CONFIDENCE_CONFIG["range"])
     plot_right_line(ax_conf_right2, pre_conf_unlearn, CONFIDENCE_CONFIG["range"], mode='confidence', direction='unlearn')
     
-    # 전체 figure 상단에 최종 FQS 값을 텍스트로 표시합니다.
+    # Display final FQS value as text at top of entire figure
     fig.text(0.5, 0.97, f"Final FQS: {final_json['FQS']}", ha='center', fontsize=16, color='blue')
     
     out_filename = f'class_{forget_class}_distribution_comparison_4scenarios.png'

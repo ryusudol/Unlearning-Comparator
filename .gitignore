@@ -10,6 +10,8 @@ backend/*.png
 paper/
 z_dist_exp/
 myenv/
-*.py
 *.pdf
 *.mdc
+*.png
+*.npy
+*.ipynb

@@ -47,7 +47,7 @@ export default function App() {
   if (isPageLoading) return <></>;
 
   return (
-    <section className="relative" style={{ zoom }}>
+    <section id="app-container" className="relative" style={{ zoom }}>
       <Header />
       {!isExperimentLoading && (
         <div className="flex items-center">
