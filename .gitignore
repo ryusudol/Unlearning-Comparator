@@ -12,3 +12,6 @@ z_dist_exp/
 myenv/
 *.pdf
 *.mdc
+*.png
+*.npy
+*.ipynb
