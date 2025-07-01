@@ -193,14 +193,15 @@ def freeze_first_k_layer_groups(model, k):
     return total_frozen_params
 
 
-def apply_layer_modifications(model, freeze_first_k=0, reinit_last_k=0):
+def apply_layer_modifications(model, freeze_first_k=0, freeze_last_k=0, reinit_last_k=0):
     """
     Apply layer freezing and reinitialization to a model.
     
     Args:
         model: ResNet18 model
-        freeze_first_k: Number of first layer groups to freeze (0-9)
-        reinit_last_k: Number of last layer groups to reinitialize (0-9)
+        freeze_first_k: Number of first layer groups to freeze (0-10)
+        freeze_last_k: Number of last layer groups to freeze (0-10)
+        reinit_last_k: Number of last layer groups to reinitialize (0-10)
     
     Returns:
         dict: Statistics about modifications applied
@@ -208,7 +209,8 @@ def apply_layer_modifications(model, freeze_first_k=0, reinit_last_k=0):
     stats = {
         'frozen_params': 0,
         'reinitialized_params': 0,
-        'frozen_groups': freeze_first_k,
+        'frozen_first_groups': freeze_first_k,
+        'frozen_last_groups': freeze_last_k,
         'reinitialized_groups': reinit_last_k,
         'frozen_layers': [],
         'reinitialized_layers': []
@@ -223,12 +225,24 @@ def apply_layer_modifications(model, freeze_first_k=0, reinit_last_k=0):
             stats['reinitialized_layers'].append(group_name)
         stats['reinitialized_params'] = reinitialize_last_k_layer_groups(model, reinit_last_k)
     
+    # Apply freezing - first k groups
     if freeze_first_k > 0:
         layer_groups = get_resnet18_layer_groups(model)
         for i in range(min(freeze_first_k, len(layer_groups))):
             group_name = f"Group {i}: {get_layer_group_info()[i]['name']}"
             stats['frozen_layers'].append(group_name)
-        stats['frozen_params'] = freeze_first_k_layer_groups(model, freeze_first_k)
+        stats['frozen_params'] += freeze_first_k_layer_groups(model, freeze_first_k)
+    
+    # Apply freezing - last k groups  
+    if freeze_last_k > 0:
+        layer_groups = get_resnet18_layer_groups(model)
+        start_idx = max(0, len(layer_groups) - freeze_last_k)
+        for i in range(start_idx, len(layer_groups)):
+            group_name = f"Group {i}: {get_layer_group_info()[i]['name']}"
+            # Avoid duplicates if already in frozen_layers
+            if group_name not in stats['frozen_layers']:
+                stats['frozen_layers'].append(group_name)
+        stats['frozen_params'] += freeze_last_k_layer_groups(model, freeze_last_k)
     
     return stats
 

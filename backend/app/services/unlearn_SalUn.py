@@ -16,6 +16,13 @@ from app.config import (
 async def unlearning_SalUn(request, status, base_weights_path):
     print(f"Starting SalUn unlearning for class {request.forget_class} with {request.epochs} epochs...")
     print(f"SalUn configuration: threshold={0.1}, random_labels={True}, lr={request.learning_rate}")
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
@@ -111,7 +118,8 @@ async def unlearning_SalUn(request, status, base_weights_path):
         test_set=test_set,
         device=device,
         base_weights_path=base_weights_path,
-        salun_config=salun_config
+        salun_config=salun_config,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     
     unlearning_SalUn_thread.start()

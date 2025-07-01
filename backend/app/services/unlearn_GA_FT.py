@@ -18,6 +18,13 @@ from app.config import (
 async def unlearning_GA_FT(request, status, base_weights_path):
     print(f"Starting GA+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
     print(f"GA LR will be: {request.learning_rate / 10:.5f}, FT LR will be: {request.learning_rate:.5f}")
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
@@ -136,7 +143,8 @@ async def unlearning_GA_FT(request, status, base_weights_path):
         ft_optimizer=ft_optimizer,
         scheduler=ga_scheduler,  # Pass GA scheduler
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     
     # Store additional configuration in the thread object

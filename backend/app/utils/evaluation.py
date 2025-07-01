@@ -358,6 +358,8 @@ async def calculate_cka_similarity(
             forget_samples = len(forget_indices)  // 2
             other_samples = len(other_indices)  // 2
 
+        # Fix random seed for consistent CKA sampling
+        torch.manual_seed(42)
         forget_sampled = forget_indices[torch.randperm(len(forget_indices))[:forget_samples]]
         other_sampled = other_indices[torch.randperm(len(other_indices))[:other_samples]]
 

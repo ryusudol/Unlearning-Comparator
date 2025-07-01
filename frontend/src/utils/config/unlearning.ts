@@ -5,6 +5,10 @@ export function getDefaultUnlearningConfig(method: string) {
     epoch = "1";
     learning_rate = "0.001";
     batch_size = "64";
+  } else if (method === "ga") {
+    epoch = "3";
+    learning_rate = "0.0001";
+    batch_size = "256";
   } else if (method === "rl") {
     epoch = "3";
     learning_rate = "0.001";

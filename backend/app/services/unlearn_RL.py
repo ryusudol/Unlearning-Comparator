@@ -17,6 +17,13 @@ from app.config import (
 
 async def unlearning_RL(request, status, base_weights_path):
     print(f"Starting RL unlearning for class {request.forget_class} with {request.epochs} epochs...")
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
@@ -100,7 +107,8 @@ async def unlearning_RL(request, status, base_weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     
     unlearning_RL_thread.start()

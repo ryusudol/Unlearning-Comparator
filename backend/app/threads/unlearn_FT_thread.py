@@ -46,7 +46,8 @@ class UnlearningFTThread(BaseUnlearningThread):
         device,
         base_weights_path,
         freeze_first_k_layers=0,
-        reinit_last_k_layers=0
+        reinit_last_k_layers=0,
+        enable_epoch_metrics=True
     ):
         super().__init__()
         self.request = request
@@ -73,6 +74,9 @@ class UnlearningFTThread(BaseUnlearningThread):
         # Layer modification parameters
         self.freeze_first_k_layers = freeze_first_k_layers
         self.reinit_last_k_layers = reinit_last_k_layers
+        
+        # Epoch metrics configuration
+        self.enable_epoch_metrics = enable_epoch_metrics
 
 
     async def async_main(self):
@@ -91,6 +95,7 @@ class UnlearningFTThread(BaseUnlearningThread):
             stats = apply_layer_modifications(
                 model=self.model,
                 freeze_first_k=self.freeze_first_k_layers,
+                freeze_last_k=0,
                 reinit_last_k=self.reinit_last_k_layers
             )
             
@@ -118,7 +123,7 @@ class UnlearningFTThread(BaseUnlearningThread):
             print("=" * 60)
         
         # Initialize epoch-wise metrics collection (all-or-nothing toggle)
-        enable_epoch_metrics = True  # Set to True to enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+        # Epoch metrics controlled from service
         
         epoch_metrics = {
             'UA': [],  # Unlearn Accuracy (train)
@@ -128,23 +133,23 @@ class UnlearningFTThread(BaseUnlearningThread):
             'PS': [],  # Privacy Score
             'C-MIA': [],  # Confidence-based MIA
             'E-MIA': []   # Entropy-based MIA
-        } if enable_epoch_metrics else {}
+        } if self.enable_epoch_metrics else {}
         
         # Initialize comprehensive metrics system if enabled
         metrics_components = None
-        if enable_epoch_metrics:
+        if self.enable_epoch_metrics:
             metrics_components = await initialize_epoch_metrics_system(
                 self.model, self.train_set, self.test_set, self.train_loader, self.device,
                 self.request.forget_class, True, True  # Enable both PS and MIA
             )
         
         # Collect epoch 0 metrics (initial state before training)
-        if enable_epoch_metrics:
+        if self.enable_epoch_metrics:
             print("Collecting initial metrics (epoch 0)...")
             initial_metrics = await calculate_comprehensive_epoch_metrics(
                 self.model, self.train_loader, self.test_loader,
                 self.train_set, self.test_set, self.criterion, self.device,
-                self.request.forget_class, enable_epoch_metrics,
+                self.request.forget_class, self.enable_epoch_metrics,
                 metrics_components['retrain_metrics_cache'] if metrics_components else None,
                 metrics_components['mia_classifier'] if metrics_components else None,
                 current_epoch=0
@@ -210,13 +215,13 @@ class UnlearningFTThread(BaseUnlearningThread):
             )
 
             # Calculate comprehensive epoch metrics if enabled (exclude from timing)
-            if enable_epoch_metrics:
+            if self.enable_epoch_metrics:
                 metrics_start = time.time()
                 print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
                 metrics = await calculate_comprehensive_epoch_metrics(
                     self.model, self.train_loader, self.test_loader,
                     self.train_set, self.test_set, self.criterion, self.device,
-                    self.request.forget_class, enable_epoch_metrics,
+                    self.request.forget_class, self.enable_epoch_metrics,
                     metrics_components['retrain_metrics_cache'] if metrics_components else None,
                     metrics_components['mia_classifier'] if metrics_components else None,
                     current_epoch=epoch + 1
@@ -226,7 +231,7 @@ class UnlearningFTThread(BaseUnlearningThread):
             
             # Print progress
             additional_metrics = None
-            if enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
+            if self.enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
                 additional_metrics = {
                     'UA': epoch_metrics['UA'][-1],
                     'RA': epoch_metrics['RA'][-1],
@@ -418,7 +423,7 @@ class UnlearningFTThread(BaseUnlearningThread):
         })
         
         # Generate epoch-wise plots if we have collected metrics
-        if enable_epoch_metrics and epoch_metrics:
+        if self.enable_epoch_metrics and epoch_metrics:
             print("Generating epoch-wise plots...")
             plot_path = save_epoch_plots(
                 epoch_metrics, "FT", self.request.forget_class, self.status.recent_id

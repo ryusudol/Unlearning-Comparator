@@ -27,6 +27,7 @@ from app.utils.thread_operations import (
 	update_epoch_metrics_collection,
 	save_epoch_plots
 )
+from app.utils.layer_utils import apply_layer_modifications
 
 class UnlearningGAThread(BaseUnlearningThread):
     def __init__(
@@ -44,7 +45,11 @@ class UnlearningGAThread(BaseUnlearningThread):
         optimizer,
         scheduler,
         device,
-        base_weights_path
+        base_weights_path,
+        freeze_first_k_layers=0,
+        freeze_last_k_layers=0,
+        reinit_last_k_layers=0,
+        enable_epoch_metrics=True
     ):
         super().__init__()
         self.request = request
@@ -66,6 +71,14 @@ class UnlearningGAThread(BaseUnlearningThread):
         self.base_weights_path = base_weights_path
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
+        
+        # Layer modification parameters
+        self.freeze_first_k_layers = freeze_first_k_layers
+        self.freeze_last_k_layers = freeze_last_k_layers
+        self.reinit_last_k_layers = reinit_last_k_layers
+        
+        # Epoch metrics configuration
+        self.enable_epoch_metrics = enable_epoch_metrics
 
     async def async_main(self):
         print(f"Starting GA unlearning for class {self.request.forget_class}...")
@@ -78,9 +91,39 @@ class UnlearningGAThread(BaseUnlearningThread):
             self.train_set, self.test_set, self.num_classes
         )
         
-        # Initialize epoch-wise metrics collection (all-or-nothing toggle)
-        enable_epoch_metrics = True  # Set to True to enable comprehensive epoch-wise metrics (UA, TA, TUA, TRA, PS, MIA)
+        # Apply layer freezing and reinitialization if requested
+        if self.freeze_first_k_layers > 0 or self.freeze_last_k_layers > 0 or self.reinit_last_k_layers > 0:
+            stats = apply_layer_modifications(
+                model=self.model,
+                freeze_first_k=self.freeze_first_k_layers,
+                freeze_last_k=self.freeze_last_k_layers,
+                reinit_last_k=self.reinit_last_k_layers
+            )
+            
+            # Print detailed information about modified layers
+            print("=" * 60)
+            print("LAYER MODIFICATION SUMMARY")
+            print("=" * 60)
+            
+            if stats['frozen_layers']:
+                print(f"🔒 FROZEN LAYERS ({stats['frozen_params']:,} parameters):")
+                for layer in stats['frozen_layers']:
+                    print(f"   - {layer}")
+            
+            if stats['reinitialized_layers']:
+                print(f"🔄 REINITIALIZED LAYERS ({stats['reinitialized_params']:,} parameters):")
+                for layer in stats['reinitialized_layers']:
+                    print(f"   - {layer}")
+            
+            total_params = sum(p.numel() for p in self.model.parameters())
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+            print(f"📊 TRAINING STATISTICS:")
+            print(f"   - Total parameters: {total_params:,}")
+            print(f"   - Trainable parameters: {trainable_params:,}")
+            print(f"   - Frozen parameters: {total_params - trainable_params:,}")
+            print("=" * 60)
         
+        # Initialize epoch-wise metrics collection (controlled from service)
         epoch_metrics = {
             'UA': [],  # Unlearn Accuracy (train)
             'RA': [],  # Retain Accuracy (remaining classes)
@@ -89,23 +132,23 @@ class UnlearningGAThread(BaseUnlearningThread):
             'PS': [],  # Privacy Score
             'C-MIA': [],  # Confidence-based MIA
             'E-MIA': []   # Entropy-based MIA
-        } if enable_epoch_metrics else {}
+        } if self.enable_epoch_metrics else {}
         
         # Initialize comprehensive metrics system if enabled
         metrics_components = None
-        if enable_epoch_metrics:
+        if self.enable_epoch_metrics:
             metrics_components = await initialize_epoch_metrics_system(
                 self.model, self.train_set, self.test_set, self.train_loader, self.device,
                 self.request.forget_class, True, True  # Enable both PS and MIA
             )
         
         # Collect epoch 0 metrics (initial state before training)
-        if enable_epoch_metrics:
+        if self.enable_epoch_metrics:
             print("Collecting initial metrics (epoch 0)...")
             initial_metrics = await calculate_comprehensive_epoch_metrics(
                 self.model, self.train_loader, self.test_loader,
                 self.train_set, self.test_set, self.criterion, self.device,
-                self.request.forget_class, enable_epoch_metrics,
+                self.request.forget_class, self.enable_epoch_metrics,
                 metrics_components['retrain_metrics_cache'] if metrics_components else None,
                 metrics_components['mia_classifier'] if metrics_components else None,
                 current_epoch=0
@@ -165,13 +208,13 @@ class UnlearningGAThread(BaseUnlearningThread):
             )
 
             # Calculate comprehensive epoch metrics if enabled (exclude from timing)
-            if enable_epoch_metrics:
+            if self.enable_epoch_metrics:
                 metrics_start = time.time()
                 print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
                 metrics = await calculate_comprehensive_epoch_metrics(
                     self.model, self.train_loader, self.test_loader,
                     self.train_set, self.test_set, self.criterion, self.device,
-                    self.request.forget_class, enable_epoch_metrics,
+                    self.request.forget_class, self.enable_epoch_metrics,
                     metrics_components['retrain_metrics_cache'] if metrics_components else None,
                     metrics_components['mia_classifier'] if metrics_components else None,
                     current_epoch=epoch + 1
@@ -182,7 +225,7 @@ class UnlearningGAThread(BaseUnlearningThread):
             # Print progress
             current_lr = self.optimizer.param_groups[0]['lr']
             additional_metrics = None
-            if enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
+            if self.enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
                 additional_metrics = {
                     'UA': epoch_metrics['UA'][-1],
                     'RA': epoch_metrics['RA'][-1],
@@ -372,7 +415,7 @@ class UnlearningGAThread(BaseUnlearningThread):
         })
         
         # Generate epoch-wise plots if we have collected metrics
-        if enable_epoch_metrics and epoch_metrics:
+        if self.enable_epoch_metrics and epoch_metrics:
             print("Generating epoch-wise plots...")
             plot_path = save_epoch_plots(
                 epoch_metrics, "GA", self.request.forget_class, self.status.recent_id
