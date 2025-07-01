@@ -24,6 +24,7 @@ from app.utils.thread_operations import (
     update_epoch_metrics_collection,
     save_epoch_plots
 )
+from app.utils.layer_utils import apply_layer_modifications
 
 
 class UnlearningFTThread(BaseUnlearningThread):
@@ -43,7 +44,9 @@ class UnlearningFTThread(BaseUnlearningThread):
         optimizer,
         scheduler,
         device,
-        base_weights_path
+        base_weights_path,
+        freeze_first_k_layers=0,
+        reinit_last_k_layers=0
     ):
         super().__init__()
         self.request = request
@@ -66,6 +69,11 @@ class UnlearningFTThread(BaseUnlearningThread):
         self.base_weights_path = base_weights_path
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
+        
+        # Layer modification parameters
+        self.freeze_first_k_layers = freeze_first_k_layers
+        self.reinit_last_k_layers = reinit_last_k_layers
+
 
     async def async_main(self):
         print(f"Starting FT unlearning for class {self.request.forget_class}...")
@@ -77,6 +85,37 @@ class UnlearningFTThread(BaseUnlearningThread):
         umap_subset, umap_subset_loader, selected_indices = setup_umap_subset(
             self.train_set, self.test_set, self.num_classes
         )
+        
+        # Apply layer freezing and reinitialization if requested
+        if self.freeze_first_k_layers > 0 or self.reinit_last_k_layers > 0:
+            stats = apply_layer_modifications(
+                model=self.model,
+                freeze_first_k=self.freeze_first_k_layers,
+                reinit_last_k=self.reinit_last_k_layers
+            )
+            
+            # Print detailed information about modified layers
+            print("=" * 60)
+            print("LAYER MODIFICATION SUMMARY")
+            print("=" * 60)
+            
+            if stats['frozen_layers']:
+                print(f"🔒 FROZEN LAYERS ({stats['frozen_params']:,} parameters):")
+                for layer in stats['frozen_layers']:
+                    print(f"   - {layer}")
+            
+            if stats['reinitialized_layers']:
+                print(f"🔄 REINITIALIZED LAYERS ({stats['reinitialized_params']:,} parameters):")
+                for layer in stats['reinitialized_layers']:
+                    print(f"   - {layer}")
+            
+            total_params = sum(p.numel() for p in self.model.parameters())
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+            print(f"📊 TRAINING STATISTICS:")
+            print(f"   - Total parameters: {total_params:,}")
+            print(f"   - Trainable parameters: {trainable_params:,}")
+            print(f"   - Frozen parameters: {total_params - trainable_params:,}")
+            print("=" * 60)
         
         # Initialize epoch-wise metrics collection (all-or-nothing toggle)
         enable_epoch_metrics = True  # Set to True to enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)

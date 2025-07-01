@@ -17,6 +17,14 @@ from app.config import (
 
 async def unlearning_FT(request, status, base_weights_path):
     print(f"Starting FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
+    
+    # Layer modification configuration (similar to SalUn config style)
+    freeze_first_k_layers = 7  # Freeze first K layer groups
+    reinit_last_k_layers = 3   # Reinitialize last K layer groups
+    
+    if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
+        print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
@@ -90,7 +98,7 @@ async def unlearning_FT(request, status, base_weights_path):
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=optimizer,
         T_max=request.epochs,
-        eta_min=0.004
+        eta_min=0.002
     )
     
     # Option 3: LinearLR (linear decay)
@@ -125,7 +133,9 @@ async def unlearning_FT(request, status, base_weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        freeze_first_k_layers=freeze_first_k_layers,
+        reinit_last_k_layers=reinit_last_k_layers
     )
     
     unlearning_FT_thread.start()
