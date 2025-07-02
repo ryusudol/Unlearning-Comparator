@@ -18,7 +18,7 @@ import { fetchAllExperimentsData } from "../../../utils/api/modelScreening";
 import { calculatePerformanceMetrics } from "../../../utils/data/experiments";
 import { useRunningStatusStore } from "../../../stores/runningStatusStore";
 import { useModelDataStore } from "../../../stores/modelDataStore";
-import { cn } from "../../../utils/util";
+import { cn, calculateZoom } from "../../../utils/util";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -105,8 +105,9 @@ export default function MyTableBody({ table }: Props) {
       const appContainer = document.getElementById("app-container");
       if (appContainer) {
         const containerRect = appContainer.getBoundingClientRect();
-        const relativeX = e.clientX - containerRect.left + 60;
-        const relativeY = e.clientY - containerRect.top + 10;
+        const zoom = calculateZoom();
+        const relativeX = (e.clientX - containerRect.left) / zoom + 60;
+        const relativeY = (e.clientY - containerRect.top) / zoom + 10;
 
         setTooltipData({
           epochMetrics: experiment.epoch_metrics,
