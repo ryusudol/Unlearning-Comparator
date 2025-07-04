@@ -34,7 +34,6 @@ class UnlearningRLThread(BaseUnlearningThread):
         self,
         request,
         status,
-        model_before,
         model_after,
         forget_loader,
         train_loader,
@@ -52,7 +51,6 @@ class UnlearningRLThread(BaseUnlearningThread):
         super().__init__()
         self.request = request
         self.status = status
-        self.model_before = model_before
         self.model = model_after
 
         self.forget_loader = forget_loader
@@ -98,10 +96,10 @@ class UnlearningRLThread(BaseUnlearningThread):
         # Initialize epoch-wise metrics collection (all-or-nothing toggle)
         
         epoch_metrics = {
-            'UA': [],  # Unlearn Accuracy (train)
+            'UA': [],  # Unlearning Accuracy (train)
             'RA': [],  # Retain Accuracy (remaining classes)
-            'TUA': [], # Test Unlearn Accuracy
-            'TRA': [], # Test Remaining Accuracy
+            'TUA': [], # Test Unlearning Accuracy
+            'TRA': [], # Test Retaining Accuracy
             'PS': [],  # Privacy Score
             'C-MIA': [],  # Confidence-based MIA
             'E-MIA': []   # Entropy-based MIA
@@ -327,7 +325,7 @@ class UnlearningRLThread(BaseUnlearningThread):
             forget_labels=forget_labels
         )
         
-        # Process attack metrics similar to GA and custom threads
+        # Process attack metrics using the same umap_subset_loader (for UI)
         print("Processing attack metrics on UMAP subset")
         values, attack_results, fqs = await process_attack_metrics(
             model=self.model, 
@@ -335,6 +333,16 @@ class UnlearningRLThread(BaseUnlearningThread):
             device=self.device, 
             forget_class=self.request.forget_class,
             create_plots=False  # No plots for UI data
+        )
+        
+        # Calculate Privacy Score on full dataset for final results
+        print("Calculating Privacy Score on full dataset")
+        _, _, final_fqs = await process_attack_metrics(
+            model=self.model, 
+            data_loader=self.train_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class,
+            create_plots=False
         )
         
         # Generate distribution plots on full forget class data (for analysis)
@@ -355,7 +363,6 @@ class UnlearningRLThread(BaseUnlearningThread):
         self.status.progress = "Calculating CKA Similarity"
         print("Calculating CKA similarity")
         cka_results = await calculate_cka_similarity(
-            model_before=self.model_before,
             model_after=self.model,
             forget_class=self.request.forget_class,
             device=self.device,
@@ -390,9 +397,8 @@ class UnlearningRLThread(BaseUnlearningThread):
             "RA": remain_accuracy,
             "TUA": round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
-            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
-            "FQS": fqs,
+            "FQS": final_fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),

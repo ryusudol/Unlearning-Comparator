@@ -183,13 +183,22 @@ def freeze_first_k_layer_groups(model, k):
     total_frozen_params = 0
     
     # Freeze first k layer groups
+    frozen_layers = []
     for i in range(min(k, len(layer_groups))):
         for layer_name, layer_module in layer_groups[i]:
+            frozen_layers.append(layer_name)
             for param in layer_module.parameters():
                 param.requires_grad = False
                 total_frozen_params += param.numel()
     
     print(f"Frozen first {k} layer groups ({total_frozen_params:,} parameters)")
+    print(f"Frozen layers: {frozen_layers}")
+    
+    # Verify freeze worked
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"Verification: {trainable_params:,}/{total_params:,} parameters trainable")
+    
     return total_frozen_params
 
 

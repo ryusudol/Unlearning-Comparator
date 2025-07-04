@@ -18,7 +18,8 @@ from .settings import (
     LEARNING_RATE,
     EPOCHS,
     DECREASING_LR,
-    GAMMA
+    GAMMA,
+    GPU_ID
 )
 
 __all__ = [
@@ -42,5 +43,8 @@ __all__ = [
     
     # Learning rate schedule
     'DECREASING_LR',
-    'GAMMA'
+    'GAMMA',
+    
+    # GPU Configuration
+    'GPU_ID'
 ] 

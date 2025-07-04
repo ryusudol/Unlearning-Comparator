@@ -64,9 +64,9 @@ def calculate_accuracy_metrics(
     """
     remain_classes = [i for i in range(num_classes) if i != forget_class]
     
-    ua = train_class_accuracies[forget_class]  # Unlearn Accuracy
+    ua = train_class_accuracies[forget_class]  # Unlearning Accuracy
     ra = sum(train_class_accuracies[i] for i in remain_classes) / len(remain_classes)  # Remain Accuracy
-    tua = test_class_accuracies[forget_class]  # Test Unlearn Accuracy
+    tua = test_class_accuracies[forget_class]  # Test Unlearning Accuracy
     tra = sum(test_class_accuracies[i] for i in remain_classes) / len(remain_classes)  # Test Remain Accuracy
     
     return {

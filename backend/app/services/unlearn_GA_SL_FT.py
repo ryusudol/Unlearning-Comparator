@@ -12,7 +12,8 @@ from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     DECREASING_LR,
-    UNLEARN_SEED
+    UNLEARN_SEED,
+    GPU_ID
 )
 
 def create_second_logit_dataset(model, forget_loader, device):
@@ -51,16 +52,13 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )
 
     # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
     # ========== GA+SL+FT Configuration (easily configurable) ==========
@@ -185,7 +183,6 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
     unlearning_GA_SL_FT_thread = UnlearningGASLFTThread(
         request=request,
         status=status,
-        model_before=model_before,
         model_after=model_after,
         retain_loader=retain_loader,
         forget_loader=forget_loader,

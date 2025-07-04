@@ -2,7 +2,6 @@ import asyncio
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import os
 
 from app.threads import UnlearningFTThread
 from app.models import get_resnet18
@@ -12,18 +11,21 @@ from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     DECREASING_LR,
-    UNLEARN_SEED
+    UNLEARN_SEED,
+    GPU_ID
 )
 
 async def unlearning_FT(request, status, base_weights_path):
     print(f"Starting FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
     
-    # Layer modification configuration (similar to SalUn config style)
-    freeze_first_k_layers = 9  # Freeze first K layer groups
-    reinit_last_k_layers = 0   # Reinitialize last K layer groups
+    # Layer modification configuration
+    freeze_first_k_layers = 0  # Freeze first K layer groups
+    reinit_last_k_layers = 0    # Reinitialize last K layer groups
     
+    ETA_MIN = 0.003
+
     # Epoch metrics configuration
-    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    enable_epoch_metrics = True  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
     
     if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
         print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
@@ -34,17 +36,13 @@ async def unlearning_FT(request, status, base_weights_path):
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )
 
     # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    
-    print(f"Loading model_before from: unlearned_models/{request.forget_class}/000{request.forget_class}.pth")
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     
     print(f"Loading model_after (base) from: {base_weights_path}")
     base_state_dict = torch.load(base_weights_path, map_location=device)
@@ -112,7 +110,7 @@ async def unlearning_FT(request, status, base_weights_path):
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=optimizer,
         T_max=request.epochs,
-        eta_min=0.001
+        eta_min=ETA_MIN
     )
     
     # Option 3: LinearLR (linear decay)
@@ -134,7 +132,6 @@ async def unlearning_FT(request, status, base_weights_path):
     unlearning_FT_thread = UnlearningFTThread(
         request=request,
         status=status,
-        model_before=model_before,
         model_after=model_after,
         criterion=criterion,
         optimizer=optimizer,

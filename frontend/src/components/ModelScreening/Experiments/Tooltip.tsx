@@ -50,7 +50,7 @@ const CONFIG = {
 const LEGEND_DATA = [
   {
     color: "#2A6218",
-    fullName: "UA (Unlearn Accuracy)",
+    fullName: "UA (Unlearning Accuracy)",
     icon: "cross",
     lineStyle: "dashed",
   },
@@ -62,7 +62,7 @@ const LEGEND_DATA = [
   },
   {
     color: "#67CA4D",
-    fullName: "TUA (Test Unlearn Accuracy)",
+    fullName: "TUA (Test Unlearning Accuracy)",
     icon: "cross",
     lineStyle: "dashed",
   },

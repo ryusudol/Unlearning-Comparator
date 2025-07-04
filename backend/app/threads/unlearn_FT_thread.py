@@ -32,7 +32,6 @@ class UnlearningFTThread(BaseUnlearningThread):
         self,
         request,
         status,
-        model_before,
         model_after,
         retain_loader,
         forget_loader,
@@ -52,7 +51,6 @@ class UnlearningFTThread(BaseUnlearningThread):
         super().__init__()
         self.request = request
         self.status = status
-        self.model_before = model_before
         self.model = model_after
 
         self.retain_loader = retain_loader
@@ -77,7 +75,6 @@ class UnlearningFTThread(BaseUnlearningThread):
         
         # Epoch metrics configuration
         self.enable_epoch_metrics = enable_epoch_metrics
-
 
     async def async_main(self):
         print(f"Starting FT unlearning for class {self.request.forget_class}...")
@@ -126,9 +123,9 @@ class UnlearningFTThread(BaseUnlearningThread):
         # Epoch metrics controlled from service
         
         epoch_metrics = {
-            'UA': [],  # Unlearn Accuracy (train)
+            'UA': [],  # Unlearning Accuracy (train)
             'RA': [],  # Retain Accuracy (remaining classes)
-            'TUA': [], # Test Unlearn Accuracy
+            'TUA': [], # Test Unlearning Accuracy
             'TRA': [], # Test Remaining Accuracy
             'PS': [],  # Privacy Score
             'C-MIA': [],  # Confidence-based MIA
@@ -244,9 +241,13 @@ class UnlearningFTThread(BaseUnlearningThread):
             
             print_epoch_progress(
                 epoch + 1, self.request.epochs, forget_epoch_loss, forget_epoch_acc,
+                learning_rate=self.optimizer.param_groups[0]['lr'],
                 eta=self.status.estimated_time_remaining,
                 additional_metrics=additional_metrics
             )
+            
+            # Update scheduler after each epoch
+            self.scheduler.step()
 
         # Calculate pure training time (excluding metrics calculation)
         rte = time.time() - start_time - total_metrics_time
@@ -341,7 +342,7 @@ class UnlearningFTThread(BaseUnlearningThread):
             forget_labels=forget_labels
         )
         
-        # Process attack metrics using the same umap_subset_loader
+        # Process attack metrics using the same umap_subset_loader (for UI)
         print("Processing attack metrics on UMAP subset")
         values, attack_results, fqs = await process_attack_metrics(
             model=self.model, 
@@ -349,6 +350,16 @@ class UnlearningFTThread(BaseUnlearningThread):
             device=self.device, 
             forget_class=self.request.forget_class,
             create_plots=False  # No plots for UI data
+        )
+        
+        # Calculate Privacy Score on full dataset for final results
+        print("Calculating Privacy Score on full dataset")
+        _, _, final_fqs = await process_attack_metrics(
+            model=self.model, 
+            data_loader=self.train_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class,
+            create_plots=False
         )
         
         # Generate distribution plots on full forget class data (for analysis)
@@ -369,7 +380,6 @@ class UnlearningFTThread(BaseUnlearningThread):
         self.status.progress = "Calculating CKA Similarity"
         print("Calculating CKA similarity")
         cka_results = await calculate_cka_similarity(
-            model_before=self.model_before,
             model_after=self.model,
             forget_class=self.request.forget_class,
             device=self.device,
@@ -404,9 +414,8 @@ class UnlearningFTThread(BaseUnlearningThread):
             "RA": remain_accuracy,
             "TUA": round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
-            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
-            "FQS": fqs,
+            "FQS": final_fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),

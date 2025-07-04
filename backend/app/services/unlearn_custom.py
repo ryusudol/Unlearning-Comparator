@@ -7,7 +7,7 @@ from app.threads import UnlearningCustomThread
 from app.utils.helpers import set_seed
 from app.utils.data_loader import get_data_loaders
 from app.models import get_resnet18
-from app.config import UNLEARN_SEED
+from app.config import UNLEARN_SEED, GPU_ID
 
 
 async def unlearning_custom(forget_class, status, weights_path, base_weights):
@@ -24,18 +24,15 @@ async def unlearning_custom(forget_class, status, weights_path, base_weights):
     )
     
     criterion = nn.CrossEntropyLoss()
-    device = torch.device("cuda" if torch.cuda.is_available() 
+    device = torch.device(f"cuda:{GPU_ID}" if torch.cuda.is_available() 
                          else "mps" if torch.backends.mps.is_available() 
                          else "cpu")
-    model_before = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load(f"unlearned_models/{forget_class}/000{forget_class}.pth", map_location=device))
     model = get_resnet18().to(device)
     model.load_state_dict(torch.load(weights_path, map_location=device))
 
     unlearning_thread = UnlearningCustomThread(
         forget_class=forget_class,
         status=status,
-        model_before=model_before,
         model=model,
         train_loader=train_loader,
         test_loader=test_loader,
