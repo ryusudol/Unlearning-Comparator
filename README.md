@@ -3,6 +3,8 @@
 
 Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **seeing, testing, and comparing** how unlearning methods balance the three MU principles—**accuracy, efficiency, and privacy**—from class- to layer-level detail.
 
+![Unlearning Comparator Workflow](img/fig_workflow_github.png)
+
 ---
 
 ## 🔗 Demo & Video
@@ -18,7 +20,7 @@ Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **
 |------------|--------------------------|
 | Fragmented evaluations | **One workflow — Build → Screen → Contrast → Attack** — keeps every run tidy and repeatable. |
 | Raw numbers hide behavior | Combine metrics & visuals: **Class-wise Accuracy chart, Prediction Matrix, Embedding Space, Layer-wise Similarity chart**. |
-| “Did it really forget?” | Built-in **membership-inference attacks** and an aggregated **privacy score** reveal lingering signals. |
+| "Did it really forget?" | Built-in **membership-inference attacks** and an aggregated **privacy score** reveal lingering signals. |
 | Baselines vary by paper | Compare against **standard baselines** or plug in your own method via two Python hooks. |
 
 ---
@@ -35,8 +37,10 @@ Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **
 | Method | Idea (aligned with the paper) |
 |--------|------------------------------|
 | **Fine-Tuning (FT)** | Continue training on the **retain set** only, leveraging catastrophic forgetting of the forget set. |
-| **Gradient Ascent (GA)** | Update weights to **maximize loss** on the forget set, actively “unteaching” it. |
+| **Gradient Ascent (GA)** | Update weights to **maximize loss** on the forget set, actively "unteaching" it. |
 | **Random Labeling (RL)** | Assign **random labels** to the forget set then fine-tune, so the model treats those samples as noise. |
+| **SCRUB** | Use **knowledge distillation** with selective forgetting, preserving important parameters while removing forget class information. |
+| **SalUn** | Apply **gradient saliency masking** to selectively update weights based on their importance for the forget class. |
 
 ### Custom Method API
 Add your algorithm, register it, and the UI will automatically expose metrics, embeddings, and privacy attacks.
