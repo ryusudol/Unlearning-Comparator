@@ -7,6 +7,7 @@ import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import { useClasses } from "../../hooks/useClasses";
 import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useDatasetMode } from "../../hooks/useDatasetMode";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,8 @@ export default function ClassPlusButton({
   hasNoSelectedForgetClass,
 }: Props) {
   const classes = useClasses();
+  const datasetMode = useDatasetMode();
+
   const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
   const addSelectedForgetClass = useForgetClassStore(
     (state) => state.addSelectedForgetClass
@@ -164,6 +167,17 @@ export default function ClassPlusButton({
             </SelectContent>
           </Select>
         </div>
+        {datasetMode === "face" && (
+          <div className="flex flex-col items-start">
+            <img
+              src={`/representative_face_images/${classes.indexOf(
+                forgetClass
+              )}.jpg`}
+              alt={forgetClass}
+              className="mx-auto size-40 rounded-md shadow-md"
+            />
+          </div>
+        )}
         <DialogFooter>
           <Button
             className="h-[34px] flex items-center text-base px-4"

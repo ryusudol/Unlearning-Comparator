@@ -13,11 +13,13 @@ import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useModelDataStore } from "../../stores/modelDataStore";
 import { Point } from "../../types/data";
 import { cn } from "../../utils/util";
+import { useClasses } from "../../hooks/useClasses";
 
 const FIRST = "first";
 const SECOND = "second";
 
 export default function Core() {
+  const classes = useClasses();
   const datasetMode = useDatasetMode();
 
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
@@ -28,17 +30,10 @@ export default function Core() {
   const [modelAPoints, setModelAPoints] = useState<Point[]>([]);
   const [modelBPoints, setModelBPoints] = useState<Point[]>([]);
 
-  const isFirstMode = displayMode === FIRST;
   const forgetClassExist = forgetClass !== -1;
 
   const handleDisplayModeChange = (e: React.MouseEvent<HTMLDivElement>) => {
-    const id = e.currentTarget.id;
-
-    if (id === FIRST) {
-      setDisplayMode(FIRST);
-    } else {
-      setDisplayMode(SECOND);
-    }
+    setDisplayMode(e.currentTarget.id);
   };
 
   useEffect(() => {
@@ -94,9 +89,9 @@ export default function Core() {
           id={FIRST}
           className={cn(
             "relative z-10 cursor-pointer px-1",
-            !isFirstMode && "text-gray-400 border-none"
+            displayMode !== FIRST && "text-gray-400 border-none"
           )}
-          AdditionalContent={isFirstMode && <UnderLine />}
+          AdditionalContent={displayMode === FIRST && <UnderLine />}
           onClick={handleDisplayModeChange}
         />
         <Title
@@ -104,22 +99,45 @@ export default function Core() {
           id={SECOND}
           className={cn(
             "relative z-10 cursor-pointer px-1",
-            isFirstMode && "text-gray-400 border-none"
+            displayMode !== SECOND && "text-gray-400 border-none"
           )}
-          AdditionalContent={!isFirstMode && <UnderLine />}
+          AdditionalContent={displayMode === SECOND && <UnderLine />}
           onClick={handleDisplayModeChange}
         />
+        {datasetMode === "face" && (
+          <Title
+            title="Who is this?"
+            id="face"
+            className={cn(
+              "relative z-10 cursor-pointer px-1",
+              displayMode !== "face" && "text-gray-400 border-none"
+            )}
+            AdditionalContent={displayMode === "face" && <UnderLine />}
+            onClick={handleDisplayModeChange}
+          />
+        )}
       </div>
       {forgetClassExist ? (
-        isFirstMode ? (
+        displayMode === FIRST ? (
           <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
-        ) : (
+        ) : displayMode === SECOND ? (
           datasetMode === "cifar10" && (
             <PrivacyAttack
               modelAPoints={modelAPoints}
               modelBPoints={modelBPoints}
             />
           )
+        ) : (
+          <section className="h-[760px] flex flex-col border rounded-md px-1.5 relative">
+            <div className="m-auto flex flex-col items-center justify-center gap-2 relative bottom-5">
+              <p className="text-3xl font-medium">{classes[forgetClass]}</p>
+              <img
+                src={`/representative_face_images/${forgetClass}.jpg`}
+                alt={classes[forgetClass]}
+                className="size-96 rounded-md shadow-md"
+              />
+            </div>
+          </section>
         )
       ) : (
         <Indicator about="ForgetClass" />
