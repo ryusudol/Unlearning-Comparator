@@ -1,11 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useBaseConfigStore } from "./baseConfigStore";
-import {
-  CIFAR_10_CLASSES,
-  FASHION_MNIST_CLASSES,
-  FACE_DATASET_CLASSES,
-} from "../constants/common";
+import { CIFAR_10_CLASSES, FACE_DATASET_CLASSES } from "../constants/common";
 
 type ForgetClassState = {
   forgetClass: number;
@@ -20,8 +16,6 @@ const getClassesForDataset = () => {
   switch (dataset) {
     case "FaceDataset":
       return FACE_DATASET_CLASSES;
-    case "Fashion-MNIST":
-      return FASHION_MNIST_CLASSES;
     case "CIFAR-10":
     default:
       return CIFAR_10_CLASSES;

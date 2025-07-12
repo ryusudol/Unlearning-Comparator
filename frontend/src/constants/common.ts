@@ -1,7 +1,7 @@
 export const API_URL = "http://localhost:8000";
 
-export const DATASETS = ["FaceDataset", "CIFAR-10", "Fashion-MNIST"];
-export const NEURAL_NETWORK_MODELS = ["ResNet-18", "ViT-B/16"];
+export const DATASETS = ["FaceDataset", "CIFAR-10"];
+export const NEURAL_NETWORK_MODELS = ["ResNet-18"];
 
 export const TRAIN = "train";
 export const TEST = "test";
@@ -39,19 +39,6 @@ export const CIFAR_10_CLASSES = [
   "horse",
   "ship",
   "truck",
-];
-
-export const FASHION_MNIST_CLASSES = [
-  "T-shirt",
-  "Trouser",
-  "Pullover",
-  "Dress",
-  "Coat",
-  "Sandal",
-  "Shirt",
-  "Sneaker",
-  "Bag",
-  "Boot",
 ];
 
 export const ANIMATION_DURATION = 500;

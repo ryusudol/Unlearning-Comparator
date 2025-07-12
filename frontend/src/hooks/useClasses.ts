@@ -1,15 +1,7 @@
 import { useBaseConfigStore } from "../stores/baseConfigStore";
-import {
-  CIFAR_10_CLASSES,
-  FACE_DATASET_CLASSES,
-  FASHION_MNIST_CLASSES,
-} from "../constants/common";
+import { CIFAR_10_CLASSES, FACE_DATASET_CLASSES } from "../constants/common";
 
 export function useClasses() {
   const dataset = useBaseConfigStore((state) => state.dataset);
-  return dataset === "CIFAR-10"
-    ? CIFAR_10_CLASSES
-    : dataset === "FaceDataset"
-    ? FACE_DATASET_CLASSES
-    : FASHION_MNIST_CLASSES;
+  return dataset === "CIFAR-10" ? CIFAR_10_CLASSES : FACE_DATASET_CLASSES;
 }
