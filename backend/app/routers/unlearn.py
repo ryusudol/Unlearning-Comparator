@@ -15,6 +15,7 @@ from app.services import (
 	run_unlearning_FT,
 	run_unlearning_GA_FT,
 	run_unlearning_GA_SL_FT,
+	run_unlearning_GA_SL_FT_V2,
 	run_unlearning_SCRUB,
 	run_unlearning_SalUn,
 	run_unlearning_custom
@@ -49,6 +50,16 @@ class UnlearningRequest(BaseModel):
     base_weights: str = Field(
         default="0000.pth", 
         description="Filename of the weights in unlearned_models folder"
+    )
+    freeze_first_k_layers: int = Field(
+        default=0, 
+        ge=0, 
+        description="Number of first layers to freeze (0-9)"
+    )
+    reinit_last_k_layers: int = Field(
+        default=0, 
+        ge=0, 
+        description="Number of last layers to reinitialize (0-9)"
     )
 
 @router.post("/unlearn/ga")
@@ -160,6 +171,29 @@ async def start_unlearning_ga_sl_ft(
     print(f"start unlearning GA+SL+FT with base_weights_path: {base_weights_path}")
     background_tasks.add_task(run_unlearning_GA_SL_FT, request, status, base_weights_path)
     return {"message": "GA+SL+FT Unlearning started"}
+
+@router.post("/unlearn/ga_sl_ft_v2")
+async def start_unlearning_ga_sl_ft_v2(
+    background_tasks: BackgroundTasks,
+    request: UnlearningRequest
+):
+    if status.is_unlearning:
+        raise HTTPException(
+            status_code=400, 
+            detail="Unlearning is already in progress"
+        )
+    status.reset()
+    base_weights_name = f"000{request.forget_class}.pth" if request.base_weights == "0000.pth" else request.base_weights
+    base_weights_path = f'unlearned_models/{request.forget_class}/{base_weights_name}'
+    if not os.path.exists(base_weights_path):
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Weights '{base_weights_path}' not found in unlearned_models/ folder"
+        )
+    print(f"start unlearning GA+SL+FT V2 with base_weights_path: {base_weights_path}")
+    print(f"Layer modifications - Freeze first {request.freeze_first_k_layers} layers, Reinit last {request.reinit_last_k_layers} layers")
+    background_tasks.add_task(run_unlearning_GA_SL_FT_V2, request, status, base_weights_path)
+    return {"message": "GA+SL+FT V2 Unlearning started"}
 
 @router.post("/unlearn/scrub")
 async def start_unlearning_scrub(

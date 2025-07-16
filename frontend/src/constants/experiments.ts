@@ -4,6 +4,7 @@ export const UNLEARNING_METHODS = [
   "Gradient Ascent",
   "GA+FT",
   "GA+SL+FT",
+  "GA+SL+FT V2",
   "SCRUB",
   "SalUn",
   "Upload",

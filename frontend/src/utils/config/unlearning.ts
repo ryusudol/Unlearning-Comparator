@@ -25,6 +25,14 @@ export function getDefaultUnlearningConfig(method: string) {
     epoch = "5";
     learning_rate = "0.01";
     batch_size = "128";
+  } else if (method === "ga_sl_ft_v2") {
+    epoch = "5";
+    learning_rate = "0.001";
+    batch_size = "128";
+  } else if (method === "salun") {
+    epoch = "5";
+    learning_rate = "0.001";
+    batch_size = "128";
   } else {
     epoch = "3";
     learning_rate = "0.001";

@@ -66,7 +66,7 @@ class UnlearningSCRUBThread(BaseUnlearningThread):
         self.scheduler = scheduler
         self.device = device
         self.base_weights_path = base_weights_path
-        self.self.enable_epoch_metrics = self.enable_epoch_metrics
+        self.enable_epoch_metrics = enable_epoch_metrics
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
         

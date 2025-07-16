@@ -257,6 +257,8 @@ export default function UnlearningConfiguration() {
         ? "GA+FT"
         : method === "ga_sl_ft"
         ? "GA+SL+FT"
+        : method === "ga_sl_ft_v2"
+        ? "GA+SL+FT V2"
         : method === "scrub"
         ? "SCRUB"
         : method === "salun"
@@ -381,8 +383,10 @@ export default function UnlearningConfiguration() {
                   : method === UNLEARNING_METHODS[4]
                   ? "ga_sl_ft"
                   : method === UNLEARNING_METHODS[5]
-                  ? "scrub"
+                  ? "ga_sl_ft_v2"
                   : method === UNLEARNING_METHODS[6]
+                  ? "scrub"
+                  : method === UNLEARNING_METHODS[7]
                   ? "salun"
                   : idx === UNLEARNING_METHODS.length - 1
                   ? "custom"
