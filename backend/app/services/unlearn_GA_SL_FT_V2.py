@@ -40,7 +40,18 @@ def create_second_logit_dataset(model, forget_loader, device):
 
 async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
     print(f"Starting GA+SL+FT V2 unlearning for class {request.forget_class} with {request.epochs} epochs...")
-    print(f"GA LR will be: {request.learning_rate / 10:.5f}, SL LR will be: {request.learning_rate * 2:.5f}, FT LR will be: {request.learning_rate:.5f}")
+    
+    device = torch.device(
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
+        else "mps" if torch.backends.mps.is_available() 
+        else "cpu"
+    )
+
+    set_seed(UNLEARN_SEED)
+    
+    # Create Unlearning Settings
+    model_after = get_resnet18().to(device)
+    model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
     # Layer modification configuration
     freeze_first_k_layers = 0  # Freeze first K layer groups
@@ -50,27 +61,15 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
     
     # Epoch metrics configuration
-    enable_epoch_metrics = True  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
 
     if enable_epoch_metrics:
         print("Epoch-wise metrics collection: ENABLED")
     
-    set_seed(UNLEARN_SEED)
-    
-    device = torch.device(
-        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
-        else "mps" if torch.backends.mps.is_available() 
-        else "cpu"
-    )
-
-    # Create Unlearning Settings
-    model_after = get_resnet18().to(device)
-    model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
-    
     # ========== GA+SL+FT V2 Configuration (easily configurable) ==========
     ga_lr_ratio = 0.1     # GA LR = request.lr * ga_lr_ratio (same as GA_FT)
     sl_lr_ratio = 1.0     # SL LR = request.lr * sl_lr_ratio (configurable multiplier)
-    ga_batch_ratio = 1.0  # GA batch size = request.batch_size * ga_batch_ratio
+    ga_batch_ratio = 8.0  # GA batch size = request.batch_size * ga_batch_ratio
     sl_batch_ratio = 1.0  # SL batch size = request.batch_size * sl_batch_ratio
     ft_batch_ratio = 1.0  # FT batch size = request.batch_size * ft_batch_ratio
     # ================================================================
@@ -80,6 +79,7 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
     sl_batch_size = int(request.batch_size * sl_batch_ratio)
     ft_batch_size = int(request.batch_size * ft_batch_ratio)
     
+    print(f"Learning rates - GA: {request.learning_rate * ga_lr_ratio:.5f}, SL: {request.learning_rate * sl_lr_ratio:.5f}, FT: {request.learning_rate:.5f}")
     print(f"Batch sizes - GA: {ga_batch_size}, SL: {sl_batch_size}, FT: {ft_batch_size}")
 
     (
@@ -165,25 +165,38 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         weight_decay=WEIGHT_DECAY
     )
     
-    # Use MultiStepLR scheduler for GA optimizer (primary)
-    ga_scheduler = optim.lr_scheduler.MultiStepLR(
+    # Option 1: MultiStepLR (original)
+    # ga_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ga_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    # sl_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=sl_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    # ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ft_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    
+    # Option 2: CosineAnnealingLR (active)
+    ga_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ga_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
-    
-    # Use MultiStepLR scheduler for SL optimizer
-    sl_scheduler = optim.lr_scheduler.MultiStepLR(
+    sl_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=sl_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
-    
-    # Use MultiStepLR scheduler for FT optimizer  
-    ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    ft_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ft_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
 
     unlearning_GA_SL_FT_V2_thread = UnlearningGASLFTV2Thread(

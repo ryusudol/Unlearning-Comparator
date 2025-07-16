@@ -44,10 +44,11 @@ def _create_distribution_plots(entropies, confidences, model_name, forget_class,
             entropy_filename = f'logits_distribution/{model_name.lower()}_entropy_{forget_class}.png'
             confidence_filename = f'logits_distribution/{model_name.lower()}_confidence_{forget_class}.png'
         else:
-            # Generate timestamp for unlearn models
+            # Generate timestamp for unlearn models (remove "unlearn_" prefix if present)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            entropy_filename = f'logits_distribution/{model_name.lower()}_entropy_{forget_class}_{timestamp}.png'
-            confidence_filename = f'logits_distribution/{model_name.lower()}_confidence_{forget_class}_{timestamp}.png'
+            clean_model_name = model_name.lower().replace("unlearn_", "").replace("unlearn", "")
+            entropy_filename = f'logits_distribution/{clean_model_name}_entropy_{forget_class}_{timestamp}.png'
+            confidence_filename = f'logits_distribution/{clean_model_name}_confidence_{forget_class}_{timestamp}.png'
         
         # Define consistent ranges for proper comparison between retrain and unlearn
         ENTROPY_RANGE = (0.0, 2.5)

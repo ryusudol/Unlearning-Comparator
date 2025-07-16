@@ -18,7 +18,6 @@ from app.config import (
 
 async def unlearning_GA_FT(request, status, base_weights_path):
     print(f"Starting GA+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
-    print(f"GA LR will be: {request.learning_rate / 10:.5f}, FT LR will be: {request.learning_rate:.5f}")
     
     # Epoch metrics configuration
     enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
@@ -51,6 +50,7 @@ async def unlearning_GA_FT(request, status, base_weights_path):
     ga_batch_size = int(request.batch_size * ga_batch_ratio)
     ft_batch_size = request.batch_size  # FT uses original batch size
     
+    print(f"Learning rates - GA: {request.learning_rate * ga_lr_ratio:.5f}, FT: {request.learning_rate:.5f}")
     print(f"Batch sizes - GA: {ga_batch_size}, FT: {ft_batch_size}")
 
     (
@@ -111,18 +111,28 @@ async def unlearning_GA_FT(request, status, base_weights_path):
         weight_decay=WEIGHT_DECAY
     )
     
-    # Use MultiStepLR scheduler for GA optimizer (primary)
-    ga_scheduler = optim.lr_scheduler.MultiStepLR(
-        optimizer=ga_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
-    )
+    # Option 1: MultiStepLR (original)
+    # ga_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ga_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    # ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ft_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
     
-    # Use MultiStepLR scheduler for FT optimizer  
-    ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    # Option 2: CosineAnnealingLR (active)
+    ga_scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=ga_optimizer,
+        T_max=request.epochs,
+        eta_min=0.0001
+    )
+    ft_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ft_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
 
     unlearning_GA_FT_thread = UnlearningGAFTThread(

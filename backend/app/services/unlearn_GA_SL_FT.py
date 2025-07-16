@@ -41,7 +41,6 @@ def create_second_logit_dataset(model, forget_loader, device):
 
 async def unlearning_GA_SL_FT(request, status, base_weights_path):
     print(f"Starting GA+SL+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
-    print(f"GA LR will be: {request.learning_rate / 10:.5f}, SL LR will be: {request.learning_rate * 2:.5f}, FT LR will be: {request.learning_rate:.5f}")
     
     # Epoch metrics configuration
     enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
@@ -74,6 +73,7 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
     sl_batch_size = int(request.batch_size * sl_batch_ratio)
     ft_batch_size = int(request.batch_size * ft_batch_ratio)
     
+    print(f"Learning rates - GA: {request.learning_rate * ga_lr_ratio:.5f}, SL: {request.learning_rate * sl_lr_ratio:.5f}, FT: {request.learning_rate:.5f}")
     print(f"Batch sizes - GA: {ga_batch_size}, SL: {sl_batch_size}, FT: {ft_batch_size}")
 
     (
@@ -159,25 +159,38 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
         weight_decay=WEIGHT_DECAY
     )
     
-    # Use MultiStepLR scheduler for GA optimizer (primary)
-    ga_scheduler = optim.lr_scheduler.MultiStepLR(
+    # Option 1: MultiStepLR (original)
+    # ga_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ga_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    # sl_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=sl_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    # ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ft_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    
+    # Option 2: CosineAnnealingLR (active)
+    ga_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ga_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
-    
-    # Use MultiStepLR scheduler for SL optimizer
-    sl_scheduler = optim.lr_scheduler.MultiStepLR(
+    sl_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=sl_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
-    
-    # Use MultiStepLR scheduler for FT optimizer  
-    ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    ft_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ft_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=0.0001
     )
 
     unlearning_GA_SL_FT_thread = UnlearningGASLFTThread(
