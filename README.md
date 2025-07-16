@@ -1,6 +1,9 @@
 # 🧹 Machine Unlearning Comparator
 *Under review*  
 
+<!-- Teaser video -->
+<video src="img/teaser.mp4" controls width="100%"></video>
+
 Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **seeing, testing, and comparing** how unlearning methods balance the three MU principles—**accuracy, efficiency, and privacy**—from class- to layer-level detail.
 
 ![Unlearning Comparator Workflow](img/fig_workflow_github.png)
