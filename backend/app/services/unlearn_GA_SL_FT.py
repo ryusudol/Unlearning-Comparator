@@ -42,6 +42,8 @@ def create_second_logit_dataset(model, forget_loader, device):
 async def unlearning_GA_SL_FT(request, status, base_weights_path):
     print(f"Starting GA+SL+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
     
+    ETA_MIN = 0.001
+    
     # Epoch metrics configuration
     enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
 
@@ -180,17 +182,17 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
     ga_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ga_optimizer,
         T_max=request.epochs,
-        eta_min=0.0001
+        eta_min=ETA_MIN * ga_lr_ratio
     )
     sl_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=sl_optimizer,
         T_max=request.epochs,
-        eta_min=0.0001
+        eta_min=ETA_MIN * sl_lr_ratio
     )
     ft_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ft_optimizer,
         T_max=request.epochs,
-        eta_min=0.0001
+        eta_min=ETA_MIN
     )
 
     unlearning_GA_SL_FT_thread = UnlearningGASLFTThread(

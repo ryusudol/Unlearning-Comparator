@@ -22,7 +22,7 @@ async def unlearning_FT(request, status, base_weights_path):
     freeze_first_k_layers = 0  # Freeze first K layer groups
     reinit_last_k_layers = 0    # Reinitialize last K layer groups
     
-    ETA_MIN = 0.003
+    ETA_MIN = 0.005
 
     # Epoch metrics configuration
     enable_epoch_metrics = True  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
@@ -59,7 +59,7 @@ async def unlearning_FT(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=True
+        augmentation=False
     )
 
     # Create retain loader (excluding forget class)
@@ -106,7 +106,7 @@ async def unlearning_FT(request, status, base_weights_path):
     #     gamma=0.2
     # )
     
-    #Option 2: CosineAnnealingLR
+    # Option 2: CosineAnnealingLR
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=optimizer,
         T_max=request.epochs,
@@ -117,7 +117,7 @@ async def unlearning_FT(request, status, base_weights_path):
     # scheduler = optim.lr_scheduler.LinearLR(
     #     optimizer=optimizer,
     #     start_factor=1.0,
-    #     end_factor=0.001,
+    #     end_factor=ETA_MIN,
     #     total_iters=request.epochs
     # )
     
