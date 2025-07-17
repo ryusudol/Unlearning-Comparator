@@ -5,8 +5,7 @@ import torch.optim as optim
 
 from app.threads import UnlearningRetrainThread
 from app.models import get_resnet18
-from app.utils.helpers import set_seed
-from app.utils.data_loader import get_data_loaders
+from app.utils import set_seed, get_cifar10_data_loaders
 from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
@@ -30,7 +29,7 @@ async def unlearning_retrain(request, status):
         test_loader,
         train_set,
         test_set
-    ) = get_data_loaders(
+    ) = get_cifar10_data_loaders(
         batch_size=request.batch_size,
         augmentation=True
     )

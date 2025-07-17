@@ -5,8 +5,7 @@ import torch.optim as optim
 
 from app.threads import UnlearningGAThread
 from app.models import get_resnet18
-from app.utils.helpers import set_seed
-from app.utils.data_loader import get_data_loaders
+from app.utils import set_seed, get_cifar10_data_loaders
 from app.config import (
 	MOMENTUM, 
 	WEIGHT_DECAY, 
@@ -27,7 +26,7 @@ async def unlearning_GA(request, status, base_weights_path):
     # Create Unlearning Settings
     model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
+    model_before.load_state_dict(torch.load(f"unlearned_models/cifar10/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
 
     (
@@ -35,7 +34,7 @@ async def unlearning_GA(request, status, base_weights_path):
         test_loader, 
         train_set, 
         test_set
-    ) = get_data_loaders(
+    ) = get_cifar10_data_loaders(
         batch_size=request.batch_size,
         augmentation=False
     )

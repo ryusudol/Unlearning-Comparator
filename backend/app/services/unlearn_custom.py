@@ -4,8 +4,7 @@ import torch
 import torch.nn as nn
 
 from app.threads import UnlearningCustomThread
-from app.utils.helpers import set_seed
-from app.utils.data_loader import get_data_loaders
+from app.utils import set_seed, get_cifar10_data_loaders
 from app.models import get_resnet18
 from app.config import UNLEARN_SEED
 
@@ -18,7 +17,7 @@ async def unlearning_custom(forget_class, status, weights_path, base_weights):
         test_loader, 
         train_set, 
         test_set
-    ) = get_data_loaders(
+    ) = get_cifar10_data_loaders(
         batch_size=1000,
         augmentation=False
     )
@@ -28,7 +27,7 @@ async def unlearning_custom(forget_class, status, weights_path, base_weights):
                          else "mps" if torch.backends.mps.is_available() 
                          else "cpu")
     model_before = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load(f"unlearned_models/{forget_class}/000{forget_class}.pth", map_location=device))
+    model_before.load_state_dict(torch.load(f"unlearned_models/cifar10/{forget_class}/000{forget_class}.pth", map_location=device))
     model = get_resnet18().to(device)
     model.load_state_dict(torch.load(weights_path, map_location=device))
 

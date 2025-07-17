@@ -71,12 +71,10 @@ export async function downloadPTH(
   forgetClass: number,
   fileName: string
 ) {
-  const fetchUrl = fileName.startsWith("000")
-    ? `${API_URL}/trained_models`
-    : `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}/weights`;
-
   try {
-    const response = await fetch(fetchUrl);
+    const response = await fetch(
+      `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}/weights`
+    );
 
     if (!response.ok) {
       throw new Error(

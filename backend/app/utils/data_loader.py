@@ -50,7 +50,7 @@ def load_face_data():
     
     return x_train, y_train
 
-def get_data_loaders(batch_size, augmentation=False):
+def get_cifar10_data_loaders(batch_size, augmentation=False):
     base_transforms = [
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))

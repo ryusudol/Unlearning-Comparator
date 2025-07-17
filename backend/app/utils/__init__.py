@@ -4,7 +4,7 @@ This package contains utility functions and modules.
 
 from .data_loader import (
 	load_cifar10_data,
-	get_data_loaders,
+	get_cifar10_data_loaders,
 	get_face_data_loaders
 )
 from .evaluation import (
@@ -29,7 +29,7 @@ from .visualization import (
 
 __all__ = [
     'load_cifar10_data',
-    'get_data_loaders',
+    'get_cifar10_data_loaders',
     'get_face_data_loaders',
     'get_layer_activations_and_predictions',
     'get_layer_activations_and_predictions_face',

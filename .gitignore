@@ -15,7 +15,8 @@ myenv/
 # *.py
 *.pdf
 *.mdc
-face
+
+backend/data/face
 
 # Claude settings
 .claude/settings.local.json
