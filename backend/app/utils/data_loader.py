@@ -78,7 +78,7 @@ def get_face_data_loaders(batch_size, train_dir, test_dir, augmentation=False):
     base_transforms = [
         transforms.Resize((160, 160)),
         transforms.ToTensor(),
-        transforms.Normalize((0.4997, 0.4274, 0.3943), (0.3181, 0.2996, 0.2911))
+        transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
     ]
 
     train_transform = transforms.Compose(
