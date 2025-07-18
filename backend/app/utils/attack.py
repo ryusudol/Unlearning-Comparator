@@ -307,7 +307,7 @@ async def process_face_attack_metrics(
                 "confidence": [item["confidence"] for item in retrain_vals]
             }
         }
-    
+
     # unlearn_data["attack"]["values"] is a list, so convert it to a dictionary for calculation.
     unlearn_vals_list = unlearn_data["attack"]["values"]
     unlearn_data_dict = {

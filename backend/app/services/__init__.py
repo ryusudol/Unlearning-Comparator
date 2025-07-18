@@ -28,6 +28,7 @@ from .unlearn_face_GA import run_unlearning_face_GA
 from .unlearn_face_RL import run_unlearning_face_RL
 from .unlearn_face_FT import run_unlearning_face_FT
 from .unlearn_face_custom import run_unlearning_face_custom
+from .unlearn_face_retrain import run_unlearning_face_retrain
 
 __all__ = [
     'run_training',
@@ -39,5 +40,6 @@ __all__ = [
     'run_unlearning_face_GA',
     'run_unlearning_face_RL',
     'run_unlearning_face_FT',
+    'run_unlearning_face_retrain',
     'run_unlearning_face_custom'
 ]

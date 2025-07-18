@@ -15,8 +15,9 @@ from app.services import (
 	run_unlearning_GA,
 	run_unlearning_FT,
 	run_unlearning_custom,
-    run_unlearning_face_GA,
+    run_unlearning_face_retrain,
     run_unlearning_face_RL,
+    run_unlearning_face_GA,
     run_unlearning_face_FT,
     run_unlearning_face_custom
 )
@@ -168,6 +169,20 @@ async def start_unlearning_retrain(
     status.reset()
     background_tasks.add_task(run_unlearning_retrain, request, status)
     return { "message": "Unlearning (retrain) started" }
+
+@router.post("/unlearn/face/retrain")
+async def start_unlearning_face_retrain(
+    request: UnlearningRequest, 
+    background_tasks: BackgroundTasks
+):
+    if status.is_unlearning:
+        raise HTTPException(
+            status_code=400, 
+            detail="Unlearning is already in progress"
+        )
+    status.reset()
+    background_tasks.add_task(run_unlearning_face_retrain, request, status)
+    return { "message": "Face dataset retraining started" }
 
 @router.get("/unlearn/status")
 async def get_unlearning_status():
