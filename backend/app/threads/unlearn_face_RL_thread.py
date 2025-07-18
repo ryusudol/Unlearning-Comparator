@@ -356,7 +356,7 @@ class UnlearningFaceRLThread(threading.Thread):
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": cka_results["similarity"],
-            "points": [],
+            "points": detailed_results,
             "attack": {
                 "values": [],
                 "results": []
