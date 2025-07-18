@@ -17,7 +17,6 @@ import { cn } from "../../../utils/util";
 
 const baseWidths = {
   "CIFAR-10": [115, 80, 80, 80, 78],
-  "Fashion-MNIST": [92, 94, 86, 93, 68],
   FaceDataset: [78, 110, 94, 104, 104],
 };
 
@@ -40,7 +39,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
     if (forgetClass !== -1) {
       const forgetClassColumn = Math.floor(forgetClass / 2);
       if (forgetClassColumn >= 0 && forgetClassColumn < widths.length) {
-        widths[forgetClassColumn] += 18;
+        widths[forgetClassColumn] += 20;
       }
     }
 
@@ -53,7 +52,6 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
         <div
           className={cn("flex flex-col", {
             "mr-[35px]": dataset === "CIFAR-10",
-            "mr-[27px]": dataset === "Fashion-MNIST",
           })}
         >
           <p className="text-lg font-medium mb-1">True Class</p>

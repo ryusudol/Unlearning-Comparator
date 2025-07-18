@@ -45,9 +45,6 @@ def load_face_data():
     x_train = np.array(x_train)
     y_train = np.array(y_train)
     
-    print(f"Loaded {len(x_train)} face images from {len(np.unique(y_train))} classes")
-    print(f"ImageFolder class order: {dataset.classes}")
-    
     return x_train, y_train
 
 def get_cifar10_data_loaders(batch_size, augmentation=False):
