@@ -235,7 +235,8 @@ export default function UnlearningConfiguration() {
           forgetClass,
           unlearningStatus.recent_id as string
         );
-        updateExperiment(newData, experimentIndex);
+        const { points, ...newDataWithoutPoints } = newData;
+        updateExperiment(newDataWithoutPoints, experimentIndex);
         saveModelB(newData.ID);
         break;
       }

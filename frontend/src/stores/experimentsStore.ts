@@ -7,7 +7,10 @@ type ExperimentsState = {
   experiments: Experiments;
   isExperimentLoading: boolean;
   addExperiment: (experiment: ExperimentData, tempIdx?: number) => void;
-  updateExperiment: (experiment: ExperimentData, idx: number) => void;
+  updateExperiment: (
+    experiment: Omit<ExperimentData, "points">,
+    idx: number
+  ) => void;
   saveExperiments: (experiments: Experiments) => void;
   deleteExperiment: (id: string) => void;
   setIsExperimentsLoading: (loading: boolean) => void;
