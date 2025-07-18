@@ -92,7 +92,6 @@ class UnlearningFaceGAThread(threading.Thread):
         self.status.total_epochs = self.request.epochs
         
         dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
-        # For ImageFolder, targets are accessed via samples
         targets = torch.tensor([sample[1] for sample in dataset.samples])
         class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
         
@@ -274,7 +273,6 @@ class UnlearningFaceGAThread(threading.Thread):
         detailed_results = []
         for i in range(len(umap_subset)):
             original_index = selected_indices[i]
-            # For ImageFolder, get ground truth from samples
             ground_truth = umap_subset.dataset.samples[original_index][1]
             is_forget = (ground_truth == self.request.forget_class)
             detailed_results.append([
