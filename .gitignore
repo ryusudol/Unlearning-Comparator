@@ -17,6 +17,7 @@ myenv/
 *.mdc
 
 backend/data/face
+/CLAUDE.md
 
 # Claude settings
 .claude/settings.local.json
