@@ -15,7 +15,7 @@ from app.utils.evaluation import (
     evaluate_model_with_distributions,
     get_layer_activations_and_predictions_face
 )
-# from app.utils.attack import process_face_attack_metrics
+from app.utils.attack import process_face_attack_metrics
 from app.utils.visualization import compute_umap_embedding_face
 from app.config import (
 	UMAP_DATA_SIZE, 
@@ -266,13 +266,13 @@ class UnlearningFaceFTThread(threading.Thread):
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
 
         # Process attack metrics using the same umap_subset_loader (no visualization here)
-        # print("Processing attack metrics on UMAP subset")
-        # values, attack_results, fqs = await process_face_attack_metrics(
-        #     model=self.model, 
-        #     data_loader=umap_subset_loader, 
-        #     device=self.device, 
-        #     forget_class=self.request.forget_class
-        # )
+        print("Processing attack metrics on UMAP subset")
+        values, attack_results, fqs = await process_face_attack_metrics(
+            model=self.model, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class
+        )
 
         # CKA similarity calculation
         self.status.progress = "Calculating CKA Similarity"
@@ -325,7 +325,7 @@ class UnlearningFaceFTThread(threading.Thread):
             "TRA": test_remain_accuracy,
             "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
-            "FQS": "N/A",
+            "FQS": fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
@@ -335,8 +335,8 @@ class UnlearningFaceFTThread(threading.Thread):
             "cka": cka_results["similarity"],
             "points": detailed_results,
             "attack": {
-                "values": [],
-                "results": []
+                "values": values,
+                "results": attack_results
             }
         }
 

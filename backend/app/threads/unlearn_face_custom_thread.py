@@ -11,7 +11,7 @@ from app.utils.evaluation import (
 	get_layer_activations_and_predictions_face, 
 	calculate_cka_similarity_face,
 )
-# from app.utils.attack import process_face_attack_metrics
+from app.utils.attack import process_face_attack_metrics
 from app.utils.visualization import compute_umap_embedding_face
 from app.utils.helpers import (
 	format_distribution, 
@@ -219,18 +219,14 @@ class UnlearningFaceCustomThread(threading.Thread):
         )
         print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
         
-        # Create a new DataLoader containing only the forget class samples for attack metrics
-        # print("Processing attack metrics on the forget set")
-        # forget_class_indices = class_indices[self.forget_class].tolist()
-        # forget_subset = torch.utils.data.Subset(dataset, forget_class_indices)
-        # forget_subset_loader = torch.utils.data.DataLoader(forget_subset, batch_size=32, shuffle=False)
-
-        # values, attack_results, fqs = await process_face_attack_metrics(
-        #     model=self.model,
-        #     data_loader=forget_subset_loader,
-        #     device=self.device,
-        #     forget_class=self.forget_class
-        # )
+        # Process attack metrics using the same umap_subset_loader
+        print("Processing attack metrics on UMAP subset")
+        values, attack_results, fqs = await process_face_attack_metrics(
+            model=self.model,
+            data_loader=umap_subset_loader,
+            device=self.device,
+            forget_class=self.forget_class
+        )
         
         # Detailed results preparation
         detailed_results = []
@@ -301,7 +297,7 @@ class UnlearningFaceCustomThread(threading.Thread):
             "TRA": test_remain_accuracy,
             "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": "N/A",
-            "FQS": "N/A",
+            "FQS": fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
@@ -311,8 +307,8 @@ class UnlearningFaceCustomThread(threading.Thread):
             "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
             "points": detailed_results,
             "attack": {
-                "values": [],
-                "results": []
+                "values": values,
+                "results": attack_results
             }
         }
 
