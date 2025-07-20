@@ -60,8 +60,8 @@ export default function DataTable({ isExpanded }: Props) {
       return [...validRows, ...undefinedRows];
     } else {
       return experimentsArray.sort((a, b) => {
-        const aSpecial = a.ID.length <= 4;
-        const bSpecial = b.ID.length <= 4;
+        const aSpecial = a.ID.length < 4;
+        const bSpecial = b.ID.length < 4;
         if (aSpecial && bSpecial) {
           return a.ID.localeCompare(b.ID);
         }

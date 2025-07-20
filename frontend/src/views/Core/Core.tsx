@@ -121,12 +121,10 @@ export default function Core() {
         displayMode === FIRST ? (
           <Embedding modelAPoints={modelAPoints} modelBPoints={modelBPoints} />
         ) : displayMode === SECOND ? (
-          datasetMode === "cifar10" && (
-            <PrivacyAttack
-              modelAPoints={modelAPoints}
-              modelBPoints={modelBPoints}
-            />
-          )
+          <PrivacyAttack
+            modelAPoints={modelAPoints}
+            modelBPoints={modelBPoints}
+          />
         ) : (
           <section className="h-[760px] flex flex-col border rounded-md px-1.5 relative">
             <div className="m-auto flex flex-col items-center justify-center gap-2 relative bottom-5">
