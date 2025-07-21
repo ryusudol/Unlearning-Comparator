@@ -33,10 +33,14 @@ from .unlearn_SCRUB_thread import UnlearningSCRUBThread
 from .unlearn_SalUn_thread import UnlearningSalUnThread
 from .unlearn_retrain_thread import UnlearningRetrainThread
 from .unlearn_custom_thread import UnlearningCustomThread
-from .unlearn_face_custom_thread import UnlearningFaceCustomThread
 from .unlearn_face_GA_thread import UnlearningFaceGAThread
 from .unlearn_face_RL_thread import UnlearningFaceRLThread
 from .unlearn_face_FT_thread import UnlearningFaceFTThread
+from .unlearn_face_GA_FT_thread import UnlearningFaceGAFTThread
+from .unlearn_face_GA_SL_FT_thread import UnlearningFaceGASLFTThread
+from .unlearn_face_SCRUB_thread import UnlearningFaceSCRUBThread
+from .unlearn_face_SalUn_thread import UnlearningFaceSalUnThread
+from .unlearn_face_custom_thread import UnlearningFaceCustomThread
 
 __all__ = [
     'TrainingThread',
@@ -52,5 +56,9 @@ __all__ = [
     'UnlearningFaceGAThread',
     'UnlearningFaceRLThread',
     'UnlearningFaceFTThread',
+    'UnlearningFaceGAFTThread',
+    'UnlearningFaceGASLFTThread',
+    'UnlearningFaceSCRUBThread',
+    'UnlearningFaceSalUnThread',
     'UnlearningFaceCustomThread'
 ]

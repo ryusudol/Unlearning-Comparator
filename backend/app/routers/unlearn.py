@@ -22,6 +22,10 @@ from app.services import (
     run_unlearning_face_RL,
     run_unlearning_face_GA,
     run_unlearning_face_FT,
+    run_unlearning_face_GA_FT,
+    run_unlearning_face_GA_SL_FT,
+    run_unlearning_face_SalUn,
+    run_unlearning_face_SCRUB,
     run_unlearning_face_custom
 )
 from app.models import UnlearningStatus
@@ -64,6 +68,10 @@ class UnlearningMethod(str, Enum):
     ga = "ga"
     rl = "rl"
     ft = "ft"
+    ga_ft = "ga_ft"
+    ga_sl_ft = "ga_sl_ft"
+    scrub = "scrub"
+    salun = "salun"
 
 unlearning_runners = {
     "cifar10": {
@@ -79,6 +87,10 @@ unlearning_runners = {
         "ga": run_unlearning_face_GA,
         "rl": run_unlearning_face_RL,
         "ft": run_unlearning_face_FT,
+        "ga_ft": run_unlearning_face_GA_FT,
+        "ga_sl_ft": run_unlearning_face_GA_SL_FT,
+        "scrub": run_unlearning_face_SCRUB,
+        "salun": run_unlearning_face_SalUn,
     },
 }
 
