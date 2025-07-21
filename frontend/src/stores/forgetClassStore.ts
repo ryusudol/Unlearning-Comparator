@@ -9,6 +9,7 @@ type ForgetClassState = {
   saveForgetClass: (forgetClass: string | number) => void;
   addSelectedForgetClass: (forgetClass: string) => void;
   deleteSelectedForgetClass: (forgetClass: string) => void;
+  initSelectedForgetClass: () => void;
 };
 
 const getClassesForDataset = () => {
@@ -59,6 +60,10 @@ export const useForgetClassStore = create<ForgetClassState>()(
             (item) => item !== target
           ),
         });
+      },
+
+      initSelectedForgetClass: () => {
+        set({ selectedForgetClasses: [] });
       },
     }),
     {

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { FileText } from "lucide-react";
 
 import ClassSelection from "./ClassSelection";
 import { Logo, GithubIcon } from "../UI/icons";
 import { useBaseConfigStore } from "../../stores/baseConfigStore";
+import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
   Select,
@@ -15,6 +17,19 @@ import {
 export default function Header() {
   const { dataset, setDataset, neuralNetworkModel, setNeuralNetworkModel } =
     useBaseConfigStore();
+  const { initSelectedForgetClass, selectedForgetClasses, saveForgetClass } =
+    useForgetClassStore();
+
+  const hasNoSelectedForgetClass = selectedForgetClasses.length === 0;
+
+  const [open, setOpen] = useState(hasNoSelectedForgetClass);
+
+  const onChangeDataset = (dataset: string) => {
+    setDataset(dataset);
+    initSelectedForgetClass();
+    saveForgetClass(-1);
+    setOpen(true);
+  };
 
   const handleGithubIconClick = () => {
     window.open(
@@ -56,8 +71,8 @@ export default function Header() {
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-300">Dataset</span>
               <Select
-                defaultValue={dataset}
-                onValueChange={setDataset}
+                value={dataset}
+                onValueChange={onChangeDataset}
                 name="dataset"
               >
                 <SelectTrigger className="w-fit h-[10px] text-xs font-semibold p-0 bg-transparent focus:outline-none focus:ring-0 border-none">
@@ -73,7 +88,7 @@ export default function Header() {
               </Select>
             </div>
           </div>
-          <ClassSelection />
+          <ClassSelection open={open} setOpen={setOpen} />
         </div>
       </div>
       <div className="flex items-center gap-3">

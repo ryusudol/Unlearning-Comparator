@@ -29,25 +29,18 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   fetchAndSaveExperiments: (forgetClass: string) => Promise<void>;
-  hasNoSelectedForgetClass: boolean;
 }
 
 export default function ClassPlusButton({
   open,
   setOpen,
   fetchAndSaveExperiments,
-  hasNoSelectedForgetClass,
 }: Props) {
   const classes = useClasses();
   const datasetMode = useDatasetMode();
 
-  const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
-  const addSelectedForgetClass = useForgetClassStore(
-    (state) => state.addSelectedForgetClass
-  );
-  const selectedForgetClasses = useForgetClassStore(
-    (state) => state.selectedForgetClasses
-  );
+  const { selectedForgetClasses, saveForgetClass, addSelectedForgetClass } =
+    useForgetClassStore();
   const { dataset, setDataset, neuralNetworkModel, setNeuralNetworkModel } =
     useBaseConfigStore();
 
@@ -60,6 +53,8 @@ export default function ClassPlusButton({
   );
 
   const [forgetClass, setForgetClass] = useState(unselectForgetClasses[0]);
+
+  const hasNoSelectedForgetClass = selectedForgetClasses.length === 0;
 
   useEffect(() => {
     setForgetClass(unselectForgetClasses[0]);

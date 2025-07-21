@@ -1,29 +1,24 @@
-import { useState } from "react";
-
 import ClassButtons from "./ClassButtons";
 import ClassPlusButton from "./ClassPlusButton";
 import { Experiment, Experiments } from "../../types/data";
 import { useClasses } from "../../hooks/useClasses";
 import { useDatasetMode } from "../../hooks/useDatasetMode";
 import { useExperimentsStore } from "../../stores/experimentsStore";
-import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { fetchAllExperimentsData } from "../../utils/api/modelScreening";
 
-export default function ClassSelection() {
+interface ClassSelectionProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+export default function ClassSelection({ open, setOpen }: ClassSelectionProps) {
   const classes = useClasses();
   const datasetMode = useDatasetMode();
 
   const saveExperiments = useExperimentsStore((state) => state.saveExperiments);
-  const selectedForgetClasses = useForgetClassStore(
-    (state) => state.selectedForgetClasses
-  );
   const setIsExperimentsLoading = useExperimentsStore(
     (state) => state.setIsExperimentsLoading
   );
-
-  const hasNoSelectedForgetClass = selectedForgetClasses.length === 0;
-
-  const [open, setOpen] = useState(hasNoSelectedForgetClass);
 
   const fetchAndSaveExperiments = async (forgetClass: string) => {
     const classIndex = classes.indexOf(forgetClass);
@@ -59,7 +54,6 @@ export default function ClassSelection() {
         open={open}
         setOpen={setOpen}
         fetchAndSaveExperiments={fetchAndSaveExperiments}
-        hasNoSelectedForgetClass={hasNoSelectedForgetClass}
       />
     </div>
   );
