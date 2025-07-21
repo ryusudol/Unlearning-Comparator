@@ -1,0 +1,423 @@
+import threading
+import asyncio
+import torch
+import time
+import os
+import uuid
+import json
+from app.utils.helpers import (
+	save_model,
+    format_distribution,
+    compress_prob_array
+)
+from app.utils.evaluation import (
+    calculate_cka_similarity_face,
+    evaluate_model_with_distributions,
+    get_layer_activations_and_predictions_face
+)
+from app.utils.attack import process_face_attack_metrics
+from app.utils.visualization import compute_umap_embedding_face
+from app.config import (
+	UMAP_DATA_SIZE, 
+	UMAP_DATASET,
+	UNLEARN_SEED,
+    MAX_GRAD_NORM
+)
+
+
+class UnlearningFaceGASLFTThread(threading.Thread):
+    def __init__(
+        self,
+        request,
+        status,
+        model_before,
+        model_after,
+        retain_loader,
+        forget_loader,
+        second_logit_loader,
+        train_loader,
+        test_loader,
+        train_set,
+        test_set,
+        criterion,
+        ga_optimizer,
+        sl_optimizer,
+        ft_optimizer,
+        scheduler,
+        device,
+        base_weights_path
+    ):
+        threading.Thread.__init__(self)
+        self.request = request
+        self.status = status
+        self.model_before = model_before
+        self.model = model_after
+        self.retain_loader = retain_loader
+        self.forget_loader = forget_loader
+        self.second_logit_loader = second_logit_loader
+        self.train_loader = train_loader
+        self.test_loader = test_loader
+        self.train_set = train_set
+        self.test_set = test_set
+        self.criterion = criterion
+        self.ga_optimizer = ga_optimizer
+        self.sl_optimizer = sl_optimizer
+        self.ft_optimizer = ft_optimizer
+        self.scheduler = scheduler
+        self.device = device
+        self.base_weights_path = base_weights_path
+        self.num_classes = 10
+        self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
+
+        self.exception = None
+        self.loop = None
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+
+    def run(self):
+        try:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+            self.loop.run_until_complete(self.unlearn_GA_SL_FT_model())
+        except Exception as e:
+            self.exception = e
+        finally:
+            if self.loop:
+                self.loop.close()
+        
+    async def unlearn_GA_SL_FT_model(self):
+        print(f"Starting GA+SL+FT unlearning for class {self.request.forget_class}...")
+        print(f"GA LR: {self.ga_optimizer.param_groups[0]['lr']:.5f}, SL LR: {self.sl_optimizer.param_groups[0]['lr']:.5f}, FT LR: {self.ft_optimizer.param_groups[0]['lr']:.5f}")
+        
+        # Display batch size information if available
+        ga_batch_info = f"GA Batch: {self.ga_batch_size}" if hasattr(self, 'ga_batch_size') else "GA Batch: default"
+        sl_batch_info = f"SL Batch: {self.sl_batch_size}" if hasattr(self, 'sl_batch_size') else "SL Batch: default"
+        ft_batch_info = f"FT Batch: {self.ft_batch_size}" if hasattr(self, 'ft_batch_size') else "FT Batch: default"
+        print(f"Batch sizes - {ga_batch_info}, {sl_batch_info}, {ft_batch_info}")
+        
+        self.status.progress = "Unlearning"
+        self.status.method = "GA+SL+FT"
+        self.status.recent_id = uuid.uuid4().hex[:4]
+        self.status.total_epochs = self.request.epochs
+        
+        # Set up UMAP subset
+        dataset = self.train_set if UMAP_DATASET == 'train' else self.test_set
+        targets = torch.tensor([sample[1] for sample in dataset.samples])
+        class_indices = [(targets == i).nonzero().squeeze() for i in range(self.num_classes)]
+        
+        samples_per_class = UMAP_DATA_SIZE // self.num_classes
+        generator = torch.Generator()
+        generator.manual_seed(UNLEARN_SEED)
+        selected_indices = []
+        for indices in class_indices:
+            perm = torch.randperm(len(indices), generator=generator)
+            selected_indices.extend(indices[perm[:samples_per_class]].tolist())
+        
+        umap_subset = torch.utils.data.Subset(dataset, selected_indices)
+        umap_subset_loader = torch.utils.data.DataLoader(
+            umap_subset, batch_size=UMAP_DATA_SIZE, shuffle=False
+        )
+
+        start_time = time.time()
+        for epoch in range(self.request.epochs):
+            self.model.train()
+            self.status.current_epoch = epoch + 1
+            epoch_ga_loss = 0.0
+            epoch_sl_loss = 0.0
+            epoch_ft_loss = 0.0
+            ga_batches = 0
+            sl_batches = 0
+            ft_batches = 0
+            
+            # Stage 1: GA stage - Gradient Ascent on forget set (with original GT labels)
+            print(f"Epoch {epoch + 1}: Starting GA (Gradient Ascent) stage...")
+            for i, (inputs, labels) in enumerate(self.forget_loader):
+                if self.stopped():
+                    self.status.is_unlearning = False
+                    print("\nTraining cancelled mid-batch.")
+                    return
+
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                self.ga_optimizer.zero_grad()
+                outputs = self.model(inputs)
+                loss = -self.criterion(outputs, labels)  # Negative loss for gradient ascent
+                loss.backward()
+
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), MAX_GRAD_NORM)
+                self.ga_optimizer.step()
+                epoch_ga_loss += (-loss.item())  # Store positive loss for display
+                ga_batches += 1
+
+            # Stage 2: SL (Second Logit) stage - Fine-tune on forget set with second logit labels
+            print(f"Epoch {epoch + 1}: Starting SL (Second Logit) stage...")
+            for i, (inputs, labels) in enumerate(self.second_logit_loader):
+                if self.stopped():
+                    self.status.is_unlearning = False
+                    print("\nTraining cancelled mid-batch.")
+                    return
+
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                self.sl_optimizer.zero_grad()
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, labels)  # Use second logit labels
+                loss.backward()
+
+                self.sl_optimizer.step()
+                epoch_sl_loss += loss.item()
+                sl_batches += 1
+
+            # Stage 3: FT stage - Fine-tuning on retain set
+            print(f"Epoch {epoch + 1}: Starting FT (Fine-Tuning) stage...")
+            for i, (inputs, labels) in enumerate(self.retain_loader):
+                if self.stopped():
+                    self.status.is_unlearning = False
+                    print("\nTraining cancelled mid-batch.")
+                    return
+
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                self.ft_optimizer.zero_grad()
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, labels)
+                loss.backward()
+
+                self.ft_optimizer.step()
+                epoch_ft_loss += loss.item()
+                ft_batches += 1
+
+            # Calculate average losses for this epoch
+            avg_ga_loss = epoch_ga_loss / ga_batches if ga_batches > 0 else 0.0
+            avg_sl_loss = epoch_sl_loss / sl_batches if sl_batches > 0 else 0.0
+            avg_ft_loss = epoch_ft_loss / ft_batches if ft_batches > 0 else 0.0
+            combined_loss = (avg_ga_loss + avg_sl_loss + avg_ft_loss) / 3.0  # Combined loss for status
+            
+            # Evaluate on forget set after each epoch
+            self.model.eval()
+            forget_running_loss = 0.0
+            forget_correct = 0
+            forget_total = 0
+            
+            with torch.no_grad():
+                for inputs, labels in self.forget_loader:
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    outputs = self.model(inputs)
+                    loss = self.criterion(outputs, labels)
+                    forget_running_loss += loss.item()
+
+                    _, predicted = torch.max(outputs.data, 1)
+                    forget_total += labels.size(0)
+                    forget_correct += (predicted == labels).sum().item()
+
+            forget_epoch_loss = forget_running_loss / len(self.forget_loader)
+            forget_epoch_acc = forget_correct / forget_total
+
+            # Status update with forget set metrics
+            elapsed_time = time.time() - start_time
+            estimated_total_time = elapsed_time / (epoch + 1) * self.request.epochs
+            
+            self.status.current_unlearn_loss = forget_epoch_loss
+            self.status.current_unlearn_accuracy = forget_epoch_acc
+            self.status.estimated_time_remaining = max(0, estimated_total_time - elapsed_time)
+            
+            self.scheduler.step()  # GA scheduler
+            if hasattr(self, 'sl_scheduler'):
+                self.sl_scheduler.step()  # SL scheduler
+            if hasattr(self, 'ft_scheduler'):
+                self.ft_scheduler.step()  # FT scheduler
+
+            print(f"\nEpoch [{epoch+1}/{self.request.epochs}]")
+            print(f"GA Loss: {avg_ga_loss:.4f}, SL Loss: {avg_sl_loss:.4f}, FT Loss: {avg_ft_loss:.4f}")
+            print(f"Unlearning Loss: {forget_epoch_loss:.4f}, Unlearning Accuracy: {forget_epoch_acc:.3f}")
+            print(f"ETA: {self.status.estimated_time_remaining:.2f}s")
+
+        rte = time.time() - start_time
+        
+        if self.stopped():
+            self.status.is_unlearning = False
+            return
+
+        # Evaluate on train set
+        self.status.progress = "Evaluating Train Set"
+        print("Start Train set evaluation")
+        (
+            train_loss,
+            train_accuracy,
+            train_class_accuracies, 
+            train_label_dist, 
+            train_conf_dist
+        ) = await evaluate_model_with_distributions(
+            model=self.model, 
+            data_loader=self.train_loader,
+            criterion=self.criterion, 
+            device=self.device,
+        )
+        
+        # Update training evaluation status for remain classes only
+        self.status.p_training_loss = train_loss
+        remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+        self.status.p_training_accuracy = remain_train_accuracy
+
+        unlearn_accuracy = train_class_accuracies[self.request.forget_class]
+        remain_accuracy = round(
+            sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
+        )
+
+        print("Train Class Accuracies:")
+        for i, acc in train_class_accuracies.items():
+            print(f"  Class {i}: {acc:.3f}")
+        print(f"Train set evaluation finished at {time.time() - start_time:.3f} seconds")
+
+        if self.stopped():
+            return
+
+        # Evaluate on test set
+        self.status.progress = "Evaluating Test Set"
+        print("Start Test set evaluation")
+        (
+            test_loss, 
+            test_accuracy, 
+            test_class_accuracies, 
+            test_label_dist, 
+            test_conf_dist
+        ) = await evaluate_model_with_distributions(
+            model=self.model, 
+            data_loader=self.test_loader, 
+            criterion=self.criterion, 
+            device=self.device,
+        )
+
+        # Update test evaluation status for remain classes only
+        self.status.p_test_loss = test_loss
+        remain_test_accuracy = sum(test_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
+        self.status.p_test_accuracy = remain_test_accuracy
+
+        print("Test Class Accuracies:")
+        for i, acc in test_class_accuracies.items():
+            print(f"  Class {i}: {acc:.3f}")
+        print(f"Test set evaluation finished at {time.time() - start_time:.3f} seconds")
+
+        if self.stopped():
+            self.status.is_unlearning = False
+            return
+
+        # UMAP and activation calculation
+        self.status.progress = "Computing UMAP"
+        
+        print("Computing layer activations")
+        (
+            activations, 
+            predicted_labels, 
+            probs, 
+        ) = await get_layer_activations_and_predictions_face(
+            model=self.model,
+            data_loader=umap_subset_loader,
+            device=self.device,
+        )
+        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
+
+        # UMAP embedding computation
+        print("Computing UMAP embedding")
+        forget_labels = torch.tensor([label == self.request.forget_class for _, label in umap_subset])
+        umap_embedding = await compute_umap_embedding_face(
+            activation=activations, 
+            labels=predicted_labels, 
+            forget_class=self.request.forget_class,
+            forget_labels=forget_labels
+        )
+        print(f"UMAP embedding computed at {time.time() - start_time:.3f} seconds")
+
+        # Process attack metrics using the same umap_subset_loader (no visualization here)
+        print("Processing attack metrics on UMAP subset")
+        values, attack_results, fqs = await process_face_attack_metrics(
+            model=self.model, 
+            data_loader=umap_subset_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class
+        )
+
+        # CKA similarity calculation
+        self.status.progress = "Calculating CKA Similarity"
+        print("Calculating CKA similarity")
+        cka_results = await calculate_cka_similarity_face(
+            model_before=self.model_before,
+            model_after=self.model,
+            forget_class=self.request.forget_class,
+            device=self.device
+        )
+        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
+
+        # Prepare detailed results
+        detailed_results = []
+        for i in range(len(umap_subset)):
+            original_index = selected_indices[i]
+            ground_truth = umap_subset.dataset.samples[original_index][1]
+            is_forget = (ground_truth == self.request.forget_class)
+            detailed_results.append([
+                int(ground_truth),                             # gt
+                int(predicted_labels[i]),                      # pred
+                int(original_index),                           # img
+                1 if is_forget else 0,                         # forget as binary
+                round(float(umap_embedding[i][0]), 2),         # x coordinate
+                round(float(umap_embedding[i][1]), 2),         # y coordinate
+                compress_prob_array(probs[i].tolist()),        # compressed probabilities
+            ])
+
+        test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
+        test_remain_accuracy = round(
+           sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
+        )
+
+        # Prepare results dictionary
+        results = {
+            "CreatedAt": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            "ID": self.status.recent_id,
+            "FC": self.request.forget_class,
+            "Type": "Unlearned",
+            "Base": os.path.basename(self.base_weights_path).replace('.pth', ''),
+            "Method": "GA+SL+FT",
+            "Epoch": self.request.epochs,
+            "BS": self.request.batch_size,
+            "LR": self.request.learning_rate,
+            "UA": round(unlearn_accuracy, 3),
+            "RA": remain_accuracy,
+            "TUA": round(test_unlearn_accuracy, 3),
+            "TRA": test_remain_accuracy,
+            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
+            "RTE": round(rte, 1),
+            "FQS": fqs,
+            "accs": [round(v, 3) for v in train_class_accuracies.values()],
+            "label_dist": format_distribution(train_label_dist),
+            "conf_dist": format_distribution(train_conf_dist),
+            "t_accs": [round(v, 3) for v in test_class_accuracies.values()],
+            "t_label_dist": format_distribution(test_label_dist),
+            "t_conf_dist": format_distribution(test_conf_dist),
+            "cka": cka_results["similarity"],
+            "points": detailed_results,
+            "attack": {
+                "values": values,
+                "results": attack_results
+            }
+        }
+
+        # Save results to JSON file
+        os.makedirs('data', exist_ok=True)
+        forget_class_dir = os.path.join('data/face', str(self.request.forget_class))
+        os.makedirs(forget_class_dir, exist_ok=True)
+
+        result_path = os.path.join(forget_class_dir, f'{results["ID"]}.json')  
+        with open(result_path, 'w') as f:
+            json.dump(results, f, indent=2)
+
+        save_model(
+            model=self.model, 
+            forget_class=self.request.forget_class,
+            model_name=self.status.recent_id,
+            dataset_mode="face",
+        )
+        print(f"Results saved to {result_path}")
+        print("GA+SL+FT Unlearning inference completed!")
+        self.status.progress = "Completed"
