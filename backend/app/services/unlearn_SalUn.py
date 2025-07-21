@@ -2,10 +2,10 @@ import asyncio
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-from app.threads import UnlearningFTThread
+from app.threads import UnlearningSalUnThread
 from app.models import get_resnet18
-from app.utils import set_seed, get_cifar10_data_loaders
+from app.utils.helpers import set_seed
+from app.utils.data_loader import get_data_loaders
 from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
@@ -13,8 +13,9 @@ from app.config import (
     UNLEARN_SEED
 )
 
-async def unlearning_FT(request, status, base_weights_path):
-    print(f"Starting FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
+async def unlearning_SalUn(request, status, base_weights_path):
+    print(f"Starting SalUn unlearning for class {request.forget_class} with {request.epochs} epochs...")
+    print(f"SalUn configuration: threshold={0.1}, random_labels={True}, lr={request.learning_rate}")
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
@@ -27,7 +28,7 @@ async def unlearning_FT(request, status, base_weights_path):
     model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
     
-    model_before.load_state_dict(torch.load(f"unlearned_models/cifar10/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
+    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
     (
@@ -35,7 +36,7 @@ async def unlearning_FT(request, status, base_weights_path):
         test_loader,
         train_set,
         test_set
-    ) = get_cifar10_data_loaders(
+    ) = get_data_loaders(
         batch_size=request.batch_size,
         augmentation=False
     )
@@ -71,43 +72,29 @@ async def unlearning_FT(request, status, base_weights_path):
     )
 
     criterion = nn.CrossEntropyLoss()
+    
+    # SalUn specific hyperparameters (official code settings for CIFAR-10 ResNet-18)
+    salun_config = {
+        'saliency_threshold': 0.1,      # salient weights
+        'use_random_labels': True,      # Use random labeling on forget data (RL method)
+        'grad_clip': 100.0,               # Gradient clipping norm
+    }
+    
     optimizer = optim.SGD(
         params=model_after.parameters(),
         lr=request.learning_rate,
         momentum=MOMENTUM,
         weight_decay=WEIGHT_DECAY
     )
-    # Option 1: MultiStepLR (original)
-    # scheduler = optim.lr_scheduler.MultiStepLR(
-    #     optimizer=optimizer,
-    #     milestones=DECREASING_LR,
-    #     gamma=0.2
-    # )
     
-    #Option 2: CosineAnnealingLR
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    # Use MultiStepLR for SalUn (same as other methods)
+    scheduler = optim.lr_scheduler.MultiStepLR(
         optimizer=optimizer,
-        T_max=request.epochs,
-        eta_min=0.004
+        milestones=DECREASING_LR,
+        gamma=0.2
     )
-    
-    # Option 3: LinearLR (linear decay)
-    # scheduler = optim.lr_scheduler.LinearLR(
-    #     optimizer=optimizer,
-    #     start_factor=1.0,
-    #     end_factor=0.001,
-    #     total_iters=request.epochs
-    # )
-    
-    # Option 4: CosineAnnealingWarmRestarts (cosine annealing with warm restarts)
-    # scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
-    #     optimizer=optimizer,
-    #     T_0=request.epochs // 4,  # First restart after T_0 epochs
-    #     T_mult=1,  # Multiply T_0 by 2 after each restart
-    #     eta_min=0.003
-    # )
 
-    unlearning_FT_thread = UnlearningFTThread(
+    unlearning_SalUn_thread = UnlearningSalUnThread(
         request=request,
         status=status,
         model_before=model_before,
@@ -123,23 +110,24 @@ async def unlearning_FT(request, status, base_weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        salun_config=salun_config
     )
     
-    unlearning_FT_thread.start()
+    unlearning_SalUn_thread.start()
 
     # thread start
-    while unlearning_FT_thread.is_alive():
+    while unlearning_SalUn_thread.is_alive():
         await asyncio.sleep(0.1)
         if status.cancel_requested:
-            unlearning_FT_thread.stop()
+            unlearning_SalUn_thread.stop()
             print("Cancellation requested, stopping the unlearning process...")
         
     status.is_unlearning = False
 
     # thread end
-    if unlearning_FT_thread.exception:
-        print(f"An error occurred during FT unlearning: {str(unlearning_FT_thread.exception)}")
+    if unlearning_SalUn_thread.exception:
+        print(f"An error occurred during SalUn unlearning: {str(unlearning_SalUn_thread.exception)}")
     elif status.cancel_requested:
         print("Unlearning process was cancelled.")
     else:
@@ -147,11 +135,11 @@ async def unlearning_FT(request, status, base_weights_path):
 
     return status
 
-async def run_unlearning_FT(request, status, base_weights_path):
+async def run_unlearning_SalUn(request, status, base_weights_path):
     try:
         status.is_unlearning = True
         status.progress = "Unlearning"
-        updated_status = await unlearning_FT(request, status, base_weights_path)
+        updated_status = await unlearning_SalUn(request, status, base_weights_path)
         return updated_status
     finally:
         status.cancel_requested = False

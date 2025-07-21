@@ -1,40 +1,39 @@
 import torch
 import time
 import uuid
-from app.utils.helpers import (
-	format_distribution
-)
+from app.utils.helpers import format_distribution
 from app.utils.evaluation import (
-	calculate_cka_similarity,
-	evaluate_model_with_distributions, 
-	get_layer_activations_and_predictions
+    calculate_cka_similarity,
+    evaluate_model_with_distributions,
+    get_layer_activations_and_predictions
 )
 from app.utils.visualization import compute_umap_embedding
-from app.config.settings import (
-	MAX_GRAD_NORM
-)
 from app.utils.attack import process_attack_metrics
 from app.utils.thread_base import BaseUnlearningThread
 from app.utils.thread_operations import (
-	setup_umap_subset,
-	update_training_status,
-	prepare_detailed_results,
-	create_base_results_dict,
-	save_results_and_model,
-	print_epoch_progress,
-	calculate_comprehensive_epoch_metrics,
-	initialize_epoch_metrics_system,
-	update_epoch_metrics_collection,
-	save_epoch_plots
+    setup_umap_subset,
+    update_training_status,
+    prepare_detailed_results,
+    create_base_results_dict,
+    save_results_and_model,
+    print_epoch_progress,
+    evaluate_on_forget_set,
+    calculate_accuracy_metrics,
+    calculate_comprehensive_epoch_metrics,
+    initialize_epoch_metrics_system,
+    update_epoch_metrics_collection,
+    save_epoch_plots
 )
 
-class UnlearningGAThread(BaseUnlearningThread):
+
+class UnlearningSalUnThread(BaseUnlearningThread):
     def __init__(
         self,
         request,
         status,
         model_before,
         model_after,
+        retain_loader,
         forget_loader,
         train_loader,
         test_loader,
@@ -44,7 +43,8 @@ class UnlearningGAThread(BaseUnlearningThread):
         optimizer,
         scheduler,
         device,
-        base_weights_path
+        base_weights_path,
+        salun_config
     ):
         super().__init__()
         self.request = request
@@ -52,6 +52,7 @@ class UnlearningGAThread(BaseUnlearningThread):
         self.model_before = model_before
         self.model = model_after
 
+        self.retain_loader = retain_loader
         self.forget_loader = forget_loader
         self.train_loader = train_loader
         self.test_loader = test_loader
@@ -66,20 +67,128 @@ class UnlearningGAThread(BaseUnlearningThread):
         self.base_weights_path = base_weights_path
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
+        
+        # SalUn specific hyperparameters
+        self.saliency_threshold = salun_config['saliency_threshold']
+        self.use_random_labels = salun_config['use_random_labels']
+        self.grad_clip = salun_config['grad_clip']
+        
+        # Initialize saliency mask
+        self.saliency_mask = None
+
+    def _compute_gradient_saliency(self):
+        """Compute gradient-based weight saliency map using forget data"""
+        print("Computing gradient-based weight saliency...")
+        
+        # Initialize gradient accumulator
+        gradient_dict = {}
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                gradient_dict[name] = torch.zeros_like(param)
+        
+        self.model.eval()
+        
+        # Compute gradients on forget dataset
+        batch_count = 0
+        for data, target in self.forget_loader:
+            data, target = data.to(self.device), target.to(self.device)
+            
+            self.optimizer.zero_grad()
+            output = self.model(data)
+            
+            # Use negative loss for gradient ascent on forget data
+            loss = -self.criterion(output, target)
+            loss.backward()
+            
+            # Accumulate gradient magnitudes
+            for name, param in self.model.named_parameters():
+                if param.requires_grad and param.grad is not None:
+                    gradient_dict[name] += param.grad.abs()
+            
+            batch_count += 1
+            if batch_count >= 5:  # Limit computation for efficiency
+                break
+        
+        # Normalize by number of batches
+        for name in gradient_dict:
+            gradient_dict[name] /= batch_count
+        
+        # Generate saliency mask based on threshold
+        all_grads = torch.cat([gradient_dict[name].flatten() 
+                              for name in gradient_dict.keys()])
+        
+        # Select top-k% most salient weights
+        k = int(self.saliency_threshold * len(all_grads))
+        if k > 0:
+            topk_values, _ = torch.topk(all_grads, k)
+            threshold_value = topk_values[-1]
+        else:
+            threshold_value = float('inf')
+        
+        # Create binary mask and move to device
+        mask = {}
+        for name in gradient_dict.keys():
+            mask[name] = (gradient_dict[name] >= threshold_value).float().to(self.device)
+        
+        print(f"Saliency mask created with threshold {self.saliency_threshold} "
+              f"({k}/{len(all_grads)} parameters selected)")
+        
+        return mask
+
+
+    def _apply_saliency_mask_to_gradients(self, apply_mask=True):
+        """Apply saliency mask to model gradients"""
+        if self.saliency_mask is None or not apply_mask:
+            return
+            
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                if name in self.saliency_mask and param.grad is not None:
+                    # Apply saliency mask: only update salient weights
+                    param.grad *= self.saliency_mask[name]
+
+    def _salun_unlearn_step(self, data, target, is_forget_batch=True):
+        """Perform one SalUn unlearning step following official RL implementation"""
+        data, target = data.to(self.device), target.to(self.device)
+        
+        # Apply random labeling to ALL samples in forget batch (excluding forget class)
+        if is_forget_batch and self.use_random_labels:
+            # Efficient random label assignment excluding forget class
+            other_classes = [c for c in range(self.num_classes) if c != self.request.forget_class]
+            rand_idx = torch.randint(0, len(other_classes), target.shape, device=self.device)
+            target = torch.tensor(other_classes, device=self.device)[rand_idx]
+        
+        self.optimizer.zero_grad()
+        output = self.model(data)
+        
+        # Standard cross-entropy loss (same for forget and retain)
+        loss = self.criterion(output, target)
+        loss.backward()
+        
+        # Apply saliency mask to ALL batches (official SalUn behavior)
+        self._apply_saliency_mask_to_gradients(apply_mask=True)
+        
+        # Gradient clipping
+        if self.grad_clip > 0:
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=self.grad_clip)
+        
+        self.optimizer.step()
+        
+        return loss.item()
 
     async def async_main(self):
-        print(f"Starting GA unlearning for class {self.request.forget_class}...")
+        print(f"Starting SalUn unlearning for class {self.request.forget_class}...")
         self.status.progress = "Unlearning"
-        self.status.method = "Gradient-Ascent"
+        self.status.method = "SalUn"
         self.status.recent_id = uuid.uuid4().hex[:4]
         self.status.total_epochs = self.request.epochs
-        
+
         umap_subset, umap_subset_loader, selected_indices = setup_umap_subset(
             self.train_set, self.test_set, self.num_classes
         )
         
-        # Initialize epoch-wise metrics collection (all-or-nothing toggle)
-        enable_epoch_metrics = True  # Set to True to enable comprehensive epoch-wise metrics (UA, TA, TUA, TRA, PS, MIA)
+        # Initialize epoch-wise metrics collection
+        enable_epoch_metrics = True
         
         epoch_metrics = {
             'UA': [],  # Unlearn Accuracy (train)
@@ -98,6 +207,10 @@ class UnlearningGAThread(BaseUnlearningThread):
                 self.model, self.train_set, self.test_set, self.train_loader, self.device,
                 self.request.forget_class, True, True  # Enable both PS and MIA
             )
+        
+        # Step 1: Compute gradient-based saliency mask
+        self.status.progress = "Computing Saliency Map"
+        self.saliency_mask = self._compute_gradient_saliency()
         
         # Collect epoch 0 metrics (initial state before training)
         if enable_epoch_metrics:
@@ -128,40 +241,69 @@ class UnlearningGAThread(BaseUnlearningThread):
                     }
                 )
 
-        # Start timing after all preprocessing
+        # Start timing after all preprocessing  
         start_time = time.time()
         total_metrics_time = 0  # Accumulate metrics calculation time
 
+        # Step 2: SalUn Unlearning Training Loop (Sequential: Forget → Retain, following official CIFAR-10 approach)
         for epoch in range(self.request.epochs):
             self.model.train()
+            self.status.current_epoch = epoch + 1
             running_loss = 0.0
-            correct = 0
             total = 0
+            correct = 0
             
+            print(f"Epoch {epoch + 1}: SalUn RL method - forget data with random labels, then retain data")
+            
+            # Phase 1: Process forget data with random labeling
             for i, (inputs, labels) in enumerate(self.forget_loader):
-                if self.check_stopped_and_return(self.status):
+                if self.stopped():
+                    self.status.is_unlearning = False
+                    print("\nTraining cancelled mid-batch.")
                     return
-                inputs, labels = inputs.to(self.device), labels.to(self.device)
-                self.optimizer.zero_grad()
-                outputs = self.model(inputs)
-                loss = -self.criterion(outputs, labels)
-                loss.backward()
 
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), MAX_GRAD_NORM)
-                self.optimizer.step()
-                running_loss += (-loss.item())
+                loss = self._salun_unlearn_step(inputs, labels, is_forget_batch=True)
+                running_loss += loss
 
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                # Track accuracy for forget data
+                with torch.no_grad():
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    outputs = self.model(inputs)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
+            
+            # Phase 2: Process retain data with normal training
+            for i, (inputs, labels) in enumerate(self.retain_loader):
+                if self.stopped():
+                    self.status.is_unlearning = False
+                    print("\nTraining cancelled mid-batch.")
+                    return
 
-            epoch_loss = running_loss / len(self.forget_loader)
-            epoch_acc = correct / total
-            self.scheduler.step()
+                loss = self._salun_unlearn_step(inputs, labels, is_forget_batch=False)
+                running_loss += loss
 
+                # Track accuracy for retain data
+                with torch.no_grad():
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    outputs = self.model(inputs)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
+
+            # Update learning rate
+            if self.scheduler:
+                self.scheduler.step()
+
+            # Evaluate on forget loader after each epoch
+            forget_epoch_loss, forget_epoch_acc = evaluate_on_forget_set(
+                self.model, self.forget_loader, self.criterion, self.device
+            )
+            
             # Update status
             update_training_status(
-                self.status, epoch, self.request.epochs, start_time, epoch_loss, epoch_acc
+                self.status, epoch, self.request.epochs, start_time, 
+                forget_epoch_loss, forget_epoch_acc
             )
 
             # Calculate comprehensive epoch metrics if enabled (exclude from timing)
@@ -180,7 +322,6 @@ class UnlearningGAThread(BaseUnlearningThread):
                 total_metrics_time += time.time() - metrics_start
             
             # Print progress
-            current_lr = self.optimizer.param_groups[0]['lr']
             additional_metrics = None
             if enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
                 additional_metrics = {
@@ -194,17 +335,17 @@ class UnlearningGAThread(BaseUnlearningThread):
                 }
             
             print_epoch_progress(
-                epoch + 1, self.request.epochs, epoch_loss, epoch_acc, 
-                current_lr, self.status.estimated_time_remaining,
-                additional_metrics
+                epoch + 1, self.request.epochs, forget_epoch_loss, forget_epoch_acc,
+                eta=self.status.estimated_time_remaining,
+                additional_metrics=additional_metrics
             )
 
         # Calculate pure training time (excluding metrics calculation)
         rte = time.time() - start_time - total_metrics_time
-        
+
         if self.check_stopped_and_return(self.status):
             return
-        
+
         # Evaluate on train set
         self.status.progress = "Evaluating Train Set"
         print("Start Train set evaluation")
@@ -214,30 +355,31 @@ class UnlearningGAThread(BaseUnlearningThread):
             train_class_accuracies, 
             train_label_dist, 
             train_conf_dist
-        ) = await evaluate_model_with_distributions (
+        ) = await evaluate_model_with_distributions(
             model=self.model, 
             data_loader=self.train_loader,
             criterion=self.criterion, 
-            device=self.device,
+            device=self.device
         )
-        
-        unlearn_accuracy = train_class_accuracies[self.request.forget_class]
-        remain_accuracy = round(
-            sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
-        )
+
         # Update training evaluation status for remain classes only
         self.status.p_training_loss = train_loss
         remain_train_accuracy = sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes)
         self.status.p_training_accuracy = remain_train_accuracy
 
+        unlearn_accuracy = train_class_accuracies[self.request.forget_class]
+        remain_accuracy = round(
+            sum(train_class_accuracies[i] for i in self.remain_classes) / len(self.remain_classes), 3
+        )
+
         print("Train Class Accuracies:")
         for i, acc in train_class_accuracies.items():
             print(f"  Class {i}: {acc:.3f}")
         print(f"Train set evaluation finished at {time.time() - start_time:.3f} seconds")
-        
-        if self.check_stopped_and_return(self.status):
-            return
 
+        if self.stopped():
+            return
+        
         # Evaluate on test set
         self.status.progress = "Evaluating Test Set"
         print("Start Test set evaluation")
@@ -251,7 +393,7 @@ class UnlearningGAThread(BaseUnlearningThread):
             model=self.model, 
             data_loader=self.test_loader, 
             criterion=self.criterion, 
-            device=self.device,
+            device=self.device
         )
 
         # Update test evaluation status for remain classes only
@@ -262,7 +404,6 @@ class UnlearningGAThread(BaseUnlearningThread):
         print("Test Class Accuracies:")
         for i, acc in test_class_accuracies.items():
             print(f"  Class {i}: {acc:.3f}")
-
         print(f"Test set evaluation finished at {time.time() - start_time:.3f} seconds")
 
         if self.check_stopped_and_return(self.status):
@@ -281,7 +422,6 @@ class UnlearningGAThread(BaseUnlearningThread):
             data_loader=umap_subset_loader,
             device=self.device,
         )
-        print(f"Layer activations computed at {time.time() - start_time:.3f} seconds")
 
         # UMAP embedding computation
         print("Computing UMAP embedding")
@@ -292,9 +432,8 @@ class UnlearningGAThread(BaseUnlearningThread):
             forget_class=self.request.forget_class,
             forget_labels=forget_labels
         )
-        print(f"UMAP embedding computed in {time.time() - start_time:.3f}s")
         
-        # Add attack metrics processing similar to custom_thread
+        # Process attack metrics using the same umap_subset_loader
         print("Processing attack metrics on UMAP subset")
         values, attack_results, fqs = await process_attack_metrics(
             model=self.model, 
@@ -318,34 +457,38 @@ class UnlearningGAThread(BaseUnlearningThread):
             model_name="Unlearn"
         )
 
-        # Compute CKA similarity
+        # CKA similarity calculation
         self.status.progress = "Calculating CKA Similarity"
         print("Calculating CKA similarity")
-        self.model.eval()  # Ensure model is in eval mode for CKA calculation
         cka_results = await calculate_cka_similarity(
             model_before=self.model_before,
             model_after=self.model,
             forget_class=self.request.forget_class,
             device=self.device,
         )
-        print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
+        # Calculate accuracy metrics after both train and test evaluations
+        accuracy_metrics = calculate_accuracy_metrics(
+            train_class_accuracies, test_class_accuracies, 
+            self.request.forget_class, self.num_classes
+        )
+        
         # Prepare detailed results
         self.status.progress = "Preparing Results"
         detailed_results = prepare_detailed_results(
             umap_subset, selected_indices, predicted_labels, 
             umap_embedding, probs, self.request.forget_class
         )
-
+        
         test_unlearn_accuracy = test_class_accuracies[self.request.forget_class]
         test_remain_accuracy = round(
            sum(test_class_accuracies[i] for i in self.remain_classes) / 9.0, 3
         )
-        
+
         # Create results dictionary
         results = create_base_results_dict(
             self.status, self.request.forget_class, self.base_weights_path, 
-            "GradientAscent", self.request
+            "SalUn", self.request
         )
         
         results.update({
@@ -368,14 +511,16 @@ class UnlearningGAThread(BaseUnlearningThread):
             "attack": {
                 "values": values,
                 "results": attack_results
-            }
+            },
+            "saliency_threshold": self.saliency_threshold,  # Add SalUn-specific info
+            "use_random_labels": self.use_random_labels
         })
         
         # Generate epoch-wise plots if we have collected metrics
         if enable_epoch_metrics and epoch_metrics:
             print("Generating epoch-wise plots...")
             plot_path = save_epoch_plots(
-                epoch_metrics, "GA", self.request.forget_class, self.status.recent_id
+                epoch_metrics, "SalUn", self.request.forget_class, self.status.recent_id
             )
             if plot_path:
                 results["epoch_plot_path"] = plot_path
@@ -391,5 +536,5 @@ class UnlearningGAThread(BaseUnlearningThread):
         )
         
         print(f"Results saved to {result_path}")
-        print("GA Unlearning inference completed!")
+        print("SalUn Unlearning inference completed!")
         self.status.progress = "Completed"
