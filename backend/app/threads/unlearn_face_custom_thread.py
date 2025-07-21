@@ -273,8 +273,6 @@ class UnlearningFaceCustomThread(threading.Thread):
             cka_results = await calculate_cka_similarity_face(
                 model_before=self.model_before,
                 model_after=self.model,
-                train_loader=self.train_loader,
-                test_loader=self.test_loader,
                 forget_class=self.forget_class,
                 device=self.device
             )

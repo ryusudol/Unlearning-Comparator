@@ -3,8 +3,6 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.config import UNLEARN_SEED
 import torch
-from PIL import Image
-import os
 
 def load_cifar10_data():
     """Load CIFAR-10 training data with automatic download"""

@@ -377,12 +377,12 @@ async def calculate_cka_similarity(
     detailed_layers = [
         'conv1',
         'layer1.0',
-        'layer1.1',     
-        'layer2.0',     
-        'layer2.1',     
-        'layer3.0',     
-        'layer3.1',  
-        'layer4.0',     
+        'layer1.1',
+        'layer2.0',
+        'layer2.1',
+        'layer3.0',
+        'layer3.1',
+        'layer4.0',
         'layer4.1',
         'fc'
     ]
@@ -525,134 +525,180 @@ async def calculate_cka_similarity(
             }
         } if retrain_model_loaded else None
     }
+
+async def calculate_cka_similarity_face(
+    model_before, 
+    model_after, 
+    forget_class, 
+    device,
+    batch_size=1000
+):
+    # Create clean data loaders without augmentation for consistent CKA calculation
+    base_transforms = transforms.Compose([
+        transforms.Resize((160, 160)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
     
-# async def calculate_cka_similarity_face(
-#     model_before,
-#     model_after,
-#     train_loader,
-#     test_loader,
-#     forget_class,
-#     device
-# ):
-#     detailed_layers = [
-#         'backbone.conv2d_1a',
-#         'backbone.conv2d_2a',
-#         'backbone.conv2d_2b',
-#         'backbone.conv2d_3b',
-#         'backbone.conv2d_4a',
-#         'backbone.repeat_1',
-#         'backbone.mixed_6a',
-#         'backbone.repeat_2',
-#         'backbone.mixed_7a',
-#         'backbone.repeat_3',
-#         'backbone.block8',
-#         'backbone.avgpool_1a',
-#         'classifier'
-#     ]
+    from torchvision import datasets
+    clean_train_set = datasets.ImageFolder(root='./data/face/train', transform=base_transforms)
+    clean_test_set = datasets.ImageFolder(root='./data/face/test', transform=base_transforms)
     
-#     cka = CKA(model_before, 
-#               model_after, 
-#               model1_name="Before Unlearning", 
-#               model2_name="After Unlearning",
-#               model1_layers=detailed_layers, 
-#               model2_layers=detailed_layers, 
-#               device=device)
+    train_loader = DataLoader(clean_train_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(clean_test_set, batch_size=batch_size, shuffle=False, num_workers=0)
     
-#     def filter_loader(loader, is_train=False):
-#         targets = loader.dataset.targets
-#         targets = torch.tensor(targets) if not isinstance(targets, torch.Tensor) else targets
+    # InceptionResnetV1 layers for analysis
+    detailed_layers = [
+        'backbone.conv2d_1a',
+        'backbone.conv2d_2a',
+        'backbone.conv2d_2b',
+        'backbone.conv2d_3b',
+        'backbone.conv2d_4a',
+        'backbone.repeat_1',
+        'backbone.mixed_6a',
+        'backbone.repeat_2',
+        'backbone.mixed_7a',
+        'backbone.repeat_3',
+        'backbone.block8',
+        'backbone.avgpool_1a',
+        'classifier'
+    ]
+    
+    def filter_loader(loader, is_train=False):
+        targets = loader.dataset.targets
+        targets = torch.tensor(targets) if not isinstance(targets, torch.Tensor) else targets
         
-#         forget_indices = (targets == forget_class).nonzero(as_tuple=True)[0]
-#         other_indices = (targets != forget_class).nonzero(as_tuple=True)[0]
+        forget_indices = (targets == forget_class).nonzero(as_tuple=True)[0]
+        other_indices = (targets != forget_class).nonzero(as_tuple=True)[0]
 
-#         if is_train:
-#             forget_samples = len(forget_indices) // 10
-#             other_samples = len(other_indices) // 10
-#         else:
-#             forget_samples = len(forget_indices) // 2
-#             other_samples = len(other_indices) // 2
+        if is_train:
+            forget_samples = len(forget_indices) // 10
+            other_samples = len(other_indices) // 10
+        else:
+            forget_samples = len(forget_indices) // 2
+            other_samples = len(other_indices) // 2
 
-#         forget_sampled = forget_indices[torch.randperm(len(forget_indices))[:forget_samples]]
-#         other_sampled = other_indices[torch.randperm(len(other_indices))[:other_samples]]
+        forget_sampled = forget_indices[torch.randperm(len(forget_indices))[:forget_samples]]
+        other_sampled = other_indices[torch.randperm(len(other_indices))[:other_samples]]
 
-#         forget_loader = DataLoader(
-#             Subset(loader.dataset, forget_sampled),
-#             batch_size=loader.batch_size,
-#             shuffle=False,
-#             num_workers=0,
-#             pin_memory=True
-#         )
+        forget_loader = DataLoader(
+            Subset(loader.dataset, forget_sampled),
+            batch_size=loader.batch_size,
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True
+        )
         
-#         other_loader = DataLoader(
-#             Subset(loader.dataset, other_sampled), 
-#             batch_size=loader.batch_size,
-#             shuffle=False,
-#             num_workers=0,
-#             pin_memory=True
-#         )
+        other_loader = DataLoader(
+            Subset(loader.dataset, other_sampled), 
+            batch_size=loader.batch_size,
+            shuffle=False,
+            num_workers=0,
+            pin_memory=True
+        )
 
-#         return forget_loader, other_loader
+        return forget_loader, other_loader
 
-#     forget_class_train_loader, other_classes_train_loader = filter_loader(train_loader, is_train=True)
-#     forget_class_test_loader, other_classes_test_loader = filter_loader(test_loader, is_train=False)
+    forget_class_train_loader, other_classes_train_loader = filter_loader(train_loader, is_train=True)
+    forget_class_test_loader, other_classes_test_loader = filter_loader(test_loader, is_train=False)
     
-#     def get_fallback_cka_results(layer_count):
-#         return {'CKA': np.zeros((layer_count, layer_count))}
+    # Load retrain model for additional CKA comparison
+    retrain_model = None
+    retrain_model_path = f"unlearned_models/face/{forget_class}/a00{forget_class}.pth"
+    retrain_model_loaded = False
     
-#     # errors = []
+    if os.path.exists(retrain_model_path):
+        try:
+            from app.models.face_resnet import get_facenet_model
+            retrain_model = get_facenet_model(device, pretrained=False)
+            retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=device))
+            retrain_model_loaded = True
+            print(f"Loaded retrain model from {retrain_model_path}")
+        except Exception as e:
+            print(f"Error loading retrain model: {e}")
+            retrain_model = None
+            retrain_model_loaded = False
+    else:
+        print(f"Retrain model not found at {retrain_model_path}")
+        retrain_model_loaded = False
     
-#     with torch.no_grad():
-#         try:
-#             cka.compare(forget_class_train_loader, forget_class_train_loader)
-#             results_forget_train = cka.export()
-#         except Exception as e:
-#             print(f"Error in forget_class_train CKA computation: {e}")
-#             results_forget_train = get_fallback_cka_results(len(detailed_layers))
-#             # errors.append({"type": "forget_class_train", "error": str(e)})
+    with model_eval_mode(model_before), model_eval_mode(model_after):
         
-#         try:
-#             cka.compare(other_classes_train_loader, other_classes_train_loader)
-#             results_other_train = cka.export()
-#         except Exception as e:
-#             print(f"Error in other_classes_train CKA computation: {e}")
-#             results_other_train = get_fallback_cka_results(len(detailed_layers))
-#             # errors.append({"type": "other_classes_train", "error": str(e)})
+        cka = CKA(model_before, 
+                  model_after, 
+                  model1_name="Before Unlearning", 
+                  model2_name="After Unlearning",
+                  model1_layers=detailed_layers, 
+                  model2_layers=detailed_layers, 
+                  device=device)
         
-#         try:
-#             cka.compare(forget_class_test_loader, forget_class_test_loader)
-#             results_forget_test = cka.export()
-#         except Exception as e:
-#             print(f"Error in forget_class_test CKA computation: {e}")
-#             results_forget_test = get_fallback_cka_results(len(detailed_layers))
-#             # errors.append({"type": "forget_class_test", "error": str(e)})
-        
-#         try:
-#             cka.compare(other_classes_test_loader, other_classes_test_loader)
-#             results_other_test = cka.export()
-#         except Exception as e:
-#             print(f"Error in other_classes_test CKA computation: {e}")
-#             results_other_test = get_fallback_cka_results(len(detailed_layers))
-#             # errors.append({"type": "other_classes_test", "error": str(e)})
-
-#     def format_cka_results(results):
-#         return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
-
-#     result = {
-#         "similarity": {
-#             "layers": detailed_layers,
-#             "train": {
-#                 "forget_class": format_cka_results(results_forget_train),
-#                 "other_classes": format_cka_results(results_other_train)
-#             },
-#             "test": {
-#                 "forget_class": format_cka_results(results_forget_test),
-#                 "other_classes": format_cka_results(results_other_test)
-#             }
-#         }
-#     }
+        with torch.no_grad():
+            # Original comparison: before vs after
+            cka.compare(forget_class_train_loader, forget_class_train_loader)
+            results_forget_train = cka.export()
+            cka.compare(other_classes_train_loader, other_classes_train_loader)
+            results_other_train = cka.export()
+            cka.compare(forget_class_test_loader, forget_class_test_loader)
+            results_forget_test = cka.export()
+            cka.compare(other_classes_test_loader, other_classes_test_loader)
+            results_other_test = cka.export()
+            
+            # Retrain comparison: retrain vs unlearned
+            retrain_results_forget_train = None
+            retrain_results_other_train = None
+            retrain_results_forget_test = None
+            retrain_results_other_test = None
+            
+            if retrain_model_loaded and retrain_model is not None:
+                with model_eval_mode(retrain_model):
+                    cka_retrain = CKA(retrain_model, 
+                                    model_after, 
+                                    model1_name="Retrain Model", 
+                                    model2_name="Unlearned Model",
+                                    model1_layers=detailed_layers, 
+                                    model2_layers=detailed_layers, 
+                                    device=device)
+                    
+                    cka_retrain.compare(forget_class_train_loader, forget_class_train_loader)
+                    retrain_results_forget_train = cka_retrain.export()
+                    cka_retrain.compare(other_classes_train_loader, other_classes_train_loader)
+                    retrain_results_other_train = cka_retrain.export()
+                    cka_retrain.compare(forget_class_test_loader, forget_class_test_loader)
+                    retrain_results_forget_test = cka_retrain.export()
+                    cka_retrain.compare(other_classes_test_loader, other_classes_test_loader)
+                    retrain_results_other_test = cka_retrain.export()
     
-#     # if errors:
-#     #     result["errors"] = errors
-#     #     result["has_fallback_data"] = True
+    def format_cka_results(results):
+        if results is None:
+            return None
+        return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
+
+    # Clean up retrain model to free memory
+    if retrain_model_loaded and retrain_model is not None:
+        del retrain_model
+        torch.cuda.empty_cache() if device.type == 'cuda' else None
     
-#     return result
+    return {
+        "similarity": {
+            "layers": detailed_layers,
+            "train": {
+                "forget_class": format_cka_results(results_forget_train),
+                "other_classes": format_cka_results(results_other_train)
+            },
+            "test": {
+                "forget_class": format_cka_results(results_forget_test),
+                "other_classes": format_cka_results(results_other_test)
+            }
+        },
+        "similarity_retrain": {
+            "layers": detailed_layers,
+            "train": {
+                "forget_class": format_cka_results(retrain_results_forget_train),
+                "other_classes": format_cka_results(retrain_results_other_train)
+            },
+            "test": {
+                "forget_class": format_cka_results(retrain_results_forget_test),
+                "other_classes": format_cka_results(retrain_results_other_test)
+            }
+        } if retrain_model_loaded else None
+    }
