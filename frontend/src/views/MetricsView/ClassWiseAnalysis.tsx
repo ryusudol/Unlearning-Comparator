@@ -11,7 +11,7 @@ import {
   useModelBExperiment,
 } from "../../hooks/useModelExperiment";
 
-export default function ClassWiseAccuracy() {
+export default function ClassWiseAnalysis() {
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const modelA = useModelDataStore((state) => state.modelA);
   const modelB = useModelDataStore((state) => state.modelB);

@@ -17,6 +17,17 @@ import {
   FQSHeader,
 } from "./ColumnHeaders";
 
+const methodMapping: Record<string, string> = {
+  FineTuning: "Fine-Tuning",
+  RandomLabeling: "Random Labeling",
+  GradientAscent: "Gradient Ascent",
+  "GA+FT": "GA+FT",
+  "GA+SL+FT": "GA+SL+FT",
+  SCRUB: "SCRUB",
+  SalUn: "SalUn",
+  Custom: "Upload",
+};
+
 function getValueToDisplay(value: unknown) {
   return value === "N/A" || value === "NaN"
     ? "-"
@@ -84,26 +95,14 @@ export const columns: ColumnDef<ExperimentData>[] = [
     filterFn: (row, columnId, filterValue) => {
       const rawValue = row.getValue(columnId);
       const displayValue = getValueToDisplay(rawValue) as string;
-      const methodValue = displayValue.startsWith("F")
-        ? "Fine-Tuning"
-        : displayValue.startsWith("R")
-        ? "Random Labeling"
-        : displayValue.startsWith("G")
-        ? "Gradient Ascent"
-        : displayValue;
+      const methodValue = methodMapping[displayValue] || displayValue;
       if (filterValue.length === 0) return true;
       return filterValue.includes(methodValue);
     },
     cell: ({ row }) => {
       const method = row.getValue("Method");
       const valueToDisplay = getValueToDisplay(method) as string;
-      const value = valueToDisplay.startsWith("F")
-        ? "Fine-Tuning"
-        : valueToDisplay.startsWith("R")
-        ? "Random Labeling"
-        : valueToDisplay.startsWith("G")
-        ? "Gradient Ascent"
-        : valueToDisplay;
+      const value = methodMapping[valueToDisplay] || valueToDisplay;
       return <div>{value}</div>;
     },
   },

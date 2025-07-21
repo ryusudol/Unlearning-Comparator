@@ -85,7 +85,7 @@ export default function Core() {
     >
       <div className="flex items-center gap-1 mb-1.5 ml-1 relative right-1">
         <Title
-          title="Embedding"
+          title="Embedding Space"
           id={FIRST}
           className={cn(
             "relative z-10 cursor-pointer px-1",

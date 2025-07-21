@@ -255,12 +255,12 @@ export default function BubbleChart({
       });
   }, [
     classes,
-    selectedDataset,
     experiment,
     forgetClass,
     handleMouseOut,
     hoveredY,
     onHover,
+    selectedDataset,
     showYAxis,
     zoom,
   ]);

@@ -60,6 +60,14 @@ export type AttackData = {
   results: AttackResults;
 };
 
+export type EpochMetrics = {
+  UA: number[];
+  RA: number[];
+  TUA: number[];
+  TRA: number[];
+  PS: number[];
+};
+
 export type ExperimentData = {
   CreatedAt: string;
   ID: string;
@@ -84,8 +92,10 @@ export type ExperimentData = {
   t_label_dist: Dist;
   t_conf_dist: Dist;
   cka: CKA;
+  cka_retrain?: CKA;
   points: Point[];
   attack: AttackData;
+  epoch_metrics?: EpochMetrics;
 };
 
 export type Experiment = Omit<ExperimentData, "points">;

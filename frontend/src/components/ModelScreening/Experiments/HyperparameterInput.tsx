@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 
+import { Input } from "../../UI/input";
+import { PlusIcon } from "../../UI/icons";
+import { cn } from "../../../utils/util";
 import {
   EPOCH,
   LEARNING_RATE,
   BATCH_SIZE,
 } from "../../../constants/experiments";
-import { Input } from "../../UI/input";
-import { PlusIcon } from "../../UI/icons";
-import { COLORS } from "../../../constants/colors";
-import { cn } from "../../../utils/util";
 
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "list"> {
@@ -120,7 +119,7 @@ export default function HyperparameterInput({
         )}
         onClick={handlePlusClick}
       >
-        <PlusIcon className="w-2 h-2" color={COLORS.BUTTON_BG_COLOR} />
+        <PlusIcon className="w-2 h-2" color="#585858" />
       </div>
     </div>
   );

@@ -319,7 +319,6 @@ export default React.memo(function Tooltip({
     forgetClass,
     isModelA,
     legendRectColor,
-    datasetMode,
   ]);
 
   return (

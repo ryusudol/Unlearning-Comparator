@@ -28,7 +28,7 @@ export default function AddExperimentsButton() {
         <Button
           onClick={() => setOpen(true)}
           className={cn("w-[255px] mb-1", {
-            "hover:bg-[#585858] cursor-not-allowed": isRunning,
+            "hover:bg-neutral-dark cursor-not-allowed": isRunning,
           })}
         >
           <PlusIcon color="white" className="w-3 h-3 mr-1.5" />

@@ -1,6 +1,6 @@
 import View from "../../components/common/View";
 import Title from "../../components/common/Title";
-import ClassWiseAccuracy from "./ClassWiseAccuracy";
+import ClassWiseAnalysis from "./ClassWiseAnalysis";
 import PredictionMatrix from "./PredictionMatrix";
 import LayerWiseSimilarity from "./LayerWiseSimilarity";
 import { CONFIG } from "../../app/App";
@@ -15,7 +15,7 @@ export default function MetricsCore() {
     >
       <Title title="Metrics View" className="left-0.5" />
       <div className="flex flex-col gap-6">
-        <ClassWiseAccuracy />
+        <ClassWiseAnalysis />
         <PredictionMatrix />
         <LayerWiseSimilarity />
       </div>

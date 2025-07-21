@@ -126,11 +126,7 @@ export default function DataTable({ isExpanded }: Props) {
     if (!modelAExists) {
       if (tableData.length > 0) {
         saveModelA(tableData[0].ID);
-        if (tableData.length > 1) {
-          saveModelB(tableData[1].ID);
-        } else {
-          saveModelB("");
-        }
+        saveModelB(tableData[1].ID);
       } else {
         saveModelA("");
         saveModelB("");
