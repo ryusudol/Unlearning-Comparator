@@ -44,7 +44,7 @@ export default function Progress() {
   }, [runningIndex]);
 
   const currentStatus =
-    forgetClassExist && statuses[forgetClass].length > displayedPageIdx
+    forgetClassExist && statuses[forgetClass]?.length > displayedPageIdx
       ? statuses[forgetClass][displayedPageIdx]
       : null;
 
@@ -118,7 +118,7 @@ export default function Progress() {
       ) : (
         <Indicator about="ForgetClass" />
       )}
-      {totalExperimentsCount > 0 && statuses[forgetClass].length > 0 && (
+      {totalExperimentsCount > 0 && statuses[forgetClass]?.length > 0 && (
         <Pagination currentPage={currentPage} onClick={handlePaginationClick} />
       )}
     </View>
