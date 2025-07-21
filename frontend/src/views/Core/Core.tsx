@@ -49,7 +49,7 @@ export default function Core() {
         const data = await fetchFileData(datasetMode, forgetClass, modelA);
         setModelAPoints(data.points);
       } catch (error) {
-        console.error(`Failed to fetch an model A data file: ${error}`);
+        console.error(`Failed to fetch model A file data: ${error}`);
         setModelAPoints([]);
       }
     }
@@ -69,7 +69,7 @@ export default function Core() {
         const data = await fetchFileData(datasetMode, forgetClass, modelB);
         setModelBPoints(data.points);
       } catch (error) {
-        console.error(`Error fetching model B file data: ${error}`);
+        console.error(`Failed to fetch model B file data: ${error}`);
         setModelBPoints([]);
       }
     }
