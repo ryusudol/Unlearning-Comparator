@@ -27,6 +27,7 @@ interface Props {
 
 export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const classes = useClasses();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const dataset = useBaseConfigStore((state) => state.dataset);
 
@@ -36,7 +37,7 @@ export default function EmbeddingsLegend({ highlight, setHighlight }: Props) {
   const getGridTemplateColumns = () => {
     const widths = [...baseWidths[dataset as keyof typeof baseWidths]];
 
-    if (forgetClass !== -1) {
+    if (forgetClass !== -1 && dataset === "FaceDataset") {
       const forgetClassColumn = Math.floor(forgetClass / 2);
       if (forgetClassColumn >= 0 && forgetClassColumn < widths.length) {
         widths[forgetClassColumn] += 20;
