@@ -6,6 +6,7 @@ type ModelState = {
   modelB: string;
   saveModelA: (modelA: string) => void;
   saveModelB: (modelB: string) => void;
+  resetModelSelections: () => void;
 };
 
 export const useModelDataStore = create<ModelState>()(
@@ -15,6 +16,7 @@ export const useModelDataStore = create<ModelState>()(
       modelB: "",
       saveModelA: (modelA) => set({ modelA }),
       saveModelB: (modelB) => set({ modelB }),
+      resetModelSelections: () => set({ modelA: "", modelB: "" }),
     }),
     {
       name: "models",

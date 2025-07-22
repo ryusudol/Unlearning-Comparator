@@ -1,6 +1,7 @@
 import { MultiplicationSignIcon } from "../UI/icons";
 import { useClasses } from "../../hooks/useClasses";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { cn } from "../../utils/util";
 
 interface Props {
@@ -13,8 +14,12 @@ export default function ClassButtons({
   fetchAndSaveExperiments,
 }: Props) {
   const classes = useClasses();
+
   const forgetClass = useForgetClassStore((state) => state.forgetClass);
   const saveForgetClass = useForgetClassStore((state) => state.saveForgetClass);
+  const resetModelSelections = useModelDataStore(
+    (state) => state.resetModelSelections
+  );
   const selectedForgetClasses = useForgetClassStore(
     (state) => state.selectedForgetClasses
   );
@@ -30,9 +35,9 @@ export default function ClassButtons({
   };
 
   const handleDeleteClick = async (targetClass: string) => {
-    const firstSelectedForgetClass = selectedForgetClasses[0];
-    const secondSelectedForgetClass = selectedForgetClasses[1];
-    const targetSelectedForgetClassesIndex = selectedForgetClasses.indexOf(
+    const firstSelectedClass = selectedForgetClasses[0];
+    const secondSelectedClass = selectedForgetClasses[1];
+    const targetClassesIndex = selectedForgetClasses.indexOf(
       classes.indexOf(targetClass)
     );
 
@@ -42,11 +47,12 @@ export default function ClassButtons({
       if (selectedForgetClasses.length === 1) {
         saveForgetClass(-1);
         setOpen(true);
+        resetModelSelections();
       } else {
         const autoSelectedForgetClass =
-          targetSelectedForgetClassesIndex === 0
-            ? classes[secondSelectedForgetClass]
-            : classes[firstSelectedForgetClass];
+          targetClassesIndex === 0
+            ? classes[secondSelectedClass]
+            : classes[firstSelectedClass];
         saveForgetClass(autoSelectedForgetClass);
         await fetchAndSaveExperiments(autoSelectedForgetClass);
       }

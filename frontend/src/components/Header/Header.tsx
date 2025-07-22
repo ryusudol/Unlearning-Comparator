@@ -5,6 +5,7 @@ import ClassSelection from "./ClassSelection";
 import { Logo, GithubIcon } from "../UI/icons";
 import { useBaseConfigStore } from "../../stores/baseConfigStore";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
+import { useModelDataStore } from "../../stores/modelDataStore";
 import { DATASETS, NEURAL_NETWORK_MODELS } from "../../constants/common";
 import {
   Select,
@@ -15,6 +16,9 @@ import {
 } from "../UI/select";
 
 export default function Header() {
+  const resetModelSelections = useModelDataStore(
+    (state) => state.resetModelSelections
+  );
   const { dataset, setDataset, neuralNetworkModel, setNeuralNetworkModel } =
     useBaseConfigStore();
   const { initSelectedForgetClass, selectedForgetClasses, saveForgetClass } =
@@ -29,6 +33,7 @@ export default function Header() {
     initSelectedForgetClass();
     saveForgetClass(-1);
     setOpen(true);
+    resetModelSelections();
   };
 
   const handleGithubIconClick = () => {
