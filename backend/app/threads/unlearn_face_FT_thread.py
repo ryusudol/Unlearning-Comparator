@@ -331,6 +331,7 @@ class UnlearningFaceFTThread(threading.Thread):
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": cka_results["similarity"],
+            "cka_retrain": cka_results.get("similarity_retrain"),
             "points": detailed_results,
             "attack": {
                 "values": values,

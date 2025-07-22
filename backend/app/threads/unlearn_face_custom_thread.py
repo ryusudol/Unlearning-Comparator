@@ -303,6 +303,7 @@ class UnlearningFaceCustomThread(threading.Thread):
             "t_label_dist": format_distribution(test_label_dist),
             "t_conf_dist": format_distribution(test_conf_dist),
             "cka": "N/A" if self.is_training_eval else cka_results["similarity"],
+            "cka_retrain": cka_results.get("similarity_retrain"),
             "points": detailed_results,
             "attack": {
                 "values": values,
