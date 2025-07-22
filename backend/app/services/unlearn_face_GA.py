@@ -35,12 +35,12 @@ async def unlearning_face_GA(request, status, base_weights_path):
         else "cpu"
     )
 
-    model_before = get_facenet_model(device, pretrained=False)
+    model_before = get_facenet_model(device)
     model_before.load_state_dict(torch.load(f"unlearned_models/face/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
-    model_after = get_facenet_model(device, pretrained=False)
+    model_after = get_facenet_model(device)
     state_dict = torch.load(base_weights_path, map_location=device)
     filtered_state_dict = {
-        k: v for k, v in state_dict.items() if not k.startswith("backbone.logits")
+        k: v for k, v in state_dict.items() if not k.startswith("logits")
     }
     model_after.load_state_dict(filtered_state_dict, strict=False)
     

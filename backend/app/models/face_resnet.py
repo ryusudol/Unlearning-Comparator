@@ -1,21 +1,8 @@
 import torch.nn as nn
 from facenet_pytorch import InceptionResnetV1
 
-class FaceNetClassifier(nn.Module):
-    def __init__(self, backbone, classifier):
-        super().__init__()
-        self.backbone = backbone
-        self.classifier = classifier
-        
-    def forward(self, x):
-        emb = self.backbone(x)
-        logits = self.classifier(emb)
-        return logits
 
-def get_facenet_model(device, pretrained=True):
-    backbone = InceptionResnetV1(
-        classify=False,
-        pretrained="vggface2" if pretrained else None,
-    )
-    classifier = nn.Linear(512, 10)
-    return FaceNetClassifier(backbone, classifier).to(device)
+def get_facenet_model(device, num_classes=10):
+    model = InceptionResnetV1(classify=True, pretrained="vggface2", num_classes=num_classes).to(device)
+    model.logits = nn.Linear(model.logits.in_features, num_classes)
+    return model

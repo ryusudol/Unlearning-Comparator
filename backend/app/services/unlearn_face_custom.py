@@ -30,11 +30,11 @@ async def unlearning_face_custom(forget_class, status, weights_path, base_weight
                          else "mps" if torch.backends.mps.is_available() 
                          else "cpu")
 
-    model_before = get_facenet_model(device, pretrained=False)
+    model_before = get_facenet_model(device)
     model_before.load_state_dict(torch.load(f"unlearned_models/face/{forget_class}/000{forget_class}.pth", map_location=device))
-    model = get_facenet_model(device, pretrained=False)
+    model = get_facenet_model(device)
     state_dict = torch.load(weights_path, map_location=device)
-    filtered_state_dict = {k: v for k, v in state_dict.items() if not k.startswith("backbone.logits")}
+    filtered_state_dict = {k: v for k, v in state_dict.items() if not k.startswith("logits")}
     model.load_state_dict(filtered_state_dict, strict=False)
 
     unlearning_thread = UnlearningFaceCustomThread(
