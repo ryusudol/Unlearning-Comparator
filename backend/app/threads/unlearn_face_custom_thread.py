@@ -119,14 +119,14 @@ class UnlearningFaceCustomThread(threading.Thread):
         # Evaluate on train set
         (
             train_loss,
-            train_accuracy, 
-            train_class_accuracies, 
-            train_label_dist, 
+            train_accuracy,
+            train_class_accuracies,
+            train_label_dist,
             train_conf_dist
         ) = await evaluate_model_with_distributions (
-            model=self.model, 
+            model=self.model,
             data_loader=self.train_loader,
-            criterion=self.criterion, 
+            criterion=self.criterion,
             device=self.device,
         )
 
