@@ -83,7 +83,7 @@ async def get_layer_activations_and_predictions_face(
     def hook_fn(module, input, output):
         activations.append(output.detach().cpu().numpy())
 
-    hook = model.backbone.avgpool_1a.register_forward_hook(hook_fn)
+    hook = model.avgpool_1a.register_forward_hook(hook_fn)
 
     with torch.no_grad():
         for inputs, labels in data_loader:
@@ -549,18 +549,18 @@ async def calculate_cka_similarity_face(
     
     # InceptionResnetV1 layers for analysis
     detailed_layers = [
-        'backbone.conv2d_1a',
-        'backbone.conv2d_2a',
-        'backbone.conv2d_2b',
-        'backbone.conv2d_3b',
-        'backbone.conv2d_4a',
-        'backbone.repeat_1',
-        'backbone.mixed_6a',
-        'backbone.repeat_2',
-        'backbone.mixed_7a',
-        'backbone.repeat_3',
-        'backbone.block8',
-        'backbone.avgpool_1a',
+        'conv2d_1a',
+        'conv2d_2a',
+        'conv2d_2b',
+        'conv2d_3b',
+        'conv2d_4a',
+        'repeat_1',
+        'mixed_6a',
+        'repeat_2',
+        'mixed_7a',
+        'repeat_3',
+        'block8',
+        'avgpool_1a',
         'classifier'
     ]
     
