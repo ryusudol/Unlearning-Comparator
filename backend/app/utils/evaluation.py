@@ -610,7 +610,7 @@ async def calculate_cka_similarity_face(
     if os.path.exists(retrain_model_path):
         try:
             from app.models.face_resnet import get_facenet_model
-            retrain_model = get_facenet_model(device, pretrained=False)
+            retrain_model = get_facenet_model(device)
             retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=device))
             retrain_model_loaded = True
             print(f"Loaded retrain model from {retrain_model_path}")
