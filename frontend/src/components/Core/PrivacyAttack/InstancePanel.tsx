@@ -307,7 +307,7 @@ export default function InstancePanel({
         style={{ width: CONFIG.IMG_COLLECTIONS_WIDTH }}
         className="h-[168px]"
       >
-        {!isFetchingSubsetImages ? (
+        {isFetchingSubsetImages ? (
           <SubsetImageSkeleton />
         ) : (
           <div
