@@ -213,7 +213,7 @@ async def get_all_subset_images(forget_class: str):
         raise HTTPException(status_code=400, detail="forget_class must be between 0 and 9")
     
     # Set up the cache file path in the data/subset directory
-    cache_dir = os.path.join("data", "subset", str(class_id))
+    cache_dir = os.path.join("data", "subset", "cifar10", str(class_id))
     os.makedirs(cache_dir, exist_ok=True)
     cache_file = os.path.join(cache_dir, f"{class_id}_base64.json")
 
