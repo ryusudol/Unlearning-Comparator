@@ -9,10 +9,13 @@ import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { useAttackStateStore } from "../../../stores/attackStore";
 import { THRESHOLD_STRATEGIES } from "../../../constants/privacyAttack";
 import { Prob } from "../../../types/embeddings";
-import { fetchAllSubsetImages } from "../../../utils/api/attackSimulations";
 import { calculateZoom } from "../../../utils/util";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import { useThresholdStore } from "../../../stores/thresholdStore";
+import {
+  fetchCifar10SubsetImages,
+  fetchFaceSubsetImages,
+} from "../../../utils/api/attackSimulations";
 import {
   ENTROPY,
   UNLEARN,
@@ -74,6 +77,7 @@ export default function AttackAnalytics({
   const [images, setImages] = useState<Image[]>();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [dataMetric, setDataMetric] = useState(metric);
+  const [isFetchingSubsetImages, setIsFetchingSubsetImages] = useState(false);
 
   const computedThresholdData = data?.lineChartData.find(
     (d) => Math.abs(d.threshold - thresholdValue) < 0.001
@@ -242,15 +246,21 @@ export default function AttackAnalytics({
   useEffect(() => {
     const fetchImage = async () => {
       try {
+        setIsFetchingSubsetImages(true);
         type Response = { images: Image[] };
-        const res: Response = await fetchAllSubsetImages(forgetClass);
+        const func =
+          datasetMode === "cifar10"
+            ? fetchCifar10SubsetImages
+            : fetchFaceSubsetImages;
+        const res: Response = await func(forgetClass);
         setImages(res.images);
+        setIsFetchingSubsetImages(false);
       } catch (error) {
         console.error(`Error fetching subset images: ${error}`);
       }
     };
     fetchImage();
-  }, [forgetClass]);
+  }, [datasetMode, forgetClass]);
 
   const getLineChartData = useCallback(
     (experiment: Experiment) => {
@@ -568,6 +578,7 @@ export default function AttackAnalytics({
             data={data}
             imageMap={imageMap}
             attackScore={attackScore}
+            isFetchingSubsetImages={isFetchingSubsetImages}
             setHoveredId={setHoveredId}
             onElementClick={handleElementClick}
           />

@@ -8,6 +8,7 @@ interface AttackSuccessFailureProps {
   data: Data;
   imageMap: Map<number, Image>;
   attackScore: number;
+  isFetchingSubsetImages: boolean;
   setHoveredId: (val: number | null) => void;
   onElementClick: (
     event: React.MouseEvent,
@@ -22,6 +23,7 @@ export default function AttackSuccessFailure({
   data,
   imageMap,
   attackScore,
+  isFetchingSubsetImages,
   setHoveredId,
   onElementClick,
 }: AttackSuccessFailureProps) {
@@ -43,6 +45,7 @@ export default function AttackSuccessFailure({
           thresholdValue={thresholdValue}
           imageMap={imageMap}
           hoveredId={hoveredId}
+          isFetchingSubsetImages={isFetchingSubsetImages}
           setHoveredId={setHoveredId}
           onElementClick={onElementClick}
         />
@@ -53,6 +56,7 @@ export default function AttackSuccessFailure({
           thresholdValue={thresholdValue}
           imageMap={imageMap}
           hoveredId={hoveredId}
+          isFetchingSubsetImages={isFetchingSubsetImages}
           setHoveredId={setHoveredId}
           onElementClick={onElementClick}
         />

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import * as d3 from "d3";
 
+import SubsetImageSkeleton from "./SubsetImageSkeleton";
 import { Slider } from "../../UI/slider";
 import { Checkbox } from "../../UI/checkbox";
 import { ScrollArea } from "../../UI/scroll-area";
@@ -26,6 +27,7 @@ interface Props {
   thresholdValue: number;
   imageMap: Map<number, Image>;
   hoveredId: number | null;
+  isFetchingSubsetImages: boolean;
   setHoveredId: (val: number | null) => void;
   onElementClick: (
     event: React.MouseEvent,
@@ -40,6 +42,7 @@ export default function InstancePanel({
   thresholdValue,
   imageMap,
   hoveredId,
+  isFetchingSubsetImages,
   setHoveredId,
   onElementClick,
 }: Props) {
@@ -304,16 +307,20 @@ export default function InstancePanel({
         style={{ width: CONFIG.IMG_COLLECTIONS_WIDTH }}
         className="h-[168px]"
       >
-        <div
-          className="grid gap-[1px]"
-          style={{
-            gridTemplateColumns: `repeat(${getGridColumns(imgSize)}, ${
-              CONFIG.IMG_SIZES[imgSize]
-            }px)`,
-          }}
-        >
-          {images}
-        </div>
+        {!isFetchingSubsetImages ? (
+          <SubsetImageSkeleton />
+        ) : (
+          <div
+            className="grid gap-[1px]"
+            style={{
+              gridTemplateColumns: `repeat(${getGridColumns(imgSize)}, ${
+                CONFIG.IMG_SIZES[imgSize]
+              }px)`,
+            }}
+          >
+            {images}
+          </div>
+        )}
       </ScrollArea>
     </div>
   );
