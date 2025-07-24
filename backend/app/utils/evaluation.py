@@ -413,7 +413,7 @@ async def calculate_cka_similarity(
         )
         
         other_loader = DataLoader(
-            Subset(loader.dataset, other_sampled), 
+            Subset(loader.dataset, other_sampled),
             batch_size=loader.batch_size,
             shuffle=False,
             num_workers=0,
@@ -494,7 +494,12 @@ async def calculate_cka_similarity(
     def format_cka_results(results):
         if results is None:
             return None
-        return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
+
+        cka_matrix = results['CKA']
+        if torch.isnan(cka_matrix).any():
+            cka_matrix = torch.nan_to_num(cka_matrix, nan=0.0)
+
+        return [[round(float(value), 3) for value in layer_results] for layer_results in cka_matrix.tolist()]
 
     # Clean up retrain model to free memory
     if retrain_model_loaded and retrain_model is not None:
@@ -554,6 +559,7 @@ async def calculate_cka_similarity_face(
         'conv2d_2b',
         'conv2d_3b',
         'conv2d_4a',
+        'conv2d_4b',
         'repeat_1',
         'mixed_6a',
         'repeat_2',
@@ -561,7 +567,8 @@ async def calculate_cka_similarity_face(
         'repeat_3',
         'block8',
         'avgpool_1a',
-        'classifier'
+        'last_linear',
+        'logits'
     ]
     
     def filter_loader(loader, is_train=False):
@@ -572,8 +579,8 @@ async def calculate_cka_similarity_face(
         other_indices = (targets != forget_class).nonzero(as_tuple=True)[0]
 
         if is_train:
-            forget_samples = len(forget_indices) // 10
-            other_samples = len(other_indices) // 10
+            forget_samples = len(forget_indices) // 5
+            other_samples = len(other_indices) // 5
         else:
             forget_samples = len(forget_indices) // 2
             other_samples = len(other_indices) // 2
@@ -590,7 +597,7 @@ async def calculate_cka_similarity_face(
         )
         
         other_loader = DataLoader(
-            Subset(loader.dataset, other_sampled), 
+            Subset(loader.dataset, other_sampled),
             batch_size=loader.batch_size,
             shuffle=False,
             num_workers=0,
@@ -671,7 +678,12 @@ async def calculate_cka_similarity_face(
     def format_cka_results(results):
         if results is None:
             return None
-        return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
+
+        cka_matrix = results['CKA']
+        if torch.isnan(cka_matrix).any():
+            cka_matrix = torch.nan_to_num(cka_matrix, nan=0.0)
+
+        return [[round(float(value), 3) for value in layer_results] for layer_results in cka_matrix.tolist()]
 
     # Clean up retrain model to free memory
     if retrain_model_loaded and retrain_model is not None:
