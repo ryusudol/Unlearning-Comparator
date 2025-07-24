@@ -27,9 +27,9 @@ export async function deleteRow(
     console.error("Failed to delete the row:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to delete the row: ${error.message}`);
+      console.error(`Failed to delete the row: ${error.message}`);
     } else {
-      alert("An unknown error occurred while deleting the row . . .");
+      console.error("An unknown error occurred while deleting the row . . .");
     }
 
     throw error;
@@ -57,9 +57,11 @@ export async function downloadJSON(
     console.error("Failed to download the JSON file:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to download the JSON file: ${error.message}`);
+      console.error(`Failed to download the JSON file: ${error.message}`);
     } else {
-      alert("An unknown error occurred while downloading the JSON file . . .");
+      console.error(
+        "An unknown error occurred while downloading the JSON file . . ."
+      );
     }
 
     throw error;
@@ -98,9 +100,11 @@ export async function downloadPTH(
     console.error("Failed to download the PTH file:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to download the PTH file: ${error.message}`);
+      console.error(`Failed to download the PTH file: ${error.message}`);
     } else {
-      alert("An unknown error occurred while downloading the PTH file . . .");
+      console.error(
+        "An unknown error occurred while downloading the PTH file . . ."
+      );
     }
 
     throw error;
@@ -161,9 +165,11 @@ export async function executeMethodUnlearning(
     console.error("Failed to unlearn with the predefined setting:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to unlearn with the predefined setting: ${error.message}`);
+      console.error(
+        `Failed to unlearn with the predefined setting: ${error.message}`
+      );
     } else {
-      alert("An unknown error occurred while unlearning . . .");
+      console.error("An unknown error occurred while unlearning . . .");
     }
 
     throw error;
@@ -194,9 +200,9 @@ export async function executeCustomUnlearning(
     console.error("Failed to unlearn with the custom file:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to unlearn with the custom file: ${error.message}`);
+      console.error(`Failed to unlearn with the custom file: ${error.message}`);
     } else {
-      alert(
+      console.error(
         "An unknown error occurred while executing custom unlearning . . ."
       );
     }
@@ -219,9 +225,11 @@ export async function fetchAllExperimentsData(
     console.error("Failed to fetch all unlearned data file:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to fetch all unlearned data file: ${error.message}`);
+      console.error(
+        `Failed to fetch all unlearned data file: ${error.message}`
+      );
     } else {
-      alert(
+      console.error(
         "An unknown error occurred while fetching all unlearned data file . . ."
       );
     }

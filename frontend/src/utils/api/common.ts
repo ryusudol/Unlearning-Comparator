@@ -43,9 +43,11 @@ export async function fetchAllWeightNames(
     console.error("Failed to fetch all weights names:", error);
 
     if (error instanceof Error) {
-      alert(`Failed to fetch all weights names: ${error.message}`);
+      console.error(`Failed to fetch all weights names: ${error.message}`);
     } else {
-      alert("An unknown error occurred while fetching all weights names . . .");
+      console.error(
+        "An unknown error occurred while fetching all weights names . . ."
+      );
     }
 
     throw error;
