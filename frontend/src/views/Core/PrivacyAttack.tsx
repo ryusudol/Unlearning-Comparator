@@ -57,16 +57,16 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     loadRetrainData();
   }, [datasetMode, forgetClass]);
 
-  const FetchFailedIndicator = (
+  const fetchFailedIndicator = (
     <Indicator text="Failed to fetch retrain data" />
   );
-  const UnselectedModelIndicator = (
+  const unselectedModelIndicator = (
     <Indicator text="Please select an unlearned model to compare the attack results" />
   );
   const contentA = !retrainData ? (
-    FetchFailedIndicator
+    fetchFailedIndicator
   ) : isModelAOriginal ? (
-    UnselectedModelIndicator
+    unselectedModelIndicator
   ) : (
     <AttackAnalytics
       mode="A"
@@ -76,9 +76,9 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
     />
   );
   const contentB = !retrainData ? (
-    FetchFailedIndicator
+    fetchFailedIndicator
   ) : isModelBOriginal ? (
-    UnselectedModelIndicator
+    unselectedModelIndicator
   ) : (
     <AttackAnalytics
       mode="B"
