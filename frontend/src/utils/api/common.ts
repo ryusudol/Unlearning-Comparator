@@ -1,12 +1,12 @@
 import { API_URL } from "../../constants/common";
-import { ExperimentData } from "../../types/data";
+import { BaseExperiment } from "../../types/data";
 import { DatasetMode } from "../../types/common";
 
 export async function fetchFileData(
   datasetMode: DatasetMode,
   forgetClass: number,
   fileName: string
-): Promise<ExperimentData> {
+): Promise<BaseExperiment> {
   try {
     const response = await fetch(
       `${API_URL}/data/${datasetMode}/${forgetClass}/${fileName}`

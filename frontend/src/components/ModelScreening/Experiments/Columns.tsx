@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import MethodFilterHeader from "./MethodFilterHeader";
 import { Badge } from "../../UI/badge";
-import { ExperimentData } from "../../../types/data";
+import { BaseExperiment } from "../../../types/data";
 import { getTypeColors } from "../../../utils/data/colors";
 import { COLORS } from "../../../constants/colors";
 import {
@@ -55,7 +55,7 @@ export const COLUMN_WIDTHS = {
   B: 52,
 };
 
-export const columns: ColumnDef<ExperimentData>[] = [
+export const columns: ColumnDef<BaseExperiment>[] = [
   {
     accessorKey: "ID",
     header: "ID",

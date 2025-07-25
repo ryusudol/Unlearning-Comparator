@@ -7,9 +7,9 @@ import {
 } from "../../UI/hover-card";
 import { Button } from "../../UI/button";
 import { UnfoldMoreIcon } from "../../UI/icons";
-import { ExperimentData } from "../../../types/data";
+import { BaseExperiment } from "../../../types/data";
 
-const handleSorting = (column: Column<ExperimentData, unknown>) => {
+const handleSorting = (column: Column<BaseExperiment, unknown>) => {
   const currentSort = column.getIsSorted();
   if (!currentSort) {
     column.toggleSorting(true);
@@ -23,7 +23,7 @@ const handleSorting = (column: Column<ExperimentData, unknown>) => {
 export const EpochHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -44,7 +44,7 @@ export const EpochHeader = ({
 export const BSHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -72,7 +72,7 @@ export const BSHeader = ({
 export const LRHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -100,7 +100,7 @@ export const LRHeader = ({
 export const UAHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -128,7 +128,7 @@ export const UAHeader = ({
 export const RAHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -156,7 +156,7 @@ export const RAHeader = ({
 export const TUAHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -184,7 +184,7 @@ export const TUAHeader = ({
 export const TRAHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -212,7 +212,7 @@ export const TRAHeader = ({
 export const RTEHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (
@@ -240,7 +240,7 @@ export const RTEHeader = ({
 export const FQSHeader = ({
   column,
 }: {
-  column: Column<ExperimentData, unknown>;
+  column: Column<BaseExperiment, unknown>;
 }) => {
   const sortOrder = column.getIsSorted() || null;
   return (

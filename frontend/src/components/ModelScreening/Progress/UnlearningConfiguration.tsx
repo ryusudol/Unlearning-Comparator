@@ -10,7 +10,7 @@ import { fetchFileData, fetchAllWeightNames } from "../../../utils/api/common";
 import { useExperimentsStore } from "../../../stores/experimentsStore";
 import { useRunningIndexStore } from "../../../stores/runningIndexStore";
 import { UnlearningConfigurationData } from "../../../types/experiments";
-import { ExperimentData } from "../../../types/data";
+import { BaseExperiment } from "../../../types/data";
 import { useModelDataStore } from "../../../stores/modelDataStore";
 import { useDatasetMode } from "../../../hooks/useDatasetMode";
 import { cn } from "../../../utils/util";
@@ -38,7 +38,7 @@ import {
 } from "../../../constants/experiments";
 
 const CUSTOM = "custom";
-let initialExperiment: ExperimentData = {
+let initialExperiment: BaseExperiment = {
   CreatedAt: "",
   ID: "",
   FC: -1,

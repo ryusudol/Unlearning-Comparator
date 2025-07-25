@@ -19,7 +19,7 @@ import {
 import { columns } from "./Columns";
 import { COLUMN_WIDTHS } from "./Columns";
 import { COLORS } from "../../../constants/colors";
-import { ExperimentData, EpochMetrics } from "../../../types/data";
+import { BaseExperiment, EpochMetrics } from "../../../types/data";
 import { useForgetClassStore } from "../../../stores/forgetClassStore";
 import { PerformanceMetrics } from "../../../types/experiments";
 import { Experiments } from "../../../types/data";
@@ -41,7 +41,7 @@ const CONFIG = {
 };
 
 interface Props {
-  table: TableType<ExperimentData>;
+  table: TableType<BaseExperiment>;
 }
 
 export default function _TableBody({ table }: Props) {

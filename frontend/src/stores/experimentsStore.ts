@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Experiments } from "../types/data";
-import { ExperimentData } from "../types/data";
+import { BaseExperiment } from "../types/data";
 
 type ExperimentsState = {
   experiments: Experiments;
   isExperimentLoading: boolean;
-  addExperiment: (experiment: ExperimentData, tempIdx?: number) => void;
+  addExperiment: (experiment: BaseExperiment, tempIdx?: number) => void;
   updateExperiment: (
-    experiment: Omit<ExperimentData, "points">,
+    experiment: Omit<BaseExperiment, "points">,
     idx: number
   ) => void;
   saveExperiments: (experiments: Experiments) => void;

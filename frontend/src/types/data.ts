@@ -68,7 +68,7 @@ export type EpochMetrics = {
   PS: number[];
 };
 
-export type ExperimentData = {
+export type BaseExperiment = {
   CreatedAt: string;
   ID: string;
   FC: number;
@@ -98,6 +98,6 @@ export type ExperimentData = {
   epoch_metrics?: EpochMetrics;
 };
 
-export type Experiment = Omit<ExperimentData, "points">;
+export type Experiment = Omit<BaseExperiment, "points">;
 
 export type Experiments = { [key: string]: Experiment };

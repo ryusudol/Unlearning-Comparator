@@ -9,7 +9,7 @@ import { useModelDataStore } from "../../stores/modelDataStore";
 import { fetchFileData } from "../../utils/api/common";
 import { useForgetClassStore } from "../../stores/forgetClassStore";
 import { useAttackStateStore } from "../../stores/attackStore";
-import { ExperimentData } from "../../types/data";
+import { BaseExperiment } from "../../types/data";
 import { ENTROPY, UNLEARN } from "../../constants/common";
 import { THRESHOLD_STRATEGIES } from "../../constants/privacyAttack";
 import { useDatasetMode } from "../../hooks/useDatasetMode";
@@ -29,7 +29,7 @@ export default function PrivacyAttack({ modelAPoints, modelBPoints }: Props) {
   const setDirection = useAttackStateStore((state) => state.setDirection);
   const setStrategy = useAttackStateStore((state) => state.setStrategy);
 
-  const [retrainData, setRetrainData] = useState<ExperimentData>();
+  const [retrainData, setRetrainData] = useState<BaseExperiment>();
 
   const isModelAOriginal = modelA.startsWith("000");
   const isModelBOriginal = modelB.startsWith("000");

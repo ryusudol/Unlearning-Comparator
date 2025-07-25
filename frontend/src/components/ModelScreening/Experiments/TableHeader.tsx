@@ -2,10 +2,10 @@ import { Table as TableType, flexRender } from "@tanstack/react-table";
 
 import { Table, TableHead, TableHeader, TableRow } from "../../UI/table";
 import { COLUMN_WIDTHS } from "./Columns";
-import { ExperimentData } from "../../../types/data";
+import { BaseExperiment } from "../../../types/data";
 
 interface Props {
-  table: TableType<ExperimentData>;
+  table: TableType<BaseExperiment>;
 }
 
 export default function _TableHeader({ table }: Props) {

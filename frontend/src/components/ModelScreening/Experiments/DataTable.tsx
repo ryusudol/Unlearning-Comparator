@@ -9,7 +9,7 @@ import {
 
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-import { ExperimentData } from "../../../types/data";
+import { BaseExperiment } from "../../../types/data";
 import { ScrollArea } from "../../UI/scroll-area";
 import { RadioGroup, RadioGroupItem } from "../../UI/radio-group";
 import { cn } from "../../../utils/util";
@@ -86,7 +86,7 @@ export default function DataTable({ isExpanded }: Props) {
 
     return {
       ...column,
-      cell: ({ row }: CellContext<ExperimentData, unknown>) => {
+      cell: ({ row }: CellContext<BaseExperiment, unknown>) => {
         const isSelected = currentSelection === row.id;
         const radioDistance = isModelAColumn ? "left-1" : "left-0.5";
         return (
@@ -109,8 +109,8 @@ export default function DataTable({ isExpanded }: Props) {
   });
 
   const table = useReactTable({
-    getRowId: (row: ExperimentData) => row.ID,
-    data: tableData as ExperimentData[],
+    getRowId: (row: BaseExperiment) => row.ID,
+    data: tableData as BaseExperiment[],
     columns: modifiedColumns,
     manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
