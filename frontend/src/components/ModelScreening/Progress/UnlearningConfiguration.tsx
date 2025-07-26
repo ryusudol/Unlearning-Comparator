@@ -37,7 +37,7 @@ import {
   LEARNING_RATE,
 } from "../../../constants/experiments";
 
-const CUSTOM = "custom";
+const UPLOAD = "upload";
 let initialExperiment: BaseExperiment = {
   CreatedAt: "",
   ID: "",
@@ -99,10 +99,10 @@ export default function UnlearningConfiguration() {
   const { updateIsRunning, initStatus, updateActiveStep, updateStatus } =
     useRunningStatusStore();
   const updateRunningIndex = useRunningIndexStore(
-    (state) => state.updateRunningIndex
+    (state) => state.updateRunningIndex,
   );
   const updateExperiment = useExperimentsStore(
-    (state) => state.updateExperiment
+    (state) => state.updateExperiment,
   );
 
   const [initModel, setInitialModel] = useState(`000${forgetClass}.pth`);
@@ -114,8 +114,8 @@ export default function UnlearningConfiguration() {
   const [isDisabled, setIsDisabled] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File>();
 
-  const isCustom = method === CUSTOM;
-  const totalExperimentsCount = isCustom
+  const isUploadMode = method === UPLOAD;
+  const totalExperimentsCount = isUploadMode
     ? !selectedFile
       ? 0
       : 1
@@ -135,8 +135,8 @@ export default function UnlearningConfiguration() {
 
   useEffect(() => {
     if (
-      (isCustom && !selectedFile) ||
-      (!isCustom &&
+      (isUploadMode && !selectedFile) ||
+      (!isUploadMode &&
         (epochList.length === 0 ||
           learningRateList.length === 0 ||
           batchSizeList.length === 0))
@@ -148,7 +148,7 @@ export default function UnlearningConfiguration() {
   }, [
     batchSizeList.length,
     epochList.length,
-    isCustom,
+    isUploadMode,
     learningRateList.length,
     selectedFile,
   ]);
@@ -167,15 +167,15 @@ export default function UnlearningConfiguration() {
   const handlePlusClick = (id: string, value: string) => {
     if (id === EPOCH) {
       setEpochList((prev) =>
-        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
+        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value],
       );
     } else if (id === LEARNING_RATE) {
       setLearningRateList((prev) =>
-        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
+        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value],
       );
     } else if (id === BATCH_SIZE) {
       setBatchSizeList((prev) =>
-        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value]
+        prev.length >= 5 || prev.includes(value) ? prev : [...prev, value],
       );
     }
   };
@@ -200,7 +200,7 @@ export default function UnlearningConfiguration() {
   const pollStatus = async (
     experimentIndex: number,
     learningRate?: number,
-    batchSize?: number
+    batchSize?: number,
   ) => {
     const startTime = Date.now();
 
@@ -233,7 +233,7 @@ export default function UnlearningConfiguration() {
         const newData = await fetchFileData(
           datasetMode,
           forgetClass,
-          unlearningStatus.recent_id as string
+          unlearningStatus.recent_id as string,
         );
         const { points, ...newDataWithoutPoints } = newData;
         updateExperiment(newDataWithoutPoints, experimentIndex);
@@ -251,24 +251,14 @@ export default function UnlearningConfiguration() {
     initStatus(forgetClass, totalExperimentsCount);
     updateActiveStep(1);
 
-    const methodFullName =
-      method === "ft"
-        ? "FineTuning"
-        : method === "rl"
-        ? "RandomLabeling"
-        : method === "ga"
-        ? "GradientAscent"
-        : method === "ga_ft"
-        ? "GA+FT"
-        : method === "ga_sl_ft"
-        ? "GA+SL+FT"
-        : method === "scrub"
-        ? "SCRUB"
-        : method === "salun"
-        ? "SalUn"
-        : "Custom";
+    const methodFullName = (
+      Object.keys(UNLEARNING_METHODS).find(
+        (key) =>
+          UNLEARNING_METHODS[key as keyof typeof UNLEARNING_METHODS] === method,
+      ) || "Upload"
+    ).replace(/[-\s]/g, "");
 
-    if (isCustom) {
+    if (isUploadMode) {
       if (!selectedFile) return;
 
       initialExperiment = {
@@ -326,7 +316,7 @@ export default function UnlearningConfiguration() {
           await pollStatus(
             idx,
             combination.learning_rate,
-            combination.batch_size
+            combination.batch_size,
           );
         } catch (error) {
           console.error("Error occured while unlearning: ", error);
@@ -369,38 +359,18 @@ export default function UnlearningConfiguration() {
         <Label className="text-base text-nowrap mb-1">Unlearning Method</Label>
         <Select value={method} onValueChange={handleMethodChange}>
           <SelectTrigger className="h-[25px] text-base">
-            <SelectValue placeholder={UNLEARNING_METHODS[0]} />
+            <SelectValue placeholder={Object.keys(UNLEARNING_METHODS)[0]} />
           </SelectTrigger>
           <SelectContent>
-            {UNLEARNING_METHODS.map((method, idx) => {
-              const value =
-                method === UNLEARNING_METHODS[0]
-                  ? "ft"
-                  : method === UNLEARNING_METHODS[1]
-                  ? "rl"
-                  : method === UNLEARNING_METHODS[2]
-                  ? "ga"
-                  : method === UNLEARNING_METHODS[3]
-                  ? "ga_ft"
-                  : method === UNLEARNING_METHODS[4]
-                  ? "ga_sl_ft"
-                  : method === UNLEARNING_METHODS[5]
-                  ? "scrub"
-                  : method === UNLEARNING_METHODS[6]
-                  ? "salun"
-                  : idx === UNLEARNING_METHODS.length - 1
-                  ? "custom"
-                  : "-";
-              return (
-                <SelectItem key={idx} value={value}>
-                  {method}
-                </SelectItem>
-              );
-            })}
+            {Object.values(UNLEARNING_METHODS).map((value, idx) => (
+              <SelectItem key={idx} value={value}>
+                {method}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
-      {isCustom ? (
+      {isUploadMode ? (
         <CustomUnlearning
           fileName={selectedFile ? selectedFile.name : ""}
           onChange={handleFileChange}
@@ -418,7 +388,7 @@ export default function UnlearningConfiguration() {
           onBadgeClick={handleBadgeClick}
         />
       )}
-      {!isCustom && (
+      {!isUploadMode && (
         <span
           className={cn("mb-1 w-full text-center", {
             "mt-2.5": batchSizeList.length === 0,
@@ -439,8 +409,8 @@ export default function UnlearningConfiguration() {
       )}
       <Button
         className={cn("h-[34px] flex items-center text-base px-4", {
-          "mt-2": isCustom,
-          "mt-1": !isCustom,
+          "mt-2": isUploadMode,
+          "mt-1": !isUploadMode,
         })}
         disabled={isDisabled}
       >

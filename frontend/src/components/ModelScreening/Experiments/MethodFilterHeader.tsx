@@ -87,7 +87,7 @@ export default function MethodFilterHeader({ column }: { column: any }) {
             >
               All
             </div>
-            {UNLEARNING_METHODS.map((method) => (
+            {Object.keys(UNLEARNING_METHODS).map((method) => (
               <div
                 key={method}
                 onClick={handleSelect(method)}
@@ -95,14 +95,14 @@ export default function MethodFilterHeader({ column }: { column: any }) {
                   "px-2.5 py-1.5 hover:bg-gray-100 cursor-pointer",
                   filterValues.includes(method)
                     ? "bg-[#f0f6fa]"
-                    : "bg-transparent"
+                    : "bg-transparent",
                 )}
               >
                 {method}
               </div>
             ))}
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );

@@ -25,15 +25,15 @@ const methodMapping: Record<string, string> = {
   "GA+SL+FT": "GA+SL+FT",
   SCRUB: "SCRUB",
   SalUn: "SalUn",
-  Custom: "Upload",
+  Upload: "Upload",
 };
 
 function getValueToDisplay(value: unknown) {
   return value === "N/A" || value === "NaN"
     ? "-"
     : typeof value === "string"
-    ? value
-    : Number(value);
+      ? value
+      : Number(value);
 }
 
 const DECIMAL_POINT = 3;
