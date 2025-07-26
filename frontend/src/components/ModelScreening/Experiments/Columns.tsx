@@ -16,8 +16,9 @@ import {
   RTEHeader,
   FQSHeader,
 } from "./ColumnHeaders";
+import { UNLEARNING_METHODS } from "../../../constants/experiments";
 
-const methodMapping: Record<string, string> = {
+const methodMapping: Record<string, keyof typeof UNLEARNING_METHODS> = {
   FineTuning: "Fine-Tuning",
   RandomLabeling: "Random Labeling",
   GradientAscent: "Gradient Ascent",

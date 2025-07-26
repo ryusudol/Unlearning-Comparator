@@ -1,11 +1,11 @@
 import os
 from enum import Enum
 from fastapi import (
-    APIRouter, 
-    BackgroundTasks, 
-    HTTPException, 
-    UploadFile, 
-    File, 
+    APIRouter,
+    BackgroundTasks,
+    HTTPException,
+    UploadFile,
+    File,
     Form
 )
 from pydantic import BaseModel, Field
@@ -37,26 +37,26 @@ status = UnlearningStatus()
 class UnlearningRequest(BaseModel):
     # seed: int = UNLEARN_SEED
     batch_size: int = Field(
-        default=128, 
+        default=128,
         description="Batch size for unlearning"
     )
     learning_rate: float = Field(
-        default=0.001, 
+        default=0.001,
         description="Learning rate for unlearning"
     )
     epochs: int = Field(
-        default=3, 
-        ge=1, 
+        default=3,
+        ge=1,
         description="Number of unlearning epochs"
     )
     forget_class: int = Field(
-        default=4, 
-        ge=-1, 
-        lt=10, 
+        default=4,
+        ge=-1,
+        lt=10,
         description="Class to forget (0-9), -1 for original"
     )
     base_weights: str = Field(
-        default="0000.pth", 
+        default="0000.pth",
         description="Filename of the weights in unlearned_models folder"
     )
 
@@ -126,11 +126,11 @@ async def start_unlearning_custom_merged(
     weights_filename = f"{filename_prefix}{weights_file.filename}"
     weights_path = os.path.join('uploaded_models', weights_filename)
     os.makedirs('uploaded_models', exist_ok=True)
-    
+
     with open(weights_path, "wb") as buffer:
         content = await weights_file.read()
         buffer.write(content)
-    
+
     base_weights = f"000{forget_class}.pth" if base_weights == "0000.pth" else base_weights
     background_tasks.add_task(
         runner,
@@ -139,7 +139,7 @@ async def start_unlearning_custom_merged(
         weights_path,
         base_weights
     )
-    
+
     return { "message": "Custom unlearning started" }
 
 @router.post("/unlearn/{dataset_mode}/{method}")
@@ -177,12 +177,12 @@ async def start_unlearning(
 
 @router.post("/unlearn/retrain")
 async def start_unlearning_retrain(
-    request: UnlearningRequest, 
+    request: UnlearningRequest,
     background_tasks: BackgroundTasks
 ):
     if status.is_unlearning:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="Unlearning is already in progress"
         )
     status.reset()
@@ -211,7 +211,7 @@ async def get_unlearning_status():
 async def cancel_unlearning():
     if not status.is_unlearning:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="No unlearning in progress"
         )
     status.cancel_requested = True
