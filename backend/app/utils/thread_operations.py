@@ -7,6 +7,80 @@ from torch.utils.data import DataLoader, Subset
 from app.config import UMAP_DATA_SIZE, UMAP_DATASET, UNLEARN_SEED
 
 
+def get_evaluation_functions(dataset_mode="cifar10"):
+    """
+    Get appropriate evaluation functions based on dataset mode.
+    
+    Args:
+        dataset_mode: "cifar10" or "face"
+    
+    Returns:
+        Dictionary with evaluation function references
+    """
+    if dataset_mode == "face":
+        from app.utils.evaluation import (
+            get_layer_activations_and_predictions_face,
+            calculate_cka_similarity_face
+        )
+        return {
+            'get_layer_activations_and_predictions': get_layer_activations_and_predictions_face,
+            'calculate_cka_similarity': calculate_cka_similarity_face
+        }
+    else:
+        from app.utils.evaluation import (
+            get_layer_activations_and_predictions,
+            calculate_cka_similarity
+        )
+        return {
+            'get_layer_activations_and_predictions': get_layer_activations_and_predictions,
+            'calculate_cka_similarity': calculate_cka_similarity
+        }
+
+
+def get_attack_functions(dataset_mode="cifar10"):
+    """
+    Get appropriate attack processing functions based on dataset mode.
+    
+    Args:
+        dataset_mode: "cifar10" or "face"
+    
+    Returns:
+        Dictionary with attack function references
+    """
+    if dataset_mode == "face":
+        from app.utils.attack import process_face_attack_metrics
+        return {
+            'process_attack_metrics': process_face_attack_metrics
+        }
+    else:
+        from app.utils.attack import process_attack_metrics
+        return {
+            'process_attack_metrics': process_attack_metrics
+        }
+
+
+def get_visualization_functions(dataset_mode="cifar10"):
+    """
+    Get appropriate visualization functions based on dataset mode.
+    
+    Args:
+        dataset_mode: "cifar10" or "face"
+    
+    Returns:
+        Dictionary with visualization function references
+    """
+    if dataset_mode == "face":
+        from app.utils.visualization import compute_umap_embedding_face
+        return {
+            'compute_umap_embedding': compute_umap_embedding_face
+        }
+    else:
+        from app.utils.visualization import compute_umap_embedding
+        return {
+            'compute_umap_embedding': compute_umap_embedding
+        }
+
+
 def setup_umap_subset(
     train_set, 
     test_set, 
@@ -14,6 +88,7 @@ def setup_umap_subset(
 ):
     """
     Create UMAP subset and loader with consistent sampling across all threads.
+    Supports both CIFAR-10 datasets (with .targets) and ImageFolder datasets (with .samples).
     
     Args:
         train_set: Training dataset
@@ -24,7 +99,17 @@ def setup_umap_subset(
         Tuple of (umap_subset, umap_subset_loader, selected_indices)
     """
     dataset = train_set if UMAP_DATASET == 'train' else test_set
-    targets = torch.tensor(dataset.targets)
+    
+    # Handle different dataset types
+    if hasattr(dataset, 'targets'):
+        # CIFAR-10 style dataset
+        targets = torch.tensor(dataset.targets)
+    elif hasattr(dataset, 'samples'):
+        # ImageFolder style dataset (face data)
+        targets = torch.tensor([sample[1] for sample in dataset.samples])
+    else:
+        raise ValueError(f"Unsupported dataset type: {type(dataset)}")
+    
     class_indices = [(targets == i).nonzero().squeeze() for i in range(num_classes)]
     
     samples_per_class = UMAP_DATA_SIZE // num_classes
@@ -115,6 +200,7 @@ def prepare_detailed_results(
 ):
     """
     Prepare detailed results for UMAP visualization with consistent format.
+    Supports both CIFAR-10 datasets (with .targets) and ImageFolder datasets (with .samples).
     
     Args:
         umap_subset: UMAP subset dataset
@@ -132,7 +218,17 @@ def prepare_detailed_results(
     detailed_results = []
     for i in range(len(umap_subset)):
         original_index = selected_indices[i]
-        ground_truth = umap_subset.dataset.targets[original_index]
+        
+        # Handle different dataset types for ground truth extraction
+        if hasattr(umap_subset.dataset, 'targets'):
+            # CIFAR-10 style dataset
+            ground_truth = umap_subset.dataset.targets[original_index]
+        elif hasattr(umap_subset.dataset, 'samples'):
+            # ImageFolder style dataset (face data)
+            ground_truth = umap_subset.dataset.samples[original_index][1]
+        else:
+            raise ValueError(f"Unsupported dataset type: {type(umap_subset.dataset)}")
+        
         is_forget = (ground_truth == forget_class)
         detailed_results.append([
             int(ground_truth),                             # gt
@@ -200,7 +296,8 @@ def save_results_and_model(
     results,
     model,
     forget_class,
-    status
+    status,
+    dataset_mode="cifar10"
 ):
     """
     Save results to JSON and model weights with consistent file structure.
@@ -210,6 +307,7 @@ def save_results_and_model(
         model: Model to save
         forget_class: Class to forget
         status: Status object with recent_id
+        dataset_mode: Dataset mode ("cifar10" or "face")
     
     Returns:
         Path to saved results file
@@ -220,7 +318,10 @@ def save_results_and_model(
     
     # Create directory structure
     os.makedirs('data', exist_ok=True)
-    forget_class_dir = os.path.join('data', str(forget_class))
+    if dataset_mode == "face":
+        forget_class_dir = os.path.join('data/face', str(forget_class))
+    else:
+        forget_class_dir = os.path.join('data', str(forget_class))
     os.makedirs(forget_class_dir, exist_ok=True)
     
     # Save results
@@ -232,7 +333,8 @@ def save_results_and_model(
     save_model(
         model=model,
         forget_class=forget_class,
-        model_name=status.recent_id
+        model_name=status.recent_id,
+        dataset_mode=dataset_mode
     )
     
     return result_path
@@ -409,8 +511,14 @@ async def calculate_comprehensive_epoch_metrics(
                 from torch.utils.data import DataLoader, Subset
                 
                 # Create forget loader for MIA calculation
-                forget_indices = [i for i, target in enumerate(train_set.targets) 
-                                if target == forget_class]
+                if hasattr(train_set, 'targets'):
+                    forget_indices = [i for i, target in enumerate(train_set.targets) 
+                                    if target == forget_class]
+                elif hasattr(train_set, 'samples'):
+                    forget_indices = [i for i, (_, target) in enumerate(train_set.samples) 
+                                    if target == forget_class]
+                else:
+                    raise ValueError(f"Unsupported dataset type: {type(train_set)}")
                 forget_subset = Subset(train_set, forget_indices)
                 forget_loader = DataLoader(forget_subset, batch_size=128, shuffle=False)
                 
@@ -476,7 +584,7 @@ async def initialize_epoch_metrics_system(
     if enable_ps:
         try:
             from app.utils.attack_full_dataset import calculate_model_metrics
-            from app.models import get_resnet18
+            from app.models.resnet import get_resnet18
             import os
             
             retrain_model_path = f"unlearned_models/{forget_class}/a00{forget_class}.pth"
@@ -509,15 +617,27 @@ async def initialize_epoch_metrics_system(
             print("Initializing MIA classifier...")
             
             # Create shadow loaders
-            remaining_train_indices = [i for i, target in enumerate(train_set.targets) 
-                                      if target != forget_class]
+            if hasattr(train_set, 'targets'):
+                remaining_train_indices = [i for i, target in enumerate(train_set.targets) 
+                                          if target != forget_class]
+            elif hasattr(train_set, 'samples'):
+                remaining_train_indices = [i for i, (_, target) in enumerate(train_set.samples) 
+                                          if target != forget_class]
+            else:
+                raise ValueError(f"Unsupported dataset type: {type(train_set)}")
             shadow_train_size = min(4500, len(remaining_train_indices))
             shadow_train_indices = random.sample(remaining_train_indices, shadow_train_size)
             shadow_train_subset = Subset(train_set, shadow_train_indices)
             shadow_train_loader = DataLoader(shadow_train_subset, batch_size=128, shuffle=False)
             
-            remaining_test_indices = [i for i, target in enumerate(test_set.targets) 
-                                     if target != forget_class]
+            if hasattr(test_set, 'targets'):
+                remaining_test_indices = [i for i, target in enumerate(test_set.targets) 
+                                         if target != forget_class]
+            elif hasattr(test_set, 'samples'):
+                remaining_test_indices = [i for i, (_, target) in enumerate(test_set.samples) 
+                                         if target != forget_class]
+            else:
+                raise ValueError(f"Unsupported dataset type: {type(test_set)}")
             shadow_test_size = min(4500, len(remaining_test_indices))
             shadow_test_indices = random.sample(remaining_test_indices, shadow_test_size)
             shadow_test_subset = Subset(test_set, shadow_test_indices)
