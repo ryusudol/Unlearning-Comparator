@@ -1,23 +1,2 @@
-**/__pycache__/
-
-backend/umap_visualizations/
-backend/trained_models/
-backend/unlearned_models/
-backend/uploaded_models/
-backend/attack/
-backend/.python-version
-backend/*.png
-backend/data/cifar-10-batches-py/
-backend/data/cifar-10-python.tar.gz
-paper/
-z_dist_exp/
-myenv/
-# *.py
-*.pdf
-*.mdc
-
-backend/data/face
-/CLAUDE.md
-
-# Claude settings
-.claude
+.claude/
+CLAUDE.md
