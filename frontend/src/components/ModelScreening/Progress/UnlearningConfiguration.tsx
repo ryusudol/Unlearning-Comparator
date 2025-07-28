@@ -362,9 +362,9 @@ export default function UnlearningConfiguration() {
             <SelectValue placeholder={Object.keys(UNLEARNING_METHODS)[0]} />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(UNLEARNING_METHODS).map((value, idx) => (
+            {Object.entries(UNLEARNING_METHODS).map(([key, value], idx) => (
               <SelectItem key={idx} value={value}>
-                {method}
+                {key}
               </SelectItem>
             ))}
           </SelectContent>
