@@ -1159,7 +1159,7 @@ export default function AttackPlot({
         ? redInts[0]
         : { x: xScaleL(0), y: yScaleL(thresholdValue) };
     const infoGroupXPos =
-      currentData.attack_score >= CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP
+      currentData?.attack_score && currentData.attack_score >= CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP
         ? xScaleL(CONFIG.ATTACK_SCORE_X_LIMIT_FOR_INFO_GROUP)
         : attackIntersectPos.x;
     const effectiveThreshold = isMetricEntropy
@@ -1205,7 +1205,7 @@ export default function AttackPlot({
       .attr("font-size", FONT_CONFIG.FONT_SIZE_12)
       .attr("dy", "1.2em")
       .attr("style", textShadowStyle)
-      .text(`Attack Score: ${currentData.attack_score.toFixed(3)}`);
+      .text(`Attack Score: ${currentData?.attack_score?.toFixed(3) || '0.000'}`);
 
     infoGroup
       .append("text")
@@ -1223,7 +1223,7 @@ export default function AttackPlot({
       .attr("style", textShadowStyle)
       .text(`FNR: ${currentData.fnr.toFixed(3)}`);
 
-    onUpdateAttackScore(currentData.attack_score);
+    onUpdateAttackScore(currentData?.attack_score || 0);
   }, [
     attackData,
     isAboveThresholdUnlearn,

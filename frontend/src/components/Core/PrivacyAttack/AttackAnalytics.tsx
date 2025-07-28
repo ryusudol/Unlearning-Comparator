@@ -80,7 +80,7 @@ export default function AttackAnalytics({
   const [isFetchingSubsetImages, setIsFetchingSubsetImages] = useState(false);
 
   const computedThresholdData = data?.lineChartData.find(
-    (d) => Math.abs(d.threshold - thresholdValue) < 0.001
+    (d) => Math.abs(d.threshold - thresholdValue) < 0.001,
   );
 
   const isModelA = mode === "A";
@@ -161,7 +161,7 @@ export default function AttackAnalytics({
   const handleElementClick = useCallback(
     async (
       event: React.MouseEvent,
-      elementData: Bin & { type: CategoryType }
+      elementData: Bin & { type: CategoryType },
     ) => {
       event.stopPropagation();
 
@@ -185,7 +185,7 @@ export default function AttackAnalytics({
           `${API_URL}/image/${datasetMode}/${elementData.img_idx}`,
           {
             signal: controller.signal,
-          }
+          },
         );
 
         if (!response.ok) throw new Error("Failed to fetch tooltip data");
@@ -236,7 +236,7 @@ export default function AttackAnalytics({
         console.error(`Failed to fetch tooltip data: ${error}`);
       }
     },
-    [datasetMode, isModelA, modelPoints, retrainPoints]
+    [datasetMode, isModelA, modelPoints, retrainPoints],
   );
 
   useEffect(() => {
@@ -278,18 +278,41 @@ export default function AttackAnalytics({
       )
         return [];
 
+      const validUnlearnData = unlearnData.filter(
+        (item) => item && typeof item.attack_score === "number",
+      );
+      const validRetrainData = retrainData.filter(
+        (item) => item && typeof item.attack_score === "number",
+      );
+
+      if (validUnlearnData.length === 0 || validRetrainData.length === 0) {
+        return [];
+      }
+
       const lineChartData: AttackResultWithType[] = [];
       for (let i = 0; i < unlearnData.length; i++) {
-        if (unlearnData[i].attack_score > retrainData[i].attack_score) {
-          lineChartData.push({ ...unlearnData[i], type: UNLEARN });
+        const unlearnItem = unlearnData[i];
+        const retrainItem = retrainData[i];
+
+        if (
+          !unlearnItem ||
+          !retrainItem ||
+          typeof unlearnItem.attack_score !== "number" ||
+          typeof retrainItem.attack_score !== "number"
+        ) {
+          continue;
+        }
+
+        if (unlearnItem.attack_score > retrainItem.attack_score) {
+          lineChartData.push({ ...unlearnItem, type: UNLEARN });
         } else {
-          lineChartData.push({ ...retrainData[i], type: CONFIDENCE });
+          lineChartData.push({ ...retrainItem, type: CONFIDENCE });
         }
       }
 
       return lineChartData;
     },
-    [metric]
+    [metric],
   );
 
   useEffect(() => {
@@ -324,7 +347,7 @@ export default function AttackAnalytics({
       });
 
       const lineChartData = getLineChartData(
-        isModelA ? modelAExperiment : modelBExperiment
+        isModelA ? modelAExperiment : modelBExperiment,
       );
 
       if (prevMetricRef.current !== metric) {
@@ -355,8 +378,13 @@ export default function AttackAnalytics({
 
   const findMaxAttackData = (lineData: AttackResult[]) => {
     return lineData.reduce(
-      (prev, curr) => (curr.attack_score > prev.attack_score ? curr : prev),
-      lineData[0]
+      (prev, curr) =>
+        curr?.attack_score &&
+        prev?.attack_score &&
+        curr.attack_score > prev.attack_score
+          ? curr
+          : prev,
+      lineData[0],
     );
   };
 
@@ -422,15 +450,17 @@ export default function AttackAnalytics({
     if (combinedLineChartData.length > 0) {
       const thresholdGroups: { [commonThresholdKey: number]: number } = {};
       combinedLineChartData.forEach((item) => {
-        thresholdGroups[item.threshold] =
-          (thresholdGroups[item.threshold] || 0) + item.attack_score;
+        if (item?.attack_score) {
+          thresholdGroups[item.threshold] =
+            (thresholdGroups[item.threshold] || 0) + item.attack_score;
+        }
       });
       const bestThresholdEntry = Object.entries(thresholdGroups).reduce(
         (best, [t, sum]) => {
           const thresholdCandidate = parseFloat(t);
           return sum > best.sum ? { th: thresholdCandidate, sum } : best;
         },
-        { th: thresholdValue, sum: -Infinity }
+        { th: thresholdValue, sum: -Infinity },
       );
       commonThreshold = bestThresholdEntry.th;
     }
@@ -515,7 +545,11 @@ export default function AttackAnalytics({
               : [];
             if (lineData.length > 0) {
               const maxAttackData = findMaxAttackData(lineData);
-              if (maxAttackData.attack_score > bestResult.attack_score) {
+              if (
+                maxAttackData?.attack_score &&
+                bestResult?.attack_score &&
+                maxAttackData.attack_score > bestResult.attack_score
+              ) {
                 bestResult = {
                   metric: m,
                   threshold: maxAttackData.threshold,
