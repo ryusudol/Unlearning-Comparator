@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:8000";
+export const API_URL = "http://localhost:8001";
 
 export const DATASETS = ["FaceDataset", "CIFAR-10"];
 export const NEURAL_NETWORK_MODELS = ["ResNet-18"];

@@ -28,6 +28,7 @@ async def unlearning_face_SalUn(request, status, base_weights_path):
     model_before = get_facenet_model(device)
     model_after = get_facenet_model(device)
     model_before.load_state_dict(torch.load(f"unlearned_models/face/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
+    #print(list(model_before.state_dict().keys())[:20])
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device), strict=False)
     
     (

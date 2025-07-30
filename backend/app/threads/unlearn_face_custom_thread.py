@@ -228,7 +228,7 @@ class UnlearningFaceCustomThread(BaseUnlearningThread):
             print(f"CKA similarity calculated at {time.time() - start_time:.3f} seconds")
 
         # Create results dictionary using unified structure
-        request_stub = type('obj', (object,), {'epochs': "N/A", 'batch_size': "N/A", 'lr': "N/A"})()
+        request_stub = type('obj', (object,), {'epochs': "N/A", 'batch_size': "N/A", 'learning_rate': "N/A"})()
         results = create_base_results_dict(
             self.status, self.forget_class, self.base_weights, 
             "Custom", request_stub

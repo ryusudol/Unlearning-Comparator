@@ -5,6 +5,10 @@ build-backend = "hatchling.build"
 [tool.hatch.envs.default]
 python = "3.10"
 
+[tool.hatch.envs.default.env]  
+TORCH_HOME = "/media/NAS/cacheDir/yurim/torch"
+XDG_CACHE_HOME = "/media/NAS/cacheDir/yurim"
+
 [project]
 name = "Machine-Unlearning-Comparator"
 version = "0.1.0"  
@@ -59,7 +63,7 @@ no-cov = "cov --no-cov {args}"
 start = "uvicorn main:app --reload"
 
 [tool.hatch.envs.default.scripts]
-start = "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+start = "uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
 # start = "uvicorn main:app --reload"
 
 [tool.hatch.build.targets.wheel] 
