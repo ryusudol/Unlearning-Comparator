@@ -83,7 +83,7 @@ class UnlearningSCRUBThread(BaseUnlearningThread):
     def _create_teacher_model(self):
         """Create teacher model for knowledge distillation"""
         teacher_model = get_resnet18().to(self.device)
-        teacher_model.load_state_dict(self.model_before.state_dict())
+        teacher_model.load_state_dict(torch.load(self.base_weights_path, map_location=self.device))
         teacher_model.eval()
         return teacher_model
 

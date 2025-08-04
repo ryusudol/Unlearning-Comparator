@@ -19,11 +19,6 @@ from app.config import (
 async def unlearning_SCRUB(request, status, base_weights_path):
     print(f"Starting SCRUB unlearning for class {request.forget_class} with {request.epochs} epochs...")
     
-    # Epoch metrics configuration
-    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
-
-    if enable_epoch_metrics:
-        print("Epoch-wise metrics collection: ENABLED")
     
     set_seed(UNLEARN_SEED)
     
@@ -79,7 +74,7 @@ async def unlearning_SCRUB(request, status, base_weights_path):
 
     criterion = nn.CrossEntropyLoss()
     
-    # SCRUB specific hyperparameters (easily configurable here)
+    # SCRUB specific hyperparameters
     scrub_config = {
         'alpha': 0.5,          # Knowledge distillation weight
         'beta': 0,             # Forget set loss weight (paper value: 0)
@@ -88,6 +83,12 @@ async def unlearning_SCRUB(request, status, base_weights_path):
         'msteps': 100            # Maximum steps for forget set loss
     }
     
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+
     optimizer = optim.SGD(
         params=model_after.parameters(),
         lr=request.learning_rate,

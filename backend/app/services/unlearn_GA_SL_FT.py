@@ -1,4 +1,5 @@
 import asyncio
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -42,15 +43,7 @@ def create_second_logit_dataset(model, forget_loader, device):
 async def unlearning_GA_SL_FT(request, status, base_weights_path):
     print(f"Starting GA+SL+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
     
-    ETA_MIN = 0.001
-    
-    # Epoch metrics configuration
-    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
-
-    if enable_epoch_metrics:
-        print("Epoch-wise metrics collection: ENABLED")
-    
-    set_seed(UNLEARN_SEED)
+    ETA_MIN = 0.0024
     
     device = torch.device(
         f"cuda:{GPU_ID}" if torch.cuda.is_available() 
@@ -58,14 +51,29 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
         else "cpu"
     )
 
+    set_seed(UNLEARN_SEED)
+    
     # Create Unlearning Settings
     model_after = get_resnet18().to(device)
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
+    # Layer modification configuration
+    freeze_first_k_layers = 0  # Freeze first K layer groups
+    reinit_last_k_layers = 3   # Reinitialize last K layer groups
+    
+    if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
+        print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     # ========== GA+SL+FT Configuration (easily configurable) ==========
-    ga_lr_ratio = 0.5     # GA LR = request.lr * ga_lr_ratio (same as GA_FT)
+    ga_lr_ratio = 0.01     # GA LR = request.lr * ga_lr_ratio (same as GA_FT)
     sl_lr_ratio = 1.0     # SL LR = request.lr * sl_lr_ratio (configurable multiplier)
-    ga_batch_ratio = 1.0  # GA batch size = request.batch_size * ga_batch_ratio
+    ga_batch_ratio = 16.0  # GA batch size = request.batch_size * ga_batch_ratio
     sl_batch_ratio = 1.0  # SL batch size = request.batch_size * sl_batch_ratio
     ft_batch_ratio = 1.0  # FT batch size = request.batch_size * ft_batch_ratio
     # ================================================================
@@ -120,6 +128,7 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
 
     # Create second logit dataset using the original model
     print("Creating second logit dataset...")
+    relabeling_start_time = time.time()
     second_logit_data = create_second_logit_dataset(
         model_after, forget_loader, device
     )
@@ -134,8 +143,9 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
         batch_size=sl_batch_size,
         shuffle=True
     )
+    relabeling_time = time.time() - relabeling_start_time
     
-    print(f"Second logit dataset created with {len(second_logit_data)} samples")
+    print(f"Second logit dataset created with {len(second_logit_data)} samples (Time: {relabeling_time:.2f}s)")
 
     criterion = nn.CrossEntropyLoss()
     
@@ -213,6 +223,8 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
         scheduler=ga_scheduler,  # Pass GA scheduler as primary
         device=device,
         base_weights_path=base_weights_path,
+        freeze_first_k_layers=freeze_first_k_layers,
+        reinit_last_k_layers=reinit_last_k_layers,
         enable_epoch_metrics=enable_epoch_metrics
     )
     
@@ -222,6 +234,7 @@ async def unlearning_GA_SL_FT(request, status, base_weights_path):
     unlearning_GA_SL_FT_thread.ga_batch_size = ga_batch_size
     unlearning_GA_SL_FT_thread.sl_batch_size = sl_batch_size
     unlearning_GA_SL_FT_thread.ft_batch_size = ft_batch_size
+    unlearning_GA_SL_FT_thread.relabeling_time = relabeling_time
     
     unlearning_GA_SL_FT_thread.start()
 

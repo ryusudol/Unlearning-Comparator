@@ -80,7 +80,7 @@ async def unlearning_SalUn(request, status, base_weights_path):
     
     # SalUn specific hyperparameters (official code settings for CIFAR-10 ResNet-18)
     salun_config = {
-        'saliency_threshold': 0.1,      # salient weights
+        'saliency_threshold': 0.75,      # salient weights (1.0이면 모두 업데이트)
         'use_random_labels': True,      # Use random labeling on forget data (RL method)
         'grad_clip': 100.0,               # Gradient clipping norm
     }

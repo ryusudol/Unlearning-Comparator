@@ -16,19 +16,19 @@ export default function Tooltip({
       >
         <p className="leading-5">
           <span style={{ color: COLORS.EMERALD }}>Model A </span>(Retain):{" "}
-          <span className="font-semibold">{payload[1].value}</span>
+          <span className="font-semibold">{Number(payload[1].value).toFixed(3)}</span>
         </p>
         <p className="leading-5">
           <span style={{ color: COLORS.PURPLE }}>Model B </span>(Retain):{" "}
-          <span className="font-semibold">{payload[3].value}</span>
+          <span className="font-semibold">{Number(payload[3].value).toFixed(3)}</span>
         </p>
         <p className="leading-5">
           <span style={{ color: COLORS.EMERALD }}>Model A </span>(Forget):{" "}
-          <span className="font-semibold">{payload[0].value}</span>
+          <span className="font-semibold">{Number(payload[0].value).toFixed(3)}</span>
         </p>
         <p className="leading-5">
           <span style={{ color: COLORS.PURPLE }}>Model B </span>(Forget):{" "}
-          <span className="font-semibold">{payload[2].value}</span>
+          <span className="font-semibold">{Number(payload[2].value).toFixed(3)}</span>
         </p>
       </div>
     );

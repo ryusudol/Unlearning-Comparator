@@ -1,4 +1,5 @@
 import asyncio
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -34,15 +35,14 @@ def create_second_logit_dataset(model, forget_loader, device):
             
             # Store the data with second logit labels
             for i in range(inputs.size(0)):
-                second_logit_data.append((inputs[i].cpu(), second_logits[i].cpu()))
+                second_logit_data.append((inputs[i].cpu(), second_logits[i].item()))
     
     return second_logit_data
 
 async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
     print(f"Starting GA+SL+FT V2 unlearning for class {request.forget_class} with {request.epochs} epochs...")
     
-    ETA_MIN = 0.001
-    
+    ETA_MIN = 0.0015
     device = torch.device(
         f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
@@ -69,20 +69,18 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         print("Epoch-wise metrics collection: ENABLED")
     
     # ========== GA+SL+FT V2 Configuration (easily configurable) ==========
-    ga_lr_ratio = 0.1     # GA LR = request.lr * ga_lr_ratio (same as GA_FT)
-    sl_lr_ratio = 1.0     # SL LR = request.lr * sl_lr_ratio (configurable multiplier)
+    ga_lr_ratio = 0.01    # GA LR = request.lr * ga_lr_ratio (same as GA_FT)
+    mixed_lr_ratio = 1.0   # Mixed SL+FT LR = request.lr * mixed_lr_ratio
     ga_batch_ratio = 8.0  # GA batch size = request.batch_size * ga_batch_ratio
-    sl_batch_ratio = 1.0  # SL batch size = request.batch_size * sl_batch_ratio
-    ft_batch_ratio = 1.0  # FT batch size = request.batch_size * ft_batch_ratio
+    mixed_batch_ratio = 1.0  # Mixed batch size = request.batch_size * mixed_batch_ratio
     # ================================================================
     
     # Calculate batch sizes
     ga_batch_size = int(request.batch_size * ga_batch_ratio)
-    sl_batch_size = int(request.batch_size * sl_batch_ratio)
-    ft_batch_size = int(request.batch_size * ft_batch_ratio)
+    mixed_batch_size = int(request.batch_size * mixed_batch_ratio)
     
-    print(f"Learning rates - GA: {request.learning_rate * ga_lr_ratio:.5f}, SL: {request.learning_rate * sl_lr_ratio:.5f}, FT: {request.learning_rate:.5f}")
-    print(f"Batch sizes - GA: {ga_batch_size}, SL: {sl_batch_size}, FT: {ft_batch_size}")
+    print(f"Learning rates - GA: {request.learning_rate * ga_lr_ratio:.5f}, Mixed: {request.learning_rate * mixed_lr_ratio:.5f}")
+    print(f"Batch sizes - GA: {ga_batch_size}, Mixed: {mixed_batch_size}")
 
     (
         train_loader,
@@ -105,7 +103,7 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
     )
     retain_loader = torch.utils.data.DataLoader(
         dataset=retain_subset,
-        batch_size=ft_batch_size,
+        batch_size=mixed_batch_size,
         shuffle=True
     )
 
@@ -126,26 +124,53 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
 
     # Create second logit dataset using the original model
     print("Creating second logit dataset...")
+    relabeling_start_time = time.time()
     second_logit_data = create_second_logit_dataset(
         model_after, forget_loader, device
     )
     
-    # Create second logit loader
-    second_logit_dataset = torch.utils.data.TensorDataset(
-        torch.stack([data[0] for data in second_logit_data]),
-        torch.stack([data[1] for data in second_logit_data])
+    # Create combined SL+FT dataset for mixed training
+    print("Creating combined SL+FT dataset for mixed training...")
+    
+    # Combine second logit data with retain data
+    combined_data = []
+    combined_labels = []
+    combined_types = []  # Track whether each sample is SL or FT
+    
+    # Add second logit data (marked as SL type)
+    for data, label in second_logit_data:
+        combined_data.append(data)
+        combined_labels.append(label)  # label is already int from .item()
+        combined_types.append(0)  # 0 for SL
+    
+    # Add retain data (marked as FT type) 
+    for inputs, labels in retain_subset:
+        combined_data.append(inputs)
+        combined_labels.append(labels)  # labels is already int
+        combined_types.append(1)  # 1 for FT
+    
+    # Create combined dataset
+    combined_dataset = torch.utils.data.TensorDataset(
+        torch.stack(combined_data),
+        torch.tensor(combined_labels, dtype=torch.long),  # Convert all to tensor
+        torch.tensor(combined_types, dtype=torch.long)
     )
-    second_logit_loader = torch.utils.data.DataLoader(
-        dataset=second_logit_dataset,
-        batch_size=sl_batch_size,
+    
+    # Create mixed loader that shuffles SL and FT data together
+    mixed_sl_ft_loader = torch.utils.data.DataLoader(
+        dataset=combined_dataset,
+        batch_size=mixed_batch_size,
         shuffle=True
     )
     
-    print(f"Second logit dataset created with {len(second_logit_data)} samples")
+    print(f"Combined dataset created: {len(second_logit_data)} SL samples + {len(retain_subset)} FT samples = {len(combined_dataset)} total")
+    relabeling_time = time.time() - relabeling_start_time
+    
+    print(f"Second logit dataset created with {len(second_logit_data)} samples (Time: {relabeling_time:.2f}s)")
 
     criterion = nn.CrossEntropyLoss()
     
-    # Create three separate optimizers with different learning rates
+    # Create two optimizers: GA and Mixed (SL+FT)
     ga_optimizer = optim.SGD(
         params=model_after.parameters(),
         lr=request.learning_rate * ga_lr_ratio,
@@ -153,16 +178,9 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         weight_decay=WEIGHT_DECAY
     )
     
-    sl_optimizer = optim.SGD(
+    mixed_optimizer = optim.SGD(
         params=model_after.parameters(),
-        lr=request.learning_rate * sl_lr_ratio,
-        momentum=MOMENTUM,
-        weight_decay=WEIGHT_DECAY
-    )
-    
-    ft_optimizer = optim.SGD(
-        params=model_after.parameters(),
-        lr=request.learning_rate,
+        lr=request.learning_rate * mixed_lr_ratio,
         momentum=MOMENTUM,
         weight_decay=WEIGHT_DECAY
     )
@@ -173,13 +191,8 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
     #     milestones=DECREASING_LR,
     #     gamma=0.2
     # )
-    # sl_scheduler = optim.lr_scheduler.MultiStepLR(
-    #     optimizer=sl_optimizer,
-    #     milestones=DECREASING_LR,
-    #     gamma=0.2
-    # )
-    # ft_scheduler = optim.lr_scheduler.MultiStepLR(
-    #     optimizer=ft_optimizer,
+    # mixed_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=mixed_optimizer,
     #     milestones=DECREASING_LR,
     #     gamma=0.2
     # )
@@ -190,15 +203,10 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         T_max=request.epochs,
         eta_min=ETA_MIN * ga_lr_ratio
     )
-    sl_scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=sl_optimizer,
+    mixed_scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=mixed_optimizer,
         T_max=request.epochs,
-        eta_min=ETA_MIN * sl_lr_ratio
-    )
-    ft_scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=ft_optimizer,
-        T_max=request.epochs,
-        eta_min=ETA_MIN
+        eta_min=ETA_MIN * mixed_lr_ratio
     )
 
     unlearning_GA_SL_FT_V2_thread = UnlearningGASLFTV2Thread(
@@ -207,15 +215,14 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         model_after=model_after,
         retain_loader=retain_loader,
         forget_loader=forget_loader,
-        second_logit_loader=second_logit_loader,
+        mixed_sl_ft_loader=mixed_sl_ft_loader,  # Pass mixed loader instead
         train_loader=train_loader,
         test_loader=test_loader,
         train_set=train_set,
         test_set=test_set,
         criterion=criterion,
         ga_optimizer=ga_optimizer,
-        sl_optimizer=sl_optimizer,
-        ft_optimizer=ft_optimizer,
+        mixed_optimizer=mixed_optimizer,
         scheduler=ga_scheduler,  # Pass GA scheduler as primary
         device=device,
         base_weights_path=base_weights_path,
@@ -225,11 +232,10 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
     )
     
     # Store additional configuration in the thread object
-    unlearning_GA_SL_FT_V2_thread.sl_scheduler = sl_scheduler
-    unlearning_GA_SL_FT_V2_thread.ft_scheduler = ft_scheduler
+    unlearning_GA_SL_FT_V2_thread.mixed_scheduler = mixed_scheduler
     unlearning_GA_SL_FT_V2_thread.ga_batch_size = ga_batch_size
-    unlearning_GA_SL_FT_V2_thread.sl_batch_size = sl_batch_size
-    unlearning_GA_SL_FT_V2_thread.ft_batch_size = ft_batch_size
+    unlearning_GA_SL_FT_V2_thread.mixed_batch_size = mixed_batch_size
+    unlearning_GA_SL_FT_V2_thread.relabeling_time = relabeling_time
     
     unlearning_GA_SL_FT_V2_thread.start()
 

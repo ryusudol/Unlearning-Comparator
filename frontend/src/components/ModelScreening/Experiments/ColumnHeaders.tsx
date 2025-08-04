@@ -147,7 +147,7 @@ export const RAHeader = ({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto px-3 py-2" side="top">
-        Retaining Accuracy
+        Retain Accuracy
       </HoverCardContent>
     </HoverCard>
   );
@@ -203,7 +203,7 @@ export const TRAHeader = ({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto px-3 py-2" side="top">
-        Test Retaining Accuracy
+        Test Retain Accuracy
       </HoverCardContent>
     </HoverCard>
   );

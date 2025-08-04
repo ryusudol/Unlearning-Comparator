@@ -49,6 +49,8 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
         scheduler,
         device,
         base_weights_path,
+        freeze_first_k_layers=0,
+        reinit_last_k_layers=0,
         enable_epoch_metrics=True
     ):
         super().__init__()
@@ -72,6 +74,8 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
         self.scheduler = scheduler
         self.device = device
         self.base_weights_path = base_weights_path
+        self.freeze_first_k_layers = freeze_first_k_layers
+        self.reinit_last_k_layers = reinit_last_k_layers
         self.enable_epoch_metrics = enable_epoch_metrics
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
@@ -89,11 +93,45 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
         self.status.progress = "Unlearning"
         self.status.method = "GA+SL+FT"
         self.status.recent_id = uuid.uuid4().hex[:4]
-        self.status.total_epochs = self.request.epochs
+        # Add +1 for initial FT epoch only if reinit_last_k > 0
+        self.status.total_epochs = self.request.epochs + (1 if self.reinit_last_k_layers > 0 else 0)
         
         umap_subset, umap_subset_loader, selected_indices = setup_umap_subset(
             self.train_set, self.test_set, self.num_classes
         )
+        
+        # Apply layer freezing and reinitialization if requested
+        if self.freeze_first_k_layers > 0 or self.reinit_last_k_layers > 0:
+            from app.utils.layer_utils import apply_layer_modifications
+            stats = apply_layer_modifications(
+                model=self.model,
+                freeze_first_k=self.freeze_first_k_layers,
+                freeze_last_k=0,
+                reinit_last_k=self.reinit_last_k_layers
+            )
+            
+            # Print detailed information about modified layers
+            print("=" * 60)
+            print("LAYER MODIFICATION SUMMARY")
+            print("=" * 60)
+            
+            if stats['frozen_layers']:
+                print(f"🔒 FROZEN LAYERS ({stats['frozen_params']:,} parameters):")
+                for layer in stats['frozen_layers']:
+                    print(f"   - {layer}")
+            
+            if stats['reinitialized_layers']:
+                print(f"🔄 REINITIALIZED LAYERS ({stats['reinitialized_params']:,} parameters):")
+                for layer in stats['reinitialized_layers']:
+                    print(f"   - {layer}")
+            
+            total_params = sum(p.numel() for p in self.model.parameters())
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+            print(f"📊 TRAINING STATISTICS:")
+            print(f"   - Total parameters: {total_params:,}")
+            print(f"   - Trainable parameters: {trainable_params:,}")
+            print(f"   - Frozen parameters: {total_params - trainable_params:,}")
+            print("=" * 60)
         
         # Epoch metrics controlled from service
         # Initialize epoch-wise metrics collection (all-or-nothing toggle)
@@ -145,13 +183,85 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
                     }
                 )
 
-        # Start timing after all preprocessing
+        # Start timing before re-labeling (include in unlearning time)
         start_time = time.time()
         total_metrics_time = 0  # Accumulate metrics calculation time
 
+        # PHASE 0: Initial Fine-Tuning on retain set for stability (if reinit_last_k > 0)
+        if self.reinit_last_k_layers > 0:
+            print("=" * 60)
+            print("PHASE 0: Initial Fine-Tuning for GA Stability")
+            print("=" * 60)
+            
+            self.model.train()
+            self.status.current_epoch = 1
+            epoch_ft_loss = 0.0
+            ft_batches = 0
+            
+            print("Epoch 0 (Initial FT): Fine-tuning on retain set...")
+            for i, (inputs, labels) in enumerate(self.retain_loader):
+                if self.check_stopped_and_return(self.status):
+                    return
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                self.ft_optimizer.zero_grad()
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, labels)
+                loss.backward()
+
+                self.ft_optimizer.step()
+                epoch_ft_loss += loss.item()
+                ft_batches += 1
+
+            avg_ft_loss = epoch_ft_loss / ft_batches if ft_batches > 0 else 0.0
+            
+            # Evaluate on forget set after initial FT
+            _, initial_forget_acc = evaluate_on_forget_set(
+                self.model, self.forget_loader, self.criterion, self.device
+            )
+            
+            # Calculate comprehensive epoch metrics if enabled (exclude from timing)
+            if self.enable_epoch_metrics:
+                metrics_start = time.time()
+                print(f"Collecting comprehensive metrics for initial FT epoch...")
+                metrics = await calculate_comprehensive_epoch_metrics(
+                    self.model, self.train_loader, self.test_loader,
+                    self.train_set, self.test_set, self.criterion, self.device,
+                    self.request.forget_class, self.enable_epoch_metrics,
+                    metrics_components['retrain_metrics_cache'] if metrics_components else None,
+                    metrics_components['mia_classifier'] if metrics_components else None,
+                    current_epoch=1
+                )
+                update_epoch_metrics_collection(epoch_metrics, metrics)
+                total_metrics_time += time.time() - metrics_start
+            
+            # Print progress for initial FT
+            additional_metrics = None
+            if self.enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 1:
+                additional_metrics = {
+                    'UA': epoch_metrics['UA'][-1],
+                    'RA': epoch_metrics['RA'][-1],
+                    'TUA': epoch_metrics['TUA'][-1],
+                    'TRA': epoch_metrics['TRA'][-1],
+                    'PS': epoch_metrics['PS'][-1],
+                    'C-MIA': epoch_metrics['C-MIA'][-1],
+                    'E-MIA': epoch_metrics['E-MIA'][-1]
+                }
+            
+            print_epoch_progress(
+                1, self.request.epochs + 1, avg_ft_loss, initial_forget_acc,
+                eta=None,
+                additional_metrics=additional_metrics
+            )
+
+        print("=" * 60)
+        print("PHASE 1-N: GA+SL+FT Unlearning Cycles")
+        print("=" * 60)
+
         for epoch in range(self.request.epochs):
             self.model.train()
-            self.status.current_epoch = epoch + 1
+            # Adjust current epoch based on whether initial FT was performed
+            epoch_offset = 2 if self.reinit_last_k_layers > 0 else 1
+            self.status.current_epoch = epoch + epoch_offset
             epoch_ga_loss = 0.0
             epoch_sl_loss = 0.0
             epoch_ft_loss = 0.0
@@ -223,8 +333,9 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
                 self.ft_scheduler.step()  # FT scheduler
 
             # Update status with combined metrics
+            total_epochs = self.request.epochs + (1 if self.reinit_last_k_layers > 0 else 0)
             update_training_status(
-                self.status, epoch, self.request.epochs, start_time, 
+                self.status, epoch + 1, total_epochs, start_time, 
                 combined_loss, forget_epoch_acc
             )
 
@@ -232,13 +343,14 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
             if self.enable_epoch_metrics:
                 metrics_start = time.time()
                 print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
+                current_epoch = epoch + epoch_offset
                 metrics = await calculate_comprehensive_epoch_metrics(
                     self.model, self.train_loader, self.test_loader,
                     self.train_set, self.test_set, self.criterion, self.device,
                     self.request.forget_class, self.enable_epoch_metrics,
                     metrics_components['retrain_metrics_cache'] if metrics_components else None,
                     metrics_components['mia_classifier'] if metrics_components else None,
-                    current_epoch=epoch + 1
+                    current_epoch=current_epoch
                 )
                 update_epoch_metrics_collection(epoch_metrics, metrics)
                 total_metrics_time += time.time() - metrics_start
@@ -256,14 +368,16 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
                     'E-MIA': epoch_metrics['E-MIA'][-1]
                 }
             
+            total_epochs = self.request.epochs + (1 if self.reinit_last_k_layers > 0 else 0)
+            current_display_epoch = epoch + epoch_offset
             print_epoch_progress(
-                epoch + 1, self.request.epochs, combined_loss, forget_epoch_acc,
+                current_display_epoch, total_epochs, combined_loss, forget_epoch_acc,
                 eta=self.status.estimated_time_remaining,
                 additional_metrics=additional_metrics
             )
 
-        # Calculate pure training time (excluding metrics calculation)
-        rte = time.time() - start_time - total_metrics_time
+        # Calculate pure training time (excluding metrics calculation) + relabeling time
+        rte = time.time() - start_time - total_metrics_time + getattr(self, 'relabeling_time', 0.0)
         
         if self.check_stopped_and_return(self.status):
             return
@@ -359,7 +473,7 @@ class UnlearningGASLFTThread(BaseUnlearningThread):
         
         # Process attack metrics using the same umap_subset_loader (for UI)
         print("Processing attack metrics on UMAP subset")
-        values, attack_results, fqs = await process_attack_metrics(
+        values, attack_results, _ = await process_attack_metrics(
             model=self.model, 
             data_loader=umap_subset_loader, 
             device=self.device, 

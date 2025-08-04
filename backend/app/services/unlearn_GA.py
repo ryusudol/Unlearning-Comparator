@@ -20,7 +20,7 @@ async def unlearning_GA(request, status, base_weights_path):
     
     # Layer modification configuration (similar to SalUn config style)
     freeze_first_k_layers = 0  # Freeze first K layer groups
-    freeze_last_k_layers = 3   # Freeze last K layer groups  
+    freeze_last_k_layers = 0   # Freeze last K layer groups  
     reinit_last_k_layers = 0   # Reinitialize last K layer groups
     
     # Epoch metrics configuration

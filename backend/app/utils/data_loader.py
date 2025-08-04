@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from app.config import UNLEARN_SEED
@@ -31,7 +32,12 @@ def get_data_loaders(batch_size, augmentation=False):
     
     train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0)
+    
+    # Create deterministic generator for reproducible shuffling
+    g = torch.Generator()
+    g.manual_seed(UNLEARN_SEED)
+    
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=0, generator=g)
     test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=0)
     print("loaded loaders")
     return train_loader, test_loader, train_set, test_set
