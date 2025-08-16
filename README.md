@@ -6,7 +6,7 @@ A web-based visual analytics system for the comparative evaluation of Machine Un
 - **System Introduction** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
 - **Live demo** → [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/) 
 
-<br>
+
 
 ![Unlearning Comparator Workflow](img/fig_workflow_github.png)
 This system helps researchers systematically compare MU methods based on three core principles: **accuracy, efficiency, and privacy**. The workflow is structured into four stages: **Build → Screen → Contrast → Attack**.
