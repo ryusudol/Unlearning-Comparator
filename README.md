@@ -1,52 +1,48 @@
 # 🧹 Machine Unlearning Comparator
-*Under review*  
 
-<!-- Teaser -->
+- **System Introduction** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
+- **Live demo** → [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/)  
+
+A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods.
+
 ![Teaser Animation](img/teaser.gif)
 
-Machine Unlearning Comparator is a **web-based visual-analytics toolkit** for **seeing, testing, and comparing** how unlearning methods balance the three MU principles—**accuracy, efficiency, and privacy**—from class- to layer-level detail.
+This system helps researchers systematically compare MU methods based on three core principles: **accuracy, efficiency, and privacy**. The workflow is structured into four stages: **Build → Screen → Contrast → Attack**.
 
 ![Unlearning Comparator Workflow](img/fig_workflow_github.png)
 
 ---
 
-## 🔗 Demo & Video
-
-- **Live demo** → [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/)  
-- **5-min overview** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
-  
----
-
-## 🚀 Why use the Comparator?
-
-| Pain Point | How the Comparator helps |
-|------------|--------------------------|
-| Fragmented evaluations | **One workflow — Build → Screen → Contrast → Attack** — keeps every run tidy and repeatable. |
-| Raw numbers hide behavior | Combine metrics & visuals: **Class-wise Accuracy chart, Prediction Matrix, Embedding Space, Layer-wise Similarity chart**. |
-| "Did it really forget?" | Built-in **membership-inference attacks** and an aggregated **privacy score** reveal lingering signals. |
-| Baselines vary by paper | Compare against **standard baselines** or plug in your own method via two Python hooks. |
-
----
-
 ## ✨ Key Features
 
-### Multi-Level Comparison
-* **Metrics View** – follow Unlearning/Retaining Accuracy, Run Time (RT), and the worst-case privacy score in one glance.  
-* **Embedding Space** – twin UMAPs show how feature clusters shift after unlearning.  
-* **Layer-wise Similarity** – CKA curves pinpoint layers that still encode the forget class.  
-* **Attack Simulation** – sweep thresholds, flag high-risk samples, and inspect logits interactively.
+* **Multi-Level Visual Comparison**
+    * Analyze model behavior from class, instance, and layer-level perspectives.
+    * Includes: `Class-wise Accuracy chart`, `Prediction Matrix`, `Embedding Space`, and `Layer-wise Similarity chart`.
 
-### Built-in Baselines
-| Method | Idea (aligned with the paper) |
-|--------|------------------------------|
-| **Fine-Tuning (FT)** | Continue training on the **retain set** only, leveraging catastrophic forgetting of the forget set. |
-| **Gradient Ascent (GA)** | Update weights to **maximize loss** on the forget set, actively "unteaching" it. |
-| **Random Labeling (RL)** | Assign **random labels** to the forget set then fine-tune, so the model treats those samples as noise. |
-| **SCRUB** | Use **knowledge distillation** with selective forgetting, preserving important parameters while removing forget class information. |
-| **SalUn** | Apply **gradient saliency masking** to selectively update weights based on their importance for the forget class. |
+* **Interactive Privacy Audits**
+    * Simulate **Membership Inference Attacks (MIAs)** to verify data removal.
 
-### Custom Method API
-Add your algorithm, register it, and the UI will automatically expose metrics, embeddings, and privacy attacks.
+![Privacy Attack Visualization](img/fig_attack.png)
+
+---
+
+## 🔧 Built-in Methods
+
+| Method | Description |
+| :--- | :--- |
+| **Fine-Tuning (FT)** | Fine-tunes the model only on the **retain set**. |
+| **Gradient Ascent (GA)** | Adjusts model parameters to **maximize loss** on the forget set. |
+| **Random Labeling (RL)** | Assigns **random labels** to the forget set and then fine-tunes the model. |
+| **SCRUB** | Uses a **teacher-student distillation** framework to maximize loss on the forget set while minimizing it on the retain set. |
+| **SalUn** | **Masks weights** influenced by the forget set before applying random labeling and targeted fine-tuning. |
+
+---
+
+## 🔌 Add Your Own Method
+
+Implement and register your own MU methods via a Python hook for direct comparison within the system.
+
+💡 **Tip**: Ask [Claude Code](https://claude.ai/code) for a boilerplate template to get started quickly!
 
 ---
 
@@ -54,9 +50,9 @@ Add your algorithm, register it, and the UI will automatically expose metrics, e
 
 ### Backend
 ```bash
-# 1 Install deps & enter env
+# 1. Install deps & activate environment
 hatch shell
-# 2 Run the API
+# 2. Run the API server
 hatch run start
 ```
 
@@ -74,6 +70,3 @@ pnpm start
 - **ResNet-18 CIFAR-10 MU checkpoints** → <https://huggingface.co/jaeunglee/resnet18-cifar10-unlearning>
 - **ResNet-18 FashionMNIST MU checkpoints** → <https://huggingface.co/Yurim0507/resnet18-fashionmnist-unlearning>
 - **ViT-Base CIFAR-10 MU checkpoints** → <https://huggingface.co/Yurim0507/vit-base-16-cifar10-unlearning>
-
-
-
