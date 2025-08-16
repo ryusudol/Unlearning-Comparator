@@ -25,7 +25,8 @@ async def unlearning_GA(request, status, base_weights_path):
     
     # Epoch metrics configuration
     enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
-    
+    AUGMENTATION = False
+
     if freeze_first_k_layers > 0 or freeze_last_k_layers > 0 or reinit_last_k_layers > 0:
         print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, freeze_last_k={freeze_last_k_layers}, reinit_last_k={reinit_last_k_layers}")
     
@@ -51,7 +52,7 @@ async def unlearning_GA(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=AUGMENTATION
     )
     
     forget_indices = [

@@ -22,11 +22,11 @@ async def unlearning_FT(request, status, base_weights_path):
     freeze_first_k_layers = 0  # Freeze first K layer groups
     reinit_last_k_layers = 0    # Reinitialize last K layer groups
     
-    ETA_MIN = 0.0023
-    AUGMENTATION = True
+    ETA_MIN = 0.01
+    AUGMENTATION = False
     
     # Epoch metrics configuration
-    enable_epoch_metrics = True  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
     
     if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
         print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")

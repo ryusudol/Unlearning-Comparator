@@ -39,7 +39,7 @@ async def unlearning_SCRUB(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=True
+        augmentation=False
     )
 
     # Create retain loader (excluding forget class)

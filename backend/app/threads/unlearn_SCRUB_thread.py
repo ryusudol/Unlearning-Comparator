@@ -540,8 +540,6 @@ class UnlearningSCRUBThread(BaseUnlearningThread):
             plot_path = save_epoch_plots(
                 epoch_metrics, "SCRUB", self.request.forget_class, self.status.recent_id
             )
-            if plot_path:
-                results["epoch_plot_path"] = plot_path
             
             # Add epoch metrics to results (rounded to 3 decimal places)
             results["epoch_metrics"] = {

@@ -21,7 +21,7 @@ async def unlearning_RL(request, status, base_weights_path):
     
     # Epoch metrics configuration
     enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
-    
+    AUGMENTATION = False
     if enable_epoch_metrics:
         print("Epoch-wise metrics collection: ENABLED")
     
@@ -44,7 +44,7 @@ async def unlearning_RL(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=AUGMENTATION
     )
 
     # Create retain loader (excluding forget class)

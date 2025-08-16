@@ -35,7 +35,7 @@ async def unlearning_GA_FT(request, status, base_weights_path):
     if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
         print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
 
-    ETA_MIN = 0.0034
+    ETA_MIN = 0.003
     enable_epoch_metrics = False # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
     if enable_epoch_metrics:
         print("Epoch-wise metrics collection: ENABLED")

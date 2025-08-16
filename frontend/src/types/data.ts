@@ -66,6 +66,8 @@ export type EpochMetrics = {
   TUA: number[];
   TRA: number[];
   PS: number[];
+  "C-MIA"?: number[];
+  "E-MIA"?: number[];
 };
 
 export type ExperimentData = {

@@ -437,9 +437,7 @@ class UnlearningFTThread(BaseUnlearningThread):
             plot_path = save_epoch_plots(
                 epoch_metrics, "FT", self.request.forget_class, self.status.recent_id
             )
-            if plot_path:
-                results["epoch_plot_path"] = plot_path
-            
+    
             # Add epoch metrics to results (rounded to 3 decimal places)
             results["epoch_metrics"] = {
                 key: [round(val, 3) for val in values] for key, values in epoch_metrics.items()

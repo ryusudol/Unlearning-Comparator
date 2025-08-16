@@ -43,7 +43,7 @@ def create_second_logit_dataset(model, forget_loader, device):
 async def unlearning_GA_SL_FT(request, status, base_weights_path):
     print(f"Starting GA+SL+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
     
-    ETA_MIN = 0.0024
+    ETA_MIN = 0.002
     
     device = torch.device(
         f"cuda:{GPU_ID}" if torch.cuda.is_available() 

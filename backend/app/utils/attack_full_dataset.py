@@ -77,17 +77,17 @@ def _create_distribution_plots(entropies, confidences, model_name, forget_class,
             }
         ]
         
-        # Create plots
-        saved_paths = []
-        for config in plot_configs:
-            _create_single_distribution_plot(
-                config['data'], config['title'], config['xlabel'], 
-                config['color'], config['filename'], np.mean(config['data']),
-                bins=config['bins'], range_vals=config['range_vals']
-            )
-            saved_paths.append(config['filename'])
+        # Create plots - DISABLED
+        # saved_paths = []
+        # for config in plot_configs:
+        #     _create_single_distribution_plot(
+        #         config['data'], config['title'], config['xlabel'], 
+        #         config['color'], config['filename'], np.mean(config['data']),
+        #         bins=config['bins'], range_vals=config['range_vals']
+        #     )
+        #     saved_paths.append(config['filename'])
         
-        print(f"{model_name} distribution plots saved: {', '.join(saved_paths)}")
+        # print(f"{model_name} distribution plots saved: {', '.join(saved_paths)}")
         
     except Exception as e:
         print(f"Error creating {model_name} distribution plots: {e}")
