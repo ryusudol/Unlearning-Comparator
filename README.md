@@ -1,5 +1,6 @@
 # 🧹 Machine Unlearning Comparator *(Under Review)*
 A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods.
+
 ![Teaser Animation](img/teaser.gif)
 
 - **System Introduction** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
