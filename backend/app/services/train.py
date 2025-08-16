@@ -9,14 +9,15 @@ from app.utils import set_seed, get_data_loaders
 from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
-    UNLEARN_SEED
+    UNLEARN_SEED,
+    GPU_ID
 )
 
 async def training(request, status):
     print(f"Starting training with {request.epochs} epochs...")
     set_seed(UNLEARN_SEED)
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )

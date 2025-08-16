@@ -12,40 +12,47 @@ from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     DECREASING_LR,
-    UNLEARN_SEED
+    UNLEARN_SEED,
+    GPU_ID
 )
 
 async def unlearning_GA_FT(request, status, base_weights_path):
     print(f"Starting GA+FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
-    print(f"GA LR will be: {request.learning_rate / 10:.5f}, FT LR will be: {request.learning_rate:.5f}")
+
     set_seed(UNLEARN_SEED)
-    
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )
-
-    # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
+
+    # Layer modification configuration
+    freeze_first_k_layers = 0  # Freeze first K layer groups
+    reinit_last_k_layers = 3   # Reinitialize last K layer groups
     
+    if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
+        print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
+
+    ETA_MIN = 0.003
+    enable_epoch_metrics = False # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+
     # ========== GA+FT Configuration (easily configurable) ==========
-    ga_lr_ratio = 0.5     # GA LR = request.lr * ga_lr_ratio (changeable)
-    ga_batch_ratio = 1.0  # GA batch size = request.batch_size * ga_batch_ratio (changeable)
+    ga_lr_ratio = 0.05    # GA LR = request.lr * ga_lr_ratio (changeable)
+    ga_batch_ratio = 32.0  # GA batch size = request.batch_size * ga_batch_ratio (changeable)
     # Examples:
     # - ga_batch_ratio = 0.5: GA uses half the batch size of FT
     # - ga_batch_ratio = 2.0: GA uses double the batch size of FT
     # - ga_batch_ratio = 1.0: GA uses same batch size as FT (default)
     # ================================================================
     
-    # Calculate batch sizes first
     ga_batch_size = int(request.batch_size * ga_batch_ratio)
-    ft_batch_size = request.batch_size  # FT uses original batch size
+    ft_batch_size = request.batch_size
     
+    print(f"Learning rates - GA: {request.learning_rate * ga_lr_ratio:.5f}, FT: {request.learning_rate:.5f}")
     print(f"Batch sizes - GA: {ga_batch_size}, FT: {ft_batch_size}")
 
     (
@@ -106,24 +113,33 @@ async def unlearning_GA_FT(request, status, base_weights_path):
         weight_decay=WEIGHT_DECAY
     )
     
-    # Use MultiStepLR scheduler for GA optimizer (primary)
-    ga_scheduler = optim.lr_scheduler.MultiStepLR(
-        optimizer=ga_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
-    )
+    # Option 1: MultiStepLR (original)
+    # ga_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ga_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
+    # ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    #     optimizer=ft_optimizer,
+    #     milestones=DECREASING_LR,
+    #     gamma=0.2
+    # )
     
-    # Use MultiStepLR scheduler for FT optimizer  
-    ft_scheduler = optim.lr_scheduler.MultiStepLR(
+    # Option 2: CosineAnnealingLR (active)
+    ga_scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=ga_optimizer,
+        T_max=request.epochs,
+        eta_min=ETA_MIN * ga_lr_ratio
+    )
+    ft_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=ft_optimizer,
-        milestones=DECREASING_LR,
-        gamma=0.2
+        T_max=request.epochs,
+        eta_min=ETA_MIN
     )
 
     unlearning_GA_FT_thread = UnlearningGAFTThread(
         request=request,
         status=status,
-        model_before=model_before,
         model_after=model_after,
         retain_loader=retain_loader,
         forget_loader=forget_loader,
@@ -136,7 +152,10 @@ async def unlearning_GA_FT(request, status, base_weights_path):
         ft_optimizer=ft_optimizer,
         scheduler=ga_scheduler,  # Pass GA scheduler
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        freeze_first_k_layers=freeze_first_k_layers,
+        reinit_last_k_layers=reinit_last_k_layers,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     
     # Store additional configuration in the thread object

@@ -12,23 +12,29 @@ from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     DECREASING_LR,
-    UNLEARN_SEED
+    UNLEARN_SEED,
+    GPU_ID
 )
 
 async def unlearning_RL(request, status, base_weights_path):
     print(f"Starting RL unlearning for class {request.forget_class} with {request.epochs} epochs...")
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    AUGMENTATION = False
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )
 
     # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
     
     (
@@ -38,7 +44,7 @@ async def unlearning_RL(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=AUGMENTATION
     )
 
     # Create retain loader (excluding forget class)
@@ -87,7 +93,6 @@ async def unlearning_RL(request, status, base_weights_path):
     unlearning_RL_thread = UnlearningRLThread(
         request=request,
         status=status,
-        model_before=model_before,
         model_after=model_after,
         criterion=criterion,
         optimizer=optimizer,
@@ -100,7 +105,8 @@ async def unlearning_RL(request, status, base_weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     
     unlearning_RL_thread.start()

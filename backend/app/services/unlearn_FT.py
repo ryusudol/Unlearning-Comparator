@@ -2,7 +2,6 @@ import asyncio
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import os
 
 from app.threads import UnlearningFTThread
 from app.models import get_resnet18
@@ -12,25 +11,47 @@ from app.config import (
     MOMENTUM,
     WEIGHT_DECAY,
     DECREASING_LR,
-    UNLEARN_SEED
+    UNLEARN_SEED,
+    GPU_ID
 )
 
 async def unlearning_FT(request, status, base_weights_path):
     print(f"Starting FT unlearning for class {request.forget_class} with {request.epochs} epochs...")
+    
+    # Layer modification configuration
+    freeze_first_k_layers = 0  # Freeze first K layer groups
+    reinit_last_k_layers = 0    # Reinitialize last K layer groups
+    
+    ETA_MIN = 0.01
+    AUGMENTATION = False
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    
+    if freeze_first_k_layers > 0 or reinit_last_k_layers > 0:
+        print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, reinit_last_k={reinit_last_k_layers}")
+    
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )
 
     # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
     
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
-    model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
+    print(f"Loading model_after (base) from: {base_weights_path}")
+    base_state_dict = torch.load(base_weights_path, map_location=device)
+    model_after.load_state_dict(base_state_dict)
+    
+    # Verify base model loaded correctly by checking a sample parameter
+    print(f"Base model fc.weight[0:3, 0:3]: {model_after.fc.weight[:3, :3]}")
+    print(f"Base weights path used: {base_weights_path}")
     
     (
         train_loader,
@@ -39,7 +60,7 @@ async def unlearning_FT(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=True
+        augmentation=AUGMENTATION
     )
 
     # Create retain loader (excluding forget class)
@@ -86,33 +107,25 @@ async def unlearning_FT(request, status, base_weights_path):
     #     gamma=0.2
     # )
     
-    #Option 2: CosineAnnealingLR
+    # Option 2: CosineAnnealingLR
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=optimizer,
         T_max=request.epochs,
-        eta_min=0.004
+        eta_min=ETA_MIN
     )
     
     # Option 3: LinearLR (linear decay)
     # scheduler = optim.lr_scheduler.LinearLR(
     #     optimizer=optimizer,
     #     start_factor=1.0,
-    #     end_factor=0.001,
+    #     end_factor=0.2,
     #     total_iters=request.epochs
     # )
     
-    # Option 4: CosineAnnealingWarmRestarts (cosine annealing with warm restarts)
-    # scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
-    #     optimizer=optimizer,
-    #     T_0=request.epochs // 4,  # First restart after T_0 epochs
-    #     T_mult=1,  # Multiply T_0 by 2 after each restart
-    #     eta_min=0.003
-    # )
 
     unlearning_FT_thread = UnlearningFTThread(
         request=request,
         status=status,
-        model_before=model_before,
         model_after=model_after,
         criterion=criterion,
         optimizer=optimizer,
@@ -125,7 +138,10 @@ async def unlearning_FT(request, status, base_weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device,
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        freeze_first_k_layers=freeze_first_k_layers,
+        reinit_last_k_layers=reinit_last_k_layers,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     
     unlearning_FT_thread.start()

@@ -131,8 +131,15 @@ async def process_attack_metrics(
                     
                 local_indices = torch.where(forget_mask)[0]
                 batch_start_idx = batch_idx * data_loader.batch_size
-                original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
-                                    for idx in local_indices]
+                
+                # Handle both subset and full dataset cases
+                if hasattr(data_loader.dataset, 'indices'):
+                    # For subset datasets (like umap_subset_loader)
+                    original_indices = [data_loader.dataset.indices[batch_start_idx + idx.item()] 
+                                        for idx in local_indices]
+                else:
+                    # For full datasets (like train_loader)
+                    original_indices = [batch_start_idx + idx.item() for idx in local_indices]
                 selected_outputs = outputs[forget_mask]
 
                 # Compute entropy scores

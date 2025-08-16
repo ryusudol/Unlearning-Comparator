@@ -16,3 +16,6 @@ EPOCHS = 200
 
 DECREASING_LR = [80, 120]
 GAMMA = 0.2
+
+# GPU Configuration
+GPU_ID = 1

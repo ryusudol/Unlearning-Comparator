@@ -11,23 +11,38 @@ from app.config import (
 	MOMENTUM, 
 	WEIGHT_DECAY, 
 	DECREASING_LR,
-	UNLEARN_SEED
+	UNLEARN_SEED,
+	GPU_ID
 )
 
 async def unlearning_GA(request, status, base_weights_path):
     print(f"Starting GA unlearning for class {request.forget_class} with {request.epochs} epochs...")
+    
+    # Layer modification configuration (similar to SalUn config style)
+    freeze_first_k_layers = 0  # Freeze first K layer groups
+    freeze_last_k_layers = 0   # Freeze last K layer groups  
+    reinit_last_k_layers = 0   # Reinitialize last K layer groups
+    
+    # Epoch metrics configuration
+    enable_epoch_metrics = False  # Enable comprehensive epoch-wise metrics (UA, RA, TUA, TRA, PS, MIA)
+    AUGMENTATION = False
+
+    if freeze_first_k_layers > 0 or freeze_last_k_layers > 0 or reinit_last_k_layers > 0:
+        print(f"Layer modifications: freeze_first_k={freeze_first_k_layers}, freeze_last_k={freeze_last_k_layers}, reinit_last_k={reinit_last_k_layers}")
+    
+    if enable_epoch_metrics:
+        print("Epoch-wise metrics collection: ENABLED")
+    
     set_seed(UNLEARN_SEED)
     
     device = torch.device(
-        "cuda" if torch.cuda.is_available() 
+        f"cuda:{GPU_ID}" if torch.cuda.is_available() 
         else "mps" if torch.backends.mps.is_available() 
         else "cpu"
     )
 
     # Create Unlearning Settings
-    model_before = get_resnet18().to(device)
     model_after = get_resnet18().to(device)
-    model_before.load_state_dict(torch.load(f"unlearned_models/{request.forget_class}/000{request.forget_class}.pth", map_location=device))
     model_after.load_state_dict(torch.load(base_weights_path, map_location=device))
 
     (
@@ -37,7 +52,7 @@ async def unlearning_GA(request, status, base_weights_path):
         test_set
     ) = get_data_loaders(
         batch_size=request.batch_size,
-        augmentation=False
+        augmentation=AUGMENTATION
     )
     
     forget_indices = [
@@ -69,7 +84,6 @@ async def unlearning_GA(request, status, base_weights_path):
     unlearning_GA_thread = UnlearningGAThread(
         request=request,
         status=status,
-        model_before=model_before,
         model_after=model_after,
         criterion=criterion,
         optimizer=optimizer,
@@ -81,7 +95,11 @@ async def unlearning_GA(request, status, base_weights_path):
         train_set=train_set,
         test_set=test_set,
         device=device, 
-        base_weights_path=base_weights_path
+        base_weights_path=base_weights_path,
+        freeze_first_k_layers=freeze_first_k_layers,
+        freeze_last_k_layers=freeze_last_k_layers,
+        reinit_last_k_layers=reinit_last_k_layers,
+        enable_epoch_metrics=enable_epoch_metrics
     )
     unlearning_GA_thread.start()
 

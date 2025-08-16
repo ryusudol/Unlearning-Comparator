@@ -15,6 +15,7 @@ from app.config.settings import (
 )
 from app.utils.attack import process_attack_metrics
 from app.utils.thread_base import BaseUnlearningThread
+from app.utils.layer_utils import apply_layer_modifications
 from app.utils.thread_operations import (
 	setup_umap_subset,
 	update_training_status,
@@ -29,7 +30,7 @@ from app.utils.thread_operations import (
 	save_epoch_plots
 )
 
-class UnlearningGAFTThread(BaseUnlearningThread):
+class UnlearningGASLFTV2Thread(BaseUnlearningThread):
     def __init__(
         self,
         request,
@@ -37,13 +38,14 @@ class UnlearningGAFTThread(BaseUnlearningThread):
         model_after,
         retain_loader,
         forget_loader,
+        mixed_sl_ft_loader,
         train_loader,
         test_loader,
         train_set,
         test_set,
         criterion,
         ga_optimizer,
-        ft_optimizer,
+        mixed_optimizer,
         scheduler,
         device,
         base_weights_path,
@@ -58,6 +60,7 @@ class UnlearningGAFTThread(BaseUnlearningThread):
 
         self.retain_loader = retain_loader
         self.forget_loader = forget_loader
+        self.mixed_sl_ft_loader = mixed_sl_ft_loader  # New combined loader
         self.train_loader = train_loader
         self.test_loader = test_loader
 
@@ -66,7 +69,7 @@ class UnlearningGAFTThread(BaseUnlearningThread):
         
         self.criterion = criterion
         self.ga_optimizer = ga_optimizer  # GA optimizer with lr/10
-        self.ft_optimizer = ft_optimizer  # FT optimizer with original lr
+        self.mixed_optimizer = mixed_optimizer  # Mixed optimizer for SL+FT data
         self.scheduler = scheduler
         self.device = device
         self.base_weights_path = base_weights_path
@@ -77,18 +80,19 @@ class UnlearningGAFTThread(BaseUnlearningThread):
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
 
     async def async_main(self):
-        print(f"Starting GA+FT unlearning for class {self.request.forget_class}...")
-        print(f"GA LR: {self.ga_optimizer.param_groups[0]['lr']:.5f}, FT LR: {self.ft_optimizer.param_groups[0]['lr']:.5f}")
+        print(f"Starting GA+SL+FT V2 unlearning for class {self.request.forget_class}...")
+        print(f"GA LR: {self.ga_optimizer.param_groups[0]['lr']:.5f}, Mixed LR: {self.mixed_optimizer.param_groups[0]['lr']:.5f}")
         
         # Display batch size information if available
         ga_batch_info = f"GA Batch: {self.ga_batch_size}" if hasattr(self, 'ga_batch_size') else "GA Batch: default"
-        ft_batch_info = f"FT Batch: {self.ft_batch_size}" if hasattr(self, 'ft_batch_size') else "FT Batch: default"
-        print(f"Batch sizes - {ga_batch_info}, {ft_batch_info}")
+        mixed_batch_info = f"Mixed Batch: {self.mixed_batch_size}" if hasattr(self, 'mixed_batch_size') else "Mixed Batch: default"
+        print(f"Batch sizes - {ga_batch_info}, {mixed_batch_info}")
         
         self.status.progress = "Unlearning"
-        self.status.method = "GA+FT"
+        self.status.method = "GA+SL+FT V2"
         self.status.recent_id = uuid.uuid4().hex[:4]
-        self.status.total_epochs = self.request.epochs
+        # Add +1 for initial FT epoch only if reinit_last_k > 0
+        self.status.total_epochs = self.request.epochs + (1 if self.reinit_last_k_layers > 0 else 0)
         
         umap_subset, umap_subset_loader, selected_indices = setup_umap_subset(
             self.train_set, self.test_set, self.num_classes
@@ -96,7 +100,6 @@ class UnlearningGAFTThread(BaseUnlearningThread):
         
         # Apply layer freezing and reinitialization if requested
         if self.freeze_first_k_layers > 0 or self.reinit_last_k_layers > 0:
-            from app.utils.layer_utils import apply_layer_modifications
             stats = apply_layer_modifications(
                 model=self.model,
                 freeze_first_k=self.freeze_first_k_layers,
@@ -164,7 +167,7 @@ class UnlearningGAFTThread(BaseUnlearningThread):
             # Display epoch 0 metrics
             if initial_metrics:
                 print_epoch_progress(
-                    0, self.request.epochs, 0.0, initial_metrics.get('UA', 0.0),
+                    0, self.status.total_epochs, 0.0, initial_metrics.get('UA', 0.0),
                     eta=None,
                     additional_metrics={
                         'UA': initial_metrics.get('UA', 0.0),
@@ -177,7 +180,7 @@ class UnlearningGAFTThread(BaseUnlearningThread):
                     }
                 )
 
-        # Start timing after all preprocessing
+        # Start timing before re-labeling (include in unlearning time)
         start_time = time.time()
         total_metrics_time = 0  # Accumulate metrics calculation time
 
@@ -189,24 +192,24 @@ class UnlearningGAFTThread(BaseUnlearningThread):
             
             self.model.train()
             self.status.current_epoch = 1
-            epoch_ft_loss = 0.0
-            ft_batches = 0
+            epoch_initial_ft_loss = 0.0
+            initial_ft_batches = 0
             
             print("Epoch 0 (Initial FT): Fine-tuning on retain set...")
             for i, (inputs, labels) in enumerate(self.retain_loader):
                 if self.check_stopped_and_return(self.status):
                     return
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                self.ft_optimizer.zero_grad()
+                self.mixed_optimizer.zero_grad()
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
                 loss.backward()
 
-                self.ft_optimizer.step()
-                epoch_ft_loss += loss.item()
-                ft_batches += 1
+                self.mixed_optimizer.step()
+                epoch_initial_ft_loss += loss.item()
+                initial_ft_batches += 1
 
-            avg_ft_loss = epoch_ft_loss / ft_batches if ft_batches > 0 else 0.0
+            avg_initial_ft_loss = epoch_initial_ft_loss / initial_ft_batches if initial_ft_batches > 0 else 0.0
             
             # Evaluate on forget set after initial FT
             _, initial_forget_acc = evaluate_on_forget_set(
@@ -240,23 +243,29 @@ class UnlearningGAFTThread(BaseUnlearningThread):
                     'C-MIA': epoch_metrics['C-MIA'][-1],
                     'E-MIA': epoch_metrics['E-MIA'][-1]
                 }
-
+            
             print_epoch_progress(
-                1, self.request.epochs + 1, avg_ft_loss, initial_forget_acc,
+                1, self.status.total_epochs, avg_initial_ft_loss, initial_forget_acc,
                 eta=None,
                 additional_metrics=additional_metrics
             )
 
+        print("=" * 60)
+        print("PHASE 1-N: GA+SL+FT Unlearning Cycles")
+        print("=" * 60)
+
         for epoch in range(self.request.epochs):
             epoch_start_time = time.time()  # Epoch 시작 시간
             self.model.train()
-            self.status.current_epoch = epoch + 1
+            # Adjust current epoch based on whether initial FT was performed
+            epoch_offset = 2 if self.reinit_last_k_layers > 0 else 1
+            self.status.current_epoch = epoch + epoch_offset
             epoch_ga_loss = 0.0
-            epoch_ft_loss = 0.0
+            epoch_mixed_loss = 0.0
             ga_batches = 0
-            ft_batches = 0
+            mixed_batches = 0
             
-            # Stage 1: GA stage - Gradient Ascent on forget set
+            # Stage 1: GA stage - Gradient Ascent on forget set (with original GT labels)
             ga_stage_start = time.time()
             print(f"Epoch {epoch + 1}: Starting GA (Gradient Ascent) stage...")
             for i, (inputs, labels) in enumerate(self.forget_loader):
@@ -276,29 +285,34 @@ class UnlearningGAFTThread(BaseUnlearningThread):
             ga_stage_time = time.time() - ga_stage_start
             print(f"  GA stage completed in {ga_stage_time:.2f}s ({ga_batches} batches)")
 
-            # Stage 2: FT stage - Fine-tuning on retain set
-            ft_stage_start = time.time()
-            print(f"Epoch {epoch + 1}: Starting FT (Fine-Tuning) stage...")
-            for i, (inputs, labels) in enumerate(self.retain_loader):
+            # Stage 2: Mixed SL+FT stage - Unified training on shuffled data
+            mixed_stage_start = time.time()
+            print(f"Epoch {epoch + 1}: Starting Mixed SL+FT stage (unified training)...")
+            
+            for i, (inputs, labels, _) in enumerate(self.mixed_sl_ft_loader):
                 if self.check_stopped_and_return(self.status):
                     return
+                
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                self.ft_optimizer.zero_grad()
+                
+                # Train with mixed optimizer on all data
+                self.mixed_optimizer.zero_grad()
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
                 loss.backward()
-
-                self.ft_optimizer.step()
-                epoch_ft_loss += loss.item()
-                ft_batches += 1
+                self.mixed_optimizer.step()
+                
+                # Track losses (simplified)
+                epoch_mixed_loss += loss.item()
+                mixed_batches += 1
             
-            ft_stage_time = time.time() - ft_stage_start
-            print(f"  FT stage completed in {ft_stage_time:.2f}s ({ft_batches} batches)")
+            mixed_stage_time = time.time() - mixed_stage_start
+            print(f"  Mixed stage completed in {mixed_stage_time:.2f}s ({mixed_batches} batches)")
 
             # Calculate average losses for this epoch
             avg_ga_loss = epoch_ga_loss / ga_batches if ga_batches > 0 else 0.0
-            avg_ft_loss = epoch_ft_loss / ft_batches if ft_batches > 0 else 0.0
-            combined_loss = (avg_ga_loss + avg_ft_loss) / 2.0  # Combined loss for status
+            avg_mixed_loss = epoch_mixed_loss / mixed_batches if mixed_batches > 0 else 0.0
+            combined_loss = (avg_ga_loss + avg_mixed_loss) / 2.0  # Combined loss for status
             
             # Evaluate on forget set to get forget accuracy
             _, forget_epoch_acc = evaluate_on_forget_set(
@@ -306,12 +320,12 @@ class UnlearningGAFTThread(BaseUnlearningThread):
             )
             
             self.scheduler.step()  # GA scheduler
-            if hasattr(self, 'ft_scheduler'):
-                self.ft_scheduler.step()  # FT scheduler
+            if hasattr(self, 'mixed_scheduler'):
+                self.mixed_scheduler.step()  # Mixed scheduler
 
             # Update status with combined metrics
             update_training_status(
-                self.status, epoch, self.request.epochs, start_time, 
+                self.status, epoch + 1, self.status.total_epochs, start_time, 
                 combined_loss, forget_epoch_acc
             )
 
@@ -319,13 +333,14 @@ class UnlearningGAFTThread(BaseUnlearningThread):
             if self.enable_epoch_metrics:
                 metrics_start = time.time()
                 print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
+                current_epoch = epoch + epoch_offset
                 metrics = await calculate_comprehensive_epoch_metrics(
                     self.model, self.train_loader, self.test_loader,
                     self.train_set, self.test_set, self.criterion, self.device,
                     self.request.forget_class, self.enable_epoch_metrics,
                     metrics_components['retrain_metrics_cache'] if metrics_components else None,
                     metrics_components['mia_classifier'] if metrics_components else None,
-                    current_epoch=epoch + 1
+                    current_epoch=current_epoch
                 )
                 update_epoch_metrics_collection(epoch_metrics, metrics)
                 total_metrics_time += time.time() - metrics_start
@@ -343,18 +358,19 @@ class UnlearningGAFTThread(BaseUnlearningThread):
                     'E-MIA': epoch_metrics['E-MIA'][-1]
                 }
             
+            current_display_epoch = epoch + epoch_offset
             print_epoch_progress(
-                epoch + 1, self.request.epochs, combined_loss, forget_epoch_acc,
+                current_display_epoch, self.status.total_epochs, combined_loss, forget_epoch_acc,
                 eta=self.status.estimated_time_remaining,
                 additional_metrics=additional_metrics
             )
             
             epoch_total_time = time.time() - epoch_start_time
-            print(f"📊 Epoch {epoch + 1} TOTAL TIME: {epoch_total_time:.2f}s (GA: {ga_stage_time:.2f}s, FT: {ft_stage_time:.2f}s)")
+            print(f"📊 Epoch {epoch + 1} TOTAL TIME: {epoch_total_time:.2f}s (GA: {ga_stage_time:.2f}s, Mixed: {mixed_stage_time:.2f}s)")
             print("-" * 60)
 
-        # Calculate pure training time (excluding metrics calculation)
-        rte = time.time() - start_time - total_metrics_time
+        # Calculate pure training time (excluding metrics calculation) + relabeling time
+        rte = time.time() - start_time - total_metrics_time + getattr(self, 'relabeling_time', 0.0)
         
         if self.check_stopped_and_return(self.status):
             return
@@ -508,7 +524,7 @@ class UnlearningGAFTThread(BaseUnlearningThread):
         # Create results dictionary
         results = create_base_results_dict(
             self.status, self.request.forget_class, self.base_weights_path, 
-            "GA+FT", self.request
+            "GA+SL+FT V2", self.request
         )
         
         results.update({
@@ -530,16 +546,20 @@ class UnlearningGAFTThread(BaseUnlearningThread):
             "attack": {
                 "values": values,
                 "results": attack_results
-            }
+            },
+            # Add layer modification info
+            "freeze_first_k": self.freeze_first_k_layers,
+            "reinit_last_k": self.reinit_last_k_layers
         })
         
         # Generate epoch-wise plots if we have collected metrics
         if self.enable_epoch_metrics and epoch_metrics:
             print("Generating epoch-wise plots...")
             plot_path = save_epoch_plots(
-                epoch_metrics, "GA_FT", self.request.forget_class, self.status.recent_id
+                epoch_metrics, "GA_SL_FT_V2", self.request.forget_class, self.status.recent_id
             )
-  # Add epoch metrics to results (rounded to 3 decimal places)
+
+            # Add epoch metrics to results (rounded to 3 decimal places)
             results["epoch_metrics"] = {
                 key: [round(val, 3) for val in values] for key, values in epoch_metrics.items()
             }
@@ -550,5 +570,5 @@ class UnlearningGAFTThread(BaseUnlearningThread):
         )
         
         print(f"Results saved to {result_path}")
-        print("GA+FT Unlearning inference completed!")
+        print("GA+SL+FT V2 Unlearning inference completed!")
         self.status.progress = "Completed"

@@ -11,6 +11,7 @@ Available threads:
     UnlearningFTThread: Unlearning using fine-tuning method
     UnlearningGAFTThread: Unlearning using combined GA+FT method
     UnlearningGASLFTThread: Unlearning using GA+SL+FT method with second logit
+    UnlearningGASLFTV2Thread: Unlearning using GA+SL+FT V2 method with layer modifications and initial FT
     UnlearningSCRUBThread: Unlearning using SCRUB method
     UnlearningSalUnThread: Unlearning using SalUn gradient saliency method
     UnlearningRetrainThread: Unlearning by retraining from scratch
@@ -29,9 +30,10 @@ from .unlearn_RL_thread import UnlearningRLThread
 from .unlearn_FT_thread import UnlearningFTThread
 from .unlearn_GA_FT_thread import UnlearningGAFTThread
 from .unlearn_GA_SL_FT_thread import UnlearningGASLFTThread
+from .unlearn_GA_SL_FT_V2_thread import UnlearningGASLFTV2Thread
 from .unlearn_SCRUB_thread import UnlearningSCRUBThread
 from .unlearn_SalUn_thread import UnlearningSalUnThread
 from .unlearn_retrain_thread import UnlearningRetrainThread
 from .unlearn_custom_thread import UnlearningCustomThread
 
-__all__ = ['TrainingThread', 'UnlearningGAThread', 'UnlearningRLThread', 'UnlearningFTThread', 'UnlearningGAFTThread', 'UnlearningGASLFTThread', 'UnlearningSCRUBThread', 'UnlearningSalUnThread', 'UnlearningRetrainThread', 'UnlearningCustomThread']
+__all__ = ['TrainingThread', 'UnlearningGAThread', 'UnlearningRLThread', 'UnlearningFTThread', 'UnlearningGAFTThread', 'UnlearningGASLFTThread', 'UnlearningGASLFTV2Thread', 'UnlearningSCRUBThread', 'UnlearningSalUnThread', 'UnlearningRetrainThread', 'UnlearningCustomThread']

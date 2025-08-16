@@ -31,7 +31,6 @@ class UnlearningSalUnThread(BaseUnlearningThread):
         self,
         request,
         status,
-        model_before,
         model_after,
         retain_loader,
         forget_loader,
@@ -44,12 +43,12 @@ class UnlearningSalUnThread(BaseUnlearningThread):
         scheduler,
         device,
         base_weights_path,
-        salun_config
+        salun_config,
+        enable_epoch_metrics=True
     ):
         super().__init__()
         self.request = request
         self.status = status
-        self.model_before = model_before
         self.model = model_after
 
         self.retain_loader = retain_loader
@@ -65,6 +64,7 @@ class UnlearningSalUnThread(BaseUnlearningThread):
         self.scheduler = scheduler
         self.device = device
         self.base_weights_path = base_weights_path
+        self.enable_epoch_metrics = enable_epoch_metrics
         self.num_classes = 10
         self.remain_classes = [i for i in range(self.num_classes) if i != self.request.forget_class]
         
@@ -187,22 +187,22 @@ class UnlearningSalUnThread(BaseUnlearningThread):
             self.train_set, self.test_set, self.num_classes
         )
         
+        # Epoch metrics controlled from service
         # Initialize epoch-wise metrics collection
-        enable_epoch_metrics = True
         
         epoch_metrics = {
-            'UA': [],  # Unlearn Accuracy (train)
+            'UA': [],  # Unlearning Accuracy (train)
             'RA': [],  # Retain Accuracy (remaining classes)
-            'TUA': [], # Test Unlearn Accuracy
-            'TRA': [], # Test Remaining Accuracy
+            'TUA': [], # Test Unlearning Accuracy
+            'TRA': [], # Test Retaining Accuracy
             'PS': [],  # Privacy Score
             'C-MIA': [],  # Confidence-based MIA
             'E-MIA': []   # Entropy-based MIA
-        } if enable_epoch_metrics else {}
+        } if self.enable_epoch_metrics else {}
         
         # Initialize comprehensive metrics system if enabled
         metrics_components = None
-        if enable_epoch_metrics:
+        if self.enable_epoch_metrics:
             metrics_components = await initialize_epoch_metrics_system(
                 self.model, self.train_set, self.test_set, self.train_loader, self.device,
                 self.request.forget_class, True, True  # Enable both PS and MIA
@@ -213,12 +213,12 @@ class UnlearningSalUnThread(BaseUnlearningThread):
         self.saliency_mask = self._compute_gradient_saliency()
         
         # Collect epoch 0 metrics (initial state before training)
-        if enable_epoch_metrics:
+        if self.enable_epoch_metrics:
             print("Collecting initial metrics (epoch 0)...")
             initial_metrics = await calculate_comprehensive_epoch_metrics(
                 self.model, self.train_loader, self.test_loader,
                 self.train_set, self.test_set, self.criterion, self.device,
-                self.request.forget_class, enable_epoch_metrics,
+                self.request.forget_class, self.enable_epoch_metrics,
                 metrics_components['retrain_metrics_cache'] if metrics_components else None,
                 metrics_components['mia_classifier'] if metrics_components else None,
                 current_epoch=0
@@ -307,13 +307,13 @@ class UnlearningSalUnThread(BaseUnlearningThread):
             )
 
             # Calculate comprehensive epoch metrics if enabled (exclude from timing)
-            if enable_epoch_metrics:
+            if self.enable_epoch_metrics:
                 metrics_start = time.time()
                 print(f"Collecting comprehensive metrics for epoch {epoch + 1}...")
                 metrics = await calculate_comprehensive_epoch_metrics(
                     self.model, self.train_loader, self.test_loader,
                     self.train_set, self.test_set, self.criterion, self.device,
-                    self.request.forget_class, enable_epoch_metrics,
+                    self.request.forget_class, self.enable_epoch_metrics,
                     metrics_components['retrain_metrics_cache'] if metrics_components else None,
                     metrics_components['mia_classifier'] if metrics_components else None,
                     current_epoch=epoch + 1
@@ -323,7 +323,7 @@ class UnlearningSalUnThread(BaseUnlearningThread):
             
             # Print progress
             additional_metrics = None
-            if enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
+            if self.enable_epoch_metrics and epoch_metrics and len(epoch_metrics['UA']) > 0:
                 additional_metrics = {
                     'UA': epoch_metrics['UA'][-1],
                     'RA': epoch_metrics['RA'][-1],
@@ -433,7 +433,7 @@ class UnlearningSalUnThread(BaseUnlearningThread):
             forget_labels=forget_labels
         )
         
-        # Process attack metrics using the same umap_subset_loader
+        # Process attack metrics using the same umap_subset_loader (for UI)
         print("Processing attack metrics on UMAP subset")
         values, attack_results, fqs = await process_attack_metrics(
             model=self.model, 
@@ -441,6 +441,16 @@ class UnlearningSalUnThread(BaseUnlearningThread):
             device=self.device, 
             forget_class=self.request.forget_class,
             create_plots=False  # No plots for UI data
+        )
+        
+        # Calculate Privacy Score on full dataset for final results
+        print("Calculating Privacy Score on full dataset")
+        _, _, final_fqs = await process_attack_metrics(
+            model=self.model, 
+            data_loader=self.train_loader, 
+            device=self.device, 
+            forget_class=self.request.forget_class,
+            create_plots=False
         )
         
         # Generate distribution plots on full forget class data (for analysis)
@@ -461,7 +471,6 @@ class UnlearningSalUnThread(BaseUnlearningThread):
         self.status.progress = "Calculating CKA Similarity"
         print("Calculating CKA similarity")
         cka_results = await calculate_cka_similarity(
-            model_before=self.model_before,
             model_after=self.model,
             forget_class=self.request.forget_class,
             device=self.device,
@@ -496,9 +505,8 @@ class UnlearningSalUnThread(BaseUnlearningThread):
             "RA": remain_accuracy,
             "TUA": round(test_unlearn_accuracy, 3),
             "TRA": test_remain_accuracy,
-            "PA": round(((1 - unlearn_accuracy) + (1 - test_unlearn_accuracy) + remain_accuracy + test_remain_accuracy) / 4, 3),
             "RTE": round(rte, 1),
-            "FQS": fqs,
+            "FQS": final_fqs,
             "accs": [round(v, 3) for v in train_class_accuracies.values()],
             "label_dist": format_distribution(train_label_dist),
             "conf_dist": format_distribution(train_conf_dist),
@@ -517,14 +525,12 @@ class UnlearningSalUnThread(BaseUnlearningThread):
         })
         
         # Generate epoch-wise plots if we have collected metrics
-        if enable_epoch_metrics and epoch_metrics:
+        if self.enable_epoch_metrics and epoch_metrics:
             print("Generating epoch-wise plots...")
             plot_path = save_epoch_plots(
                 epoch_metrics, "SalUn", self.request.forget_class, self.status.recent_id
             )
-            if plot_path:
-                results["epoch_plot_path"] = plot_path
-            
+       
             # Add epoch metrics to results (rounded to 3 decimal places)
             results["epoch_metrics"] = {
                 key: [round(val, 3) for val in values] for key, values in epoch_metrics.items()

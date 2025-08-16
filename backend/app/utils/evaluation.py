@@ -11,6 +11,7 @@ from torch_cka import CKA
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from app.config import UMAP_DATA_SIZE
+from app.models import get_resnet18
 
 
 @contextmanager
@@ -309,12 +310,18 @@ async def evaluate_model_with_distributions(model, data_loader, criterion, devic
     return avg_loss, accuracy, class_accuracies, label_distribution, confidence_distribution
 
 async def calculate_cka_similarity(
-    model_before, 
     model_after, 
     forget_class, 
     device,
     batch_size=1000
 ):
+    # Load original model from file
+    from app.models import get_resnet18
+    model_before = get_resnet18().to(device)
+    original_model_path = f"unlearned_models/{forget_class}/000{forget_class}.pth"
+    print(f"Loading original model from: {original_model_path}")
+    model_before.load_state_dict(torch.load(original_model_path, map_location=device))
+    
     # Create clean data loaders without augmentation for consistent CKA calculation
     base_transforms = transforms.Compose([
         transforms.ToTensor(),
@@ -358,8 +365,17 @@ async def calculate_cka_similarity(
             forget_samples = len(forget_indices)  // 2
             other_samples = len(other_indices)  // 2
 
-        forget_sampled = forget_indices[torch.randperm(len(forget_indices))[:forget_samples]]
-        other_sampled = other_indices[torch.randperm(len(other_indices))[:other_samples]]
+        # Fix random seed for consistent CKA sampling - use forget_class as part of seed
+        seed = 42 + forget_class  # Consistent per forget class
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+        
+        # Sort indices for complete determinism
+        forget_indices_sorted = torch.sort(forget_indices)[0]
+        other_indices_sorted = torch.sort(other_indices)[0]
+        
+        forget_sampled = forget_indices_sorted[:forget_samples]
+        other_sampled = other_indices_sorted[:other_samples]
 
         forget_loader = DataLoader(
             Subset(loader.dataset, forget_sampled),
@@ -453,9 +469,14 @@ async def calculate_cka_similarity(
             return None
         return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
 
-    # Clean up retrain model to free memory
+    # Clean up models to free memory
     if retrain_model_loaded and retrain_model is not None:
         del retrain_model
+        torch.cuda.empty_cache() if device.type == 'cuda' else None
+    
+    # Clean up original model
+    if model_before is not None:
+        del model_before
         torch.cuda.empty_cache() if device.type == 'cuda' else None
     
     return {

@@ -37,15 +37,15 @@ def plot_epoch_metrics(
     # Plot all metrics with specified styles
     # UA, TUA: X markers (thick X) - UA with dashed lines
     ax.plot(epochs, epoch_metrics['UA'], color='darkgreen', linewidth=2.5, linestyle='--', 
-            label='UA (Unlearn Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
+            label='UA (Unlearning Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
     ax.plot(epochs, epoch_metrics['TUA'], color='#228B22', linewidth=2.5, linestyle='--', 
-            label='TUA (Test Unlearn Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
+            label='TUA (Test Unlearning Accuracy)', marker='X', markersize=12, zorder=10, clip_on=False)
     
     # RA, TRA: circle markers - RA with solid lines
     ax.plot(epochs, epoch_metrics['RA'], color='darkgreen', linewidth=2.5, linestyle='-', 
             label='RA (Remain Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
     ax.plot(epochs, epoch_metrics['TRA'], color='#228B22', linewidth=2.5, linestyle='-', 
-            label='TRA (Test Remain Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
+            label='TRA (Test Retaining Accuracy)', marker='o', markersize=12, zorder=10, clip_on=False)
     
     # PS: dash-dot line, dark orange, star marker
     ax.plot(epochs, epoch_metrics['PS'], color='#FF6600', linewidth=2.5, linestyle='-.',
