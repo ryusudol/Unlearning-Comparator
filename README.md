@@ -3,7 +3,7 @@ A web-based visual analytics system for the comparative evaluation of Machine Un
 
 ![Teaser Animation](img/teaser.gif)
 - **System Introduction** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
-- **Live demo** → [Machine Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/) 
+- **Live demo** → [Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/) 
 
 
 
