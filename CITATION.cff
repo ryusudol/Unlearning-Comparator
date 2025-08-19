@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "Unlearning Comparator: A Visual Analytics System for Comparative Evaluation of Machine Unlearning Methods"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: Jaeung
+    family-names: Lee
+  - given-names: Suhyeon
+    family-names: Yu
+  - given-names: Yurim
+    family-names: Jang
+  - given-names: Simon S.
+    family-names: Woo
+  - given-names: Jaemin
+    family-names: Jo
+identifiers:
+  - type: url
+    value: "https://arxiv.org/abs/2508.12730"
+    description: "arXiv preprint"
+repository-code: "https://github.com/gnueaj/Machine-Unlearning-Comparator"
+url: "https://gnueaj.github.io/Machine-Unlearning-Comparator/"
+abstract: "A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods."
+keywords:
+  - machine-unlearning
+  - visual-analytics
+  - privacy
+  - machine-learning
+  - data-removal
+license: MIT
+date-released: 2025-01-01

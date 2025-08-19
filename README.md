@@ -1,4 +1,7 @@
-# 🧹 Machine Unlearning Comparator *(Under Review)*
+# 🧹 Machine Unlearning Comparator
+
+[![arXiv](https://img.shields.io/badge/arXiv-2508.12730-b31b1b.svg)](https://arxiv.org/abs/2508.12730)
+
 A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods.
 
 ![Teaser Animation](img/teaser.gif)
@@ -68,3 +71,19 @@ pnpm start
 - **ResNet-18 CIFAR-10 MU checkpoints** → <https://huggingface.co/jaeunglee/resnet18-cifar10-unlearning>
 - **ResNet-18 FashionMNIST MU checkpoints** → <https://huggingface.co/Yurim0507/resnet18-fashionmnist-unlearning>
 - **ViT-Base CIFAR-10 MU checkpoints** → <https://huggingface.co/Yurim0507/vit-base-16-cifar10-unlearning>
+
+---
+
+## 📚 Citation
+
+If you use this tool in your research, please cite our paper:
+
+```bibtex
+@misc{lee2025unlearning,
+  title = {{Unlearning Comparator:} A Visual Analytics System for Comparative Evaluation of Machine Unlearning Methods},
+  author = {Jaeung Lee and Suhyeon Yu and Yurim Jang and Simon S. Woo and Jaemin Jo},
+  year   = {2025},
+  note   = {arXiv:2508.12730},
+  url    = {https://arxiv.org/abs/2508.12730}
+}
+```
