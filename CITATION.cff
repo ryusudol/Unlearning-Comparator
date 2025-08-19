@@ -1,7 +1,7 @@
 cff-version: 1.2.0
-title: "Unlearning Comparator: A Visual Analytics System for Comparative Evaluation of Machine Unlearning Methods"
-message: "If you use this research, please cite it using the metadata from this file."
-type: article
+title: Machine Unlearning Comparator
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
 authors:
   - given-names: Jaeung
     family-names: Lee
@@ -13,35 +13,22 @@ authors:
     family-names: Woo
   - given-names: Jaemin
     family-names: Jo
-identifiers:
-  - type: doi
-    value: "10.48550/arXiv.2508.12730"
-  - type: url
-    value: "https://arxiv.org/abs/2508.12730"
-    description: "arXiv preprint"
-repository-code: "https://github.com/gnueaj/Machine-Unlearning-Comparator"
-url: "https://arxiv.org/abs/2508.12730"
-abstract: "A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods."
-keywords:
-  - machine-unlearning
-  - visual-analytics
-  - privacy
-  - machine-learning
-  - data-removal
+version: 1.0.0
+url: https://github.com/gnueaj/Machine-Unlearning-Comparator
 preferred-citation:
   type: article
-  title: "Unlearning Comparator: A Visual Analytics System for Comparative Evaluation of Machine Unlearning Methods"
   authors:
-    - given-names: Jaeung
-      family-names: Lee
-    - given-names: Suhyeon
-      family-names: Yu
-    - given-names: Yurim
-      family-names: Jang
-    - given-names: Simon S.
-      family-names: Woo
-    - given-names: Jaemin
-      family-names: Jo
+    - family-names: Lee
+      given-names: Jaeung
+    - family-names: Yu
+      given-names: Suhyeon
+    - family-names: Jang
+      given-names: Yurim
+    - family-names: Woo
+      given-names: Simon S.
+    - family-names: Jo
+      given-names: Jaemin
+  title: "Unlearning Comparator: A Visual Analytics System for Comparative Evaluation of Machine Unlearning Methods"
   year: 2025
-  url: "https://arxiv.org/abs/2508.12730"
-  notes: "arXiv:2508.12730"
+  journal: arXiv preprint arXiv:2508.12730
+  url: https://arxiv.org/abs/2508.12730
