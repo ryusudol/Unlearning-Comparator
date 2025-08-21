@@ -1,9 +1,7 @@
 # 🧹 Machine Unlearning Comparator
 
 [![YouTube](https://img.shields.io/badge/Intro-YouTube-red?logo=youtube&logoColor=white)](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
-&nbsp;
 [![Demo](https://img.shields.io/badge/Demo-Live-green?logo=react&logoColor=white)](https://gnueaj.github.io/Machine-Unlearning-Comparator/)
-&nbsp;
 [![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2508.12730)
 
 A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods.
