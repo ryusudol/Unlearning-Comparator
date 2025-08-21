@@ -1,17 +1,18 @@
 # 🧹 Machine Unlearning Comparator
 
-[![arXiv](https://img.shields.io/badge/arXiv-2508.12730-b31b1b.svg)](https://arxiv.org/abs/2508.12730)
+[![YouTube](https://img.shields.io/badge/Intro-YouTube-red?logo=youtube&logoColor=white)](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
+&nbsp;
+[![Demo](https://img.shields.io/badge/Demo-Live-green?logo=react&logoColor=white)](https://gnueaj.github.io/Machine-Unlearning-Comparator/)
+&nbsp;
+[![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2508.12730)
 
 A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods.
 
 ![Teaser Animation](img/teaser.gif)
-- **System Introduction** → [YouTube](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
-- **Interactive Demo** → [Unlearning Comparator](https://gnueaj.github.io/Machine-Unlearning-Comparator/) 
 
-
+This system helps researchers systematically compare MU methods based on three core principles: **accuracy, efficiency, and privacy**. The workflow is structured into four stages: **Build → Screen → Contrast → Attack**.
 
 ![Unlearning Comparator Workflow](img/fig_workflow_github.png)
-This system helps researchers systematically compare MU methods based on three core principles: **accuracy, efficiency, and privacy**. The workflow is structured into four stages: **Build → Screen → Contrast → Attack**.
 
 ## ✨ Key Features
 
