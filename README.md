@@ -86,3 +86,6 @@ If you use this tool in your research, please cite our paper:
   url    = {https://arxiv.org/abs/2508.12730}
 }
 ```
+
+![Star History Chart](https://api.star-history.com/svg?repos=gnueaj/Machine-Unlearning-Comparator&type=Date)
+
