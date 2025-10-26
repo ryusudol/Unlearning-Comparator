@@ -77,7 +77,7 @@ Adjust UMAP parameters for `Embedding Space` visualization in [backend/app/confi
 
 ---
 
-## Related Resources
+## 🔗 Related Resources
 - **ResNet-18 CIFAR-10 MU checkpoints** → <https://huggingface.co/jaeunglee/resnet18-cifar10-unlearning>
 - **ResNet-18 FashionMNIST MU checkpoints** → <https://huggingface.co/Yurim0507/resnet18-fashionmnist-unlearning>
 - **ViT-Base CIFAR-10 MU checkpoints** → <https://huggingface.co/Yurim0507/vit-base-16-cifar10-unlearning>
