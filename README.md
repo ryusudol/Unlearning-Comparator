@@ -68,7 +68,7 @@ pnpm start
 
 ## ⚙️ Configuration
 
-### UMAP Embedding Space
+### UMAP Visualization
 
 Adjust UMAP parameters for `Embedding Space` visualization in [backend/app/config/settings.py](backend/app/config/settings.py):
 
