@@ -66,6 +66,17 @@ pnpm start
 
 ---
 
+## ⚙️ Configuration
+
+### UMAP Embedding Space
+
+Adjust UMAP parameters for `Embedding Space` visualization in [backend/app/config/settings.py](backend/app/config/settings.py):
+
+- `UMAP_N_NEIGHBORS`: Lower (5-10) for local clusters, higher (11-20) for global structure
+- `UMAP_MIN_DIST`: Lower (0.1-0.3) for tighter clusters, higher (0.5-0.9) for even spacing
+
+---
+
 ## Related Resources
 - **ResNet-18 CIFAR-10 MU checkpoints** → <https://huggingface.co/jaeunglee/resnet18-cifar10-unlearning>
 - **ResNet-18 FashionMNIST MU checkpoints** → <https://huggingface.co/Yurim0507/resnet18-fashionmnist-unlearning>
