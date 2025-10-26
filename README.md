@@ -98,5 +98,5 @@ If you use this tool in your research, please cite our paper:
 }
 ```
 
-![Star History Chart](https://api.star-history.com/svg?repos=gnueaj/Machine-Unlearning-Comparator&type=Date)
+![Star History Chart](https://api.star-history.com/svg?repos=gnueaj/machine-unlearning-comparator&type=Date)
 
