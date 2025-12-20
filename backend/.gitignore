@@ -7,3 +7,5 @@ backend/*.png
 d3ex/
 attack/
 attack_exp/
+data/
+.claude
