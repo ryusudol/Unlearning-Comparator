@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -101,7 +102,20 @@ async def unlearning_retrain(request, status):
             f"An error occurred during Retrain unlearning: "
             f"{str(unlearning_thread.exception)}"
         )
-        return status
+
+    # Free memory before cleanup
+    del unlearning_thread
+    del model, optimizer, scheduler
+    del train_loader, test_loader, train_set, test_set
+    del unlearning_loader, subset
+    del criterion
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    elif torch.backends.mps.is_available():
+        torch.mps.empty_cache()
 
     return status
 
