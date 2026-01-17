@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from contextlib import contextmanager
 
-from torch_cka import CKA
+from pytorch_cka import CKA
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from app.config import UMAP_DATA_SIZE
@@ -316,7 +316,6 @@ async def calculate_cka_similarity(
     batch_size=1000
 ):
     # Load original model from file
-    from app.models import get_resnet18
     model_before = get_resnet18().to(device)
     original_model_path = f"unlearned_models/{forget_class}/000{forget_class}.pth"
     print(f"Loading original model from: {original_model_path}")
@@ -405,7 +404,6 @@ async def calculate_cka_similarity(
     
     if os.path.exists(retrain_model_path):
         try:
-            from app.models import get_resnet18
             retrain_model = get_resnet18().to(device)
             retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=device))
             retrain_model_loaded = True
@@ -427,10 +425,10 @@ async def calculate_cka_similarity(
              device=device
     ) as cka:
         # Original comparison: before vs after
-        forget_train_cka_matrix = cka.compare(forget_class_train_loader, forget_class_train_loader)
-        other_train_cka_matrix = cka.compare(other_classes_train_loader, other_classes_train_loader)
-        forget_test_cka_matrix = cka.compare(forget_class_test_loader, forget_class_test_loader)
-        other_test_cka_matrix = cka.compare(other_classes_test_loader, other_classes_test_loader)
+        forget_train_cka_matrix = cka.compare(forget_class_train_loader)
+        other_train_cka_matrix = cka.compare(other_classes_train_loader)
+        forget_test_cka_matrix = cka.compare(forget_class_test_loader)
+        other_test_cka_matrix = cka.compare(other_classes_test_loader)
 
         # Retrain comparison: retrain vs unlearned
         retrain_forget_train_cka_matrix = None
@@ -447,10 +445,10 @@ async def calculate_cka_similarity(
                      model2_layers=detailed_layers,
                      device=device
             ) as cka_retrain:
-                retrain_forget_train_cka_matrix = cka_retrain.compare(forget_class_train_loader, forget_class_train_loader)
-                retrain_other_train_cka_matrix = cka_retrain.compare(other_classes_train_loader, other_classes_train_loader)
-                retrain_forget_test_cka_matrix = cka_retrain.compare(forget_class_test_loader, forget_class_test_loader)
-                retrain_other_test_cka_matrix = cka_retrain.compare(other_classes_test_loader, other_classes_test_loader)
+                retrain_forget_train_cka_matrix = cka_retrain.compare(forget_class_train_loader)
+                retrain_other_train_cka_matrix = cka_retrain.compare(other_classes_train_loader)
+                retrain_forget_test_cka_matrix = cka_retrain.compare(forget_class_test_loader)
+                retrain_other_test_cka_matrix = cka_retrain.compare(other_classes_test_loader)
     
     def format_cka_results(results):
         if results is None:
