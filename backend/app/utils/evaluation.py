@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from contextlib import contextmanager
 
-from torch_cka import CKA
+from pytorch_cka import CKA
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from app.config import UMAP_DATA_SIZE
@@ -316,7 +316,6 @@ async def calculate_cka_similarity(
     batch_size=1000
 ):
     # Load original model from file
-    from app.models import get_resnet18
     model_before = get_resnet18().to(device)
     original_model_path = f"unlearned_models/{forget_class}/000{forget_class}.pth"
     print(f"Loading original model from: {original_model_path}")
@@ -341,12 +340,12 @@ async def calculate_cka_similarity(
     detailed_layers = [
         'conv1',
         'layer1.0',
-        'layer1.1',     
-        'layer2.0',     
-        'layer2.1',     
-        'layer3.0',     
-        'layer3.1',  
-        'layer4.0',     
+        'layer1.1',
+        'layer2.0',
+        'layer2.1',
+        'layer3.0',
+        'layer3.1',
+        'layer4.0',
         'layer4.1',
         'fc'
     ]
@@ -405,7 +404,6 @@ async def calculate_cka_similarity(
     
     if os.path.exists(retrain_model_path):
         try:
-            from app.models import get_resnet18
             retrain_model = get_resnet18().to(device)
             retrain_model.load_state_dict(torch.load(retrain_model_path, map_location=device))
             retrain_model_loaded = True
@@ -418,88 +416,76 @@ async def calculate_cka_similarity(
         print(f"Retrain model not found at {retrain_model_path}")
         retrain_model_loaded = False
     
-    with model_eval_mode(model_before), model_eval_mode(model_after):
-        
-        cka = CKA(model_before, 
-                  model_after, 
-                  model1_name="Before Unlearning", 
-                  model2_name="After Unlearning",
-                  model1_layers=detailed_layers, 
-                  model2_layers=detailed_layers, 
-                  device=device)
-        
-        with torch.no_grad():
-            # Original comparison: before vs after
-            cka.compare(forget_class_train_loader, forget_class_train_loader)
-            results_forget_train = cka.export()
-            cka.compare(other_classes_train_loader, other_classes_train_loader)
-            results_other_train = cka.export()
-            cka.compare(forget_class_test_loader, forget_class_test_loader)
-            results_forget_test = cka.export()
-            cka.compare(other_classes_test_loader, other_classes_test_loader)
-            results_other_test = cka.export()
+    with CKA(model1=model_before,
+             model2=model_after, 
+             model1_name="Before Unlearning",
+             model2_name="After Unlearning",
+             model1_layers=detailed_layers,
+             model2_layers=detailed_layers,
+             device=device
+    ) as cka:
+        # Original comparison: before vs after
+        forget_train_cka_matrix = cka.compare(forget_class_train_loader)
+        other_train_cka_matrix = cka.compare(other_classes_train_loader)
+        forget_test_cka_matrix = cka.compare(forget_class_test_loader)
+        other_test_cka_matrix = cka.compare(other_classes_test_loader)
+
+        # Retrain comparison: retrain vs unlearned
+        retrain_forget_train_cka_matrix = None
+        retrain_other_train_cka_matrix = None
+        retrain_forget_test_cka_matrix = None
+        retrain_other_test_cka_matrix = None
             
-            # Retrain comparison: retrain vs unlearned
-            retrain_results_forget_train = None
-            retrain_results_other_train = None
-            retrain_results_forget_test = None
-            retrain_results_other_test = None
-            
-            if retrain_model_loaded and retrain_model is not None:
-                with model_eval_mode(retrain_model):
-                    cka_retrain = CKA(retrain_model, 
-                                    model_after, 
-                                    model1_name="Retrain Model", 
-                                    model2_name="Unlearned Model",
-                                    model1_layers=detailed_layers, 
-                                    model2_layers=detailed_layers, 
-                                    device=device)
-                    
-                    cka_retrain.compare(forget_class_train_loader, forget_class_train_loader)
-                    retrain_results_forget_train = cka_retrain.export()
-                    cka_retrain.compare(other_classes_train_loader, other_classes_train_loader)
-                    retrain_results_other_train = cka_retrain.export()
-                    cka_retrain.compare(forget_class_test_loader, forget_class_test_loader)
-                    retrain_results_forget_test = cka_retrain.export()
-                    cka_retrain.compare(other_classes_test_loader, other_classes_test_loader)
-                    retrain_results_other_test = cka_retrain.export()
+        if retrain_model_loaded and retrain_model is not None:
+            with CKA(model1=retrain_model,
+                     model2=model_after,
+                     model1_name="Retrain Model",
+                     model2_name="Unlearned Model",
+                     model1_layers=detailed_layers,
+                     model2_layers=detailed_layers,
+                     device=device
+            ) as cka_retrain:
+                retrain_forget_train_cka_matrix = cka_retrain.compare(forget_class_train_loader)
+                retrain_other_train_cka_matrix = cka_retrain.compare(other_classes_train_loader)
+                retrain_forget_test_cka_matrix = cka_retrain.compare(forget_class_test_loader)
+                retrain_other_test_cka_matrix = cka_retrain.compare(other_classes_test_loader)
     
     def format_cka_results(results):
         if results is None:
             return None
-        return [[round(float(value), 3) for value in layer_results] for layer_results in results['CKA'].tolist()]
+        return [[round(float(value), 3) for value in layer_results] for layer_results in results.tolist()]
 
     # Clean up models to free memory
     if retrain_model_loaded and retrain_model is not None:
         del retrain_model
         torch.cuda.empty_cache() if device.type == 'cuda' else None
-    
+
     # Clean up original model
     if model_before is not None:
         del model_before
         torch.cuda.empty_cache() if device.type == 'cuda' else None
-    
+
     return {
         "similarity": {
             "layers": detailed_layers,
             "train": {
-                "forget_class": format_cka_results(results_forget_train),
-                "other_classes": format_cka_results(results_other_train)
+                "forget_class": format_cka_results(forget_train_cka_matrix),
+                "other_classes": format_cka_results(other_train_cka_matrix)
             },
             "test": {
-                "forget_class": format_cka_results(results_forget_test),
-                "other_classes": format_cka_results(results_other_test)
+                "forget_class": format_cka_results(forget_test_cka_matrix),
+                "other_classes": format_cka_results(other_test_cka_matrix)
             }
         },
         "similarity_retrain": {
             "layers": detailed_layers,
             "train": {
-                "forget_class": format_cka_results(retrain_results_forget_train),
-                "other_classes": format_cka_results(retrain_results_other_train)
+                "forget_class": format_cka_results(retrain_forget_train_cka_matrix),
+                "other_classes": format_cka_results(retrain_other_train_cka_matrix)
             },
             "test": {
-                "forget_class": format_cka_results(retrain_results_forget_test),
-                "other_classes": format_cka_results(retrain_results_other_test)
+                "forget_class": format_cka_results(retrain_forget_test_cka_matrix),
+                "other_classes": format_cka_results(retrain_other_test_cka_matrix)
             }
         } if retrain_model_loaded else None
     }

@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import os
 import torch
 import torch.nn as nn
@@ -63,6 +64,20 @@ async def unlearning_custom(forget_class, status, weights_path, base_weights):
         print("Unlearning process was cancelled.")
     else:
         print("Unlearning process completed successfully.")
+
+    # Free memory before cleanup
+    del unlearning_thread
+    del model
+    del train_loader, test_loader
+    del train_set, test_set
+    del criterion
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    elif torch.backends.mps.is_available():
+        torch.mps.empty_cache()
 
     return status
 

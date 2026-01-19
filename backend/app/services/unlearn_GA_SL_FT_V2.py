@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import time
 import torch
 import torch.nn as nn
@@ -255,6 +256,23 @@ async def unlearning_GA_SL_FT_V2(request, status, base_weights_path):
         print("Unlearning process was cancelled.")
     else:
         print("Unlearning process completed successfully.")
+
+    # Free memory before cleanup
+    del unlearning_GA_SL_FT_V2_thread
+    del model_after
+    del ga_optimizer, mixed_optimizer
+    del ga_scheduler, mixed_scheduler
+    del train_loader, test_loader, retain_loader, forget_loader, mixed_sl_ft_loader
+    del train_set, test_set, retain_subset, forget_subset
+    del second_logit_data, combined_data, combined_labels, combined_types, combined_dataset
+    del criterion
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    elif torch.backends.mps.is_available():
+        torch.mps.empty_cache()
 
     return status
 
