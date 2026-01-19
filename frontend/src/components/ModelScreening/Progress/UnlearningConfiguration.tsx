@@ -372,23 +372,23 @@ export default function UnlearningConfiguration() {
           <SelectContent>
             {UNLEARNING_METHODS.map((method, idx) => {
               const value =
-                method === UNLEARNING_METHODS[0]
+                method === "Fine-Tuning"
                   ? "ft"
-                  : method === UNLEARNING_METHODS[1]
+                  : method === "Random Labeling"
                   ? "rl"
-                  : method === UNLEARNING_METHODS[2]
+                  : method === "Gradient Ascent"
                   ? "ga"
-                  : method === UNLEARNING_METHODS[3]
+                  : method === "GA+FT"
                   ? "ga_ft"
-                  : method === UNLEARNING_METHODS[4]
+                  : method === "GA+SL+FT"
                   ? "ga_sl_ft"
-                  : method === UNLEARNING_METHODS[5]
+                  : method === "GA+SL+FT V2"
                   ? "ga_sl_ft_v2"
-                  : method === UNLEARNING_METHODS[6]
+                  : method === "SCRUB"
                   ? "scrub"
-                  : method === UNLEARNING_METHODS[7]
+                  : method === "SalUn"
                   ? "salun"
-                  : idx === UNLEARNING_METHODS.length - 1
+                  : method === "Upload"
                   ? "custom"
                   : "-";
               return (
