@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -119,6 +120,19 @@ async def unlearning_GA(request, status, base_weights_path):
         print("Unlearning process was cancelled.")
     else:
         print("Unlearning process completed successfully.")
+
+    # Free memory before cleanup
+    del unlearning_GA_thread
+    del model_after, optimizer, scheduler
+    del train_loader, test_loader, forget_loader
+    del train_set, test_set, forget_subset
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    elif torch.backends.mps.is_available():
+        torch.mps.empty_cache()
 
     return status
 
