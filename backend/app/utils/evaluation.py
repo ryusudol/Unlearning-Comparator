@@ -487,7 +487,7 @@ async def calculate_cka_similarity(model_after, forget_class, device, batch_size
         model2_name="After Unlearning",
         model1_layers=detailed_layers,
         model2_layers=detailed_layers,
-        device="cpu",
+        device=device,
     ) as cka:
         # Original comparison: before vs after
         forget_train_cka_matrix = cka.compare(forget_class_train_loader)
@@ -509,7 +509,7 @@ async def calculate_cka_similarity(model_after, forget_class, device, batch_size
                 model2_name="Unlearned Model",
                 model1_layers=detailed_layers,
                 model2_layers=detailed_layers,
-                device="cpu",
+                device=device,
             ) as cka_retrain:
                 retrain_forget_train_cka_matrix = cka_retrain.compare(
                     forget_class_train_loader
