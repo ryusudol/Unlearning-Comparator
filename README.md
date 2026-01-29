@@ -2,7 +2,7 @@
 
 [![YouTube](https://img.shields.io/badge/Intro-YouTube-red?logo=youtube&logoColor=white)](https://youtu.be/yAyAYp2msDk?si=Q-8IgVlrk8uSBceu)
 [![Demo](https://img.shields.io/badge/Demo-Live-green?logo=react&logoColor=white)](https://gnueaj.github.io/Machine-Unlearning-Comparator/)
-[![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2508.12730)
+[![Paper](https://img.shields.io/badge/Paper-TVCG-b31b1b?logo=read-the-docs&logoColor=white)](https://ieeexplore.ieee.org/document/11364307)
 [![GitHub Stars](https://img.shields.io/github/stars/gnueaj/Machine-Unlearning-Comparator?style=social)](https://github.com/gnueaj/Machine-Unlearning-Comparator)
 
 A web-based visual analytics system for the comparative evaluation of Machine Unlearning (MU) methods.
